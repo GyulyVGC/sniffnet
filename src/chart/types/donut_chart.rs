@@ -1,7 +1,6 @@
-use crate::chart::types::chart_type::ChartType;
 use crate::gui::styles::donut::Catalog;
 use crate::gui::styles::style_constants::{FONT_SIZE_FOOTER, FONT_SIZE_SUBTITLE};
-use crate::networking::types::byte_multiple::ByteMultiple;
+use crate::networking::types::data_representation::DataRepr;
 use iced::alignment::{Horizontal, Vertical};
 use iced::widget::canvas::path::Arc;
 use iced::widget::canvas::{Frame, Text};
@@ -10,10 +9,9 @@ use iced::{Font, Length, Radians, Renderer, mouse};
 use std::f32::consts;
 
 pub struct DonutChart {
-    chart_type: ChartType,
+    data_repr: DataRepr,
     incoming: u128,
     outgoing: u128,
-    filtered_out: u128,
     dropped: u128,
     font: Font,
     thumbnail: bool,
@@ -21,19 +19,17 @@ pub struct DonutChart {
 
 impl DonutChart {
     fn new(
-        chart_type: ChartType,
+        data_repr: DataRepr,
         incoming: u128,
         outgoing: u128,
-        filtered_out: u128,
         dropped: u128,
         font: Font,
         thumbnail: bool,
     ) -> Self {
         Self {
-            chart_type,
+            data_repr,
             incoming,
             outgoing,
-            filtered_out,
             dropped,
             font,
             thumbnail,
@@ -41,24 +37,19 @@ impl DonutChart {
     }
 
     fn total(&self) -> u128 {
-        self.incoming + self.outgoing + self.filtered_out + self.dropped
+        self.incoming + self.outgoing + self.dropped
     }
 
     fn title(&self) -> String {
         let total = self.total();
-        if self.chart_type.eq(&ChartType::Bytes) {
-            ByteMultiple::formatted_string(total)
-        } else {
-            total.to_string()
-        }
+        self.data_repr.formatted_string(total)
     }
 
-    fn angles(&self) -> [(Radians, Radians); 4] {
+    fn angles(&self) -> [(Radians, Radians); 3] {
         #[allow(clippy::cast_precision_loss)]
         let mut values = [
             self.incoming as f32,
             self.outgoing as f32,
-            self.filtered_out as f32,
             self.dropped as f32,
         ];
         let total: f32 = values.iter().sum();
@@ -105,12 +96,7 @@ impl<Message, Theme: Catalog> canvas::Program<Message, Theme> for DonutChart {
         let radius = (frame.width().min(frame.height()) / 2.0) * 0.9;
 
         let style = <Theme as Catalog>::style(theme, &<Theme as Catalog>::default());
-        let colors = [
-            style.incoming,
-            style.outgoing,
-            style.filtered_out,
-            style.dropped,
-        ];
+        let colors = [style.incoming, style.outgoing, style.dropped];
 
         for ((start_angle, end_angle), color) in self.angles().into_iter().zip(colors) {
             let path = canvas::Path::new(|builder| {
@@ -150,10 +136,9 @@ impl<Message, Theme: Catalog> canvas::Program<Message, Theme> for DonutChart {
 }
 
 pub fn donut_chart<Message, Theme: Catalog>(
-    chart_type: ChartType,
+    data_repr: DataRepr,
     incoming: u128,
     outgoing: u128,
-    filtered_out: u128,
     dropped: u128,
     font: Font,
     thumbnail: bool,
@@ -164,13 +149,7 @@ pub fn donut_chart<Message, Theme: Catalog>(
         Length::Fixed(110.0)
     };
     iced::widget::canvas(DonutChart::new(
-        chart_type,
-        incoming,
-        outgoing,
-        filtered_out,
-        dropped,
-        font,
-        thumbnail,
+        data_repr, incoming, outgoing, dropped, font, thumbnail,
     ))
     .width(size)
     .height(size)

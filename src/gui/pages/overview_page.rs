@@ -1,7 +1,7 @@
 //! Module defining the run page of the application.
 //!
 //! It contains elements to display traffic statistics: chart, detailed connections data
-//! and overall statistics about the filtered traffic.
+//! and overall statistics about the traffic.
 
 use crate::chart::types::donut_chart::donut_chart;
 use crate::countries::country_utils::get_flag_tooltip;
@@ -12,14 +12,16 @@ use crate::gui::styles::button::ButtonType;
 use crate::gui::styles::container::ContainerType;
 use crate::gui::styles::rule::RuleType;
 use crate::gui::styles::scrollbar::ScrollbarType;
-use crate::gui::styles::style_constants::FONT_SIZE_TITLE;
+use crate::gui::styles::style_constants::{FONT_SIZE_FOOTER, FONT_SIZE_TITLE};
 use crate::gui::styles::text::TextType;
 use crate::gui::styles::types::palette_extension::PaletteExtension;
+use crate::gui::types::filters::Filters;
 use crate::gui::types::message::Message;
+use crate::gui::types::settings::Settings;
 use crate::networking::types::capture_context::CaptureSource;
 use crate::networking::types::data_info::DataInfo;
 use crate::networking::types::data_info_host::DataInfoHost;
-use crate::networking::types::filters::Filters;
+use crate::networking::types::data_representation::DataRepr;
 use crate::networking::types::host::Host;
 use crate::networking::types::service::Service;
 use crate::report::get_report_entries::{get_host_entries, get_service_entries};
@@ -27,18 +29,16 @@ use crate::report::types::search_parameters::SearchParameters;
 use crate::report::types::sort_type::SortType;
 use crate::translations::translations::{
     active_filters_translation, error_translation, incoming_translation, no_addresses_translation,
-    none_translation, outgoing_translation, some_observed_translation, traffic_rate_translation,
-    waiting_translation,
+    none_translation, outgoing_translation, traffic_rate_translation, waiting_translation,
 };
 use crate::translations::translations_2::{
     data_representation_translation, dropped_translation, host_translation,
     only_top_30_items_translation,
 };
 use crate::translations::translations_3::{service_translation, unsupported_link_type_translation};
-use crate::translations::translations_4::{excluded_translation, reading_from_pcap_translation};
-use crate::utils::formatted_strings::get_active_filters_string;
+use crate::translations::translations_4::reading_from_pcap_translation;
 use crate::utils::types::icon::Icon;
-use crate::{ByteMultiple, ChartType, ConfigSettings, Language, RunningPage, StyleType};
+use crate::{Language, RunningPage, StyleType};
 use iced::Length::{Fill, FillPortion};
 use iced::alignment::{Horizontal, Vertical};
 use iced::widget::scrollable::Direction;
@@ -48,74 +48,77 @@ use iced::widget::{
     Button, Column, Container, Row, Rule, Scrollable, Space, Text, Tooltip, button,
     horizontal_space, vertical_space,
 };
-use iced::{Alignment, Font, Length, Padding};
+use iced::{Alignment, Element, Font, Length, Padding};
 use std::fmt::Write;
 
 /// Computes the body of gui overview page
-pub fn overview_page(sniffer: &Sniffer) -> Container<Message, StyleType> {
-    let ConfigSettings {
+pub fn overview_page(sniffer: &Sniffer) -> Container<'_, Message, StyleType> {
+    let Settings {
         style, language, ..
-    } = sniffer.configs.settings;
+    } = sniffer.conf.settings;
     let font = style.get_extension().font;
     let font_headers = style.get_extension().font_headers;
 
     let mut body = Column::new();
     let mut tab_and_body = Column::new().height(Length::Fill);
 
-    let dots = &sniffer.dots_pulse.0;
+    // some packets are there!
+    let tabs = get_pages_tabs(
+        RunningPage::Overview,
+        font,
+        font_headers,
+        language,
+        sniffer.unread_notifications,
+    );
+    tab_and_body = tab_and_body.push(tabs);
 
-    if let Some(error) = sniffer.pcap_error.as_ref() {
-        // pcap threw an ERROR!
-        body = body_pcap_error(error, dots, language, font);
-    } else {
-        // NO pcap error detected
-        let observed = sniffer.info_traffic.all_packets;
-        let filtered = sniffer.info_traffic.tot_data_info.tot_packets();
+    let container_chart = container_chart(sniffer, font);
 
-        match (observed, filtered) {
-            (0, 0) => {
-                //no packets observed at all
-                body = body_no_packets(&sniffer.capture_source, font, language, dots);
-            }
-            (observed, 0) => {
-                //no packets have been filtered but some have been observed
-                body = body_no_observed(&sniffer.filters, observed, font, language, dots);
-            }
-            (_observed, _filtered) => {
-                //observed > filtered > 0 || observed = filtered > 0
-                let tabs = get_pages_tabs(
-                    RunningPage::Overview,
-                    font,
-                    font_headers,
-                    language,
-                    sniffer.unread_notifications,
-                );
-                tab_and_body = tab_and_body.push(tabs);
+    let container_info = col_info(sniffer);
 
-                let container_chart = container_chart(sniffer, font);
+    let container_report = row_report(sniffer);
 
-                let container_info = col_info(sniffer);
-
-                let container_report = row_report(sniffer);
-
-                body = body
-                    .width(Length::Fill)
-                    .padding(10)
-                    .spacing(10)
-                    .align_x(Alignment::Center)
-                    .push(
-                        Row::new()
-                            .height(280)
-                            .spacing(10)
-                            .push(container_info)
-                            .push(container_chart),
-                    )
-                    .push(container_report);
-            }
-        }
-    }
+    body = body
+        .width(Length::Fill)
+        .padding(10)
+        .spacing(10)
+        .align_x(Alignment::Center)
+        .push(
+            Row::new()
+                .height(280)
+                .spacing(10)
+                .push(container_info)
+                .push(container_chart),
+        )
+        .push(container_report);
 
     Container::new(Column::new().push(tab_and_body.push(body))).height(Length::Fill)
+}
+
+pub fn waiting_page(sniffer: &Sniffer) -> Option<Container<'_, Message, StyleType>> {
+    let Settings {
+        style, language, ..
+    } = sniffer.conf.settings;
+    let font = style.get_extension().font;
+
+    let dots = &sniffer.dots_pulse.0;
+
+    let tot_packets = sniffer
+        .info_traffic
+        .tot_data_info
+        .tot_data(DataRepr::Packets);
+
+    let body = if let Some(error) = sniffer.pcap_error.as_ref() {
+        // pcap threw an ERROR!
+        body_pcap_error(error, dots, language, font)
+    } else if tot_packets == 0 {
+        // no packets observed at all
+        body_no_packets(&sniffer.capture_source, font, language, dots)
+    } else {
+        return None;
+    };
+
+    Some(Container::new(Column::new().push(body)).height(Length::Fill))
 }
 
 fn body_no_packets<'a>(
@@ -170,31 +173,6 @@ fn body_no_packets<'a>(
         .push(Space::with_height(FillPortion(2)))
 }
 
-fn body_no_observed<'a>(
-    filters: &Filters,
-    observed: u128,
-    font: Font,
-    language: Language,
-    dots: &str,
-) -> Column<'a, Message, StyleType> {
-    let tot_packets_text = some_observed_translation(language, observed)
-        .align_x(Alignment::Center)
-        .font(font);
-
-    Column::new()
-        .width(Length::Fill)
-        .padding(10)
-        .spacing(10)
-        .align_x(Alignment::Center)
-        .push(vertical_space())
-        .push(Icon::Funnel.to_text().size(60))
-        .push(get_active_filters_col(filters, language, font))
-        .push(Rule::horizontal(20))
-        .push(tot_packets_text)
-        .push(Text::new(dots.to_owned()).font(font).size(50))
-        .push(Space::with_height(FillPortion(2)))
-}
-
 fn body_pcap_error<'a>(
     pcap_error: &'a str,
     dots: &'a str,
@@ -241,20 +219,24 @@ fn row_report<'a>(sniffer: &Sniffer) -> Row<'a, Message, StyleType> {
 }
 
 fn col_host<'a>(sniffer: &Sniffer) -> Column<'a, Message, StyleType> {
-    let ConfigSettings {
+    let Settings {
         style, language, ..
-    } = sniffer.configs.settings;
+    } = sniffer.conf.settings;
     let font = style.get_extension().font;
-    let chart_type = sniffer.traffic_chart.chart_type;
+    let data_repr = sniffer.traffic_chart.data_repr;
 
     let mut scroll_host = Column::new()
         .padding(Padding::ZERO.right(11.0))
         .align_x(Alignment::Center);
-    let entries = get_host_entries(&sniffer.info_traffic, chart_type, sniffer.host_sort_type);
+    let entries = get_host_entries(
+        &sniffer.info_traffic,
+        data_repr,
+        sniffer.conf.host_sort_type,
+    );
     let first_entry_data_info = entries
         .iter()
         .map(|(_, d)| d.data_info)
-        .max_by(|d1, d2| d1.compare(d2, SortType::Ascending, chart_type))
+        .max_by(|d1, d2| d1.compare(d2, SortType::Ascending, data_repr))
         .unwrap_or_default();
 
     for (host, data_info_host) in &entries {
@@ -263,7 +245,7 @@ fn col_host<'a>(sniffer: &Sniffer) -> Column<'a, Message, StyleType> {
         let host_bar = host_bar(
             host,
             data_info_host,
-            chart_type,
+            data_repr,
             first_entry_data_info,
             font,
             language,
@@ -304,7 +286,7 @@ fn col_host<'a>(sniffer: &Sniffer) -> Column<'a, Message, StyleType> {
                 )
                 .push(horizontal_space())
                 .push(sort_arrows(
-                    sniffer.host_sort_type,
+                    sniffer.conf.host_sort_type,
                     Message::HostSortSelection,
                 )),
         )
@@ -318,24 +300,28 @@ fn col_host<'a>(sniffer: &Sniffer) -> Column<'a, Message, StyleType> {
 }
 
 fn col_service<'a>(sniffer: &Sniffer) -> Column<'a, Message, StyleType> {
-    let ConfigSettings {
+    let Settings {
         style, language, ..
-    } = sniffer.configs.settings;
+    } = sniffer.conf.settings;
     let font = style.get_extension().font;
-    let chart_type = sniffer.traffic_chart.chart_type;
+    let data_repr = sniffer.traffic_chart.data_repr;
 
     let mut scroll_service = Column::new()
         .padding(Padding::ZERO.right(11.0))
         .align_x(Alignment::Center);
-    let entries = get_service_entries(&sniffer.info_traffic, chart_type, sniffer.service_sort_type);
+    let entries = get_service_entries(
+        &sniffer.info_traffic,
+        data_repr,
+        sniffer.conf.service_sort_type,
+    );
     let first_entry_data_info = entries
         .iter()
         .map(|&(_, d)| d)
-        .max_by(|d1, d2| d1.compare(d2, SortType::Ascending, chart_type))
+        .max_by(|d1, d2| d1.compare(d2, SortType::Ascending, data_repr))
         .unwrap_or_default();
 
     for (service, data_info) in &entries {
-        let content = service_bar(service, data_info, chart_type, first_entry_data_info, font);
+        let content = service_bar(service, data_info, data_repr, first_entry_data_info, font);
 
         scroll_service = scroll_service.push(
             button(content)
@@ -368,7 +354,7 @@ fn col_service<'a>(sniffer: &Sniffer) -> Column<'a, Message, StyleType> {
                 )
                 .push(horizontal_space())
                 .push(sort_arrows(
-                    sniffer.service_sort_type,
+                    sniffer.conf.service_sort_type,
                     Message::ServiceSortSelection,
                 )),
         )
@@ -384,16 +370,13 @@ fn col_service<'a>(sniffer: &Sniffer) -> Column<'a, Message, StyleType> {
 pub fn host_bar<'a>(
     host: &Host,
     data_info_host: &DataInfoHost,
-    chart_type: ChartType,
+    data_repr: DataRepr,
     first_entry_data_info: DataInfo,
     font: Font,
     language: Language,
 ) -> Row<'a, Message, StyleType> {
-    let (incoming_bar_len, outgoing_bar_len) = get_bars_length(
-        chart_type,
-        &first_entry_data_info,
-        &data_info_host.data_info,
-    );
+    let (incoming_bar_len, outgoing_bar_len) =
+        get_bars_length(data_repr, &first_entry_data_info, &data_info_host.data_info);
 
     Row::new()
         .height(FLAGS_HEIGHT_BIG)
@@ -422,11 +405,10 @@ pub fn host_bar<'a>(
                         )
                         .push(horizontal_space())
                         .push(
-                            Text::new(if chart_type.eq(&ChartType::Packets) {
-                                data_info_host.data_info.tot_packets().to_string()
-                            } else {
-                                ByteMultiple::formatted_string(data_info_host.data_info.tot_bytes())
-                            })
+                            Text::new(
+                                data_repr
+                                    .formatted_string(data_info_host.data_info.tot_data(data_repr)),
+                            )
                             .font(font),
                         ),
                 )
@@ -437,12 +419,12 @@ pub fn host_bar<'a>(
 pub fn service_bar<'a>(
     service: &Service,
     data_info: &DataInfo,
-    chart_type: ChartType,
+    data_repr: DataRepr,
     first_entry_data_info: DataInfo,
     font: Font,
 ) -> Row<'a, Message, StyleType> {
     let (incoming_bar_len, outgoing_bar_len) =
-        get_bars_length(chart_type, &first_entry_data_info, data_info);
+        get_bars_length(data_repr, &first_entry_data_info, data_info);
 
     Row::new()
         .height(FLAGS_HEIGHT_BIG)
@@ -456,28 +438,29 @@ pub fn service_bar<'a>(
                         .push(Text::new(service.to_string()).font(font))
                         .push(horizontal_space())
                         .push(
-                            Text::new(if chart_type.eq(&ChartType::Packets) {
-                                data_info.tot_packets().to_string()
-                            } else {
-                                ByteMultiple::formatted_string(data_info.tot_bytes())
-                            })
-                            .font(font),
+                            Text::new(data_repr.formatted_string(data_info.tot_data(data_repr)))
+                                .font(font),
                         ),
                 )
                 .push(get_bars(incoming_bar_len, outgoing_bar_len)),
         )
 }
 
-fn col_info<'a>(sniffer: &Sniffer) -> Container<'a, Message, StyleType> {
-    let ConfigSettings {
+fn col_info(sniffer: &Sniffer) -> Container<'_, Message, StyleType> {
+    let Settings {
         style, language, ..
-    } = sniffer.configs.settings;
+    } = sniffer.conf.settings;
     let PaletteExtension { font, .. } = style.get_extension();
 
-    let col_device = col_device(language, font, &sniffer.capture_source);
+    let col_device = col_device(
+        language,
+        font,
+        &sniffer.capture_source,
+        &sniffer.conf.filters,
+    );
 
     let col_data_representation =
-        col_data_representation(language, font, sniffer.traffic_chart.chart_type);
+        col_data_representation(language, font, sniffer.traffic_chart.data_repr);
 
     let donut_row = donut_row(language, font, sniffer);
 
@@ -507,8 +490,8 @@ fn col_info<'a>(sniffer: &Sniffer) -> Container<'a, Message, StyleType> {
         .class(ContainerType::BorderedRound)
 }
 
-fn container_chart(sniffer: &Sniffer, font: Font) -> Container<Message, StyleType> {
-    let ConfigSettings { language, .. } = sniffer.configs.settings;
+fn container_chart(sniffer: &Sniffer, font: Font) -> Container<'_, Message, StyleType> {
+    let Settings { language, .. } = sniffer.conf.settings;
     let traffic_chart = &sniffer.traffic_chart;
 
     Container::new(
@@ -534,6 +517,7 @@ fn col_device<'a>(
     language: Language,
     font: Font,
     cs: &CaptureSource,
+    filters: &'a Filters,
 ) -> Column<'a, Message, StyleType> {
     let link_type = cs.get_link_type();
     #[cfg(not(target_os = "windows"))]
@@ -541,21 +525,55 @@ fn col_device<'a>(
     #[cfg(target_os = "windows")]
     let cs_info = cs.get_desc().unwrap_or(cs.get_name());
 
+    let filters_desc: Element<Message, StyleType> = if filters.is_some_filter_active() {
+        Row::new()
+            .spacing(10)
+            .push(Text::new("BPF").font(font))
+            .push(get_info_tooltip(filters.bpf().to_string(), font))
+            .into()
+    } else {
+        Text::new(none_translation(language)).font(font).into()
+    };
+
     Column::new()
         .height(Length::Fill)
         .spacing(10)
-        .push(TextType::highlighted_subtitle_with_desc(
-            cs.title(language),
-            &cs_info,
-            font,
-        ))
-        .push(link_type.link_type_col(language, font))
+        .push(
+            Column::new()
+                .push(
+                    Text::new(format!("{}:", cs.title(language)))
+                        .class(TextType::Subtitle)
+                        .font(font),
+                )
+                .push(
+                    Row::new()
+                        .spacing(10)
+                        .push(Text::new(format!("   {}", &cs_info)).font(font))
+                        .push(get_info_tooltip(
+                            link_type.full_print_on_one_line(language),
+                            font,
+                        )),
+                ),
+        )
+        .push(
+            Column::new()
+                .push(
+                    Text::new(format!("{}:", active_filters_translation(language)))
+                        .class(TextType::Subtitle)
+                        .font(font),
+                )
+                .push(
+                    Row::new()
+                        .push(Text::new("   ".to_string()).font(font))
+                        .push(filters_desc),
+                ),
+        )
 }
 
 fn col_data_representation<'a>(
     language: Language,
     font: Font,
-    chart_type: ChartType,
+    data_repr: DataRepr,
 ) -> Column<'a, Message, StyleType> {
     let mut ret_val = Column::new().spacing(5).push(
         Text::new(format!("{}:", data_representation_translation(language)))
@@ -563,77 +581,61 @@ fn col_data_representation<'a>(
             .font(font),
     );
 
-    for option in ChartType::ALL {
-        let is_active = chart_type.eq(&option);
-        ret_val = ret_val.push(
-            Button::new(
-                Text::new(option.get_label(language).to_owned())
-                    .width(Length::Fill)
-                    .align_x(Alignment::Center)
-                    .align_y(Alignment::Center)
-                    .font(font),
-            )
-            .width(Length::Fill)
-            .height(33)
-            .class(if is_active {
-                ButtonType::BorderedRoundSelected
-            } else {
-                ButtonType::BorderedRound
-            })
-            .on_press(Message::ChartSelection(option)),
-        );
-    }
+    let [bits, bytes, packets] = DataRepr::ALL.map(|option| {
+        let is_active = data_repr.eq(&option);
+        Button::new(
+            Text::new(option.get_label(language).to_owned())
+                .width(Length::Fill)
+                .align_x(Alignment::Center)
+                .align_y(Alignment::Center)
+                .font(font),
+        )
+        .width(Length::Fill)
+        .height(33)
+        .class(if is_active {
+            ButtonType::BorderedRoundSelected
+        } else {
+            ButtonType::BorderedRound
+        })
+        .on_press(Message::DataReprSelection(option))
+    });
+
+    ret_val = ret_val
+        .push(Row::new().spacing(5).push(bits).push(bytes))
+        .push(packets);
+
     ret_val
 }
 
-fn donut_row<'a>(
+fn donut_row(
     language: Language,
     font: Font,
     sniffer: &Sniffer,
-) -> Container<'a, Message, StyleType> {
-    let chart_type = sniffer.traffic_chart.chart_type;
-    let filters = &sniffer.filters;
+) -> Container<'_, Message, StyleType> {
+    let data_repr = sniffer.traffic_chart.data_repr;
 
-    let (in_data, out_data, filtered_out, dropped) =
-        sniffer.info_traffic.get_thumbnail_data(chart_type);
-
-    let legend_entry_filtered = if filters.none_active() {
-        None
-    } else {
-        Some(donut_legend_entry(
-            filtered_out,
-            chart_type,
-            RuleType::FilteredOut,
-            filters,
-            font,
-            language,
-        ))
-    };
+    let (in_data, out_data, dropped) = sniffer.info_traffic.get_thumbnail_data(data_repr);
 
     let legend_col = Column::new()
         .spacing(5)
         .push(donut_legend_entry(
             in_data,
-            chart_type,
+            data_repr,
             RuleType::Incoming,
-            filters,
             font,
             language,
         ))
         .push(donut_legend_entry(
             out_data,
-            chart_type,
+            data_repr,
             RuleType::Outgoing,
-            filters,
             font,
             language,
         ))
-        .push_maybe(legend_entry_filtered)
         .push(donut_legend_entry(
             dropped,
-            chart_type,
+            data_repr,
             RuleType::Dropped,
-            filters,
             font,
             language,
         ));
@@ -642,10 +644,9 @@ fn donut_row<'a>(
         .align_y(Vertical::Center)
         .spacing(20)
         .push(donut_chart(
-            chart_type,
+            data_repr,
             in_data,
             out_data,
-            filtered_out,
             dropped,
             font,
             sniffer.thumbnail,
@@ -661,30 +662,18 @@ fn donut_row<'a>(
 
 fn donut_legend_entry<'a>(
     value: u128,
-    chart_type: ChartType,
+    data_repr: DataRepr,
     rule_type: RuleType,
-    filters: &Filters,
     font: Font,
     language: Language,
 ) -> Row<'a, Message, StyleType> {
-    let value_text = if chart_type.eq(&ChartType::Bytes) {
-        ByteMultiple::formatted_string(value)
-    } else {
-        value.to_string()
-    };
+    let value_text = data_repr.formatted_string(value);
 
     let label = match rule_type {
         RuleType::Incoming => incoming_translation(language),
         RuleType::Outgoing => outgoing_translation(language),
-        RuleType::FilteredOut => excluded_translation(language),
         RuleType::Dropped => dropped_translation(language),
         _ => "",
-    };
-
-    let tooltip = if matches!(rule_type, RuleType::FilteredOut) {
-        Some(get_active_filters_tooltip(filters, language, font))
-    } else {
-        None
     };
 
     Row::new()
@@ -696,28 +685,18 @@ fn donut_legend_entry<'a>(
                 .push(Rule::horizontal(1).class(rule_type)),
         )
         .push(Text::new(format!("{label}: {value_text}")).font(font))
-        .push_maybe(tooltip)
 }
 
 const MIN_BARS_LENGTH: f32 = 4.0;
 
 pub fn get_bars_length(
-    chart_type: ChartType,
+    data_repr: DataRepr,
     first_entry: &DataInfo,
     data_info: &DataInfo,
 ) -> (u16, u16) {
-    let (in_val, out_val, first_entry_tot_val) = match chart_type {
-        ChartType::Packets => (
-            data_info.incoming_packets(),
-            data_info.outgoing_packets(),
-            first_entry.tot_packets(),
-        ),
-        ChartType::Bytes => (
-            data_info.incoming_bytes(),
-            data_info.outgoing_bytes(),
-            first_entry.tot_bytes(),
-        ),
-    };
+    let in_val = data_info.incoming_data(data_repr);
+    let out_val = data_info.outgoing_data(data_repr);
+    let first_entry_tot_val = first_entry.tot_data(data_repr);
 
     let tot_val = in_val + out_val;
     if tot_val == 0 {
@@ -808,46 +787,12 @@ fn get_star_button<'a>(is_favorite: bool, host: Host) -> Button<'a, Message, Sty
     .on_press(Message::AddOrRemoveFavorite(host, !is_favorite))
 }
 
-fn get_active_filters_col<'a>(
-    filters: &Filters,
-    language: Language,
-    font: Font,
-) -> Column<'a, Message, StyleType> {
-    let mut ret_val = Column::new().push(
-        Text::new(active_filters_translation(language))
-            .font(font)
-            .class(TextType::Subtitle),
-    );
-
-    if filters.none_active() {
-        ret_val = ret_val.push(Text::new(format!("   {}", none_translation(language))).font(font));
-    } else {
-        let filters_string = get_active_filters_string(filters, language);
-        ret_val = ret_val.push(Row::new().push(Text::new(filters_string).font(font)));
-    }
-    ret_val
-}
-
-fn get_active_filters_tooltip<'a>(
-    filters: &Filters,
-    language: Language,
-    font: Font,
-) -> Tooltip<'a, Message, StyleType> {
-    let filters_string = get_active_filters_string(filters, language);
-
-    let mut ret_val = Column::new().push(
-        Text::new(active_filters_translation(language))
-            .font(font)
-            .class(TextType::Subtitle),
-    );
-
-    ret_val = ret_val.push(Row::new().push(Text::new(filters_string).font(font)));
-
+fn get_info_tooltip<'a>(info_str: String, font: Font) -> Tooltip<'a, Message, StyleType> {
     Tooltip::new(
         Container::new(
             Text::new("i")
+                .size(FONT_SIZE_FOOTER)
                 .font(font)
-                .size(15)
                 .line_height(LineHeight::Relative(1.0)),
         )
         .align_x(Alignment::Center)
@@ -855,7 +800,7 @@ fn get_active_filters_tooltip<'a>(
         .height(20)
         .width(20)
         .class(ContainerType::BadgeInfo),
-        ret_val,
+        Text::new(info_str).font(font),
         Position::FollowCursor,
     )
     .class(ContainerType::Tooltip)
@@ -881,20 +826,24 @@ fn sort_arrows<'a>(
 
 #[cfg(test)]
 mod tests {
-    use crate::chart::types::chart_type::ChartType;
     use crate::gui::pages::overview_page::{MIN_BARS_LENGTH, get_bars_length};
     use crate::networking::types::data_info::DataInfo;
+    use crate::networking::types::data_representation::DataRepr;
 
     #[test]
     fn test_get_bars_length_simple() {
         let first_entry = DataInfo::new_for_tests(50, 50, 150, 50);
         let data_info = DataInfo::new_for_tests(25, 55, 165, 30);
         assert_eq!(
-            get_bars_length(ChartType::Packets, &first_entry, &data_info),
+            get_bars_length(DataRepr::Packets, &first_entry, &data_info),
             (25, 55)
         );
         assert_eq!(
-            get_bars_length(ChartType::Bytes, &first_entry, &data_info),
+            get_bars_length(DataRepr::Bytes, &first_entry, &data_info),
+            (83, 15)
+        );
+        assert_eq!(
+            get_bars_length(DataRepr::Bits, &first_entry, &data_info),
             (83, 15)
         );
     }
@@ -904,21 +853,21 @@ mod tests {
         let first_entry = DataInfo::new_for_tests(50, 50, 150, 50);
         let mut data_info = DataInfo::new_for_tests(2, 1, 1, 0);
         assert_eq!(
-            get_bars_length(ChartType::Packets, &first_entry, &data_info),
+            get_bars_length(DataRepr::Packets, &first_entry, &data_info),
             (MIN_BARS_LENGTH as u16 / 2, MIN_BARS_LENGTH as u16 / 2)
         );
         assert_eq!(
-            get_bars_length(ChartType::Bytes, &first_entry, &data_info),
+            get_bars_length(DataRepr::Bytes, &first_entry, &data_info),
             (MIN_BARS_LENGTH as u16, 0)
         );
 
         data_info = DataInfo::new_for_tests(0, 3, 0, 2);
         assert_eq!(
-            get_bars_length(ChartType::Packets, &first_entry, &data_info),
+            get_bars_length(DataRepr::Packets, &first_entry, &data_info),
             (0, MIN_BARS_LENGTH as u16)
         );
         assert_eq!(
-            get_bars_length(ChartType::Bytes, &first_entry, &data_info),
+            get_bars_length(DataRepr::Bytes, &first_entry, &data_info),
             (0, MIN_BARS_LENGTH as u16)
         );
     }
@@ -929,31 +878,31 @@ mod tests {
             DataInfo::new_for_tests(u128::MAX / 2, u128::MAX / 2, u128::MAX / 2, u128::MAX / 2);
         let mut data_info = DataInfo::new_for_tests(1, 1, 1, 1);
         assert_eq!(
-            get_bars_length(ChartType::Packets, &first_entry, &data_info),
+            get_bars_length(DataRepr::Packets, &first_entry, &data_info),
             (MIN_BARS_LENGTH as u16 / 2, MIN_BARS_LENGTH as u16 / 2)
         );
         assert_eq!(
-            get_bars_length(ChartType::Bytes, &first_entry, &data_info),
+            get_bars_length(DataRepr::Bytes, &first_entry, &data_info),
             (MIN_BARS_LENGTH as u16 / 2, MIN_BARS_LENGTH as u16 / 2)
         );
 
         data_info = DataInfo::new_for_tests(0, 1, 0, 1);
         assert_eq!(
-            get_bars_length(ChartType::Packets, &first_entry, &data_info),
+            get_bars_length(DataRepr::Packets, &first_entry, &data_info),
             (0, MIN_BARS_LENGTH as u16)
         );
         assert_eq!(
-            get_bars_length(ChartType::Bytes, &first_entry, &data_info),
+            get_bars_length(DataRepr::Bytes, &first_entry, &data_info),
             (0, MIN_BARS_LENGTH as u16)
         );
 
         data_info = DataInfo::new_for_tests(1, 0, 1, 0);
         assert_eq!(
-            get_bars_length(ChartType::Packets, &first_entry, &data_info),
+            get_bars_length(DataRepr::Packets, &first_entry, &data_info),
             (MIN_BARS_LENGTH as u16, 0)
         );
         assert_eq!(
-            get_bars_length(ChartType::Bytes, &first_entry, &data_info),
+            get_bars_length(DataRepr::Bytes, &first_entry, &data_info),
             (MIN_BARS_LENGTH as u16, 0)
         );
     }
@@ -964,93 +913,93 @@ mod tests {
 
         let mut data_info = DataInfo::new_for_tests(0, 9, 0, 10);
         assert_eq!(
-            get_bars_length(ChartType::Packets, &first_entry, &data_info),
+            get_bars_length(DataRepr::Packets, &first_entry, &data_info),
             (0, 16)
         );
         assert_eq!(
-            get_bars_length(ChartType::Bytes, &first_entry, &data_info),
+            get_bars_length(DataRepr::Bytes, &first_entry, &data_info),
             (0, 71)
         );
         data_info = DataInfo::new_for_tests(9, 0, 13, 0);
         assert_eq!(
-            get_bars_length(ChartType::Packets, &first_entry, &data_info),
+            get_bars_length(DataRepr::Packets, &first_entry, &data_info),
             (16, 0)
         );
         assert_eq!(
-            get_bars_length(ChartType::Bytes, &first_entry, &data_info),
+            get_bars_length(DataRepr::Bytes, &first_entry, &data_info),
             (93, 0)
         );
 
         data_info = DataInfo::new_for_tests(4, 5, 6, 7);
         assert_eq!(
-            get_bars_length(ChartType::Packets, &first_entry, &data_info),
+            get_bars_length(DataRepr::Packets, &first_entry, &data_info),
             (7, 9)
         );
         assert_eq!(
-            get_bars_length(ChartType::Bytes, &first_entry, &data_info),
+            get_bars_length(DataRepr::Bytes, &first_entry, &data_info),
             (43, 50)
         );
         data_info = DataInfo::new_for_tests(5, 4, 7, 6);
         assert_eq!(
-            get_bars_length(ChartType::Packets, &first_entry, &data_info),
+            get_bars_length(DataRepr::Packets, &first_entry, &data_info),
             (9, 7)
         );
         assert_eq!(
-            get_bars_length(ChartType::Bytes, &first_entry, &data_info),
+            get_bars_length(DataRepr::Bytes, &first_entry, &data_info),
             (50, 43)
         );
 
         data_info = DataInfo::new_for_tests(1, 8, 1, 12);
         assert_eq!(
-            get_bars_length(ChartType::Packets, &first_entry, &data_info),
+            get_bars_length(DataRepr::Packets, &first_entry, &data_info),
             (MIN_BARS_LENGTH as u16 / 2, 14)
         );
         assert_eq!(
-            get_bars_length(ChartType::Bytes, &first_entry, &data_info),
+            get_bars_length(DataRepr::Bytes, &first_entry, &data_info),
             (7, 86)
         );
         data_info = DataInfo::new_for_tests(8, 1, 12, 1);
         assert_eq!(
-            get_bars_length(ChartType::Packets, &first_entry, &data_info),
+            get_bars_length(DataRepr::Packets, &first_entry, &data_info),
             (14, MIN_BARS_LENGTH as u16 / 2)
         );
         assert_eq!(
-            get_bars_length(ChartType::Bytes, &first_entry, &data_info),
+            get_bars_length(DataRepr::Bytes, &first_entry, &data_info),
             (86, 7)
         );
 
         data_info = DataInfo::new_for_tests(6, 1, 10, 1);
         assert_eq!(
-            get_bars_length(ChartType::Packets, &first_entry, &data_info),
+            get_bars_length(DataRepr::Packets, &first_entry, &data_info),
             (11, MIN_BARS_LENGTH as u16 / 2)
         );
         assert_eq!(
-            get_bars_length(ChartType::Bytes, &first_entry, &data_info),
+            get_bars_length(DataRepr::Bytes, &first_entry, &data_info),
             (71, 7)
         );
         data_info = DataInfo::new_for_tests(1, 6, 1, 9);
         assert_eq!(
-            get_bars_length(ChartType::Packets, &first_entry, &data_info),
+            get_bars_length(DataRepr::Packets, &first_entry, &data_info),
             (MIN_BARS_LENGTH as u16 / 2, 11,)
         );
         assert_eq!(
-            get_bars_length(ChartType::Bytes, &first_entry, &data_info),
+            get_bars_length(DataRepr::Bytes, &first_entry, &data_info),
             (7, 64)
         );
 
         data_info = DataInfo::new_for_tests(1, 6, 5, 5);
         assert_eq!(
-            get_bars_length(ChartType::Bytes, &first_entry, &data_info),
+            get_bars_length(DataRepr::Bytes, &first_entry, &data_info),
             (36, 36)
         );
 
         data_info = DataInfo::new_for_tests(0, 0, 0, 0);
         assert_eq!(
-            get_bars_length(ChartType::Packets, &first_entry, &data_info),
+            get_bars_length(DataRepr::Packets, &first_entry, &data_info),
             (0, 0)
         );
         assert_eq!(
-            get_bars_length(ChartType::Bytes, &first_entry, &data_info),
+            get_bars_length(DataRepr::Bytes, &first_entry, &data_info),
             (0, 0)
         );
     }

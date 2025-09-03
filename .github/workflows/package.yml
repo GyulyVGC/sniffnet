@@ -38,7 +38,7 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: Install Linux dependencies
         if: matrix.os == 'ubuntu'
@@ -126,7 +126,7 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: Install dependencies
         run: apt-get update -y && apt-get install -y curl build-essential
@@ -139,7 +139,7 @@ jobs:
       - name: Install packaging tools
         run: cargo install cargo-deb
 
-      - uses: actions/download-artifact@v4
+      - uses: actions/download-artifact@v5
         with:
           name: build-ubuntu-${{ matrix.target }}
           path: target/
@@ -158,6 +158,63 @@ jobs:
           path: artifacts/
           if-no-files-found: error
 
+  appimage:
+    runs-on: ubuntu-latest
+    container:
+      image: debian:latest
+      options: --privileged
+    needs: deb
+    strategy:
+      fail-fast: true
+      matrix:
+        include:
+          - arch: amd64
+            appimgarch: x86_64
+          - arch: arm64
+            appimgarch: aarch64
+          - arch: i386
+            appimgarch: i686
+          - arch: armhf
+            appimgarch: armhf
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v5
+
+      - name: Install dependencies
+        run: apt-get update -y && apt-get install -y git build-essential graphicsmagick-imagemagick-compat wget file desktop-file-utils libfuse2
+
+      - name: Download Debian package
+        uses: actions/download-artifact@v5
+        with:
+          name: deb-${{ matrix.arch }}
+          path: /target/
+
+      - name: Download pkg2appimage
+        shell: bash
+        run: git clone https://github.com/AppImageCommunity/pkg2appimage.git
+
+      - name: Replace placeholders
+        shell: bash
+        run: |
+          sed -i -e 's/REPLACE_TAG/Sniffnet_LinuxDEB_${{ matrix.arch }}.deb/g' resources/packaging/linux/AppImage/sniffnet.yml
+          sed -i -e 's/binary-${arch}/binary-${{ matrix.arch }}/g' pkg2appimage/functions.sh
+
+      - name: Repackage for AppImage
+        shell: bash
+        run: |
+          cd pkg2appimage
+          ARCH=${{ matrix.appimgarch }} FUNCTIONS_SH=$(pwd)/functions.sh ./pkg2appimage ../resources/packaging/linux/AppImage/sniffnet.yml
+          mkdir /out
+          mv out/*.AppImage /out/Sniffnet_LinuxAppImage_${{ matrix.arch }}.AppImage
+
+      - name: Upload package artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: appimage-${{ matrix.arch }}
+          path: /out/
+          if-no-files-found: error
+
   rpm:
     runs-on: ubuntu-latest
     container:
@@ -174,7 +231,7 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: Install dependencies
         run: dnf update -y && dnf install -y @development-tools patchelf
@@ -187,7 +244,7 @@ jobs:
       - name: Install packaging tools
         run: cargo install cargo-generate-rpm
 
-      - uses: actions/download-artifact@v4
+      - uses: actions/download-artifact@v5
         with:
           name: build-ubuntu-${{ matrix.target }}
           path: target/
@@ -221,7 +278,7 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: Install Rust
         uses: dtolnay/rust-toolchain@stable
@@ -231,7 +288,7 @@ jobs:
           cargo install toml-cli
           brew install create-dmg
 
-      - uses: actions/download-artifact@v4
+      - uses: actions/download-artifact@v5
         with:
           name: build-macos-${{ matrix.target }}
           path: target/
@@ -285,7 +342,7 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: Install dependencies
         shell: powershell
@@ -306,7 +363,7 @@ jobs:
       - name: Install packaging tools
         run: cargo install cargo-wix
 
-      - uses: actions/download-artifact@v4
+      - uses: actions/download-artifact@v5
         with:
           name: build-windows-${{ matrix.target }}
           path: target/
@@ -318,9 +375,29 @@ jobs:
           cargo wix --no-build --nocapture --target ${{ matrix.target }}
           Move-Item -Path target\wix\sniffnet*.msi -Destination .\artifacts\Sniffnet_Windows_${{ matrix.arch }}.msi
 
-      - name: Upload package artifacts
+      - name: Upload unsigned package artifacts
+        id: upload-unsigned-artifact
         uses: actions/upload-artifact@v4
         with:
           name: msi-${{ matrix.arch }}
           path: artifacts/
           if-no-files-found: error
+
+      - name: Sign package artifacts
+        uses: signpath/github-action-submit-signing-request@v1.3
+        with:
+          api-token: '${{ secrets.SIGNPATH_API_TOKEN }}'
+          organization-id: '3b533e02-73c3-4908-a018-d09a34498a6a'
+          project-slug: 'sniffnet'
+          signing-policy-slug: 'release-signing'
+          github-artifact-id: '${{ steps.upload-unsigned-artifact.outputs.artifact-id }}'
+          wait-for-completion: true
+          output-artifact-directory: './artifacts'
+
+      - name: Upload signed package artifacts (overwrite unsigned)
+        uses: actions/upload-artifact@v4
+        with:
+          name: msi-${{ matrix.arch }}
+          path: artifacts/
+          if-no-files-found: error
+          overwrite: true

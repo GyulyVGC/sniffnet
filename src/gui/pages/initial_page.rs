@@ -2,17 +2,7 @@
 //!
 //! It contains elements to select network adapter and traffic filters.
 
-use std::collections::HashSet;
 use std::fmt::Write;
-
-use iced::Length::FillPortion;
-use iced::widget::scrollable::Direction;
-use iced::widget::tooltip::Position;
-use iced::widget::{
-    Button, Checkbox, Column, Container, Row, Rule, Scrollable, Space, Text, TextInput, Tooltip,
-    button, center,
-};
-use iced::{Alignment, Font, Length, Padding, alignment};
 
 use crate::gui::components::button::button_open_file;
 use crate::gui::sniffer::Sniffer;
@@ -21,287 +11,171 @@ use crate::gui::styles::container::ContainerType;
 use crate::gui::styles::scrollbar::ScrollbarType;
 use crate::gui::styles::style_constants::{FONT_SIZE_SUBTITLE, FONT_SIZE_TITLE};
 use crate::gui::styles::text::TextType;
-use crate::gui::styles::text_input::TextInputType;
 use crate::gui::styles::types::gradient_type::GradientType;
 use crate::gui::types::export_pcap::ExportPcap;
+use crate::gui::types::filters::Filters;
 use crate::gui::types::message::Message;
-use crate::networking::types::capture_context::CaptureSource;
-use crate::networking::types::filters::Filters;
-use crate::networking::types::ip_collection::AddressCollection;
-use crate::networking::types::port_collection::PortCollection;
+use crate::gui::types::settings::Settings;
+use crate::networking::types::capture_context::{CaptureSource, CaptureSourcePicklist};
 use crate::translations::translations::{
-    address_translation, addresses_translation, choose_adapters_translation,
-    ip_version_translation, protocol_translation, select_filters_translation, start_translation,
+    address_translation, addresses_translation, network_adapter_translation, start_translation,
 };
 use crate::translations::translations_3::{
-    directory_translation, export_capture_translation, file_name_translation, port_translation,
+    directory_translation, export_capture_translation, file_name_translation,
 };
-use crate::translations::translations_4::import_capture_translation;
-use crate::utils::formatted_strings::{get_invalid_filters_string, get_path_termination_string};
+use crate::translations::translations_4::capture_file_translation;
+use crate::translations::translations_5::{filter_traffic_translation, traffic_source_translation};
+use crate::utils::formatted_strings::get_path_termination_string;
 use crate::utils::types::file_info::FileInfo;
 use crate::utils::types::icon::Icon;
-use crate::{ConfigSettings, IpVersion, Language, Protocol, StyleType};
+use crate::{Language, StyleType};
+use iced::Length::FillPortion;
+use iced::widget::scrollable::Direction;
+use iced::widget::{
+    Button, Checkbox, Column, Container, PickList, Row, Scrollable, Space, Text, TextInput, button,
+    center, vertical_space,
+};
+use iced::{Alignment, Font, Length, Padding, alignment};
 
 /// Computes the body of gui initial page
-pub fn initial_page(sniffer: &Sniffer) -> Container<Message, StyleType> {
-    let ConfigSettings {
+pub fn initial_page(sniffer: &Sniffer) -> Container<'_, Message, StyleType> {
+    let Settings {
         style,
         language,
         color_gradient,
         ..
-    } = sniffer.configs.settings;
+    } = sniffer.conf.settings;
     let font = style.get_extension().font;
+    let font_headers = style.get_extension().font_headers;
 
-    let col_adapter = get_col_adapter(sniffer, font);
-    let col_import_pcap = get_col_import_pcap(
-        language,
-        font,
-        &sniffer.capture_source,
-        &sniffer.import_pcap_path,
-    );
-    let col_capture_source = Column::new().push(col_adapter).push(col_import_pcap);
+    let col_data_source = get_col_data_source(sniffer, font, language);
 
-    let ip_active = &sniffer.filters.ip_versions;
-    let col_ip_buttons = col_ip_buttons(ip_active, font, language);
-
-    let protocol_active = &sniffer.filters.protocols;
-    let col_protocol_buttons = col_protocol_buttons(protocol_active, font, language);
-
-    let address_active = &sniffer.filters.address_str;
-    let col_address_filter = col_address_input(address_active, font, language);
-
-    let port_active = &sniffer.filters.port_str;
-    let col_port_filter = col_port_input(port_active, font, language);
-
-    let filters_pane = Column::new()
-        .width(FillPortion(6))
-        .padding(10)
-        .spacing(15)
-        .push(
-            select_filters_translation(language)
-                .font(font)
-                .class(TextType::Title)
-                .size(FONT_SIZE_TITLE),
-        )
-        .push(
-            Row::new()
-                .spacing(20)
-                .push(col_ip_buttons)
-                .push(col_protocol_buttons),
-        )
-        .push(
-            Row::new()
-                .spacing(20)
-                .push(col_address_filter)
-                .push(col_port_filter),
-        )
-        .push(Rule::horizontal(40))
-        .push(get_export_pcap_group(
-            &sniffer.capture_source,
-            &sniffer.export_pcap,
+    let col_checkboxes = Column::new()
+        .spacing(10)
+        .push(get_filters_group(&sniffer.conf.filters, font, language))
+        .push_maybe(get_export_pcap_group_maybe(
+            sniffer.conf.capture_source_picklist,
+            &sniffer.conf.export_pcap,
             language,
             font,
+        ));
+
+    let is_capture_source_consistent = sniffer.is_capture_source_consistent();
+    let right_col = Column::new()
+        .width(FillPortion(1))
+        .padding(10)
+        .push(Space::with_height(76))
+        .push(col_checkboxes)
+        .push(vertical_space())
+        .push(button_start(
+            font_headers,
+            language,
+            color_gradient,
+            is_capture_source_consistent,
         ))
-        .push(
-            Container::new(button_start(
-                font,
-                language,
-                color_gradient,
-                &sniffer.filters,
-            ))
-            .width(Length::Fill)
-            .height(Length::Fill)
-            .align_y(Alignment::Start)
-            .align_x(Alignment::Center),
-        );
+        .push(vertical_space());
 
     let body = Column::new().push(Space::with_height(5)).push(
         Row::new()
-            .push(col_capture_source)
-            .push(Space::with_width(30))
-            .push(filters_pane),
+            .push(col_data_source)
+            .push(Space::with_width(15))
+            .push(right_col),
     );
 
     Container::new(body).height(Length::Fill)
 }
 
-fn col_ip_buttons(
-    active_ip_filters: &HashSet<IpVersion>,
-    font: Font,
-    language: Language,
-) -> Column<Message, StyleType> {
-    let mut buttons_row = Row::new().spacing(5).padding(Padding::ZERO.left(5));
-    for option in IpVersion::ALL {
-        let is_active = active_ip_filters.contains(&option);
-        let check_symbol = if is_active { "✔" } else { "✘" };
-        buttons_row = buttons_row.push(
-            Button::new(
-                Text::new(format!("{option} {check_symbol}"))
-                    .align_x(Alignment::Center)
-                    .align_y(Alignment::Center)
-                    .font(font),
-            )
-            .width(80)
-            .height(35)
-            .class(if is_active {
-                ButtonType::BorderedRoundSelected
-            } else {
-                ButtonType::BorderedRound
-            })
-            .on_press(Message::IpVersionSelection(option, !is_active)),
-        );
-    }
-
-    Column::new()
-        .width(Length::Fill)
-        .spacing(7)
-        .push(
-            Text::new(ip_version_translation(language))
-                .font(font)
-                .class(TextType::Subtitle)
-                .size(FONT_SIZE_SUBTITLE),
-        )
-        .push(buttons_row)
-}
-
-fn col_protocol_buttons(
-    active_protocol_filters: &HashSet<Protocol>,
-    font: Font,
-    language: Language,
-) -> Column<Message, StyleType> {
-    let mut buttons_row = Row::new().spacing(5).padding(Padding::ZERO.left(5));
-    for option in Protocol::ALL {
-        let is_active = active_protocol_filters.contains(&option);
-        let check_symbol = if is_active { "✔" } else { "✘" };
-        buttons_row = buttons_row.push(
-            Button::new(
-                Text::new(format!("{option} {check_symbol}"))
-                    .align_x(Alignment::Center)
-                    .align_y(Alignment::Center)
-                    .font(font),
-            )
-            .width(80)
-            .height(35)
-            .class(if is_active {
-                ButtonType::BorderedRoundSelected
-            } else {
-                ButtonType::BorderedRound
-            })
-            .on_press(Message::ProtocolSelection(option, !is_active)),
-        );
-    }
-
-    Column::new()
-        .width(Length::Fill)
-        .spacing(7)
-        .push(
-            Text::new(protocol_translation(language))
-                .font(font)
-                .class(TextType::Subtitle)
-                .size(FONT_SIZE_SUBTITLE),
-        )
-        .push(buttons_row)
-}
-
-fn col_address_input(value: &str, font: Font, language: Language) -> Column<Message, StyleType> {
-    let is_error = if value.is_empty() {
-        false
-    } else {
-        AddressCollection::new(value).is_none()
-    };
-    let input_row = Row::new().padding(Padding::ZERO.left(5)).push(
-        TextInput::new(AddressCollection::PLACEHOLDER_STR, value)
-            .padding([3, 5])
-            .on_input(Message::AddressFilter)
-            .font(font)
-            .width(310)
-            .class(if is_error {
-                TextInputType::Error
-            } else {
-                TextInputType::Standard
-            }),
-    );
-
-    Column::new()
-        .width(Length::Fill)
-        .spacing(7)
-        .push(
-            Text::new(address_translation(language))
-                .font(font)
-                .class(TextType::Subtitle)
-                .size(FONT_SIZE_SUBTITLE),
-        )
-        .push(input_row)
-}
-
-fn col_port_input(value: &str, font: Font, language: Language) -> Column<Message, StyleType> {
-    let is_error = if value.is_empty() {
-        false
-    } else {
-        PortCollection::new(value).is_none()
-    };
-    let input_row = Row::new().padding(Padding::ZERO.left(5)).push(
-        TextInput::new(PortCollection::PLACEHOLDER_STR, value)
-            .padding([3, 5])
-            .on_input(Message::PortFilter)
-            .font(font)
-            .width(180)
-            .class(if is_error {
-                TextInputType::Error
-            } else {
-                TextInputType::Standard
-            }),
-    );
-
-    Column::new()
-        .width(Length::Fill)
-        .spacing(7)
-        .push(
-            Text::new(port_translation(language))
-                .font(font)
-                .class(TextType::Subtitle)
-                .size(FONT_SIZE_SUBTITLE),
-        )
-        .push(input_row)
-}
-
-fn button_start(
-    font: Font,
+fn button_start<'a>(
+    font_headers: Font,
     language: Language,
     color_gradient: GradientType,
-    filters: &Filters,
-) -> Tooltip<Message, StyleType> {
-    let mut content = button(
-        Icon::Rocket
-            .to_text()
-            .size(25)
+    is_capture_source_consistent: bool,
+) -> Button<'a, Message, StyleType> {
+    button(
+        Text::new(start_translation(language))
+            .font(font_headers)
+            .size(FONT_SIZE_TITLE)
+            .width(Length::Fill)
             .align_x(alignment::Alignment::Center)
             .align_y(alignment::Alignment::Center),
     )
-    .padding(10)
-    .height(80)
-    .width(160)
-    .class(ButtonType::Gradient(color_gradient));
-
-    let mut tooltip = start_translation(language).to_string();
-    //tooltip.push_str(" [⏎]");
-    let mut position = Position::Top;
-
-    if filters.are_valid() {
-        content = content.on_press(Message::Start);
+    .padding(20)
+    .width(Length::Fill)
+    .class(ButtonType::Gradient(color_gradient))
+    .on_press_maybe(if is_capture_source_consistent {
+        Some(Message::Start)
     } else {
-        tooltip = get_invalid_filters_string(filters, language);
-        position = Position::FollowCursor;
-    }
-
-    Tooltip::new(content, Text::new(tooltip).font(font), position)
-        .gap(5)
-        .class(ContainerType::Tooltip)
+        None
+    })
 }
 
-fn get_col_adapter(sniffer: &Sniffer, font: Font) -> Column<Message, StyleType> {
-    let ConfigSettings { language, .. } = sniffer.configs.settings;
+fn get_col_data_source(
+    sniffer: &Sniffer,
+    font: Font,
+    language: Language,
+) -> Column<'_, Message, StyleType> {
+    let current_option = if sniffer.conf.capture_source_picklist == CaptureSourcePicklist::Device {
+        network_adapter_translation(language)
+    } else {
+        capture_file_translation(language)
+    };
+    let picklist = PickList::new(
+        [
+            network_adapter_translation(language),
+            capture_file_translation(language),
+        ],
+        Some(current_option),
+        move |option| {
+            if option == network_adapter_translation(language) {
+                Message::SetCaptureSource(CaptureSourcePicklist::Device)
+            } else {
+                Message::SetCaptureSource(CaptureSourcePicklist::File)
+            }
+        },
+    )
+    .padding([2, 7])
+    .font(font);
 
+    let mut col = Column::new()
+        .align_x(Alignment::Center)
+        .padding(Padding::new(10.0).top(30))
+        .spacing(30)
+        .height(Length::Fill)
+        .width(FillPortion(1))
+        .push(
+            Row::new()
+                .spacing(10)
+                .push(
+                    Text::new(traffic_source_translation(language))
+                        .font(font)
+                        .class(TextType::Title)
+                        .size(FONT_SIZE_TITLE),
+                )
+                .push(picklist),
+        );
+
+    match &sniffer.conf.capture_source_picklist {
+        CaptureSourcePicklist::Device => {
+            col = col.push(get_col_adapter(sniffer, font, language));
+        }
+        CaptureSourcePicklist::File => {
+            col = col.push(get_col_import_pcap(
+                language,
+                font,
+                &sniffer.capture_source,
+                &sniffer.conf.import_pcap_path,
+            ));
+        }
+    }
+
+    col
+}
+
+fn get_col_adapter(
+    sniffer: &Sniffer,
+    font: Font,
+    language: Language,
+) -> Column<'_, Message, StyleType> {
     let mut dev_str_list = vec![];
     for my_dev in &sniffer.my_devices {
         let mut title = String::new();
@@ -342,16 +216,8 @@ fn get_col_adapter(sniffer: &Sniffer, font: Font) -> Column<Message, StyleType> 
     }
 
     Column::new()
-        .padding(10)
         .spacing(5)
         .height(Length::Fill)
-        .width(FillPortion(4))
-        .push(
-            choose_adapters_translation(language)
-                .font(font)
-                .class(TextType::Title)
-                .size(FONT_SIZE_TITLE),
-        )
         .push(if dev_str_list.is_empty() {
             Into::<iced::Element<Message, StyleType>>::into(center(
                 Icon::get_hourglass(sniffer.dots_pulse.0.len()).size(60),
@@ -359,7 +225,7 @@ fn get_col_adapter(sniffer: &Sniffer, font: Font) -> Column<Message, StyleType> 
         } else {
             Scrollable::with_direction(
                 dev_str_list.into_iter().fold(
-                    Column::new().padding(13).spacing(5),
+                    Column::new().padding(Padding::ZERO.right(13)).spacing(5),
                     |scroll_adapters, (name, title, subtitle, addrs)| {
                         let addrs_text = if addrs.is_empty() {
                             None
@@ -424,7 +290,7 @@ fn get_col_import_pcap<'a>(
 
     let content = Column::new()
         .width(Length::Fill)
-        .align_x(Alignment::Center)
+        .align_x(alignment::Alignment::Center)
         .spacing(5)
         .push(button_row);
 
@@ -439,29 +305,59 @@ fn get_col_import_pcap<'a>(
             })
             .on_press(Message::SetPcapImport(path.to_string())),
     )
-    .padding(13);
+    .padding(Padding::ZERO.right(13));
 
-    Column::new()
-        .padding(10)
-        .spacing(5)
-        .width(FillPortion(4))
-        .push(
-            Text::new(import_capture_translation(language))
-                .font(font)
-                .class(TextType::Title)
-                .size(FONT_SIZE_TITLE),
-        )
-        .push(button)
+    Column::new().spacing(5).push(button)
 }
 
-fn get_export_pcap_group<'a>(
-    cs: &CaptureSource,
+fn get_filters_group<'a>(
+    filters: &Filters,
+    font: Font,
+    language: Language,
+) -> Container<'a, Message, StyleType> {
+    let expanded = filters.expanded();
+    let bpf = filters.bpf();
+
+    let caption = filter_traffic_translation(language);
+    let checkbox = Checkbox::new(caption, expanded)
+        .on_toggle(move |_| Message::ToggleFilters)
+        .size(18)
+        .font(font);
+
+    let mut ret_val = Column::new().spacing(10).push(checkbox);
+
+    if expanded {
+        let input = TextInput::new("", bpf)
+            .on_input(Message::BpfFilter)
+            .padding([2, 5])
+            .font(font);
+        let inner_col = Column::new()
+            .spacing(10)
+            .padding(Padding::ZERO.left(26))
+            .push(
+                Row::new()
+                    .align_y(Alignment::Center)
+                    .spacing(5)
+                    .push(Text::new("BPF:").font(font))
+                    .push(input),
+            );
+        ret_val = ret_val.push(inner_col);
+    }
+
+    Container::new(ret_val)
+        .padding(15)
+        .width(Length::Fill)
+        .class(ContainerType::BorderedRound)
+}
+
+fn get_export_pcap_group_maybe<'a>(
+    cs_pick: CaptureSourcePicklist,
     export_pcap: &ExportPcap,
     language: Language,
     font: Font,
-) -> Container<'a, Message, StyleType> {
-    if matches!(cs, CaptureSource::File(_)) {
-        return Container::new(Space::with_height(Length::Fill));
+) -> Option<Container<'a, Message, StyleType>> {
+    if cs_pick == CaptureSourcePicklist::File {
+        return None;
     }
 
     let enabled = export_pcap.enabled();
@@ -479,7 +375,7 @@ fn get_export_pcap_group<'a>(
     if enabled {
         let inner_col = Column::new()
             .spacing(10)
-            .padding(Padding::ZERO.left(45))
+            .padding(Padding::ZERO.left(26))
             .push(
                 Row::new()
                     .align_y(Alignment::Center)
@@ -489,8 +385,7 @@ fn get_export_pcap_group<'a>(
                         TextInput::new(ExportPcap::DEFAULT_FILE_NAME, file_name)
                             .on_input(Message::OutputPcapFile)
                             .padding([2, 5])
-                            .font(font)
-                            .width(200),
+                            .font(font),
                     ),
             )
             .push(
@@ -511,12 +406,10 @@ fn get_export_pcap_group<'a>(
         ret_val = ret_val.push(inner_col);
     }
 
-    Container::new(
+    Some(
         Container::new(ret_val)
-            .padding(10)
+            .padding(15)
             .width(Length::Fill)
             .class(ContainerType::BorderedRound),
     )
-    .height(Length::Fill)
-    .align_y(Alignment::Start)
 }

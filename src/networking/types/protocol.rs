@@ -19,33 +19,3 @@ impl std::fmt::Display for Protocol {
         write!(f, "{self:?}")
     }
 }
-
-impl Protocol {
-    pub const ALL: [Protocol; 4] = [Protocol::TCP, Protocol::UDP, Protocol::ICMP, Protocol::ARP];
-}
-
-#[cfg(test)]
-mod tests {
-    use super::*;
-
-    #[test]
-    fn test_protocol_display() {
-        for protocol in Protocol::ALL {
-            match protocol {
-                Protocol::TCP => assert_eq!(protocol.to_string(), "TCP"),
-                Protocol::UDP => assert_eq!(protocol.to_string(), "UDP"),
-                Protocol::ICMP => assert_eq!(protocol.to_string(), "ICMP"),
-                Protocol::ARP => assert_eq!(protocol.to_string(), "ARP"),
-            }
-        }
-    }
-
-    #[test]
-    fn test_all_protocols_collection() {
-        assert_eq!(Protocol::ALL.len(), 4);
-        assert_eq!(Protocol::ALL.get(0).unwrap(), &Protocol::TCP);
-        assert_eq!(Protocol::ALL.get(1).unwrap(), &Protocol::UDP);
-        assert_eq!(Protocol::ALL.get(2).unwrap(), &Protocol::ICMP);
-        assert_eq!(Protocol::ALL.get(3).unwrap(), &Protocol::ARP);
-    }
-}

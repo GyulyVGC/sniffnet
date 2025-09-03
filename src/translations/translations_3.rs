@@ -1,4 +1,4 @@
-#![allow(clippy::match_same_arms)]
+#![allow(clippy::match_same_arms, clippy::match_wildcard_for_single_variants)]
 
 use iced::widget::Text;
 
@@ -28,6 +28,7 @@ pub fn general_translation(language: Language) -> &'static str {
         Language::UK => "Загальні",
         Language::ID => "Umum",
         Language::NL => "Algemeen",
+        Language::EL => "Γενικά",
         _ => "General",
     }
 }
@@ -55,6 +56,7 @@ pub fn zoom_translation(language: Language) -> &'static str {
         Language::TR => "Yakınlaştırma",
         Language::UK => "Масштабування",
         Language::ID => "Perbesar",
+        Language::EL => "Εστίαση",
         _ => "Zoom",
     }
 }
@@ -82,6 +84,7 @@ pub fn mmdb_files_translation(language: Language) -> &'static str {
         Language::UK => "Файли бази даних",
         Language::ID => "Berkas database",
         Language::NL => "Database bestanden",
+        Language::EL => "Αρχεία βάσης δεδομένων",
         _ => "Database files",
     }
 }
@@ -109,6 +112,9 @@ pub fn params_not_editable_translation(language: Language) -> &'static str {
         Language::UK => "Наступні параметри не можна змінювати під час аналізу трафіку",
         Language::ID => "Parameter berikut tidak bisa diubah saat dianalisa",
         Language::NL => "De volgende parameters kunnen niet worden aangepast tijdens de analyse",
+        Language::EL => {
+            "Οι ακόλουθες παράμετροι δεν μπορούν να τροποποιηθούν κατά τη διάρκεια της ανάλυσης"
+        }
         _ => "The following parameters can't be modified during the analysis",
     }
 }
@@ -135,6 +141,7 @@ pub fn custom_style_translation(language: Language) -> &'static str {
         Language::UK => "Власний стиль",
         Language::ID => "Ubah Model",
         Language::NL => "Aangepaste stijl",
+        Language::EL => "Προσαρμοσμένο στυλ",
         _ => "Custom style",
     }
 }
@@ -160,6 +167,7 @@ pub fn copy_translation(language: Language) -> &'static str {
         Language::UK => "Копіювати",
         Language::ID => "Salin",
         Language::NL => "Kopiëren",
+        Language::EL => "Αντιγραφή",
         _ => "Copy",
     }
 }
@@ -186,35 +194,37 @@ pub fn port_translation(language: Language) -> &'static str {
         Language::UK => "Порт",
         Language::ID => "Port",
         Language::NL => "Poort",
+        Language::EL => "Θύρα",
         _ => "Port",
     }
 }
 
-pub fn invalid_filters_translation(language: Language) -> &'static str {
-    match language {
-        Language::EN => "Invalid filters",
-        // Language::FA => "صافی نامعتبر",
-        Language::ES | Language::PT => "Filtros inválidos",
-        Language::IT => "Filtri non validi",
-        Language::FR => "Filtres invalides",
-        Language::DE => "Ungültige Filter",
-        Language::PL => "Nieprawidłowe filtry",
-        Language::RU => "Неверный формат фильтров",
-        Language::RO => "Filtre invalide",
-        Language::JA => "無効なフィルター",
-        Language::UZ => "Noto'g'ri filtrlar",
-        Language::SV => "Ogiltiga filter",
-        Language::VI => "Bộ lọc không khả dụng",
-        Language::ZH => "无效的过滤器",
-        Language::ZH_TW => "無效的篩選器",
-        Language::KO => "잘못된 필터",
-        Language::TR => "Geçersiz filtreler",
-        Language::UK => "Неправильний формат фільтрів",
-        Language::ID => "Filter salah",
-        Language::NL => "Ongeldige filters",
-        _ => "Invalid filters",
-    }
-}
+// pub fn invalid_filters_translation(language: Language) -> &'static str {
+//     match language {
+//         Language::EN => "Invalid filters",
+//         // Language::FA => "صافی نامعتبر",
+//         Language::ES | Language::PT => "Filtros inválidos",
+//         Language::IT => "Filtri non validi",
+//         Language::FR => "Filtres invalides",
+//         Language::DE => "Ungültige Filter",
+//         Language::PL => "Nieprawidłowe filtry",
+//         Language::RU => "Неверный формат фильтров",
+//         Language::RO => "Filtre invalide",
+//         Language::JA => "無効なフィルター",
+//         Language::UZ => "Noto'g'ri filterlar",
+//         Language::SV => "Ogiltiga filter",
+//         Language::VI => "Bộ lọc không khả dụng",
+//         Language::ZH => "无效的过滤器",
+//         Language::ZH_TW => "無效的篩選器",
+//         Language::KO => "잘못된 필터",
+//         Language::TR => "Geçersiz filtreler",
+//         Language::UK => "Неправильний формат фільтрів",
+//         Language::ID => "Filter salah",
+//         Language::NL => "Ongeldige filters",
+//         Language::EL => "Μη έγκυρα φίλτρα",
+//         _ => "Invalid filters",
+//     }
+// }
 
 pub fn messages_translation(language: Language) -> &'static str {
     match language {
@@ -238,6 +248,7 @@ pub fn messages_translation(language: Language) -> &'static str {
         Language::UK => "Повідомлення",
         Language::ID => "Pesan",
         Language::NL => "Berichten",
+        Language::EL => "Μηνύματα",
         _ => "Messages",
     }
 }
@@ -264,6 +275,7 @@ pub fn link_type_translation(language: Language) -> &'static str {
         Language::PT => "Tipo de conexão",
         Language::UK => "Різновид зʼєднання",
         Language::ID => "Tipe koneksi",
+        Language::EL => "Τύπος σύνδεσης",
         _ => "Link type",
     }
 }
@@ -324,6 +336,9 @@ pub fn unsupported_link_type_translation<'a>(
         Language::NL => {
             "Het linktype dat is gekoppeld aan deze adapter wordt nog niet ondersteund door Sniffnet..."
         }
+        Language::EL => {
+            "Ο τύπος σύνδεσης που σχετίζεται με αυτόν τον προσαρμογέα δεν υποστηρίζεται ακόμη από το Sniffnet..."
+        }
         _ => "The link type associated with this adapter is not supported by Sniffnet yet...",
     };
 
@@ -356,6 +371,7 @@ pub fn style_from_file_translation(language: Language) -> &'static str {
         Language::UK => "Виберіть стиль з файлу",
         Language::ID => "Pilih model / gaya dari berkas",
         Language::NL => "Selecteer stijl vanuit een bestand",
+        Language::EL => "Επιλογή στυλ από αρχείο",
         _ => "Select style from a file",
     }
 }
@@ -383,6 +399,7 @@ pub fn database_from_file_translation(language: Language) -> &'static str {
         Language::UK => "Виберіть файл бази даних",
         Language::ID => "Pilih berkas database",
         Language::NL => "Selecteer database bestand",
+        Language::EL => "Επιλογή αρχείου βάσης δεδομένων",
         _ => "Select database file",
     }
 }
@@ -410,6 +427,7 @@ pub fn filter_by_host_translation(language: Language) -> &'static str {
         Language::UK => "Фільтр за хостом мережі",
         Language::ID => "Filter berdasarkan jaringan asal",
         Language::NL => "Filteren op netwerk host",
+        Language::EL => "Φίλτρο ανά διακομιστή δικτύου",
         _ => "Filter by network host",
     }
 }
@@ -434,6 +452,7 @@ pub fn service_translation(language: Language) -> &'static str {
         Language::UK => "Сервіс",
         Language::ID => "Layanan",
         Language::NL => "Dienst",
+        Language::EL => "Υπηρεσία",
         _ => "Service",
     }
 }
@@ -461,6 +480,7 @@ pub fn export_capture_translation(language: Language) -> &'static str {
         Language::ID => "Ekspor data tangkapan",
         Language::ES => "Exportar archivo de captura",
         Language::NL => "Exporteer capture bestand",
+        Language::EL => "Εξαγωγή αρχείου καταγραφής",
         _ => "Export capture file",
     }
 }
@@ -487,6 +507,7 @@ pub fn directory_translation(language: Language) -> &'static str {
         Language::ID => "Direktori",
         Language::ES => "Directorio",
         Language::NL => "Map",
+        Language::EL => "Κατάλογος",
         _ => "Directory",
     }
 }
@@ -514,6 +535,7 @@ pub fn select_directory_translation(language: Language) -> &'static str {
         Language::ID => "Pilih direktori tujuan",
         Language::ES => "Selecciona el directorio de destino",
         Language::NL => "Selecteer doelmap",
+        Language::EL => "Επιλογή καταλόγου προορισμού",
         _ => "Select destination directory",
     }
 }
@@ -541,6 +563,7 @@ pub fn file_name_translation(language: Language) -> &'static str {
         Language::ID => "Nama berkas",
         Language::ES => "Nombre del archivo",
         Language::NL => "Bestandsnaam",
+        Language::EL => "Όνομα αρχείου",
         _ => "File name",
     }
 }
@@ -567,6 +590,7 @@ pub fn thumbnail_mode_translation(language: Language) -> &'static str {
         Language::UK => "Режим мініатюри",
         Language::ID => "Mode gambar kecil",
         Language::NL => "Miniatuur modus",
+        Language::EL => "Λειτουργία μικρογραφιών",
         _ => "Thumbnail mode",
     }
 }
