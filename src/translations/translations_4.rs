@@ -71,6 +71,7 @@ pub fn capture_file_translation(language: Language) -> &'static str {
         Language::UZ => "Tahlil faylini",
         Language::EL => "Αρχείου καταγραφής",
         Language::RO => "Importă fișierul de captură",
+        Language::ZH_TW => "導入擷取文件",
         _ => "Capture file",
     }
 }
@@ -86,6 +87,7 @@ pub fn select_capture_translation(language: Language) -> &'static str {
         Language::RO => "Selectează fișierul de captură",
         Language::DE => "Aufzeichnungsdatei auswählen",
         Language::UZ => "Tahlil faylini tanlang",
+        Language::ZH_TW => "選擇擷取文件",
         Language::EL => "Επιλογή αρχείου καταγραφής",
         _ => "Select capture file",
     }
@@ -139,6 +141,11 @@ pub fn reading_from_pcap_translation<'a>(language: Language, file: &str) -> Text
                                 {file_name_translation}: {file}\n\n\
                                 Fayl bo'sh emasligiga aminmisiz?"
         ),
+        Language::ZH_TW => format!(
+            "從檔案讀取資料包...\n\n\
+                                {file_name_translation}: {file}\n\n\
+                                您確定您選擇的檔案不是空的嗎？"
+        ),
         Language::EL => format!(
             "Ανάγνωση πακέτων από αρχείο...\n\n\
                                  {file_name_translation}: {file}\n\n\
@@ -163,6 +170,7 @@ pub fn data_exceeded_translation(language: Language) -> &'static str {
         Language::RO => "Limita de date depășită",
         Language::DE => "Datenschwelle überschritten",
         Language::UZ => "Ma'lumotlar chegarasidan oshib ketdi",
+        Language::ZH_TW => "已排除",
         Language::EL => "Υπέρβαση ορίου δεδομένων",
         _ => "Data threshold exceeded",
     }
@@ -179,6 +187,7 @@ pub fn bits_exceeded_translation(language: Language) -> &'static str {
         Language::RO => "Limita de biți depășită",
         Language::DE => "Bitschwelle überschritten",
         Language::UZ => "Bitlar chegarasidan oshib ketdi",
+        Language::ZH_TW => "超出數據界限",
         Language::EL => "Υπέρβαση ορίου δυφίων",
         _ => "Bits threshold exceeded",
     }
@@ -192,6 +201,7 @@ pub fn bits_translation(language: Language) -> &'static str {
         Language::UZ => "bitlar",
         Language::EL => "Δυφία",
         Language::RO => "Biți",
+        Language::ZH_TW => "位元",
         _ => "bits",
     }
 }
@@ -206,6 +216,7 @@ pub fn pause_translation(language: Language) -> &'static str {
         Language::NL => "Pauzeren",
         Language::RO => "Pauză",
         Language::UZ => "To'xtatish",
+        Language::ZH_TW => "暫停",
         Language::EL => "Παύση",
         _ => "Pause",
     }
@@ -223,6 +234,7 @@ pub fn resume_translation(language: Language) -> &'static str {
         Language::RO => "Continuă",
         Language::DE => "Fortsetzen",
         Language::UZ => "Davom ettirish",
+        Language::ZH_TW => "繼續",
         Language::EL => "Συνέχεια",
         _ => "Resume",
     }
