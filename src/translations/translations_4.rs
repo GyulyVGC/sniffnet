@@ -207,7 +207,9 @@ pub fn bits_exceeded_translation(language: Language) -> &'static str {
 
 pub fn bits_translation(language: Language) -> &'static str {
     match language {
-        Language::EN | Language::IT | Language::NL | Language::DE | Language::FR | Language::ID => "bits",
+        Language::EN | Language::IT | Language::NL | Language::DE | Language::FR | Language::ID => {
+            "bits"
+        }
         Language::JA => "ビット",
         Language::ZH => "比特",
         Language::UZ => "bitlar",
