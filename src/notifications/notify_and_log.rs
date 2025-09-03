@@ -1,8 +1,8 @@
 use crate::InfoTraffic;
-use crate::chart::types::chart_type::ChartType;
 use crate::networking::types::capture_context::CaptureSource;
 use crate::networking::types::data_info::DataInfo;
 use crate::networking::types::data_info_host::DataInfoHost;
+use crate::networking::types::data_representation::DataRepr;
 use crate::networking::types::host::Host;
 use crate::networking::types::service::Service;
 use crate::notifications::types::logged_notification::{
@@ -31,8 +31,8 @@ pub fn notify_and_log(
     let data_info = info_traffic_msg.tot_data_info;
     // data threshold
     if let Some(threshold) = notifications.data_notification.threshold {
-        let chart_type = notifications.data_notification.chart_type;
-        if data_info.tot_data(chart_type) > u128::from(threshold) {
+        let data_repr = notifications.data_notification.data_repr;
+        if data_info.tot_data(data_repr) > u128::from(threshold) {
             //log this notification
             logged_notifications.1 += 1;
             if logged_notifications.0.len() >= 30 {
@@ -43,13 +43,13 @@ pub fn notify_and_log(
                 .push_front(LoggedNotification::DataThresholdExceeded(
                     DataThresholdExceeded {
                         id: logged_notifications.1,
-                        chart_type,
+                        data_repr,
                         threshold: notifications.data_notification.previous_threshold,
                         data_info,
                         timestamp: get_formatted_timestamp(timestamp),
                         is_expanded: false,
-                        hosts: hosts_list(info_traffic_msg, chart_type),
-                        services: services_list(info_traffic_msg, chart_type),
+                        hosts: hosts_list(info_traffic_msg, data_repr),
+                        services: services_list(info_traffic_msg, data_repr),
                     },
                 ));
             if sound_to_play.eq(&Sound::None) {
@@ -98,7 +98,7 @@ pub fn notify_and_log(
     logged_notifications.1 - emitted_notifications_prev
 }
 
-fn hosts_list(info_traffic_msg: &InfoTraffic, chart_type: ChartType) -> Vec<(Host, DataInfoHost)> {
+fn hosts_list(info_traffic_msg: &InfoTraffic, data_repr: DataRepr) -> Vec<(Host, DataInfoHost)> {
     let mut hosts: Vec<(Host, DataInfoHost)> = info_traffic_msg
         .hosts
         .iter()
@@ -106,7 +106,7 @@ fn hosts_list(info_traffic_msg: &InfoTraffic, chart_type: ChartType) -> Vec<(Hos
         .collect();
     hosts.sort_by(|(_, a), (_, b)| {
         a.data_info
-            .compare(&b.data_info, SortType::Descending, chart_type)
+            .compare(&b.data_info, SortType::Descending, data_repr)
     });
     let n_entry = min(hosts.len(), 4);
     hosts
@@ -117,17 +117,14 @@ fn hosts_list(info_traffic_msg: &InfoTraffic, chart_type: ChartType) -> Vec<(Hos
         .collect()
 }
 
-fn services_list(
-    info_traffic_msg: &InfoTraffic,
-    chart_type: ChartType,
-) -> Vec<(Service, DataInfo)> {
+fn services_list(info_traffic_msg: &InfoTraffic, data_repr: DataRepr) -> Vec<(Service, DataInfo)> {
     let mut services: Vec<(Service, DataInfo)> = info_traffic_msg
         .services
         .iter()
         .filter(|(service, _)| service != &&Service::NotApplicable)
         .map(|(s, data)| (*s, *data))
         .collect();
-    services.sort_by(|(_, a), (_, b)| a.compare(b, SortType::Descending, chart_type));
+    services.sort_by(|(_, a), (_, b)| a.compare(b, SortType::Descending, data_repr));
     let n_entry = min(services.len(), 4);
     services
         .get(..n_entry)

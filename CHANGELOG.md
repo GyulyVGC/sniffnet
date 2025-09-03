@@ -3,7 +3,21 @@
 All Sniffnet releases with the relative changes are documented in this file.
 
 ## [UNRELEASED]
+- Enhanced traffic filtering capabilities: Berkeley Packet Filter ([#937](https://github.com/GyulyVGC/sniffnet/pull/937) — fixes [#810](https://github.com/GyulyVGC/sniffnet/issues/810))
+- Added support for `Linux SLL` link type, enabling to monitor the `any` interface on Linux ([#945](https://github.com/GyulyVGC/sniffnet/pull/945))
+- Added _bits_ data representation ([#936](https://github.com/GyulyVGC/sniffnet/pull/936) — fixes [#506](https://github.com/GyulyVGC/sniffnet/issues/506))
+- An AppImage of Sniffnet is now available ([#859](https://github.com/GyulyVGC/sniffnet/pull/859) — fixes [#900](https://github.com/GyulyVGC/sniffnet/issues/900))
 - Added Dutch translation 🇳🇱 ([#854](https://github.com/GyulyVGC/sniffnet/pull/854))
+- Improved configurations persistence across different runs of the app ([#938](https://github.com/GyulyVGC/sniffnet/pull/938) — fixes [#507](https://github.com/GyulyVGC/sniffnet/issues/507))
+- The Windows Installer is now signed with a code signing certificate provided by the [SignPath Foundation](https://signpath.org/) ([#897](https://github.com/GyulyVGC/sniffnet/pull/897) — fixes [#894](https://github.com/GyulyVGC/sniffnet/issues/894))
+- Updated some of the existing translations to v1.4: 
+  - German ([#833](https://github.com/GyulyVGC/sniffnet/pull/833))
+  - Uzbek ([#834](https://github.com/GyulyVGC/sniffnet/pull/834))
+  - Simplified Chinese ([#838](https://github.com/GyulyVGC/sniffnet/pull/838))
+  - Japanese ([#849](https://github.com/GyulyVGC/sniffnet/pull/849))
+  - French ([#864](https://github.com/GyulyVGC/sniffnet/pull/864))
+  - Greek ([#879](https://github.com/GyulyVGC/sniffnet/pull/879))
+- Fix support for IPinfo's databases (the most recent version renamed the `country` field to `country_code`)
 
 ## [1.4.0] - 2025-06-27
 - Import PCAP files ([#795](https://github.com/GyulyVGC/sniffnet/pull/795) — fixes [#283](https://github.com/GyulyVGC/sniffnet/issues/283))

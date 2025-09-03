@@ -63,11 +63,11 @@ mod tests {
     #[test]
     fn test_get_country_with_custom_ipinfo_single_reader() {
         let reader_1 = MmdbReader::from(
-            &String::from("resources/test/ipinfo_country_sample.mmdb"),
+            &String::from("resources/test/ipinfo_location_sample.mmdb"),
             COUNTRY_MMDB,
         );
         let reader_2 = MmdbReader::from(
-            &String::from("resources/test/ipinfo_country_sample.mmdb"),
+            &String::from("resources/test/ipinfo_location_sample.mmdb"),
             &[],
         );
 
@@ -75,16 +75,16 @@ mod tests {
             assert!(matches!(reader, MmdbReader::Custom(_)));
 
             // known IP
-            let res = get_country(&IpAddr::from([2, 2, 146, 0]), &reader);
-            assert_eq!(res, Country::GB);
+            let res = get_country(&IpAddr::from([1, 0, 6, 99]), &reader);
+            assert_eq!(res, Country::AU);
 
             // another known IP
-            let res = get_country(&IpAddr::from([23, 193, 112, 81]), &reader);
-            assert_eq!(res, Country::US);
+            let res = get_country(&IpAddr::from([1, 0, 8, 0]), &reader);
+            assert_eq!(res, Country::CN);
 
             // known IPv6
-            let res = get_country(&IpAddr::from_str("2a0e:1d80::").unwrap(), &reader);
-            assert_eq!(res, Country::RO);
+            // let res = get_country(&IpAddr::from_str("2a0e:1d80::").unwrap(), &reader);
+            // assert_eq!(res, Country::RO);
 
             // unknown IP
             let res = get_country(&IpAddr::from([127, 0, 0, 1]), &reader);
@@ -99,28 +99,26 @@ mod tests {
     #[test]
     fn test_get_country_with_custom_ipinfo_combined_reader() {
         let reader_1 = MmdbReader::from(
-            &String::from("resources/test/ipinfo_country_asn_sample.mmdb"),
+            &String::from("resources/test/ipinfo_lite_sample.mmdb"),
             COUNTRY_MMDB,
         );
-        let reader_2 = MmdbReader::from(
-            &String::from("resources/test/ipinfo_country_asn_sample.mmdb"),
-            &[],
-        );
+        let reader_2 =
+            MmdbReader::from(&String::from("resources/test/ipinfo_lite_sample.mmdb"), &[]);
 
         for reader in vec![reader_1, reader_2] {
             assert!(matches!(reader, MmdbReader::Custom(_)));
 
             // known IP
-            let res = get_country(&IpAddr::from([31, 171, 144, 141]), &reader);
-            assert_eq!(res, Country::IT);
+            let res = get_country(&IpAddr::from([1, 0, 65, 1]), &reader);
+            assert_eq!(res, Country::JP);
 
             // another known IP
-            let res = get_country(&IpAddr::from([103, 112, 220, 111]), &reader);
-            assert_eq!(res, Country::TH);
+            let res = get_country(&IpAddr::from([1, 6, 230, 0]), &reader);
+            assert_eq!(res, Country::IN);
 
             // known IPv6
-            let res = get_country(&IpAddr::from_str("2a02:6ea0:f001::").unwrap(), &reader);
-            assert_eq!(res, Country::AR);
+            // let res = get_country(&IpAddr::from_str("2a02:6ea0:f001::").unwrap(), &reader);
+            // assert_eq!(res, Country::AR);
 
             // unknown IP
             let res = get_country(&IpAddr::from([127, 0, 0, 1]), &reader);

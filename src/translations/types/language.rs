@@ -119,7 +119,18 @@ impl Language {
     }
 
     pub fn is_up_to_date(self) -> bool {
-        matches!(self, Language::EN | Language::IT | Language::NL)
+        matches!(
+            self,
+            Language::EN
+                | Language::IT
+                | Language::NL
+                | Language::DE
+                | Language::UZ
+                | Language::ZH
+                | Language::JA
+                | Language::FR
+                | Language::EL
+        )
     }
 }
 
