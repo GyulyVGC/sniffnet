@@ -1,11 +1,7 @@
-use iced::Font;
-use iced::widget::Column;
 use pcap::Linktype;
 
-use crate::gui::styles::text::TextType;
-use crate::gui::types::message::Message;
+use crate::Language;
 use crate::translations::translations_3::link_type_translation;
-use crate::{Language, StyleType};
 
 /// Currently supported link types
 #[derive(Copy, Clone, Default)]
@@ -16,6 +12,8 @@ pub enum MyLinkType {
     Loop(Linktype),
     IPv4(Linktype),
     IPv6(Linktype),
+    LinuxSll(Linktype),
+    LinuxSll2(Linktype),
     Unsupported(Linktype),
     #[default]
     NotYetAssigned,
@@ -34,6 +32,8 @@ impl MyLinkType {
             Linktype::LOOP => Self::Loop(link_type),
             Linktype::IPV4 => Self::IPv4(link_type),
             Linktype::IPV6 => Self::IPv6(link_type),
+            Linktype::LINUX_SLL => Self::LinuxSll(link_type),
+            Linktype::LINUX_SLL2 => Self::LinuxSll2(link_type),
             _ => Self::Unsupported(link_type),
         }
     }
@@ -46,6 +46,8 @@ impl MyLinkType {
             | Self::Loop(l)
             | Self::IPv4(l)
             | Self::IPv6(l)
+            | Self::LinuxSll(l)
+            | Self::LinuxSll2(l)
             | Self::Unsupported(l) => {
                 format!(
                     "{}: {} ({})",
@@ -55,34 +57,6 @@ impl MyLinkType {
                 )
             }
             Self::NotYetAssigned => String::new(),
-        }
-    }
-
-    pub fn link_type_col<'a>(
-        self,
-        language: Language,
-        font: Font,
-    ) -> Column<'a, Message, StyleType> {
-        match self {
-            Self::Null(l)
-            | Self::Ethernet(l)
-            | Self::RawIp(l)
-            | Self::Loop(l)
-            | Self::IPv4(l)
-            | Self::IPv6(l)
-            | Self::Unsupported(l) => {
-                let link_info = format!(
-                    "{} ({})",
-                    l.get_name().unwrap_or_else(|_| l.0.to_string()),
-                    l.get_description().unwrap_or_else(|_| String::new())
-                );
-                TextType::highlighted_subtitle_with_desc(
-                    link_type_translation(language),
-                    &link_info,
-                    font,
-                )
-            }
-            Self::NotYetAssigned => Column::new().height(0),
         }
     }
 }

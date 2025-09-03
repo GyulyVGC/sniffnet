@@ -15,24 +15,25 @@ use crate::gui::sniffer::FONT_FAMILY_NAME;
 use crate::gui::styles::style_constants::CHARTS_LINE_BORDER;
 use crate::gui::styles::types::palette::to_rgb_color;
 use crate::gui::types::message::Message;
+use crate::networking::types::data_representation::DataRepr;
 use crate::networking::types::traffic_direction::TrafficDirection;
 use crate::translations::translations::{incoming_translation, outgoing_translation};
 use crate::utils::error_logger::{ErrorLogger, Location};
 use crate::utils::formatted_strings::{get_formatted_num_seconds, get_formatted_timestamp};
 use crate::utils::types::timestamp::Timestamp;
-use crate::{ByteMultiple, ChartType, Language, StyleType, location};
+use crate::{Language, StyleType, location};
 
 /// Struct defining the chart to be displayed in gui run page
 pub struct TrafficChart {
     /// Current time interval number
     pub ticks: u32,
-    /// Sent bytes filtered and their time occurrence
+    /// Sent bytes and their time occurrence
     pub out_bytes: ChartSeries,
-    /// Received bytes filtered and their time occurrence
+    /// Received bytes and their time occurrence
     pub in_bytes: ChartSeries,
-    /// Sent packets filtered and their time occurrence
+    /// Sent packets and their time occurrence
     pub out_packets: ChartSeries,
-    /// Received packets filtered and their time occurrence
+    /// Received packets and their time occurrence
     pub in_packets: ChartSeries,
     /// Minimum number of bytes per time interval (computed on last 30 intervals)
     pub min_bytes: f32,
@@ -45,7 +46,7 @@ pub struct TrafficChart {
     /// Language used for the chart legend
     pub language: Language,
     /// Packets or bytes
-    pub chart_type: ChartType,
+    pub data_repr: DataRepr,
     /// Style of the chart
     pub style: StyleType,
     /// Whether the chart is for the thumbnail page
@@ -71,7 +72,7 @@ impl TrafficChart {
             min_packets: 0.0,
             max_packets: 0.0,
             language,
-            chart_type: ChartType::Bytes,
+            data_repr: DataRepr::Bytes,
             style,
             thumbnail: false,
             is_live_capture: true,
@@ -80,7 +81,7 @@ impl TrafficChart {
         }
     }
 
-    pub fn view(&self) -> Element<Message, StyleType> {
+    pub fn view(&self) -> Element<'_, Message, StyleType> {
         let x_labels = if self.is_live_capture || self.thumbnail {
             None
         } else {
@@ -115,8 +116,8 @@ impl TrafficChart {
             .into()
     }
 
-    pub fn change_kind(&mut self, kind: ChartType) {
-        self.chart_type = kind;
+    pub fn change_kind(&mut self, kind: DataRepr) {
+        self.data_repr = kind;
     }
 
     pub fn change_language(&mut self, language: Language) {
@@ -169,9 +170,10 @@ impl TrafficChart {
     }
 
     fn y_axis_range(&self) -> Range<f32> {
-        let (min, max) = match self.chart_type {
-            ChartType::Packets => (self.min_packets, self.max_packets),
-            ChartType::Bytes => (self.min_bytes, self.max_bytes),
+        let (min, max) = match self.data_repr {
+            DataRepr::Packets => (self.min_packets, self.max_packets),
+            DataRepr::Bytes => (self.min_bytes, self.max_bytes),
+            DataRepr::Bits => (self.min_bytes * 8.0, self.max_bytes * 8.0),
         };
         let fs = max - min;
         let gap = fs * 0.05;
@@ -186,12 +188,12 @@ impl TrafficChart {
     }
 
     fn spline_to_plot(&self, direction: TrafficDirection) -> &Spline<f32, f32> {
-        match self.chart_type {
-            ChartType::Packets => match direction {
+        match self.data_repr {
+            DataRepr::Packets => match direction {
                 TrafficDirection::Incoming => &self.in_packets.spline,
                 TrafficDirection::Outgoing => &self.out_packets.spline,
             },
-            ChartType::Bytes => match direction {
+            DataRepr::Bytes | DataRepr::Bits => match direction {
                 TrafficDirection::Incoming => &self.in_bytes.spline,
                 TrafficDirection::Outgoing => &self.out_bytes.spline,
             },
@@ -219,11 +221,16 @@ impl TrafficChart {
         let color = self.series_color(direction);
         let alpha = self.style.get_extension().alpha_chart_badge;
         let spline = self.spline_to_plot(direction);
+        let multiplier = if self.data_repr == DataRepr::Bits {
+            8.0
+        } else {
+            1.0
+        };
 
         let data = match spline.keys() {
             // if we have only one tick, we need to add a second point to draw the area
-            [k] => vec![(0.0, k.value), (0.1, k.value)],
-            _ => sample_spline(spline),
+            [k] => vec![(0.0, k.value * multiplier), (0.1, k.value * multiplier)],
+            _ => sample_spline(spline, multiplier),
         };
 
         AreaSeries::new(data, 0.0, color.mix(alpha.into()))
@@ -283,12 +290,10 @@ impl Chart<Message> for TrafficChart {
             .max_light_lines(0)
             .label_style(self.font(12.5))
             .y_labels(min(5, y_labels))
-            .y_label_formatter(if self.chart_type.eq(&ChartType::Packets) {
-                &|packets| packets.abs().to_string()
-            } else {
+            .y_label_formatter(
                 #[allow(clippy::cast_possible_truncation, clippy::cast_sign_loss)]
-                &|bytes| ByteMultiple::formatted_string(bytes.abs() as u128)
-            })
+                &|amount| self.data_repr.formatted_string(amount.abs() as u128),
+            )
             .x_labels(min(6, x_labels))
             .x_label_formatter(
                 #[allow(clippy::cast_possible_truncation, clippy::cast_sign_loss)]
@@ -331,7 +336,7 @@ impl Chart<Message> for TrafficChart {
     }
 }
 
-fn sample_spline(spline: &Spline<f32, f32>) -> Vec<(f32, f32)> {
+fn sample_spline(spline: &Spline<f32, f32>, multiplier: f32) -> Vec<(f32, f32)> {
     let pts = spline.len() * 10; // 10 samples per key
     let mut ret_val = Vec::new();
     let len = spline.len();
@@ -348,7 +353,7 @@ fn sample_spline(spline: &Spline<f32, f32>) -> Vec<(f32, f32)> {
     for i in 0..pts {
         #[allow(clippy::cast_precision_loss)]
         let x = first_x + delta * i as f32;
-        let p = spline.clamped_sample(x).unwrap_or_default();
+        let p = spline.clamped_sample(x).unwrap_or_default() * multiplier;
         ret_val.push((x, p));
     }
     ret_val
@@ -402,7 +407,7 @@ mod tests {
         let eps = 0.001;
 
         let pts = spline.len() * 10;
-        let samples = sample_spline(&spline);
+        let samples = sample_spline(&spline, 1.0);
         assert_eq!(samples.len(), pts);
 
         let delta = samples[1].0 - samples[0].0;

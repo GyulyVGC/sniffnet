@@ -4,10 +4,11 @@ use crate::networking::manage_packets::get_address_to_lookup;
 use crate::networking::types::address_port_pair::AddressPortPair;
 use crate::networking::types::data_info::DataInfo;
 use crate::networking::types::data_info_host::DataInfoHost;
+use crate::networking::types::data_representation::DataRepr;
 use crate::networking::types::host::Host;
 use crate::networking::types::info_address_port_pair::InfoAddressPortPair;
 use crate::report::types::sort_type::SortType;
-use crate::{ChartType, InfoTraffic, ReportSortType, Service, Sniffer};
+use crate::{InfoTraffic, Service, Sniffer};
 
 /// Return the elements that satisfy the search constraints and belong to the given page,
 /// and the total number of elements which satisfy the search constraints,
@@ -46,24 +47,12 @@ pub fn get_searched_entries(
         })
         .collect();
 
-    all_results.sort_by(|&(_, a), &(_, b)| match sniffer.report_sort_type {
-        ReportSortType {
-            byte_sort,
-            packet_sort: SortType::Neutral,
-        } => match byte_sort {
-            SortType::Ascending => a.transmitted_bytes.cmp(&b.transmitted_bytes),
-            SortType::Descending => b.transmitted_bytes.cmp(&a.transmitted_bytes),
-            SortType::Neutral => b.final_timestamp.cmp(&a.final_timestamp),
-        },
-        ReportSortType {
-            byte_sort: SortType::Neutral,
-            packet_sort,
-        } => match packet_sort {
-            SortType::Ascending => a.transmitted_packets.cmp(&b.transmitted_packets),
-            SortType::Descending => b.transmitted_packets.cmp(&a.transmitted_packets),
-            SortType::Neutral => b.final_timestamp.cmp(&a.final_timestamp),
-        },
-        _ => b.final_timestamp.cmp(&a.final_timestamp),
+    all_results.sort_by(|&(_, a), &(_, b)| {
+        a.compare(
+            b,
+            sniffer.conf.report_sort_type,
+            sniffer.traffic_chart.data_repr,
+        )
     });
 
     let upper_bound = min(sniffer.page_number * 20, all_results.len());
@@ -82,12 +71,12 @@ pub fn get_searched_entries(
 
 pub fn get_host_entries(
     info_traffic: &InfoTraffic,
-    chart_type: ChartType,
+    data_repr: DataRepr,
     sort_type: SortType,
 ) -> Vec<(Host, DataInfoHost)> {
     let mut sorted_vec: Vec<(&Host, &DataInfoHost)> = info_traffic.hosts.iter().collect();
 
-    sorted_vec.sort_by(|&(_, a), &(_, b)| a.data_info.compare(&b.data_info, sort_type, chart_type));
+    sorted_vec.sort_by(|&(_, a), &(_, b)| a.data_info.compare(&b.data_info, sort_type, data_repr));
 
     let n_entry = min(sorted_vec.len(), 30);
     sorted_vec[0..n_entry]
@@ -98,7 +87,7 @@ pub fn get_host_entries(
 
 pub fn get_service_entries(
     info_traffic: &InfoTraffic,
-    chart_type: ChartType,
+    data_repr: DataRepr,
     sort_type: SortType,
 ) -> Vec<(Service, DataInfo)> {
     let mut sorted_vec: Vec<(&Service, &DataInfo)> = info_traffic
@@ -107,7 +96,7 @@ pub fn get_service_entries(
         .filter(|(service, _)| service != &&Service::NotApplicable)
         .collect();
 
-    sorted_vec.sort_by(|&(_, a), &(_, b)| a.compare(b, sort_type, chart_type));
+    sorted_vec.sort_by(|&(_, a), &(_, b)| a.compare(b, sort_type, data_repr));
 
     let n_entry = min(sorted_vec.len(), 30);
     sorted_vec[0..n_entry]
