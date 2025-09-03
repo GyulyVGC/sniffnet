@@ -601,7 +601,8 @@
       "avatar_url": "https://avatars.githubusercontent.com/u/171437458?v=4",
       "profile": "https://github.com/shu-kitamura",
       "contributions": [
-        "code"
+        "code",
+        "translation"
       ]
     },
     {
@@ -729,6 +730,51 @@
       "profile": "https://github.com/islameehassan",
       "contributions": [
         "code"
+      ]
+    },
+    {
+      "login": "lionrayonnant",
+      "name": "Lion Rayonnant",
+      "avatar_url": "https://avatars.githubusercontent.com/u/106342136?v=4",
+      "profile": "https://github.com/lionrayonnant",
+      "contributions": [
+        "translation"
+      ]
+    },
+    {
+      "login": "18601673727",
+      "name": "18601673727",
+      "avatar_url": "https://avatars.githubusercontent.com/u/3302620?v=4",
+      "profile": "https://github.com/18601673727",
+      "contributions": [
+        "translation"
+      ]
+    },
+    {
+      "login": "AlleM43",
+      "name": "AlleM43",
+      "avatar_url": "https://avatars.githubusercontent.com/u/16104173?v=4",
+      "profile": "https://github.com/AlleM43",
+      "contributions": [
+        "platform"
+      ]
+    },
+    {
+      "login": "aris1009",
+      "name": "Aris Konstantoulas",
+      "avatar_url": "https://avatars.githubusercontent.com/u/25184469?v=4",
+      "profile": "https://github.com/aris1009",
+      "contributions": [
+        "translation"
+      ]
+    },
+    {
+      "login": "mmseng",
+      "name": "Matt Seng",
+      "avatar_url": "https://avatars.githubusercontent.com/u/8218085?v=4",
+      "profile": "https://github.com/mmseng",
+      "contributions": [
+        "financial"
       ]
     }
   ],

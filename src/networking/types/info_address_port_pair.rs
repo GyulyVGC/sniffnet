@@ -1,12 +1,15 @@
 //! Module defining the `InfoAddressPortPair` struct, useful to format the output report file and
 //! to keep track of statistics about the sniffed traffic.
 
+use std::cmp::Ordering;
 use std::collections::HashMap;
 
 use crate::Service;
 use crate::networking::types::arp_type::ArpType;
+use crate::networking::types::data_representation::DataRepr;
 use crate::networking::types::icmp_type::IcmpType;
 use crate::networking::types::traffic_direction::TrafficDirection;
+use crate::report::types::sort_type::SortType;
 use crate::utils::types::timestamp::Timestamp;
 
 /// Struct useful to format the output report file and to keep track of statistics about the sniffed traffic.
@@ -55,5 +58,95 @@ impl InfoAddressPortPair {
                 .and_modify(|v| *v += count)
                 .or_insert(*count);
         }
+    }
+
+    pub fn transmitted_data(&self, data_repr: DataRepr) -> u128 {
+        match data_repr {
+            DataRepr::Packets => self.transmitted_packets,
+            DataRepr::Bytes => self.transmitted_bytes,
+            DataRepr::Bits => self.transmitted_bytes * 8,
+        }
+    }
+
+    pub fn compare(&self, other: &Self, sort_type: SortType, data_repr: DataRepr) -> Ordering {
+        match sort_type {
+            SortType::Ascending => self
+                .transmitted_data(data_repr)
+                .cmp(&other.transmitted_data(data_repr)),
+            SortType::Descending => other
+                .transmitted_data(data_repr)
+                .cmp(&self.transmitted_data(data_repr)),
+            SortType::Neutral => other.final_timestamp.cmp(&self.final_timestamp),
+        }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::networking::types::data_representation::DataRepr;
+    use crate::report::types::sort_type::SortType;
+
+    #[test]
+    fn test_info_address_port_pair_data() {
+        let pair1 = InfoAddressPortPair {
+            transmitted_bytes: 1000,
+            transmitted_packets: 10,
+            final_timestamp: Timestamp::new(8, 1300),
+            ..Default::default()
+        };
+        let pair2 = InfoAddressPortPair {
+            transmitted_bytes: 1100,
+            transmitted_packets: 8,
+            final_timestamp: Timestamp::new(15, 0),
+            ..Default::default()
+        };
+
+        assert_eq!(pair1.transmitted_data(DataRepr::Bytes), 1000);
+        assert_eq!(pair1.transmitted_data(DataRepr::Packets), 10);
+        assert_eq!(pair1.transmitted_data(DataRepr::Bits), 8000);
+
+        assert_eq!(pair2.transmitted_data(DataRepr::Bytes), 1100);
+        assert_eq!(pair2.transmitted_data(DataRepr::Packets), 8);
+        assert_eq!(pair2.transmitted_data(DataRepr::Bits), 8800);
+
+        assert_eq!(
+            pair1.compare(&pair2, SortType::Ascending, DataRepr::Bytes),
+            Ordering::Less
+        );
+        assert_eq!(
+            pair1.compare(&pair2, SortType::Descending, DataRepr::Bytes),
+            Ordering::Greater
+        );
+        assert_eq!(
+            pair1.compare(&pair2, SortType::Neutral, DataRepr::Bytes),
+            Ordering::Greater
+        );
+
+        assert_eq!(
+            pair1.compare(&pair2, SortType::Ascending, DataRepr::Packets),
+            Ordering::Greater
+        );
+        assert_eq!(
+            pair1.compare(&pair2, SortType::Descending, DataRepr::Packets),
+            Ordering::Less
+        );
+        assert_eq!(
+            pair1.compare(&pair2, SortType::Neutral, DataRepr::Packets),
+            Ordering::Greater
+        );
+
+        assert_eq!(
+            pair1.compare(&pair2, SortType::Ascending, DataRepr::Bits),
+            Ordering::Less
+        );
+        assert_eq!(
+            pair1.compare(&pair2, SortType::Descending, DataRepr::Bits),
+            Ordering::Greater
+        );
+        assert_eq!(
+            pair1.compare(&pair2, SortType::Neutral, DataRepr::Bits),
+            Ordering::Greater
+        );
     }
 }

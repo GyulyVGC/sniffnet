@@ -1,6 +1,6 @@
-use crate::chart::types::chart_type::ChartType;
 use crate::networking::types::data_info::DataInfo;
 use crate::networking::types::data_info_host::DataInfoHost;
+use crate::networking::types::data_representation::DataRepr;
 use crate::networking::types::host::Host;
 use crate::networking::types::service::Service;
 
@@ -38,7 +38,7 @@ impl LoggedNotification {
 #[derive(Clone)]
 pub struct DataThresholdExceeded {
     pub(crate) id: usize,
-    pub(crate) chart_type: ChartType,
+    pub(crate) data_repr: DataRepr,
     pub(crate) threshold: u64,
     pub(crate) data_info: DataInfo,
     pub(crate) timestamp: String,

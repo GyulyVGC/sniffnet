@@ -11,7 +11,6 @@ use iced::widget::{
 };
 use iced::{Alignment, Font, Length, Padding, Pixels, alignment};
 
-use crate::chart::types::chart_type::ChartType;
 use crate::gui::components::tab::get_pages_tabs;
 use crate::gui::components::types::my_modal::MyModal;
 use crate::gui::pages::overview_page::{get_bars, get_bars_length};
@@ -22,28 +21,30 @@ use crate::gui::styles::style_constants::{FONT_SIZE_FOOTER, FONT_SIZE_SUBTITLE, 
 use crate::gui::styles::text::TextType;
 use crate::gui::styles::text_input::TextInputType;
 use crate::gui::types::message::Message;
+use crate::gui::types::settings::Settings;
 use crate::networking::types::address_port_pair::AddressPortPair;
-use crate::networking::types::byte_multiple::ByteMultiple;
 use crate::networking::types::data_info::DataInfo;
+use crate::networking::types::data_representation::DataRepr;
 use crate::networking::types::host_data_states::HostStates;
 use crate::networking::types::info_address_port_pair::InfoAddressPortPair;
 use crate::networking::types::traffic_direction::TrafficDirection;
 use crate::report::get_report_entries::get_searched_entries;
 use crate::report::types::report_col::ReportCol;
 use crate::report::types::search_parameters::{FilterInputType, SearchParameters};
+use crate::report::types::sort_type::SortType;
 use crate::translations::translations_2::{
     administrative_entity_translation, country_translation, domain_name_translation,
     no_search_results_translation, only_show_favorites_translation, showing_results_translation,
 };
 use crate::translations::translations_3::filter_by_host_translation;
 use crate::utils::types::icon::Icon;
-use crate::{ConfigSettings, Language, ReportSortType, RunningPage, Sniffer, StyleType};
+use crate::{Language, RunningPage, Sniffer, StyleType};
 
 /// Computes the body of gui inspect page
-pub fn inspect_page(sniffer: &Sniffer) -> Container<Message, StyleType> {
-    let ConfigSettings {
+pub fn inspect_page(sniffer: &Sniffer) -> Container<'_, Message, StyleType> {
+    let Settings {
         style, language, ..
-    } = sniffer.configs.settings;
+    } = sniffer.conf.settings;
     let font = style.get_extension().font;
     let font_headers = style.get_extension().font_headers;
 
@@ -75,7 +76,8 @@ pub fn inspect_page(sniffer: &Sniffer) -> Container<Message, StyleType> {
             language,
             &sniffer.search,
             font,
-            sniffer.report_sort_type,
+            sniffer.conf.report_sort_type,
+            sniffer.traffic_chart.data_repr,
         ))
         .push(Space::with_height(4))
         .push(Rule::horizontal(5))
@@ -97,7 +99,7 @@ pub fn inspect_page(sniffer: &Sniffer) -> Container<Message, StyleType> {
                 .align_y(Alignment::Center)
                 .align_x(Alignment::Center)
                 .padding(Padding::new(7.0).top(10).bottom(3))
-                .width(1042)
+                .width(947)
                 .class(ContainerType::BorderedRound),
         );
 
@@ -105,9 +107,10 @@ pub fn inspect_page(sniffer: &Sniffer) -> Container<Message, StyleType> {
 }
 
 fn report<'a>(sniffer: &Sniffer) -> Column<'a, Message, StyleType> {
-    let ConfigSettings {
+    let Settings {
         style, language, ..
-    } = sniffer.configs.settings;
+    } = sniffer.conf.settings;
+    let data_repr = sniffer.traffic_chart.data_repr;
     let font = style.get_extension().font;
 
     let (search_results, results_number, agglomerate) = get_searched_entries(sniffer);
@@ -122,12 +125,17 @@ fn report<'a>(sniffer: &Sniffer) -> Column<'a, Message, StyleType> {
     let end_entry_num = start_entry_num + search_results.len() - 1;
     for report_entry in search_results {
         scroll_report = scroll_report.push(
-            button(row_report_entry(&report_entry.0, &report_entry.1, font))
-                .padding(2)
-                .on_press(Message::ShowModal(MyModal::ConnectionDetails(
-                    report_entry.0,
-                )))
-                .class(ButtonType::Neutral),
+            button(row_report_entry(
+                &report_entry.0,
+                &report_entry.1,
+                data_repr,
+                font,
+            ))
+            .padding(2)
+            .on_press(Message::ShowModal(MyModal::ConnectionDetails(
+                report_entry.0,
+            )))
+            .class(ButtonType::Neutral),
         );
     }
     if results_number > 0 {
@@ -144,7 +152,7 @@ fn report<'a>(sniffer: &Sniffer) -> Column<'a, Message, StyleType> {
             .push(get_agglomerates_row(
                 font,
                 agglomerate,
-                sniffer.traffic_chart.chart_type,
+                sniffer.traffic_chart.data_repr,
             ))
             .push(Rule::horizontal(5))
             .push(get_change_page_row(
@@ -177,12 +185,13 @@ fn report_header_row(
     language: Language,
     search_params: &SearchParameters,
     font: Font,
-    sort_type: ReportSortType,
-) -> Row<Message, StyleType> {
+    sort_type: SortType,
+    data_repr: DataRepr,
+) -> Row<'_, Message, StyleType> {
     let mut ret_val = Row::new().padding([0, 2]).align_y(Alignment::Center);
     for report_col in ReportCol::ALL {
         let (title_display, title_small_display, tooltip_val) =
-            title_report_col_display(&report_col, language);
+            title_report_col_display(&report_col, data_repr, language);
         let title_row = Row::new()
             .align_y(Alignment::End)
             .push(Text::new(title_display).font(font))
@@ -208,7 +217,9 @@ fn report_header_row(
             .width(report_col.get_width())
             .height(56)
             .push(title_tooltip);
-        if report_col != ReportCol::Packets && report_col != ReportCol::Bytes {
+        if report_col == ReportCol::Data {
+            col_header = col_header.push(sort_arrows(sort_type));
+        } else {
             col_header = col_header.push(
                 Container::new(filter_input(
                     report_col.get_filter_input_type(),
@@ -218,8 +229,6 @@ fn report_header_row(
                 .height(Length::Fill)
                 .align_y(Alignment::Center),
             );
-        } else {
-            col_header = col_header.push(sort_arrows(sort_type, &report_col));
         }
         ret_val = ret_val.push(col_header);
     }
@@ -228,10 +237,11 @@ fn report_header_row(
 
 fn title_report_col_display(
     report_col: &ReportCol,
+    data_repr: DataRepr,
     language: Language,
 ) -> (String, String, String) {
     let max_chars = report_col.get_max_chars(Some(language));
-    let title = report_col.get_title(language);
+    let title = report_col.get_title(language, data_repr);
     let title_direction_info = report_col.get_title_direction_info(language);
     let chars_title = title.chars().collect::<Vec<char>>();
     let chars_title_direction_info = title_direction_info.chars().collect::<Vec<char>>();
@@ -261,21 +271,16 @@ fn title_report_col_display(
     }
 }
 
-fn sort_arrows<'a>(
-    active_sort_type: ReportSortType,
-    report_col: &ReportCol,
-) -> Container<'a, Message, StyleType> {
+fn sort_arrows<'a>(active_sort_type: SortType) -> Container<'a, Message, StyleType> {
     Container::new(
         button(
             active_sort_type
-                .icon(report_col)
+                .icon()
                 .align_x(Alignment::Center)
                 .align_y(Alignment::Center),
         )
-        .class(active_sort_type.button_type(report_col))
-        .on_press(Message::ReportSortSelection(
-            active_sort_type.next_sort(report_col),
-        )),
+        .class(active_sort_type.button_type())
+        .on_press(Message::ReportSortSelection(active_sort_type.next_sort())),
     )
     .align_y(Alignment::Center)
     .height(Length::Fill)
@@ -284,6 +289,7 @@ fn sort_arrows<'a>(
 fn row_report_entry<'a>(
     key: &AddressPortPair,
     val: &InfoAddressPortPair,
+    data_repr: DataRepr,
     font: Font,
 ) -> Row<'a, Message, StyleType> {
     let text_type = if val.traffic_direction == TrafficDirection::Outgoing {
@@ -296,7 +302,7 @@ fn row_report_entry<'a>(
 
     for report_col in ReportCol::ALL {
         let max_chars = report_col.get_max_chars(None);
-        let col_value = report_col.get_value(key, val);
+        let col_value = report_col.get_value(key, val, data_repr);
         ret_val = ret_val.push(
             Container::new(
                 Text::new(if col_value.len() <= max_chars {
@@ -476,7 +482,7 @@ fn filter_combobox(
     combo_box_state: &combo_box::State<String>,
     search_params: SearchParameters,
     font: Font,
-) -> Container<Message, StyleType> {
+) -> Container<'_, Message, StyleType> {
     let filter_value = filter_input_type.current_value(&search_params).to_string();
     let is_filter_active = !filter_value.is_empty();
 
@@ -550,31 +556,22 @@ fn get_button_change_page<'a>(increment: bool) -> Button<'a, Message, StyleType>
 fn get_agglomerates_row<'a>(
     font: Font,
     tot: DataInfo,
-    chart_type: ChartType,
+    data_repr: DataRepr,
 ) -> Row<'a, Message, StyleType> {
-    let tot_packets = tot.tot_packets();
-    let tot_bytes = tot.tot_bytes();
-
-    let (in_length, out_length) = get_bars_length(chart_type, &tot, &tot);
+    let (in_length, out_length) = get_bars_length(data_repr, &tot, &tot);
     let bars = get_bars(in_length, out_length).width(ReportCol::FILTER_COLUMNS_WIDTH);
 
-    let bytes_col = Column::new()
+    let data_col = Column::new()
         .align_x(Alignment::Center)
-        .width(ReportCol::Bytes.get_width())
-        .push(Text::new(ByteMultiple::formatted_string(tot_bytes)).font(font));
-
-    let packets_col = Column::new()
-        .align_x(Alignment::Center)
-        .width(ReportCol::Packets.get_width())
-        .push(Text::new(tot_packets.to_string()).font(font));
+        .width(ReportCol::Data.get_width())
+        .push(Text::new(data_repr.formatted_string(tot.tot_data(data_repr))).font(font));
 
     Row::new()
         .padding([0, 2])
         .height(40)
         .align_y(Alignment::Center)
         .push(bars)
-        .push(bytes_col)
-        .push(packets_col)
+        .push(data_col)
 }
 
 fn get_change_page_row<'a>(
@@ -633,6 +630,7 @@ fn button_clear_filter<'a>(
 #[cfg(test)]
 mod tests {
     use crate::gui::pages::inspect_page::title_report_col_display;
+    use crate::networking::types::data_representation::DataRepr;
     use crate::report::types::report_col::ReportCol;
     use crate::translations::types::language::Language;
 
@@ -641,78 +639,81 @@ mod tests {
         // check glyph len when adding new language...
         assert_eq!(Language::ALL.len(), 22);
         for report_col in ReportCol::ALL {
-            for language in Language::ALL {
-                let (title, title_small, tooltip_val) =
-                    title_report_col_display(&report_col, language);
-                let title_chars = title.chars().collect::<Vec<char>>();
-                let title_small_chars = title_small.chars().collect::<Vec<char>>();
-                let max_chars = report_col.get_max_chars(Some(language));
-                if tooltip_val.is_empty() {
-                    // all is entirely displayed
-                    assert!(title_chars.len() + title_small_chars.len() <= max_chars);
-                    assert_eq!(title, report_col.get_title(language));
-                    assert_eq!(title_small, report_col.get_title_direction_info(language));
-                } else {
-                    // tooltip is the full concatenation
-                    assert_eq!(
-                        tooltip_val,
-                        [
-                            report_col.get_title(language),
-                            report_col.get_title_direction_info(language)
-                        ]
-                        .concat()
-                    );
-                    if report_col.get_title_direction_info(language).len() == 0 {
-                        // displayed values have max len -1 (they include "…" that counts for 2 units)
-                        assert_eq!(title_chars.len() + title_small_chars.len(), max_chars - 1);
+            for data_repr in DataRepr::ALL {
+                for language in Language::ALL {
+                    let (title, title_small, tooltip_val) =
+                        title_report_col_display(&report_col, data_repr, language);
+                    let title_chars = title.chars().collect::<Vec<char>>();
+                    let title_small_chars = title_small.chars().collect::<Vec<char>>();
+                    let max_chars = report_col.get_max_chars(Some(language));
+                    if tooltip_val.is_empty() {
+                        // all is entirely displayed
+                        assert!(title_chars.len() + title_small_chars.len() <= max_chars);
+                        assert_eq!(title, report_col.get_title(language, data_repr));
+                        assert_eq!(title_small, report_col.get_title_direction_info(language));
                     } else {
-                        match title_chars.len() {
-                            x if x == max_chars - 4 || x == max_chars - 3 => {
-                                assert_eq!(title_small_chars.len(), 1)
-                            }
-                            _ => assert_eq!(
-                                title_chars.len() + title_small_chars.len(),
-                                max_chars - 1
-                            ),
-                        }
-                    }
-                    if title != report_col.get_title(language) {
-                        // first title part is not full, so second one is suspensions
-                        assert_eq!(title_small, "…");
-                        // check len wrt max
-                        assert!(title_chars.len() >= max_chars - 4);
-                        // first title part is max - 2 chars of full self
+                        // tooltip is the full concatenation
                         assert_eq!(
-                            title,
-                            report_col
-                                .get_title(language)
-                                .chars()
-                                .collect::<Vec<char>>()[..max_chars - 2]
-                                .iter()
-                                .collect::<String>()
+                            tooltip_val,
+                            [
+                                report_col.get_title(language, data_repr),
+                                report_col.get_title_direction_info(language)
+                            ]
+                            .concat()
                         );
-                    } else {
-                        // first part is untouched
-                        // second title part is max - title.len - 2 chars of full self, plus suspensions
-                        let mut second_part = [
-                            &report_col
-                                .get_title_direction_info(language)
-                                .chars()
-                                .collect::<Vec<char>>()[..max_chars - 2 - title_chars.len()]
-                                .iter()
-                                .collect::<String>(),
-                            "…",
-                        ]
-                        .concat();
-                        if second_part == String::from(" (…") || second_part == String::from(" …")
-                        {
-                            second_part = String::from("…");
+                        if report_col.get_title_direction_info(language).len() == 0 {
+                            // displayed values have max len -1 (they include "…" that counts for 2 units)
+                            assert_eq!(title_chars.len() + title_small_chars.len(), max_chars - 1);
+                        } else {
+                            match title_chars.len() {
+                                x if x == max_chars - 4 || x == max_chars - 3 => {
+                                    assert_eq!(title_small_chars.len(), 1)
+                                }
+                                _ => assert_eq!(
+                                    title_chars.len() + title_small_chars.len(),
+                                    max_chars - 1
+                                ),
+                            }
                         }
-                        assert_eq!(title_small, second_part);
-                        // second part never terminates with "(…"
-                        assert!(!title_small.ends_with("(…"));
-                        // second part never terminates with " …"
-                        assert!(!title_small.ends_with(" …"));
+                        if title != report_col.get_title(language, data_repr) {
+                            // first title part is not full, so second one is suspensions
+                            assert_eq!(title_small, "…");
+                            // check len wrt max
+                            assert!(title_chars.len() >= max_chars - 4);
+                            // first title part is max - 2 chars of full self
+                            assert_eq!(
+                                title,
+                                report_col
+                                    .get_title(language, data_repr)
+                                    .chars()
+                                    .collect::<Vec<char>>()[..max_chars - 2]
+                                    .iter()
+                                    .collect::<String>()
+                            );
+                        } else {
+                            // first part is untouched
+                            // second title part is max - title.len - 2 chars of full self, plus suspensions
+                            let mut second_part = [
+                                &report_col
+                                    .get_title_direction_info(language)
+                                    .chars()
+                                    .collect::<Vec<char>>()[..max_chars - 2 - title_chars.len()]
+                                    .iter()
+                                    .collect::<String>(),
+                                "…",
+                            ]
+                            .concat();
+                            if second_part == String::from(" (…")
+                                || second_part == String::from(" …")
+                            {
+                                second_part = String::from("…");
+                            }
+                            assert_eq!(title_small, second_part);
+                            // second part never terminates with "(…"
+                            assert!(!title_small.ends_with("(…"));
+                            // second part never terminates with " …"
+                            assert!(!title_small.ends_with(" …"));
+                        }
                     }
                 }
             }

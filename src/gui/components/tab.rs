@@ -99,12 +99,12 @@ fn new_page_tab<'a>(
                 .align_y(alignment::Alignment::Center),
         );
 
-    if let Some(num) = unread {
-        if num > 0 {
-            content = content
-                .push(Space::with_width(7))
-                .push(notifications_badge(font_headers, num));
-        }
+    if let Some(num) = unread
+        && num > 0
+    {
+        content = content
+            .push(Space::with_width(7))
+            .push(notifications_badge(font_headers, num));
     }
 
     content = content.push(horizontal_space());
