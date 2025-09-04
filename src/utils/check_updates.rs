@@ -50,17 +50,14 @@ async fn is_newer_release_available(max_retries: u8, seconds_between_retries: u8
         latest_version = latest_version.trim().to_string();
 
         // release name sample: v1.2.3
-        if let Some(stripped) = latest_version.strip_prefix('v') {
-            if let (Ok(latest_semver), Ok(current_semver)) =
-                (Version::parse(stripped), Version::parse(APP_VERSION))
-            {
-                return if latest_semver > current_semver {
-                    Some(true)
-                } else {
-                    Some(false)
-                };
-            }
+        let stripped = latest_version.trim_start_matches('v');
+
+        if let (Ok(latest_semver), Ok(current_semver)) =
+            (Version::parse(stripped), Version::parse(APP_VERSION))
+        {
+            return Some(latest_semver > current_semver);
         }
+
     }
     let retries_left = max_retries - 1;
     if retries_left > 0 {
