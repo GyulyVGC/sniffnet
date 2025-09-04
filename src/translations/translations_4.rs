@@ -238,7 +238,6 @@ pub fn bits_translation(language: Language) -> &'static str {
 #[allow(dead_code)]
 pub fn pause_translation(language: Language) -> &'static str {
     match language {
-        Language::EN => "Pause",
         Language::EN | Language::DE | Language::FR => "Pause",
         Language::IT | Language::ES => "Pausa",
         Language::JA => "一時停止",
