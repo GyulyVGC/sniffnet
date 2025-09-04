@@ -13,7 +13,7 @@ pub enum TextInputType {
     #[default]
     Standard,
     Badge,
-    Error,
+    // Error,
 }
 
 const TEXT_INPUT_BORDER_RADIUS: f32 = 5.0;
@@ -25,7 +25,8 @@ impl TextInputType {
         Style {
             background: Background::Color(match self {
                 TextInputType::Badge => Color::TRANSPARENT,
-                _ => Color {
+                // TextInputType::Error |
+                TextInputType::Standard => Color {
                     a: ext.alpha_round_borders,
                     ..ext.buttons_color
                 },
@@ -36,7 +37,7 @@ impl TextInputType {
                 color: match self {
                     TextInputType::Badge => Color::TRANSPARENT,
                     TextInputType::Standard => ext.buttons_color,
-                    TextInputType::Error => ext.red_alert_color,
+                    // TextInputType::Error => ext.red_alert_color,
                 },
             },
             icon: Color {
@@ -51,17 +52,17 @@ impl TextInputType {
 
     fn focused(&self, style: &StyleType) -> Style {
         let colors = style.get_palette();
-        let ext = style.get_extension();
+        // let ext = style.get_extension();
         let is_nightly = style.get_extension().is_nightly;
         Style {
             background: Background::Color(colors.primary),
             border: Border {
                 radius: TEXT_INPUT_BORDER_RADIUS.into(),
                 width: BORDER_WIDTH,
-                color: match self {
-                    TextInputType::Error => ext.red_alert_color,
-                    _ => colors.secondary,
-                },
+                color: colors.secondary, // match self {
+                                         // TextInputType::Error => ext.red_alert_color,
+                                         //     _ => colors.secondary,
+                                         // },
             },
             icon: Color {
                 a: if is_nightly { 0.2 } else { 0.7 },
@@ -114,15 +115,16 @@ impl TextInputType {
         Style {
             background: Background::Color(match self {
                 TextInputType::Badge => Color::TRANSPARENT,
-                _ => ext.buttons_color,
+                // TextInputType::Error |
+                TextInputType::Standard => ext.buttons_color,
             }),
             border: Border {
                 radius: TEXT_INPUT_BORDER_RADIUS.into(),
                 width: BORDER_WIDTH,
-                color: match self {
-                    TextInputType::Error => ext.red_alert_color,
-                    _ => colors.secondary,
-                },
+                color: colors.secondary, // match self {
+                                         // TextInputType::Error => ext.red_alert_color,
+                                         //     _ => colors.secondary,
+                                         // },
             },
             icon: Color {
                 a: if ext.is_nightly { 0.2 } else { 0.7 },
@@ -140,7 +142,8 @@ impl TextInputType {
         Style {
             background: Background::Color(match self {
                 TextInputType::Badge => Color::TRANSPARENT,
-                _ => Color {
+                // TextInputType::Error |
+                TextInputType::Standard => Color {
                     a: ext.alpha_round_containers,
                     ..ext.buttons_color
                 },
@@ -154,10 +157,10 @@ impl TextInputType {
                         a: ext.alpha_round_borders,
                         ..ext.buttons_color
                     },
-                    TextInputType::Error => Color {
-                        a: ext.alpha_round_borders,
-                        ..ext.red_alert_color
-                    },
+                    // TextInputType::Error => Color {
+                    //     a: ext.alpha_round_borders,
+                    //     ..ext.red_alert_color
+                    // },
                 },
             },
             icon: Color {

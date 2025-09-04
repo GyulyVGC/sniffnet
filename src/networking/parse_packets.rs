@@ -14,7 +14,6 @@ use crate::networking::types::bogon::is_bogon;
 use crate::networking::types::capture_context::{CaptureContext, CaptureSource};
 use crate::networking::types::data_info::DataInfo;
 use crate::networking::types::data_info_host::DataInfoHost;
-use crate::networking::types::filters::Filters;
 use crate::networking::types::host::{Host, HostMessage};
 use crate::networking::types::icmp_type::IcmpType;
 use crate::networking::types::info_traffic::InfoTraffic;
@@ -26,10 +25,8 @@ use crate::utils::formatted_strings::get_domain_from_r_dns;
 use crate::utils::types::timestamp::Timestamp;
 use async_channel::Sender;
 use dns_lookup::lookup_addr;
-use etherparse::err::ip::{HeaderError, LaxHeaderSliceError};
-use etherparse::err::{Layer, LenError};
-use etherparse::{LaxPacketHeaders, LenSource};
-use pcap::{Address, Device, Packet};
+use etherparse::{EtherType, LaxPacketHeaders};
+use pcap::{Address, Packet};
 use std::collections::HashMap;
 use std::net::IpAddr;
 use std::sync::{Arc, Mutex};
@@ -40,7 +37,6 @@ use std::time::{Duration, Instant};
 pub fn parse_packets(
     cap_id: usize,
     mut cs: CaptureSource,
-    filters: &Filters,
     mmdb_readers: &MmdbReaders,
     capture_context: CaptureContext,
     tx: &Sender<BackendTrafficMessage>,
@@ -97,7 +93,7 @@ pub fn parse_packets(
                 }
             }
             Ok(packet) => {
-                if let Ok(headers) = get_sniffable_headers(&packet, my_link_type) {
+                if let Some(headers) = get_sniffable_headers(&packet, my_link_type) {
                     #[allow(clippy::useless_conversion)]
                     let secs = i64::from(packet.header.ts.tv_sec);
                     #[allow(clippy::useless_conversion)]
@@ -137,148 +133,139 @@ pub fn parse_packets(
                         continue;
                     };
 
-                    let passed_filters = filters.matches(&packet_filters_fields);
-                    if passed_filters {
-                        // save this packet to PCAP file
-                        if let Some(file) = savefile.as_mut() {
-                            file.write(&packet);
-                        }
-                        // update the map
-                        let (traffic_direction, service) = modify_or_insert_in_map(
-                            &mut info_traffic_msg,
-                            &key,
-                            &cs,
-                            mac_addresses,
-                            icmp_type,
-                            arp_type,
-                            exchanged_bytes,
-                        );
+                    // save this packet to PCAP file
+                    if let Some(file) = savefile.as_mut() {
+                        file.write(&packet);
+                    }
+                    // update the map
+                    let (traffic_direction, service) = modify_or_insert_in_map(
+                        &mut info_traffic_msg,
+                        &key,
+                        &cs,
+                        mac_addresses,
+                        icmp_type,
+                        arp_type,
+                        exchanged_bytes,
+                    );
 
-                        info_traffic_msg
-                            .tot_data_info
-                            .add_packet(exchanged_bytes, traffic_direction);
+                    info_traffic_msg
+                        .tot_data_info
+                        .add_packet(exchanged_bytes, traffic_direction);
 
-                        // check the rDNS status of this address and act accordingly
-                        let address_to_lookup = get_address_to_lookup(&key, traffic_direction);
-                        let mut r_dns_waiting_resolution = false;
-                        let mut resolutions_lock = resolutions_state.lock().unwrap();
-                        let r_dns_already_resolved = resolutions_lock
-                            .addresses_resolved
+                    // check the rDNS status of this address and act accordingly
+                    let address_to_lookup = get_address_to_lookup(&key, traffic_direction);
+                    let mut r_dns_waiting_resolution = false;
+                    let mut resolutions_lock = resolutions_state.lock().unwrap();
+                    let r_dns_already_resolved = resolutions_lock
+                        .addresses_resolved
+                        .contains_key(&address_to_lookup);
+                    if !r_dns_already_resolved {
+                        r_dns_waiting_resolution = resolutions_lock
+                            .addresses_waiting_resolution
                             .contains_key(&address_to_lookup);
-                        if !r_dns_already_resolved {
-                            r_dns_waiting_resolution = resolutions_lock
-                                .addresses_waiting_resolution
-                                .contains_key(&address_to_lookup);
-                        }
-
-                        match (r_dns_waiting_resolution, r_dns_already_resolved) {
-                            (false, false) => {
-                                // rDNS not requested yet (first occurrence of this address to lookup)
-
-                                // Add this address to the map of addresses waiting for a resolution
-                                // Useful to NOT perform again a rDNS lookup for this entry
-                                resolutions_lock.addresses_waiting_resolution.insert(
-                                    address_to_lookup,
-                                    DataInfo::new_with_first_packet(
-                                        exchanged_bytes,
-                                        traffic_direction,
-                                    ),
-                                );
-                                drop(resolutions_lock);
-
-                                // launch new thread to resolve host name
-                                let key2 = key;
-                                let resolutions_state2 = resolutions_state.clone();
-                                let new_hosts_to_send2 = new_hosts_to_send.clone();
-                                let interface_addresses = cs.get_addresses().clone();
-                                let mmdb_readers_2 = mmdb_readers.clone();
-                                let tx2 = tx.clone();
-                                let _ = thread::Builder::new()
-                                    .name("thread_reverse_dns_lookup".to_string())
-                                    .spawn(move || {
-                                        reverse_dns_lookup(
-                                            &resolutions_state2,
-                                            &new_hosts_to_send2,
-                                            &key2,
-                                            traffic_direction,
-                                            &interface_addresses,
-                                            &mmdb_readers_2,
-                                            &tx2,
-                                        );
-                                    })
-                                    .log_err(location!());
-                            }
-                            (true, false) => {
-                                // waiting for a previously requested rDNS resolution
-                                // update the corresponding waiting address data
-                                resolutions_lock
-                                    .addresses_waiting_resolution
-                                    .entry(address_to_lookup)
-                                    .and_modify(|data_info| {
-                                        data_info.add_packet(exchanged_bytes, traffic_direction);
-                                    });
-                                drop(resolutions_lock);
-                            }
-                            (_, true) => {
-                                // rDNS already resolved
-                                // update the corresponding host's data info
-                                let host = resolutions_lock
-                                    .addresses_resolved
-                                    .get(&address_to_lookup)
-                                    .unwrap_or(&Host::default())
-                                    .clone();
-                                drop(resolutions_lock);
-                                info_traffic_msg
-                                    .hosts
-                                    .entry(host)
-                                    .and_modify(|data_info_host| {
-                                        data_info_host
-                                            .data_info
-                                            .add_packet(exchanged_bytes, traffic_direction);
-                                    })
-                                    .or_insert_with(|| {
-                                        let my_interface_addresses = cs.get_addresses();
-                                        let traffic_type = get_traffic_type(
-                                            &address_to_lookup,
-                                            my_interface_addresses,
-                                            traffic_direction,
-                                        );
-                                        let is_loopback = address_to_lookup.is_loopback();
-                                        let is_local = is_local_connection(
-                                            &address_to_lookup,
-                                            my_interface_addresses,
-                                        );
-                                        let is_bogon = is_bogon(&address_to_lookup);
-                                        DataInfoHost {
-                                            data_info: DataInfo::new_with_first_packet(
-                                                exchanged_bytes,
-                                                traffic_direction,
-                                            ),
-                                            is_favorite: false,
-                                            is_loopback,
-                                            is_local,
-                                            is_bogon,
-                                            traffic_type,
-                                        }
-                                    });
-                            }
-                        }
-
-                        //increment the packet count for the sniffed service
-                        info_traffic_msg
-                            .services
-                            .entry(service)
-                            .and_modify(|data_info| {
-                                data_info.add_packet(exchanged_bytes, traffic_direction);
-                            })
-                            .or_insert_with(|| {
-                                DataInfo::new_with_first_packet(exchanged_bytes, traffic_direction)
-                            });
                     }
 
-                    //increment number of sniffed packets and bytes
-                    info_traffic_msg.all_packets += 1;
-                    info_traffic_msg.all_bytes += exchanged_bytes;
+                    match (r_dns_waiting_resolution, r_dns_already_resolved) {
+                        (false, false) => {
+                            // rDNS not requested yet (first occurrence of this address to lookup)
+
+                            // Add this address to the map of addresses waiting for a resolution
+                            // Useful to NOT perform again a rDNS lookup for this entry
+                            resolutions_lock.addresses_waiting_resolution.insert(
+                                address_to_lookup,
+                                DataInfo::new_with_first_packet(exchanged_bytes, traffic_direction),
+                            );
+                            drop(resolutions_lock);
+
+                            // launch new thread to resolve host name
+                            let key2 = key;
+                            let resolutions_state2 = resolutions_state.clone();
+                            let new_hosts_to_send2 = new_hosts_to_send.clone();
+                            let interface_addresses = cs.get_addresses().clone();
+                            let mmdb_readers_2 = mmdb_readers.clone();
+                            let tx2 = tx.clone();
+                            let _ = thread::Builder::new()
+                                .name("thread_reverse_dns_lookup".to_string())
+                                .spawn(move || {
+                                    reverse_dns_lookup(
+                                        &resolutions_state2,
+                                        &new_hosts_to_send2,
+                                        &key2,
+                                        traffic_direction,
+                                        &interface_addresses,
+                                        &mmdb_readers_2,
+                                        &tx2,
+                                    );
+                                })
+                                .log_err(location!());
+                        }
+                        (true, false) => {
+                            // waiting for a previously requested rDNS resolution
+                            // update the corresponding waiting address data
+                            resolutions_lock
+                                .addresses_waiting_resolution
+                                .entry(address_to_lookup)
+                                .and_modify(|data_info| {
+                                    data_info.add_packet(exchanged_bytes, traffic_direction);
+                                });
+                            drop(resolutions_lock);
+                        }
+                        (_, true) => {
+                            // rDNS already resolved
+                            // update the corresponding host's data info
+                            let host = resolutions_lock
+                                .addresses_resolved
+                                .get(&address_to_lookup)
+                                .unwrap_or(&Host::default())
+                                .clone();
+                            drop(resolutions_lock);
+                            info_traffic_msg
+                                .hosts
+                                .entry(host)
+                                .and_modify(|data_info_host| {
+                                    data_info_host
+                                        .data_info
+                                        .add_packet(exchanged_bytes, traffic_direction);
+                                })
+                                .or_insert_with(|| {
+                                    let my_interface_addresses = cs.get_addresses();
+                                    let traffic_type = get_traffic_type(
+                                        &address_to_lookup,
+                                        my_interface_addresses,
+                                        traffic_direction,
+                                    );
+                                    let is_loopback = address_to_lookup.is_loopback();
+                                    let is_local = is_local_connection(
+                                        &address_to_lookup,
+                                        my_interface_addresses,
+                                    );
+                                    let is_bogon = is_bogon(&address_to_lookup);
+                                    DataInfoHost {
+                                        data_info: DataInfo::new_with_first_packet(
+                                            exchanged_bytes,
+                                            traffic_direction,
+                                        ),
+                                        is_favorite: false,
+                                        is_loopback,
+                                        is_local,
+                                        is_bogon,
+                                        traffic_type,
+                                    }
+                                });
+                        }
+                    }
+
+                    //increment the packet count for the sniffed service
+                    info_traffic_msg
+                        .services
+                        .entry(service)
+                        .and_modify(|data_info| {
+                            data_info.add_packet(exchanged_bytes, traffic_direction);
+                        })
+                        .or_insert_with(|| {
+                            DataInfo::new_with_first_packet(exchanged_bytes, traffic_direction)
+                        });
+
                     // update dropped packets number
                     if let Ok(stats) = cap.stats() {
                         info_traffic_msg.dropped_packets = stats.dropped;
@@ -292,27 +279,23 @@ pub fn parse_packets(
 fn get_sniffable_headers<'a>(
     packet: &'a Packet,
     my_link_type: MyLinkType,
-) -> Result<LaxPacketHeaders<'a>, LaxHeaderSliceError> {
+) -> Option<LaxPacketHeaders<'a>> {
     match my_link_type {
         MyLinkType::Ethernet(_) | MyLinkType::Unsupported(_) | MyLinkType::NotYetAssigned => {
-            LaxPacketHeaders::from_ethernet(packet).map_err(LaxHeaderSliceError::Len)
+            LaxPacketHeaders::from_ethernet(packet).ok()
         }
         MyLinkType::RawIp(_) | MyLinkType::IPv4(_) | MyLinkType::IPv6(_) => {
-            LaxPacketHeaders::from_ip(packet)
+            LaxPacketHeaders::from_ip(packet).ok()
         }
+        MyLinkType::LinuxSll(_) => from_linux_sll(packet, true),
+        MyLinkType::LinuxSll2(_) => from_linux_sll(packet, false),
         MyLinkType::Null(_) | MyLinkType::Loop(_) => from_null(packet),
     }
 }
 
-fn from_null(packet: &[u8]) -> Result<LaxPacketHeaders, LaxHeaderSliceError> {
+fn from_null(packet: &[u8]) -> Option<LaxPacketHeaders<'_>> {
     if packet.len() <= 4 {
-        return Err(LaxHeaderSliceError::Len(LenError {
-            required_len: 4,
-            len: packet.len(),
-            len_source: LenSource::Slice,
-            layer: Layer::Ethernet2Header,
-            layer_start_offset: 0,
-        }));
+        return None;
     }
 
     let is_valid_af_inet = {
@@ -333,12 +316,29 @@ fn from_null(packet: &[u8]) -> Result<LaxPacketHeaders, LaxHeaderSliceError> {
     };
 
     if is_valid_af_inet {
-        LaxPacketHeaders::from_ip(&packet[4..])
+        LaxPacketHeaders::from_ip(&packet[4..]).ok()
     } else {
-        Err(LaxHeaderSliceError::Content(
-            HeaderError::UnsupportedIpVersion { version_number: 0 },
-        ))
+        None
     }
+}
+
+fn from_linux_sll(packet: &[u8], is_v1: bool) -> Option<LaxPacketHeaders<'_>> {
+    let header_len = if is_v1 { 16 } else { 20 };
+    if packet.len() <= header_len {
+        return None;
+    }
+
+    let protocol_type = u16::from_be_bytes(if is_v1 {
+        [packet[14], packet[15]]
+    } else {
+        [packet[0], packet[1]]
+    });
+    let payload = &packet[header_len..];
+
+    Some(LaxPacketHeaders::from_ether_type(
+        EtherType(protocol_type),
+        payload,
+    ))
 }
 
 fn reverse_dns_lookup(
@@ -442,12 +442,7 @@ fn maybe_send_tick_run_live(
             new_hosts_to_send.lock().unwrap().drain(..).collect(),
             false,
         ));
-        for dev in Device::list().log_err(location!()).unwrap_or_default() {
-            if dev.name.eq(&cs.get_name()) {
-                cs.set_addresses(dev.addresses);
-                break;
-            }
-        }
+        cs.set_addresses();
     }
 }
 
