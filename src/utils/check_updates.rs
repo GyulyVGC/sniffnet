@@ -1,5 +1,5 @@
-use crate::utils::formatted_strings::APP_VERSION;
 use crate::SNIFFNET_LOWERCASE;
+use crate::utils::formatted_strings::APP_VERSION;
 use semver::Version;
 use serde::Deserialize;
 use std::time::Duration;
@@ -51,10 +51,9 @@ async fn is_newer_release_available(max_retries: u8, seconds_between_retries: u8
 
         // release name sample: v1.2.3
         if let Some(stripped) = latest_version.strip_prefix('v') {
-            if let (Ok(latest_semver), Ok(current_semver)) = (
-                Version::parse(stripped),
-                Version::parse(APP_VERSION),
-            ) {
+            if let (Ok(latest_semver), Ok(current_semver)) =
+                (Version::parse(stripped), Version::parse(APP_VERSION))
+            {
                 return if latest_semver > current_semver {
                     Some(true)
                 } else {
