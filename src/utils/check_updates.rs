@@ -57,7 +57,6 @@ async fn is_newer_release_available(max_retries: u8, seconds_between_retries: u8
         {
             return Some(latest_semver > current_semver);
         }
-
     }
     let retries_left = max_retries - 1;
     if retries_left > 0 {
