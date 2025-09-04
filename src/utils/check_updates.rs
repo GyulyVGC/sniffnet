@@ -1,5 +1,6 @@
 use crate::SNIFFNET_LOWERCASE;
 use crate::utils::formatted_strings::APP_VERSION;
+use semver::Version;
 use serde::Deserialize;
 use std::time::Duration;
 
@@ -48,23 +49,13 @@ async fn is_newer_release_available(max_retries: u8, seconds_between_retries: u8
             .name;
         latest_version = latest_version.trim().to_string();
 
-        // release name sample: v1.1.2
-        // TODO: support versions with numbers of more than 1 digit
-        let latest_version_as_bytes = latest_version.as_bytes();
-        if latest_version.len() == 6
-            && latest_version.starts_with('v')
-            && char::from(latest_version_as_bytes[1]).is_numeric()
-            && char::from(latest_version_as_bytes[2]).eq(&'.')
-            && char::from(latest_version_as_bytes[3]).is_numeric()
-            && char::from(latest_version_as_bytes[4]).eq(&'.')
-            && char::from(latest_version_as_bytes[5]).is_numeric()
+        // release name sample: v1.2.3
+        let stripped = latest_version.trim_start_matches('v');
+
+        if let (Ok(latest_semver), Ok(current_semver)) =
+            (Version::parse(stripped), Version::parse(APP_VERSION))
         {
-            latest_version.remove(0);
-            return if latest_version.gt(&APP_VERSION.to_string()) {
-                Some(true)
-            } else {
-                Some(false)
-            };
+            return Some(latest_semver > current_semver);
         }
     }
     let retries_left = max_retries - 1;
