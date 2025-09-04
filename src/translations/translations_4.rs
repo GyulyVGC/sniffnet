@@ -140,6 +140,7 @@ pub fn reading_from_pcap_translation<'a>(language: Language, file: &str) -> Text
             "Leyendo paquetes desde el archivo...\n\n\
              {file_name_translation}: {file}\n\n\
              ¿Seguro que el archivo seleccionado no está vacío?"
+        ),
         Language::RO => format!(
             "Citirea pachetelor din fișier...\n\n\
                                  {file_name_translation}: {file}\n\n\
@@ -217,9 +218,13 @@ pub fn bits_exceeded_translation(language: Language) -> &'static str {
 
 pub fn bits_translation(language: Language) -> &'static str {
     match language {
-        Language::EN | Language::IT | Language::NL | Language::DE | Language::FR | Language::ID | Language::ES => {
-            "bits"
-        }
+        Language::EN
+        | Language::IT
+        | Language::NL
+        | Language::DE
+        | Language::FR
+        | Language::ID
+        | Language::ES => "bits",
         Language::JA => "ビット",
         Language::ZH => "比特",
         Language::UZ => "bitlar",
