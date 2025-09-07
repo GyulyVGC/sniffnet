@@ -17,6 +17,9 @@ All Sniffnet releases with the relative changes are documented in this file.
   - Japanese ([#849](https://github.com/GyulyVGC/sniffnet/pull/849))
   - French ([#864](https://github.com/GyulyVGC/sniffnet/pull/864))
   - Greek ([#879](https://github.com/GyulyVGC/sniffnet/pull/879))
+  - Romanian ([#890](https://github.com/GyulyVGC/sniffnet/pull/890))
+  - Traditional Chinese (Taiwan) ([#904](https://github.com/GyulyVGC/sniffnet/pull/904))
+  - Indonesian ([#909](https://github.com/GyulyVGC/sniffnet/pull/909))
 - Fix support for IPinfo's databases (the most recent version renamed the `country` field to `country_code`)
 
 ## [1.4.0] - 2025-06-27
