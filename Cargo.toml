@@ -49,7 +49,7 @@ serde = { version = "1.0.219", default-features = false, features = ["derive"] }
 rodio = { version = "0.21.1", default-features = false, features = ["mp3", "playback"] }
 dns-lookup = "3.0.0"
 toml = "0.9.5"
-ctrlc = { version = "3.4.7", features = ["termination"] }
+ctrlc = { version = "3.5.0", features = ["termination"] }
 rfd = "0.15.4"
 phf = "0.13.1"
 phf_shared = "0.13.1"
