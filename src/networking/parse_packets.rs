@@ -53,7 +53,10 @@ pub fn parse_packets(
     let mut first_packet_ticks = None;
 
     let (pcap_tx, pcap_rx) = std::sync::mpsc::channel();
-    thread::spawn(move || packet_stream(cap, &pcap_tx));
+    let _ = thread::Builder::new()
+        .name("thread_packet_stream".to_string())
+        .spawn(move || packet_stream(cap, &pcap_tx))
+        .log_err(location!());
 
     loop {
         let (packet_res, cap_stats) = pcap_rx
