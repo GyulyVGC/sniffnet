@@ -20,6 +20,7 @@ All Sniffnet releases with the relative changes are documented in this file.
   - Romanian ([#890](https://github.com/GyulyVGC/sniffnet/pull/890))
   - Traditional Chinese (Taiwan) ([#904](https://github.com/GyulyVGC/sniffnet/pull/904))
   - Indonesian ([#909](https://github.com/GyulyVGC/sniffnet/pull/909))
+- Fix live chart not being updated when packets aren't captured on Linux ([#957](https://github.com/GyulyVGC/sniffnet/pull/957) — fixes [#951](https://github.com/GyulyVGC/sniffnet/issues/951))
 - Fix support for IPinfo's databases (the most recent version renamed the `country` field to `country_code`)
 
 ## [1.4.0] - 2025-06-27
