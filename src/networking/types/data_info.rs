@@ -165,6 +165,8 @@ mod tests {
         assert_eq!(data_info_1.outgoing_data(DataRepr::Bytes), 1400);
         assert_eq!(data_info_1.outgoing_data(DataRepr::Bits), 11200);
 
+        // sleep a little to have a different final_instant
+        std::thread::sleep(std::time::Duration::from_millis(10));
         let mut data_info_2 = DataInfo::new_with_first_packet(100, TrafficDirection::Outgoing);
         // 0, 1, 0, 100
         data_info_2.add_packets(19, 300, TrafficDirection::Outgoing);
