@@ -52,7 +52,7 @@ pub fn parse_packets(
     // instant of the first parsed packet plus multiples of 1 second (only used in live captures)
     let mut first_packet_ticks = None;
 
-    let (pcap_tx, pcap_rx) = std::sync::mpsc::channel();
+    let (pcap_tx, pcap_rx) = std::sync::mpsc::sync_channel(10_000);
     let _ = thread::Builder::new()
         .name("thread_packet_stream".to_string())
         .spawn(move || packet_stream(cap, &pcap_tx))
@@ -485,7 +485,7 @@ fn maybe_send_tick_run_offline(
 
 fn packet_stream(
     mut cap: CaptureType,
-    tx: &std::sync::mpsc::Sender<(Result<PacketOwned, pcap::Error>, Option<pcap::Stat>)>,
+    tx: &std::sync::mpsc::SyncSender<(Result<PacketOwned, pcap::Error>, Option<pcap::Stat>)>,
 ) {
     loop {
         let packet_res = cap.next_packet();
