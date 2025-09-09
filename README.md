@@ -12,7 +12,7 @@ Application to comfortably monitor your Internet traffic.<br>
 Cross-platform. Intuitive. Reliable.
 
 Translated in:<br>
-🇨🇳 🇩🇪 🇫🇷 🇷🇺 🇵🇹 🇪🇦 🇮🇹 🇵🇱 [+&nbsp;14&nbsp;more&nbsp;languages](https://github.com/GyulyVGC/sniffnet/issues/60)
+🇨🇳 🇩🇪 🇫🇷 🇷🇺 🇵🇹 🇪🇦 🇮🇹 🇵🇱 [+&nbsp;15&nbsp;more&nbsp;languages](https://github.com/GyulyVGC/sniffnet/issues/60)
 </div>
 
 <p>
@@ -81,6 +81,7 @@ Do you want to help the project in an alternative way? You can also head to the 
       <picture><img alt="Linux" title="Linux" height="85px" src="https://raw.githubusercontent.com/GyulyVGC/sniffnet/main/resources/repository/badges/linux.svg"/></picture>
     </td>
     <td>
+      AppImage: <a href="https://github.com/GyulyVGC/sniffnet/releases/latest/download/Sniffnet_LinuxAppImage_amd64.AppImage">amd64</a> | <a href="https://github.com/GyulyVGC/sniffnet/releases/latest/download/Sniffnet_LinuxAppImage_arm64.AppImage">arm64</a> | <a href="https://github.com/GyulyVGC/sniffnet/releases/latest/download/Sniffnet_LinuxAppImage_i386.AppImage">i386</a> | <a href="https://github.com/GyulyVGC/sniffnet/releases/latest/download/Sniffnet_LinuxAppImage_armhf.AppImage">armhf</a> <br>
       DEB: <a href="https://github.com/GyulyVGC/sniffnet/releases/latest/download/Sniffnet_LinuxDEB_amd64.deb">amd64</a> | <a href="https://github.com/GyulyVGC/sniffnet/releases/latest/download/Sniffnet_LinuxDEB_arm64.deb">arm64</a> | <a href="https://github.com/GyulyVGC/sniffnet/releases/latest/download/Sniffnet_LinuxDEB_i386.deb">i386</a> | <a href="https://github.com/GyulyVGC/sniffnet/releases/latest/download/Sniffnet_LinuxDEB_armhf.deb">armhf</a> <br>
       RPM: <a href="https://github.com/GyulyVGC/sniffnet/releases/latest/download/Sniffnet_LinuxRPM_x86_64.rpm">x86_64</a> | <a href="https://github.com/GyulyVGC/sniffnet/releases/latest/download/Sniffnet_LinuxRPM_aarch64.rpm">aarch64</a>
     </td>
