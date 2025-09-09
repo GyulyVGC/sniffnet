@@ -2,7 +2,7 @@
 
 All Sniffnet releases with the relative changes are documented in this file.
 
-## [UNRELEASED]
+## [1.4.1] - 2025-09-13
 - Enhanced traffic filtering capabilities: Berkeley Packet Filter ([#937](https://github.com/GyulyVGC/sniffnet/pull/937) — fixes [#810](https://github.com/GyulyVGC/sniffnet/issues/810))
 - Added support for `Linux SLL` link type, enabling to monitor the `any` interface on Linux ([#945](https://github.com/GyulyVGC/sniffnet/pull/945))
 - Added _bits_ data representation ([#936](https://github.com/GyulyVGC/sniffnet/pull/936) — fixes [#506](https://github.com/GyulyVGC/sniffnet/issues/506))
