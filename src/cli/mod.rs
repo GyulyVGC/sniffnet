@@ -99,6 +99,7 @@ mod tests {
         let modified_conf = Conf {
             settings: Settings {
                 color_gradient: GradientType::Wild,
+                focus_mode: false,
                 language: Language::ZH,
                 scale_factor: 0.65,
                 mmdb_country: "countrymmdb".to_string(),

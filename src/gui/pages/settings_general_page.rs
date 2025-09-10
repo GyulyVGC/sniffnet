@@ -1,7 +1,8 @@
 use iced::widget::text::LineHeight;
 use iced::widget::tooltip::Position;
 use iced::widget::{
-    Column, Container, PickList, Row, Rule, Slider, Space, Text, Tooltip, button, vertical_space,
+    Column, Container, PickList, Row, Rule, Slider, Space, Text, Toggler, Tooltip, button,
+    vertical_space,
 };
 use iced::{Alignment, Font, Length, Padding};
 
@@ -22,6 +23,7 @@ use crate::translations::translations_3::{
     mmdb_files_translation, params_not_editable_translation, zoom_translation,
 };
 use crate::translations::translations_4::share_feedback_translation;
+use crate::translations::translations_5::toggle_focus_mode_translation;
 use crate::utils::formatted_strings::get_path_termination_string;
 use crate::utils::types::file_info::FileInfo;
 use crate::utils::types::icon::Icon;
@@ -41,6 +43,7 @@ pub fn settings_general_page(sniffer: &Sniffer) -> Container<'_, Message, StyleT
     let content = Column::new()
         .align_x(Alignment::Center)
         .width(Length::Fill)
+        .spacing(10)
         .push(settings_header(
             font,
             font_headers,
@@ -48,7 +51,6 @@ pub fn settings_general_page(sniffer: &Sniffer) -> Container<'_, Message, StyleT
             language,
         ))
         .push(get_settings_tabs(SettingsPage::General, font, language))
-        .push(Space::with_height(10))
         .push(column_all_general_setting(sniffer, font));
 
     Container::new(content)
@@ -59,6 +61,7 @@ pub fn settings_general_page(sniffer: &Sniffer) -> Container<'_, Message, StyleT
 
 fn column_all_general_setting(sniffer: &Sniffer, font: Font) -> Column<'_, Message, StyleType> {
     let Settings {
+        focus_mode,
         language,
         scale_factor,
         mmdb_country,
@@ -71,7 +74,7 @@ fn column_all_general_setting(sniffer: &Sniffer, font: Font) -> Column<'_, Messa
     let mut column = Column::new()
         .align_x(Alignment::Center)
         .padding([5, 10])
-        .push(row_language_scale_factor(language, font, scale_factor))
+        .push(ui_settings(language, font, scale_factor, focus_mode))
         .push(Rule::horizontal(25));
 
     if !is_editable {
@@ -96,10 +99,11 @@ fn column_all_general_setting(sniffer: &Sniffer, font: Font) -> Column<'_, Messa
     column
 }
 
-fn row_language_scale_factor<'a>(
+fn ui_settings<'a>(
     language: Language,
     font: Font,
     scale_factor: f64,
+    focus_mode: bool,
 ) -> Row<'a, Message, StyleType> {
     Row::new()
         .align_y(Alignment::Start)
@@ -108,7 +112,7 @@ fn row_language_scale_factor<'a>(
         .push(Rule::vertical(25))
         .push(scale_factor_slider(language, font, scale_factor))
         .push(Rule::vertical(25))
-        .push(need_help(language, font))
+        .push(toggle_focus_mode_column(language, font, focus_mode))
 }
 
 fn language_picklist<'a>(language: Language, font: Font) -> Container<'a, Message, StyleType> {
@@ -203,6 +207,38 @@ fn scale_factor_slider<'a>(
     .align_y(Alignment::Center)
 }
 
+fn toggle_focus_mode_column<'a>(
+    language: Language,
+    font: Font,
+    is_focus_mode: bool,
+) -> Container<'a, Message, StyleType> {
+    let toggler_cta = Toggler::new(is_focus_mode)
+        .on_toggle(Message::ToggleFocusMode)
+        .width(Length::Shrink)
+        .spacing(5)
+        .size(23)
+        .font(font);
+
+    let toggler_label = Text::new(toggle_focus_mode_translation(language))
+        .class(TextType::Subtitle)
+        .size(FONT_SIZE_SUBTITLE)
+        .font(font);
+
+    let content = Column::new()
+        .push(toggler_label)
+        .push(vertical_space())
+        .push(toggler_cta)
+        .push(vertical_space())
+        .align_x(Alignment::Center);
+    Container::new(content)
+        .width(Length::Fill)
+        .align_x(Alignment::Center)
+        .align_y(Alignment::Center)
+}
+
+// TODO: Find a different place to put this button.
+//       https://github.com/GyulyVGC/sniffnet/pull/947
+#[allow(dead_code)]
 fn need_help<'a>(language: Language, font: Font) -> Container<'a, Message, StyleType> {
     let content = Column::new()
         .align_x(Alignment::Center)
@@ -250,6 +286,7 @@ fn mmdb_settings<'a>(
     mmdb_readers: &MmdbReaders,
 ) -> Column<'a, Message, StyleType> {
     Column::new()
+        .width(Length::Fill)
         .spacing(5)
         .align_x(Alignment::Center)
         .push(
@@ -258,6 +295,7 @@ fn mmdb_settings<'a>(
                 .class(TextType::Subtitle)
                 .size(FONT_SIZE_SUBTITLE),
         )
+        .push(vertical_space())
         .push(mmdb_selection_row(
             is_editable,
             font,
@@ -276,6 +314,7 @@ fn mmdb_settings<'a>(
             "ASN",
             language,
         ))
+        .push(vertical_space())
 }
 
 fn mmdb_selection_row<'a>(
