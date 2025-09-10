@@ -8,6 +8,7 @@ use crate::translations::types::language::Language;
 // pub fn choose_adapters_translation<'a>(language: Language) -> Text<'a, StyleType> {
 //     Text::new(match language {
 //         Language::EN => "Select network adapter to inspect",
+//         Language::CZ => "Výběr síťového adaptéru ke kontrole",
 //         Language::IT => "Seleziona la scheda di rete da ispezionare",
 //         Language::FR => "Sélectionnez une carte réseau à inspecter",
 //         Language::ES => "Seleccione el adaptador de red que desea inspeccionar",
@@ -36,6 +37,7 @@ use crate::translations::types::language::Language;
 // pub fn application_protocol_translation(language: Language) -> &'static str {
 //     match language {
 //         Language::EN => "Application protocol",
+//         Language::CZ => "Aplikační protokol",
 //         Language::IT => "Protocollo applicativo",
 //         Language::FR => "Protocole applicatif",
 //         Language::ES => "Protocolo de aplicación",
@@ -63,6 +65,7 @@ use crate::translations::types::language::Language;
 // pub fn select_filters_translation<'a>(language: Language) -> Text<'a, StyleType> {
 //     Text::new(match language {
 //         Language::EN => "Select filters to be applied on network traffic",
+//         Language::CZ => "Výběr filtrů které budou použity na síťový provoz",
 //         Language::IT => "Seleziona i filtri da applicare al traffico di rete",
 //         Language::FR => "Sélectionnez les filtres à appliquer sur le traffic réseau",
 //         Language::ES => "Seleccionar los filtros que se aplicarán al tráfico de red",
@@ -91,6 +94,7 @@ use crate::translations::types::language::Language;
 pub fn start_translation(language: Language) -> &'static str {
     match language {
         Language::EN | Language::DE | Language::RO | Language::KO | Language::NL => "Start!",
+        Language::CZ => "Start!",
         Language::IT => "Avvia!",
         Language::FR => "Commencer!",
         Language::ES => "¡Empieza!",
@@ -114,6 +118,7 @@ pub fn start_translation(language: Language) -> &'static str {
 pub fn address_translation(language: Language) -> &'static str {
     match language {
         Language::EN => "Address",
+        Language::CZ => "Adresa",
         Language::IT => "Indirizzo",
         Language::FR | Language::DE => "Adresse",
         Language::ES => "Dirección",
@@ -139,6 +144,7 @@ pub fn address_translation(language: Language) -> &'static str {
 pub fn addresses_translation(language: Language) -> &'static str {
     match language {
         Language::EN => "Addresses",
+        Language::CZ => "Adresy",
         Language::IT => "Indirizzi",
         Language::FR => "Adresses",
         Language::ES => "Direcciones",
@@ -166,6 +172,7 @@ pub fn addresses_translation(language: Language) -> &'static str {
 // pub fn ip_version_translation(language: Language) -> &'static str {
 //     match language {
 //         Language::EN => "IP version",
+//         Language::CZ => "Verze IP",
 //         Language::IT => "Versione IP",
 //         Language::FR => "Version IP",
 //         Language::ES => "Versión IP",
@@ -194,6 +201,7 @@ pub fn addresses_translation(language: Language) -> &'static str {
 // pub fn transport_protocol_translation(language: Language) -> &'static str {
 //     match language {
 //         Language::EN => "Transport protocol",
+//         Language::CZ => "Transportní protokol",
 //         Language::IT => "Protocollo di trasporto",
 //         Language::FR => "Protocole de transport",
 //         Language::ES | Language::PT => "Protocolo de transporte",
@@ -220,6 +228,7 @@ pub fn addresses_translation(language: Language) -> &'static str {
 pub fn protocol_translation(language: Language) -> &'static str {
     match language {
         Language::EN | Language::RO | Language::NL => "Protocol",
+        Language::CZ => "Protokol",
         Language::IT => "Protocollo",
         Language::FR => "Protocole",
         Language::ES | Language::PT => "Protocolo",
@@ -243,6 +252,7 @@ pub fn protocol_translation(language: Language) -> &'static str {
 pub fn traffic_rate_translation<'a>(language: Language) -> Text<'a, StyleType> {
     Text::new(match language {
         Language::EN => "Traffic rate",
+        Language::CZ => "Intenzita provozu",
         Language::IT => "Intensità del traffico",
         Language::FR => "Fréquence du traffic",
         Language::ES => "Tasa de tráfico",
@@ -271,6 +281,7 @@ pub fn traffic_rate_translation<'a>(language: Language) -> Text<'a, StyleType> {
 // pub fn relevant_connections_translation(language: Language) -> Text<StyleType> {
 //     Text::new(match language {
 //         Language::EN => "Relevant connections:",
+//         Language::CZ => "Relevantní spojení:",
 //         Language::IT => "Connessioni rilevanti:",
 //         Language::FR => "Connexions pertinentes:",
 //         Language::ES => "Conexiones Relevantes:",
@@ -296,6 +307,7 @@ pub fn traffic_rate_translation<'a>(language: Language) -> Text<'a, StyleType> {
 pub fn settings_translation(language: Language) -> &'static str {
     match language {
         Language::EN => "Settings",
+        Language::CZ => "Nastavení",
         Language::IT => "Impostazioni",
         Language::FR => "Paramètres",
         Language::ES => "Ajustes",
@@ -323,6 +335,7 @@ pub fn settings_translation(language: Language) -> &'static str {
 pub fn yes_translation<'a>(language: Language) -> Text<'a, StyleType> {
     Text::new(match language {
         Language::EN => "Yes",
+        Language::CZ => "Ano",
         Language::IT => "Sì",
         Language::FR => "Oui",
         Language::ES => "Sí",
@@ -348,6 +361,7 @@ pub fn yes_translation<'a>(language: Language) -> Text<'a, StyleType> {
 pub fn ask_quit_translation<'a>(language: Language) -> Text<'a, StyleType> {
     Text::new(match language {
         Language::EN => "Are you sure you want to quit this analysis?",
+        Language::CZ => "Opravdu ukončit tuto analýzu?",
         Language::IT => "Sei sicuro di voler interrompere questa analisi?",
         Language::FR => "Êtes-vous sûr de vouloir quitter l'application ?",
         Language::ES => "¿Estás seguro de que quieres dejar este análisis?",
@@ -376,6 +390,7 @@ pub fn ask_quit_translation<'a>(language: Language) -> Text<'a, StyleType> {
 pub fn quit_analysis_translation(language: Language) -> &'static str {
     match language {
         Language::EN => "Quit analysis",
+        Language::CZ => "Ukončit analýzu",
         Language::IT => "Interrompi analisi",
         Language::FR => "Quitter l'analyse",
         Language::ES => "Quitar el análisis",
@@ -404,6 +419,7 @@ pub fn quit_analysis_translation(language: Language) -> &'static str {
 pub fn ask_clear_all_translation<'a>(language: Language) -> Text<'a, StyleType> {
     Text::new(match language {
         Language::EN => "Are you sure you want to clear notifications?",
+        Language::CZ => "Opravdu chcete vyčistit notifikace?",
         Language::IT => "Sei sicuro di voler eliminare le notifiche?",
         Language::FR => "Êtes-vous sûr de vouloir effacer les notifications ?",
         Language::ES => "¿Seguro que quieres borrar las notificaciones?",
@@ -432,6 +448,7 @@ pub fn ask_clear_all_translation<'a>(language: Language) -> Text<'a, StyleType> 
 pub fn clear_all_translation(language: Language) -> &'static str {
     match language {
         Language::EN => "Clear all",
+        Language::CZ => "Vyčistit vše",
         Language::IT => "Elimina tutto",
         Language::FR => "Tout effacer",
         Language::ES => "Borrar todo",
@@ -459,6 +476,7 @@ pub fn clear_all_translation(language: Language) -> &'static str {
 pub fn hide_translation(language: Language) -> &'static str {
     match language {
         Language::EN => "Hide",
+        Language::CZ => "Skrýt",
         Language::IT => "Nascondi",
         Language::FR => "Masquer",
         Language::ES => "Ocultar",
@@ -487,6 +505,7 @@ pub fn hide_translation(language: Language) -> &'static str {
 pub fn network_adapter_translation(language: Language) -> &'static str {
     match language {
         Language::EN | Language::VI => "Network adapter",
+        Language::CZ => "Síťový adaptér",
         Language::IT => "Adattatore di rete",
         Language::FR => "Carte réseau",
         Language::ES => "Adaptador de red",
@@ -519,6 +538,11 @@ pub fn no_addresses_translation<'a>(language: Language, adapter: &str) -> Text<'
             "No traffic can be observed because the adapter you selected has no active addresses...\n\n\
                                  {network_adapter_translation}: {adapter}\n\n\
                                  If you are sure you are connected to the internet, try choosing a different adapter."
+        ),
+        Language::CZ => format!(
+            "Nelze sledovat žádný provoz, protože vybraný adaptér nemá žádné aktivní adresy....\n\n\
+                                 {network_adapter_translation}: {adapter}\n\n\
+                                 Pokud jste si jisti, že jste připojeni k internetu, zkuste vybrat jiný adaptér.."
         ),
         Language::IT => format!(
             "Non è osservabile alcun traffico perché l'adattatore di rete selezionato non ha indirizzi attivi...\n\n\
@@ -640,6 +664,11 @@ pub fn waiting_translation<'a>(language: Language, adapter: &str) -> Text<'a, St
                                  {network_adapter_translation}: {adapter}\n\n\
                                  Are you sure you are connected to the internet and you have selected the correct adapter?"
         ),
+        Language::CZ => format!(
+            "Zatím nebyl zaznamenán žádný provoz. Čeká se na síťové pakety...\n\n\
+                                 {network_adapter_translation}: {adapter}\n\n\
+                                 Jste si jisti, že jste připojeni k internetu a vybrali jste správný adaptér?"
+        ),
         Language::IT => format!(
             "Nessun tipo di traffico è stato osservato finora. Attendo pacchetti di rete...\n\n\
                                 {network_adapter_translation}: {adapter}\n\n\
@@ -759,6 +788,11 @@ pub fn waiting_translation<'a>(language: Language, adapter: &str) -> Text<'a, St
 //                                  Filtered packets: 0\n\n\
 //                                  Some packets have been intercepted, but still none has been selected according to the filters you specified..."
 //         ),
+//         Language::CZ => format!(
+//             "Celkový počet zachycených paketů: {observed}\n\n\
+//                                  Filtrovaných paketů: 0\n\n\
+//                                  Některé pakety byly zachyceny, ale žádný z nich nebyl vybrán podle nastavených filtrů..."
+//         ),
 //         Language::IT => format!(
 //             "Totale pacchetti intercettati: {observed}\n\n\
 //                                  Pacchetti filtrati: 0\n\n\
@@ -873,6 +907,7 @@ pub fn waiting_translation<'a>(language: Language, adapter: &str) -> Text<'a, St
 // pub fn filtered_packets_translation(language: Language) -> &'static str {
 //     match language {
 //         Language::EN => "Filtered packets",
+//         Language::CZ => "Filtrované pakety",
 //         Language::IT => "Pacchetti filtrati",
 //         Language::FR => "Paquets filtrés",
 //         Language::ES => "Paquetes filtrados",
@@ -901,6 +936,7 @@ pub fn waiting_translation<'a>(language: Language, adapter: &str) -> Text<'a, St
 // pub fn filtered_bytes_translation(language: Language) -> &'static str {
 //     match language {
 //         Language::EN => "Filtered bytes",
+//         Language::CZ => "Filtrované bajty",
 //         Language::IT => "Byte filtrati",
 //         Language::FR => "Octets filtrés",
 //         Language::ES | Language::PT => "Bytes filtrados",
@@ -928,6 +964,7 @@ pub fn waiting_translation<'a>(language: Language, adapter: &str) -> Text<'a, St
 // pub fn of_total_translation(language: Language, percentage: &str) -> String {
 //     match language {
 //         Language::EN => format!("({percentage} of the total)"),
+//         Language::CZ => format!("({percentage} ze všech)"),
 //         Language::IT => format!("({percentage} del totale)"),
 //         Language::FR => format!("({percentage} du total)"),
 //         Language::ES => format!("({percentage} del total)"),
@@ -972,6 +1009,7 @@ pub fn waiting_translation<'a>(language: Language, adapter: &str) -> Text<'a, St
 // pub fn filtered_application_translation(language: Language) -> Text<StyleType> {
 //     Text::new(match language {
 //         Language::EN => "Filtered packets per application protocol:",
+//         Language::CZ => "Filtrované pakety podle aplikačního protokolu:",
 //         Language::IT => "Pacchetti filtrati per protocollo applicativo:",
 //         Language::FR => "Paquets filtrés par protocole applicatif:",
 //         Language::ES => "Paquetes filtrados por protocolo de aplicación:",
@@ -998,6 +1036,8 @@ pub fn waiting_translation<'a>(language: Language, adapter: &str) -> Text<'a, St
 //     Text::new(match language {
 //         Language::EN => "Nothing to show at the moment.\n\
 //                          To add a connection to your favorites, click on the star symbol near the connection.",
+//         Language::CZ => "V tuto chvíli není co zobrazit.\n\
+//                          Chcete-li přidat připojení do oblíbených, klikněte na symbol hvězdičky vedle připojení.",
 //         Language::IT => "Nulla da vedere per il momento.\n\
 //                          Per aggiungere una connessione ai tuoi preferiti, clicca sul simbolo della stella vicino alla connessione.",
 //         Language::FR => "Rien a voir pour le moment.\n\
@@ -1042,6 +1082,10 @@ pub fn error_translation(language: Language, error: &str) -> Text<'_, StyleType>
     Text::new(match language {
         Language::EN => format!(
             "An error occurred! \n\n\
+                                {error}"
+        ),
+        Language::CZ => format!(
+            "Vyskytla se chyba! \n\n\
                                 {error}"
         ),
         Language::IT => format!(
@@ -1138,6 +1182,7 @@ pub fn error_translation(language: Language, error: &str) -> Text<'_, StyleType>
 // pub fn both_translation(language: Language) -> &'static str {
 //     match language {
 //         Language::EN => "both",
+//         Language::CZ => "oba",
 //         Language::IT => "entrambi",
 //         Language::FR => "les deux",
 //         Language::ES | Language::PT => "ambos",
@@ -1164,6 +1209,7 @@ pub fn error_translation(language: Language, error: &str) -> Text<'_, StyleType>
 // pub fn all_protocols_translation(language: Language) -> &'static str {
 //     match language {
 //         Language::EN => "All protocols",
+//         Language::CZ => "Všechny protokoly",
 //         Language::IT => "Tutti i protocolli",
 //         Language::FR => "Tous les protocoles",
 //         Language::ES => "Todos los protocolos",
@@ -1183,6 +1229,7 @@ pub fn error_translation(language: Language, error: &str) -> Text<'_, StyleType>
 // pub fn all_translation(language: Language) -> &'static str {
 //     match language {
 //         Language::EN => "All",
+//         Language::CZ => "Vše",
 //         Language::IT => "Tutti",
 //         Language::FR => "Tous",
 //         Language::ES | Language::PT => "Todos",
@@ -1209,6 +1256,7 @@ pub fn error_translation(language: Language, error: &str) -> Text<'_, StyleType>
 pub fn packets_translation(language: Language) -> &'static str {
     match language {
         Language::EN => "packets",
+        Language::CZ => "pakety",
         Language::IT => "pacchetti",
         Language::FR => "paquets",
         Language::ES => "paquetes",
@@ -1235,6 +1283,7 @@ pub fn packets_translation(language: Language) -> &'static str {
 // pub fn packets_chart_translation(language: Language) -> &'static str {
 //     match language {
 //         Language::EN => "packets per second",
+//         Language::CZ => "paketů za sekundu",
 //         Language::IT => "pacchetti al secondo",
 //         Language::FR => "paquets par seconde",
 //         Language::ES => "paquetes por segundo",
@@ -1272,6 +1321,7 @@ pub fn bytes_translation(language: Language) -> &'static str {
         | Language::ID
         | Language::NL
         | Language::DE => "bytes",
+        Language::CZ => "bajtů",
         Language::FR => "octets",
         Language::PL => "bajty",
         Language::UK => "байти",
@@ -1290,6 +1340,7 @@ pub fn bytes_translation(language: Language) -> &'static str {
 // pub fn bytes_chart_translation(language: Language) -> &'static str {
 //     match language {
 //         Language::EN => "bytes per second",
+//         Language::CZ => "bajtů za sekundu",
 //         Language::IT => "byte al secondo",
 //         Language::FR => "octets par seconde",
 //         Language::ES | Language::PT => "bytes por segundo",
@@ -1317,6 +1368,7 @@ pub fn bytes_translation(language: Language) -> &'static str {
 // pub fn recent_report_translation(language: Language) -> &'static str {
 //     match language {
 //         Language::EN => "most recent",
+//         Language::CZ => "nejnovější",
 //         Language::IT => "più recenti",
 //         Language::FR => "la plus récente",
 //         Language::ES => "más reciente",
@@ -1344,6 +1396,7 @@ pub fn bytes_translation(language: Language) -> &'static str {
 // pub fn packets_report_translation(language: Language) -> &'static str {
 //     match language {
 //         Language::EN => "most packets",
+//         Language::CZ => "většina paketů",
 //         Language::IT => "più pacchetti",
 //         Language::FR => "le plus de paquets",
 //         Language::ES => "mayoría de los paquetes",
@@ -1371,6 +1424,7 @@ pub fn bytes_translation(language: Language) -> &'static str {
 // pub fn bytes_report_translation(language: Language) -> &'static str {
 //     match language {
 //         Language::EN => "most bytes",
+//         Language::CZ => "většina bajtů",
 //         Language::IT => "più byte",
 //         Language::FR => "le plus de données",
 //         Language::ES => "mayoría de los bytes",
@@ -1397,6 +1451,7 @@ pub fn bytes_translation(language: Language) -> &'static str {
 // pub fn favorite_report_translation(language: Language) -> &'static str {
 //     match language {
 //         Language::EN => "favorites",
+//         Language::CZ => "oblíbené",
 //         Language::IT => "preferiti",
 //         Language::FR => "favoris",
 //         Language::ES | Language::PT => "favoritos",
@@ -1421,6 +1476,7 @@ pub fn bytes_translation(language: Language) -> &'static str {
 pub fn notifications_title_translation<'a>(language: Language) -> Text<'a, StyleType> {
     Text::new(match language {
         Language::EN => "Customize your notifications",
+        Language::CZ => "Přizpůsobte si oznámení",
         Language::IT => "Personalizza le tue notifiche",
         Language::FR => "Personnalisez vos notifications",
         Language::ES => "Personaliza tus notificaciones",
@@ -1449,6 +1505,7 @@ pub fn notifications_title_translation<'a>(language: Language) -> Text<'a, Style
 pub fn appearance_title_translation<'a>(language: Language) -> Text<'a, StyleType> {
     Text::new(match language {
         Language::EN => "Choose your favorite theme",
+        Language::CZ => "Výběr oblíbeného tématu",
         Language::IT => "Scegli il tuo tema preferito",
         Language::FR => "Sélectionnez votre thème préféré",
         Language::ES => "Elige tu tema favorito",
@@ -1477,6 +1534,7 @@ pub fn appearance_title_translation<'a>(language: Language) -> Text<'a, StyleTyp
 pub fn active_filters_translation(language: Language) -> &'static str {
     match language {
         Language::EN => "Active filters",
+        Language::CZ => "Aktivní filtry",
         Language::IT => "Filtri attivi",
         Language::FR => "Filtres actifs",
         Language::ES => "Filtros activos",
@@ -1505,6 +1563,7 @@ pub fn active_filters_translation(language: Language) -> &'static str {
 pub fn none_translation(language: Language) -> &'static str {
     match language {
         Language::EN => "none",
+        Language::CZ => "žádný",
         Language::IT => "nessuno",
         Language::FR => "aucun",
         Language::ES => "ninguno",
@@ -1533,6 +1592,7 @@ pub fn none_translation(language: Language) -> &'static str {
 // pub fn yeti_night_translation(language: Language) -> &'static str {
 //     match language {
 //         Language::EN => "Sniffnet's original dark theme",
+//         Language::CZ => "Původní tmavý motiv Sniffnetu",
 //         Language::IT => "Il tema scuro originale di Sniffnet",
 //         Language::FR => "Thème original sombre de Sniffnet",
 //         Language::ES => "Tema oscuro original de Sniffnet",
@@ -1561,6 +1621,7 @@ pub fn none_translation(language: Language) -> &'static str {
 // pub fn yeti_day_translation(language: Language) -> &'static str {
 //     match language {
 //         Language::EN => "Sniffnet's original light theme",
+//         Language::CZ => "Původní světlý motiv Sniffnetu",
 //         Language::IT => "Il tema chiaro originale di Sniffnet",
 //         Language::FR => "Thème original clair de Sniffnet",
 //         Language::ES | Language::PT => "Tema claro original de Sniffnet",
@@ -1588,6 +1649,7 @@ pub fn none_translation(language: Language) -> &'static str {
 // pub fn deep_sea_translation(language: Language) -> &'static str {
 //     match language {
 //         Language::EN => "To dive into network traffic",
+//         Language::CZ => "Ponořit se do síťového provozu",
 //         Language::IT => "Per immergersi nel traffico di rete",
 //         Language::FR => "Pour plonger dans votre trafic réseau",
 //         Language::ES => "Para sumergirse en el tráfico de la red",
@@ -1616,6 +1678,7 @@ pub fn none_translation(language: Language) -> &'static str {
 // pub fn mon_amour_translation(language: Language) -> &'static str {
 //     match language {
 //         Language::EN => "Lovely theme made for dreamers",
+//         Language::CZ => "Krásné téma vytvořené pro snílky",
 //         Language::IT => "Tema incantevole fatto per i sognatori",
 //         Language::FR => "Thème romantique fait pour les rêveurs",
 //         Language::ES => "Tema encantador hecho para soñadores",
@@ -1644,6 +1707,7 @@ pub fn none_translation(language: Language) -> &'static str {
 pub fn incoming_translation(language: Language) -> &'static str {
     match language {
         Language::EN => "Incoming",
+        Language::CZ => "Příchozí",
         Language::IT => "In entrata",
         Language::FR => "Entrant",
         Language::ES => "Entrante",
@@ -1671,6 +1735,7 @@ pub fn incoming_translation(language: Language) -> &'static str {
 pub fn outgoing_translation(language: Language) -> &'static str {
     match language {
         Language::EN => "Outgoing",
+        Language::CZ => "Odchozí",
         Language::IT => "In uscita",
         Language::FR => "Sortant",
         Language::ES => "Saliente",
@@ -1698,6 +1763,7 @@ pub fn outgoing_translation(language: Language) -> &'static str {
 pub fn notifications_translation(language: Language) -> &'static str {
     match language {
         Language::EN | Language::FR => "Notifications",
+        Language::CZ => "Oznámení",
         Language::IT => "Notifiche",
         Language::ES => "Notificaciones",
         Language::PL => "Powiadomienia",
@@ -1723,6 +1789,7 @@ pub fn notifications_translation(language: Language) -> &'static str {
 pub fn style_translation(language: Language) -> &'static str {
     match language {
         Language::EN | Language::FR => "Style",
+        Language::CZ => "Styl",
         Language::IT => "Stile",
         Language::ES | Language::PT => "Estilo",
         Language::PL => "Styl",
@@ -1746,6 +1813,7 @@ pub fn style_translation(language: Language) -> &'static str {
 pub fn language_translation(language: Language) -> &'static str {
     match language {
         Language::EN => "Language",
+        Language::CZ => "Jazyk",
         Language::IT => "Lingua",
         Language::FR => "Langue",
         Language::ES => "Idioma",
@@ -1774,6 +1842,7 @@ pub fn language_translation(language: Language) -> &'static str {
 pub fn overview_translation(language: Language) -> &'static str {
     match language {
         Language::EN => "Overview",
+        Language::CZ => "Přehled",
         Language::IT => "Panoramica",
         Language::FR => "Résumé",
         Language::ES => "Resumen",
@@ -1802,6 +1871,7 @@ pub fn overview_translation(language: Language) -> &'static str {
 // pub fn packets_threshold_translation(language: Language) -> &'static str {
 //     match language {
 //         Language::EN => "Notify me when a packets threshold is exceeded",
+//         Language::CZ => "Upozornit při překročení prahové hodnoty paketů",
 //         Language::IT => "Notificami quando una soglia di pacchetti è superata",
 //         Language::FR => "Me notifier lorsqu'un seuil de paquet est atteint",
 //         Language::ES => "Notificarme cuando se supere un límite de paquetes",
@@ -1830,6 +1900,7 @@ pub fn overview_translation(language: Language) -> &'static str {
 // pub fn bytes_threshold_translation(language: Language) -> &'static str {
 //     match language {
 //         Language::EN => "Notify me when a bytes threshold is exceeded",
+//         Language::CZ => "Upozornit při překročení prahové hodnoty bajtů",
 //         Language::IT => "Notificami quando una soglia di byte è superata",
 //         Language::FR => "Me notifier lorsqu'un seuil de donnée est atteint",
 //         Language::ES => "Notificarme cuando se exceda un límite de bytes",
@@ -1858,6 +1929,7 @@ pub fn overview_translation(language: Language) -> &'static str {
 pub fn per_second_translation(language: Language) -> &'static str {
     match language {
         Language::EN => "(per second)",
+        Language::CZ => "(za sekundu)",
         Language::IT => "(al secondo)",
         Language::FR => "(par seconde)",
         Language::ES | Language::PT => "(por segundo)",
@@ -1883,6 +1955,7 @@ pub fn per_second_translation(language: Language) -> &'static str {
 // pub fn specify_multiples_translation(language: Language) -> &'static str {
 //     match language {
 //         Language::EN => "you can also specify 'K', 'M' and 'G'",
+//         Language::CZ => "je možno specifikovat 'K', 'M' a 'G'",
 //         Language::IT => "puoi anche specificare 'K', 'M' e 'G'",
 //         Language::FR => "vous pouvez également spécifier 'K', 'M' et 'G'",
 //         Language::ES => "también puede especificar 'K', 'M' y 'G'",
@@ -1911,6 +1984,7 @@ pub fn per_second_translation(language: Language) -> &'static str {
 // pub fn favorite_notification_translation(language: Language) -> &'static str {
 //     match language {
 //         Language::EN => "Notify me when new data are exchanged from my favorites",
+//         Language::CZ => "Upozornit v případě že budou vyměněna nová data z mých oblíbených položek",
 //         Language::IT => "Notificami quando nuovi dati sono scambiati dai miei preferiti",
 //         Language::FR => "Notifiez-moi lorsque des données sont échangées depuis mes favoris",
 //         Language::ES => "Notificarme cuando se intercambien nuevos datos de mis favoritos",
@@ -1941,6 +2015,7 @@ pub fn per_second_translation(language: Language) -> &'static str {
 pub fn threshold_translation(language: Language) -> &'static str {
     match language {
         Language::EN => "Threshold",
+        Language::CZ => "Prahová hodnota",
         Language::IT => "Soglia",
         Language::FR => "Seuil",
         Language::ES => "Límite",
@@ -1969,6 +2044,7 @@ pub fn threshold_translation(language: Language) -> &'static str {
 pub fn volume_translation(language: Language) -> &'static str {
     match language {
         Language::EN | Language::IT | Language::FR | Language::PT | Language::NL => "Volume",
+        Language::CZ => "Hlasitost",
         Language::ES => "Volumen",
         Language::PL => "Głośność",
         Language::DE => "Lautstärke",
@@ -1992,6 +2068,7 @@ pub fn volume_translation(language: Language) -> &'static str {
 pub fn sound_translation(language: Language) -> &'static str {
     match language {
         Language::EN => "Sound",
+        Language::CZ => "Zvuk",
         Language::IT => "Suono",
         Language::FR => "Son",
         Language::ES => "Sonido",
@@ -2018,6 +2095,7 @@ pub fn sound_translation(language: Language) -> &'static str {
 pub fn bytes_exceeded_translation(language: Language) -> &'static str {
     match language {
         Language::EN => "Bytes threshold exceeded",
+        Language::CZ => "Překročení prahové hodnoty bajtů",
         Language::IT => "Soglia di Byte superata",
         Language::FR => "Seuil de donnée atteint",
         Language::ES => "¡Límite de bytes superado",
@@ -2046,6 +2124,7 @@ pub fn bytes_exceeded_translation(language: Language) -> &'static str {
 // pub fn bytes_exceeded_value_translation(language: Language, value: &str) -> String {
 //     match language {
 //         Language::EN => format!("{value} have been exchanged"),
+//         Language::CZ => format!("{value} byly vyměněny"),
 //         Language::IT => format!("{value} sono stati scambiati"),
 //         Language::FR => format!("{value} ont été échangé"),
 //         Language::ES => format!("{value} han sido intercambiado/s"),
@@ -2074,6 +2153,7 @@ pub fn bytes_exceeded_translation(language: Language) -> &'static str {
 pub fn packets_exceeded_translation(language: Language) -> &'static str {
     match language {
         Language::EN => "Packets threshold exceeded",
+        Language::CZ => "Překročení prahové hodnoty paketů",
         Language::IT => "Soglia di pacchetti superata",
         Language::FR => "Le seuil de paquet a été atteint",
         Language::ES => "¡Se ha superado el límite de paquetes",
@@ -2104,6 +2184,10 @@ pub fn packets_exceeded_translation(language: Language) -> &'static str {
 //         Language::EN => match value {
 //             1 => "1 packet has been exchanged".to_owned(),
 //             npackets => format!("{npackets} packets have been exchanged"),
+//         },
+//         Language::CZ => match value {
+//             1 => "Byl vyměněn 1 paket".to_owned(),
+//             npackets => format!("{npackets} pakety byly vyměněny"),
 //         },
 //         Language::IT => match value {
 //             1 => "1 pacchetto è stato scambiato".to_owned(),
@@ -2154,6 +2238,7 @@ pub fn packets_exceeded_translation(language: Language) -> &'static str {
 pub fn favorite_transmitted_translation(language: Language) -> &'static str {
     match language {
         Language::EN => "New data exchanged from favorites",
+        Language::CZ => "Nová data vyměněná z oblíbených položek",
         Language::IT => "Nuovi dati scambiati dai preferiti",
         Language::FR => "Nouvel échange de donnée depuis un favori",
         Language::ES => "¡Nuevos datos intercambiados de favoritos",
@@ -2186,6 +2271,11 @@ pub fn no_notifications_set_translation<'a>(language: Language) -> Text<'a, Styl
             "You haven't enabled notifications yet!\n\n\
                                  After enabling them, this page will display a log of your notifications\n\n\
                                  You can enable notifications from settings:"
+        }
+        Language::CZ => {
+            "Ještě nemáte povolena oznámení!\n\n\
+                                 Po jejich povolení se na této stránce zobrazí protokol oznámení.\n\n\
+                                 Oznámení můžete povolit v nastavení:"
         }
         Language::IT => {
             "Non hai ancora abilitato le notifiche!\n\n\
@@ -2304,6 +2394,10 @@ pub fn no_notifications_received_translation<'a>(language: Language) -> Text<'a,
             "Nothing to see at the moment...\n\n\
                                  When you receive a notification, it will be displayed here"
         }
+        Language::CZ => {
+            "Momentálně není nic k vidění...\n\n\
+                                 Jakmile obdržíte oznámení, zobrazí se zde."
+        }
         Language::IT => {
             "Nulla da vedere al momento...\n\n\
                                 Quando riceverai una notifica, essa verrà mostrata qui"
@@ -2398,6 +2492,7 @@ pub fn no_notifications_received_translation<'a>(language: Language) -> Text<'a,
 pub fn only_last_30_translation(language: Language) -> &'static str {
     match language {
         Language::EN => "Only the last 30 notifications are displayed",
+        Language::CZ => "Zobrazí se pouze posledních 30 oznámení",
         Language::IT => "Solo le ultime 30 notifiche sono mostrate",
         Language::FR => "Seulement les 30 dernières notifications sont affichées",
         Language::ES => "Sólo se muestran las últimas 30 notificaciones",
