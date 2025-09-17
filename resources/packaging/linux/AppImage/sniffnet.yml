@@ -1,9 +1,9 @@
 app: Sniffnet
 ingredients:
-  dist: trixie
+  dist: buster
   packages:
-    - libpcap0.8t64
+    - libpcap0.8
   sources:
-    - deb https://deb.debian.org/debian stable main
+    - deb https://archive.debian.org/debian buster main
   debs:
     - /target/REPLACE_TAG
