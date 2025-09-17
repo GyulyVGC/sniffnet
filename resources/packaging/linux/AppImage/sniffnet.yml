@@ -1,8 +1,8 @@
 app: Sniffnet
 ingredients:
-  dist: bookworm
+  dist: trixie
   packages:
-    - libpcap0.8
+    - libpcap0.8t64
   sources:
     - deb https://deb.debian.org/debian stable main
   debs:
