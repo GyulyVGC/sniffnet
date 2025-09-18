@@ -3,6 +3,9 @@
 All Sniffnet releases with the relative changes are documented in this file.
 
 ## [UNRELEASED]
+- Fix AppImage error with `libpcap` dependency ([#971](https://github.com/GyulyVGC/sniffnet/pull/971))
+
+## [1.4.1] - 2025-09-13
 - Enhanced traffic filtering capabilities: Berkeley Packet Filter ([#937](https://github.com/GyulyVGC/sniffnet/pull/937) — fixes [#810](https://github.com/GyulyVGC/sniffnet/issues/810))
 - Added support for `Linux SLL` link type, enabling to monitor the `any` interface on Linux ([#945](https://github.com/GyulyVGC/sniffnet/pull/945))
 - Added _bits_ data representation ([#936](https://github.com/GyulyVGC/sniffnet/pull/936) — fixes [#506](https://github.com/GyulyVGC/sniffnet/issues/506))
@@ -20,6 +23,7 @@ All Sniffnet releases with the relative changes are documented in this file.
   - Romanian ([#890](https://github.com/GyulyVGC/sniffnet/pull/890))
   - Traditional Chinese (Taiwan) ([#904](https://github.com/GyulyVGC/sniffnet/pull/904))
   - Indonesian ([#909](https://github.com/GyulyVGC/sniffnet/pull/909))
+- Fix live chart not being updated when packets aren't captured on Linux ([#957](https://github.com/GyulyVGC/sniffnet/pull/957) — fixes [#951](https://github.com/GyulyVGC/sniffnet/issues/951))
 - Fix support for IPinfo's databases (the most recent version renamed the `country` field to `country_code`)
 
 ## [1.4.0] - 2025-06-27
