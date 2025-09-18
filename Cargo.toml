@@ -57,6 +57,7 @@ splines = "5.0.0"
 clap = { version = "4.5.47", features = ["derive"] }
 tokio = { version = "1.47.1", features = ["macros"] }
 async-channel = "2.5.0"
+semver = "1.0.27"
 
 [target.'cfg(windows)'.dependencies]
 gag = "1.0.0"

@@ -3,6 +3,7 @@
 All Sniffnet releases with the relative changes are documented in this file.
 
 ## [UNRELEASED]
+- Improve update checks using `semver` ([#891](https://github.com/GyulyVGC/sniffnet/pull/891))
 - Fix AppImage error with `libpcap` dependency ([#971](https://github.com/GyulyVGC/sniffnet/pull/971))
 
 ## [1.4.1] - 2025-09-13
