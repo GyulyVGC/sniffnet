@@ -2,6 +2,9 @@
 
 All Sniffnet releases with the relative changes are documented in this file.
 
+## [UNRELEASED]
+- Fix AppImage error with `libpcap` dependency ([#971](https://github.com/GyulyVGC/sniffnet/pull/971))
+
 ## [1.4.1] - 2025-09-13
 - Enhanced traffic filtering capabilities: Berkeley Packet Filter ([#937](https://github.com/GyulyVGC/sniffnet/pull/937) — fixes [#810](https://github.com/GyulyVGC/sniffnet/issues/810))
 - Added support for `Linux SLL` link type, enabling to monitor the `any` interface on Linux ([#945](https://github.com/GyulyVGC/sniffnet/pull/945))
