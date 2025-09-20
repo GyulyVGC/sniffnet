@@ -1,15 +1,16 @@
 //! GUI bottom footer
 
+use iced::widget::horizontal_space;
 use iced::widget::text::LineHeight;
 use iced::widget::tooltip::Position;
 use iced::widget::{Column, Container, Row, Text, Tooltip, button, rich_text, span};
-use iced::widget::{Space, horizontal_space};
 use iced::{Alignment, Font, Length, Padding};
 
 use crate::gui::components::button::row_open_link_tooltip;
 use crate::gui::styles::button::ButtonType;
 use crate::gui::styles::container::ContainerType;
-use crate::gui::styles::style_constants::{FONT_SIZE_FOOTER, FONT_SIZE_SUBTITLE};
+use crate::gui::styles::style_constants::FONT_SIZE_FOOTER;
+use crate::gui::styles::style_constants::FONT_SIZE_SUBTITLE;
 use crate::gui::styles::text::TextType;
 use crate::gui::styles::types::gradient_type::GradientType;
 use crate::gui::styles::types::style_type::StyleType;
@@ -19,6 +20,7 @@ use crate::utils::formatted_strings::APP_VERSION;
 use crate::utils::types::icon::Icon;
 use crate::utils::types::web_page::WebPage;
 use crate::{Language, SNIFFNET_TITLECASE};
+use iced::widget::Space;
 
 pub fn footer<'a>(
     thumbnail: bool,
@@ -39,7 +41,9 @@ pub fn footer<'a>(
         font_footer,
         newer_release_available,
         &dots_pulse.0,
-    );
+    )
+    .height(Length::Fill)
+    .width(Length::Fill);
 
     let heart_size = match dots_pulse.1 {
         1 => 17.0,
@@ -203,22 +207,18 @@ fn get_button_sponsor<'a>(font: Font) -> Tooltip<'a, Message, StyleType> {
     .class(ContainerType::Tooltip)
 }
 
-fn get_release_details<'a>(
+pub fn get_release_details<'a>(
     language: Language,
     font: Font,
     font_footer: Font,
     newer_release_available: Option<bool>,
     dots: &str,
 ) -> Row<'a, Message, StyleType> {
-    let mut ret_val = Row::new()
-        .align_y(Alignment::Center)
-        .height(Length::Fill)
-        .width(Length::Fill)
-        .push(
-            Text::new(format!("{SNIFFNET_TITLECASE} {APP_VERSION}"))
-                .size(FONT_SIZE_FOOTER)
-                .font(font_footer),
-        );
+    let mut ret_val = Row::new().align_y(Alignment::Center).push(
+        Text::new(format!("{SNIFFNET_TITLECASE} {APP_VERSION}"))
+            .size(FONT_SIZE_FOOTER)
+            .font(font_footer),
+    );
     if let Some(boolean_response) = newer_release_available {
         if boolean_response {
             // a newer release is available on GitHub

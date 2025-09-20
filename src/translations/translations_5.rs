@@ -19,3 +19,11 @@ pub fn traffic_source_translation(language: Language) -> &'static str {
         _ => "Traffic source",
     }
 }
+
+pub fn expanded_view_translation(language: Language) -> &'static str {
+    match language {
+        Language::EN => "Expanded view",
+        Language::IT => "Vista estesa",
+        _ => "Expanded view",
+    }
+}
