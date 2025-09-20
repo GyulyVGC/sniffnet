@@ -42,8 +42,8 @@ pub fn footer<'a>(
         newer_release_available,
         &dots_pulse.0,
     )
-    height(Length::Fill)
-            .width(Length::Fill);
+    .height(Length::Fill)
+    .width(Length::Fill);
 
     let heart_size = match dots_pulse.1 {
         1 => 17.0,

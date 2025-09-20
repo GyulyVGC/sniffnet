@@ -107,6 +107,7 @@ pub fn header(sniffer: &Sniffer) -> Container<'_, Message, StyleType> {
                 font,
                 font_update_notification,
                 sniffer.newer_release_available,
+                &sniffer.dots_pulse.0,
             ));
         }
         row.push(get_button_settings(
