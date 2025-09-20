@@ -23,7 +23,7 @@ use crate::translations::translations_3::{
     mmdb_files_translation, params_not_editable_translation, zoom_translation,
 };
 use crate::translations::translations_4::share_feedback_translation;
-use crate::translations::translations_5::toggle_focus_mode_translation;
+use crate::translations::translations_5::expanded_view_translation;
 use crate::utils::formatted_strings::get_path_termination_string;
 use crate::utils::types::file_info::FileInfo;
 use crate::utils::types::icon::Icon;
@@ -112,7 +112,7 @@ fn ui_settings<'a>(
         .push(Rule::vertical(25))
         .push(scale_factor_slider(language, font, scale_factor))
         .push(Rule::vertical(25))
-        .push(toggle_focus_mode_column(language, font, focus_mode))
+        .push(expanded_view_column(language, font, focus_mode))
 }
 
 fn language_picklist<'a>(language: Language, font: Font) -> Container<'a, Message, StyleType> {
@@ -207,7 +207,7 @@ fn scale_factor_slider<'a>(
     .align_y(Alignment::Center)
 }
 
-fn toggle_focus_mode_column<'a>(
+fn expanded_view_column<'a>(
     language: Language,
     font: Font,
     is_focus_mode: bool,
@@ -219,7 +219,7 @@ fn toggle_focus_mode_column<'a>(
         .size(23)
         .font(font);
 
-    let toggler_label = Text::new(toggle_focus_mode_translation(language))
+    let toggler_label = Text::new(expanded_view_translation(language))
         .class(TextType::Subtitle)
         .size(FONT_SIZE_SUBTITLE)
         .font(font);

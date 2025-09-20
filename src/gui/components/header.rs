@@ -5,7 +5,7 @@ use iced::widget::tooltip::Position;
 use iced::widget::{Container, Row, Space, Text, Tooltip, button, horizontal_space};
 use iced::{Alignment, Element, Font, Length};
 
-use crate::gui::components::shared::get_release_details;
+use crate::gui::components::footer::get_release_details;
 use crate::gui::components::tab::notifications_badge;
 use crate::gui::pages::types::settings_page::SettingsPage;
 use crate::gui::sniffer::Sniffer;

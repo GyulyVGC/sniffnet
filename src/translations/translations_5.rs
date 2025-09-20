@@ -20,9 +20,10 @@ pub fn traffic_source_translation(language: Language) -> &'static str {
     }
 }
 
-pub fn toggle_focus_mode_translation(language: Language) -> &'static str {
+pub fn expanded_view_translation(language: Language) -> &'static str {
     match language {
-        Language::EN => "Focus Mode",
-        _ => "Focus Mode",
+        Language::EN => "Expanded view",
+        Language::IT => "Vista estesa",
+        _ => "Expanded view",
     }
 }

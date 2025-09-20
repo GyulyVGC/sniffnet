@@ -6,17 +6,21 @@ use iced::widget::tooltip::Position;
 use iced::widget::{Column, Container, Row, Text, Tooltip, button, rich_text, span};
 use iced::{Alignment, Font, Length, Padding};
 
-use crate::Language;
 use crate::gui::components::button::row_open_link_tooltip;
-use crate::gui::components::shared::get_release_details;
+use crate::gui::styles::button::ButtonType;
 use crate::gui::styles::container::ContainerType;
 use crate::gui::styles::style_constants::FONT_SIZE_FOOTER;
+use crate::gui::styles::style_constants::FONT_SIZE_SUBTITLE;
 use crate::gui::styles::text::TextType;
 use crate::gui::styles::types::gradient_type::GradientType;
 use crate::gui::styles::types::style_type::StyleType;
 use crate::gui::types::message::Message;
+use crate::translations::translations_2::new_version_available_translation;
+use crate::utils::formatted_strings::APP_VERSION;
 use crate::utils::types::icon::Icon;
 use crate::utils::types::web_page::WebPage;
+use crate::{Language, SNIFFNET_TITLECASE};
+use iced::widget::Space;
 
 pub fn footer<'a>(
     thumbnail: bool,
@@ -196,6 +200,50 @@ fn get_button_sponsor<'a>(font: Font) -> Tooltip<'a, Message, StyleType> {
     )
     .gap(10)
     .class(ContainerType::Tooltip)
+}
+
+pub fn get_release_details<'a>(
+    language: Language,
+    font: Font,
+    font_footer: Font,
+    newer_release_available: Option<bool>,
+) -> Row<'a, Message, StyleType> {
+    let mut ret_val = Row::new().align_y(Alignment::Center).push(
+        Text::new(format!("{SNIFFNET_TITLECASE} {APP_VERSION}"))
+            .size(FONT_SIZE_FOOTER)
+            .font(font_footer),
+    );
+    if let Some(boolean_response) = newer_release_available {
+        if boolean_response {
+            // a newer release is available on GitHub
+            let button = button(
+                Icon::Update
+                    .to_text()
+                    .class(TextType::Danger)
+                    .size(18)
+                    .align_x(Alignment::Center)
+                    .align_y(Alignment::Center)
+                    .line_height(LineHeight::Relative(0.8)),
+            )
+            .padding(0)
+            .height(35)
+            .width(35)
+            .class(ButtonType::Alert)
+            .on_press(Message::OpenWebPage(WebPage::WebsiteDownload));
+            let tooltip = Tooltip::new(
+                button,
+                row_open_link_tooltip(new_version_available_translation(language), font),
+                Position::Top,
+            )
+            .gap(7.5)
+            .class(ContainerType::Tooltip);
+            ret_val = ret_val.push(Space::with_width(10)).push(tooltip);
+        } else {
+            // this is the latest release
+            ret_val = ret_val.push(Text::new(" ✔").size(FONT_SIZE_SUBTITLE).font(font_footer));
+        }
+    }
+    ret_val
 }
 
 fn thumbnail_footer<'a>() -> Container<'a, Message, StyleType> {
