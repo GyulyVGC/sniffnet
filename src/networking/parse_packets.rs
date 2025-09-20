@@ -11,7 +11,7 @@ use crate::networking::manage_packets::{
 use crate::networking::types::address_port_pair::AddressPortPair;
 use crate::networking::types::arp_type::ArpType;
 use crate::networking::types::bogon::is_bogon;
-use crate::networking::types::capture_context::{CaptureContext, CaptureSource};
+use crate::networking::types::capture_context::{CaptureContext, CaptureSource, CaptureType};
 use crate::networking::types::data_info::DataInfo;
 use crate::networking::types::data_info_host::DataInfoHost;
 use crate::networking::types::host::{Host, HostMessage};
@@ -26,7 +26,7 @@ use crate::utils::types::timestamp::Timestamp;
 use async_channel::Sender;
 use dns_lookup::lookup_addr;
 use etherparse::{EtherType, LaxPacketHeaders};
-use pcap::{Address, Packet};
+use pcap::{Address, Packet, PacketHeader};
 use std::collections::HashMap;
 use std::net::IpAddr;
 use std::sync::{Arc, Mutex};
@@ -42,7 +42,7 @@ pub fn parse_packets(
     tx: &Sender<BackendTrafficMessage>,
 ) {
     let my_link_type = capture_context.my_link_type();
-    let (mut cap, mut savefile) = capture_context.consume();
+    let (cap, mut savefile) = capture_context.consume();
 
     let mut info_traffic_msg = InfoTraffic::default();
     let resolutions_state = Arc::new(Mutex::new(AddressesResolutionState::default()));
@@ -52,8 +52,16 @@ pub fn parse_packets(
     // instant of the first parsed packet plus multiples of 1 second (only used in live captures)
     let mut first_packet_ticks = None;
 
+    let (pcap_tx, pcap_rx) = std::sync::mpsc::sync_channel(10_000);
+    let _ = thread::Builder::new()
+        .name("thread_packet_stream".to_string())
+        .spawn(move || packet_stream(cap, &pcap_tx))
+        .log_err(location!());
+
     loop {
-        let packet_res = cap.next_packet();
+        let (packet_res, cap_stats) = pcap_rx
+            .recv_timeout(Duration::from_millis(150))
+            .unwrap_or((Err(pcap::Error::TimeoutExpired), None));
 
         if tx.is_closed() {
             return;
@@ -93,7 +101,7 @@ pub fn parse_packets(
                 }
             }
             Ok(packet) => {
-                if let Some(headers) = get_sniffable_headers(&packet, my_link_type) {
+                if let Some(headers) = get_sniffable_headers(&packet.data, my_link_type) {
                     #[allow(clippy::useless_conversion)]
                     let secs = i64::from(packet.header.ts.tv_sec);
                     #[allow(clippy::useless_conversion)]
@@ -135,7 +143,10 @@ pub fn parse_packets(
 
                     // save this packet to PCAP file
                     if let Some(file) = savefile.as_mut() {
-                        file.write(&packet);
+                        file.write(&Packet {
+                            header: &packet.header,
+                            data: &packet.data,
+                        });
                     }
                     // update the map
                     let (traffic_direction, service) = modify_or_insert_in_map(
@@ -267,7 +278,7 @@ pub fn parse_packets(
                         });
 
                     // update dropped packets number
-                    if let Ok(stats) = cap.stats() {
+                    if let Some(stats) = cap_stats {
                         info_traffic_msg.dropped_packets = stats.dropped;
                     }
                 }
@@ -276,10 +287,7 @@ pub fn parse_packets(
     }
 }
 
-fn get_sniffable_headers<'a>(
-    packet: &'a Packet,
-    my_link_type: MyLinkType,
-) -> Option<LaxPacketHeaders<'a>> {
+fn get_sniffable_headers(packet: &[u8], my_link_type: MyLinkType) -> Option<LaxPacketHeaders<'_>> {
     match my_link_type {
         MyLinkType::Ethernet(_) | MyLinkType::Unsupported(_) | MyLinkType::NotYetAssigned => {
             LaxPacketHeaders::from_ethernet(packet).ok()
@@ -473,4 +481,25 @@ fn maybe_send_tick_run_offline(
             ));
         }
     }
+}
+
+fn packet_stream(
+    mut cap: CaptureType,
+    tx: &std::sync::mpsc::SyncSender<(Result<PacketOwned, pcap::Error>, Option<pcap::Stat>)>,
+) {
+    loop {
+        let packet_res = cap.next_packet();
+        let packet_owned = packet_res.map(|p| PacketOwned {
+            header: *p.header,
+            data: p.data.into(),
+        });
+        if tx.send((packet_owned, cap.stats().ok())).is_err() {
+            return;
+        }
+    }
+}
+
+struct PacketOwned {
+    pub header: PacketHeader,
+    pub data: Box<[u8]>,
 }

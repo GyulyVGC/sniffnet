@@ -666,7 +666,8 @@
       "avatar_url": "https://avatars.githubusercontent.com/u/72492241?v=4",
       "profile": "https://github.com/aguacero7",
       "contributions": [
-        "translation"
+        "translation",
+        "code"
       ]
     },
     {
@@ -775,6 +776,24 @@
       "profile": "https://github.com/mmseng",
       "contributions": [
         "financial"
+      ]
+    },
+    {
+      "login": "MelcuGoa",
+      "name": "MelcuGoa",
+      "avatar_url": "https://avatars.githubusercontent.com/u/80478973?v=4",
+      "profile": "https://github.com/MelcuGoa",
+      "contributions": [
+        "translation"
+      ]
+    },
+    {
+      "login": "paco1127",
+      "name": "Paco",
+      "avatar_url": "https://avatars.githubusercontent.com/u/52984682?v=4",
+      "profile": "https://github.com/paco1127",
+      "contributions": [
+        "translation"
       ]
     }
   ],

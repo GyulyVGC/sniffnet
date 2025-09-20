@@ -1,6 +1,6 @@
 [package]
 name = "sniffnet"
-version = "1.4.0"
+version = "1.4.1"
 authors = ["Giuliano Bellini <gyulyvgc99@gmail.com>"]
 edition = "2024"
 description = "Application to comfortably monitor your network traffic"
@@ -39,7 +39,7 @@ strip = true
 [dependencies]
 pcap = "2.3.0"
 etherparse = "0.19.0"
-chrono = { version = "0.4.41", default-features = false, features = ["clock"] }
+chrono = { version = "0.4.42", default-features = false, features = ["clock"] }
 plotters = { version = "0.3.7", default-features = false, features = ["area_series", "line_series"] }
 iced = { version = "0.13.1", features = ["tokio", "svg", "advanced", "lazy", "image"] }
 plotters-iced = "0.11.0"
@@ -49,14 +49,15 @@ serde = { version = "1.0.219", default-features = false, features = ["derive"] }
 rodio = { version = "0.21.1", default-features = false, features = ["mp3", "playback"] }
 dns-lookup = "3.0.0"
 toml = "0.9.5"
-ctrlc = { version = "3.4.7", features = ["termination"] }
+ctrlc = { version = "3.5.0", features = ["termination"] }
 rfd = "0.15.4"
 phf = "0.13.1"
 phf_shared = "0.13.1"
 splines = "5.0.0"
-clap = { version = "4.5.46", features = ["derive"] }
+clap = { version = "4.5.47", features = ["derive"] }
 tokio = { version = "1.47.1", features = ["macros"] }
 async-channel = "2.5.0"
+semver = "1.0.27"
 
 [target.'cfg(windows)'.dependencies]
 gag = "1.0.0"

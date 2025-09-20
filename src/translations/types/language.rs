@@ -130,6 +130,9 @@ impl Language {
                 | Language::JA
                 | Language::FR
                 | Language::EL
+                | Language::RO
+                | Language::ZH_TW
+                | Language::ID
         )
     }
 }

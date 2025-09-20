@@ -29,18 +29,23 @@ pub fn footer<'a>(
     font: Font,
     font_footer: Font,
     newer_release_available: Option<bool>,
-    pulse: u8,
+    dots_pulse: &(String, u8),
 ) -> Container<'a, Message, StyleType> {
     if thumbnail {
         return thumbnail_footer();
     }
 
-    let release_details_row =
-        get_release_details(language, font, font_footer, newer_release_available)
-            .height(Length::Fill)
+    let release_details_row = get_release_details(
+        language,
+        font,
+        font_footer,
+        newer_release_available,
+        &dots_pulse.0,
+    )
+    height(Length::Fill)
             .width(Length::Fill);
 
-    let heart_size = match pulse {
+    let heart_size = match dots_pulse.1 {
         1 => 17.0,
         2 => 20.0,
         _ => 14.0,
@@ -207,6 +212,7 @@ pub fn get_release_details<'a>(
     font: Font,
     font_footer: Font,
     newer_release_available: Option<bool>,
+    dots: &str,
 ) -> Row<'a, Message, StyleType> {
     let mut ret_val = Row::new().align_y(Alignment::Center).push(
         Text::new(format!("{SNIFFNET_TITLECASE} {APP_VERSION}"))
@@ -216,11 +222,15 @@ pub fn get_release_details<'a>(
     if let Some(boolean_response) = newer_release_available {
         if boolean_response {
             // a newer release is available on GitHub
+            let icon_size = match dots.len() {
+                2 => 16.0,
+                3 => 18.0,
+                _ => 14.0,
+            };
             let button = button(
                 Icon::Update
                     .to_text()
-                    .class(TextType::Danger)
-                    .size(18)
+                    .size(icon_size)
                     .align_x(Alignment::Center)
                     .align_y(Alignment::Center)
                     .line_height(LineHeight::Relative(0.8)),
