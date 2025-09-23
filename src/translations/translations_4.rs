@@ -79,7 +79,7 @@ pub fn capture_file_translation(language: Language) -> &'static str {
         Language::RO => "Fișierul de captură",
         Language::ZH_TW => "擷取文件",
         Language::ID => "File tangkapan",
-        Language::ES => "Importar archivo de captura",
+        Language::ES => "Archivo de captura",
         _ => "Capture file",
     }
 }
@@ -138,8 +138,8 @@ pub fn reading_from_pcap_translation<'a>(language: Language, file: &str) -> Text
         ),
         Language::ES => format!(
             "Leyendo paquetes desde el archivo...\n\n\
-             {file_name_translation}: {file}\n\n\
-             ¿Seguro que el archivo seleccionado no está vacío?"
+                                {file_name_translation}: {file}\n\n\
+                                ¿Seguro que el archivo seleccionado no está vacío?"
         ),
         Language::RO => format!(
             "Citirea pachetelor din fișier...\n\n\
