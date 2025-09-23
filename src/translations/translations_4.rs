@@ -16,6 +16,7 @@ pub fn reserved_address_translation(language: Language, info: &str) -> String {
         Language::ZH_TW => format!("保留的網路位址 ({info})"),
         Language::FR => format!("Adresse réservée ({info})"),
         Language::NL => format!("Gereserveerd adres ({info})"),
+        Language::ES => format!("Dirección reservada ({info})"),
         Language::RO => format!("Adresă rezervată ({info})"),
         Language::DE => format!("Reservierte Adresse ({info})"),
         Language::UZ => format!("Rezervlangan manzil ({info})"),
@@ -34,6 +35,7 @@ pub fn share_feedback_translation(language: Language) -> &'static str {
         Language::ZH_TW => "分享您的意見回饋",
         Language::FR => "Partagez vos commentaires",
         Language::NL => "Deel uw feedback",
+        Language::ES => "Comparte tus comentarios",
         Language::RO => "Împărtășiți feedback-ul dvs",
         Language::DE => "Feedback geben",
         Language::UZ => "Fikr-mulohazalaringizni ulashing",
@@ -58,6 +60,7 @@ pub fn share_feedback_translation(language: Language) -> &'static str {
 //         Language::EL => "Εξαιρούμενα",
 //         Language::RO => "Excluși",
 //         Language::ID => "Kecuali",
+//         Language::ES => "Excluidos",
 //         _ => "Excluded",
 //     }
 // }
@@ -76,6 +79,7 @@ pub fn capture_file_translation(language: Language) -> &'static str {
         Language::RO => "Fișierul de captură",
         Language::ZH_TW => "擷取文件",
         Language::ID => "File tangkapan",
+        Language::ES => "Archivo de captura",
         _ => "Capture file",
     }
 }
@@ -88,6 +92,7 @@ pub fn select_capture_translation(language: Language) -> &'static str {
         Language::JA => "キャプチャファイルを選択",
         Language::ZH => "选择捕获文件",
         Language::NL => "Selecteer capture bestand",
+        Language::ES => "Seleccionar archivo de captura",
         Language::RO => "Selectează fișierul de captură",
         Language::DE => "Aufzeichnungsdatei auswählen",
         Language::UZ => "Tahlil faylini tanlang",
@@ -130,6 +135,11 @@ pub fn reading_from_pcap_translation<'a>(language: Language, file: &str) -> Text
             "Pakketten lezen uit bestand...\n\n\
                                  {file_name_translation}: {file}\n\n\
                                  Weet je zeker dat het geselecteerde bestand niet leeg is?"
+        ),
+        Language::ES => format!(
+            "Leyendo paquetes desde el archivo...\n\n\
+                                {file_name_translation}: {file}\n\n\
+                                ¿Seguro que el archivo seleccionado no está vacío?"
         ),
         Language::RO => format!(
             "Citirea pachetelor din fișier...\n\n\
@@ -177,6 +187,7 @@ pub fn data_exceeded_translation(language: Language) -> &'static str {
         Language::JA => "データの閾値を超えました",
         Language::ZH | Language::ZH_TW => "已超出数据阈值",
         Language::NL => "Gegevenslimiet overschreden",
+        Language::ES => "Umbral de datos superado",
         Language::RO => "Limita de date depășită",
         Language::DE => "Datenschwelle überschritten",
         Language::UZ => "Ma'lumotlar chegarasidan oshib ketdi",
@@ -194,6 +205,7 @@ pub fn bits_exceeded_translation(language: Language) -> &'static str {
         Language::JA => "ビットの閾値を超えました",
         Language::ZH => "已超出比特阈值",
         Language::NL => "Bits limiet overschreden",
+        Language::ES => "Umbral de bits superado",
         Language::RO => "Limita de biți depășită",
         Language::DE => "Bitschwelle überschritten",
         Language::UZ => "Bitlar chegarasidan oshib ketdi",
@@ -206,9 +218,13 @@ pub fn bits_exceeded_translation(language: Language) -> &'static str {
 
 pub fn bits_translation(language: Language) -> &'static str {
     match language {
-        Language::EN | Language::IT | Language::NL | Language::DE | Language::FR | Language::ID => {
-            "bits"
-        }
+        Language::EN
+        | Language::IT
+        | Language::NL
+        | Language::DE
+        | Language::FR
+        | Language::ID
+        | Language::ES => "bits",
         Language::JA => "ビット",
         Language::ZH => "比特",
         Language::UZ => "bitlar",
@@ -223,7 +239,7 @@ pub fn bits_translation(language: Language) -> &'static str {
 pub fn pause_translation(language: Language) -> &'static str {
     match language {
         Language::EN | Language::DE | Language::FR => "Pause",
-        Language::IT => "Pausa",
+        Language::IT | Language::ES => "Pausa",
         Language::JA => "一時停止",
         Language::ZH => "暂停",
         Language::NL => "Pauzeren",
@@ -245,6 +261,7 @@ pub fn resume_translation(language: Language) -> &'static str {
         Language::JA => "再開",
         Language::ZH => "恢复",
         Language::NL => "Hervatten",
+        Language::ES => "Reanudar",
         Language::RO => "Continuă",
         Language::DE => "Fortsetzen",
         Language::UZ => "Davom ettirish",

@@ -4,6 +4,7 @@ All Sniffnet releases with the relative changes are documented in this file.
 
 ## [UNRELEASED]
 - Improve update checks using `semver` ([#891](https://github.com/GyulyVGC/sniffnet/pull/891))
+- Updated Spanish translation to v1.4 ([#955](https://github.com/GyulyVGC/sniffnet/pull/955))
 - Fix AppImage error with `libpcap` dependency ([#971](https://github.com/GyulyVGC/sniffnet/pull/971))
 - Fix Sniffnet wrapper script on macOS to use a relative path to the executable ([#948](https://github.com/GyulyVGC/sniffnet/pull/948) — fixes [#898](https://github.com/GyulyVGC/sniffnet/issues/898))
 
