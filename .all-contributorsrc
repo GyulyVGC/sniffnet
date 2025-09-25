@@ -804,6 +804,15 @@
       "contributions": [
         "platform"
       ]
+    },
+    {
+      "login": "Chemik582",
+      "name": "Michal Zboril",
+      "avatar_url": "https://avatars.githubusercontent.com/u/16463614?v=4",
+      "profile": "http://www.mzboril.cz",
+      "contributions": [
+        "translation"
+      ]
     }
   ],
   "contributorsPerLine": 7,
