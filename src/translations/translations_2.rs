@@ -3,6 +3,7 @@ use crate::Language;
 pub fn new_version_available_translation(language: Language) -> &'static str {
     match language {
         Language::EN => "A newer version is available!",
+        Language::CS => "Je k dispozici novější verze!",
         Language::IT => "Una versione più recente è disponibile!",
         Language::RU => "Новая версия доступна!",
         Language::EL => "Μια νεότερη έκδοση είναι διαθέσιμη!",
@@ -31,6 +32,7 @@ pub fn new_version_available_translation(language: Language) -> &'static str {
 pub fn inspect_translation(language: Language) -> &'static str {
     match language {
         Language::EN => "Inspect",
+        Language::CS => "Kontrola",
         Language::IT => "Ispeziona",
         Language::FR => "Inspecter",
         Language::ES => "Inspeccionar",
@@ -59,6 +61,7 @@ pub fn inspect_translation(language: Language) -> &'static str {
 pub fn connection_details_translation(language: Language) -> &'static str {
     match language {
         Language::EN => "Connection details",
+        Language::CS => "Podrobnosti spojení",
         Language::IT => "Dettagli della connessione",
         Language::RU => "Подробнее о соединении",
         Language::SV => "Anslutningsdetaljer",
@@ -88,6 +91,7 @@ pub fn connection_details_translation(language: Language) -> &'static str {
 pub fn dropped_translation(language: Language) -> &'static str {
     match language {
         Language::EN => "Dropped",
+        Language::CS => "Zahozené",
         Language::IT => "Persi",
         Language::RU => "Потеряно",
         Language::SV => "Tappade",
@@ -114,6 +118,7 @@ pub fn dropped_translation(language: Language) -> &'static str {
 pub fn data_representation_translation(language: Language) -> &'static str {
     match language {
         Language::EN => "Data representation",
+        Language::CS => "Prezentace dat",
         Language::IT => "Rappresentazione dei dati",
         Language::RU => "Показывать в виде", // there is selector below: "байтов" or "пакетов"
         Language::SV => "Datarepresentation",
@@ -142,6 +147,7 @@ pub fn data_representation_translation(language: Language) -> &'static str {
 pub fn host_translation(language: Language) -> &'static str {
     match language {
         Language::EN => "Network host",
+        Language::CS => "Síťová adresa",
         Language::IT => "Host di rete",
         Language::RU => "Сетевой хост",
         Language::SV => "Nätverksvärd",
@@ -170,6 +176,7 @@ pub fn host_translation(language: Language) -> &'static str {
 pub fn only_top_30_items_translation(language: Language) -> &'static str {
     match language {
         Language::EN => "Only the top 30 items are displayed here",
+        Language::CS => "Zde je zobrazeno pouze prvních 30 položek",
         Language::IT => "Solo i 30 maggiori elementi sono mostrati qui",
         Language::RU => "Показываются только первые 30 элементов",
         Language::SV => "Endast de 30 främsta föremål visas här",
@@ -198,6 +205,7 @@ pub fn only_top_30_items_translation(language: Language) -> &'static str {
 // pub fn sort_by_translation(language: Language) -> &'static str {
 //     match language {
 //         Language::EN => "Sort by",
+//         Language::CS => "Seřazeno podle",
 //         Language::IT => "Ordina per",
 //         Language::RU => "Сортировка",
 //         Language::SV => "Sortera efter",
@@ -224,6 +232,7 @@ pub fn only_top_30_items_translation(language: Language) -> &'static str {
 pub fn local_translation(language: Language) -> &'static str {
     match language {
         Language::EN => "Local network",
+        Language::CS => "Místní síť",
         Language::IT => "Rete locale",
         Language::RU => "Локальная сеть",
         Language::SV => "Lokalt nätverk",
@@ -252,6 +261,7 @@ pub fn local_translation(language: Language) -> &'static str {
 pub fn unknown_translation(language: Language) -> &'static str {
     match language {
         Language::EN => "Unknown location",
+        Language::CS => "Neznámá lokalita",
         Language::IT => "Localizzazione sconosciuta",
         Language::RU => "Неизвестный регион",
         Language::SV => "Okänd plats",
@@ -280,6 +290,7 @@ pub fn unknown_translation(language: Language) -> &'static str {
 pub fn your_network_adapter_translation(language: Language) -> &'static str {
     match language {
         Language::EN => "Your network adapter",
+        Language::CS => "Síťový adaptér",
         Language::IT => "La tua scheda di rete",
         Language::RU => "Ваш сетевой адаптер",
         Language::SV => "Din nätverksadapter",
@@ -308,6 +319,7 @@ pub fn your_network_adapter_translation(language: Language) -> &'static str {
 pub fn socket_address_translation(language: Language) -> &'static str {
     match language {
         Language::EN => "Socket address",
+        Language::CS => "Adresa soketu",
         Language::IT => "Indirizzo del socket",
         Language::RU => "Адрес сокета",
         Language::SV => "Socketadress",
@@ -336,6 +348,7 @@ pub fn socket_address_translation(language: Language) -> &'static str {
 pub fn mac_address_translation(language: Language) -> &'static str {
     match language {
         Language::EN => "MAC address",
+        Language::CS => "MAC adresa",
         Language::IT => "Indirizzo MAC",
         Language::RU => "MAC адрес",
         Language::SV => "MAC-adress",
@@ -364,6 +377,7 @@ pub fn mac_address_translation(language: Language) -> &'static str {
 pub fn source_translation(language: Language) -> &'static str {
     match language {
         Language::EN | Language::FR => "Source",
+        Language::CS => "Zdroj",
         Language::IT => "Sorgente",
         Language::RU => "Источник",
         Language::SV => "Källa",
@@ -391,6 +405,7 @@ pub fn source_translation(language: Language) -> &'static str {
 pub fn destination_translation(language: Language) -> &'static str {
     match language {
         Language::EN | Language::SV | Language::FR => "Destination",
+        Language::CS => "Cíl",
         Language::IT => "Destinazione",
         Language::RU => "Получатель",
         Language::FI => "Määränpää",
@@ -416,6 +431,7 @@ pub fn destination_translation(language: Language) -> &'static str {
 pub fn fqdn_translation(language: Language) -> &'static str {
     match language {
         Language::EN => "Fully qualified domain name",
+        Language::CS => "Plně kvalifikované doménové jméno",
         Language::IT => "Nome di dominio completo",
         Language::RU => "Полное доменное имя",
         Language::SV => "Fullständigt domännamn",
@@ -442,6 +458,7 @@ pub fn fqdn_translation(language: Language) -> &'static str {
 pub fn administrative_entity_translation(language: Language) -> &'static str {
     match language {
         Language::EN => "Autonomous System name",
+        Language::CS => "Jméno autonomního systému",
         Language::IT => "Nome del sistema autonomo",
         Language::RU => "Имя автономной системы",
         Language::SV => "Administrativ enhet",
@@ -470,6 +487,7 @@ pub fn administrative_entity_translation(language: Language) -> &'static str {
 pub fn transmitted_data_translation(language: Language) -> &'static str {
     match language {
         Language::EN => "Transmitted data",
+        Language::CS => "Přenesená data",
         Language::IT => "Dati trasmessi",
         Language::RU => "Передано данных",
         Language::SV => "Överförd data",
@@ -498,6 +516,7 @@ pub fn transmitted_data_translation(language: Language) -> &'static str {
 pub fn country_translation(language: Language) -> &'static str {
     match language {
         Language::EN => "Country",
+        Language::CS => "Země",
         Language::IT => "Paese",
         Language::RU => "Страна",
         Language::SV | Language::DE | Language::NL => "Land",
@@ -523,6 +542,7 @@ pub fn country_translation(language: Language) -> &'static str {
 pub fn domain_name_translation(language: Language) -> &'static str {
     match language {
         Language::EN => "Domain name",
+        Language::CS => "Doménové jméno",
         Language::IT => "Nome di dominio",
         Language::RU => "Доменное имя",
         Language::SV => "Domännamn",
@@ -551,6 +571,7 @@ pub fn domain_name_translation(language: Language) -> &'static str {
 pub fn only_show_favorites_translation(language: Language) -> &'static str {
     match language {
         Language::EN => "Only show favorites",
+        Language::CS => "Zobrazit pouze oblíbené",
         Language::IT => "Mostra solo i preferiti",
         Language::RU => "Показывать только избранные",
         Language::SV => "Visa endast favoriter",
@@ -579,6 +600,7 @@ pub fn only_show_favorites_translation(language: Language) -> &'static str {
 // pub fn search_filters_translation(language: Language) -> &'static str {
 //     match language {
 //         Language::EN => "Search filters",
+//         Language::CS => "Vyhledávací filtry",
 //         Language::IT => "Filtri di ricerca",
 //         Language::RU => "Фильтры для поиска",
 //         Language::SV => "Sökfilter",
@@ -606,6 +628,7 @@ pub fn only_show_favorites_translation(language: Language) -> &'static str {
 pub fn no_search_results_translation(language: Language) -> &'static str {
     match language {
         Language::EN => "No result available according to the specified search filters",
+        Language::CS => "Podle zadaných vyhledávacích filtrů není k dispozici žádný výsledek",
         Language::IT => "Nessun risultato disponibile secondo i filtri di ricerca specificati",
         Language::RU => "Ничего не найдено после применения выбранных фильтров",
         Language::SV => "Inga resultat tillgängliga utifrån de angivna sökfilterna",
@@ -641,6 +664,7 @@ pub fn showing_results_translation(
 ) -> String {
     match language {
         Language::EN => format!("Showing {start}-{end} of {total} total results"),
+        Language::CS => format!("Zobrazení {start}-{end} z celkových {total} výsledků"),
         Language::IT => format!("Sono mostrati {start}-{end} di {total} risultati totali"),
         Language::RU => format!("Показываются {start}-{end} из {total} общего числа результатов"),
         Language::SV => format!("Visar {start}-{end} av {total} totala resultat"),
@@ -671,6 +695,7 @@ pub fn showing_results_translation(
 pub fn color_gradients_translation(language: Language) -> &'static str {
     match language {
         Language::EN => "Apply color gradients",
+        Language::CS => "Použít barevné přechody",
         Language::IT => "Applica sfumature di colore",
         Language::RU => "Применить цветовой градиент", // recheck
         Language::SV => "Applicera färggradient",
