@@ -5,7 +5,7 @@ use crate::translations::types::language::Language;
 pub fn filter_traffic_translation(language: Language) -> String {
     match language {
         Language::EN => "Filter traffic",
-        Language::CZ => "Filtr provozu",
+        Language::CS => "Filtr provozu",
         Language::IT => "Filtra il traffico",
         _ => "Filter traffic",
     }
@@ -16,7 +16,7 @@ pub fn filter_traffic_translation(language: Language) -> String {
 pub fn traffic_source_translation(language: Language) -> &'static str {
     match language {
         Language::EN => "Traffic source",
-        Language::CZ => "Zdroj provozu",
+        Language::CS => "Zdroj provozu",
         Language::IT => "Fonte del traffico",
         _ => "Traffic source",
     }
