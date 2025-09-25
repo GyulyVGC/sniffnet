@@ -95,7 +95,7 @@ pub fn mmdb_files_translation(language: Language) -> &'static str {
 pub fn params_not_editable_translation(language: Language) -> &'static str {
     match language {
         Language::EN => "The following parameters can't be modified during the analysis",
-        Language::CS => "Následující parametry nelze během analýzy měnit.",
+        Language::CS => "Následující parametry nelze během analýzy měnit",
         // Language::FA => "مولفه های روبرو هنگام تحلیل قابل تغییر نیستند",
         Language::ES => "Los siguientes parámetros no pueden modificarse durante el análisis",
         Language::IT => "I seguenti parametri non sono modificabili durante l'analisi",
