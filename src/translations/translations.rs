@@ -539,9 +539,9 @@ pub fn no_addresses_translation<'a>(language: Language, adapter: &str) -> Text<'
                                  If you are sure you are connected to the internet, try choosing a different adapter."
         ),
         Language::CS => format!(
-            "Nelze sledovat žádný provoz, protože vybraný adaptér nemá žádné aktivní adresy....\n\n\
+            "Nelze sledovat žádný provoz, protože vybraný adaptér nemá žádné aktivní adresy...\n\n\
                                  {network_adapter_translation}: {adapter}\n\n\
-                                 Pokud jste si jisti, že jste připojeni k internetu, zkuste vybrat jiný adaptér.."
+                                 Pokud jste si jisti, že jste připojeni k internetu, zkuste vybrat jiný adaptér."
         ),
         Language::IT => format!(
             "Non è osservabile alcun traffico perché l'adattatore di rete selezionato non ha indirizzi attivi...\n\n\
@@ -2394,7 +2394,7 @@ pub fn no_notifications_received_translation<'a>(language: Language) -> Text<'a,
         }
         Language::CS => {
             "Momentálně není nic k vidění...\n\n\
-                                 Jakmile obdržíte oznámení, zobrazí se zde."
+                                 Jakmile obdržíte oznámení, zobrazí se zde"
         }
         Language::IT => {
             "Nulla da vedere al momento...\n\n\
