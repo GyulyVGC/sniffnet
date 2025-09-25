@@ -583,7 +583,7 @@ impl Sniffer {
             font,
             font_headers,
             self.newer_release_available,
-            self.dots_pulse.1,
+            &self.dots_pulse,
         );
 
         let content: Element<Message, StyleType> =

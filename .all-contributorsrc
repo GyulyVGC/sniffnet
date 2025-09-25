@@ -666,7 +666,8 @@
       "avatar_url": "https://avatars.githubusercontent.com/u/72492241?v=4",
       "profile": "https://github.com/aguacero7",
       "contributions": [
-        "translation"
+        "translation",
+        "code"
       ]
     },
     {
@@ -793,6 +794,15 @@
       "profile": "https://github.com/paco1127",
       "contributions": [
         "translation"
+      ]
+    },
+    {
+      "login": "InfraWhisperer",
+      "name": "Raghav Potluri",
+      "avatar_url": "https://avatars.githubusercontent.com/u/208207531?v=4",
+      "profile": "https://github.com/InfraWhisperer",
+      "contributions": [
+        "platform"
       ]
     }
   ],

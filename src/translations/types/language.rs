@@ -133,6 +133,7 @@ impl Language {
                 | Language::RO
                 | Language::ZH_TW
                 | Language::ID
+                | Language::ES
         )
     }
 }
