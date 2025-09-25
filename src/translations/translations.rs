@@ -93,8 +93,9 @@ use crate::translations::types::language::Language;
 
 pub fn start_translation(language: Language) -> &'static str {
     match language {
-        Language::EN | Language::DE | Language::RO | Language::KO | Language::NL => "Start!",
-        Language::CS => "Start!",
+        Language::EN | Language::DE | Language::RO | Language::KO | Language::NL | Language::CS => {
+            "Start!"
+        }
         Language::IT => "Avvia!",
         Language::FR => "Commencer!",
         Language::ES => "¡Empieza!",
@@ -144,11 +145,10 @@ pub fn address_translation(language: Language) -> &'static str {
 pub fn addresses_translation(language: Language) -> &'static str {
     match language {
         Language::EN => "Addresses",
-        Language::CS => "Adresy",
         Language::IT => "Indirizzi",
         Language::FR => "Adresses",
         Language::ES => "Direcciones",
-        Language::PL => "Adresy",
+        Language::PL | Language::CS => "Adresy",
         Language::DE | Language::NL => "Adressen",
         Language::UK => "Адреси",
         Language::ZH => "网络地址",
@@ -228,7 +228,6 @@ pub fn addresses_translation(language: Language) -> &'static str {
 pub fn protocol_translation(language: Language) -> &'static str {
     match language {
         Language::EN | Language::RO | Language::NL => "Protocol",
-        Language::CS => "Protokol",
         Language::IT => "Protocollo",
         Language::FR => "Protocole",
         Language::ES | Language::PT => "Protocolo",
@@ -245,7 +244,7 @@ pub fn protocol_translation(language: Language) -> &'static str {
         Language::JA => "プロトコル",
         Language::UZ => "Protokoli",
         Language::VI => "Phương thức",
-        Language::ID => "Protokol",
+        Language::ID | Language::CS => "Protokol",
     }
 }
 
@@ -1789,10 +1788,9 @@ pub fn notifications_translation(language: Language) -> &'static str {
 pub fn style_translation(language: Language) -> &'static str {
     match language {
         Language::EN | Language::FR => "Style",
-        Language::CS => "Styl",
         Language::IT => "Stile",
         Language::ES | Language::PT => "Estilo",
-        Language::PL => "Styl",
+        Language::PL | Language::CS => "Styl",
         Language::RO | Language::TR | Language::SV => "Stil",
         Language::DE => "Design",
         Language::UK | Language::RU => "Стиль",
