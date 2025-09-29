@@ -45,7 +45,7 @@ iced = { version = "0.13.1", features = ["tokio", "svg", "advanced", "lazy", "im
 plotters-iced = "0.11.0"
 maxminddb = "0.26.0"
 confy = "1.0.0"
-serde = { version = "1.0.225", default-features = false, features = ["derive"] }
+serde = { version = "1.0.228", default-features = false, features = ["derive"] }
 rodio = { version = "0.21.1", default-features = false, features = ["mp3", "playback"] }
 dns-lookup = "3.0.0"
 toml = "0.9.7"
