@@ -138,7 +138,8 @@ impl Language {
                 | Language::ZH_TW
                 | Language::ID
                 | Language::ES
-                | Language::CS,
+                | Language::CS
+                | Language::VI
         )
     }
 }
