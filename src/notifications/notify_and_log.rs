@@ -52,11 +52,17 @@ pub fn notify_and_log(
                         services: services_list(info_traffic_msg, data_repr),
                     },
                 ));
+
+            // send remote notification
+            // TODO
+
+            // register sound to play
             if sound_to_play.eq(&Sound::None) {
                 sound_to_play = notifications.data_notification.sound;
             }
         }
     }
+
     // from favorites
     if notifications.favorite_notification.notify_on_favorite {
         let favorites_last_interval: HashSet<(Host, DataInfoHost)> = info_traffic_msg
@@ -72,7 +78,6 @@ pub fn notify_and_log(
                 if logged_notifications.0.len() >= 30 {
                     logged_notifications.0.pop_back();
                 }
-
                 logged_notifications
                     .0
                     .push_front(LoggedNotification::FavoriteTransmitted(
@@ -83,7 +88,12 @@ pub fn notify_and_log(
                             timestamp: get_formatted_timestamp(timestamp),
                         },
                     ));
+
+                // send remote notification
+                // TODO
             }
+
+            // register sound to play
             if sound_to_play.eq(&Sound::None) {
                 sound_to_play = notifications.favorite_notification.sound;
             }
