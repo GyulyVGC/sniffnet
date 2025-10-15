@@ -77,7 +77,7 @@ jobs:
           targets: ${{ matrix.target }}
 
       - name: Check crate
-        if: matrix.os == 'macos' || matrix.os == 'windows' || matrix.os == 'ubuntu' && matrix.arch == 'amd64'
+        if: matrix.os == 'macos' || matrix.os == 'windows' && matrix.arch != 'arm64' || matrix.os == 'ubuntu' && matrix.arch == 'amd64'
         run: cargo publish --dry-run --target ${{ matrix.target }}
 
       - name: Clippy (release mode)
