@@ -7,6 +7,7 @@ use serde::Serialize;
 use serde::ser::SerializeStruct;
 
 /// Enum representing the possible notification events.
+#[derive(Clone)]
 pub enum LoggedNotification {
     /// Data threshold exceeded
     DataThresholdExceeded(DataThresholdExceeded),
