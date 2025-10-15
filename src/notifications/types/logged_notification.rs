@@ -77,15 +77,15 @@ impl Serialize for DataThresholdExceeded {
         let mut state = serializer.serialize_struct("DataThresholdExceeded", 6)?;
         state.serialize_field("timestamp", &self.timestamp)?;
         // TODO: info message translated
-        state.serialize_field("info", &self.info)?;
+        // state.serialize_field("info", &self.info)?;
         // TODO: pretty print
         state.serialize_field("threshold", &self.threshold)?;
         // TODO: data information
-        state.serialize_field("data", &self.data_info)?;
+        // state.serialize_field("data", &self.data_info)?;
         // TODO: host & data information (only this data repr)
-        state.serialize_field("hosts", &self.hosts)?;
+        // state.serialize_field("hosts", &self.hosts)?;
         // TODO: service & data information (only this data repr)
-        state.serialize_field("services", &self.services)?;
+        // state.serialize_field("services", &self.services)?;
         state.end()
     }
 }
@@ -98,11 +98,11 @@ impl Serialize for FavoriteTransmitted {
         let mut state = serializer.serialize_struct("DataExchangedFromFavorites", 4)?;
         state.serialize_field("timestamp", &self.timestamp)?;
         // TODO: info message translated
-        state.serialize_field("info", &self.info)?;
+        // state.serialize_field("info", &self.info)?;
         // TODO: host information
-        state.serialize_field("host", &self.host)?;
+        // state.serialize_field("host", &self.host)?;
         // TODO: data information
-        state.serialize_field("data", &self.data_info_host.data_info)?;
+        // state.serialize_field("data", &self.data_info_host.data_info)?;
         state.end()
     }
 }

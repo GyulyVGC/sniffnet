@@ -143,3 +143,5 @@ fn services_list(info_traffic_msg: &InfoTraffic, data_repr: DataRepr) -> Vec<(Se
         .into_iter()
         .collect()
 }
+
+fn send_remote_notification() {}
