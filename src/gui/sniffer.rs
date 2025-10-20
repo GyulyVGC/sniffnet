@@ -541,6 +541,20 @@ impl Sniffer {
                     n.expand(expand);
                 }
             }
+            Message::ToggleRemoteNotifications => {
+                self.conf
+                    .settings
+                    .notifications
+                    .remote_notifications
+                    .toggle();
+            }
+            Message::RemoteNotificationsUrl(url) => {
+                self.conf
+                    .settings
+                    .notifications
+                    .remote_notifications
+                    .set_url(url);
+            }
         }
         Task::none()
     }
@@ -675,7 +689,7 @@ impl Sniffer {
         }
         let emitted_notifications = notify_and_log(
             &mut self.logged_notifications,
-            self.conf.settings.notifications,
+            self.conf.settings.notifications.clone(),
             &msg,
             &self.favorite_hosts,
             &self.capture_source,
@@ -835,7 +849,7 @@ impl Sniffer {
     /// Threshold adjustments are saved in `self.timing_events.threshold_adjust` and then applied
     /// after timeout
     fn update_notifications_settings(&mut self, notification: Notification, emit_sound: bool) {
-        let notifications = self.conf.settings.notifications;
+        let data_notification = self.conf.settings.notifications.data_notification;
         let sound = match notification {
             Notification::Data(DataNotification {
                 data_repr,
@@ -858,7 +872,7 @@ impl Sniffer {
                     };
                     self.timing_events.threshold_adjust_now(temp_threshold);
                 }
-                if threshold.is_some() != notifications.data_notification.threshold.is_some() {
+                if threshold.is_some() != data_notification.threshold.is_some() {
                     self.conf.settings.notifications.data_notification.threshold = threshold;
                     self.conf
                         .settings
@@ -890,8 +904,7 @@ impl Sniffer {
         if let Some(temp_threshold) = self.timing_events.temp_threshold() {
             temp_threshold
         } else {
-            let notifications = self.conf.settings.notifications;
-            notifications.data_notification
+            self.conf.settings.notifications.data_notification
         }
     }
 

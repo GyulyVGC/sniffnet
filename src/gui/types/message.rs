@@ -135,4 +135,8 @@ pub enum Message {
     Periodic,
     /// Expand or collapse the given logged notification
     ExpandNotification(usize, bool),
+    /// Toggle remote notifications
+    ToggleRemoteNotifications,
+    /// The remote notifications URL has been updated
+    RemoteNotificationsUrl(String),
 }

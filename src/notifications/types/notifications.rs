@@ -5,12 +5,13 @@ use crate::networking::types::data_representation::DataRepr;
 use crate::notifications::types::sound::Sound;
 
 /// Used to contain the notifications configuration set by the user
-#[derive(Clone, Serialize, Deserialize, Copy, PartialEq, Debug)]
+#[derive(Clone, Serialize, Deserialize, PartialEq, Debug)]
 #[serde(default)]
 pub struct Notifications {
     pub volume: u8,
     pub data_notification: DataNotification,
     pub favorite_notification: FavoriteNotification,
+    pub remote_notifications: RemoteNotifications,
 }
 
 impl Default for Notifications {
@@ -19,6 +20,7 @@ impl Default for Notifications {
             volume: 60,
             data_notification: DataNotification::default(),
             favorite_notification: FavoriteNotification::default(),
+            remote_notifications: RemoteNotifications::default(),
         }
     }
 }
@@ -135,6 +137,34 @@ impl FavoriteNotification {
             notify_on_favorite: false,
             sound,
         }
+    }
+}
+
+#[derive(Clone, Eq, PartialEq, Serialize, Deserialize, Debug)]
+#[serde(default)]
+pub struct RemoteNotifications {
+    /// Flag to determine if remote notifications are enabled
+    pub is_active: bool,
+    /// The URL to send notifications to
+    pub url: String,
+}
+
+impl Default for RemoteNotifications {
+    fn default() -> Self {
+        RemoteNotifications {
+            is_active: false,
+            url: String::new(),
+        }
+    }
+}
+
+impl RemoteNotifications {
+    pub fn toggle(&mut self) {
+        self.is_active = !self.is_active;
+    }
+
+    pub fn set_url(&mut self, url: String) {
+        self.url = url;
     }
 }
 

@@ -1,5 +1,5 @@
 use iced::widget::scrollable::Direction;
-use iced::widget::{Button, Slider, horizontal_space};
+use iced::widget::{Button, Rule, Slider, horizontal_space};
 use iced::widget::{Checkbox, Column, Container, Row, Scrollable, Space, Text, TextInput};
 use iced::{Alignment, Font, Length, Padding};
 
@@ -16,7 +16,7 @@ use crate::gui::types::message::Message;
 use crate::gui::types::settings::Settings;
 use crate::networking::types::data_representation::DataRepr;
 use crate::notifications::types::notifications::{
-    DataNotification, FavoriteNotification, Notification,
+    DataNotification, FavoriteNotification, Notification, RemoteNotifications,
 };
 use crate::notifications::types::sound::Sound;
 use crate::translations::translations::{
@@ -25,6 +25,7 @@ use crate::translations::translations::{
 };
 use crate::translations::translations_2::data_representation_translation;
 use crate::translations::translations_4::data_exceeded_translation;
+use crate::translations::translations_5::remote_notifications_translation;
 use crate::utils::types::icon::Icon;
 use crate::{Language, Sniffer, StyleType};
 
@@ -35,7 +36,7 @@ pub fn settings_notifications_page<'a>(sniffer: &Sniffer) -> Container<'a, Messa
         color_gradient,
         mut notifications,
         ..
-    } = sniffer.conf.settings;
+    } = sniffer.conf.settings.clone();
     let font = style.get_extension().font;
     let font_headers = style.get_extension().font_headers;
 
@@ -89,6 +90,14 @@ pub fn settings_notifications_page<'a>(sniffer: &Sniffer) -> Container<'a, Messa
                 ))
                 .push(get_favorite_notify(
                     notifications.favorite_notification,
+                    language,
+                    font,
+                ))
+                .push(
+                    Container::new(Rule::horizontal(10)).padding(Padding::ZERO.left(40).right(40)),
+                )
+                .push(get_remote_notifications(
+                    notifications.remote_notifications,
                     language,
                     font,
                 )),
@@ -193,6 +202,46 @@ fn get_favorite_notify<'a>(
             language,
         );
         ret_val = ret_val.push(sound_row);
+        Container::new(ret_val)
+            .padding(15)
+            .width(700)
+            .class(ContainerType::BorderedRound)
+    } else {
+        Container::new(ret_val)
+            .padding(15)
+            .width(700)
+            .class(ContainerType::BorderedRound)
+    }
+}
+
+fn get_remote_notifications<'a>(
+    remote_notifications: RemoteNotifications,
+    language: Language,
+    font: Font,
+) -> Container<'a, Message, StyleType> {
+    let checkbox = Checkbox::new(
+        remote_notifications_translation(language),
+        remote_notifications.is_active,
+    )
+    .on_toggle(move |_| Message::ToggleRemoteNotifications)
+    .size(18)
+    .font(font);
+
+    let mut ret_val = Column::new().spacing(15).push(checkbox);
+
+    if remote_notifications.is_active {
+        let input_row = Row::new()
+            .spacing(5)
+            .align_y(Alignment::Center)
+            .padding(Padding::ZERO.left(26))
+            .push(Text::new("URL:".to_string()).font(font))
+            .push(
+                TextInput::new("https://example.com/notify", &remote_notifications.url)
+                    .on_input(Message::RemoteNotificationsUrl)
+                    .padding([2, 5])
+                    .font(font),
+            );
+        ret_val = ret_val.push(input_row);
         Container::new(ret_val)
             .padding(15)
             .width(700)
