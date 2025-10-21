@@ -7,7 +7,7 @@ use crate::networking::types::service::Service;
 use crate::notifications::types::logged_notification::{
     DataThresholdExceeded, FavoriteTransmitted, LoggedNotification,
 };
-use crate::notifications::types::notifications::Notifications;
+use crate::notifications::types::notifications::{Notifications, RemoteNotifications};
 use crate::notifications::types::sound::{Sound, play};
 use crate::report::types::sort_type::SortType;
 use crate::utils::error_logger::{ErrorLogger, Location};
@@ -22,7 +22,7 @@ use std::collections::{HashSet, VecDeque};
 /// It returns the number of new notifications emitted
 pub fn notify_and_log(
     logged_notifications: &mut (VecDeque<LoggedNotification>, usize),
-    notifications: Notifications,
+    notifications: &Notifications,
     info_traffic_msg: &InfoTraffic,
     favorites: &HashSet<Host>,
     cs: &CaptureSource,
@@ -54,7 +54,7 @@ pub fn notify_and_log(
             logged_notifications.0.push_front(notification.clone());
 
             // send remote notification
-            send_remote_notification(notification);
+            send_remote_notification(notification, notifications.remote_notifications.clone());
 
             // register sound to play
             if sound_to_play.eq(&Sound::None) {
@@ -88,7 +88,7 @@ pub fn notify_and_log(
                 logged_notifications.0.push_front(notification.clone());
 
                 // send remote notification
-                send_remote_notification(notification);
+                send_remote_notification(notification, notifications.remote_notifications.clone());
             }
 
             // register sound to play
@@ -142,22 +142,26 @@ fn services_list(info_traffic_msg: &InfoTraffic, data_repr: DataRepr) -> Vec<(Se
         .collect()
 }
 
-fn send_remote_notification(notification: LoggedNotification) {
-    tokio::task::spawn(async move {
-        let client = reqwest::Client::builder()
-            .user_agent(format!("{SNIFFNET_LOWERCASE}-{APP_VERSION}"))
-            .build()
-            .log_err(location!())
-            .ok()
-            .unwrap();
-        let result = client
-            .post("https://connect.signl4.com/webhook/vt2dfqi5ju")
-            .header("User-agent", format!("{SNIFFNET_LOWERCASE}-{APP_VERSION}"))
-            .json(&notification)
-            .send()
-            .await
-            .unwrap()
-            .error_for_status();
-        println!("{:?}", result);
-    });
+fn send_remote_notification(
+    notification: LoggedNotification,
+    remote_notifications: RemoteNotifications,
+) {
+    if remote_notifications.is_active_and_set() {
+        tokio::task::spawn(async move {
+            let Ok(client) = reqwest::Client::builder()
+                .user_agent(format!("{SNIFFNET_LOWERCASE}-{APP_VERSION}"))
+                .build()
+                .log_err(location!())
+            else {
+                return;
+            };
+            let _ = client
+                .post(&remote_notifications.url)
+                .header("User-agent", format!("{SNIFFNET_LOWERCASE}-{APP_VERSION}"))
+                .json(&notification)
+                .send()
+                .await
+                .log_err(location!());
+        });
+    }
 }

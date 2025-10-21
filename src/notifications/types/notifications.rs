@@ -11,6 +11,7 @@ pub struct Notifications {
     pub volume: u8,
     pub data_notification: DataNotification,
     pub favorite_notification: FavoriteNotification,
+    #[allow(clippy::struct_field_names)]
     pub remote_notifications: RemoteNotifications,
 }
 
@@ -140,7 +141,7 @@ impl FavoriteNotification {
     }
 }
 
-#[derive(Clone, Eq, PartialEq, Serialize, Deserialize, Debug)]
+#[derive(Clone, Eq, PartialEq, Serialize, Deserialize, Debug, Default)]
 #[serde(default)]
 pub struct RemoteNotifications {
     /// Flag to determine if remote notifications are enabled
@@ -149,22 +150,17 @@ pub struct RemoteNotifications {
     pub url: String,
 }
 
-impl Default for RemoteNotifications {
-    fn default() -> Self {
-        RemoteNotifications {
-            is_active: false,
-            url: String::new(),
-        }
-    }
-}
-
 impl RemoteNotifications {
     pub fn toggle(&mut self) {
         self.is_active = !self.is_active;
     }
 
-    pub fn set_url(&mut self, url: String) {
-        self.url = url;
+    pub fn set_url(&mut self, url: &str) {
+        self.url = url.trim().to_string();
+    }
+
+    pub fn is_active_and_set(&self) -> bool {
+        self.is_active && !self.url.is_empty()
     }
 }
 

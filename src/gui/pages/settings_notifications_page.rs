@@ -97,7 +97,7 @@ pub fn settings_notifications_page<'a>(sniffer: &Sniffer) -> Container<'a, Messa
                     Container::new(Rule::horizontal(10)).padding(Padding::ZERO.left(40).right(40)),
                 )
                 .push(get_remote_notifications(
-                    notifications.remote_notifications,
+                    &notifications.remote_notifications,
                     language,
                     font,
                 )),
@@ -215,7 +215,7 @@ fn get_favorite_notify<'a>(
 }
 
 fn get_remote_notifications<'a>(
-    remote_notifications: RemoteNotifications,
+    remote_notifications: &RemoteNotifications,
     language: Language,
     font: Font,
 ) -> Container<'a, Message, StyleType> {

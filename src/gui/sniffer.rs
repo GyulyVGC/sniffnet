@@ -553,7 +553,7 @@ impl Sniffer {
                     .settings
                     .notifications
                     .remote_notifications
-                    .set_url(url);
+                    .set_url(&url);
             }
         }
         Task::none()
@@ -689,7 +689,7 @@ impl Sniffer {
         }
         let emitted_notifications = notify_and_log(
             &mut self.logged_notifications,
-            self.conf.settings.notifications.clone(),
+            &self.conf.settings.notifications,
             &msg,
             &self.favorite_hosts,
             &self.capture_source,
