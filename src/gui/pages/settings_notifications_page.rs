@@ -221,7 +221,7 @@ fn get_remote_notifications<'a>(
 ) -> Container<'a, Message, StyleType> {
     let checkbox = Checkbox::new(
         remote_notifications_translation(language),
-        remote_notifications.is_active,
+        remote_notifications.is_active(),
     )
     .on_toggle(move |_| Message::ToggleRemoteNotifications)
     .size(18)
@@ -229,14 +229,14 @@ fn get_remote_notifications<'a>(
 
     let mut ret_val = Column::new().spacing(15).push(checkbox);
 
-    if remote_notifications.is_active {
+    if remote_notifications.is_active() {
         let input_row = Row::new()
             .spacing(5)
             .align_y(Alignment::Center)
             .padding(Padding::ZERO.left(26))
             .push(Text::new("URL:".to_string()).font(font))
             .push(
-                TextInput::new("https://example.com/notify", &remote_notifications.url)
+                TextInput::new("https://example.com/notify", remote_notifications.url())
                     .on_input(Message::RemoteNotificationsUrl)
                     .padding([2, 5])
                     .font(font),

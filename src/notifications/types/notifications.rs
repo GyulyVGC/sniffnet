@@ -145,12 +145,20 @@ impl FavoriteNotification {
 #[serde(default)]
 pub struct RemoteNotifications {
     /// Flag to determine if remote notifications are enabled
-    pub is_active: bool,
+    is_active: bool,
     /// The URL to send notifications to
-    pub url: String,
+    url: String,
 }
 
 impl RemoteNotifications {
+    pub fn is_active(&self) -> bool {
+        self.is_active
+    }
+
+    pub fn url(&self) -> &str {
+        &self.url
+    }
+
     pub fn toggle(&mut self) {
         self.is_active = !self.is_active;
     }
