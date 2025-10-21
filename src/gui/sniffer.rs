@@ -1873,7 +1873,8 @@ mod tests {
                     notifications: Notifications {
                         volume: 100,
                         data_notification: Default::default(),
-                        favorite_notification: Default::default()
+                        favorite_notification: Default::default(),
+                        remote_notifications: Default::default(),
                     },
                     style: StyleType::Custom(ExtraStyles::DraculaDark),
                 },
