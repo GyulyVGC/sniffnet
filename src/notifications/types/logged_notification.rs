@@ -5,8 +5,6 @@ use crate::networking::types::host::Host;
 use crate::networking::types::service::Service;
 use crate::translations::translations::favorite_transmitted_translation;
 use crate::translations::types::language::Language;
-use serde::Serialize;
-use serde::ser::SerializeStruct;
 use serde_json::json;
 
 /// Enum representing the possible notification events.
@@ -62,7 +60,13 @@ pub struct DataThresholdExceeded {
 
 impl DataThresholdExceeded {
     pub fn to_json(&self) -> String {
-        json!({}).to_string()
+        json!({
+            "info": self.data_repr.data_exceeded_translation(Language::EN),
+            "timestamp": self.timestamp,
+            "threshold": self.data_repr.formatted_string(self.threshold.into()),
+            "data": self.data_repr.formatted_string(self.data_info.tot_data(self.data_repr)),
+        })
+        .to_string()
     }
 }
 
@@ -78,35 +82,14 @@ impl FavoriteTransmitted {
     pub fn to_json(&self) -> String {
         json!({
             "info": favorite_transmitted_translation(Language::EN),
-            "timestamp": &self.timestamp,
+            "timestamp": self.timestamp,
             "favorite": {
-                "country": &self.host.country.to_string(),
-                "domain": &self.host.domain,
-                "asn": &self.host.asn.name,
+                "country": self.host.country.to_string(),
+                "domain": self.host.domain,
+                "asn": self.host.asn.name,
             },
-            "data":DataRepr::Bytes.formatted_string(self.data_info_host.data_info.tot_data(DataRepr::Bytes)),
+            "data": DataRepr::Bytes.formatted_string(self.data_info_host.data_info.tot_data(DataRepr::Bytes)),
         })
         .to_string()
-    }
-}
-
-impl Serialize for DataThresholdExceeded {
-    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
-    where
-        S: serde::Serializer,
-    {
-        let mut state = serializer.serialize_struct("DataThresholdExceeded", 6)?;
-        state.serialize_field("timestamp", &self.timestamp)?;
-        // TODO: info message translated
-        // state.serialize_field("info", &self.info)?;
-        // TODO: pretty print
-        state.serialize_field("threshold", &self.threshold)?;
-        // TODO: data information
-        // state.serialize_field("data", &self.data_info)?;
-        // TODO: host & data information (only this data repr)
-        // state.serialize_field("hosts", &self.hosts)?;
-        // TODO: service & data information (only this data repr)
-        // state.serialize_field("services", &self.services)?;
-        state.end()
     }
 }
