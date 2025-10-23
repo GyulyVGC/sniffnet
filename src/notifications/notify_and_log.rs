@@ -155,13 +155,17 @@ fn send_remote_notification(
             else {
                 return;
             };
-            let _ = client
+            let Ok(response) = client
                 .post(remote_notifications.url())
                 .header("User-agent", format!("{SNIFFNET_LOWERCASE}-{APP_VERSION}"))
                 .body(notification.to_json())
                 .send()
                 .await
-                .log_err(location!());
+                .log_err(location!())
+            else {
+                return;
+            };
+            let _ = response.error_for_status().log_err(location!());
         });
     }
 }
