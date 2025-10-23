@@ -21,3 +21,11 @@ pub fn traffic_source_translation(language: Language) -> &'static str {
         _ => "Traffic source",
     }
 }
+
+pub fn remote_notifications_translation(language: Language) -> &'static str {
+    match language {
+        Language::EN => "Remote notifications",
+        Language::IT => "Notifiche remote",
+        _ => "Remote notifications",
+    }
+}

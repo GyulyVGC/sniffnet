@@ -44,7 +44,7 @@ pub fn notifications_page(sniffer: &Sniffer) -> Container<'_, Message, StyleType
         language,
         notifications,
         ..
-    } = sniffer.conf.settings;
+    } = sniffer.conf.settings.clone();
     let font = style.get_extension().font;
     let font_headers = style.get_extension().font_headers;
 

@@ -1,5 +1,6 @@
-use crate::SNIFFNET_LOWERCASE;
+use crate::utils::error_logger::{ErrorLogger, Location};
 use crate::utils::formatted_strings::APP_VERSION;
+use crate::{SNIFFNET_LOWERCASE, location};
 use semver::Version;
 use serde::Deserialize;
 use std::time::Duration;
@@ -17,7 +18,11 @@ pub async fn set_newer_release_status() -> Option<bool> {
 
 /// Checks if a newer release of Sniffnet is available on GitHub
 async fn is_newer_release_available(max_retries: u8, seconds_between_retries: u8) -> Option<bool> {
-    let client = reqwest::Client::new();
+    let client = reqwest::Client::builder()
+        .user_agent(format!("{SNIFFNET_LOWERCASE}-{APP_VERSION}"))
+        .build()
+        .log_err(location!())
+        .ok()?;
     let response = client
         .get("https://api.github.com/repos/GyulyVGC/sniffnet/releases/latest")
         .header("User-agent", format!("{SNIFFNET_LOWERCASE}-{APP_VERSION}"))

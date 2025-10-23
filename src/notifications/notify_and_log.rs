@@ -1,4 +1,3 @@
-use crate::InfoTraffic;
 use crate::networking::types::capture_context::CaptureSource;
 use crate::networking::types::data_info::DataInfo;
 use crate::networking::types::data_info_host::DataInfoHost;
@@ -8,10 +7,13 @@ use crate::networking::types::service::Service;
 use crate::notifications::types::logged_notification::{
     DataThresholdExceeded, FavoriteTransmitted, LoggedNotification,
 };
-use crate::notifications::types::notifications::Notifications;
+use crate::notifications::types::notifications::{Notifications, RemoteNotifications};
 use crate::notifications::types::sound::{Sound, play};
 use crate::report::types::sort_type::SortType;
+use crate::utils::error_logger::{ErrorLogger, Location};
+use crate::utils::formatted_strings::APP_VERSION;
 use crate::utils::formatted_strings::get_formatted_timestamp;
+use crate::{InfoTraffic, SNIFFNET_LOWERCASE, location};
 use std::cmp::min;
 use std::collections::{HashSet, VecDeque};
 
@@ -20,7 +22,7 @@ use std::collections::{HashSet, VecDeque};
 /// It returns the number of new notifications emitted
 pub fn notify_and_log(
     logged_notifications: &mut (VecDeque<LoggedNotification>, usize),
-    notifications: Notifications,
+    notifications: &Notifications,
     info_traffic_msg: &InfoTraffic,
     favorites: &HashSet<Host>,
     cs: &CaptureSource,
@@ -33,30 +35,34 @@ pub fn notify_and_log(
     if let Some(threshold) = notifications.data_notification.threshold {
         let data_repr = notifications.data_notification.data_repr;
         if data_info.tot_data(data_repr) > u128::from(threshold) {
+            let notification = LoggedNotification::DataThresholdExceeded(DataThresholdExceeded {
+                id: logged_notifications.1,
+                data_repr,
+                threshold: notifications.data_notification.previous_threshold,
+                data_info,
+                timestamp: get_formatted_timestamp(timestamp),
+                is_expanded: false,
+                hosts: hosts_list(info_traffic_msg, data_repr),
+                services: services_list(info_traffic_msg, data_repr),
+            });
+
             //log this notification
             logged_notifications.1 += 1;
             if logged_notifications.0.len() >= 30 {
                 logged_notifications.0.pop_back();
             }
-            logged_notifications
-                .0
-                .push_front(LoggedNotification::DataThresholdExceeded(
-                    DataThresholdExceeded {
-                        id: logged_notifications.1,
-                        data_repr,
-                        threshold: notifications.data_notification.previous_threshold,
-                        data_info,
-                        timestamp: get_formatted_timestamp(timestamp),
-                        is_expanded: false,
-                        hosts: hosts_list(info_traffic_msg, data_repr),
-                        services: services_list(info_traffic_msg, data_repr),
-                    },
-                ));
+            logged_notifications.0.push_front(notification.clone());
+
+            // send remote notification
+            send_remote_notification(notification, notifications.remote_notifications.clone());
+
+            // register sound to play
             if sound_to_play.eq(&Sound::None) {
                 sound_to_play = notifications.data_notification.sound;
             }
         }
     }
+
     // from favorites
     if notifications.favorite_notification.notify_on_favorite {
         let favorites_last_interval: HashSet<(Host, DataInfoHost)> = info_traffic_msg
@@ -67,23 +73,25 @@ pub fn notify_and_log(
             .collect();
         if !favorites_last_interval.is_empty() {
             for (host, data_info_host) in favorites_last_interval {
+                let notification = LoggedNotification::FavoriteTransmitted(FavoriteTransmitted {
+                    id: logged_notifications.1,
+                    host,
+                    data_info_host,
+                    timestamp: get_formatted_timestamp(timestamp),
+                });
+
                 //log this notification
                 logged_notifications.1 += 1;
                 if logged_notifications.0.len() >= 30 {
                     logged_notifications.0.pop_back();
                 }
+                logged_notifications.0.push_front(notification.clone());
 
-                logged_notifications
-                    .0
-                    .push_front(LoggedNotification::FavoriteTransmitted(
-                        FavoriteTransmitted {
-                            id: logged_notifications.1,
-                            host,
-                            data_info_host,
-                            timestamp: get_formatted_timestamp(timestamp),
-                        },
-                    ));
+                // send remote notification
+                send_remote_notification(notification, notifications.remote_notifications.clone());
             }
+
+            // register sound to play
             if sound_to_play.eq(&Sound::None) {
                 sound_to_play = notifications.favorite_notification.sound;
             }
@@ -132,4 +140,32 @@ fn services_list(info_traffic_msg: &InfoTraffic, data_repr: DataRepr) -> Vec<(Se
         .to_owned()
         .into_iter()
         .collect()
+}
+
+fn send_remote_notification(
+    notification: LoggedNotification,
+    remote_notifications: RemoteNotifications,
+) {
+    if remote_notifications.is_active_and_set() {
+        tokio::task::spawn(async move {
+            let Ok(client) = reqwest::Client::builder()
+                .user_agent(format!("{SNIFFNET_LOWERCASE}-{APP_VERSION}"))
+                .build()
+                .log_err(location!())
+            else {
+                return;
+            };
+            let Ok(response) = client
+                .post(remote_notifications.url())
+                .header("User-agent", format!("{SNIFFNET_LOWERCASE}-{APP_VERSION}"))
+                .body(notification.to_json())
+                .send()
+                .await
+                .log_err(location!())
+            else {
+                return;
+            };
+            let _ = response.error_for_status().log_err(location!());
+        });
+    }
 }

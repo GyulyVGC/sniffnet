@@ -5,12 +5,14 @@ use crate::networking::types::data_representation::DataRepr;
 use crate::notifications::types::sound::Sound;
 
 /// Used to contain the notifications configuration set by the user
-#[derive(Clone, Serialize, Deserialize, Copy, PartialEq, Debug)]
+#[derive(Clone, Serialize, Deserialize, PartialEq, Debug)]
 #[serde(default)]
 pub struct Notifications {
     pub volume: u8,
     pub data_notification: DataNotification,
     pub favorite_notification: FavoriteNotification,
+    #[allow(clippy::struct_field_names)]
+    pub remote_notifications: RemoteNotifications,
 }
 
 impl Default for Notifications {
@@ -19,6 +21,7 @@ impl Default for Notifications {
             volume: 60,
             data_notification: DataNotification::default(),
             favorite_notification: FavoriteNotification::default(),
+            remote_notifications: RemoteNotifications::default(),
         }
     }
 }
@@ -135,6 +138,37 @@ impl FavoriteNotification {
             notify_on_favorite: false,
             sound,
         }
+    }
+}
+
+#[derive(Clone, Eq, PartialEq, Serialize, Deserialize, Debug, Default)]
+#[serde(default)]
+pub struct RemoteNotifications {
+    /// Flag to determine if remote notifications are enabled
+    is_active: bool,
+    /// The URL to send notifications to
+    url: String,
+}
+
+impl RemoteNotifications {
+    pub fn is_active(&self) -> bool {
+        self.is_active
+    }
+
+    pub fn url(&self) -> &str {
+        &self.url
+    }
+
+    pub fn toggle(&mut self) {
+        self.is_active = !self.is_active;
+    }
+
+    pub fn set_url(&mut self, url: &str) {
+        self.url = url.trim().to_string();
+    }
+
+    pub fn is_active_and_set(&self) -> bool {
+        self.is_active && !self.url.is_empty()
     }
 }
 
