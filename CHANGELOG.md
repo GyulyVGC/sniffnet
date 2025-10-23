@@ -6,7 +6,10 @@ All Sniffnet releases with the relative changes are documented in this file.
 - Send remote notifications via webhook ([#991](https://github.com/GyulyVGC/sniffnet/pull/991) — fixes [#841](https://github.com/GyulyVGC/sniffnet/issues/841))
 - Added Czech translation 🇨🇿 ([#960](https://github.com/GyulyVGC/sniffnet/pull/960))
 - Improve update checks using `semver` ([#891](https://github.com/GyulyVGC/sniffnet/pull/891))
-- Updated Spanish translation to v1.4 ([#955](https://github.com/GyulyVGC/sniffnet/pull/955))
+- Build the app also for Windows ARM64 (fixes [#988](https://github.com/GyulyVGC/sniffnet/issues/988))
+- Updated some of the existing translations to v1.4:
+  - Spanish ([#955](https://github.com/GyulyVGC/sniffnet/pull/955))
+  - Vietnamese ([#982](https://github.com/GyulyVGC/sniffnet/pull/982))
 - Fix AppImage error with `libpcap` dependency ([#971](https://github.com/GyulyVGC/sniffnet/pull/971))
 - Fix Sniffnet wrapper script on macOS to use a relative path to the executable ([#948](https://github.com/GyulyVGC/sniffnet/pull/948) — fixes [#898](https://github.com/GyulyVGC/sniffnet/issues/898))
 

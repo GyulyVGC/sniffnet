@@ -35,6 +35,9 @@ jobs:
           - os: windows
             arch: amd64
             target: x86_64-pc-windows-msvc
+          - os: windows
+            arch: arm64
+            target: aarch64-pc-windows-msvc
 
     steps:
       - name: Checkout repository
@@ -58,6 +61,7 @@ jobs:
           {
             "i386"  { "Lib"       }
             "amd64" { "Lib\x64"   }
+            "arm64" { "Lib\ARM64" }
             default { throw "$ARCH is not supported!" }
           }
           Add-Content -Path "$env:GITHUB_ENV" -Value "LIB=$env:TEMP\npcap-sdk\$LibPath"
@@ -335,10 +339,12 @@ jobs:
       fail-fast: true
       matrix:
         include:
-          - arch: 32-bit
+          - arch: x86
             target: i686-pc-windows-msvc
-          - arch: 64-bit
+          - arch: x64
             target: x86_64-pc-windows-msvc
+          - arch: arm64
+            target: aarch64-pc-windows-msvc
 
     steps:
       - name: Checkout repository
