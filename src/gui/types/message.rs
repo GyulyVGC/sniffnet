@@ -139,4 +139,6 @@ pub enum Message {
     ToggleRemoteNotifications,
     /// The remote notifications URL has been updated
     RemoteNotificationsUrl(String),
+    /// Pause or resume live capture
+    Freeze,
 }

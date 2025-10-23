@@ -52,6 +52,8 @@ pub enum Icon {
     Update,
     Warning,
     Waves,
+    Pause,
+    Resume,
 }
 
 impl Icon {
@@ -105,6 +107,8 @@ impl Icon {
             Icon::Update => '<',
             // Icon::Expand => 'p',
             // Icon::Collapse => 'q',
+            Icon::Pause => '-',
+            Icon::Resume => '+',
         }
     }
 

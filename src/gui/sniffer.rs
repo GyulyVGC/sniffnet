@@ -121,6 +121,8 @@ pub struct Sniffer {
     pub id: Option<Id>,
     /// Host data for filter dropdowns (comboboxes)
     pub host_data_states: HostDataStates,
+    /// Flag reporting whether the live capture is frozen
+    pub frozen: bool,
 }
 
 impl Sniffer {
@@ -160,6 +162,7 @@ impl Sniffer {
             thumbnail: false,
             id: None,
             host_data_states: HostDataStates::default(),
+            frozen: false,
         }
     }
 
@@ -554,6 +557,9 @@ impl Sniffer {
                     .notifications
                     .remote_notifications
                     .set_url(&url);
+            }
+            Message::Freeze => {
+                self.frozen = !self.frozen;
             }
         }
         Task::none()
