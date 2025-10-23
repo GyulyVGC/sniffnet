@@ -46,6 +46,7 @@ plotters-iced = "0.11.0"
 maxminddb = "0.26.0"
 confy = "1.0.0"
 serde = { version = "1.0.225", default-features = false, features = ["derive"] }
+serde_json = { version = "1.0.145", features = ["preserve_order"] }
 rodio = { version = "0.21.1", default-features = false, features = ["mp3", "playback"] }
 dns-lookup = "3.0.0"
 toml = "0.9.7"

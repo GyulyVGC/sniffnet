@@ -3,8 +3,11 @@ use crate::networking::types::data_info_host::DataInfoHost;
 use crate::networking::types::data_representation::DataRepr;
 use crate::networking::types::host::Host;
 use crate::networking::types::service::Service;
+use crate::translations::translations::favorite_transmitted_translation;
+use crate::translations::types::language::Language;
 use serde::Serialize;
 use serde::ser::SerializeStruct;
+use serde_json::json;
 
 /// Enum representing the possible notification events.
 #[derive(Clone)]
@@ -36,6 +39,13 @@ impl LoggedNotification {
             LoggedNotification::FavoriteTransmitted(_) => {}
         }
     }
+
+    pub fn to_json(&self) -> String {
+        match self {
+            LoggedNotification::DataThresholdExceeded(d) => d.to_json(),
+            LoggedNotification::FavoriteTransmitted(f) => f.to_json(),
+        }
+    }
 }
 
 #[derive(Clone)]
@@ -50,6 +60,12 @@ pub struct DataThresholdExceeded {
     pub(crate) services: Vec<(Service, DataInfo)>,
 }
 
+impl DataThresholdExceeded {
+    pub fn to_json(&self) -> String {
+        json!({}).to_string()
+    }
+}
+
 #[derive(Clone)]
 pub struct FavoriteTransmitted {
     pub(crate) id: usize,
@@ -58,15 +74,19 @@ pub struct FavoriteTransmitted {
     pub(crate) timestamp: String,
 }
 
-impl Serialize for LoggedNotification {
-    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
-    where
-        S: serde::Serializer,
-    {
-        match self {
-            LoggedNotification::DataThresholdExceeded(d) => d.serialize(serializer),
-            LoggedNotification::FavoriteTransmitted(f) => f.serialize(serializer),
-        }
+impl FavoriteTransmitted {
+    pub fn to_json(&self) -> String {
+        json!({
+            "info": favorite_transmitted_translation(Language::EN),
+            "timestamp": &self.timestamp,
+            "favorite": {
+                "country": &self.host.country.to_string(),
+                "domain": &self.host.domain,
+                "asn": &self.host.asn.name,
+            },
+            "data":DataRepr::Bytes.formatted_string(self.data_info_host.data_info.tot_data(DataRepr::Bytes)),
+        })
+        .to_string()
     }
 }
 
@@ -87,23 +107,6 @@ impl Serialize for DataThresholdExceeded {
         // state.serialize_field("hosts", &self.hosts)?;
         // TODO: service & data information (only this data repr)
         // state.serialize_field("services", &self.services)?;
-        state.end()
-    }
-}
-
-impl Serialize for FavoriteTransmitted {
-    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
-    where
-        S: serde::Serializer,
-    {
-        let mut state = serializer.serialize_struct("DataExchangedFromFavorites", 4)?;
-        state.serialize_field("timestamp", &self.timestamp)?;
-        // TODO: info message translated
-        // state.serialize_field("info", &self.info)?;
-        // TODO: host information
-        // state.serialize_field("host", &self.host)?;
-        // TODO: data information
-        // state.serialize_field("data", &self.data_info_host.data_info)?;
         state.end()
     }
 }

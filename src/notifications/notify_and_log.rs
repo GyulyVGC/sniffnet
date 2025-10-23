@@ -158,7 +158,7 @@ fn send_remote_notification(
             let _ = client
                 .post(remote_notifications.url())
                 .header("User-agent", format!("{SNIFFNET_LOWERCASE}-{APP_VERSION}"))
-                .json(&notification)
+                .body(notification.to_json())
                 .send()
                 .await
                 .log_err(location!());
