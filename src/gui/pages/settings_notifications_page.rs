@@ -73,13 +73,14 @@ pub fn settings_notifications_page<'a>(sniffer: &Sniffer) -> Container<'a, Messa
         .push(Space::with_height(5));
 
     let volume_notification_col = Column::new()
-        .padding(5)
+        .padding(Padding::new(5.0).bottom(0))
         .spacing(10)
         .align_x(Alignment::Center)
         .width(Length::Fill)
         .push(volume_slider(language, font, notifications.volume))
         .push(Scrollable::with_direction(
             Column::new()
+                .padding(Padding::ZERO.bottom(10))
                 .spacing(10)
                 .align_x(Alignment::Center)
                 .width(Length::Fill)
