@@ -178,6 +178,7 @@ impl Sniffer {
                 }) => match key.as_ref() {
                     Key::Character("q") => Some(Message::QuitWrapper),
                     Key::Character("t") => Some(Message::CtrlTPressed),
+                    Key::Named(Named::Space) => Some(Message::CtrlSpacePressed),
                     _ => None,
                 },
                 _ => None,
@@ -188,6 +189,7 @@ impl Sniffer {
                     Modifiers::COMMAND => match key.as_ref() {
                         Key::Character("q") => Some(Message::QuitWrapper),
                         Key::Character("t") => Some(Message::CtrlTPressed),
+                        Key::Named(Named::Space) => Some(Message::CtrlSpacePressed),
                         Key::Character(",") => Some(Message::OpenLastSettings),
                         Key::Named(Named::Backspace) => Some(Message::ResetButtonPressed),
                         Key::Character("d") => Some(Message::CtrlDPressed),
@@ -501,6 +503,14 @@ impl Sniffer {
                     && !self.timing_events.was_just_thumbnail_enter()
                 {
                     return Task::done(Message::ToggleThumbnail(false));
+                }
+            }
+            Message::CtrlSpacePressed => {
+                if self.running_page.is_some()
+                    && self.settings_page.is_none()
+                    && self.modal.is_none()
+                {
+                    return Task::done(Message::Freeze);
                 }
             }
             Message::ScaleFactorShortcut(increase) => {

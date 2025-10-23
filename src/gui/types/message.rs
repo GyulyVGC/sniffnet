@@ -121,6 +121,8 @@ pub enum Message {
     Drag,
     /// Ctrl+T keys have been pressed
     CtrlTPressed,
+    /// Ctrl+Space keys have been pressed
+    CtrlSpacePressed,
     /// Edit scale factor via keyboard shortcut
     ScaleFactorShortcut(bool),
     /// Set new release status
