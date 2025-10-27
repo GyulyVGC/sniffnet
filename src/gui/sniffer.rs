@@ -121,8 +121,10 @@ pub struct Sniffer {
     pub id: Option<Id>,
     /// Host data for filter dropdowns (comboboxes)
     pub host_data_states: HostDataStates,
-    /// Flag reporting whether the live capture is frozen
+    /// Flag reporting whether the packet capture is frozen
     pub frozen: bool,
+    /// Sender to freeze the packet capture
+    freeze_tx: Option<std::sync::mpsc::Sender<()>>,
 }
 
 impl Sniffer {
@@ -163,6 +165,7 @@ impl Sniffer {
             id: None,
             host_data_states: HostDataStates::default(),
             frozen: false,
+            freeze_tx: None,
         }
     }
 
@@ -570,6 +573,9 @@ impl Sniffer {
             }
             Message::Freeze => {
                 self.frozen = !self.frozen;
+                if let Some(tx) = &self.freeze_tx {
+                    let _ = tx.send(());
+                }
             }
         }
         Task::none()
@@ -766,6 +772,7 @@ impl Sniffer {
             self.traffic_chart
                 .change_capture_source(matches!(capture_source, CaptureSource::Device(_)));
             let (tx, rx) = async_channel::unbounded();
+            let (freeze_tx, freeze_rx) = std::sync::mpsc::channel();
             let _ = thread::Builder::new()
                 .name("thread_parse_packets".to_string())
                 .spawn(move || {
@@ -775,10 +782,12 @@ impl Sniffer {
                         &mmdb_readers,
                         capture_context,
                         &tx,
+                        &freeze_rx,
                     );
                 })
                 .log_err(location!());
             self.current_capture_rx.1 = Some(rx.clone());
+            self.freeze_tx = Some(freeze_tx);
             return Task::run(rx, |backend_msg| match backend_msg {
                 BackendTrafficMessage::TickRun(cap_id, msg, host_msg, no_more_packets) => {
                     Message::TickRun(cap_id, msg, host_msg, no_more_packets)
@@ -816,6 +825,8 @@ impl Sniffer {
         self.page_number = 1;
         self.thumbnail = false;
         self.host_data_states = HostDataStates::default();
+        self.frozen = false;
+        self.freeze_tx = None;
     }
 
     fn set_device(&mut self, name: &str) {

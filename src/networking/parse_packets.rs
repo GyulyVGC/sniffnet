@@ -40,6 +40,7 @@ pub fn parse_packets(
     mmdb_readers: &MmdbReaders,
     capture_context: CaptureContext,
     tx: &Sender<BackendTrafficMessage>,
+    freeze_rx: &std::sync::mpsc::Receiver<()>,
 ) {
     let my_link_type = capture_context.my_link_type();
     let (cap, mut savefile) = capture_context.consume();
@@ -52,13 +53,21 @@ pub fn parse_packets(
     // instant of the first parsed packet plus multiples of 1 second (only used in live captures)
     let mut first_packet_ticks = None;
 
-    let (pcap_tx, pcap_rx) = std::sync::mpsc::sync_channel(10_000);
+    let (pcap_tx, pcap_rx) = std::sync::mpsc::sync_channel(0);
     let _ = thread::Builder::new()
         .name("thread_packet_stream".to_string())
         .spawn(move || packet_stream(cap, &pcap_tx))
         .log_err(location!());
 
     loop {
+        // check if we need to freeze the parsing
+        if freeze_rx.try_recv().is_ok() {
+            // wait until unfreeze
+            let _ = freeze_rx.recv();
+            // reset the first packet ticks
+            first_packet_ticks = Some(Instant::now());
+        }
+
         let (packet_res, cap_stats) = pcap_rx
             .recv_timeout(Duration::from_millis(150))
             .unwrap_or((Err(pcap::Error::TimeoutExpired), None));

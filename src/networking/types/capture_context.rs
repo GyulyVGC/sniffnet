@@ -128,7 +128,7 @@ impl CaptureType {
             CaptureSource::Device(device) => {
                 let inactive = Capture::from_device(device.to_pcap_device())?;
                 let cap = inactive
-                    .promisc(true)
+                    .promisc(false)
                     .buffer_size(2_000_000) // 2MB buffer -> 10k packets of 200 bytes
                     .snaplen(if pcap_out_path.is_some() {
                         i32::from(u16::MAX)
