@@ -102,7 +102,7 @@ jobs:
         run: cargo build --release --target ${{ matrix.target }}
 
       - name: Upload build artifacts
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: build-${{ matrix.os }}-${{ matrix.target }}
           path: |
@@ -156,7 +156,7 @@ jobs:
           mv target/${{ matrix.target }}/debian/*.deb artifacts/Sniffnet_LinuxDEB_${{ matrix.arch }}.deb
 
       - name: Upload package artifacts
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: deb-${{ matrix.arch }}
           path: artifacts/
@@ -213,7 +213,7 @@ jobs:
           mv out/*.AppImage /out/Sniffnet_LinuxAppImage_${{ matrix.arch }}.AppImage
 
       - name: Upload package artifacts
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: appimage-${{ matrix.arch }}
           path: /out/
@@ -262,7 +262,7 @@ jobs:
           mv target/${{ matrix.target }}/generate-rpm/*.rpm artifacts/Sniffnet_LinuxRPM_${{ matrix.arch }}.rpm
 
       - name: Upload package artifacts
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: rpm-${{ matrix.arch }}
           path: artifacts/
@@ -326,7 +326,7 @@ jobs:
             "target/release/bundle/osx/"
 
       - name: Upload package artifacts
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: dmg-${{ matrix.arch }}
           path: artifacts/
@@ -383,7 +383,7 @@ jobs:
 
       - name: Upload unsigned package artifacts
         id: upload-unsigned-artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: msi-${{ matrix.arch }}
           path: artifacts/
@@ -401,7 +401,7 @@ jobs:
           output-artifact-directory: './artifacts'
 
       - name: Upload signed package artifacts (overwrite unsigned)
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: msi-${{ matrix.arch }}
           path: artifacts/
