@@ -50,7 +50,7 @@ serde_json = { version = "1.0.145", features = ["preserve_order"] }
 rodio = { version = "0.21.1", default-features = false, features = ["mp3", "playback"] }
 dns-lookup = "3.0.1"
 toml = "0.9.8"
-ctrlc = { version = "3.5.0", features = ["termination"] }
+ctrlc = { version = "3.5.1", features = ["termination"] }
 rfd = "0.15.4"
 phf = "0.13.1"
 phf_shared = "0.13.1"
