@@ -773,6 +773,7 @@ impl Sniffer {
                 .change_capture_source(matches!(capture_source, CaptureSource::Device(_)));
             let (tx, rx) = async_channel::unbounded();
             let (freeze_tx, freeze_rx) = std::sync::mpsc::channel();
+            let filters = self.conf.filters.clone();
             let _ = thread::Builder::new()
                 .name("thread_parse_packets".to_string())
                 .spawn(move || {
@@ -781,8 +782,9 @@ impl Sniffer {
                         capture_source,
                         &mmdb_readers,
                         capture_context,
+                        filters,
                         &tx,
-                        &freeze_rx,
+                        freeze_rx,
                     );
                 })
                 .log_err(location!());

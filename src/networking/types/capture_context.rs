@@ -150,6 +150,22 @@ impl CaptureType {
             Self::Offline(cap) => cap.filter(bpf, true),
         }
     }
+
+    pub fn pause(&mut self) {
+        if let Self::Live(cap) = self {
+            let _ = cap.filter("less 2", true).log_err(location!());
+        }
+    }
+
+    pub fn resume(&mut self, filters: &Filters) {
+        if let Self::Live(cap) = self {
+            if filters.is_some_filter_active() {
+                let _ = cap.filter(filters.bpf(), true).log_err(location!());
+            } else if cap.filter("", true).log_err(location!()).is_err() {
+                let _ = cap.filter("greater 0", true).log_err(location!());
+            }
+        }
+    }
 }
 
 #[derive(Clone)]
