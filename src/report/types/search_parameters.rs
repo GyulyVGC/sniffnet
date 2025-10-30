@@ -190,13 +190,13 @@ impl FilterInputType {
             FilterInputType::Domain => r_dns_host
                 .unwrap_or(&(String::new(), Host::default()))
                 .0
-                .to_string(),
+                .clone(),
             FilterInputType::AsName => r_dns_host
                 .unwrap_or(&(String::new(), Host::default()))
                 .1
                 .asn
                 .name
-                .to_string(),
+                .clone(),
         }
     }
 
