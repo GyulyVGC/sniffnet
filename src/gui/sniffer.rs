@@ -124,7 +124,7 @@ pub struct Sniffer {
     /// Flag reporting whether the packet capture is frozen
     pub frozen: bool,
     /// Sender to freeze the packet capture
-    freeze_tx: Option<std::sync::mpsc::Sender<()>>,
+    freeze_tx: Option<tokio::sync::broadcast::Sender<()>>,
 }
 
 impl Sniffer {
@@ -772,7 +772,8 @@ impl Sniffer {
             self.traffic_chart
                 .change_capture_source(matches!(capture_source, CaptureSource::Device(_)));
             let (tx, rx) = async_channel::unbounded();
-            let (freeze_tx, freeze_rx) = std::sync::mpsc::channel();
+            let (freeze_tx, freeze_rx) = tokio::sync::broadcast::channel(65535);
+            let freeze_rx2 = freeze_tx.subscribe();
             let filters = self.conf.filters.clone();
             let _ = thread::Builder::new()
                 .name("thread_parse_packets".to_string())
@@ -784,7 +785,7 @@ impl Sniffer {
                         capture_context,
                         filters,
                         &tx,
-                        freeze_rx,
+                        (freeze_rx, freeze_rx2),
                     );
                 })
                 .log_err(location!());

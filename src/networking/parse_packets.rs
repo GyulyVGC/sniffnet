@@ -30,10 +30,10 @@ use etherparse::{EtherType, LaxPacketHeaders};
 use pcap::{Address, Packet, PacketHeader};
 use std::collections::HashMap;
 use std::net::IpAddr;
-use std::sync::mpsc::Receiver;
 use std::sync::{Arc, Mutex};
 use std::thread;
 use std::time::{Duration, Instant};
+use tokio::sync::broadcast::Receiver;
 
 /// The calling thread enters a loop in which it waits for network packets
 pub fn parse_packets(
@@ -43,8 +43,10 @@ pub fn parse_packets(
     capture_context: CaptureContext,
     filters: Filters,
     tx: &Sender<BackendTrafficMessage>,
-    freeze_rx: Receiver<()>,
+    freeze_rxs: (Receiver<()>, Receiver<()>),
 ) {
+    let (mut freeze_rx, mut freeze_rx2) = freeze_rxs;
+
     let my_link_type = capture_context.my_link_type();
     let (cap, mut savefile) = capture_context.consume();
 
@@ -59,19 +61,17 @@ pub fn parse_packets(
     let (pcap_tx, pcap_rx) = std::sync::mpsc::sync_channel(10_000);
     let _ = thread::Builder::new()
         .name("thread_packet_stream".to_string())
-        .spawn(move || packet_stream(cap, &pcap_tx, &freeze_rx, &filters))
+        .spawn(move || packet_stream(cap, &pcap_tx, &mut freeze_rx2, &filters))
         .log_err(location!());
 
     loop {
         // // check if we need to freeze the parsing
-        // if freeze_rx.try_recv().is_ok() {
-        //     // wait until unfreeze
-        //     let _ = freeze_rx.recv();
-        //     // discard old buffered packets
-        //
-        //     // reset the first packet ticks
-        //     first_packet_ticks = Some(Instant::now());
-        // }
+        if freeze_rx.try_recv().is_ok() {
+            // wait until unfreeze
+            let _ = freeze_rx.blocking_recv();
+            // reset the first packet ticks
+            first_packet_ticks = Some(Instant::now());
+        }
 
         let (packet_res, cap_stats) = pcap_rx
             .recv_timeout(Duration::from_millis(150))
@@ -500,7 +500,7 @@ fn maybe_send_tick_run_offline(
 fn packet_stream(
     mut cap: CaptureType,
     tx: &std::sync::mpsc::SyncSender<(Result<PacketOwned, pcap::Error>, Option<pcap::Stat>)>,
-    freeze_rx: &Receiver<()>,
+    freeze_rx: &mut Receiver<()>,
     filters: &Filters,
 ) {
     loop {
@@ -509,7 +509,7 @@ fn packet_stream(
             // pause the capture
             cap.pause();
             // wait until unfreeze
-            let _ = freeze_rx.recv();
+            let _ = freeze_rx.blocking_recv();
             // resume the capture
             cap.resume(filters);
         }
