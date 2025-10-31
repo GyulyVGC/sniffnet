@@ -258,7 +258,7 @@ fn get_col_adapter(
                                     ButtonType::BorderedRound
                                 },
                             )
-                            .on_press(Message::DeviceSelection(name.to_string())),
+                            .on_press(Message::DeviceSelection(name.clone())),
                         )
                     },
                 ),
@@ -272,7 +272,7 @@ fn get_col_import_pcap<'a>(
     language: Language,
     font: Font,
     cs: &CaptureSource,
-    path: &String,
+    path: &str,
 ) -> Column<'a, Message, StyleType> {
     let is_import_pcap_set = matches!(cs, CaptureSource::File(_));
 
@@ -280,7 +280,7 @@ fn get_col_import_pcap<'a>(
         .align_y(Alignment::Center)
         .push(Text::new(get_path_termination_string(path, 25)).font(font))
         .push(button_open_file(
-            path.clone(),
+            path.to_string(),
             FileInfo::PcapImport,
             language,
             font,

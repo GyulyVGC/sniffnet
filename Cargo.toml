@@ -44,18 +44,18 @@ plotters = { version = "0.3.7", default-features = false, features = ["area_seri
 iced = { version = "0.13.1", features = ["tokio", "svg", "advanced", "lazy", "image"] }
 plotters-iced = "0.11.0"
 maxminddb = "0.26.0"
-confy = "1.0.0"
+confy = "2.0.0"
 serde = { version = "1.0.228", default-features = false, features = ["derive"] }
 serde_json = { version = "1.0.145", features = ["preserve_order"] }
 rodio = { version = "0.21.1", default-features = false, features = ["mp3", "playback"] }
 dns-lookup = "3.0.1"
 toml = "0.9.8"
-ctrlc = { version = "3.5.0", features = ["termination"] }
+ctrlc = { version = "3.5.1", features = ["termination"] }
 rfd = "0.15.4"
 phf = "0.13.1"
 phf_shared = "0.13.1"
 splines = "5.0.0"
-clap = { version = "4.5.50", features = ["derive"] }
+clap = { version = "4.5.51", features = ["derive"] }
 tokio = { version = "1.48.0", features = ["macros"] }
 async-channel = "2.5.0"
 semver = "1.0.27"

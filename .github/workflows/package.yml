@@ -102,7 +102,7 @@ jobs:
         run: cargo build --release --target ${{ matrix.target }}
 
       - name: Upload build artifacts
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: build-${{ matrix.os }}-${{ matrix.target }}
           path: |
@@ -143,7 +143,7 @@ jobs:
       - name: Install packaging tools
         run: cargo install cargo-deb
 
-      - uses: actions/download-artifact@v5
+      - uses: actions/download-artifact@v6
         with:
           name: build-ubuntu-${{ matrix.target }}
           path: target/
@@ -156,7 +156,7 @@ jobs:
           mv target/${{ matrix.target }}/debian/*.deb artifacts/Sniffnet_LinuxDEB_${{ matrix.arch }}.deb
 
       - name: Upload package artifacts
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: deb-${{ matrix.arch }}
           path: artifacts/
@@ -189,7 +189,7 @@ jobs:
         run: apt-get update -y && apt-get install -y git build-essential graphicsmagick-imagemagick-compat wget file desktop-file-utils libfuse2
 
       - name: Download Debian package
-        uses: actions/download-artifact@v5
+        uses: actions/download-artifact@v6
         with:
           name: deb-${{ matrix.arch }}
           path: /target/
@@ -213,7 +213,7 @@ jobs:
           mv out/*.AppImage /out/Sniffnet_LinuxAppImage_${{ matrix.arch }}.AppImage
 
       - name: Upload package artifacts
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: appimage-${{ matrix.arch }}
           path: /out/
@@ -248,7 +248,7 @@ jobs:
       - name: Install packaging tools
         run: cargo install cargo-generate-rpm
 
-      - uses: actions/download-artifact@v5
+      - uses: actions/download-artifact@v6
         with:
           name: build-ubuntu-${{ matrix.target }}
           path: target/
@@ -262,7 +262,7 @@ jobs:
           mv target/${{ matrix.target }}/generate-rpm/*.rpm artifacts/Sniffnet_LinuxRPM_${{ matrix.arch }}.rpm
 
       - name: Upload package artifacts
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: rpm-${{ matrix.arch }}
           path: artifacts/
@@ -292,7 +292,7 @@ jobs:
           cargo install toml-cli
           brew install create-dmg
 
-      - uses: actions/download-artifact@v5
+      - uses: actions/download-artifact@v6
         with:
           name: build-macos-${{ matrix.target }}
           path: target/
@@ -326,7 +326,7 @@ jobs:
             "target/release/bundle/osx/"
 
       - name: Upload package artifacts
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: dmg-${{ matrix.arch }}
           path: artifacts/
@@ -369,7 +369,7 @@ jobs:
       - name: Install packaging tools
         run: cargo install cargo-wix
 
-      - uses: actions/download-artifact@v5
+      - uses: actions/download-artifact@v6
         with:
           name: build-windows-${{ matrix.target }}
           path: target/
@@ -383,14 +383,14 @@ jobs:
 
       - name: Upload unsigned package artifacts
         id: upload-unsigned-artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: msi-${{ matrix.arch }}
           path: artifacts/
           if-no-files-found: error
 
       - name: Sign package artifacts
-        uses: signpath/github-action-submit-signing-request@v1.3
+        uses: signpath/github-action-submit-signing-request@v2.0
         with:
           api-token: '${{ secrets.SIGNPATH_API_TOKEN }}'
           organization-id: '3b533e02-73c3-4908-a018-d09a34498a6a'
@@ -401,7 +401,7 @@ jobs:
           output-artifact-directory: './artifacts'
 
       - name: Upload signed package artifacts (overwrite unsigned)
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: msi-${{ matrix.arch }}
           path: artifacts/
