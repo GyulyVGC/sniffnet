@@ -45,7 +45,7 @@ pub fn parse_packets(
     tx: &Sender<BackendTrafficMessage>,
     freeze_rxs: (Receiver<()>, Receiver<()>),
 ) {
-    let (mut freeze_rx, mut freeze_rx2) = freeze_rxs;
+    let (mut freeze_rx, mut freeze_rx_2) = freeze_rxs;
 
     let my_link_type = capture_context.my_link_type();
     let (cap, mut savefile) = capture_context.consume();
@@ -61,7 +61,7 @@ pub fn parse_packets(
     let (pcap_tx, pcap_rx) = std::sync::mpsc::sync_channel(10_000);
     let _ = thread::Builder::new()
         .name("thread_packet_stream".to_string())
-        .spawn(move || packet_stream(cap, &pcap_tx, &mut freeze_rx2, &filters))
+        .spawn(move || packet_stream(cap, &pcap_tx, &mut freeze_rx_2, &filters))
         .log_err(location!());
 
     loop {
