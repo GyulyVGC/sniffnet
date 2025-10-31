@@ -4,6 +4,7 @@ All Sniffnet releases with the relative changes are documented in this file.
 
 ## [UNRELEASED]
 - Send remote notifications via webhook ([#991](https://github.com/GyulyVGC/sniffnet/pull/991) — fixes [#841](https://github.com/GyulyVGC/sniffnet/issues/841))
+- Pause and resume packet captures ([#992](https://github.com/GyulyVGC/sniffnet/pull/992) — fixes [#551](https://github.com/GyulyVGC/sniffnet/issues/551))
 - Added Czech translation 🇨🇿 ([#960](https://github.com/GyulyVGC/sniffnet/pull/960))
 - Improve update checks using `semver` ([#891](https://github.com/GyulyVGC/sniffnet/pull/891))
 - Build the app also for Windows ARM64 (fixes [#988](https://github.com/GyulyVGC/sniffnet/issues/988))

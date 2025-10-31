@@ -15,6 +15,7 @@ use crate::gui::types::message::Message;
 use crate::gui::types::settings::Settings;
 use crate::translations::translations::{quit_analysis_translation, settings_translation};
 use crate::translations::translations_3::thumbnail_mode_translation;
+use crate::translations::translations_4::{pause_translation, resume_translation};
 use crate::utils::types::icon::Icon;
 use crate::{Language, SNIFFNET_TITLECASE, StyleType};
 
@@ -37,6 +38,7 @@ pub fn header(sniffer: &Sniffer) -> Container<'_, Message, StyleType> {
             language,
             color_gradient,
             unread_notifications,
+            sniffer.frozen,
         );
     }
 
@@ -60,10 +62,15 @@ pub fn header(sniffer: &Sniffer) -> Container<'_, Message, StyleType> {
                 Container::new(Space::with_width(60))
             })
             .push(horizontal_space())
-            .push(Container::new(Space::with_width(40)))
+            .push(Container::new(Space::with_width(80)))
             .push(Space::with_width(20))
             .push(logo)
             .push(Space::with_width(20))
+            .push(if is_running {
+                Container::new(get_button_freeze(font, language, sniffer.frozen, false))
+            } else {
+                Container::new(Space::with_width(40))
+            })
             .push(if is_running {
                 Container::new(get_button_minimize(font, language, false))
             } else {
@@ -161,9 +168,56 @@ pub fn get_button_minimize<'a>(
     .class(ButtonType::Thumbnail)
     .on_press(Message::ToggleThumbnail(false));
 
-    Tooltip::new(content, Text::new(tooltip).font(font), Position::Right)
-        .gap(0)
-        .class(tooltip_style)
+    Tooltip::new(
+        content,
+        Text::new(tooltip).font(font),
+        Position::FollowCursor,
+    )
+    .gap(0)
+    .class(tooltip_style)
+}
+
+pub fn get_button_freeze<'a>(
+    font: Font,
+    language: Language,
+    frozen: bool,
+    thumbnail: bool,
+) -> Tooltip<'a, Message, StyleType> {
+    let size = if thumbnail { 19 } else { 23 };
+    let button_size = if thumbnail { 30 } else { 40 };
+    let icon = if frozen { Icon::Resume } else { Icon::Pause };
+    let tooltip = if thumbnail {
+        ""
+    } else if frozen {
+        resume_translation(language)
+    } else {
+        pause_translation(language)
+    };
+    let tooltip_style = if thumbnail {
+        ContainerType::Standard
+    } else {
+        ContainerType::Tooltip
+    };
+
+    let content = button(
+        icon.to_text()
+            .size(size)
+            .align_x(Alignment::Center)
+            .align_y(Alignment::Center),
+    )
+    .padding(0)
+    .height(button_size)
+    .width(button_size)
+    .class(ButtonType::Thumbnail)
+    .on_press(Message::Freeze);
+
+    Tooltip::new(
+        content,
+        Text::new(tooltip).font(font),
+        Position::FollowCursor,
+    )
+    .gap(0)
+    .class(tooltip_style)
 }
 
 fn thumbnail_header<'a>(
@@ -172,14 +226,16 @@ fn thumbnail_header<'a>(
     language: Language,
     color_gradient: GradientType,
     unread_notifications: usize,
+    frozen: bool,
 ) -> Container<'a, Message, StyleType> {
     Container::new(
         Row::new()
             .align_y(Alignment::Center)
             .push(horizontal_space())
-            .push(Space::with_width(80))
+            .push(Space::with_width(110))
             .push(Text::new(SNIFFNET_TITLECASE).font(font_headers))
             .push(Space::with_width(10))
+            .push(get_button_freeze(font, language, frozen, true))
             .push(get_button_minimize(font, language, true))
             .push(horizontal_space())
             .push(if unread_notifications > 0 {
