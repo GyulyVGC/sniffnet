@@ -2,6 +2,7 @@ use std::net::IpAddr;
 
 use crate::countries::country_utils::{get_computer_tooltip, get_flag_tooltip};
 use crate::gui::components::button::button_hide;
+use crate::gui::components::types::my_tooltip::MyTooltip;
 use crate::gui::styles::container::ContainerType;
 use crate::gui::styles::scrollbar::ScrollbarType;
 use crate::gui::styles::style_constants::FONT_SIZE_TITLE;
@@ -36,10 +37,11 @@ use crate::translations::translations_3::{
 use crate::utils::formatted_strings::{get_formatted_timestamp, get_socket_address};
 use crate::utils::types::icon::Icon;
 use crate::{Language, Protocol, Sniffer, StyleType};
+use iced::Element;
 use iced::alignment::Vertical;
 use iced::widget::scrollable::Direction;
 use iced::widget::tooltip::Position;
-use iced::widget::{Column, Container, Row, Text, Tooltip};
+use iced::widget::{Column, Container, Row, Text};
 use iced::widget::{Rule, Scrollable, button, horizontal_space, vertical_space};
 use iced::{Alignment, Font, Length, Padding};
 
@@ -79,6 +81,7 @@ fn page_content<'a>(sniffer: &Sniffer, key: &AddressPortPair) -> Container<'a, M
         font_headers,
         color_gradient,
         language,
+        true,
     ));
 
     let mut source_caption = Row::new().align_y(Alignment::Center).spacing(10).push(
@@ -97,7 +100,7 @@ fn page_content<'a>(sniffer: &Sniffer, key: &AddressPortPair) -> Container<'a, M
     if let Some((r_dns, host)) = host_option {
         host_info_col = get_host_info_col(&r_dns, &host, font, language);
         let host_info = host_info_option.unwrap_or_default();
-        let flag = get_flag_tooltip(host.country, &host_info, language, font, false);
+        let flag = get_flag_tooltip(host.country, &host_info, language, font, false, true);
         let computer = get_local_tooltip(sniffer, &address_to_lookup, key);
         if address_to_lookup.eq(&key.address1) {
             source_caption = source_caption.push(flag);
@@ -148,6 +151,7 @@ fn page_header<'a>(
     font_headers: Font,
     color_gradient: GradientType,
     language: Language,
+    show_tooltip: bool
 ) -> Container<'a, Message, StyleType> {
     Container::new(
         Row::new()
@@ -160,7 +164,7 @@ fn page_header<'a>(
                     .align_x(Alignment::Center),
             )
             .push(
-                Container::new(button_hide(Message::HideModal, language, font))
+                Container::new(button_hide(Message::HideModal, language, font, show_tooltip))
                     .width(Length::Fill)
                     .align_x(Alignment::Center),
             ),
@@ -299,7 +303,7 @@ fn get_local_tooltip<'a>(
     sniffer: &Sniffer,
     address_to_lookup: &IpAddr,
     key: &AddressPortPair,
-) -> Tooltip<'a, Message, StyleType> {
+) -> Element<'a, Message, StyleType> {
     let Settings {
         style, language, ..
     } = sniffer.conf.settings;
@@ -325,6 +329,7 @@ fn get_local_tooltip<'a>(
         ),
         language,
         style.get_extension().font,
+        true,
     )
 }
 
@@ -407,7 +412,7 @@ fn get_button_copy<'a>(
     font: Font,
     ip: &IpAddr,
     timing_events: &TimingEvents,
-) -> Tooltip<'a, Message, StyleType> {
+) -> Element<'a, Message, StyleType> {
     let icon = if timing_events.was_just_copy_ip(ip) {
         Text::new("✔").font(font).size(14)
     } else {
@@ -420,11 +425,13 @@ fn get_button_copy<'a>(
         .width(25)
         .on_press(Message::CopyIp(*ip));
 
-    Tooltip::new(
+    MyTooltip::new(
         content,
         Text::new(format!("{} (IP)", copy_translation(language))).font(font),
-        Position::Right,
     )
-    .gap(5)
-    .class(ContainerType::Tooltip)
+    .enabled(true)
+    .position(Position::Right)
+    .gap(5.0)
+    .style(ContainerType::Tooltip)
+    .build()
 }

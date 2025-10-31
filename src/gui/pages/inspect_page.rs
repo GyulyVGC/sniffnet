@@ -6,13 +6,14 @@ use iced::widget::text_input::Side;
 use iced::widget::tooltip::Position;
 use iced::widget::{Button, Column, Container, Row, Scrollable, Text, TextInput};
 use iced::widget::{
-    ComboBox, Rule, Space, Toggler, Tooltip, button, combo_box, horizontal_space, text_input,
+    ComboBox, Rule, Space, Toggler, button, combo_box, horizontal_space, text_input,
     vertical_space,
 };
 use iced::{Alignment, Font, Length, Padding, Pixels, alignment};
 
 use crate::gui::components::tab::get_pages_tabs;
 use crate::gui::components::types::my_modal::MyModal;
+use crate::gui::components::types::my_tooltip::MyTooltip;
 use crate::gui::pages::overview_page::{get_bars, get_bars_length};
 use crate::gui::styles::button::ButtonType;
 use crate::gui::styles::container::ContainerType;
@@ -78,6 +79,7 @@ pub fn inspect_page(sniffer: &Sniffer) -> Container<'_, Message, StyleType> {
             font,
             sniffer.conf.report_sort_type,
             sniffer.traffic_chart.data_repr,
+            sniffer.settings_page.is_none() && sniffer.modal.is_none(),
         ))
         .push(Space::with_height(4))
         .push(Rule::horizontal(5))
@@ -187,6 +189,7 @@ fn report_header_row(
     font: Font,
     sort_type: SortType,
     data_repr: DataRepr,
+    show_tooltip: bool,
 ) -> Row<'_, Message, StyleType> {
     let mut ret_val = Row::new().padding([0, 2]).align_y(Alignment::Center);
     for report_col in ReportCol::ALL {
@@ -205,12 +208,15 @@ fn report_header_row(
         } else {
             ContainerType::Tooltip
         };
-        let title_tooltip = Tooltip::new(
-            title_row,
-            Text::new(tooltip_val).font(font),
-            Position::FollowCursor,
-        )
-        .class(tooltip_style);
+
+        let title_tooltip = MyTooltip::new(
+                title_row,
+                Text::new(tooltip_val).font(font),
+            )
+            .position(Position::FollowCursor)
+            .style(tooltip_style)
+            .enabled(show_tooltip)
+            .build();
 
         let mut col_header = Column::new()
             .align_x(Alignment::Center)

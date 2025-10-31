@@ -598,6 +598,7 @@ impl Sniffer {
             font_headers,
             self.newer_release_available,
             &self.dots_pulse,
+            self.settings_page.is_none() && self.modal.is_none(),
         );
 
         let content: Element<Message, StyleType> =

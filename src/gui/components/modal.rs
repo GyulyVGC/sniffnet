@@ -100,7 +100,7 @@ fn get_modal_header<'a>(
                     .align_x(Alignment::Center),
             )
             .push(
-                Container::new(button_hide(Message::HideModal, language, font))
+                Container::new(button_hide(Message::HideModal, language, font, true))
                     .width(Length::Fill)
                     .align_x(Alignment::Center),
             ),

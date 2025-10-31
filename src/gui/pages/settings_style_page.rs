@@ -311,6 +311,7 @@ fn lazy_custom_style_input<'a>(
             font,
             true,
             Message::LoadStyle,
+            true,
         ));
 
     let mut content = Column::new()

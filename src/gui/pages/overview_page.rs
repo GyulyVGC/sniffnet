@@ -7,6 +7,7 @@ use crate::chart::types::donut_chart::donut_chart;
 use crate::countries::country_utils::get_flag_tooltip;
 use crate::countries::flags_pictures::{FLAGS_HEIGHT_BIG, FLAGS_WIDTH_BIG};
 use crate::gui::components::tab::get_pages_tabs;
+use crate::gui::components::types::my_tooltip::MyTooltip;
 use crate::gui::sniffer::Sniffer;
 use crate::gui::styles::button::ButtonType;
 use crate::gui::styles::container::ContainerType;
@@ -45,7 +46,7 @@ use iced::widget::scrollable::Direction;
 use iced::widget::text::LineHeight;
 use iced::widget::tooltip::Position;
 use iced::widget::{
-    Button, Column, Container, Row, Rule, Scrollable, Space, Text, Tooltip, button,
+    Button, Column, Container, Row, Rule, Scrollable, Space, Text, button,
     horizontal_space, vertical_space,
 };
 use iced::{Alignment, Element, Font, Length, Padding};
@@ -241,7 +242,7 @@ fn col_host<'a>(sniffer: &Sniffer) -> Column<'a, Message, StyleType> {
 
     for (host, data_info_host) in &entries {
         let star_button = get_star_button(data_info_host.is_favorite, host.clone());
-
+        let show_tooltip = sniffer.settings_page.is_none() && sniffer.modal.is_none();
         let host_bar = host_bar(
             host,
             data_info_host,
@@ -249,6 +250,7 @@ fn col_host<'a>(sniffer: &Sniffer) -> Column<'a, Message, StyleType> {
             first_entry_data_info,
             font,
             language,
+            show_tooltip,
         );
 
         let content = Row::new()
@@ -374,6 +376,7 @@ pub fn host_bar<'a>(
     first_entry_data_info: DataInfo,
     font: Font,
     language: Language,
+    show_tooltip: bool,
 ) -> Row<'a, Message, StyleType> {
     let (incoming_bar_len, outgoing_bar_len) =
         get_bars_length(data_repr, &first_entry_data_info, &data_info_host.data_info);
@@ -388,6 +391,7 @@ pub fn host_bar<'a>(
             language,
             font,
             false,
+            show_tooltip,
         ))
         .push(
             Column::new()
@@ -457,6 +461,7 @@ fn col_info(sniffer: &Sniffer) -> Container<'_, Message, StyleType> {
         font,
         &sniffer.capture_source,
         &sniffer.conf.filters,
+        sniffer.settings_page.is_none() && sniffer.modal.is_none(),
     );
 
     let col_data_representation =
@@ -518,6 +523,7 @@ fn col_device<'a>(
     font: Font,
     cs: &CaptureSource,
     filters: &'a Filters,
+    show_tooltip: bool,
 ) -> Column<'a, Message, StyleType> {
     let link_type = cs.get_link_type();
     #[cfg(not(target_os = "windows"))]
@@ -529,7 +535,7 @@ fn col_device<'a>(
         Row::new()
             .spacing(10)
             .push(Text::new("BPF").font(font))
-            .push(get_info_tooltip(filters.bpf().to_string(), font))
+            .push(get_info_tooltip(filters.bpf().to_string(), font, show_tooltip))
             .into()
     } else {
         Text::new(none_translation(language)).font(font).into()
@@ -552,6 +558,7 @@ fn col_device<'a>(
                         .push(get_info_tooltip(
                             link_type.full_print_on_one_line(language),
                             font,
+                            show_tooltip,
                         )),
                 ),
         )
@@ -787,8 +794,8 @@ fn get_star_button<'a>(is_favorite: bool, host: Host) -> Button<'a, Message, Sty
     .on_press(Message::AddOrRemoveFavorite(host, !is_favorite))
 }
 
-fn get_info_tooltip<'a>(info_str: String, font: Font) -> Tooltip<'a, Message, StyleType> {
-    Tooltip::new(
+fn get_info_tooltip<'a>(info_str: String, font: Font, show_tooltip: bool) -> Element<'a, Message, StyleType> {
+    MyTooltip::new(
         Container::new(
             Text::new("i")
                 .size(FONT_SIZE_FOOTER)
@@ -801,9 +808,11 @@ fn get_info_tooltip<'a>(info_str: String, font: Font) -> Tooltip<'a, Message, St
         .width(20)
         .class(ContainerType::BadgeInfo),
         Text::new(info_str).font(font),
-        Position::FollowCursor,
     )
-    .class(ContainerType::Tooltip)
+    .enabled(show_tooltip)
+    .position(Position::FollowCursor)
+    .build()
+
 }
 
 fn sort_arrows<'a>(

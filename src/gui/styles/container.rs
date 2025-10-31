@@ -24,6 +24,7 @@ pub enum ContainerType {
     Highlighted,
     HighlightedOnHeader,
     ModalBackground,
+    Transparent,
 }
 
 impl ContainerType {
@@ -54,7 +55,7 @@ impl ContainerType {
                 ContainerType::Modal | ContainerType::HighlightedOnHeader => {
                     Background::Color(colors.primary)
                 }
-                ContainerType::Standard | ContainerType::Palette => {
+                ContainerType::Standard | ContainerType::Palette | ContainerType::Transparent => {
                     Background::Color(Color::TRANSPARENT)
                 }
                 ContainerType::ModalBackground => Background::Color(Color {
@@ -78,7 +79,8 @@ impl ContainerType {
                     | ContainerType::ModalBackground
                     | ContainerType::Gradient(_)
                     | ContainerType::HighlightedOnHeader
-                    | ContainerType::Highlighted => 0.0,
+                    | ContainerType::Highlighted
+                    | ContainerType::Transparent => 0.0,
                     ContainerType::Tooltip => BORDER_WIDTH / 2.0,
                     ContainerType::BorderedRound => BORDER_WIDTH * 2.0,
                     _ => BORDER_WIDTH,

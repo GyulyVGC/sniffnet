@@ -1,12 +1,14 @@
 //! GUI bottom footer
 
+use iced::Element;
 use iced::widget::text::LineHeight;
 use iced::widget::tooltip::Position;
-use iced::widget::{Column, Container, Row, Text, Tooltip, button, rich_text, span};
+use iced::widget::{Column, Container, Row, Text, button, rich_text, span};
 use iced::widget::{Space, horizontal_space};
 use iced::{Alignment, Font, Length, Padding};
 
 use crate::gui::components::button::row_open_link_tooltip;
+use crate::gui::components::types::my_tooltip::MyTooltip;
 use crate::gui::styles::button::ButtonType;
 use crate::gui::styles::container::ContainerType;
 use crate::gui::styles::style_constants::{FONT_SIZE_FOOTER, FONT_SIZE_SUBTITLE};
@@ -28,6 +30,7 @@ pub fn footer<'a>(
     font_footer: Font,
     newer_release_available: Option<bool>,
     dots_pulse: &(String, u8),
+    show_tooltips: bool,
 ) -> Container<'a, Message, StyleType> {
     if thumbnail {
         return thumbnail_footer();
@@ -39,6 +42,7 @@ pub fn footer<'a>(
         font_footer,
         newer_release_available,
         &dots_pulse.0,
+        show_tooltips,
     );
 
     let heart_size = match dots_pulse.1 {
@@ -52,11 +56,11 @@ pub fn footer<'a>(
         .padding([0, 20])
         .align_y(Alignment::Center)
         .push(release_details_row)
-        .push(get_button_feedback(font))
-        .push(get_button_wiki(font))
-        .push(get_button_github(font))
-        .push(get_button_news(font))
-        .push(get_button_sponsor(font))
+        .push(get_button_feedback(font, show_tooltips))
+        .push(get_button_wiki(font, show_tooltips))
+        .push(get_button_github(font, show_tooltips))
+        .push(get_button_news(font, show_tooltips))
+        .push(get_button_sponsor(font, show_tooltips))
         .push(
             Column::new()
                 .width(Length::Fill)
@@ -97,7 +101,7 @@ pub fn footer<'a>(
         .class(ContainerType::Gradient(color_gradient))
 }
 
-fn get_button_feedback<'a>(font: Font) -> Tooltip<'a, Message, StyleType> {
+fn get_button_feedback<'a>(font: Font, show_tooltip: bool) -> Element<'a, Message, StyleType> {
     let content = button(
         Icon::Roadmap
             .to_text()
@@ -111,16 +115,15 @@ fn get_button_feedback<'a>(font: Font) -> Tooltip<'a, Message, StyleType> {
     .width(30)
     .on_press(Message::OpenWebPage(WebPage::Roadmap));
 
-    Tooltip::new(
-        content,
-        row_open_link_tooltip("Roadmap", font),
-        Position::Top,
-    )
-    .gap(10)
-    .class(ContainerType::Tooltip)
+    MyTooltip::new(content, row_open_link_tooltip("Roadmap", font))
+        .enabled(show_tooltip)
+        .position(Position::Top)
+        .gap(10.0)
+        .style(ContainerType::Tooltip)
+        .build()
 }
 
-fn get_button_wiki<'a>(font: Font) -> Tooltip<'a, Message, StyleType> {
+fn get_button_wiki<'a>(font: Font, show_tooltip: bool) -> Element<'a, Message, StyleType> {
     let content = button(
         Icon::Book
             .to_text()
@@ -134,12 +137,15 @@ fn get_button_wiki<'a>(font: Font) -> Tooltip<'a, Message, StyleType> {
     .width(35)
     .on_press(Message::OpenWebPage(WebPage::Wiki));
 
-    Tooltip::new(content, row_open_link_tooltip("Wiki", font), Position::Top)
+    MyTooltip::new(content, row_open_link_tooltip("Wiki", font))
+        .enabled(show_tooltip)
+        .position(Position::Top)
         .gap(7.5)
-        .class(ContainerType::Tooltip)
+        .style(ContainerType::Tooltip)
+        .build()
 }
 
-fn get_button_github<'a>(font: Font) -> Tooltip<'a, Message, StyleType> {
+fn get_button_github<'a>(font: Font, show_tooltip: bool) -> Element<'a, Message, StyleType> {
     let content = button(
         Icon::GitHub
             .to_text()
@@ -152,16 +158,15 @@ fn get_button_github<'a>(font: Font) -> Tooltip<'a, Message, StyleType> {
     .width(40)
     .on_press(Message::OpenWebPage(WebPage::Repo));
 
-    Tooltip::new(
-        content,
-        row_open_link_tooltip("GitHub", font),
-        Position::Top,
-    )
-    .gap(5)
-    .class(ContainerType::Tooltip)
+    MyTooltip::new(content, row_open_link_tooltip("Github", font))
+        .enabled(show_tooltip)
+        .position(Position::Top)
+        .gap(5.0)
+        .style(ContainerType::Tooltip)
+        .build()
 }
 
-fn get_button_news<'a>(font: Font) -> Tooltip<'a, Message, StyleType> {
+fn get_button_news<'a>(font: Font, show_tooltip: bool) -> Element<'a, Message, StyleType> {
     let content = button(
         Icon::News
             .to_text()
@@ -174,12 +179,15 @@ fn get_button_news<'a>(font: Font) -> Tooltip<'a, Message, StyleType> {
     .width(35)
     .on_press(Message::OpenWebPage(WebPage::WebsiteNews));
 
-    Tooltip::new(content, row_open_link_tooltip("News", font), Position::Top)
+    MyTooltip::new(content, row_open_link_tooltip("News", font))
+        .enabled(show_tooltip)
+        .position(Position::Top)
         .gap(7.5)
-        .class(ContainerType::Tooltip)
+        .style(ContainerType::Tooltip)
+        .build()
 }
 
-fn get_button_sponsor<'a>(font: Font) -> Tooltip<'a, Message, StyleType> {
+fn get_button_sponsor<'a>(font: Font, show_tooltip: bool) -> Element<'a, Message, StyleType> {
     let content = button(
         Text::new('❤'.to_string())
             .font(font)
@@ -194,13 +202,12 @@ fn get_button_sponsor<'a>(font: Font) -> Tooltip<'a, Message, StyleType> {
     .width(30)
     .on_press(Message::OpenWebPage(WebPage::WebsiteSponsor));
 
-    Tooltip::new(
-        content,
-        row_open_link_tooltip("Sponsor", font),
-        Position::Top,
-    )
-    .gap(10)
-    .class(ContainerType::Tooltip)
+    MyTooltip::new(content, row_open_link_tooltip("Sponsor", font))
+        .enabled(show_tooltip)
+        .position(Position::Top)
+        .gap(10.0)
+        .style(ContainerType::Tooltip)
+        .build()
 }
 
 fn get_release_details<'a>(
@@ -209,6 +216,7 @@ fn get_release_details<'a>(
     font_footer: Font,
     newer_release_available: Option<bool>,
     dots: &str,
+    show_tooltip: bool,
 ) -> Row<'a, Message, StyleType> {
     let mut ret_val = Row::new()
         .align_y(Alignment::Center)
@@ -240,13 +248,17 @@ fn get_release_details<'a>(
             .width(35)
             .class(ButtonType::Alert)
             .on_press(Message::OpenWebPage(WebPage::WebsiteDownload));
-            let tooltip = Tooltip::new(
+
+            let tooltip = MyTooltip::new(
                 button,
                 row_open_link_tooltip(new_version_available_translation(language), font),
-                Position::Top,
             )
+            .enabled(show_tooltip)
+            .position(Position::Top)
             .gap(7.5)
-            .class(ContainerType::Tooltip);
+            .style(ContainerType::Tooltip)
+            .build();
+
             ret_val = ret_val.push(Space::with_width(10)).push(tooltip);
         } else {
             // this is the latest release

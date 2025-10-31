@@ -1,12 +1,14 @@
+use iced::Element;
 use iced::widget::text::LineHeight;
 use iced::widget::tooltip::Position;
 use iced::widget::{
-    Column, Container, PickList, Row, Rule, Slider, Space, Text, Tooltip, button, vertical_space,
+    Column, Container, PickList, Row, Rule, Slider, Space, Text, button, vertical_space,
 };
 use iced::{Alignment, Font, Length, Padding};
 
 use crate::gui::components::button::{button_open_file, row_open_link_tooltip};
 use crate::gui::components::tab::get_settings_tabs;
+use crate::gui::components::types::my_tooltip::MyTooltip;
 use crate::gui::pages::settings_notifications_page::settings_header;
 use crate::gui::pages::types::settings_page::SettingsPage;
 use crate::gui::styles::button::ButtonType;
@@ -117,29 +119,32 @@ fn language_picklist<'a>(language: Language, font: Font) -> Container<'a, Messag
         .spacing(10)
         .push(language.get_flag());
     if !language.is_up_to_date() {
+        let button = button(
+            Text::new("!")
+                .class(TextType::Danger)
+                .font(font)
+                .align_y(Alignment::Center)
+                .align_x(Alignment::Center)
+                .size(15)
+                .line_height(LineHeight::Relative(1.0)),
+        )
+        .on_press(Message::OpenWebPage(WebPage::IssueLanguages))
+        .padding(2)
+        .height(20)
+        .width(20)
+        .class(ButtonType::Alert);
+
         flag_row = flag_row.push(
-            Tooltip::new(
-                button(
-                    Text::new("!")
-                        .class(TextType::Danger)
-                        .font(font)
-                        .align_y(Alignment::Center)
-                        .align_x(Alignment::Center)
-                        .size(15)
-                        .line_height(LineHeight::Relative(1.0)),
-                )
-                .on_press(Message::OpenWebPage(WebPage::IssueLanguages))
-                .padding(2)
-                .height(20)
-                .width(20)
-                .class(ButtonType::Alert),
+            MyTooltip::new(
+                button,
                 row_open_link_tooltip(
                     "The selected language is not\nfully updated to version 1.4",
                     font,
                 ),
-                Position::FollowCursor,
             )
-            .class(ContainerType::Tooltip),
+            .position(Position::FollowCursor)
+            .style(ContainerType::Tooltip)
+            .build(),
         );
     }
 
@@ -214,7 +219,7 @@ fn need_help<'a>(language: Language, font: Font) -> Container<'a, Message, Style
         )
         .push(vertical_space())
         .push(
-            Tooltip::new(
+            MyTooltip::new(
                 button(
                     Icon::Feedback
                         .to_text()
@@ -228,10 +233,11 @@ fn need_help<'a>(language: Language, font: Font) -> Container<'a, Message, Style
                 .height(40)
                 .width(60),
                 row_open_link_tooltip("GitHub Issues", font),
-                Position::Right,
             )
-            .gap(5)
-            .class(ContainerType::Tooltip),
+            .position(Position::Right)
+            .gap(5.0)
+            .style(ContainerType::Tooltip)
+            .build()
         )
         .push(vertical_space());
 
@@ -316,6 +322,7 @@ fn mmdb_selection_row<'a>(
                 font,
                 is_editable,
                 message,
+                true,
             )
         } else {
             button_clear_mmdb(message, font, is_editable)
@@ -326,7 +333,7 @@ fn button_clear_mmdb<'a>(
     message: fn(String) -> Message,
     font: Font,
     is_editable: bool,
-) -> Tooltip<'a, Message, StyleType> {
+) -> Element<'a, Message, StyleType> {
     let mut button = button(
         Text::new("×")
             .font(font)
@@ -343,5 +350,9 @@ fn button_clear_mmdb<'a>(
         button = button.on_press(message(String::new()));
     }
 
-    Tooltip::new(button, "", Position::Right)
+    MyTooltip::new(button, Text::new("").font(font))
+        .enabled(true)
+        .position(Position::Right)
+        .style(ContainerType::Tooltip)
+        .build()
 }

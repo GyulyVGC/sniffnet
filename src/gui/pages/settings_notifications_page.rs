@@ -403,7 +403,7 @@ pub fn settings_header<'a>(
                     .align_x(Alignment::Center),
             )
             .push(
-                Container::new(button_hide(Message::CloseSettings, language, font))
+                Container::new(button_hide(Message::CloseSettings, language, font, true))
                     .width(Length::Fill)
                     .align_x(Alignment::Center),
             ),

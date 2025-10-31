@@ -1,5 +1,5 @@
 use iced::Font;
-use iced::widget::Tooltip;
+use iced::{Element};
 use iced::widget::svg::Handle;
 use iced::widget::tooltip::Position;
 use iced::widget::{Svg, Text};
@@ -22,6 +22,7 @@ use crate::countries::types::country::Country;
 use crate::gui::styles::container::ContainerType;
 use crate::gui::styles::svg::SvgType;
 use crate::gui::types::message::Message;
+use crate::gui::components::types::my_tooltip::MyTooltip;
 use crate::networking::types::data_info_host::DataInfoHost;
 use crate::networking::types::traffic_type::TrafficType;
 use crate::translations::translations_2::{
@@ -324,7 +325,8 @@ pub fn get_flag_tooltip<'a>(
     language: Language,
     font: Font,
     thumbnail: bool,
-) -> Tooltip<'a, Message, StyleType> {
+    show_tooltip: bool,
+) -> Element<'a, Message, StyleType> {
     let width = if thumbnail {
         FLAGS_WIDTH_SMALL
     } else {
@@ -350,17 +352,16 @@ pub fn get_flag_tooltip<'a>(
     } else {
         ContainerType::Tooltip
     };
-    let mut tooltip = Tooltip::new(
+    let tooltip = MyTooltip::new(
         content,
         Text::new(actual_tooltip).font(font),
-        Position::FollowCursor,
     )
-    .snap_within_viewport(true)
-    .class(tooltip_style);
-
-    if width == FLAGS_WIDTH_SMALL {
-        tooltip = tooltip.padding(3);
-    }
+    .enabled(show_tooltip)
+    .position(Position::FollowCursor)
+    .style(tooltip_style)
+    .snap_within_viewport()
+    .padding(if width == FLAGS_WIDTH_SMALL { 3.0 } else { 5.0 })
+    .build();
 
     tooltip
 }
@@ -372,7 +373,8 @@ pub fn get_computer_tooltip<'a>(
     traffic_type: TrafficType,
     language: Language,
     font: Font,
-) -> Tooltip<'a, Message, StyleType> {
+    show_tooltip: bool,
+) -> Element<'a, Message, StyleType> {
     let content = Svg::new(Handle::from_memory(Vec::from(
         match (is_my_address, is_local, is_bogon, traffic_type) {
             (true, _, _, _) => COMPUTER,
@@ -396,11 +398,10 @@ pub fn get_computer_tooltip<'a>(
         (false, false, None, TrafficType::Unicast) => unknown_translation(language).to_string(),
     };
 
-    Tooltip::new(
-        content,
-        Text::new(tooltip).font(font),
-        Position::FollowCursor,
-    )
-    .snap_within_viewport(true)
-    .class(ContainerType::Tooltip)
+    MyTooltip::new(content, Text::new(tooltip).font(font))
+        .enabled(show_tooltip)
+        .position(Position::FollowCursor)
+        .style(ContainerType::Tooltip)
+        .snap_within_viewport()
+        .build()
 }

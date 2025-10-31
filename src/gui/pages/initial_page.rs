@@ -49,6 +49,7 @@ pub fn initial_page(sniffer: &Sniffer) -> Container<'_, Message, StyleType> {
     let font_headers = style.get_extension().font_headers;
 
     let col_data_source = get_col_data_source(sniffer, font, language);
+    let show_tooltips = sniffer.settings_page.is_none() && sniffer.modal.is_none();
 
     let col_checkboxes = Column::new()
         .spacing(10)
@@ -58,6 +59,7 @@ pub fn initial_page(sniffer: &Sniffer) -> Container<'_, Message, StyleType> {
             &sniffer.conf.export_pcap,
             language,
             font,
+            show_tooltips,
         ));
 
     let is_capture_source_consistent = sniffer.is_capture_source_consistent();
@@ -119,6 +121,7 @@ fn get_col_data_source(
     } else {
         capture_file_translation(language)
     };
+    let show_tooltip = sniffer.settings_page.is_none() && sniffer.modal.is_none();
     let picklist = PickList::new(
         [
             network_adapter_translation(language),
@@ -164,6 +167,7 @@ fn get_col_data_source(
                 font,
                 &sniffer.capture_source,
                 &sniffer.conf.import_pcap_path,
+                show_tooltip,
             ));
         }
     }
@@ -258,7 +262,7 @@ fn get_col_adapter(
                                     ButtonType::BorderedRound
                                 },
                             )
-                            .on_press(Message::DeviceSelection(name.clone())),
+                            .on_press(Message::DeviceSelection(name.to_string())),
                         )
                     },
                 ),
@@ -272,7 +276,8 @@ fn get_col_import_pcap<'a>(
     language: Language,
     font: Font,
     cs: &CaptureSource,
-    path: &str,
+    path: &String,
+    show_tooltip: bool,
 ) -> Column<'a, Message, StyleType> {
     let is_import_pcap_set = matches!(cs, CaptureSource::File(_));
 
@@ -280,12 +285,13 @@ fn get_col_import_pcap<'a>(
         .align_y(Alignment::Center)
         .push(Text::new(get_path_termination_string(path, 25)).font(font))
         .push(button_open_file(
-            path.to_string(),
+            path.clone(),
             FileInfo::PcapImport,
             language,
             font,
             true,
             Message::SetPcapImport,
+            show_tooltip,
         ));
 
     let content = Column::new()
@@ -355,6 +361,7 @@ fn get_export_pcap_group_maybe<'a>(
     export_pcap: &ExportPcap,
     language: Language,
     font: Font,
+    show_tooltip: bool,
 ) -> Option<Container<'a, Message, StyleType>> {
     if cs_pick == CaptureSourcePicklist::File {
         return None;
@@ -401,6 +408,7 @@ fn get_export_pcap_group_maybe<'a>(
                         font,
                         true,
                         Message::OutputPcapDir,
+                        show_tooltip,
                     )),
             );
         ret_val = ret_val.push(inner_col);

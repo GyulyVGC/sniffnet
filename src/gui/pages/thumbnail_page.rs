@@ -27,6 +27,8 @@ pub fn thumbnail_page(sniffer: &Sniffer) -> Container<'_, Message, StyleType> {
     let Settings { style, .. } = sniffer.conf.settings;
     let font = style.get_extension().font;
 
+    let show_tooltips = sniffer.settings_page.is_none() && sniffer.modal.is_none();
+
     let tot_packets = sniffer
         .info_traffic
         .tot_data_info
@@ -76,6 +78,7 @@ pub fn thumbnail_page(sniffer: &Sniffer) -> Container<'_, Message, StyleType> {
             data_repr,
             font,
             sniffer.conf.host_sort_type,
+            show_tooltips,
         ))
         .push(Rule::vertical(10))
         .push(service_col(
@@ -98,6 +101,7 @@ fn host_col<'a>(
     data_repr: DataRepr,
     font: Font,
     sort_type: SortType,
+    show_tooltip: bool,
 ) -> Column<'a, Message, StyleType> {
     let mut host_col = Column::new()
         .padding([0, 5])
@@ -120,7 +124,7 @@ fn host_col<'a>(
 
         thumbnail_hosts.push(thumbnail_host);
 
-        let flag = get_flag_tooltip(country, data_info_host, Language::default(), font, true);
+        let flag = get_flag_tooltip(country, data_info_host, Language::default(), font, true, show_tooltip);
         let host_row = Row::new()
             .align_y(Alignment::Center)
             .spacing(5)
