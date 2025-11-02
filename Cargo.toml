@@ -126,7 +126,6 @@ assets = [
 
 [package.metadata.generate-rpm]
 post_install_script = "setcap cap_net_raw,cap_net_admin=eip /usr/bin/sniffnet"
-pre_uninstall_script = "setcap '' /usr/bin/sniffnet"
 assets = [
     { source = "target/release/sniffnet", dest = "/usr/bin/", mode = "755" },
     { source = "resources/packaging/linux/sniffnet.desktop", dest = "/usr/share/applications/", mode = "644" },

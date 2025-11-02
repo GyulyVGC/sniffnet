@@ -12,6 +12,7 @@ All Sniffnet releases with the relative changes are documented in this file.
   - Vietnamese ([#982](https://github.com/GyulyVGC/sniffnet/pull/982))
 - Fix AppImage error with `libpcap` dependency ([#971](https://github.com/GyulyVGC/sniffnet/pull/971))
 - Fix Sniffnet wrapper script on macOS to use a relative path to the executable ([#948](https://github.com/GyulyVGC/sniffnet/pull/948) — fixes [#898](https://github.com/GyulyVGC/sniffnet/issues/898))
+- Remove pre-uninstall script from Linux RPM package (fixes [#989](https://github.com/GyulyVGC/sniffnet/issues/989))
 
 ## [1.4.1] - 2025-09-13
 - Enhanced traffic filtering capabilities: Berkeley Packet Filter ([#937](https://github.com/GyulyVGC/sniffnet/pull/937) — fixes [#810](https://github.com/GyulyVGC/sniffnet/issues/810))
