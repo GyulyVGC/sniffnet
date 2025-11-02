@@ -1,5 +1,6 @@
 //! Module containing functions executed by the thread in charge of parsing sniffed packets
 
+use crate::gui::types::filters::Filters;
 use crate::location;
 use crate::mmdb::asn::get_asn;
 use crate::mmdb::country::get_country;
@@ -32,6 +33,7 @@ use std::net::IpAddr;
 use std::sync::{Arc, Mutex};
 use std::thread;
 use std::time::{Duration, Instant};
+use tokio::sync::broadcast::Receiver;
 
 /// The calling thread enters a loop in which it waits for network packets
 pub fn parse_packets(
@@ -39,8 +41,12 @@ pub fn parse_packets(
     mut cs: CaptureSource,
     mmdb_readers: &MmdbReaders,
     capture_context: CaptureContext,
+    filters: Filters,
     tx: &Sender<BackendTrafficMessage>,
+    freeze_rxs: (Receiver<()>, Receiver<()>),
 ) {
+    let (mut freeze_rx, mut freeze_rx_2) = freeze_rxs;
+
     let my_link_type = capture_context.my_link_type();
     let (cap, mut savefile) = capture_context.consume();
 
@@ -55,10 +61,18 @@ pub fn parse_packets(
     let (pcap_tx, pcap_rx) = std::sync::mpsc::sync_channel(10_000);
     let _ = thread::Builder::new()
         .name("thread_packet_stream".to_string())
-        .spawn(move || packet_stream(cap, &pcap_tx))
+        .spawn(move || packet_stream(cap, &pcap_tx, &mut freeze_rx_2, &filters))
         .log_err(location!());
 
     loop {
+        // check if we need to freeze the parsing
+        if freeze_rx.try_recv().is_ok() {
+            // wait until unfreeze
+            let _ = freeze_rx.blocking_recv();
+            // reset the first packet ticks
+            first_packet_ticks = Some(Instant::now());
+        }
+
         let (packet_res, cap_stats) = pcap_rx
             .recv_timeout(Duration::from_millis(150))
             .unwrap_or((Err(pcap::Error::TimeoutExpired), None));
@@ -486,8 +500,20 @@ fn maybe_send_tick_run_offline(
 fn packet_stream(
     mut cap: CaptureType,
     tx: &std::sync::mpsc::SyncSender<(Result<PacketOwned, pcap::Error>, Option<pcap::Stat>)>,
+    freeze_rx: &mut Receiver<()>,
+    filters: &Filters,
 ) {
     loop {
+        // check if we need to freeze the parsing
+        if freeze_rx.try_recv().is_ok() {
+            // pause the capture
+            cap.pause();
+            // wait until unfreeze
+            let _ = freeze_rx.blocking_recv();
+            // resume the capture
+            cap.resume(filters);
+        }
+
         let packet_res = cap.next_packet();
         let packet_owned = packet_res.map(|p| PacketOwned {
             header: *p.header,

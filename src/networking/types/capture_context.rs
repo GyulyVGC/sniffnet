@@ -128,7 +128,7 @@ impl CaptureType {
             CaptureSource::Device(device) => {
                 let inactive = Capture::from_device(device.to_pcap_device())?;
                 let cap = inactive
-                    .promisc(true)
+                    .promisc(false)
                     .buffer_size(2_000_000) // 2MB buffer -> 10k packets of 200 bytes
                     .snaplen(if pcap_out_path.is_some() {
                         i32::from(u16::MAX)
@@ -148,6 +148,22 @@ impl CaptureType {
         match self {
             Self::Live(cap) => cap.filter(bpf, true),
             Self::Offline(cap) => cap.filter(bpf, true),
+        }
+    }
+
+    pub fn pause(&mut self) {
+        if let Self::Live(cap) = self {
+            let _ = cap.filter("less 2", true).log_err(location!());
+        }
+    }
+
+    pub fn resume(&mut self, filters: &Filters) {
+        if let Self::Live(cap) = self {
+            if filters.is_some_filter_active() {
+                let _ = cap.filter(filters.bpf(), true).log_err(location!());
+            } else if cap.filter("", true).log_err(location!()).is_err() {
+                let _ = cap.filter("greater 0", true).log_err(location!());
+            }
         }
     }
 }

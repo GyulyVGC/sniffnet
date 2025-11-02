@@ -121,6 +121,10 @@ pub struct Sniffer {
     pub id: Option<Id>,
     /// Host data for filter dropdowns (comboboxes)
     pub host_data_states: HostDataStates,
+    /// Flag reporting whether the packet capture is frozen
+    pub frozen: bool,
+    /// Sender to freeze the packet capture
+    freeze_tx: Option<tokio::sync::broadcast::Sender<()>>,
 }
 
 impl Sniffer {
@@ -160,6 +164,8 @@ impl Sniffer {
             thumbnail: false,
             id: None,
             host_data_states: HostDataStates::default(),
+            frozen: false,
+            freeze_tx: None,
         }
     }
 
@@ -175,6 +181,7 @@ impl Sniffer {
                 }) => match key.as_ref() {
                     Key::Character("q") => Some(Message::QuitWrapper),
                     Key::Character("t") => Some(Message::CtrlTPressed),
+                    Key::Named(Named::Space) => Some(Message::CtrlSpacePressed),
                     _ => None,
                 },
                 _ => None,
@@ -185,6 +192,7 @@ impl Sniffer {
                     Modifiers::COMMAND => match key.as_ref() {
                         Key::Character("q") => Some(Message::QuitWrapper),
                         Key::Character("t") => Some(Message::CtrlTPressed),
+                        Key::Named(Named::Space) => Some(Message::CtrlSpacePressed),
                         Key::Character(",") => Some(Message::OpenLastSettings),
                         Key::Named(Named::Backspace) => Some(Message::ResetButtonPressed),
                         Key::Character("d") => Some(Message::CtrlDPressed),
@@ -500,6 +508,14 @@ impl Sniffer {
                     return Task::done(Message::ToggleThumbnail(false));
                 }
             }
+            Message::CtrlSpacePressed => {
+                if self.running_page.is_some()
+                    && self.settings_page.is_none()
+                    && self.modal.is_none()
+                {
+                    return Task::done(Message::Freeze);
+                }
+            }
             Message::ScaleFactorShortcut(increase) => {
                 let scale_factor = self.conf.settings.scale_factor;
                 if !(scale_factor > 2.99 && increase || scale_factor < 0.31 && !increase) {
@@ -554,6 +570,12 @@ impl Sniffer {
                     .notifications
                     .remote_notifications
                     .set_url(&url);
+            }
+            Message::Freeze => {
+                self.frozen = !self.frozen;
+                if let Some(tx) = &self.freeze_tx {
+                    let _ = tx.send(());
+                }
             }
         }
         Task::none()
@@ -750,6 +772,9 @@ impl Sniffer {
             self.traffic_chart
                 .change_capture_source(matches!(capture_source, CaptureSource::Device(_)));
             let (tx, rx) = async_channel::unbounded();
+            let (freeze_tx, freeze_rx) = tokio::sync::broadcast::channel(1_048_575);
+            let freeze_rx2 = freeze_tx.subscribe();
+            let filters = self.conf.filters.clone();
             let _ = thread::Builder::new()
                 .name("thread_parse_packets".to_string())
                 .spawn(move || {
@@ -758,11 +783,14 @@ impl Sniffer {
                         capture_source,
                         &mmdb_readers,
                         capture_context,
+                        filters,
                         &tx,
+                        (freeze_rx, freeze_rx2),
                     );
                 })
                 .log_err(location!());
             self.current_capture_rx.1 = Some(rx.clone());
+            self.freeze_tx = Some(freeze_tx);
             return Task::run(rx, |backend_msg| match backend_msg {
                 BackendTrafficMessage::TickRun(cap_id, msg, host_msg, no_more_packets) => {
                     Message::TickRun(cap_id, msg, host_msg, no_more_packets)
@@ -800,6 +828,8 @@ impl Sniffer {
         self.page_number = 1;
         self.thumbnail = false;
         self.host_data_states = HostDataStates::default();
+        self.frozen = false;
+        self.freeze_tx = None;
     }
 
     fn set_device(&mut self, name: &str) {
