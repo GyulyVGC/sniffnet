@@ -65,7 +65,7 @@ pub fn parse_packets(
         .log_err(location!());
 
     loop {
-        // // check if we need to freeze the parsing
+        // check if we need to freeze the parsing
         if freeze_rx.try_recv().is_ok() {
             // wait until unfreeze
             let _ = freeze_rx.blocking_recv();

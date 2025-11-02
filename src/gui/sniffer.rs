@@ -772,7 +772,7 @@ impl Sniffer {
             self.traffic_chart
                 .change_capture_source(matches!(capture_source, CaptureSource::Device(_)));
             let (tx, rx) = async_channel::unbounded();
-            let (freeze_tx, freeze_rx) = tokio::sync::broadcast::channel(65535);
+            let (freeze_tx, freeze_rx) = tokio::sync::broadcast::channel(1_048_575);
             let freeze_rx2 = freeze_tx.subscribe();
             let filters = self.conf.filters.clone();
             let _ = thread::Builder::new()
