@@ -48,11 +48,7 @@ pub fn get_searched_entries(
         .collect();
 
     all_results.sort_by(|&(_, a), &(_, b)| {
-        a.compare(
-            b,
-            sniffer.conf.report_sort_type,
-            sniffer.traffic_chart.data_repr,
-        )
+        a.compare(b, sniffer.conf.report_sort_type, sniffer.conf.data_repr)
     });
 
     let upper_bound = min(sniffer.page_number * 20, all_results.len());

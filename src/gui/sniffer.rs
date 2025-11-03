@@ -136,6 +136,7 @@ impl Sniffer {
             mmdb_asn,
             ..
         } = conf.settings.clone();
+        let data_repr = conf.data_repr;
         let capture_source = CaptureSource::from_conf(&conf);
         Self {
             conf,
@@ -149,7 +150,7 @@ impl Sniffer {
             my_devices: Vec::new(),
             pcap_error: None,
             dots_pulse: (".".to_string(), 0),
-            traffic_chart: TrafficChart::new(style, language),
+            traffic_chart: TrafficChart::new(style, language, data_repr),
             modal: None,
             settings_page: None,
             running_page: None,
@@ -281,7 +282,10 @@ impl Sniffer {
             Message::BpfFilter(value) => {
                 self.conf.filters.set_bpf(value);
             }
-            Message::DataReprSelection(unit) => self.traffic_chart.change_kind(unit),
+            Message::DataReprSelection(unit) => {
+                self.conf.data_repr = unit;
+                self.traffic_chart.change_kind(unit);
+            }
             Message::ReportSortSelection(sort) => {
                 self.page_number = 1;
                 self.conf.report_sort_type = sort;
@@ -819,7 +823,7 @@ impl Sniffer {
         self.favorite_hosts = HashSet::new();
         self.logged_notifications = (VecDeque::new(), 0);
         self.pcap_error = None;
-        self.traffic_chart = TrafficChart::new(style, language);
+        self.traffic_chart = TrafficChart::new(style, language, self.conf.data_repr);
         self.modal = None;
         self.settings_page = None;
         self.running_page = None;
@@ -1163,14 +1167,19 @@ mod tests {
         let mut sniffer = Sniffer::new(Conf::default());
 
         assert_eq!(sniffer.traffic_chart.data_repr, DataRepr::Bytes);
+        assert_eq!(sniffer.conf.data_repr, DataRepr::Bytes);
         sniffer.update(Message::DataReprSelection(DataRepr::Packets));
         assert_eq!(sniffer.traffic_chart.data_repr, DataRepr::Packets);
+        assert_eq!(sniffer.conf.data_repr, DataRepr::Packets);
         sniffer.update(Message::DataReprSelection(DataRepr::Packets));
         assert_eq!(sniffer.traffic_chart.data_repr, DataRepr::Packets);
+        assert_eq!(sniffer.conf.data_repr, DataRepr::Packets);
         sniffer.update(Message::DataReprSelection(DataRepr::Bytes));
         assert_eq!(sniffer.traffic_chart.data_repr, DataRepr::Bytes);
+        assert_eq!(sniffer.conf.data_repr, DataRepr::Bytes);
         sniffer.update(Message::DataReprSelection(DataRepr::Bits));
         assert_eq!(sniffer.traffic_chart.data_repr, DataRepr::Bits);
+        assert_eq!(sniffer.conf.data_repr, DataRepr::Bits);
     }
 
     #[test]
@@ -1241,14 +1250,19 @@ mod tests {
         let mut sniffer = Sniffer::new(Conf::default());
 
         sniffer.update(Message::Style(StyleType::MonAmour));
+        assert_eq!(sniffer.traffic_chart.style, StyleType::MonAmour);
         assert_eq!(sniffer.conf.settings.style, StyleType::MonAmour);
         sniffer.update(Message::Style(StyleType::Day));
+        assert_eq!(sniffer.traffic_chart.style, StyleType::Day);
         assert_eq!(sniffer.conf.settings.style, StyleType::Day);
         sniffer.update(Message::Style(StyleType::Night));
+        assert_eq!(sniffer.traffic_chart.style, StyleType::Night);
         assert_eq!(sniffer.conf.settings.style, StyleType::Night);
         sniffer.update(Message::Style(StyleType::DeepSea));
+        assert_eq!(sniffer.traffic_chart.style, StyleType::DeepSea);
         assert_eq!(sniffer.conf.settings.style, StyleType::DeepSea);
         sniffer.update(Message::Style(StyleType::DeepSea));
+        assert_eq!(sniffer.traffic_chart.style, StyleType::DeepSea);
         assert_eq!(sniffer.conf.settings.style, StyleType::DeepSea);
     }
 
@@ -1879,6 +1893,7 @@ mod tests {
         sniffer.update(Message::OutputPcapDir("/".to_string()));
         sniffer.update(Message::SetPcapImport("/test.pcap".to_string()));
         sniffer.update(Message::ChangeRunningPage(RunningPage::Notifications));
+        sniffer.update(Message::DataReprSelection(DataRepr::Bits));
 
         // quit the app by sending a CloseRequested message
         sniffer.update(Message::Quit);
@@ -1930,6 +1945,7 @@ mod tests {
                     directory: "/".to_string()
                 },
                 import_pcap_path: "/test.pcap".to_string(),
+                data_repr: DataRepr::Bits,
             }
         );
     }

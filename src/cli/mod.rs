@@ -87,6 +87,7 @@ mod tests {
     use crate::gui::types::settings::Settings;
     use crate::networking::types::capture_context::CaptureSourcePicklist;
     use crate::networking::types::config_device::ConfigDevice;
+    use crate::networking::types::data_representation::DataRepr;
     use crate::notifications::types::notifications::Notifications;
     use crate::report::types::sort_type::SortType;
     use crate::{ConfigWindow, Language, Sniffer, StyleType};
@@ -139,6 +140,7 @@ mod tests {
             },
             last_opened_setting: SettingsPage::General,
             last_opened_page: RunningPage::Inspect,
+            data_repr: DataRepr::Packets,
         };
         // we want to be sure that modified config is different from defaults
         assert_ne!(Conf::default(), modified_conf);

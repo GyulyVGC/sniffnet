@@ -60,7 +60,7 @@ pub struct TrafficChart {
 }
 
 impl TrafficChart {
-    pub fn new(style: StyleType, language: Language) -> Self {
+    pub fn new(style: StyleType, language: Language, data_repr: DataRepr) -> Self {
         TrafficChart {
             ticks: 0,
             out_bytes: ChartSeries::default(),
@@ -72,7 +72,7 @@ impl TrafficChart {
             min_packets: 0.0,
             max_packets: 0.0,
             language,
-            data_repr: DataRepr::Bytes,
+            data_repr,
             style,
             thumbnail: false,
             is_live_capture: true,

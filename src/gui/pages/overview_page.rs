@@ -223,7 +223,7 @@ fn col_host<'a>(sniffer: &Sniffer) -> Column<'a, Message, StyleType> {
         style, language, ..
     } = sniffer.conf.settings;
     let font = style.get_extension().font;
-    let data_repr = sniffer.traffic_chart.data_repr;
+    let data_repr = sniffer.conf.data_repr;
 
     let mut scroll_host = Column::new()
         .padding(Padding::ZERO.right(11.0))
@@ -304,7 +304,7 @@ fn col_service<'a>(sniffer: &Sniffer) -> Column<'a, Message, StyleType> {
         style, language, ..
     } = sniffer.conf.settings;
     let font = style.get_extension().font;
-    let data_repr = sniffer.traffic_chart.data_repr;
+    let data_repr = sniffer.conf.data_repr;
 
     let mut scroll_service = Column::new()
         .padding(Padding::ZERO.right(11.0))
@@ -459,8 +459,7 @@ fn col_info(sniffer: &Sniffer) -> Container<'_, Message, StyleType> {
         &sniffer.conf.filters,
     );
 
-    let col_data_representation =
-        col_data_representation(language, font, sniffer.traffic_chart.data_repr);
+    let col_data_representation = col_data_representation(language, font, sniffer.conf.data_repr);
 
     let donut_row = donut_row(language, font, sniffer);
 
@@ -612,7 +611,7 @@ fn donut_row(
     font: Font,
     sniffer: &Sniffer,
 ) -> Container<'_, Message, StyleType> {
-    let data_repr = sniffer.traffic_chart.data_repr;
+    let data_repr = sniffer.conf.data_repr;
 
     let (in_data, out_data, dropped) = sniffer.info_traffic.get_thumbnail_data(data_repr);
 

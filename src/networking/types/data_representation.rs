@@ -6,9 +6,10 @@ use crate::translations::translations_4::{bits_exceeded_translation, bits_transl
 use crate::translations::types::language::Language;
 use serde::{Deserialize, Serialize};
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize, Default)]
 pub enum DataRepr {
     Packets,
+    #[default]
     Bytes,
     Bits,
 }

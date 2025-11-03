@@ -57,7 +57,7 @@ fn page_content<'a>(sniffer: &Sniffer, key: &AddressPortPair) -> Container<'a, M
         color_gradient,
         ..
     } = sniffer.conf.settings;
-    let data_repr = sniffer.traffic_chart.data_repr;
+    let data_repr = sniffer.conf.data_repr;
     let font = style.get_extension().font;
     let font_headers = style.get_extension().font_headers;
 

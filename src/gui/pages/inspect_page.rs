@@ -77,7 +77,7 @@ pub fn inspect_page(sniffer: &Sniffer) -> Container<'_, Message, StyleType> {
             &sniffer.search,
             font,
             sniffer.conf.report_sort_type,
-            sniffer.traffic_chart.data_repr,
+            sniffer.conf.data_repr,
         ))
         .push(Space::with_height(4))
         .push(Rule::horizontal(5))
@@ -110,7 +110,7 @@ fn report<'a>(sniffer: &Sniffer) -> Column<'a, Message, StyleType> {
     let Settings {
         style, language, ..
     } = sniffer.conf.settings;
-    let data_repr = sniffer.traffic_chart.data_repr;
+    let data_repr = sniffer.conf.data_repr;
     let font = style.get_extension().font;
 
     let (search_results, results_number, agglomerate) = get_searched_entries(sniffer);
@@ -152,7 +152,7 @@ fn report<'a>(sniffer: &Sniffer) -> Column<'a, Message, StyleType> {
             .push(get_agglomerates_row(
                 font,
                 agglomerate,
-                sniffer.traffic_chart.data_repr,
+                sniffer.conf.data_repr,
             ))
             .push(Rule::horizontal(5))
             .push(get_change_page_row(
