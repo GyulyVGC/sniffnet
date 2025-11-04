@@ -286,7 +286,7 @@ fn logged_notifications<'a>(sniffer: &Sniffer) -> Column<'a, Message, StyleType>
     let Settings {
         style, language, ..
     } = sniffer.conf.settings;
-    let data_repr = sniffer.traffic_chart.data_repr;
+    let data_repr = sniffer.conf.data_repr;
     let font = style.get_extension().font;
     let mut ret_val = Column::new()
         .padding(Padding::ZERO.right(15))

@@ -6,6 +6,7 @@ use crate::gui::types::filters::Filters;
 use crate::gui::types::settings::Settings;
 use crate::networking::types::capture_context::CaptureSourcePicklist;
 use crate::networking::types::config_device::ConfigDevice;
+use crate::networking::types::data_representation::DataRepr;
 use crate::report::types::sort_type::SortType;
 #[cfg(not(test))]
 use crate::utils::error_logger::{ErrorLogger, Location};
@@ -44,6 +45,8 @@ pub struct Conf {
     pub export_pcap: ExportPcap,
     /// Import path for PCAP file
     pub import_pcap_path: String,
+    /// Data representation
+    pub data_repr: DataRepr,
 }
 
 impl Conf {

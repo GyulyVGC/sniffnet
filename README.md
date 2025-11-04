@@ -12,7 +12,7 @@ Application to comfortably monitor your Internet traffic.<br>
 Cross-platform. Intuitive. Reliable.
 
 Translated in:<br>
-🇨🇳 🇩🇪 🇫🇷 🇷🇺 🇵🇹 🇪🇦 🇮🇹 🇵🇱 [+&nbsp;15&nbsp;more&nbsp;languages](https://github.com/GyulyVGC/sniffnet/issues/60)
+🇨🇳 🇩🇪 🇫🇷 🇷🇺 🇵🇹 🇪🇦 🇮🇹 🇵🇱 [+&nbsp;16&nbsp;more&nbsp;languages](https://github.com/GyulyVGC/sniffnet/issues/60)
 </div>
 
 <p>
@@ -65,7 +65,7 @@ Do you want to help the project in an alternative way? You can also head to the 
       <picture><img alt="Windows" title="Windows" height="85px" src="https://raw.githubusercontent.com/GyulyVGC/sniffnet/main/resources/repository/badges/windows.svg"/></picture>
     </td>
     <td>
-      <a href="https://github.com/GyulyVGC/sniffnet/releases/latest/download/Sniffnet_Windows_64-bit.msi">64-bit</a> | <a href="https://github.com/GyulyVGC/sniffnet/releases/latest/download/Sniffnet_Windows_32-bit.msi">32-bit</a>
+      <a href="https://github.com/GyulyVGC/sniffnet/releases/latest/download/Sniffnet_Windows_x64.msi">x64</a> | <a href="https://github.com/GyulyVGC/sniffnet/releases/latest/download/Sniffnet_Windows_arm64.msi">arm64</a> | <a href="https://github.com/GyulyVGC/sniffnet/releases/latest/download/Sniffnet_Windows_x86.msi">x86</a>
     </td>
   </tr>
   <tr>

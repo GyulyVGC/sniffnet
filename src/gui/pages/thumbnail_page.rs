@@ -44,7 +44,7 @@ pub fn thumbnail_page(sniffer: &Sniffer) -> Container<'_, Message, StyleType> {
     }
 
     let info_traffic = &sniffer.info_traffic;
-    let data_repr = sniffer.traffic_chart.data_repr;
+    let data_repr = sniffer.conf.data_repr;
 
     let (in_data, out_data, dropped) = info_traffic.get_thumbnail_data(data_repr);
 
