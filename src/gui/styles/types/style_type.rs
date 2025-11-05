@@ -5,7 +5,7 @@ use serde::{Deserialize, Serialize};
 use crate::gui::styles::style_constants::{
     DAY_PALETTE, DAY_PALETTE_EXTENSION, DEEP_SEA_PALETTE, DEEP_SEA_PALETTE_EXTENSION,
     MON_AMOUR_PALETTE, MON_AMOUR_PALETTE_EXTENSION, NIGHT_PALETTE, NIGHT_PALETTE_EXTENSION,
-    SARASA_MONO_BOLD,
+    NOTO_SANS_BOLD,
 };
 use crate::gui::styles::types::custom_palette::ExtraStyles;
 use crate::gui::styles::types::palette::Palette;
@@ -61,7 +61,7 @@ impl StyleType {
     }
 
     pub fn get_font_weight(self) -> FontStyle {
-        if self.get_extension().font.eq(&SARASA_MONO_BOLD) {
+        if self.get_extension().font.eq(&NOTO_SANS_BOLD) {
             FontStyle::Bold
         } else {
             FontStyle::Normal
@@ -195,9 +195,9 @@ mod tests {
                 Token::Str("is_nightly"),
                 Token::Bool(true),
                 Token::Str("font"),
-                Token::Str("SARASA_MONO"),
+                Token::Str("NOTO_SANS"),
                 Token::Str("font_headers"),
-                Token::Str("SARASA_MONO_BOLD"),
+                Token::Str("NOTO_SANS_BOLD"),
                 Token::Str("alpha_chart_badge"),
                 Token::F32(0.15),
                 Token::Str("alpha_round_borders"),

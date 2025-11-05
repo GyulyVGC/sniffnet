@@ -68,7 +68,7 @@ use crate::utils::types::file_info::FileInfo;
 use crate::utils::types::web_page::WebPage;
 use crate::{StyleType, TrafficChart, location};
 
-pub const FONT_FAMILY_NAME: &str = "Sarasa Mono SC for Sniffnet";
+pub const FONT_FAMILY_NAME: &str = "Go Noto Kurrent Bold";
 pub const ICON_FONT_FAMILY_NAME: &str = "Icons for Sniffnet";
 
 /// Struct on which the GUI is based

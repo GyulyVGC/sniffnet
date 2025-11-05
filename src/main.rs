@@ -24,7 +24,7 @@ use translations::types::language::Language;
 use utils::formatted_strings::print_cli_welcome_message;
 
 use crate::gui::sniffer::FONT_FAMILY_NAME;
-use crate::gui::styles::style_constants::{ICONS_BYTES, SARASA_MONO_BOLD_BYTES, SARASA_MONO_BYTES};
+use crate::gui::styles::style_constants::{ICONS_BYTES, NOTO_SANS_BOLD_BYTES, NOTO_SANS_BYTES};
 use crate::gui::types::conf::CONF;
 use crate::gui::types::config_window::{ConfigWindow, ToPosition, ToSize};
 
@@ -81,8 +81,8 @@ pub fn main() -> iced::Result {
             // id needed for Linux Wayland; should match StartupWMClass in .desktop file; see issue #292
             id: Some(String::from(SNIFFNET_LOWERCASE)),
             fonts: vec![
-                Cow::Borrowed(SARASA_MONO_BYTES),
-                Cow::Borrowed(SARASA_MONO_BOLD_BYTES),
+                Cow::Borrowed(NOTO_SANS_BYTES),
+                Cow::Borrowed(NOTO_SANS_BOLD_BYTES),
                 Cow::Borrowed(ICONS_BYTES),
             ],
             default_font: Font::with_name(FONT_FAMILY_NAME),

@@ -4,7 +4,7 @@ use iced::{Color, Font};
 use serde::de::Unexpected;
 use serde::{Deserialize, Deserializer, Serialize, Serializer};
 
-use crate::gui::styles::style_constants::{SARASA_MONO, SARASA_MONO_BOLD};
+use crate::gui::styles::style_constants::{NOTO_SANS, NOTO_SANS_BOLD};
 use crate::gui::styles::types::color_remote::color_hash;
 
 use super::color_remote::{deserialize_color, serialize_color};
@@ -65,16 +65,16 @@ pub(super) fn deserialize_font<'de, D>(deserializer: D) -> Result<Font, D::Error
 where
     D: Deserializer<'de>,
 {
-    // Name should be SARASA_MONO or SARASA_MONO_BOLD
+    // Name should be NOTO_SANS or NOTO_SANS_BOLD
     let name = String::deserialize(deserializer)?;
     let name_str = name.as_str();
 
     match name_str {
-        "SARASA_MONO" => Ok(SARASA_MONO),
-        "SARASA_MONO_BOLD" => Ok(SARASA_MONO_BOLD),
+        "NOTO_SANS" => Ok(NOTO_SANS),
+        "NOTO_SANS_BOLD" => Ok(NOTO_SANS_BOLD),
         _ => Err(serde::de::Error::invalid_value(
             Unexpected::Str(name_str),
-            &"SARASA_MONO OR SARASA_MONO_BOLD",
+            &"NOTO_SANS OR NOTO_SANS_BOLD",
         )),
     }
 }
@@ -84,8 +84,8 @@ where
     S: Serializer,
 {
     match *font {
-        SARASA_MONO => serializer.serialize_str("SARASA_MONO"),
-        SARASA_MONO_BOLD => serializer.serialize_str("SARASA_MONO_BOLD"),
+        NOTO_SANS => serializer.serialize_str("NOTO_SANS"),
+        NOTO_SANS_BOLD => serializer.serialize_str("NOTO_SANS_BOLD"),
         _ => Err(serde::ser::Error::custom("invalid font")),
     }
 }
@@ -95,9 +95,7 @@ mod tests {
     use iced::Color;
     use serde_test::{Token, assert_tokens};
 
-    use crate::gui::styles::style_constants::{
-        RED_ALERT_COLOR_DAILY, SARASA_MONO, SARASA_MONO_BOLD,
-    };
+    use crate::gui::styles::style_constants::{NOTO_SANS, NOTO_SANS_BOLD, RED_ALERT_COLOR_DAILY};
     use crate::gui::styles::types::palette_extension::PaletteExtension;
 
     // Test if deserializing and serializing a PaletteExtension works.
@@ -105,8 +103,8 @@ mod tests {
     fn test_working_palette_extension_round_trip() {
         let ext = PaletteExtension {
             is_nightly: false,
-            font: SARASA_MONO_BOLD,
-            font_headers: SARASA_MONO,
+            font: NOTO_SANS_BOLD,
+            font_headers: NOTO_SANS,
             alpha_chart_badge: 0.5,
             alpha_round_borders: 0.25,
             alpha_round_containers: 0.1778,
@@ -128,9 +126,9 @@ mod tests {
                 Token::Str("is_nightly"),
                 Token::Bool(false),
                 Token::Str("font"),
-                Token::Str("SARASA_MONO_BOLD"),
+                Token::Str("NOTO_SANS_BOLD"),
                 Token::Str("font_headers"),
-                Token::Str("SARASA_MONO"),
+                Token::Str("NOTO_SANS"),
                 Token::Str("alpha_chart_badge"),
                 Token::F32(0.5),
                 Token::Str("alpha_round_borders"),

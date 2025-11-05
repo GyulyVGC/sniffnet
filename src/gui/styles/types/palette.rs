@@ -10,7 +10,7 @@ use plotters::style::RGBColor;
 use serde::{Deserialize, Serialize};
 
 use crate::gui::styles::style_constants::{
-    NIGHT_PALETTE, RED_ALERT_COLOR_DAILY, RED_ALERT_COLOR_NIGHTLY, SARASA_MONO, SARASA_MONO_BOLD,
+    NIGHT_PALETTE, NOTO_SANS, NOTO_SANS_BOLD, RED_ALERT_COLOR_DAILY, RED_ALERT_COLOR_NIGHTLY,
 };
 use crate::gui::styles::types::color_remote::color_hash;
 use crate::gui::styles::types::palette_extension::PaletteExtension;
@@ -94,14 +94,14 @@ impl Palette {
 
         let is_nightly = primary.r + primary.g + primary.b <= 1.5;
         let font = if is_text_body_dark {
-            SARASA_MONO_BOLD
+            NOTO_SANS_BOLD
         } else {
-            SARASA_MONO
+            NOTO_SANS
         };
         let font_headers = if is_text_headers_dark {
-            SARASA_MONO_BOLD
+            NOTO_SANS_BOLD
         } else {
-            SARASA_MONO
+            NOTO_SANS
         };
         let alpha_chart_badge = if is_nightly { 0.15 } else { 0.75 };
         let alpha_round_borders = if is_nightly { 0.3 } else { 0.6 };
@@ -209,7 +209,7 @@ mod tests {
     use iced::color;
 
     use crate::gui::styles::style_constants::{
-        RED_ALERT_COLOR_DAILY, RED_ALERT_COLOR_NIGHTLY, SARASA_MONO, SARASA_MONO_BOLD,
+        NOTO_SANS, NOTO_SANS_BOLD, RED_ALERT_COLOR_DAILY, RED_ALERT_COLOR_NIGHTLY,
     };
     use crate::gui::styles::types::palette_extension::PaletteExtension;
 
@@ -289,8 +289,8 @@ mod tests {
             palette.generate_palette_extension(),
             PaletteExtension {
                 is_nightly: true,
-                font: SARASA_MONO,
-                font_headers: SARASA_MONO_BOLD,
+                font: NOTO_SANS,
+                font_headers: NOTO_SANS_BOLD,
                 alpha_chart_badge: 0.15,
                 alpha_round_borders: 0.3,
                 alpha_round_containers: 0.12,
@@ -350,8 +350,8 @@ mod tests {
             palette.generate_palette_extension(),
             PaletteExtension {
                 is_nightly: false,
-                font: SARASA_MONO,
-                font_headers: SARASA_MONO_BOLD,
+                font: NOTO_SANS,
+                font_headers: NOTO_SANS_BOLD,
                 alpha_chart_badge: 0.75,
                 alpha_round_borders: 0.6,
                 alpha_round_containers: 0.24,

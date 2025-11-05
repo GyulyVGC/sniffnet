@@ -57,7 +57,7 @@ Here is a list of design relevant information and materials:
 
 ### Fonts
 
-Sniffnet uses `Sarasa Gothic mono`. The fonts used can be found [here](https://github.com/GyulyVGC/sniffnet/tree/main/resources/fonts).
+Sniffnet uses `Noto Sans`. The fonts used can be found [here](https://github.com/GyulyVGC/sniffnet/tree/main/resources/fonts).
 
 ### Colors and components
 

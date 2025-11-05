@@ -43,8 +43,8 @@ pub const BUTTONS_NIGHT: Color = Color {
 
 pub const NIGHT_PALETTE_EXTENSION: PaletteExtension = PaletteExtension {
     is_nightly: true,
-    font: SARASA_MONO,
-    font_headers: SARASA_MONO_BOLD,
+    font: NOTO_SANS,
+    font_headers: NOTO_SANS_BOLD,
     alpha_chart_badge: 0.15,
     alpha_round_borders: 0.4,
     alpha_round_containers: 0.3,
@@ -83,8 +83,8 @@ pub const BUTTONS_DAY: Color = Color {
 
 pub const DAY_PALETTE_EXTENSION: PaletteExtension = PaletteExtension {
     is_nightly: false,
-    font: SARASA_MONO_BOLD,
-    font_headers: SARASA_MONO,
+    font: NOTO_SANS_BOLD,
+    font_headers: NOTO_SANS,
     alpha_chart_badge: 0.75,
     alpha_round_borders: 0.45,
     alpha_round_containers: 0.2,
@@ -134,8 +134,8 @@ pub const BUTTONS_DEEP_SEA: Color = Color {
 
 pub const DEEP_SEA_PALETTE_EXTENSION: PaletteExtension = PaletteExtension {
     is_nightly: true,
-    font: SARASA_MONO,
-    font_headers: SARASA_MONO_BOLD,
+    font: NOTO_SANS,
+    font_headers: NOTO_SANS_BOLD,
     alpha_chart_badge: 0.15,
     alpha_round_borders: 0.35,
     alpha_round_containers: 0.15,
@@ -185,8 +185,8 @@ pub const BUTTONS_MON_AMOUR: Color = Color {
 
 pub const MON_AMOUR_PALETTE_EXTENSION: PaletteExtension = PaletteExtension {
     is_nightly: false,
-    font: SARASA_MONO_BOLD,
-    font_headers: SARASA_MONO,
+    font: NOTO_SANS_BOLD,
+    font_headers: NOTO_SANS,
     alpha_chart_badge: 0.75,
     alpha_round_borders: 0.5,
     alpha_round_containers: 0.25,
@@ -194,18 +194,18 @@ pub const MON_AMOUR_PALETTE_EXTENSION: PaletteExtension = PaletteExtension {
     red_alert_color: RED_ALERT_COLOR_DAILY,
 };
 
-pub const SARASA_MONO_BOLD_BYTES: &[u8] =
-    include_bytes!("../../../resources/fonts/subset/sarasa-mono-sc-bold.subset.ttf");
-pub const SARASA_MONO_BOLD: Font = Font {
+pub const NOTO_SANS_BOLD_BYTES: &[u8] =
+    include_bytes!("../../../resources/fonts/subset/GoNotoKurrent-Bold.subset.ttf");
+pub const NOTO_SANS_BOLD: Font = Font {
     family: Family::Name(FONT_FAMILY_NAME),
     weight: Weight::Bold,
     stretch: Stretch::Normal,
     style: Style::Normal,
 };
 
-pub const SARASA_MONO_BYTES: &[u8] =
-    include_bytes!("../../../resources/fonts/subset/sarasa-mono-sc-regular.subset.ttf");
-pub const SARASA_MONO: Font = Font {
+pub const NOTO_SANS_BYTES: &[u8] =
+    include_bytes!("../../../resources/fonts/subset/GoNotoKurrent-Regular.subset.ttf");
+pub const NOTO_SANS: Font = Font {
     family: Family::Name(FONT_FAMILY_NAME),
     weight: Weight::Normal,
     stretch: Stretch::Normal,
