@@ -175,6 +175,10 @@ impl Sniffer {
     }
 
     fn keyboard_subscription(&self) -> Subscription<Message> {
+        if self.welcome.is_some() {
+            return Subscription::none();
+        }
+
         const NO_MODIFIER: Modifiers = Modifiers::empty();
 
         if self.thumbnail {
