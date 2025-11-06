@@ -18,6 +18,7 @@ pub enum TextType {
     Subtitle,
     Danger,
     Sponsor,
+    Welcome(f32),
 }
 
 /// Returns a formatted caption followed by subtitle, new line, tab, and desc
@@ -68,6 +69,19 @@ pub fn highlight(style: &StyleType, element: TextType) -> Color {
                 r: c * (1.0 - p1) + secondary.r * p1,
                 g: c * (1.0 - p1) + secondary.g * p1,
                 b: c * (1.0 - p1) + secondary.b * p1,
+                a: 1.0,
+            }
+        }
+        TextType::Welcome(mut n) => {
+            if n < 0.0 || n > 1.0 {
+                n = 1.0
+            };
+            let std = colors.text_body;
+            let end = secondary;
+            Color {
+                r: std.r * (1.0 - n) + end.r * n,
+                g: std.g * (1.0 - n) + end.g * n,
+                b: std.b * (1.0 - n) + end.b * n,
                 a: 1.0,
             }
         }

@@ -8,3 +8,4 @@ pub mod settings_notifications_page;
 pub mod settings_style_page;
 pub mod thumbnail_page;
 pub mod types;
+pub mod welcome_page;
