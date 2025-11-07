@@ -73,9 +73,9 @@ pub fn highlight(style: &StyleType, element: TextType) -> Color {
             }
         }
         TextType::Welcome(mut n) => {
-            if n < 0.0 || n > 1.0 {
-                n = 1.0
-            };
+            if !(0.0..=1.0).contains(&n) {
+                n = 1.0;
+            }
             Color { a: n, ..secondary }
         }
         TextType::Incoming => colors.secondary,

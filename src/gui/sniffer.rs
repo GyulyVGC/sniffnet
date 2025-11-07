@@ -175,11 +175,11 @@ impl Sniffer {
     }
 
     fn keyboard_subscription(&self) -> Subscription<Message> {
+        const NO_MODIFIER: Modifiers = Modifiers::empty();
+
         if self.welcome.is_some() {
             return Subscription::none();
         }
-
-        const NO_MODIFIER: Modifiers = Modifiers::empty();
 
         if self.thumbnail {
             iced::event::listen_with(|event, _, _| match event {
@@ -453,9 +453,8 @@ impl Sniffer {
                     if x <= 2 {
                         let _ = self.conf.clone().store();
                         return window::close(self.id.unwrap_or_else(Id::unique));
-                    } else {
-                        self.welcome = Some((false, x.saturating_sub(1)));
                     }
+                    self.welcome = Some((false, x.saturating_sub(1)));
                 }
             }
             Message::Welcome => {
@@ -1933,7 +1932,8 @@ mod tests {
         sniffer.update(Message::ChangeRunningPage(RunningPage::Notifications));
         sniffer.update(Message::DataReprSelection(DataRepr::Bits));
 
-        // quit the app by sending a CloseRequested message
+        // force saving configs by quitting the app
+        sniffer.welcome = Some((false, 0));
         sniffer.update(Message::Quit);
 
         assert!(path.exists());
