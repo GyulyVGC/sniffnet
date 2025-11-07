@@ -76,14 +76,7 @@ pub fn highlight(style: &StyleType, element: TextType) -> Color {
             if n < 0.0 || n > 1.0 {
                 n = 1.0
             };
-            let std = colors.text_body;
-            let end = secondary;
-            Color {
-                r: std.r * (1.0 - n) + end.r * n,
-                g: std.g * (1.0 - n) + end.g * n,
-                b: std.b * (1.0 - n) + end.b * n,
-                a: 1.0,
-            }
+            Color { a: n, ..secondary }
         }
         TextType::Incoming => colors.secondary,
         TextType::Outgoing => colors.outgoing,

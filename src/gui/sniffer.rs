@@ -78,8 +78,8 @@ pub const ICON_FONT_FAMILY_NAME: &str = "Icons for Sniffnet";
 pub struct Sniffer {
     /// Parameters that are persistent across runs
     pub conf: Conf,
-    /// Are we in welcome page
-    pub welcome: Option<u8>,
+    /// Are we during welcome / quit animation? None if not, true if welcome, false if quit
+    pub welcome: Option<(bool, u8)>,
     /// Capture receiver clone (to close the channel after every run), with the current capture id (to ignore pending messages from previous captures)
     pub current_capture_rx: (usize, Option<Receiver<BackendTrafficMessage>>),
     /// Capture data
@@ -143,7 +143,7 @@ impl Sniffer {
         let capture_source = CaptureSource::from_conf(&conf);
         Self {
             conf,
-            welcome: Some(0),
+            welcome: Some((true, 0)),
             current_capture_rx: (0, None),
             info_traffic: InfoTraffic::default(),
             addresses_resolved: HashMap::new(),
@@ -240,8 +240,13 @@ impl Sniffer {
     }
 
     fn time_subscription(&self) -> Subscription<Message> {
-        if self.welcome.is_some() {
-            iced::time::every(Duration::from_millis(100)).map(|_| Message::Welcome)
+        if let Some((w, _)) = self.welcome {
+            let sub = iced::time::every(Duration::from_millis(100));
+            if w {
+                sub.map(|_| Message::Welcome)
+            } else {
+                sub.map(|_| Message::Quit)
+            }
         } else {
             iced::time::every(Duration::from_millis(1000)).map(|_| Message::Periodic)
         }
@@ -268,15 +273,6 @@ impl Sniffer {
                     Sniffer::register_sigint_handler(),
                     Task::perform(set_newer_release_status(), Message::SetNewerReleaseStatus),
                 ]);
-            }
-            Message::Welcome => {
-                if let Some(x) = self.welcome {
-                    if x >= 26 {
-                        self.welcome = None;
-                    } else {
-                        self.welcome = Some(x + 1);
-                    }
-                }
             }
             Message::TickRun(cap_id, msg, host_msgs, no_more_packets) => {
                 if cap_id == self.current_capture_rx.0 {
@@ -451,8 +447,25 @@ impl Sniffer {
             }
             Message::QuitWrapper => return self.quit_wrapper(),
             Message::Quit => {
-                let _ = self.conf.clone().store();
-                return window::close(self.id.unwrap_or_else(Id::unique));
+                if self.welcome.is_none() {
+                    self.welcome = Some((false, 13));
+                } else if let Some((false, x)) = self.welcome {
+                    if x <= 2 {
+                        let _ = self.conf.clone().store();
+                        return window::close(self.id.unwrap_or_else(Id::unique));
+                    } else {
+                        self.welcome = Some((false, x.saturating_sub(1)));
+                    }
+                }
+            }
+            Message::Welcome => {
+                if let Some((true, x)) = self.welcome {
+                    if x >= 19 {
+                        self.welcome = None;
+                    } else {
+                        self.welcome = Some((true, x + 1));
+                    }
+                }
             }
             Message::CopyIp(ip) => {
                 self.timing_events.copy_ip_now(ip);
@@ -616,7 +629,7 @@ impl Sniffer {
         let font = style.get_extension().font;
         let font_headers = style.get_extension().font_headers;
 
-        if let Some(x) = self.welcome {
+        if let Some((_, x)) = self.welcome {
             return welcome_page(font, x).into();
         }
 

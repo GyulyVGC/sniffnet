@@ -8,36 +8,36 @@ use iced::{Alignment, Font, Length};
 
 pub fn welcome_page<'a>(font: Font, x: u8) -> Container<'a, Message, StyleType> {
     let icon = match x {
-        0..=3 | 26.. => Text::new(""),
-        4 | 25 => Icon::Sniffnet1.to_text(),
-        5 | 24 => Icon::Sniffnet2.to_text(),
-        6 | 23 => Icon::Sniffnet3.to_text(),
-        7 | 22 => Icon::Sniffnet4.to_text(),
-        8..=21 => Icon::Sniffnet.to_text(),
+        0..=3 | 20.. => Text::new(""),
+        4 => Icon::Sniffnet1.to_text(),
+        5 => Icon::Sniffnet2.to_text(),
+        6 => Icon::Sniffnet3.to_text(),
+        7 => Icon::Sniffnet4.to_text(),
+        8..=19 => Icon::Sniffnet.to_text(),
     };
 
     let text = Text::new(match x {
-        0..=3 | 26.. => "",
-        4 | 25 => "S",
-        5 | 24 => "Sn",
-        6 | 23 => "Sni",
-        7 | 22 => "Snif",
-        8 | 21 => "Sniff",
-        9 | 20 => "Sniffn",
-        10 | 19 => "Sniffne",
-        11..=18 => "Sniffnet",
+        0..=3 | 20.. => "",
+        4 => "S",
+        5 => "Sn",
+        6 => "Sni",
+        7 => "Snif",
+        8 => "Sniff",
+        9 => "Sniffn",
+        10 => "Sniffne",
+        11..=19 => "Sniffnet",
     });
 
     let text_type = match x {
-        0..=3 | 26.. => TextType::Welcome(0.0),
-        4 | 25 => TextType::Welcome(0.125),
-        5 | 24 => TextType::Welcome(0.25),
-        6 | 23 => TextType::Welcome(0.375),
-        7 | 22 => TextType::Welcome(0.5),
-        8 | 21 => TextType::Welcome(0.625),
-        9 | 20 => TextType::Welcome(0.750),
-        10 | 19 => TextType::Welcome(0.875),
-        11..=18 => TextType::Welcome(1.0),
+        0..=3 | 20.. => TextType::Welcome(0.0),
+        4 => TextType::Welcome(0.125),
+        5 => TextType::Welcome(0.25),
+        6 => TextType::Welcome(0.375),
+        7 => TextType::Welcome(0.5),
+        8 => TextType::Welcome(0.625),
+        9 => TextType::Welcome(0.750),
+        10 => TextType::Welcome(0.875),
+        11..=19 => TextType::Welcome(1.0),
     };
 
     let body = Column::new()
