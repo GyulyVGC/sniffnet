@@ -33,6 +33,7 @@ use crate::gui::pages::settings_style_page::settings_style_page;
 use crate::gui::pages::thumbnail_page::thumbnail_page;
 use crate::gui::pages::types::running_page::RunningPage;
 use crate::gui::pages::types::settings_page::SettingsPage;
+use crate::gui::pages::welcome_page::welcome_page;
 use crate::gui::styles::types::custom_palette::{CustomPalette, ExtraStyles};
 use crate::gui::styles::types::palette::Palette;
 use crate::gui::types::conf::Conf;
@@ -77,6 +78,8 @@ pub const ICON_FONT_FAMILY_NAME: &str = "Icons for Sniffnet";
 pub struct Sniffer {
     /// Parameters that are persistent across runs
     pub conf: Conf,
+    /// Are we during welcome / quit animation? None if not, true if welcome, false if quit
+    pub welcome: Option<(bool, u8)>,
     /// Capture receiver clone (to close the channel after every run), with the current capture id (to ignore pending messages from previous captures)
     pub current_capture_rx: (usize, Option<Receiver<BackendTrafficMessage>>),
     /// Capture data
@@ -140,6 +143,7 @@ impl Sniffer {
         let capture_source = CaptureSource::from_conf(&conf);
         Self {
             conf,
+            welcome: Some((true, 0)),
             current_capture_rx: (0, None),
             info_traffic: InfoTraffic::default(),
             addresses_resolved: HashMap::new(),
@@ -172,6 +176,10 @@ impl Sniffer {
 
     fn keyboard_subscription(&self) -> Subscription<Message> {
         const NO_MODIFIER: Modifiers = Modifiers::empty();
+
+        if self.welcome.is_some() {
+            return Subscription::none();
+        }
 
         if self.thumbnail {
             iced::event::listen_with(|event, _, _| match event {
@@ -231,8 +239,17 @@ impl Sniffer {
         }
     }
 
-    fn time_subscription() -> Subscription<Message> {
-        iced::time::every(Duration::from_millis(1000)).map(|_| Message::Periodic)
+    fn time_subscription(&self) -> Subscription<Message> {
+        if let Some((w, _)) = self.welcome {
+            let sub = iced::time::every(Duration::from_millis(100));
+            if w {
+                sub.map(|_| Message::Welcome)
+            } else {
+                sub.map(|_| Message::Quit)
+            }
+        } else {
+            iced::time::every(Duration::from_millis(1000)).map(|_| Message::Periodic)
+        }
     }
 
     fn window_subscription() -> Subscription<Message> {
@@ -430,8 +447,24 @@ impl Sniffer {
             }
             Message::QuitWrapper => return self.quit_wrapper(),
             Message::Quit => {
-                let _ = self.conf.clone().store();
-                return window::close(self.id.unwrap_or_else(Id::unique));
+                if self.welcome.is_none() {
+                    self.welcome = Some((false, 13));
+                } else if let Some((false, x)) = self.welcome {
+                    if x <= 2 {
+                        let _ = self.conf.clone().store();
+                        return window::close(self.id.unwrap_or_else(Id::unique));
+                    }
+                    self.welcome = Some((false, x.saturating_sub(1)));
+                }
+            }
+            Message::Welcome => {
+                if let Some((true, x)) = self.welcome {
+                    if x >= 19 {
+                        self.welcome = None;
+                    } else {
+                        self.welcome = Some((true, x + 1));
+                    }
+                }
             }
             Message::CopyIp(ip) => {
                 self.timing_events.copy_ip_now(ip);
@@ -595,6 +628,10 @@ impl Sniffer {
         let font = style.get_extension().font;
         let font_headers = style.get_extension().font_headers;
 
+        if let Some((_, x)) = self.welcome {
+            return welcome_page(font, x).into();
+        }
+
         let header = header(self);
 
         let body = if self.thumbnail {
@@ -676,7 +713,7 @@ impl Sniffer {
         Subscription::batch([
             self.keyboard_subscription(),
             self.mouse_subscription(),
-            Sniffer::time_subscription(),
+            self.time_subscription(),
             Sniffer::window_subscription(),
         ])
     }
@@ -1895,7 +1932,8 @@ mod tests {
         sniffer.update(Message::ChangeRunningPage(RunningPage::Notifications));
         sniffer.update(Message::DataReprSelection(DataRepr::Bits));
 
-        // quit the app by sending a CloseRequested message
+        // force saving configs by quitting the app
+        sniffer.welcome = Some((false, 0));
         sniffer.update(Message::Quit);
 
         assert!(path.exists());

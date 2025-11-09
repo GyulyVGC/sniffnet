@@ -21,6 +21,8 @@ use crate::{Language, StyleType};
 pub enum Message {
     /// Run tasks to initialize the app
     StartApp(Option<window::Id>),
+    /// Animate welcome page
+    Welcome,
     /// Sent by the backend parsing packets; includes the capture id, new data, new hosts batched data, and whether an offline capture has finished
     TickRun(usize, InfoTraffic, Vec<HostMessage>, bool),
     /// Capture source selected from the picklist

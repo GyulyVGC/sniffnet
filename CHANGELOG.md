@@ -2,6 +2,9 @@
 
 All Sniffnet releases with the relative changes are documented in this file.
 
+## [UNRELEASED]
+- Add animated welcome screen ([#1002](https://github.com/GyulyVGC/sniffnet/pull/1002))
+
 ## [1.4.2] - 2025-11-04
 - Send remote notifications via webhook ([#991](https://github.com/GyulyVGC/sniffnet/pull/991) — fixes [#841](https://github.com/GyulyVGC/sniffnet/issues/841))
 - Pause and resume packet captures ([#992](https://github.com/GyulyVGC/sniffnet/pull/992) — fixes [#551](https://github.com/GyulyVGC/sniffnet/issues/551))
