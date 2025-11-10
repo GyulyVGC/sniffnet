@@ -20,12 +20,12 @@ impl MyDevice {
                 return device;
             }
         }
-        Device::lookup().unwrap_or(None).unwrap_or_else(|| Device {
+        Device {
             name: String::new(),
             desc: None,
             addresses: vec![],
             flags: DeviceFlags::empty(),
-        })
+        }
     }
 
     pub fn from_pcap_device(device: Device) -> Self {

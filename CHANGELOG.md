@@ -4,6 +4,7 @@ All Sniffnet releases with the relative changes are documented in this file.
 
 ## [UNRELEASED]
 - Add animated welcome screen ([#1002](https://github.com/GyulyVGC/sniffnet/pull/1002))
+- Return a PCAP error when trying to start a capture from an unknown adapter name
 
 ## [1.4.2] - 2025-11-04
 - Send remote notifications via webhook ([#991](https://github.com/GyulyVGC/sniffnet/pull/991) — fixes [#841](https://github.com/GyulyVGC/sniffnet/issues/841))
