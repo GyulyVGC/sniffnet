@@ -48,6 +48,7 @@ use crate::mmdb::country::COUNTRY_MMDB;
 use crate::mmdb::types::mmdb_reader::{MmdbReader, MmdbReaders};
 use crate::networking::parse_packets::BackendTrafficMessage;
 use crate::networking::parse_packets::parse_packets;
+use crate::networking::traffic_preview::traffic_preview;
 use crate::networking::types::capture_context::{
     CaptureContext, CaptureSource, CaptureSourcePicklist, MyPcapImport,
 };
@@ -269,6 +270,12 @@ impl Sniffer {
         match message {
             Message::StartApp(id) => {
                 self.id = id;
+                let _ = thread::Builder::new()
+                    .name("thread_traffic_preview".to_string())
+                    .spawn(move || {
+                        traffic_preview();
+                    })
+                    .log_err(location!());
                 return Task::batch([
                     Sniffer::register_sigint_handler(),
                     Task::perform(set_newer_release_status(), Message::SetNewerReleaseStatus),
