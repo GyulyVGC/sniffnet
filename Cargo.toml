@@ -55,7 +55,7 @@ rfd = "0.15.4"
 phf = "0.13.1"
 phf_shared = "0.13.1"
 splines = "5.0.0"
-clap = { version = "4.5.51", features = ["derive"] }
+clap = { version = "4.5.53", features = ["derive"] }
 tokio = { version = "1.48.0", features = ["macros"] }
 async-channel = "2.5.0"
 semver = "1.0.27"
