@@ -51,7 +51,7 @@ rodio = { version = "0.21.1", default-features = false, features = ["mp3", "play
 dns-lookup = "3.0.1"
 toml = "0.9.8"
 ctrlc = { version = "3.5.1", features = ["termination"] }
-rfd = "0.15.4"
+rfd = "0.16.0"
 phf = "0.13.1"
 phf_shared = "0.13.1"
 splines = "5.0.0"
