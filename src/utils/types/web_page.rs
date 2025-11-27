@@ -27,10 +27,10 @@ impl WebPage {
     pub fn get_url(&self) -> &str {
         match self {
             WebPage::Repo => "https://github.com/GyulyVGC/sniffnet",
-            // WebPage::Website => "https://www.sniffnet.app",
-            WebPage::WebsiteSponsor => "https://www.sniffnet.app/sponsor",
-            WebPage::WebsiteDownload => "https://www.sniffnet.app/download",
-            WebPage::WebsiteNews => "https://www.sniffnet.app/news",
+            // WebPage::Website => "https://www.sniffnet.net",
+            WebPage::WebsiteSponsor => "https://www.sniffnet.net/sponsor",
+            WebPage::WebsiteDownload => "https://www.sniffnet.net/download",
+            WebPage::WebsiteNews => "https://www.sniffnet.net/news",
             WebPage::Roadmap => "https://whimsical.com/sniffnet-roadmap-Damodrdfx22V9jGnpHSCGo",
             WebPage::Issues => "https://github.com/GyulyVGC/sniffnet/issues",
             WebPage::IssueLanguages => "https://github.com/GyulyVGC/sniffnet/issues/60",

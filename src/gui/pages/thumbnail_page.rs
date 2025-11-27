@@ -238,8 +238,8 @@ mod tests {
         );
 
         assert_eq!(
-            clip_text("      \n\t    sniffnet.app       ", MAX_CHARS_HOST),
-            "sniffnet.app"
+            clip_text("      \n\t    sniffnet.net       ", MAX_CHARS_HOST),
+            "sniffnet.net"
         );
         assert_eq!(
             clip_text("        protocol90 23456    \n      ", MAX_CHARS_SERVICE),

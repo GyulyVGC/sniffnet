@@ -1,9 +1,5 @@
 {
-  "origins": [
-    "https://sniffnet.app"
-  ],
-  "originsRegex": [
-    "http://localhost:[0-9]+"
-  ],
+  "origins": ["https://sniffnet.net"],
+  "originsRegex": ["http://localhost:[0-9]+"],
   "defaultCommentOrder": "oldest"
 }

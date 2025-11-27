@@ -41,7 +41,7 @@ for this reason implementing an optimal UI for the application is crucially impo
 
 ## 🚀 The Main Product
 
-Sniffnet can be downloaded from [here](https://sniffnet.app/download/).
+Sniffnet can be downloaded from [here](https://sniffnet.net/download/).
 
 ### Target audience
 
