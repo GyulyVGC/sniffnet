@@ -28,7 +28,7 @@ pub fn print_cli_welcome_message() {
 │                                                                    │\n\
 │                           Sniffnet {ver}                           │\n\
 │                                                                    │\n\
-│           → Website: https://sniffnet.net                          │\n\
+│           → Website: https://sniffnet.app                          │\n\
 │           → GitHub:  https://github.com/GyulyVGC/sniffnet          │\n\
 │                                                                    │\n\
 ╰────────────────────────────────────────────────────────────────────╯\n\n"

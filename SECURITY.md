@@ -3,7 +3,7 @@
 We consider the security of Sniffnet a top priority.<br>
 The application is developed with a **security-first approach**:
 it has always been designed to **protect users' data privacy and system integrity**,
-as demonstrated by [security audits](https://sniffnet.net/news/security-audit/) assessing the application safety.
+as demonstrated by [security audits](https://sniffnet.app/news/security-audit/) assessing the application safety.
 
 But no matter how much effort we put into securing the app, there can still be **vulnerabilities** present.
 
