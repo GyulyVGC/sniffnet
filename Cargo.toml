@@ -37,7 +37,7 @@ strip = true
 #═══════════════════════════════════════════════════════════════════════════════════════════════════════════════════════
 
 [dependencies]
-pcap = "2.3.0"
+pcap = "2.4.0"
 etherparse = "0.19.0"
 chrono = { version = "0.4.42", default-features = false, features = ["clock"] }
 plotters = { version = "0.3.7", default-features = false, features = ["area_series", "line_series"] }
