@@ -7,7 +7,7 @@ pub const ASN_MMDB: &[u8] = include_bytes!("../../resources/DB/GeoLite2-ASN.mmdb
 
 #[allow(clippy::module_name_repetitions)]
 pub fn get_asn(address: &IpAddr, asn_db_reader: &MmdbReader) -> Asn {
-    if let Ok(Some(res)) = asn_db_reader.lookup::<MmdbAsnEntry>(*address) {
+    if let Some(res) = asn_db_reader.lookup::<MmdbAsnEntry>(*address) {
         return res.get_asn();
     }
     Asn::default()
