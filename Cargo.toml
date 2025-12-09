@@ -64,7 +64,7 @@ semver = "1.0.27"
 gag = "1.0.0"
 
 [target.'cfg(not(target_arch = "powerpc64"))'.dependencies]
-reqwest = { version = "0.12.24", default-features = false, features = ["json", "rustls-tls"] }
+reqwest = { version = "0.12.25", default-features = false, features = ["json", "rustls-tls"] }
 
 [target.'cfg(target_arch = "powerpc64")'.dependencies]
 reqwest = { version = "0.12.24", features = ["json"] }
