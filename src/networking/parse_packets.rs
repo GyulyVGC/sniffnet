@@ -37,6 +37,7 @@ use std::time::{Duration, Instant};
 use tokio::sync::broadcast::Receiver;
 
 /// The calling thread enters a loop in which it waits for network packets
+#[allow(clippy::too_many_lines)]
 pub fn parse_packets(
     cap_id: usize,
     mut cs: CaptureSource,

@@ -3,7 +3,7 @@ use std::sync::Arc;
 
 use crate::location;
 use crate::utils::error_logger::{ErrorLogger, Location};
-use maxminddb::{MaxMindDbError, Reader};
+use maxminddb::Reader;
 use serde::Deserialize;
 
 #[derive(Clone)]
@@ -32,14 +32,11 @@ impl MmdbReader {
         }
     }
 
-    pub fn lookup<'a, T: Deserialize<'a>>(
-        &'a self,
-        ip: IpAddr,
-    ) -> Result<Option<T>, MaxMindDbError> {
+    pub fn lookup<'a, T: Deserialize<'a>>(&'a self, ip: IpAddr) -> Option<T> {
         match self {
-            MmdbReader::Default(reader) => reader.lookup(ip),
-            MmdbReader::Custom(reader) => reader.lookup(ip),
-            MmdbReader::Empty => Ok(None),
+            MmdbReader::Default(reader) => reader.lookup(ip).and_then(|lr| lr.decode()).ok()?,
+            MmdbReader::Custom(reader) => reader.lookup(ip).and_then(|lr| lr.decode()).ok()?,
+            MmdbReader::Empty => None,
         }
     }
 }

@@ -59,6 +59,9 @@ Do you want to help the project in an alternative way? You can also head to the 
 
 ## Download
 
+<picture><img height="28px" alt="" title="Downloads count" src="https://raw.githubusercontent.com/GyulyVGC/GyulyVGC.github.io/master/assets/img/downloads_badge.svg"/></picture>
+<a href="https://github.com/GyulyVGC/sniffnet/releases/latest"><img height="28px" alt="" title="Latest version" src="https://img.shields.io/github/v/release/gyulyvgc/sniffnet?color=blue&label=version&logo=github&style=for-the-badge"/></a>
+
 <table>
   <tr>
     <td>

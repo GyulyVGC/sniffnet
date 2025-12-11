@@ -265,6 +265,7 @@ impl Sniffer {
         })
     }
 
+    #[allow(clippy::too_many_lines)]
     pub fn update(&mut self, message: Message) -> Task<Message> {
         self.dots_pulse.1 = (self.dots_pulse.1 + 1) % 3;
         match message {

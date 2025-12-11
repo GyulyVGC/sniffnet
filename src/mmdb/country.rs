@@ -7,7 +7,7 @@ pub const COUNTRY_MMDB: &[u8] = include_bytes!("../../resources/DB/GeoLite2-Coun
 
 #[allow(clippy::module_name_repetitions)]
 pub fn get_country(address: &IpAddr, country_db_reader: &MmdbReader) -> Country {
-    if let Ok(Some(res)) = country_db_reader.lookup::<MmdbCountryEntry>(*address) {
+    if let Some(res) = country_db_reader.lookup::<MmdbCountryEntry>(*address) {
         return res.get_country();
     }
     Country::ZZ // unknown
