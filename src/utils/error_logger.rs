@@ -14,9 +14,8 @@ impl<T, E: Display> ErrorLogger<T, E> for Result<T, E> {
             let line = location.line;
             eprintln!("Sniffnet error at [{file}:{line}]: {e}");
             // in debug mode, panic on error
-            const {
-                assert!(!cfg!(debug_assertions));
-            }
+            #[cfg(debug_assertions)]
+            panic!();
         }
 
         self
