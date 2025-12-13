@@ -4,6 +4,7 @@
 
 use std::fmt::Write;
 
+use crate::chart::types::preview_chart::PreviewChart;
 use crate::gui::components::button::button_open_file;
 use crate::gui::sniffer::Sniffer;
 use crate::gui::styles::button::ButtonType;
@@ -232,6 +233,7 @@ fn get_col_adapter(
                         } else {
                             Some(Text::new(addrs).font(font))
                         };
+                        let preview_chart = sniffer.preview_charts.get(name);
                         scroll_adapters.push(
                             Button::new(
                                 Column::new()
@@ -243,7 +245,8 @@ fn get_col_adapter(
                                             .size(FONT_SIZE_SUBTITLE),
                                     )
                                     .push_maybe(subtitle.map(|sub| Text::new(sub).font(font)))
-                                    .push_maybe(addrs_text),
+                                    .push_maybe(addrs_text)
+                                    .push_maybe(preview_chart.map(PreviewChart::view)),
                             )
                             .padding([20, 30])
                             .width(Length::Fill)

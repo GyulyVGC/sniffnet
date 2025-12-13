@@ -7,7 +7,7 @@ use crate::networking::types::my_link_type::MyLinkType;
 use crate::utils::error_logger::{ErrorLogger, Location};
 use async_channel::Sender;
 use pcap::Device;
-use std::collections::{HashMap, VecDeque};
+use std::collections::HashMap;
 use std::thread;
 use std::time::{Duration, Instant};
 use tokio::sync::broadcast::Receiver;
@@ -15,22 +15,6 @@ use tokio::sync::broadcast::Receiver;
 #[derive(Default, Debug, Clone)]
 pub struct TrafficPreview {
     pub data: HashMap<String, u128>,
-}
-
-#[derive(Default, Debug, Clone)]
-pub struct TrafficPreviews {
-    pub data: HashMap<String, VecDeque<u128>>,
-}
-
-impl TrafficPreviews {
-    pub fn refresh(&mut self, msg: TrafficPreview) {
-        for (dev, pkts) in msg.data {
-            self.data
-                .entry(dev)
-                .and_modify(|v| v.push_back(pkts))
-                .or_insert(VecDeque::from([pkts]));
-        }
-    }
 }
 
 pub fn traffic_preview(tx: &Sender<TrafficPreview>, freeze_rxs: (Receiver<()>, Receiver<()>)) {

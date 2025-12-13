@@ -54,7 +54,7 @@ impl PreviewChart {
     }
 
     pub fn view(&self) -> Element<'_, Message, StyleType> {
-        Column::new().push(ChartWidget::new(self)).into()
+        Column::new().height(50).push(ChartWidget::new(self)).into()
     }
 
     pub fn change_style(&mut self, style: StyleType) {
@@ -120,7 +120,7 @@ impl Chart<Message> for PreviewChart {
             return;
         }
 
-        self.set_margins_and_label_areas(&mut chart_builder);
+        // self.set_margins_and_label_areas(&mut chart_builder);
 
         let x_axis_range = self.x_axis_range();
         let x_axis_start = x_axis_range.start;

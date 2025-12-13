@@ -18,6 +18,7 @@ use std::sync::Arc;
 use std::thread;
 use std::time::Duration;
 
+use crate::chart::types::preview_chart::PreviewChart;
 use crate::gui::components::footer::footer;
 use crate::gui::components::header::header;
 use crate::gui::components::modal::{get_clear_all_overlay, get_exit_overlay, modal};
@@ -48,7 +49,7 @@ use crate::mmdb::country::COUNTRY_MMDB;
 use crate::mmdb::types::mmdb_reader::{MmdbReader, MmdbReaders};
 use crate::networking::parse_packets::BackendTrafficMessage;
 use crate::networking::parse_packets::parse_packets;
-use crate::networking::traffic_preview::{TrafficPreviews, traffic_preview};
+use crate::networking::traffic_preview::traffic_preview;
 use crate::networking::types::capture_context::{
     CaptureContext, CaptureSource, CaptureSourcePicklist, MyPcapImport,
 };
@@ -101,8 +102,10 @@ pub struct Sniffer {
     pub pcap_error: Option<String>,
     /// Messages status
     pub dots_pulse: (String, u8),
-    /// Chart displayed
+    /// Traffic chart displayed in the Overview page
     pub traffic_chart: TrafficChart,
+    /// Traffic preview charts displayed in the initial page
+    pub preview_charts: HashMap<String, PreviewChart>,
     /// Currently displayed modal; None if no modal is displayed
     pub modal: Option<MyModal>,
     /// Currently displayed settings page; None if settings is closed
@@ -131,8 +134,6 @@ pub struct Sniffer {
     pub freeze_tx: Option<tokio::sync::broadcast::Sender<()>>,
     /// Sender to freeze the traffic preview
     pub freeze_preview_tx: Option<tokio::sync::broadcast::Sender<()>>,
-    /// Traffic previews for charts
-    pub traffic_previews: TrafficPreviews,
 }
 
 impl Sniffer {
@@ -160,6 +161,7 @@ impl Sniffer {
             pcap_error: None,
             dots_pulse: (".".to_string(), 0),
             traffic_chart: TrafficChart::new(style, language, data_repr),
+            preview_charts: HashMap::new(),
             modal: None,
             settings_page: None,
             running_page: None,
@@ -177,7 +179,6 @@ impl Sniffer {
             frozen: false,
             freeze_tx: None,
             freeze_preview_tx: None,
-            traffic_previews: TrafficPreviews::default(),
         }
     }
 
@@ -635,8 +636,19 @@ impl Sniffer {
                     let _ = tx.send(());
                 }
             }
-            Message::TrafficPreview(preview) => {
-                self.traffic_previews.refresh(preview);
+            Message::TrafficPreview(msg) => {
+                for (dev, packets) in msg.data {
+                    self.preview_charts
+                        .entry(dev)
+                        .and_modify(|chart| {
+                            chart.update_charts_data(packets);
+                        })
+                        .or_insert({
+                            let mut chart = PreviewChart::new(self.conf.settings.style);
+                            chart.update_charts_data(packets);
+                            chart
+                        });
+                }
             }
         }
         Task::none()
