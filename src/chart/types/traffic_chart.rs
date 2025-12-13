@@ -62,7 +62,7 @@ pub struct TrafficChart {
 
 impl TrafficChart {
     pub fn new(style: StyleType, language: Language, data_repr: DataRepr) -> Self {
-        TrafficChart {
+        Self {
             ticks: 0,
             out_bytes: ChartSeries::default(),
             in_bytes: ChartSeries::default(),
