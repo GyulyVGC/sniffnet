@@ -63,6 +63,29 @@ impl ChartSeries {
     }
 }
 
+pub(super) fn sample_spline(spline: &Spline<f32, f32>, multiplier: f32) -> Vec<(f32, f32)> {
+    let len = spline.len();
+    let pts = len * 10; // 10 samples per key
+    let mut ret_val = Vec::new();
+    let first_x = spline
+        .get(0)
+        .unwrap_or(&Key::new(0.0, 0.0, Interpolation::Cosine))
+        .t;
+    let last_x = spline
+        .get(len.saturating_sub(1))
+        .unwrap_or(&Key::new(0.0, 0.0, Interpolation::Cosine))
+        .t;
+    #[allow(clippy::cast_precision_loss)]
+    let delta = (last_x - first_x) / (pts as f32 - 1.0);
+    for i in 0..pts {
+        #[allow(clippy::cast_precision_loss)]
+        let x = first_x + delta * i as f32;
+        let p = spline.clamped_sample(x).unwrap_or_default() * multiplier;
+        ret_val.push((x, p));
+    }
+    ret_val
+}
+
 fn reduce_all_time_data(all_time: &mut Vec<(f32, f32)>) {
     // bisect data until we have less than 150 points
     while all_time.len() > 150 {

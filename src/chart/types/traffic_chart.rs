@@ -8,9 +8,9 @@ use iced::{Element, Length, Padding};
 use plotters::prelude::*;
 use plotters::series::LineSeries;
 use plotters_iced::{Chart, ChartBuilder, ChartWidget, DrawingBackend};
-use splines::{Interpolation, Key, Spline};
+use splines::Spline;
 
-use crate::chart::types::chart_series::ChartSeries;
+use crate::chart::types::chart_series::{ChartSeries, sample_spline};
 use crate::gui::sniffer::FONT_FAMILY_NAME;
 use crate::gui::styles::style_constants::CHARTS_LINE_BORDER;
 use crate::gui::styles::types::palette::to_rgb_color;
@@ -401,29 +401,6 @@ impl Chart<Message> for TrafficChart {
                 .log_err(location!());
         }
     }
-}
-
-fn sample_spline(spline: &Spline<f32, f32>, multiplier: f32) -> Vec<(f32, f32)> {
-    let pts = spline.len() * 10; // 10 samples per key
-    let mut ret_val = Vec::new();
-    let len = spline.len();
-    let first_x = spline
-        .get(0)
-        .unwrap_or(&Key::new(0.0, 0.0, Interpolation::Cosine))
-        .t;
-    let last_x = spline
-        .get(len.saturating_sub(1))
-        .unwrap_or(&Key::new(0.0, 0.0, Interpolation::Cosine))
-        .t;
-    #[allow(clippy::cast_precision_loss)]
-    let delta = (last_x - first_x) / (pts as f32 - 1.0);
-    for i in 0..pts {
-        #[allow(clippy::cast_precision_loss)]
-        let x = first_x + delta * i as f32;
-        let p = spline.clamped_sample(x).unwrap_or_default() * multiplier;
-        ret_val.push((x, p));
-    }
-    ret_val
 }
 
 #[cfg(test)]

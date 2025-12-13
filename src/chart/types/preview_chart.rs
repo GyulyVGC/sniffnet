@@ -5,9 +5,8 @@ use iced::widget::Column;
 use plotters::prelude::*;
 use plotters::series::LineSeries;
 use plotters_iced::{Chart, ChartBuilder, ChartWidget, DrawingBackend};
-use splines::{Interpolation, Key, Spline};
 
-use crate::chart::types::chart_series::ChartSeries;
+use crate::chart::types::chart_series::{ChartSeries, sample_spline};
 use crate::gui::styles::style_constants::CHARTS_LINE_BORDER;
 use crate::gui::styles::types::palette::to_rgb_color;
 use crate::gui::types::message::Message;
@@ -101,7 +100,7 @@ impl PreviewChart {
         let data = match spline.keys() {
             // if we have only one tick, we need to add a second point to draw the area
             [k] => vec![(0.0, k.value), (0.1, k.value)],
-            _ => sample_spline(spline),
+            _ => sample_spline(spline, 1.0),
         };
 
         AreaSeries::new(data, 0.0, color.mix(alpha.into()))
@@ -162,34 +161,11 @@ impl Chart<Message> for PreviewChart {
     }
 }
 
-fn sample_spline(spline: &Spline<f32, f32>) -> Vec<(f32, f32)> {
-    let pts = spline.len() * 10; // 10 samples per key
-    let mut ret_val = Vec::new();
-    let len = spline.len();
-    let first_x = spline
-        .get(0)
-        .unwrap_or(&Key::new(0.0, 0.0, Interpolation::Cosine))
-        .t;
-    let last_x = spline
-        .get(len.saturating_sub(1))
-        .unwrap_or(&Key::new(0.0, 0.0, Interpolation::Cosine))
-        .t;
-    #[allow(clippy::cast_precision_loss)]
-    let delta = (last_x - first_x) / (pts as f32 - 1.0);
-    for i in 0..pts {
-        #[allow(clippy::cast_precision_loss)]
-        let x = first_x + delta * i as f32;
-        let p = spline.clamped_sample(x).unwrap_or_default();
-        ret_val.push((x, p));
-    }
-    ret_val
-}
-
 #[cfg(test)]
 mod tests {
     use splines::{Interpolation, Key, Spline};
 
-    use crate::chart::types::traffic_chart::sample_spline;
+    use crate::chart::types::chart_series::sample_spline;
 
     #[test]
     fn test_spline_samples() {
