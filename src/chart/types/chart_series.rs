@@ -1,144 +1,4 @@
-use crate::TrafficChart;
-use crate::networking::types::data_representation::DataRepr;
-use crate::networking::types::info_traffic::InfoTraffic;
 use splines::{Interpolation, Key, Spline};
-
-impl TrafficChart {
-    pub fn update_charts_data(&mut self, info_traffic_msg: &InfoTraffic, no_more_packets: bool) {
-        self.no_more_packets = no_more_packets;
-
-        if self.ticks == 0 {
-            self.first_packet_timestamp = info_traffic_msg.last_packet_timestamp;
-        }
-
-        #[allow(clippy::cast_precision_loss)]
-        let tot_seconds = self.ticks as f32;
-        self.ticks += 1;
-
-        #[allow(clippy::cast_precision_loss)]
-        let out_bytes_entry = -(info_traffic_msg
-            .tot_data_info
-            .outgoing_data(DataRepr::Bytes) as f32);
-        #[allow(clippy::cast_precision_loss)]
-        let in_bytes_entry = info_traffic_msg
-            .tot_data_info
-            .incoming_data(DataRepr::Bytes) as f32;
-        #[allow(clippy::cast_precision_loss)]
-        let out_packets_entry = -(info_traffic_msg
-            .tot_data_info
-            .outgoing_data(DataRepr::Packets) as f32);
-        #[allow(clippy::cast_precision_loss)]
-        let in_packets_entry = info_traffic_msg
-            .tot_data_info
-            .incoming_data(DataRepr::Packets) as f32;
-
-        let out_bytes_point = (tot_seconds, out_bytes_entry);
-        let in_bytes_point = (tot_seconds, in_bytes_entry);
-        let out_packets_point = (tot_seconds, out_packets_entry);
-        let in_packets_point = (tot_seconds, in_packets_entry);
-
-        // update sent bytes traffic data
-        update_series(
-            &mut self.out_bytes,
-            out_bytes_point,
-            self.is_live_capture,
-            no_more_packets,
-        );
-        self.min_bytes = get_min(&self.out_bytes);
-
-        // update received bytes traffic data
-        update_series(
-            &mut self.in_bytes,
-            in_bytes_point,
-            self.is_live_capture,
-            no_more_packets,
-        );
-        self.max_bytes = get_max(&self.in_bytes);
-
-        // update sent packets traffic data
-        update_series(
-            &mut self.out_packets,
-            out_packets_point,
-            self.is_live_capture,
-            no_more_packets,
-        );
-        self.min_packets = get_min(&self.out_packets);
-
-        // update received packets traffic data
-        update_series(
-            &mut self.in_packets,
-            in_packets_point,
-            self.is_live_capture,
-            no_more_packets,
-        );
-        self.max_packets = get_max(&self.in_packets);
-    }
-
-    pub fn push_offline_gap_to_splines(&mut self, gap: u32) {
-        for i in 0..gap {
-            #[allow(clippy::cast_precision_loss)]
-            let point = ((self.ticks + i) as f32, 0.0);
-            update_series(&mut self.in_bytes, point, false, false);
-            update_series(&mut self.out_bytes, point, false, false);
-            update_series(&mut self.in_packets, point, false, false);
-            update_series(&mut self.out_packets, point, false, false);
-        }
-        self.ticks += gap;
-    }
-}
-
-fn update_series(
-    series: &mut ChartSeries,
-    point: (f32, f32),
-    is_live_capture: bool,
-    no_more_packets: bool,
-) {
-    // update spline
-    let spline = &mut series.spline;
-    let key = Key::new(point.0, point.1, Interpolation::Cosine);
-    if spline.len() >= 30 {
-        spline.remove(0);
-    }
-    spline.add(key);
-
-    // if offline capture, update all time data
-    if !is_live_capture {
-        let all_time = &mut series.all_time;
-        all_time.push(point);
-
-        // if we reached the end of the PCAP, reduce all time data into spline
-        if no_more_packets {
-            reduce_all_time_data(all_time);
-            let keys = all_time
-                .iter()
-                .map(|p| Key::new(p.0, p.1, Interpolation::Cosine))
-                .collect();
-            *spline = Spline::from_vec(keys);
-        }
-    }
-}
-
-/// Finds the minimum y value to be displayed in chart.
-fn get_min(serie: &ChartSeries) -> f32 {
-    let mut min = 0.0;
-    for key in &serie.spline {
-        if key.value < min {
-            min = key.value;
-        }
-    }
-    min
-}
-
-/// Finds the maximum y value to be displayed in chart.
-fn get_max(serie: &ChartSeries) -> f32 {
-    let mut max = 0.0;
-    for key in &serie.spline {
-        if key.value > max {
-            max = key.value;
-        }
-    }
-    max
-}
 
 #[derive(Default, Clone)]
 pub struct ChartSeries {
@@ -146,6 +6,61 @@ pub struct ChartSeries {
     pub spline: Spline<f32, f32>,
     /// Used to draw overall data, after the offline capture is over (not used in live captures)
     pub all_time: Vec<(f32, f32)>,
+}
+
+impl ChartSeries {
+    pub(super) fn update_series(
+        &mut self,
+        point: (f32, f32),
+        is_live_capture: bool,
+        no_more_packets: bool,
+    ) {
+        // update spline
+        let spline = &mut self.spline;
+        let key = Key::new(point.0, point.1, Interpolation::Cosine);
+        if spline.len() >= 30 {
+            spline.remove(0);
+        }
+        spline.add(key);
+
+        // if offline capture, update all time data
+        if !is_live_capture {
+            let all_time = &mut self.all_time;
+            all_time.push(point);
+
+            // if we reached the end of the PCAP, reduce all time data into spline
+            if no_more_packets {
+                reduce_all_time_data(all_time);
+                let keys = all_time
+                    .iter()
+                    .map(|p| Key::new(p.0, p.1, Interpolation::Cosine))
+                    .collect();
+                *spline = Spline::from_vec(keys);
+            }
+        }
+    }
+
+    /// Finds the minimum y value to be displayed in chart.
+    pub(super) fn get_min(&self) -> f32 {
+        let mut min = 0.0;
+        for key in &self.spline {
+            if key.value < min {
+                min = key.value;
+            }
+        }
+        min
+    }
+
+    /// Finds the maximum y value to be displayed in chart.
+    pub(super) fn get_max(&self) -> f32 {
+        let mut max = 0.0;
+        for key in &self.spline {
+            if key.value > max {
+                max = key.value;
+            }
+        }
+        max
+    }
 }
 
 fn reduce_all_time_data(all_time: &mut Vec<(f32, f32)>) {
@@ -219,7 +134,7 @@ fn reduce_all_time_data(all_time: &mut Vec<(f32, f32)>) {
 mod tests {
     use splines::{Interpolation, Key, Spline};
 
-    use crate::chart::manage_chart_data::{ChartSeries, get_max, get_min};
+    use crate::chart::chart_series::{ChartSeries, get_max, get_min};
     use crate::networking::types::data_info::DataInfo;
     use crate::networking::types::data_representation::DataRepr;
     use crate::utils::types::timestamp::Timestamp;

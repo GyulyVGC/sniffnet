@@ -10,12 +10,13 @@ use plotters::series::LineSeries;
 use plotters_iced::{Chart, ChartBuilder, ChartWidget, DrawingBackend};
 use splines::{Interpolation, Key, Spline};
 
-use crate::chart::manage_chart_data::ChartSeries;
+use crate::chart::types::chart_series::ChartSeries;
 use crate::gui::sniffer::FONT_FAMILY_NAME;
 use crate::gui::styles::style_constants::CHARTS_LINE_BORDER;
 use crate::gui::styles::types::palette::to_rgb_color;
 use crate::gui::types::message::Message;
 use crate::networking::types::data_representation::DataRepr;
+use crate::networking::types::info_traffic::InfoTraffic;
 use crate::networking::types::traffic_direction::TrafficDirection;
 use crate::translations::translations::{incoming_translation, outgoing_translation};
 use crate::utils::error_logger::{ErrorLogger, Location};
@@ -79,6 +80,72 @@ impl TrafficChart {
             no_more_packets: false,
             first_packet_timestamp: Timestamp::default(),
         }
+    }
+
+    pub fn update_charts_data(&mut self, info_traffic_msg: &InfoTraffic, no_more_packets: bool) {
+        self.no_more_packets = no_more_packets;
+
+        if self.ticks == 0 {
+            self.first_packet_timestamp = info_traffic_msg.last_packet_timestamp;
+        }
+
+        #[allow(clippy::cast_precision_loss)]
+        let tot_seconds = self.ticks as f32;
+        self.ticks += 1;
+
+        #[allow(clippy::cast_precision_loss)]
+        let out_bytes_entry = -(info_traffic_msg
+            .tot_data_info
+            .outgoing_data(DataRepr::Bytes) as f32);
+        #[allow(clippy::cast_precision_loss)]
+        let in_bytes_entry = info_traffic_msg
+            .tot_data_info
+            .incoming_data(DataRepr::Bytes) as f32;
+        #[allow(clippy::cast_precision_loss)]
+        let out_packets_entry = -(info_traffic_msg
+            .tot_data_info
+            .outgoing_data(DataRepr::Packets) as f32);
+        #[allow(clippy::cast_precision_loss)]
+        let in_packets_entry = info_traffic_msg
+            .tot_data_info
+            .incoming_data(DataRepr::Packets) as f32;
+
+        let out_bytes_point = (tot_seconds, out_bytes_entry);
+        let in_bytes_point = (tot_seconds, in_bytes_entry);
+        let out_packets_point = (tot_seconds, out_packets_entry);
+        let in_packets_point = (tot_seconds, in_packets_entry);
+
+        // update sent bytes traffic data
+        self.out_bytes
+            .update_series(out_bytes_point, self.is_live_capture, no_more_packets);
+        self.out_bytes.get_min();
+
+        // update received bytes traffic data
+        self.in_bytes
+            .update_series(in_bytes_point, self.is_live_capture, no_more_packets);
+        self.in_bytes.get_max();
+
+        // update sent packets traffic data
+        self.out_packets
+            .update_series(out_packets_point, self.is_live_capture, no_more_packets);
+        self.out_packets.get_min();
+
+        // update received packets traffic data
+        self.in_packets
+            .update_series(in_packets_point, self.is_live_capture, no_more_packets);
+        self.in_packets.get_max();
+    }
+
+    pub fn push_offline_gap_to_splines(&mut self, gap: u32) {
+        for i in 0..gap {
+            #[allow(clippy::cast_precision_loss)]
+            let point = ((self.ticks + i) as f32, 0.0);
+            self.in_bytes.update_series(point, false, false);
+            self.out_bytes.update_series(point, false, false);
+            self.in_packets.update_series(point, false, false);
+            self.out_packets.update_series(point, false, false);
+        }
+        self.ticks += gap;
     }
 
     pub fn view(&self) -> Element<'_, Message, StyleType> {
