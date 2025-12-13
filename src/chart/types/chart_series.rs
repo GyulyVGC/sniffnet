@@ -134,7 +134,7 @@ fn reduce_all_time_data(all_time: &mut Vec<(f32, f32)>) {
 mod tests {
     use splines::{Interpolation, Key, Spline};
 
-    use crate::chart::chart_series::{ChartSeries, get_max, get_min};
+    use crate::chart::types::chart_series::ChartSeries;
     use crate::networking::types::data_info::DataInfo;
     use crate::networking::types::data_representation::DataRepr;
     use crate::utils::types::timestamp::Timestamp;
@@ -247,13 +247,13 @@ mod tests {
             ..Default::default()
         };
 
-        assert_eq!(get_min(&sent), -1000.0);
-        assert_eq!(get_max(&received), 21000.0);
+        assert_eq!(sent.get_min(), -1000.0);
+        assert_eq!(received.get_max(), 21000.0);
 
         traffic_chart.update_charts_data(&info_traffic, false);
 
-        assert_eq!(get_min(&traffic_chart.out_packets), -3333.0);
-        assert_eq!(get_max(&traffic_chart.in_bytes), 21000.0);
+        assert_eq!(traffic_chart.out_packets.get_min(), -3333.0);
+        assert_eq!(traffic_chart.in_bytes.get_max(), 21000.0);
 
         let mut sent_bytes = sent.clone();
         sent_bytes

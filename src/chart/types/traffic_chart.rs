@@ -118,22 +118,22 @@ impl TrafficChart {
         // update sent bytes traffic data
         self.out_bytes
             .update_series(out_bytes_point, self.is_live_capture, no_more_packets);
-        self.out_bytes.get_min();
+        self.min_bytes = self.out_bytes.get_min();
 
         // update received bytes traffic data
         self.in_bytes
             .update_series(in_bytes_point, self.is_live_capture, no_more_packets);
-        self.in_bytes.get_max();
+        self.max_bytes = self.in_bytes.get_max();
 
         // update sent packets traffic data
         self.out_packets
             .update_series(out_packets_point, self.is_live_capture, no_more_packets);
-        self.out_packets.get_min();
+        self.min_packets = self.out_packets.get_min();
 
         // update received packets traffic data
         self.in_packets
             .update_series(in_packets_point, self.is_live_capture, no_more_packets);
-        self.in_packets.get_max();
+        self.max_packets = self.in_packets.get_max();
     }
 
     pub fn push_offline_gap_to_splines(&mut self, gap: u32) {
