@@ -5,6 +5,7 @@ use crate::gui::components::types::my_modal::MyModal;
 use crate::gui::pages::types::running_page::RunningPage;
 use crate::gui::pages::types::settings_page::SettingsPage;
 use crate::gui::styles::types::gradient_type::GradientType;
+use crate::networking::traffic_preview::TrafficPreview;
 use crate::networking::types::capture_context::CaptureSourcePicklist;
 use crate::networking::types::data_representation::DataRepr;
 use crate::networking::types::host::{Host, HostMessage};
@@ -145,4 +146,6 @@ pub enum Message {
     RemoteNotificationsUrl(String),
     /// Pause or resume live capture
     Freeze,
+    /// Traffic preview
+    TrafficPreview(TrafficPreview),
 }

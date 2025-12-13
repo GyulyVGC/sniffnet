@@ -48,7 +48,7 @@ use crate::mmdb::country::COUNTRY_MMDB;
 use crate::mmdb::types::mmdb_reader::{MmdbReader, MmdbReaders};
 use crate::networking::parse_packets::BackendTrafficMessage;
 use crate::networking::parse_packets::parse_packets;
-use crate::networking::traffic_preview::traffic_preview;
+use crate::networking::traffic_preview::{TrafficPreviews, traffic_preview};
 use crate::networking::types::capture_context::{
     CaptureContext, CaptureSource, CaptureSourcePicklist, MyPcapImport,
 };
@@ -128,7 +128,11 @@ pub struct Sniffer {
     /// Flag reporting whether the packet capture is frozen
     pub frozen: bool,
     /// Sender to freeze the packet capture
-    freeze_tx: Option<tokio::sync::broadcast::Sender<()>>,
+    pub freeze_tx: Option<tokio::sync::broadcast::Sender<()>>,
+    /// Sender to freeze the traffic preview
+    pub freeze_preview_tx: Option<tokio::sync::broadcast::Sender<()>>,
+    /// Traffic previews for charts
+    pub traffic_previews: TrafficPreviews,
 }
 
 impl Sniffer {
@@ -172,6 +176,8 @@ impl Sniffer {
             host_data_states: HostDataStates::default(),
             frozen: false,
             freeze_tx: None,
+            freeze_preview_tx: None,
+            traffic_previews: TrafficPreviews::default(),
         }
     }
 
@@ -271,15 +277,22 @@ impl Sniffer {
         match message {
             Message::StartApp(id) => {
                 self.id = id;
+                let (tx, rx) = async_channel::unbounded();
+                let (freeze_tx, freeze_rx) = tokio::sync::broadcast::channel(1_048_575);
+                let freeze_rx2 = freeze_tx.subscribe();
                 let _ = thread::Builder::new()
                     .name("thread_traffic_preview".to_string())
                     .spawn(move || {
-                        traffic_preview();
+                        traffic_preview(&tx, (freeze_rx, freeze_rx2));
                     })
                     .log_err(location!());
+                self.freeze_preview_tx = Some(freeze_tx);
                 return Task::batch([
                     Sniffer::register_sigint_handler(),
                     Task::perform(set_newer_release_status(), Message::SetNewerReleaseStatus),
+                    Task::run(rx, |traffic_preview| {
+                        Message::TrafficPreview(traffic_preview)
+                    }),
                 ]);
             }
             Message::TickRun(cap_id, msg, host_msgs, no_more_packets) => {
@@ -621,6 +634,9 @@ impl Sniffer {
                 if let Some(tx) = &self.freeze_tx {
                     let _ = tx.send(());
                 }
+            }
+            Message::TrafficPreview(preview) => {
+                self.traffic_previews.refresh(preview);
             }
         }
         Task::none()

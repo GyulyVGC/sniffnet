@@ -5,11 +5,35 @@ use crate::networking::types::capture_context::{CaptureContext, CaptureSource};
 use crate::networking::types::my_device::MyDevice;
 use crate::networking::types::my_link_type::MyLinkType;
 use crate::utils::error_logger::{ErrorLogger, Location};
+use async_channel::Sender;
 use pcap::Device;
+use std::collections::{HashMap, VecDeque};
 use std::thread;
 use std::time::{Duration, Instant};
+use tokio::sync::broadcast::Receiver;
 
-pub fn traffic_preview() {
+#[derive(Default, Debug, Clone)]
+pub struct TrafficPreview {
+    pub data: HashMap<String, u128>,
+}
+
+#[derive(Default, Debug, Clone)]
+pub struct TrafficPreviews {
+    pub data: HashMap<String, VecDeque<u128>>,
+}
+
+impl TrafficPreviews {
+    pub fn refresh(&mut self, msg: TrafficPreview) {
+        for (dev, pkts) in msg.data {
+            self.data
+                .entry(dev)
+                .and_modify(|v| v.push_back(pkts))
+                .or_insert(VecDeque::from([pkts]));
+        }
+    }
+}
+
+pub fn traffic_preview(tx: &Sender<TrafficPreview>, freeze_rxs: (Receiver<()>, Receiver<()>)) {
     let (freeze_tx, mut freeze_rx) = tokio::sync::broadcast::channel(1_048_575);
     let (pcap_tx, pcap_rx) = std::sync::mpsc::sync_channel(10_000);
     for dev in Device::list().unwrap_or_default() {
@@ -28,10 +52,19 @@ pub fn traffic_preview() {
         let _ = thread::Builder::new()
             .name("thread_device_traffic_preview".to_string())
             .spawn(move || {
-                packet_stream(cap, &pcap_tx, &mut freeze_rx, &Filters::default(), dev_info);
+                packet_stream(
+                    cap,
+                    &pcap_tx,
+                    &mut freeze_rx,
+                    &Filters::default(),
+                    dev_info.as_ref(),
+                );
             })
             .log_err(location!());
     }
+
+    let mut traffic_preview = TrafficPreview::default();
+    let mut first_packet_ticks = None;
 
     loop {
         // check if we need to freeze the parsing
@@ -39,10 +72,10 @@ pub fn traffic_preview() {
             // wait until unfreeze
             let _ = freeze_rx.blocking_recv();
             // reset the first packet ticks
-            // first_packet_ticks = Some(Instant::now());
+            first_packet_ticks = Some(Instant::now());
         }
 
-        let (packet_res, cap_stats) = pcap_rx
+        let (packet_res, _) = pcap_rx
             .recv_timeout(Duration::from_millis(150))
             .unwrap_or((Err(pcap::Error::TimeoutExpired), None));
 
@@ -50,13 +83,24 @@ pub fn traffic_preview() {
         //     return;
         // }
 
+        maybe_send_traffic_preview(&mut traffic_preview, &mut first_packet_ticks, tx);
+
         if let Ok(packet) = packet_res {
             let my_link_type = packet.dev_info.as_ref().unwrap().my_link_type;
             if get_sniffable_headers(&packet.data, my_link_type).is_some() {
-                println!(
-                    "Received packet on {}",
-                    packet.dev_info.as_ref().map_or("?", |d| d.name.as_str()),
-                );
+                let Some(dev_info) = packet.dev_info else {
+                    continue;
+                };
+
+                if first_packet_ticks.is_none() {
+                    first_packet_ticks = Some(Instant::now());
+                }
+
+                traffic_preview
+                    .data
+                    .entry(dev_info.name)
+                    .and_modify(|p| *p += 1)
+                    .or_insert(1);
             }
         }
     }
@@ -66,4 +110,16 @@ pub fn traffic_preview() {
 pub(super) struct DevInfo {
     name: String,
     my_link_type: MyLinkType,
+}
+
+fn maybe_send_traffic_preview(
+    traffic_preview: &mut TrafficPreview,
+    first_packet_ticks: &mut Option<Instant>,
+    tx: &Sender<TrafficPreview>,
+) {
+    if first_packet_ticks.is_some_and(|i| i.elapsed() >= Duration::from_millis(1000)) {
+        *first_packet_ticks =
+            first_packet_ticks.and_then(|i| i.checked_add(Duration::from_millis(1000)));
+        let _ = tx.send_blocking(std::mem::take(traffic_preview));
+    }
 }

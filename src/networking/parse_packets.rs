@@ -507,7 +507,7 @@ pub(super) fn packet_stream(
     tx: &std::sync::mpsc::SyncSender<(Result<PacketOwned, pcap::Error>, Option<pcap::Stat>)>,
     freeze_rx: &mut Receiver<()>,
     filters: &Filters,
-    dev_info: Option<DevInfo>,
+    dev_info: Option<&DevInfo>,
 ) {
     loop {
         // check if we need to freeze the parsing
@@ -524,7 +524,7 @@ pub(super) fn packet_stream(
         let packet_owned = packet_res.map(|p| PacketOwned {
             header: *p.header,
             data: p.data.into(),
-            dev_info: dev_info.clone(),
+            dev_info: dev_info.cloned(),
         });
         if tx.send((packet_owned, cap.stats().ok())).is_err() {
             return;
