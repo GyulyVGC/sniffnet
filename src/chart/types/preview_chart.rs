@@ -19,8 +19,6 @@ pub struct PreviewChart {
     pub ticks: u32,
     /// Packets (sent & received)
     pub packets: ChartSeries,
-    /// Minimum number of packets per time interval (computed on last 30 intervals)
-    pub min_packets: f32,
     /// Maximum number of packets per time interval (computed on last 30 intervals)
     pub max_packets: f32,
     /// Style of the chart
@@ -32,7 +30,6 @@ impl PreviewChart {
         Self {
             ticks: 0,
             packets: ChartSeries::default(),
-            min_packets: 0.0,
             max_packets: 0.0,
             style,
         }
@@ -49,7 +46,6 @@ impl PreviewChart {
 
         // update sent bytes traffic data
         self.packets.update_series(packets_point, true, false);
-        self.min_packets = self.packets.get_min();
         self.max_packets = self.packets.get_max();
     }
 
@@ -59,17 +55,6 @@ impl PreviewChart {
 
     pub fn change_style(&mut self, style: StyleType) {
         self.style = style;
-    }
-
-    fn set_margins_and_label_areas<DB: DrawingBackend>(
-        &self,
-        chart_builder: &mut ChartBuilder<DB>,
-    ) {
-        chart_builder
-            .margin_right(25)
-            .margin_top(6)
-            .set_label_area_size(LabelAreaPosition::Left, 55);
-        chart_builder.set_label_area_size(LabelAreaPosition::Bottom, 40);
     }
 
     fn x_axis_range(&self) -> Range<f32> {
@@ -86,10 +71,8 @@ impl PreviewChart {
     }
 
     fn y_axis_range(&self) -> Range<f32> {
-        let (min, max) = (self.min_packets, self.max_packets);
-        let fs = max - min;
-        let gap = fs * 0.05;
-        min - gap..max + gap
+        let max = self.max_packets;
+        0.0..max
     }
 
     fn area_series<DB: DrawingBackend>(&self) -> AreaSeries<DB, f32, f32> {
@@ -119,8 +102,6 @@ impl Chart<Message> for PreviewChart {
         if self.ticks < 1 {
             return;
         }
-
-        // self.set_margins_and_label_areas(&mut chart_builder);
 
         let x_axis_range = self.x_axis_range();
         let x_axis_start = x_axis_range.start;

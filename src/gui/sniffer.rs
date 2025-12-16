@@ -338,7 +338,7 @@ impl Sniffer {
             Message::Reset => self.reset(),
             Message::Style(style) => {
                 self.conf.settings.style = style;
-                self.traffic_chart.change_style(style);
+                self.change_charts_style();
             }
             Message::LoadStyle(path) => {
                 self.conf.settings.style_path.clone_from(&path);
@@ -347,7 +347,7 @@ impl Sniffer {
                         CustomPalette::from_palette(palette),
                     ));
                     self.conf.settings.style = style;
-                    self.traffic_chart.change_style(style);
+                    self.change_charts_style();
                 }
             }
             Message::AddOrRemoveFavorite(host, add) => self.add_or_remove_favorite(&host, add),
@@ -892,6 +892,7 @@ impl Sniffer {
         // increment capture id to ignore pending messages from previous captures
         self.current_capture_rx = (self.current_capture_rx.0 + 1, None);
         self.info_traffic = InfoTraffic::default();
+        self.preview_charts = HashMap::new();
         self.addresses_resolved = HashMap::new();
         self.favorite_hosts = HashSet::new();
         self.logged_notifications = (VecDeque::new(), 0);
@@ -1181,6 +1182,14 @@ impl Sniffer {
             && matches!(self.capture_source, CaptureSource::Device(_))
             || self.conf.capture_source_picklist == CaptureSourcePicklist::File
                 && matches!(self.capture_source, CaptureSource::File(_))
+    }
+
+    fn change_charts_style(&mut self) {
+        let style = self.conf.settings.style;
+        self.traffic_chart.change_style(style);
+        for chart in self.preview_charts.values_mut() {
+            chart.change_style(style);
+        }
     }
 }
 
