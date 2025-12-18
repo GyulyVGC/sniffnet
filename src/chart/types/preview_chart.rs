@@ -1,7 +1,7 @@
 use std::ops::Range;
 
 use iced::Element;
-use iced::widget::Column;
+use iced::widget::{Column, Space};
 use plotters::prelude::*;
 use plotters_iced::{Chart, ChartBuilder, ChartWidget, DrawingBackend};
 
@@ -49,7 +49,11 @@ impl PreviewChart {
     }
 
     pub fn view(&self) -> Element<'_, Message, StyleType> {
-        Column::new().height(40).push(ChartWidget::new(self)).into()
+        Column::new()
+            .height(45)
+            .push(Space::with_height(5))
+            .push(ChartWidget::new(self))
+            .into()
     }
 
     pub fn change_style(&mut self, style: StyleType) {

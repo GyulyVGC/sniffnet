@@ -9,7 +9,7 @@ use crate::gui::sniffer::Sniffer;
 use crate::gui::styles::button::ButtonType;
 use crate::gui::styles::container::ContainerType;
 use crate::gui::styles::scrollbar::ScrollbarType;
-use crate::gui::styles::style_constants::{FONT_SIZE_SUBTITLE, FONT_SIZE_TITLE};
+use crate::gui::styles::style_constants::{FONT_SIZE_FOOTER, FONT_SIZE_SUBTITLE, FONT_SIZE_TITLE};
 use crate::gui::styles::text::TextType;
 use crate::gui::styles::types::gradient_type::GradientType;
 use crate::gui::types::export_pcap::ExportPcap;
@@ -17,9 +17,8 @@ use crate::gui::types::filters::Filters;
 use crate::gui::types::message::Message;
 use crate::gui::types::settings::Settings;
 use crate::networking::types::capture_context::{CaptureSource, CaptureSourcePicklist};
-use crate::translations::translations::{
-    address_translation, addresses_translation, network_adapter_translation, start_translation,
-};
+use crate::networking::types::my_device::MyDevice;
+use crate::translations::translations::{network_adapter_translation, start_translation};
 use crate::translations::translations_3::{
     directory_translation, export_capture_translation, file_name_translation,
 };
@@ -138,7 +137,7 @@ fn get_col_data_source(
 
     let mut col = Column::new()
         .align_x(Alignment::Center)
-        .padding(Padding::new(10.0).top(30))
+        .padding(Padding::new(10.0).top(30).bottom(0))
         .spacing(30)
         .height(Length::Fill)
         .width(FillPortion(1))
@@ -156,7 +155,7 @@ fn get_col_data_source(
 
     match &sniffer.conf.capture_source_picklist {
         CaptureSourcePicklist::Device => {
-            col = col.push(get_col_adapter(sniffer, font, language));
+            col = col.push(get_col_adapter(sniffer, font));
         }
         CaptureSourcePicklist::File => {
             col = col.push(get_col_import_pcap(
@@ -171,72 +170,22 @@ fn get_col_data_source(
     col
 }
 
-fn get_col_adapter(
-    sniffer: &Sniffer,
-    font: Font,
-    language: Language,
-) -> Column<'_, Message, StyleType> {
-    let mut dev_str_list = vec![];
-    // TODO: do not iterate here
-    for (my_dev, _) in &sniffer.preview_charts {
-        let mut title = String::new();
-        #[allow(unused_mut)]
-        let mut subtitle: Option<&String> = None;
-        let name = my_dev.get_name();
-        match my_dev.get_desc() {
-            None => {
-                title.push_str(name);
-            }
-            Some(description) => {
-                #[cfg(not(target_os = "windows"))]
-                {
-                    let _ = writeln!(title, "{name}");
-                    subtitle = Some(description);
-                }
-                #[cfg(target_os = "windows")]
-                title.push_str(description);
-            }
-        }
-        let mut addrs_str = String::new();
-        let num_addresses = my_dev.get_addresses().len();
-        match num_addresses {
-            0 => {}
-            1 => {
-                let _ = write!(addrs_str, "{}:", address_translation(language));
-            }
-            _ => {
-                let _ = write!(addrs_str, "{}:", addresses_translation(language));
-            }
-        }
-
-        for addr in my_dev.get_addresses() {
-            let address_string = addr.addr.to_string();
-            let _ = write!(addrs_str, "\n   {address_string}");
-        }
-        dev_str_list.push((name, title, subtitle, addrs_str));
-    }
-
+fn get_col_adapter(sniffer: &Sniffer, font: Font) -> Column<'_, Message, StyleType> {
     Column::new()
         .spacing(5)
         .height(Length::Fill)
-        .push(if dev_str_list.is_empty() {
+        .push(if sniffer.preview_charts.is_empty() {
             Into::<iced::Element<Message, StyleType>>::into(center(
                 Icon::get_hourglass(sniffer.dots_pulse.0.len()).size(60),
             ))
         } else {
             Scrollable::with_direction(
-                dev_str_list.into_iter().fold(
+                sniffer.preview_charts.iter().fold(
                     Column::new().padding(Padding::ZERO.right(13)).spacing(5),
-                    |scroll_adapters, (name, title, subtitle, addrs)| {
-                        let addrs_text = if addrs.is_empty() {
-                            None
-                        } else {
-                            Some(Text::new(addrs).font(font))
-                        };
-                        let my_device_chart = sniffer
-                            .preview_charts
-                            .iter()
-                            .find(|(dev, _)| dev.get_name().eq(name));
+                    |scroll_adapters, (my_dev, chart)| {
+                        let name = my_dev.get_name();
+                        let addresses_row = get_addresses_row(my_dev, font);
+                        let (title, subtitle) = get_adapter_title_subtitle(my_dev);
                         scroll_adapters.push(
                             Button::new(
                                 Column::new()
@@ -248,16 +197,14 @@ fn get_col_adapter(
                                             .size(FONT_SIZE_SUBTITLE),
                                     )
                                     .push_maybe(subtitle.map(|sub| Text::new(sub).font(font)))
-                                    .push_maybe(addrs_text)
-                                    .push_maybe(my_device_chart.and_then(|(_, c)| {
-                                        if c.max_packets > 0.0 {
-                                            Some(c.view())
-                                        } else {
-                                            None
-                                        }
-                                    })),
+                                    .push_maybe(addresses_row)
+                                    .push_maybe(if chart.max_packets > 0.0 {
+                                        Some(chart.view())
+                                    } else {
+                                        None
+                                    }),
                             )
-                            .padding([20, 30])
+                            .padding(15)
                             .width(Length::Fill)
                             .class(
                                 if let CaptureSource::Device(device) = &sniffer.capture_source {
@@ -278,6 +225,45 @@ fn get_col_adapter(
             )
             .into()
         })
+}
+
+fn get_addresses_row(my_dev: &MyDevice, font: Font) -> Option<Row<'_, Message, StyleType>> {
+    let addresses = my_dev.get_addresses();
+    if addresses.is_empty() {
+        return None;
+    }
+    let mut row = Row::new().spacing(5);
+    for addr in my_dev.get_addresses() {
+        let address_string = addr.addr.to_string();
+        row = row.push(
+            Container::new(Text::new(address_string).size(FONT_SIZE_FOOTER).font(font))
+                .padding(Padding::new(5.0).left(10).right(10))
+                .class(ContainerType::AdapterAddress),
+        );
+    }
+    Some(row)
+}
+
+fn get_adapter_title_subtitle(my_dev: &MyDevice) -> (String, Option<String>) {
+    let mut title = String::new();
+    #[allow(unused_mut)]
+    let mut subtitle: Option<String> = None;
+    let name = my_dev.get_name();
+    match my_dev.get_desc() {
+        None => {
+            title.push_str(name);
+        }
+        Some(description) => {
+            #[cfg(not(target_os = "windows"))]
+            {
+                let _ = writeln!(title, "{name}");
+                subtitle = Some(description.to_owned());
+            }
+            #[cfg(target_os = "windows")]
+            title.push_str(description.to_owned());
+        }
+    }
+    (title, subtitle)
 }
 
 fn get_col_import_pcap<'a>(

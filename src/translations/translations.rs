@@ -142,32 +142,32 @@ pub fn address_translation(language: Language) -> &'static str {
     }
 }
 
-pub fn addresses_translation(language: Language) -> &'static str {
-    match language {
-        Language::EN => "Addresses",
-        Language::IT => "Indirizzi",
-        Language::FR => "Adresses",
-        Language::ES => "Direcciones",
-        Language::PL | Language::CS => "Adresy",
-        Language::DE | Language::NL => "Adressen",
-        Language::UK => "Адреси",
-        Language::ZH => "网络地址",
-        Language::ZH_TW => "網路位址",
-        Language::RO => "Adrese",
-        Language::KO => "주소",
-        Language::TR => "Adresler",
-        Language::RU => "Адреса",
-        Language::PT => "Endereços",
-        Language::EL => "Διευθύνσεις",
-        // Language::FA => "نشانی ها",
-        Language::SV => "Adresser",
-        Language::FI => "Osoitteet",
-        Language::JA => "アドレス",
-        Language::UZ => "Manzillar",
-        Language::VI => "Danh sách địa chỉ",
-        Language::ID => "Alamat",
-    }
-}
+// pub fn addresses_translation(language: Language) -> &'static str {
+//     match language {
+//         Language::EN => "Addresses",
+//         Language::IT => "Indirizzi",
+//         Language::FR => "Adresses",
+//         Language::ES => "Direcciones",
+//         Language::PL | Language::CS => "Adresy",
+//         Language::DE | Language::NL => "Adressen",
+//         Language::UK => "Адреси",
+//         Language::ZH => "网络地址",
+//         Language::ZH_TW => "網路位址",
+//         Language::RO => "Adrese",
+//         Language::KO => "주소",
+//         Language::TR => "Adresler",
+//         Language::RU => "Адреса",
+//         Language::PT => "Endereços",
+//         Language::EL => "Διευθύνσεις",
+//         // Language::FA => "نشانی ها",
+//         Language::SV => "Adresser",
+//         Language::FI => "Osoitteet",
+//         Language::JA => "アドレス",
+//         Language::UZ => "Manzillar",
+//         Language::VI => "Danh sách địa chỉ",
+//         Language::ID => "Alamat",
+//     }
+// }
 
 // pub fn ip_version_translation(language: Language) -> &'static str {
 //     match language {
