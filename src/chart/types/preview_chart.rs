@@ -50,7 +50,7 @@ impl PreviewChart {
     }
 
     pub fn view(&self) -> Element<'_, Message, StyleType> {
-        Column::new().height(50).push(ChartWidget::new(self)).into()
+        Column::new().height(40).push(ChartWidget::new(self)).into()
     }
 
     pub fn change_style(&mut self, style: StyleType) {

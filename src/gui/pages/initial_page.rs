@@ -4,7 +4,6 @@
 
 use std::fmt::Write;
 
-use crate::chart::types::preview_chart::PreviewChart;
 use crate::gui::components::button::button_open_file;
 use crate::gui::sniffer::Sniffer;
 use crate::gui::styles::button::ButtonType;
@@ -178,7 +177,8 @@ fn get_col_adapter(
     language: Language,
 ) -> Column<'_, Message, StyleType> {
     let mut dev_str_list = vec![];
-    for my_dev in &sniffer.my_devices {
+    // TODO: do not iterate here
+    for (_, (my_dev, _)) in &sniffer.preview_charts {
         let mut title = String::new();
         #[allow(unused_mut)]
         let mut subtitle: Option<&String> = None;
@@ -233,7 +233,7 @@ fn get_col_adapter(
                         } else {
                             Some(Text::new(addrs).font(font))
                         };
-                        let preview_chart = sniffer.preview_charts.get(name);
+                        let my_device_chart = sniffer.preview_charts.get(name);
                         scroll_adapters.push(
                             Button::new(
                                 Column::new()
@@ -246,7 +246,7 @@ fn get_col_adapter(
                                     )
                                     .push_maybe(subtitle.map(|sub| Text::new(sub).font(font)))
                                     .push_maybe(addrs_text)
-                                    .push_maybe(preview_chart.map(PreviewChart::view)),
+                                    .push_maybe(my_device_chart.map(|(_, c)| c.view())),
                             )
                             .padding([20, 30])
                             .width(Length::Fill)

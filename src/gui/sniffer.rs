@@ -9,7 +9,6 @@ use iced::mouse::Event::ButtonPressed;
 use iced::widget::Column;
 use iced::window::{Id, Level};
 use iced::{Element, Point, Size, Subscription, Task, window};
-use pcap::Device;
 use rfd::FileHandle;
 use std::collections::{HashMap, HashSet, VecDeque};
 use std::net::IpAddr;
@@ -96,8 +95,6 @@ pub struct Sniffer {
     pub newer_release_available: Option<bool>,
     /// Network device to be analyzed, or PCAP file to be imported
     pub capture_source: CaptureSource,
-    /// List of network devices
-    pub my_devices: Vec<MyDevice>,
     /// Signals if a pcap error occurred
     pub pcap_error: Option<String>,
     /// Messages status
@@ -105,7 +102,8 @@ pub struct Sniffer {
     /// Traffic chart displayed in the Overview page
     pub traffic_chart: TrafficChart,
     /// Traffic preview charts displayed in the initial page
-    pub preview_charts: HashMap<String, PreviewChart>,
+    // TODO: make this a Vec<(MyDevice, PreviewChart)> to keep the order of the devices consistent
+    pub preview_charts: HashMap<String, (MyDevice, PreviewChart)>,
     /// Currently displayed modal; None if no modal is displayed
     pub modal: Option<MyModal>,
     /// Currently displayed settings page; None if settings is closed
@@ -157,7 +155,6 @@ impl Sniffer {
             logged_notifications: (VecDeque::new(), 0),
             newer_release_available: None,
             capture_source,
-            my_devices: Vec::new(),
             pcap_error: None,
             dots_pulse: (".".to_string(), 0),
             traffic_chart: TrafficChart::new(style, language, data_repr),
@@ -603,7 +600,7 @@ impl Sniffer {
             }
             Message::Periodic => {
                 self.update_waiting_dots();
-                self.fetch_devices();
+                self.capture_source.set_addresses();
                 self.update_threshold();
             }
             Message::ExpandNotification(id, expand) => {
@@ -637,16 +634,18 @@ impl Sniffer {
                 }
             }
             Message::TrafficPreview(msg) => {
+                // TODO: remove or hide inactive devices
                 for (dev, packets) in msg.data {
                     self.preview_charts
-                        .entry(dev)
-                        .and_modify(|chart| {
+                        .entry(dev.get_name().clone())
+                        .and_modify(|(my_dev, chart)| {
+                            *my_dev = dev.clone();
                             chart.update_charts_data(packets);
                         })
                         .or_insert({
                             let mut chart = PreviewChart::new(self.conf.settings.style);
                             chart.update_charts_data(packets);
-                            chart
+                            (dev, chart)
                         });
                 }
             }
@@ -911,21 +910,12 @@ impl Sniffer {
     }
 
     fn set_device(&mut self, name: &str) {
-        for my_dev in &self.my_devices {
+        for (_, (my_dev, _)) in &self.preview_charts {
             if my_dev.get_name().eq(&name) {
                 self.conf.device.device_name = name.to_string();
                 self.capture_source = CaptureSource::Device(my_dev.clone());
                 break;
             }
-        }
-    }
-
-    fn fetch_devices(&mut self) {
-        self.my_devices.clear();
-        self.capture_source.set_addresses();
-        for dev in Device::list().log_err(location!()).unwrap_or_default() {
-            let my_dev = MyDevice::from_pcap_device(dev);
-            self.my_devices.push(my_dev);
         }
     }
 
@@ -1187,7 +1177,7 @@ impl Sniffer {
     fn change_charts_style(&mut self) {
         let style = self.conf.settings.style;
         self.traffic_chart.change_style(style);
-        for chart in self.preview_charts.values_mut() {
+        for (_, chart) in self.preview_charts.values_mut() {
             chart.change_style(style);
         }
     }
