@@ -2,8 +2,6 @@
 //!
 //! It contains elements to select network adapter and traffic filters.
 
-use std::fmt::Write;
-
 use crate::gui::components::button::button_open_file;
 use crate::gui::sniffer::Sniffer;
 use crate::gui::styles::button::ButtonType;
@@ -256,11 +254,11 @@ fn get_adapter_title_subtitle(my_dev: &MyDevice) -> (String, Option<String>) {
         Some(description) => {
             #[cfg(not(target_os = "windows"))]
             {
-                let _ = writeln!(title, "{name}");
+                title.push_str(name);
                 subtitle = Some(description.to_owned());
             }
             #[cfg(target_os = "windows")]
-            title.push_str(description.to_owned());
+            title.push_str(description);
         }
     }
     (title, subtitle)
