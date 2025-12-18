@@ -75,6 +75,7 @@ fn handle_devices_and_previews(
             continue;
         }
         data.insert(dev_name.clone(), 0);
+        traffic_preview.data.push((my_dev.clone(), 0));
         let mut freeze_rx = freeze_tx.subscribe();
         let pcap_tx = pcap_tx.clone();
         let capture_source = CaptureSource::Device(my_dev);

@@ -178,7 +178,7 @@ fn get_col_adapter(
 ) -> Column<'_, Message, StyleType> {
     let mut dev_str_list = vec![];
     // TODO: do not iterate here
-    for (_, (my_dev, _)) in &sniffer.preview_charts {
+    for (my_dev, _) in &sniffer.preview_charts {
         let mut title = String::new();
         #[allow(unused_mut)]
         let mut subtitle: Option<&String> = None;
@@ -233,7 +233,10 @@ fn get_col_adapter(
                         } else {
                             Some(Text::new(addrs).font(font))
                         };
-                        let my_device_chart = sniffer.preview_charts.get(name);
+                        let my_device_chart = sniffer
+                            .preview_charts
+                            .iter()
+                            .find(|(dev, _)| dev.get_name().eq(name));
                         scroll_adapters.push(
                             Button::new(
                                 Column::new()

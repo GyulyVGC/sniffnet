@@ -102,8 +102,7 @@ pub struct Sniffer {
     /// Traffic chart displayed in the Overview page
     pub traffic_chart: TrafficChart,
     /// Traffic preview charts displayed in the initial page
-    // TODO: make this a Vec<(MyDevice, PreviewChart)> to keep the order of the devices consistent
-    pub preview_charts: HashMap<String, (MyDevice, PreviewChart)>,
+    pub preview_charts: Vec<(MyDevice, PreviewChart)>,
     /// Currently displayed modal; None if no modal is displayed
     pub modal: Option<MyModal>,
     /// Currently displayed settings page; None if settings is closed
@@ -158,7 +157,7 @@ impl Sniffer {
             pcap_error: None,
             dots_pulse: (".".to_string(), 0),
             traffic_chart: TrafficChart::new(style, language, data_repr),
-            preview_charts: HashMap::new(),
+            preview_charts: Vec::new(),
             modal: None,
             settings_page: None,
             running_page: None,
@@ -634,20 +633,34 @@ impl Sniffer {
                 }
             }
             Message::TrafficPreview(msg) => {
-                // TODO: remove or hide inactive devices
+                self.preview_charts.retain(|(my_dev, _)| {
+                    msg.data
+                        .iter()
+                        .any(|(d, _)| d.get_name().eq(my_dev.get_name()))
+                });
                 for (dev, packets) in msg.data {
-                    self.preview_charts
-                        .entry(dev.get_name().clone())
-                        .and_modify(|(my_dev, chart)| {
-                            *my_dev = dev.clone();
-                            chart.update_charts_data(packets);
-                        })
-                        .or_insert({
-                            let mut chart = PreviewChart::new(self.conf.settings.style);
-                            chart.update_charts_data(packets);
-                            (dev, chart)
-                        });
+                    let Some((my_dev, chart)) = self
+                        .preview_charts
+                        .iter_mut()
+                        .find(|(my_dev, _)| my_dev.get_name().eq(dev.get_name()))
+                    else {
+                        let mut chart = PreviewChart::new(self.conf.settings.style);
+                        chart.update_charts_data(packets);
+                        self.preview_charts.push((dev, chart));
+                        continue;
+                    };
+                    *my_dev = dev.clone();
+                    chart.update_charts_data(packets);
                 }
+                self.preview_charts.sort_by(|(_, c1), (_, c2)| {
+                    if c1.max_packets > 0.0 && c2.max_packets == 0.0 {
+                        std::cmp::Ordering::Less
+                    } else if c1.max_packets == 0.0 && c2.max_packets > 0.0 {
+                        std::cmp::Ordering::Greater
+                    } else {
+                        std::cmp::Ordering::Equal
+                    }
+                });
             }
         }
         Task::none()
@@ -891,7 +904,9 @@ impl Sniffer {
         // increment capture id to ignore pending messages from previous captures
         self.current_capture_rx = (self.current_capture_rx.0 + 1, None);
         self.info_traffic = InfoTraffic::default();
-        self.preview_charts = HashMap::new();
+        self.preview_charts
+            .iter_mut()
+            .for_each(|(_, chart)| *chart = PreviewChart::new(style));
         self.addresses_resolved = HashMap::new();
         self.favorite_hosts = HashSet::new();
         self.logged_notifications = (VecDeque::new(), 0);
@@ -910,7 +925,7 @@ impl Sniffer {
     }
 
     fn set_device(&mut self, name: &str) {
-        for (_, (my_dev, _)) in &self.preview_charts {
+        for (my_dev, _) in &self.preview_charts {
             if my_dev.get_name().eq(&name) {
                 self.conf.device.device_name = name.to_string();
                 self.capture_source = CaptureSource::Device(my_dev.clone());
@@ -1177,7 +1192,7 @@ impl Sniffer {
     fn change_charts_style(&mut self) {
         let style = self.conf.settings.style;
         self.traffic_chart.change_style(style);
-        for (_, chart) in self.preview_charts.values_mut() {
+        for (_, chart) in &mut self.preview_charts {
             chart.change_style(style);
         }
     }

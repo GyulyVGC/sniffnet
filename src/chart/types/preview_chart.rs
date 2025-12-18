@@ -44,13 +44,18 @@ impl PreviewChart {
         let packets_entry = packets as f32;
         let packets_point = (tot_seconds, packets_entry);
 
-        // update sent bytes traffic data
+        // update traffic data
         self.packets.update_series(packets_point, true, false);
         self.max_packets = self.packets.get_max();
     }
 
     pub fn view(&self) -> Element<'_, Message, StyleType> {
-        Column::new().height(40).push(ChartWidget::new(self)).into()
+        if self.max_packets > 0.0 {
+            Column::new().height(40).push(ChartWidget::new(self))
+        } else {
+            Column::new()
+        }
+        .into()
     }
 
     pub fn change_style(&mut self, style: StyleType) {
