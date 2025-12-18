@@ -3,7 +3,6 @@ use std::ops::Range;
 use iced::Element;
 use iced::widget::Column;
 use plotters::prelude::*;
-use plotters::series::LineSeries;
 use plotters_iced::{Chart, ChartBuilder, ChartWidget, DrawingBackend};
 
 use crate::chart::types::chart_series::{ChartSeries, sample_spline};
@@ -50,12 +49,7 @@ impl PreviewChart {
     }
 
     pub fn view(&self) -> Element<'_, Message, StyleType> {
-        if self.max_packets > 0.0 {
-            Column::new().height(40).push(ChartWidget::new(self))
-        } else {
-            Column::new()
-        }
-        .into()
+        Column::new().height(40).push(ChartWidget::new(self)).into()
     }
 
     pub fn change_style(&mut self, style: StyleType) {
@@ -109,8 +103,6 @@ impl Chart<Message> for PreviewChart {
         }
 
         let x_axis_range = self.x_axis_range();
-        let x_axis_start = x_axis_range.start;
-        let x_axis_end = x_axis_range.end;
         let y_axis_range = self.y_axis_range();
 
         let Ok(mut chart) = chart_builder
@@ -137,13 +129,6 @@ impl Chart<Message> for PreviewChart {
         // draw packets series
         let area_series = self.area_series();
         let _ = chart.draw_series(area_series).log_err(location!());
-        // draw x axis to hide zeroed values
-        let _ = chart
-            .draw_series(LineSeries::new(
-                [(x_axis_start, 0.0), (x_axis_end, 0.0)],
-                ShapeStyle::from(&buttons_color).stroke_width(CHARTS_LINE_BORDER),
-            ))
-            .log_err(location!());
     }
 }
 

@@ -249,7 +249,13 @@ fn get_col_adapter(
                                     )
                                     .push_maybe(subtitle.map(|sub| Text::new(sub).font(font)))
                                     .push_maybe(addrs_text)
-                                    .push_maybe(my_device_chart.map(|(_, c)| c.view())),
+                                    .push_maybe(my_device_chart.and_then(|(_, c)| {
+                                        if c.max_packets > 0.0 {
+                                            Some(c.view())
+                                        } else {
+                                            None
+                                        }
+                                    })),
                             )
                             .padding([20, 30])
                             .width(Length::Fill)

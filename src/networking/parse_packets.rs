@@ -9,7 +9,6 @@ use crate::networking::manage_packets::{
     analyze_headers, get_address_to_lookup, get_traffic_type, is_local_connection,
     modify_or_insert_in_map,
 };
-use crate::networking::traffic_preview::DevInfo;
 use crate::networking::types::address_port_pair::AddressPortPair;
 use crate::networking::types::arp_type::ArpType;
 use crate::networking::types::bogon::is_bogon;
@@ -63,7 +62,7 @@ pub fn parse_packets(
     let (pcap_tx, pcap_rx) = std::sync::mpsc::sync_channel(10_000);
     let _ = thread::Builder::new()
         .name("thread_packet_stream".to_string())
-        .spawn(move || packet_stream(cap, &pcap_tx, &mut freeze_rx_2, &filters, None))
+        .spawn(move || packet_stream(cap, &pcap_tx, &mut freeze_rx_2, &filters))
         .log_err(location!());
 
     loop {
@@ -502,12 +501,11 @@ fn maybe_send_tick_run_offline(
     }
 }
 
-pub(super) fn packet_stream(
+fn packet_stream(
     mut cap: CaptureType,
     tx: &std::sync::mpsc::SyncSender<(Result<PacketOwned, pcap::Error>, Option<pcap::Stat>)>,
     freeze_rx: &mut Receiver<()>,
     filters: &Filters,
-    dev_info: Option<&DevInfo>,
 ) {
     loop {
         // check if we need to freeze the parsing
@@ -524,7 +522,6 @@ pub(super) fn packet_stream(
         let packet_owned = packet_res.map(|p| PacketOwned {
             header: *p.header,
             data: p.data.into(),
-            dev_info: dev_info.cloned(),
         });
         if tx.send((packet_owned, cap.stats().ok())).is_err() {
             return;
@@ -532,8 +529,7 @@ pub(super) fn packet_stream(
     }
 }
 
-pub(super) struct PacketOwned {
-    pub header: PacketHeader,
-    pub data: Box<[u8]>,
-    pub dev_info: Option<DevInfo>,
+struct PacketOwned {
+    header: PacketHeader,
+    data: Box<[u8]>,
 }

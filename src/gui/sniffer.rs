@@ -48,7 +48,7 @@ use crate::mmdb::country::COUNTRY_MMDB;
 use crate::mmdb::types::mmdb_reader::{MmdbReader, MmdbReaders};
 use crate::networking::parse_packets::BackendTrafficMessage;
 use crate::networking::parse_packets::parse_packets;
-use crate::networking::traffic_preview::traffic_preview;
+use crate::networking::traffic_preview::{TrafficPreview, traffic_preview};
 use crate::networking::types::capture_context::{
     CaptureContext, CaptureSource, CaptureSourcePicklist, MyPcapImport,
 };
@@ -83,6 +83,8 @@ pub struct Sniffer {
     pub welcome: Option<(bool, u8)>,
     /// Capture receiver clone (to close the channel after every run), with the current capture id (to ignore pending messages from previous captures)
     pub current_capture_rx: (usize, Option<Receiver<BackendTrafficMessage>>),
+    /// Preview capture clone (to close the channel after every run)
+    pub preview_capture_rx: Option<Receiver<TrafficPreview>>,
     /// Capture data
     pub info_traffic: InfoTraffic,
     /// Map of the resolved addresses with their full rDNS value and the corresponding host
@@ -129,8 +131,6 @@ pub struct Sniffer {
     pub frozen: bool,
     /// Sender to freeze the packet capture
     pub freeze_tx: Option<tokio::sync::broadcast::Sender<()>>,
-    /// Sender to freeze the traffic preview
-    pub freeze_preview_tx: Option<tokio::sync::broadcast::Sender<()>>,
 }
 
 impl Sniffer {
@@ -148,6 +148,7 @@ impl Sniffer {
             conf,
             welcome: Some((true, 0)),
             current_capture_rx: (0, None),
+            preview_capture_rx: None,
             info_traffic: InfoTraffic::default(),
             addresses_resolved: HashMap::new(),
             favorite_hosts: HashSet::new(),
@@ -174,7 +175,6 @@ impl Sniffer {
             host_data_states: HostDataStates::default(),
             frozen: false,
             freeze_tx: None,
-            freeze_preview_tx: None,
         }
     }
 
@@ -274,22 +274,11 @@ impl Sniffer {
         match message {
             Message::StartApp(id) => {
                 self.id = id;
-                let (tx, rx) = async_channel::unbounded();
-                let (freeze_tx, freeze_rx) = tokio::sync::broadcast::channel(1_048_575);
-                let freeze_rx2 = freeze_tx.subscribe();
-                let _ = thread::Builder::new()
-                    .name("thread_traffic_preview".to_string())
-                    .spawn(move || {
-                        traffic_preview(&tx, (freeze_rx, freeze_rx2));
-                    })
-                    .log_err(location!());
-                self.freeze_preview_tx = Some(freeze_tx);
+                let previews_task = self.start_traffic_previews();
                 return Task::batch([
                     Sniffer::register_sigint_handler(),
                     Task::perform(set_newer_release_status(), Message::SetNewerReleaseStatus),
-                    Task::run(rx, |traffic_preview| {
-                        Message::TrafficPreview(traffic_preview)
-                    }),
+                    previews_task,
                 ]);
             }
             Message::TickRun(cap_id, msg, host_msgs, no_more_packets) => {
@@ -331,7 +320,7 @@ impl Sniffer {
                     return self.start();
                 }
             }
-            Message::Reset => self.reset(),
+            Message::Reset => return self.reset(),
             Message::Style(style) => {
                 self.conf.settings.style = style;
                 self.change_charts_style();
@@ -840,6 +829,12 @@ impl Sniffer {
     }
 
     fn start(&mut self) -> Task<Message> {
+        // close capture preview channel to kill previous preview captures
+        if let Some(rx) = &self.preview_capture_rx {
+            rx.close();
+        }
+        self.preview_capture_rx = None;
+
         if matches!(&self.capture_source, CaptureSource::Device(_)) {
             let current_device_name = &self.capture_source.get_name();
             self.set_device(current_device_name);
@@ -893,7 +888,7 @@ impl Sniffer {
         Task::none()
     }
 
-    fn reset(&mut self) {
+    fn reset(&mut self) -> Task<Message> {
         // close capture channel to kill previous captures
         if let Some(rx) = &self.current_capture_rx.1 {
             rx.close();
@@ -922,6 +917,21 @@ impl Sniffer {
         self.host_data_states = HostDataStates::default();
         self.frozen = false;
         self.freeze_tx = None;
+        self.start_traffic_previews()
+    }
+
+    fn start_traffic_previews(&mut self) -> Task<Message> {
+        let (tx, rx) = async_channel::unbounded();
+        let _ = thread::Builder::new()
+            .name("thread_traffic_preview".to_string())
+            .spawn(move || {
+                traffic_preview(&tx);
+            })
+            .log_err(location!());
+        self.preview_capture_rx = Some(rx.clone());
+        Task::run(rx, |traffic_preview| {
+            Message::TrafficPreview(traffic_preview)
+        })
     }
 
     fn set_device(&mut self, name: &str) {
