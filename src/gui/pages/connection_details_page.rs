@@ -99,7 +99,7 @@ fn page_content<'a>(sniffer: &Sniffer, key: &AddressPortPair) -> Container<'a, M
         let host_info = host_info_option.unwrap_or_default();
         let flag = get_flag_tooltip(host.country, &host_info, language, font, false);
         let computer = get_local_tooltip(sniffer, &address_to_lookup, key);
-        if address_to_lookup.eq(&key.address1) {
+        if address_to_lookup.eq(&key.source) {
             source_caption = source_caption.push(flag);
             dest_caption = dest_caption.push(computer);
         } else {
@@ -110,8 +110,8 @@ fn page_content<'a>(sniffer: &Sniffer, key: &AddressPortPair) -> Container<'a, M
 
     let mut source_col = get_src_or_dest_col(
         source_caption,
-        &key.address1,
-        key.port1,
+        &key.source,
+        key.sport,
         val.mac_address1.as_ref(),
         font,
         language,
@@ -119,15 +119,15 @@ fn page_content<'a>(sniffer: &Sniffer, key: &AddressPortPair) -> Container<'a, M
     );
     let mut dest_col = get_src_or_dest_col(
         dest_caption,
-        &key.address2,
-        key.port2,
+        &key.dest,
+        key.dport,
         val.mac_address2.as_ref(),
         font,
         language,
         &sniffer.timing_events,
     );
 
-    if address_to_lookup.eq(&key.address1) {
+    if address_to_lookup.eq(&key.source) {
         source_col = source_col.push(host_info_col);
     } else {
         dest_col = dest_col.push(host_info_col);
@@ -304,10 +304,10 @@ fn get_local_tooltip<'a>(
         style, language, ..
     } = sniffer.conf.settings;
 
-    let local_address = if address_to_lookup.eq(&key.address1) {
-        &key.address2
+    let local_address = if address_to_lookup.eq(&key.source) {
+        &key.dest
     } else {
-        &key.address1
+        &key.source
     };
     let my_interface_addresses = sniffer.capture_source.get_addresses();
     get_computer_tooltip(
@@ -315,10 +315,10 @@ fn get_local_tooltip<'a>(
         is_local_connection(local_address, my_interface_addresses),
         is_bogon(local_address),
         get_traffic_type(
-            if address_to_lookup.eq(&key.address1) {
-                &key.address2
+            if address_to_lookup.eq(&key.source) {
+                &key.dest
             } else {
-                &key.address1
+                &key.source
             },
             my_interface_addresses,
             TrafficDirection::Outgoing,

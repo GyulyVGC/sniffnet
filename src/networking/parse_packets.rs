@@ -19,7 +19,6 @@ use crate::networking::types::host::{Host, HostMessage};
 use crate::networking::types::icmp_type::IcmpType;
 use crate::networking::types::info_traffic::InfoTraffic;
 use crate::networking::types::my_link_type::MyLinkType;
-use crate::networking::types::packet_filters_fields::PacketFiltersFields;
 use crate::networking::types::traffic_direction::TrafficDirection;
 use crate::utils::error_logger::{ErrorLogger, Location};
 use crate::utils::formatted_strings::get_domain_from_r_dns;
@@ -49,6 +48,10 @@ pub fn parse_packets(
     let (mut freeze_rx, mut freeze_rx_2) = freeze_rxs;
 
     let my_link_type = capture_context.my_link_type();
+    if !my_link_type.is_supported() {
+        return;
+    }
+
     let (Some(cap), mut savefile) = capture_context.consume() else {
         return;
     };
@@ -143,7 +146,6 @@ pub fn parse_packets(
                     let mut mac_addresses = (None, None);
                     let mut icmp_type = IcmpType::default();
                     let mut arp_type = ArpType::default();
-                    let mut packet_filters_fields = PacketFiltersFields::default();
 
                     let key_option = analyze_headers(
                         headers,
@@ -151,7 +153,6 @@ pub fn parse_packets(
                         &mut exchanged_bytes,
                         &mut icmp_type,
                         &mut arp_type,
-                        &mut packet_filters_fields,
                     );
 
                     let Some(key) = key_option else {

@@ -1,7 +1,10 @@
 use crate::gui::types::filters::Filters;
 use crate::location;
+use crate::networking::manage_packets::analyze_headers;
 use crate::networking::parse_packets::get_sniffable_headers;
+use crate::networking::types::arp_type::ArpType;
 use crate::networking::types::capture_context::{CaptureContext, CaptureSource, CaptureType};
+use crate::networking::types::icmp_type::IcmpType;
 use crate::networking::types::my_device::MyDevice;
 use crate::networking::types::my_link_type::MyLinkType;
 use crate::utils::error_logger::{ErrorLogger, Location};
@@ -42,7 +45,16 @@ pub fn traffic_preview(tx: &Sender<TrafficPreview>) {
         if let Ok(packet) = packet_res {
             let dev_info = packet.dev_info;
             let my_link_type = dev_info.my_link_type;
-            if get_sniffable_headers(&packet.data, my_link_type).is_some() {
+            if let Some(headers) = get_sniffable_headers(&packet.data, my_link_type)
+                && analyze_headers(
+                    headers,
+                    &mut (None, None),
+                    &mut 0,
+                    &mut IcmpType::default(),
+                    &mut ArpType::default(),
+                )
+                .is_some()
+            {
                 data.entry(dev_info.name)
                     .and_modify(|p| *p += 1)
                     .or_insert(1);
@@ -96,6 +108,9 @@ fn packet_stream(
     tx: &std::sync::mpsc::SyncSender<(Result<PacketOwned, pcap::Error>, Option<pcap::Stat>)>,
     dev_info: &DevInfo,
 ) {
+    if !dev_info.my_link_type.is_supported() {
+        return;
+    }
     loop {
         let packet_res = cap.next_packet();
         let packet_owned = packet_res.map(|p| PacketOwned {

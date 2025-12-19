@@ -164,17 +164,17 @@ impl FilterInputType {
         r_dns_host: Option<&(String, Host)>,
     ) -> String {
         match self {
-            FilterInputType::AddressSrc => key.address1.to_string(),
+            FilterInputType::AddressSrc => key.source.to_string(),
             FilterInputType::PortSrc => {
-                if let Some(port) = key.port1 {
+                if let Some(port) = key.sport {
                     port.to_string()
                 } else {
                     "-".to_string()
                 }
             }
-            FilterInputType::AddressDst => key.address2.to_string(),
+            FilterInputType::AddressDst => key.dest.to_string(),
             FilterInputType::PortDst => {
-                if let Some(port) = key.port2 {
+                if let Some(port) = key.dport {
                     port.to_string()
                 } else {
                     "-".to_string()
