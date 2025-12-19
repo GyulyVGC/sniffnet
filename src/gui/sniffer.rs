@@ -83,8 +83,8 @@ pub struct Sniffer {
     pub welcome: Option<(bool, u8)>,
     /// Capture receiver clone (to close the channel after every run), with the current capture id (to ignore pending messages from previous captures)
     pub current_capture_rx: (usize, Option<Receiver<BackendTrafficMessage>>),
-    /// Preview capture clone (to close the channel after every run)
-    pub preview_capture_rx: Option<Receiver<TrafficPreview>>,
+    /// Preview captures receiver clone (to close the channel when starting the analysis)
+    pub preview_captures_rx: Option<Receiver<TrafficPreview>>,
     /// Capture data
     pub info_traffic: InfoTraffic,
     /// Map of the resolved addresses with their full rDNS value and the corresponding host
@@ -148,7 +148,7 @@ impl Sniffer {
             conf,
             welcome: Some((true, 0)),
             current_capture_rx: (0, None),
-            preview_capture_rx: None,
+            preview_captures_rx: None,
             info_traffic: InfoTraffic::default(),
             addresses_resolved: HashMap::new(),
             favorite_hosts: HashSet::new(),
@@ -829,11 +829,11 @@ impl Sniffer {
     }
 
     fn start(&mut self) -> Task<Message> {
-        // close capture preview channel to kill previous preview captures
-        if let Some(rx) = &self.preview_capture_rx {
+        // close captures preview channel to kill previous preview captures
+        if let Some(rx) = &self.preview_captures_rx {
             rx.close();
         }
-        self.preview_capture_rx = None;
+        self.preview_captures_rx = None;
 
         if matches!(&self.capture_source, CaptureSource::Device(_)) {
             let current_device_name = &self.capture_source.get_name();
@@ -928,7 +928,7 @@ impl Sniffer {
                 traffic_preview(&tx);
             })
             .log_err(location!());
-        self.preview_capture_rx = Some(rx.clone());
+        self.preview_captures_rx = Some(rx.clone());
         Task::run(rx, |traffic_preview| {
             Message::TrafficPreview(traffic_preview)
         })

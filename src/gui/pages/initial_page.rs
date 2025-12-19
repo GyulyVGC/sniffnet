@@ -231,7 +231,7 @@ fn get_addresses_row(my_dev: &MyDevice, font: Font) -> Option<Row<'_, Message, S
         return None;
     }
     let mut row = Row::new().spacing(5);
-    for addr in my_dev.get_addresses() {
+    for addr in addresses {
         let address_string = addr.addr.to_string();
         row = row.push(
             Container::new(Text::new(address_string).size(FONT_SIZE_FOOTER).font(font))
