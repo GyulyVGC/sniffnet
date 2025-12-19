@@ -49,7 +49,9 @@ pub fn parse_packets(
     let (mut freeze_rx, mut freeze_rx_2) = freeze_rxs;
 
     let my_link_type = capture_context.my_link_type();
-    let (cap, mut savefile) = capture_context.consume();
+    let (Some(cap), mut savefile) = capture_context.consume() else {
+        return;
+    };
 
     let mut info_traffic_msg = InfoTraffic::default();
     let resolutions_state = Arc::new(Mutex::new(AddressesResolutionState::default()));

@@ -74,7 +74,9 @@ fn handle_devices_and_previews(
             name: dev_name,
             my_link_type,
         };
-        let (cap, _) = capture_context.consume();
+        let (Some(cap), _) = capture_context.consume() else {
+            continue;
+        };
         let _ = thread::Builder::new()
             .name("thread_device_traffic_preview".to_string())
             .spawn(move || {
