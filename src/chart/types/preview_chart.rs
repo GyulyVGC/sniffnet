@@ -1,7 +1,7 @@
 use std::ops::Range;
 
 use iced::Element;
-use iced::widget::{Column, Space};
+use iced::widget::Column;
 use plotters::prelude::*;
 use plotters_iced::{Chart, ChartBuilder, ChartWidget, DrawingBackend};
 
@@ -49,11 +49,7 @@ impl PreviewChart {
     }
 
     pub fn view(&self) -> Element<'_, Message, StyleType> {
-        Column::new()
-            .height(45)
-            .push(Space::with_height(5))
-            .push(ChartWidget::new(self))
-            .into()
+        Column::new().height(45).push(ChartWidget::new(self)).into()
     }
 
     pub fn change_style(&mut self, style: StyleType) {
@@ -75,7 +71,8 @@ impl PreviewChart {
 
     fn y_axis_range(&self) -> Range<f32> {
         let max = self.max_packets;
-        0.0..max
+        let gap = max * 0.1;
+        0.0..max + gap
     }
 
     fn area_series<DB: DrawingBackend>(&self) -> AreaSeries<DB, f32, f32> {
@@ -122,8 +119,6 @@ impl Chart<Message> for PreviewChart {
         let _ = chart
             .configure_mesh()
             .axis_style(buttons_color)
-            .bold_line_style(buttons_color.mix(0.3))
-            .light_line_style(buttons_color.mix(0.0))
             .max_light_lines(0)
             .y_labels(0)
             .x_labels(0)
