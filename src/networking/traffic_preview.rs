@@ -70,6 +70,7 @@ fn handle_devices_and_previews(
         let capture_source = CaptureSource::Device(my_dev);
         let capture_context = CaptureContext::new(&capture_source, None, &Filters::default());
         let my_link_type = capture_context.my_link_type();
+        let thread_name = format!("thread_traffic_preview_{dev_name}");
         let dev_info = DevInfo {
             name: dev_name,
             my_link_type,
@@ -78,7 +79,7 @@ fn handle_devices_and_previews(
             continue;
         };
         let _ = thread::Builder::new()
-            .name("thread_device_traffic_preview".to_string())
+            .name(thread_name)
             .spawn(move || {
                 packet_stream(cap, &pcap_tx, &dev_info);
             })
