@@ -43,13 +43,13 @@ chrono = { version = "0.4.42", default-features = false, features = ["clock"] }
 plotters = { version = "0.3.7", default-features = false, features = ["area_series", "line_series"] }
 iced = { version = "0.13.1", features = ["tokio", "svg", "advanced", "lazy", "image"] }
 plotters-iced = "0.11.0"
-maxminddb = "0.27.0"
+maxminddb = "0.27.1"
 confy = "2.0.0"
 serde = { version = "1.0.228", default-features = false, features = ["derive"] }
 serde_json = { version = "1.0.145", features = ["preserve_order"] }
 rodio = { version = "0.21.1", default-features = false, features = ["mp3", "playback"] }
 dns-lookup = "3.0.1"
-toml = "0.9.8"
+toml = "0.9.10"
 ctrlc = { version = "3.5.1", features = ["termination"] }
 rfd = "0.16.0"
 phf = "0.13.1"
@@ -64,10 +64,10 @@ semver = "1.0.27"
 gag = "1.0.0"
 
 [target.'cfg(not(target_arch = "powerpc64"))'.dependencies]
-reqwest = { version = "0.12.24", default-features = false, features = ["json", "rustls-tls"] }
+reqwest = { version = "0.12.26", default-features = false, features = ["json", "rustls-tls"] }
 
 [target.'cfg(target_arch = "powerpc64")'.dependencies]
-reqwest = { version = "0.12.24", features = ["json"] }
+reqwest = { version = "0.12.26", features = ["json"] }
 
 #───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
 
