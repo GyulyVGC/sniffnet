@@ -315,7 +315,8 @@ fn get_filters_group<'a>(
     let bpf = filters.bpf();
 
     let caption = filter_traffic_translation(language);
-    let checkbox = Checkbox::new(caption, expanded)
+    let checkbox = Checkbox::new(expanded)
+        .label(caption)
         .on_toggle(move |_| Message::ToggleFilters)
         .size(18)
         .font(font);
@@ -361,7 +362,8 @@ fn get_export_pcap_group_maybe<'a>(
     let directory = export_pcap.directory();
 
     let caption = export_capture_translation(language);
-    let checkbox = Checkbox::new(caption, enabled)
+    let checkbox = Checkbox::new(enabled)
+        .label(caption)
         .on_toggle(move |_| Message::ToggleExportPcap)
         .size(18)
         .font(font);

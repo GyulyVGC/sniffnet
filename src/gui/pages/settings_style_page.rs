@@ -50,16 +50,16 @@ pub fn settings_style_page(sniffer: &Sniffer) -> Container<'_, Message, StyleTyp
             language,
         ))
         .push(get_settings_tabs(SettingsPage::Appearance, font, language))
-        .push(Space::with_height(15))
+        .push(Space::new().height(15))
         .push(
             appearance_title_translation(language)
                 .class(TextType::Subtitle)
                 .font(font)
                 .size(FONT_SIZE_SUBTITLE),
         )
-        .push(Space::with_height(15))
+        .push(Space::new().height(15))
         .push(gradients_row(font, color_gradient, language))
-        .push(Space::with_height(15));
+        .push(Space::new().height(15));
 
     let mut styles_col = Column::new()
         .align_x(Alignment::Center)
@@ -67,10 +67,10 @@ pub fn settings_style_page(sniffer: &Sniffer) -> Container<'_, Message, StyleTyp
         .push(
             Row::new()
                 .push(get_palette_container(style, "Yeti".to_string(), Night))
-                .push(Space::with_width(15))
+                .push(Space::new().width(15))
                 .push(get_palette_container(style, "Yeti".to_string(), Day)),
         )
-        .push(Space::with_height(15))
+        .push(Space::new().height(15))
         .push(
             Row::new()
                 .push(get_palette_container(
@@ -78,14 +78,14 @@ pub fn settings_style_page(sniffer: &Sniffer) -> Container<'_, Message, StyleTyp
                     "Deep Sea".to_string(),
                     DeepSea,
                 ))
-                .push(Space::with_width(15))
+                .push(Space::new().width(15))
                 .push(get_palette_container(
                     style,
                     "Mon Amour".to_string(),
                     MonAmour,
                 )),
         )
-        .push(Space::with_height(15));
+        .push(Space::new().height(15));
     for children in get_extra_palettes(ExtraStyles::all_styles(), style) {
         styles_col = styles_col.push(children);
     }
@@ -93,7 +93,7 @@ pub fn settings_style_page(sniffer: &Sniffer) -> Container<'_, Message, StyleTyp
         .push(lazy((language, style_path.clone(), style), move |_| {
             lazy_custom_style_input(language, font, &style_path, style)
         }))
-        .push(Space::with_height(10));
+        .push(Space::new().height(10));
 
     let styles_scroll = Scrollable::with_direction(
         styles_col,
@@ -262,15 +262,15 @@ fn get_extra_palettes<'a>(
             children.extend([
                 Row::new()
                     .push(first)
-                    .push(Space::with_width(15))
+                    .push(Space::new().width(15))
                     .push(second)
                     .into(),
-                <Space as Into<Element<Message, StyleType>>>::into(Space::with_height(15)),
+                <Space as Into<Element<Message, StyleType>>>::into(Space::new().height(15)),
             ]);
         } else {
             children.extend([
                 Row::new().push(first).into(),
-                <Space as Into<Element<Message, StyleType>>>::into(Space::with_height(15)),
+                <Space as Into<Element<Message, StyleType>>>::into(Space::new().height(15)),
             ]);
         }
     }

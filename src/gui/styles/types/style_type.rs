@@ -1,4 +1,4 @@
-use iced::application::{Appearance, DefaultStyle};
+use iced::theme::{Base, Mode, Style};
 use plotters::prelude::FontStyle;
 use serde::{Deserialize, Serialize};
 
@@ -29,12 +29,59 @@ impl Default for StyleType {
     }
 }
 
-impl DefaultStyle for StyleType {
-    fn default_style(&self) -> Appearance {
+impl Base for StyleType {
+    fn default(preference: Mode) -> Self {
+        match preference {
+            Mode::Light => Self::Custom(ExtraStyles::A11yLight),
+            _ => Self::Custom(ExtraStyles::A11yDark),
+        }
+    }
+
+    fn mode(&self) -> Mode {
+        match self {
+            StyleType::Night | StyleType::DeepSea => Mode::Dark,
+            StyleType::Day | StyleType::MonAmour => Mode::Light,
+            StyleType::Custom(style) => {
+                if style.get_extension().is_nightly {
+                    Mode::Dark
+                } else {
+                    Mode::Light
+                }
+            }
+        }
+    }
+
+    fn base(&self) -> Style {
         let colors = self.get_palette();
-        Appearance {
+        Style {
             background_color: colors.primary,
             text_color: colors.text_body,
+        }
+    }
+
+    fn palette(&self) -> Option<iced::theme::Palette> {
+        None
+    }
+
+    fn name(&self) -> &str {
+        match self {
+            StyleType::Night => "Yeti Night",
+            StyleType::Day => "Yeti Day",
+            StyleType::DeepSea => "Deep Sea",
+            StyleType::MonAmour => "Mon Amour",
+            StyleType::Custom(style) => match style {
+                ExtraStyles::DraculaDark => "Dracula Dark",
+                ExtraStyles::DraculaLight => "Dracula Light",
+                ExtraStyles::GruvboxDark => "Gruvbox Dark",
+                ExtraStyles::GruvboxLight => "Gruvbox Light",
+                ExtraStyles::NordDark => "Nord Dark",
+                ExtraStyles::NordLight => "Nord Light",
+                ExtraStyles::SolarizedDark => "Solarized Dark",
+                ExtraStyles::SolarizedLight => "Solarized Light",
+                ExtraStyles::A11yDark => "A11y Dark",
+                ExtraStyles::A11yLight => "A11y Light",
+                ExtraStyles::CustomToml(_) => "Custom Theme",
+            },
         }
     }
 }

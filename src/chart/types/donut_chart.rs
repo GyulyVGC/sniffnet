@@ -1,7 +1,6 @@
 use crate::gui::styles::donut::Catalog;
 use crate::gui::styles::style_constants::{FONT_SIZE_FOOTER, FONT_SIZE_SUBTITLE};
 use crate::networking::types::data_representation::DataRepr;
-use iced::alignment::{Horizontal, Vertical};
 use iced::widget::canvas::path::Arc;
 use iced::widget::canvas::{Frame, Text};
 use iced::widget::{Canvas, canvas};
@@ -118,8 +117,6 @@ impl<Message, Theme: Catalog> canvas::Program<Message, Theme> for DonutChart {
         frame.fill_text(Text {
             content: self.title().clone(),
             position: center,
-            vertical_alignment: Vertical::Center,
-            horizontal_alignment: Horizontal::Center,
             color: style.text_color,
             size: if self.thumbnail {
                 FONT_SIZE_FOOTER

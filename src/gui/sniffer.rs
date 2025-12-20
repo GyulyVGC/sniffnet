@@ -514,7 +514,7 @@ impl Sniffer {
                         window::toggle_decorations(window_id),
                         window::resize(window_id, size),
                         window::move_to(window_id, position.to_point()),
-                        window::change_level(window_id, Level::AlwaysOnTop),
+                        window::set_level(window_id, Level::AlwaysOnTop),
                     ])
                 } else {
                     if self
@@ -525,7 +525,7 @@ impl Sniffer {
                     }
                     let mut commands = vec![
                         window::toggle_decorations(window_id),
-                        window::change_level(window_id, Level::Normal),
+                        window::set_level(window_id, Level::Normal),
                     ];
                     if !triggered_by_resize {
                         let size = self.conf.window.size.to_size();

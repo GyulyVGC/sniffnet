@@ -247,7 +247,7 @@ fn get_release_details<'a>(
             )
             .gap(7.5)
             .class(ContainerType::Tooltip);
-            ret_val = ret_val.push(Space::with_width(10)).push(tooltip);
+            ret_val = ret_val.push(Space::new().width(10)).push(tooltip);
         } else {
             // this is the latest release
             ret_val = ret_val.push(Text::new(" ✔").size(FONT_SIZE_SUBTITLE).font(font_footer));

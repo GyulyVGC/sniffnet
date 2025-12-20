@@ -118,31 +118,29 @@ fn get_data_notify<'a>(
     language: Language,
     font: Font,
 ) -> Container<'a, Message, StyleType> {
-    let checkbox = Checkbox::new(
-        data_exceeded_translation(language),
-        data_notification.threshold.is_some(),
-    )
-    .on_toggle(move |toggled| {
-        if toggled {
-            Message::UpdateNotificationSettings(
-                Notification::Data(DataNotification {
-                    threshold: Some(data_notification.previous_threshold),
-                    ..data_notification
-                }),
-                false,
-            )
-        } else {
-            Message::UpdateNotificationSettings(
-                Notification::Data(DataNotification {
-                    threshold: None,
-                    ..data_notification
-                }),
-                false,
-            )
-        }
-    })
-    .size(18)
-    .font(font);
+    let checkbox = Checkbox::new(data_notification.threshold.is_some())
+        .label(data_exceeded_translation(language))
+        .on_toggle(move |toggled| {
+            if toggled {
+                Message::UpdateNotificationSettings(
+                    Notification::Data(DataNotification {
+                        threshold: Some(data_notification.previous_threshold),
+                        ..data_notification
+                    }),
+                    false,
+                )
+            } else {
+                Message::UpdateNotificationSettings(
+                    Notification::Data(DataNotification {
+                        threshold: None,
+                        ..data_notification
+                    }),
+                    false,
+                )
+            }
+        })
+        .size(18)
+        .font(font);
 
     let mut ret_val = Column::new().spacing(15).push(checkbox);
 
@@ -177,22 +175,20 @@ fn get_favorite_notify<'a>(
     language: Language,
     font: Font,
 ) -> Container<'a, Message, StyleType> {
-    let checkbox = Checkbox::new(
-        favorite_transmitted_translation(language),
-        favorite_notification.notify_on_favorite,
-    )
-    .on_toggle(move |toggled| {
-        Message::UpdateNotificationSettings(
-            if toggled {
-                Notification::Favorite(FavoriteNotification::on(favorite_notification.sound))
-            } else {
-                Notification::Favorite(FavoriteNotification::off(favorite_notification.sound))
-            },
-            false,
-        )
-    })
-    .size(18)
-    .font(font);
+    let checkbox = Checkbox::new(favorite_notification.notify_on_favorite)
+        .label(favorite_transmitted_translation(language))
+        .on_toggle(move |toggled| {
+            Message::UpdateNotificationSettings(
+                if toggled {
+                    Notification::Favorite(FavoriteNotification::on(favorite_notification.sound))
+                } else {
+                    Notification::Favorite(FavoriteNotification::off(favorite_notification.sound))
+                },
+                false,
+            )
+        })
+        .size(18)
+        .font(font);
 
     let mut ret_val = Column::new().spacing(15).push(checkbox);
 
@@ -220,13 +216,11 @@ fn get_remote_notifications<'a>(
     language: Language,
     font: Font,
 ) -> Container<'a, Message, StyleType> {
-    let checkbox = Checkbox::new(
-        remote_notifications_translation(language),
-        remote_notifications.is_active(),
-    )
-    .on_toggle(move |_| Message::ToggleRemoteNotifications)
-    .size(18)
-    .font(font);
+    let checkbox = Checkbox::new(remote_notifications.is_active())
+        .label(remote_notifications_translation(language))
+        .on_toggle(move |_| Message::ToggleRemoteNotifications)
+        .size(18)
+        .font(font);
 
     let mut ret_val = Column::new().spacing(15).push(checkbox);
 
