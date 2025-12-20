@@ -69,12 +69,14 @@ impl CaptureContext {
         }
     }
 
-    pub fn consume(self) -> (CaptureType, Option<Savefile>) {
+    pub fn consume(self) -> (Option<CaptureType>, Option<Savefile>) {
         match self {
-            Self::Live(on) => (CaptureType::Live(on.cap), None),
-            Self::LiveWithSavefile(onws) => (CaptureType::Live(onws.live.cap), Some(onws.savefile)),
-            Self::Offline(off) => (CaptureType::Offline(off.cap), None),
-            Self::Error(_) => panic!(),
+            Self::Live(on) => (Some(CaptureType::Live(on.cap)), None),
+            Self::LiveWithSavefile(onws) => {
+                (Some(CaptureType::Live(onws.live.cap)), Some(onws.savefile))
+            }
+            Self::Offline(off) => (Some(CaptureType::Offline(off.cap)), None),
+            Self::Error(_) => (None, None),
         }
     }
 

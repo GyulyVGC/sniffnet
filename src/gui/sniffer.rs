@@ -9,7 +9,6 @@ use iced::mouse::Event::ButtonPressed;
 use iced::widget::Column;
 use iced::window::{Id, Level};
 use iced::{Element, Point, Size, Subscription, Task, window};
-use pcap::Device;
 use rfd::FileHandle;
 use std::collections::{HashMap, HashSet, VecDeque};
 use std::net::IpAddr;
@@ -18,6 +17,7 @@ use std::sync::Arc;
 use std::thread;
 use std::time::Duration;
 
+use crate::chart::types::preview_chart::PreviewChart;
 use crate::gui::components::footer::footer;
 use crate::gui::components::header::header;
 use crate::gui::components::modal::{get_clear_all_overlay, get_exit_overlay, modal};
@@ -48,6 +48,7 @@ use crate::mmdb::country::COUNTRY_MMDB;
 use crate::mmdb::types::mmdb_reader::{MmdbReader, MmdbReaders};
 use crate::networking::parse_packets::BackendTrafficMessage;
 use crate::networking::parse_packets::parse_packets;
+use crate::networking::traffic_preview::{TrafficPreview, traffic_preview};
 use crate::networking::types::capture_context::{
     CaptureContext, CaptureSource, CaptureSourcePicklist, MyPcapImport,
 };
@@ -82,6 +83,8 @@ pub struct Sniffer {
     pub welcome: Option<(bool, u8)>,
     /// Capture receiver clone (to close the channel after every run), with the current capture id (to ignore pending messages from previous captures)
     pub current_capture_rx: (usize, Option<Receiver<BackendTrafficMessage>>),
+    /// Preview captures receiver clone (to close the channel when starting the analysis)
+    pub preview_captures_rx: Option<Receiver<TrafficPreview>>,
     /// Capture data
     pub info_traffic: InfoTraffic,
     /// Map of the resolved addresses with their full rDNS value and the corresponding host
@@ -94,14 +97,14 @@ pub struct Sniffer {
     pub newer_release_available: Option<bool>,
     /// Network device to be analyzed, or PCAP file to be imported
     pub capture_source: CaptureSource,
-    /// List of network devices
-    pub my_devices: Vec<MyDevice>,
     /// Signals if a pcap error occurred
     pub pcap_error: Option<String>,
     /// Messages status
     pub dots_pulse: (String, u8),
-    /// Chart displayed
+    /// Traffic chart displayed in the Overview page
     pub traffic_chart: TrafficChart,
+    /// Traffic preview charts displayed in the initial page
+    pub preview_charts: Vec<(MyDevice, PreviewChart)>,
     /// Currently displayed modal; None if no modal is displayed
     pub modal: Option<MyModal>,
     /// Currently displayed settings page; None if settings is closed
@@ -127,7 +130,7 @@ pub struct Sniffer {
     /// Flag reporting whether the packet capture is frozen
     pub frozen: bool,
     /// Sender to freeze the packet capture
-    freeze_tx: Option<tokio::sync::broadcast::Sender<()>>,
+    pub freeze_tx: Option<tokio::sync::broadcast::Sender<()>>,
 }
 
 impl Sniffer {
@@ -145,16 +148,17 @@ impl Sniffer {
             conf,
             welcome: Some((true, 0)),
             current_capture_rx: (0, None),
+            preview_captures_rx: None,
             info_traffic: InfoTraffic::default(),
             addresses_resolved: HashMap::new(),
             favorite_hosts: HashSet::new(),
             logged_notifications: (VecDeque::new(), 0),
             newer_release_available: None,
             capture_source,
-            my_devices: Vec::new(),
             pcap_error: None,
             dots_pulse: (".".to_string(), 0),
             traffic_chart: TrafficChart::new(style, language, data_repr),
+            preview_charts: Vec::new(),
             modal: None,
             settings_page: None,
             running_page: None,
@@ -270,9 +274,11 @@ impl Sniffer {
         match message {
             Message::StartApp(id) => {
                 self.id = id;
+                let previews_task = self.start_traffic_previews();
                 return Task::batch([
                     Sniffer::register_sigint_handler(),
                     Task::perform(set_newer_release_status(), Message::SetNewerReleaseStatus),
+                    previews_task,
                 ]);
             }
             Message::TickRun(cap_id, msg, host_msgs, no_more_packets) => {
@@ -314,10 +320,10 @@ impl Sniffer {
                     return self.start();
                 }
             }
-            Message::Reset => self.reset(),
+            Message::Reset => return self.reset(),
             Message::Style(style) => {
                 self.conf.settings.style = style;
-                self.traffic_chart.change_style(style);
+                self.change_charts_style();
             }
             Message::LoadStyle(path) => {
                 self.conf.settings.style_path.clone_from(&path);
@@ -326,7 +332,7 @@ impl Sniffer {
                         CustomPalette::from_palette(palette),
                     ));
                     self.conf.settings.style = style;
-                    self.traffic_chart.change_style(style);
+                    self.change_charts_style();
                 }
             }
             Message::AddOrRemoveFavorite(host, add) => self.add_or_remove_favorite(&host, add),
@@ -582,7 +588,7 @@ impl Sniffer {
             }
             Message::Periodic => {
                 self.update_waiting_dots();
-                self.fetch_devices();
+                self.capture_source.set_addresses();
                 self.update_threshold();
             }
             Message::ExpandNotification(id, expand) => {
@@ -614,6 +620,36 @@ impl Sniffer {
                 if let Some(tx) = &self.freeze_tx {
                     let _ = tx.send(());
                 }
+            }
+            Message::TrafficPreview(msg) => {
+                self.preview_charts.retain(|(my_dev, _)| {
+                    msg.data
+                        .iter()
+                        .any(|(d, _)| d.get_name().eq(my_dev.get_name()))
+                });
+                for (dev, packets) in msg.data {
+                    let Some((my_dev, chart)) = self
+                        .preview_charts
+                        .iter_mut()
+                        .find(|(my_dev, _)| my_dev.get_name().eq(dev.get_name()))
+                    else {
+                        let mut chart = PreviewChart::new(self.conf.settings.style);
+                        chart.update_charts_data(packets);
+                        self.preview_charts.push((dev, chart));
+                        continue;
+                    };
+                    *my_dev = dev;
+                    chart.update_charts_data(packets);
+                }
+                self.preview_charts.sort_by(|(_, c1), (_, c2)| {
+                    if c1.max_packets > 0.0 && c2.max_packets == 0.0 {
+                        std::cmp::Ordering::Less
+                    } else if c1.max_packets == 0.0 && c2.max_packets > 0.0 {
+                        std::cmp::Ordering::Greater
+                    } else {
+                        std::cmp::Ordering::Equal
+                    }
+                });
             }
         }
         Task::none()
@@ -793,6 +829,15 @@ impl Sniffer {
     }
 
     fn start(&mut self) -> Task<Message> {
+        // close captures preview channel to kill previous preview captures
+        if let Some(rx) = &self.preview_captures_rx {
+            rx.close();
+        }
+        self.preview_captures_rx = None;
+        self.preview_charts
+            .iter_mut()
+            .for_each(|(_, chart)| *chart = PreviewChart::new(self.conf.settings.style));
+
         if matches!(&self.capture_source, CaptureSource::Device(_)) {
             let current_device_name = &self.capture_source.get_name();
             self.set_device(current_device_name);
@@ -846,7 +891,7 @@ impl Sniffer {
         Task::none()
     }
 
-    fn reset(&mut self) {
+    fn reset(&mut self) -> Task<Message> {
         // close capture channel to kill previous captures
         if let Some(rx) = &self.current_capture_rx.1 {
             rx.close();
@@ -872,24 +917,30 @@ impl Sniffer {
         self.host_data_states = HostDataStates::default();
         self.frozen = false;
         self.freeze_tx = None;
+        self.start_traffic_previews()
+    }
+
+    fn start_traffic_previews(&mut self) -> Task<Message> {
+        let (tx, rx) = async_channel::unbounded();
+        let _ = thread::Builder::new()
+            .name("thread_traffic_preview".to_string())
+            .spawn(move || {
+                traffic_preview(&tx);
+            })
+            .log_err(location!());
+        self.preview_captures_rx = Some(rx.clone());
+        Task::run(rx, |traffic_preview| {
+            Message::TrafficPreview(traffic_preview)
+        })
     }
 
     fn set_device(&mut self, name: &str) {
-        for my_dev in &self.my_devices {
+        for (my_dev, _) in &self.preview_charts {
             if my_dev.get_name().eq(&name) {
                 self.conf.device.device_name = name.to_string();
                 self.capture_source = CaptureSource::Device(my_dev.clone());
                 break;
             }
-        }
-    }
-
-    fn fetch_devices(&mut self) {
-        self.my_devices.clear();
-        self.capture_source.set_addresses();
-        for dev in Device::list().log_err(location!()).unwrap_or_default() {
-            let my_dev = MyDevice::from_pcap_device(dev);
-            self.my_devices.push(my_dev);
         }
     }
 
@@ -1146,6 +1197,14 @@ impl Sniffer {
             && matches!(self.capture_source, CaptureSource::Device(_))
             || self.conf.capture_source_picklist == CaptureSourcePicklist::File
                 && matches!(self.capture_source, CaptureSource::File(_))
+    }
+
+    fn change_charts_style(&mut self) {
+        let style = self.conf.settings.style;
+        self.traffic_chart.change_style(style);
+        for (_, chart) in &mut self.preview_charts {
+            chart.change_style(style);
+        }
     }
 }
 

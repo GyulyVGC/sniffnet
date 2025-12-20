@@ -24,6 +24,7 @@ pub enum ContainerType {
     Highlighted,
     HighlightedOnHeader,
     ModalBackground,
+    AdapterAddress,
 }
 
 impl ContainerType {
@@ -61,6 +62,10 @@ impl ContainerType {
                     a: 0.9,
                     ..Color::BLACK
                 }),
+                ContainerType::AdapterAddress => Background::Color(Color {
+                    a: if ext.is_nightly { 0.4 } else { 0.7 },
+                    ..ext.buttons_color
+                }),
             }),
             border: Border {
                 radius: match self {
@@ -68,6 +73,7 @@ impl ContainerType {
                     ContainerType::Modal => Radius::new(0).bottom(BORDER_ROUNDED_RADIUS),
                     ContainerType::Tooltip => 7.0.into(),
                     ContainerType::Badge
+                    | ContainerType::AdapterAddress
                     | ContainerType::BadgeInfo
                     | ContainerType::Highlighted
                     | ContainerType::HighlightedOnHeader => 100.0.into(),
@@ -84,6 +90,7 @@ impl ContainerType {
                     _ => BORDER_WIDTH,
                 },
                 color: match self {
+                    ContainerType::AdapterAddress => colors.primary,
                     ContainerType::Palette => Color::BLACK,
                     ContainerType::BadgeInfo => colors.secondary,
                     ContainerType::Modal => ext.buttons_color,

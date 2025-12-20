@@ -17,7 +17,6 @@ use gui::styles::style_constants::FONT_SIZE_BODY;
 use gui::styles::types::style_type::StyleType;
 use networking::types::data_representation::ByteMultiple;
 use networking::types::info_traffic::InfoTraffic;
-use networking::types::ip_version::IpVersion;
 use networking::types::protocol::Protocol;
 use networking::types::service::Service;
 use translations::types::language::Language;

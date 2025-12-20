@@ -3,6 +3,7 @@
 All Sniffnet releases with the relative changes are documented in this file.
 
 ## [UNRELEASED]
+- Add charts to preview network adapters traffic in initial page ([#1026](https://github.com/GyulyVGC/sniffnet/pull/1026) — fixes [#556](https://github.com/GyulyVGC/sniffnet/issues/556))
 - Add animated welcome screen ([#1002](https://github.com/GyulyVGC/sniffnet/pull/1002))
 - Return a PCAP error when trying to start a capture from an unknown adapter name
 

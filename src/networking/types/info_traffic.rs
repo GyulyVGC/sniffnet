@@ -26,7 +26,7 @@ pub struct InfoTraffic {
 }
 
 impl InfoTraffic {
-    pub fn refresh(&mut self, msg: &mut InfoTraffic) {
+    pub fn refresh(&mut self, msg: &mut Self) {
         self.tot_data_info.refresh(msg.tot_data_info);
 
         self.dropped_packets = msg.dropped_packets;
