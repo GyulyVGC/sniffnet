@@ -638,7 +638,7 @@ impl Sniffer {
                         self.preview_charts.push((dev, chart));
                         continue;
                     };
-                    *my_dev = dev.clone();
+                    *my_dev = dev;
                     chart.update_charts_data(packets);
                 }
                 self.preview_charts.sort_by(|(_, c1), (_, c2)| {
