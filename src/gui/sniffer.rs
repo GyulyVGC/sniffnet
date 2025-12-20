@@ -834,6 +834,9 @@ impl Sniffer {
             rx.close();
         }
         self.preview_captures_rx = None;
+        self.preview_charts
+            .iter_mut()
+            .for_each(|(_, chart)| *chart = PreviewChart::new(self.conf.settings.style));
 
         if matches!(&self.capture_source, CaptureSource::Device(_)) {
             let current_device_name = &self.capture_source.get_name();
@@ -899,9 +902,6 @@ impl Sniffer {
         // increment capture id to ignore pending messages from previous captures
         self.current_capture_rx = (self.current_capture_rx.0 + 1, None);
         self.info_traffic = InfoTraffic::default();
-        self.preview_charts
-            .iter_mut()
-            .for_each(|(_, chart)| *chart = PreviewChart::new(style));
         self.addresses_resolved = HashMap::new();
         self.favorite_hosts = HashSet::new();
         self.logged_notifications = (VecDeque::new(), 0);
