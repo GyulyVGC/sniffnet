@@ -1,7 +1,7 @@
 use std::cmp::min;
 use std::net::IpAddr;
 
-use iced::widget::{Column, Container, Row, Rule, Space, Text};
+use iced::widget::{Column, Container, Row, Space, Text, rule};
 use iced::{Alignment, Font, Length};
 
 use crate::chart::types::donut_chart::donut_chart;
@@ -77,7 +77,7 @@ pub fn thumbnail_page(sniffer: &Sniffer) -> Container<'_, Message, StyleType> {
             font,
             sniffer.conf.host_sort_type,
         ))
-        .push(Rule::vertical(10))
+        .push(rule::vertical(10))
         .push(service_col(
             info_traffic,
             data_repr,

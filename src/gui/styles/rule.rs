@@ -10,7 +10,7 @@ use iced::widget::rule::{Catalog, FillMode, Style};
 pub enum RuleType {
     #[default]
     Standard,
-    PaletteColor(Color, u16),
+    PaletteColor(Color),
     Incoming,
     Outgoing,
     Dropped,
@@ -24,18 +24,18 @@ impl RuleType {
             color: match self {
                 RuleType::Incoming => colors.secondary,
                 RuleType::Outgoing => colors.outgoing,
-                RuleType::PaletteColor(color, _) => *color,
+                RuleType::PaletteColor(color) => *color,
                 RuleType::Dropped => ext.buttons_color,
                 RuleType::Standard => Color {
                     a: ext.alpha_round_borders,
                     ..ext.buttons_color
                 },
             },
-            width: match self {
-                RuleType::PaletteColor(_, width) => *width,
-                RuleType::Standard => 3,
-                _ => 5,
-            },
+            // width: match self {
+            //     RuleType::PaletteColor(_, width) => *width,
+            //     RuleType::Standard => 3,
+            //     _ => 5,
+            // },
             radius: 0.0.into(),
             fill_mode: FillMode::Full,
         }

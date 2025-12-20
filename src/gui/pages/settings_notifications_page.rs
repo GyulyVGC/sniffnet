@@ -1,5 +1,5 @@
 use iced::widget::scrollable::Direction;
-use iced::widget::{Button, Rule, Slider};
+use iced::widget::{Button, Slider, rule};
 use iced::widget::{Checkbox, Column, Container, Row, Scrollable, Space, Text, TextInput};
 use iced::{Alignment, Font, Length, Padding};
 
@@ -95,7 +95,7 @@ pub fn settings_notifications_page<'a>(sniffer: &Sniffer) -> Container<'a, Messa
                     font,
                 ))
                 .push(
-                    Container::new(Rule::horizontal(10)).padding(Padding::ZERO.left(40).right(40)),
+                    Container::new(rule::horizontal(10)).padding(Padding::ZERO.left(40).right(40)),
                 )
                 .push(get_remote_notifications(
                     &notifications.remote_notifications,

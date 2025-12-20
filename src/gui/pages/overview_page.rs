@@ -45,7 +45,7 @@ use iced::widget::scrollable::Direction;
 use iced::widget::text::LineHeight;
 use iced::widget::tooltip::Position;
 use iced::widget::{
-    Button, Column, Container, Row, Rule, Scrollable, Space, Text, Tooltip, button,
+    Button, Column, Container, Row, Scrollable, Space, Text, Tooltip, button, rule,
 };
 use iced::{Alignment, Element, Font, Length, Padding};
 use std::fmt::Write;
@@ -475,10 +475,10 @@ fn col_info(sniffer: &Sniffer) -> Container<'_, Message, StyleType> {
                     )
                     .width(Length::Fill),
                 )
-                .push(Container::new(Rule::vertical(25)).height(Length::Shrink))
+                .push(Container::new(rule::vertical(25)).height(Length::Shrink))
                 .push(col_data_representation.width(Length::Fill)),
         )
-        .push(Rule::horizontal(15))
+        .push(rule::horizontal(15))
         .push(donut_row.height(Length::Fill));
 
     Container::new(content)
@@ -680,7 +680,7 @@ fn donut_legend_entry<'a>(
         .push(
             Row::new()
                 .width(10)
-                .push(Rule::horizontal(1).class(rule_type)),
+                .push(rule::horizontal(1).class(rule_type)),
         )
         .push(Text::new(format!("{label}: {value_text}")).font(font))
 }
@@ -748,14 +748,14 @@ pub fn get_bars<'a>(in_len: u16, out_len: u16) -> Row<'a, Message, StyleType> {
         .push(if in_len > 0 {
             Row::new()
                 .width(Length::FillPortion(in_len))
-                .push(Rule::horizontal(1).class(RuleType::Incoming))
+                .push(rule::horizontal(1).class(RuleType::Incoming))
         } else {
             Row::new()
         })
         .push(if out_len > 0 {
             Row::new()
                 .width(Length::FillPortion(out_len))
-                .push(Rule::horizontal(1).class(RuleType::Outgoing))
+                .push(rule::horizontal(1).class(RuleType::Outgoing))
         } else {
             Row::new()
         })

@@ -1,6 +1,6 @@
 use iced::widget::text::LineHeight;
 use iced::widget::tooltip::Position;
-use iced::widget::{Column, Container, PickList, Row, Rule, Slider, Space, Text, Tooltip, button};
+use iced::widget::{Column, Container, PickList, Row, Slider, Space, Text, Tooltip, button, rule};
 use iced::{Alignment, Font, Length, Padding};
 
 use crate::gui::components::button::{button_open_file, row_open_link_tooltip};
@@ -70,7 +70,7 @@ fn column_all_general_setting(sniffer: &Sniffer, font: Font) -> Column<'_, Messa
         .align_x(Alignment::Center)
         .padding([5, 10])
         .push(row_language_scale_factor(language, font, scale_factor))
-        .push(Rule::horizontal(25));
+        .push(rule::horizontal(25));
 
     if !is_editable {
         column = column
@@ -103,9 +103,9 @@ fn row_language_scale_factor<'a>(
         .align_y(Alignment::Start)
         .height(100)
         .push(language_picklist(language, font))
-        .push(Rule::vertical(25))
+        .push(rule::vertical(25))
         .push(scale_factor_slider(language, font, scale_factor))
-        .push(Rule::vertical(25))
+        .push(rule::vertical(25))
         .push(need_help(language, font))
 }
 

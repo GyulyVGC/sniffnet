@@ -32,7 +32,7 @@ use iced::Length::FillPortion;
 use iced::widget::scrollable::Direction;
 use iced::widget::text::LineHeight;
 use iced::widget::tooltip::Position;
-use iced::widget::{Column, Container, Row, Rule, Scrollable, Text, Tooltip};
+use iced::widget::{Column, Container, Row, Scrollable, Text, Tooltip, rule};
 use iced::widget::{Space, button};
 use iced::{Alignment, Font, Length, Padding};
 use std::cmp::max;
@@ -437,7 +437,7 @@ fn data_notification_extra<'a>(
     Some(
         Row::new()
             .push(hosts_col)
-            .push(Container::new(Rule::vertical(30)).height(height))
+            .push(Container::new(rule::vertical(30)).height(height))
             .push(services_col),
     )
 }

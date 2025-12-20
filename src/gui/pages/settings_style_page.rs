@@ -1,6 +1,6 @@
 use iced::widget::scrollable::Direction;
-use iced::widget::{Button, Column, Container, Row, Scrollable, Text};
-use iced::widget::{Rule, Space, button, lazy};
+use iced::widget::{Button, Column, Container, Row, Scrollable, Text, rule};
+use iced::widget::{Space, button, lazy};
 use iced::{Alignment, Color, Element, Font, Length, Padding};
 
 use crate::StyleType::{Day, DeepSea, MonAmour, Night};
@@ -218,18 +218,26 @@ fn get_palette_rule<'a>(
 
     Container::new(
         Row::new()
-            .push(Row::new().width(120).push(
-                Rule::horizontal(height).class(RuleType::PaletteColor(palette.primary, height)),
-            ))
-            .push(Row::new().width(80).push(
-                Rule::horizontal(height).class(RuleType::PaletteColor(palette.secondary, height)),
-            ))
-            .push(Row::new().width(60).push(
-                Rule::horizontal(height).class(RuleType::PaletteColor(palette.outgoing, height)),
-            ))
-            .push(Row::new().width(40).push(
-                Rule::horizontal(height).class(RuleType::PaletteColor(buttons_color, height)),
-            )),
+            .push(
+                Row::new()
+                    .width(120)
+                    .push(rule::horizontal(height).class(RuleType::PaletteColor(palette.primary))),
+            )
+            .push(
+                Row::new().width(80).push(
+                    rule::horizontal(height).class(RuleType::PaletteColor(palette.secondary)),
+                ),
+            )
+            .push(
+                Row::new()
+                    .width(60)
+                    .push(rule::horizontal(height).class(RuleType::PaletteColor(palette.outgoing))),
+            )
+            .push(
+                Row::new()
+                    .width(40)
+                    .push(rule::horizontal(height).class(RuleType::PaletteColor(buttons_color))),
+            ),
     )
     .align_x(Alignment::Center)
     .align_y(Alignment::Center)

@@ -39,8 +39,8 @@ use crate::{Language, Protocol, Sniffer, StyleType};
 use iced::alignment::Vertical;
 use iced::widget::scrollable::Direction;
 use iced::widget::tooltip::Position;
-use iced::widget::{Column, Container, Row, Space, Text, Tooltip};
-use iced::widget::{Rule, Scrollable, button};
+use iced::widget::{Column, Container, Row, Space, Text, Tooltip, rule};
+use iced::widget::{Scrollable, button};
 use iced::{Alignment, Font, Length, Padding};
 
 pub fn connection_details_page(
@@ -276,7 +276,7 @@ fn get_host_info_col<'a>(
     let mut host_info_col = Column::new().spacing(4);
     if r_dns.parse::<IpAddr>().is_err() || (!host.asn.name.is_empty() && !host.asn.code.is_empty())
     {
-        host_info_col = host_info_col.push(Rule::horizontal(10.0));
+        host_info_col = host_info_col.push(rule::horizontal(10.0));
     }
     if r_dns.parse::<IpAddr>().is_err() {
         host_info_col = host_info_col.push(TextType::highlighted_subtitle_with_desc(
@@ -352,7 +352,7 @@ fn get_src_or_dest_col<'a>(
                 .width(Length::Fill)
                 .align_x(Alignment::Center),
         )
-        .push(Rule::horizontal(10.0))
+        .push(rule::horizontal(10.0))
         .push(
             Row::new()
                 .spacing(10)
