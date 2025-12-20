@@ -2,7 +2,7 @@
 
 use iced::widget::text::LineHeight;
 use iced::widget::tooltip::Position;
-use iced::widget::{Container, Row, Space, Text, Tooltip, button, horizontal_space};
+use iced::widget::{Container, Row, Space, Text, Tooltip, button};
 use iced::{Alignment, Font, Length};
 
 use crate::gui::components::tab::notifications_badge;
@@ -59,24 +59,24 @@ pub fn header(sniffer: &Sniffer) -> Container<'_, Message, StyleType> {
             .push(if is_running {
                 Container::new(get_button_reset(font, language))
             } else {
-                Container::new(Space::with_width(60))
+                Container::new(Space::new().width(60))
             })
-            .push(horizontal_space())
-            .push(Container::new(Space::with_width(80)))
-            .push(Space::with_width(20))
+            .push(Space::new().width(Length::Fill))
+            .push(Container::new(Space::new().width(80)))
+            .push(Space::new().width(20))
             .push(logo)
-            .push(Space::with_width(20))
+            .push(Space::new().width(20))
             .push(if is_running {
                 Container::new(get_button_freeze(font, language, sniffer.frozen, false))
             } else {
-                Container::new(Space::with_width(40))
+                Container::new(Space::new().width(40))
             })
             .push(if is_running {
                 Container::new(get_button_minimize(font, language, false))
             } else {
-                Container::new(Space::with_width(40))
+                Container::new(Space::new().width(40))
             })
-            .push(horizontal_space())
+            .push(Space::new().width(Length::Fill))
             .push(get_button_settings(font, language, last_opened_setting)),
     )
     .height(70)
@@ -231,13 +231,13 @@ fn thumbnail_header<'a>(
     Container::new(
         Row::new()
             .align_y(Alignment::Center)
-            .push(horizontal_space())
-            .push(Space::with_width(110))
+            .push(Space::new().width(Length::Fill))
+            .push(Space::new().width(110))
             .push(Text::new(SNIFFNET_TITLECASE).font(font_headers))
-            .push(Space::with_width(10))
+            .push(Space::new().width(10))
             .push(get_button_freeze(font, language, frozen, true))
             .push(get_button_minimize(font, language, true))
-            .push(horizontal_space())
+            .push(Space::new().width(Length::Fill))
             .push(if unread_notifications > 0 {
                 Container::new(
                     notifications_badge(font, unread_notifications)
@@ -246,7 +246,7 @@ fn thumbnail_header<'a>(
                 .width(40)
                 .align_x(Alignment::Center)
             } else {
-                Container::new(Space::with_width(40))
+                Container::new(Space::new().width(40))
             }),
     )
     .height(30)

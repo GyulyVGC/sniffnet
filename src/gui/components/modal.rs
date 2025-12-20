@@ -1,7 +1,6 @@
 use iced::alignment::Alignment;
 use iced::widget::{
-    Column, Container, Row, Space, Text, button, center, horizontal_space, mouse_area, opaque,
-    stack,
+    Column, Container, Row, Space, Text, button, center, mouse_area, opaque, stack,
 };
 use iced::{Element, Font, Length};
 
@@ -36,7 +35,7 @@ pub fn get_exit_overlay<'a>(
             language,
             quit_analysis_translation(language),
         ))
-        .push(Space::with_height(20))
+        .push(Space::new().height(20))
         .push(
             ask_quit_translation(language)
                 .align_x(Alignment::Center)
@@ -68,7 +67,7 @@ pub fn get_clear_all_overlay<'a>(
             language,
             clear_all_translation(language),
         ))
-        .push(Space::with_height(20))
+        .push(Space::new().height(20))
         .push(
             ask_clear_all_translation(language)
                 .align_x(Alignment::Center)
@@ -91,7 +90,7 @@ fn get_modal_header<'a>(
 ) -> Container<'a, Message, StyleType> {
     Container::new(
         Row::new()
-            .push(horizontal_space())
+            .push(Space::new().width(Length::Fill))
             .push(
                 Text::new(title)
                     .font(font_headers)

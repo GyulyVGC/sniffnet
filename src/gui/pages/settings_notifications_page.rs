@@ -1,5 +1,5 @@
 use iced::widget::scrollable::Direction;
-use iced::widget::{Button, Rule, Slider, horizontal_space};
+use iced::widget::{Button, Rule, Slider};
 use iced::widget::{Checkbox, Column, Container, Row, Scrollable, Space, Text, TextInput};
 use iced::{Alignment, Font, Length, Padding};
 
@@ -61,7 +61,7 @@ pub fn settings_notifications_page<'a>(sniffer: &Sniffer) -> Container<'a, Messa
             font,
             language,
         ))
-        .push(Space::with_height(15))
+        .push(Space::new().height(15))
         .push(
             notifications_title_translation(language)
                 .font(font)
@@ -70,7 +70,7 @@ pub fn settings_notifications_page<'a>(sniffer: &Sniffer) -> Container<'a, Messa
                 .width(Length::Fill)
                 .align_x(Alignment::Center),
         )
-        .push(Space::with_height(5));
+        .push(Space::new().height(5));
 
     let volume_notification_col = Column::new()
         .padding(Padding::new(5.0).bottom(0))
@@ -322,7 +322,7 @@ fn volume_slider<'a>(
                             .step(5)
                             .width(200),
                     )
-                    .push(Space::with_width(15))
+                    .push(Space::new().width(15))
                     .push(
                         Icon::AudioHigh
                             .to_text()
@@ -394,7 +394,7 @@ pub fn settings_header<'a>(
 ) -> Container<'a, Message, StyleType> {
     Container::new(
         Row::new()
-            .push(horizontal_space())
+            .push(Space::new().width(Length::Fill))
             .push(
                 Text::new(settings_translation(language))
                     .font(font_headers)

@@ -1,9 +1,9 @@
 //! GUI bottom footer
 
+use iced::widget::Space;
 use iced::widget::text::LineHeight;
 use iced::widget::tooltip::Position;
 use iced::widget::{Column, Container, Row, Text, Tooltip, button, rich_text, span};
-use iced::widget::{Space, horizontal_space};
 use iced::{Alignment, Font, Length, Padding};
 
 use crate::gui::components::button::row_open_link_tooltip;
@@ -257,5 +257,5 @@ fn get_release_details<'a>(
 }
 
 fn thumbnail_footer<'a>() -> Container<'a, Message, StyleType> {
-    Container::new(horizontal_space()).height(0)
+    Container::new(Space::new().width(Length::Fill)).height(0)
 }

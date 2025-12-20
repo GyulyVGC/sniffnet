@@ -1,7 +1,7 @@
 //! Tab buttons to be used in the various pages just under the header
 
 use iced::widget::text::LineHeight;
-use iced::widget::{Button, Container, Row, Space, Text, button, horizontal_space};
+use iced::widget::{Button, Container, Row, Space, Text, button};
 use iced::{Alignment, Font, Length, alignment};
 
 use crate::gui::pages::types::settings_page::SettingsPage;
@@ -73,7 +73,7 @@ fn new_page_tab<'a>(
     let mut content = Row::new()
         .height(Length::Fill)
         .align_y(Alignment::Center)
-        .push(horizontal_space())
+        .push(Space::new().width(Length::Fill))
         .push(
             page.icon()
                 .size(15)
@@ -85,7 +85,7 @@ fn new_page_tab<'a>(
                 .align_x(alignment::Alignment::Center)
                 .align_y(alignment::Alignment::Center),
         )
-        .push(Space::with_width(10))
+        .push(Space::new().width(10))
         .push(
             Text::new(page.get_tab_label(language).to_string())
                 .font(font)
@@ -103,11 +103,11 @@ fn new_page_tab<'a>(
         && num > 0
     {
         content = content
-            .push(Space::with_width(7))
+            .push(Space::new().width(7))
             .push(notifications_badge(font_headers, num));
     }
 
-    content = content.push(horizontal_space());
+    content = content.push(Space::new().width(Length::Fill));
 
     button(content)
         .height(if active { 35 } else { 30 })
@@ -130,7 +130,7 @@ fn new_settings_tab<'a>(
     let content = Row::new()
         .height(Length::Fill)
         .align_y(Alignment::Center)
-        .push(horizontal_space())
+        .push(Space::new().width(Length::Fill))
         .push(
             page.icon()
                 .size(15)
@@ -142,7 +142,7 @@ fn new_settings_tab<'a>(
                 .align_x(alignment::Alignment::Center)
                 .align_y(alignment::Alignment::Center),
         )
-        .push(Space::with_width(10))
+        .push(Space::new().width(10))
         .push(
             Text::new(page.get_tab_label(language).to_string())
                 .font(font)
@@ -155,7 +155,7 @@ fn new_settings_tab<'a>(
                 .align_x(alignment::Alignment::Center)
                 .align_y(alignment::Alignment::Center),
         )
-        .push(horizontal_space());
+        .push(Space::new().width(Length::Fill));
 
     button(content)
         .height(if active { 35 } else { 30 })

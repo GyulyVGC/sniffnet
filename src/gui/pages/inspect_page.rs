@@ -5,10 +5,7 @@ use iced::widget::text::LineHeight;
 use iced::widget::text_input::Side;
 use iced::widget::tooltip::Position;
 use iced::widget::{Button, Column, Container, Row, Scrollable, Text, TextInput};
-use iced::widget::{
-    ComboBox, Rule, Space, Toggler, Tooltip, button, combo_box, horizontal_space, text_input,
-    vertical_space,
-};
+use iced::widget::{ComboBox, Rule, Space, Toggler, Tooltip, button, combo_box, text_input};
 use iced::{Alignment, Font, Length, Padding, Pixels, alignment};
 
 use crate::gui::components::tab::get_pages_tabs;
@@ -79,7 +76,7 @@ pub fn inspect_page(sniffer: &Sniffer) -> Container<'_, Message, StyleType> {
             sniffer.conf.report_sort_type,
             sniffer.conf.data_repr,
         ))
-        .push(Space::with_height(4))
+        .push(Space::new().height(4))
         .push(Rule::horizontal(5))
         .push(report);
 
@@ -170,11 +167,11 @@ fn report<'a>(sniffer: &Sniffer) -> Column<'a, Message, StyleType> {
                 .height(Length::Fill)
                 .padding(20)
                 .align_x(Alignment::Center)
-                .push(vertical_space())
+                .push(Space::new().height(Length::Fill))
                 .push(Icon::Funnel.to_text().size(60))
-                .push(Space::with_height(15))
+                .push(Space::new().height(15))
                 .push(Text::new(no_search_results_translation(language)).font(font))
-                .push(Space::with_height(Length::FillPortion(2))),
+                .push(Space::new().height(Length::FillPortion(2))),
         );
     }
 
@@ -414,7 +411,7 @@ fn host_filters_col<'a>(
     Column::new()
         .align_x(Alignment::Start)
         .push(title_row)
-        .push(Space::with_height(10))
+        .push(Space::new().height(10))
         .push(
             Row::new()
                 .align_y(Alignment::Center)
@@ -586,11 +583,11 @@ fn get_change_page_row<'a>(
         .height(40)
         .align_y(Alignment::Center)
         .spacing(10)
-        .push(horizontal_space())
+        .push(Space::new().width(Length::Fill))
         .push(if page_number > 1 {
             Container::new(get_button_change_page(false).width(25))
         } else {
-            Container::new(Space::with_width(25))
+            Container::new(Space::new().width(25))
         })
         .push(
             Text::new(showing_results_translation(
@@ -604,9 +601,9 @@ fn get_change_page_row<'a>(
         .push(if page_number < results_number.div_ceil(20) {
             Container::new(get_button_change_page(true).width(25))
         } else {
-            Container::new(Space::with_width(25))
+            Container::new(Space::new().width(25))
         })
-        .push(horizontal_space())
+        .push(Space::new().width(Length::Fill))
 }
 
 fn button_clear_filter<'a>(

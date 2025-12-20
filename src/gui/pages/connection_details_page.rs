@@ -39,8 +39,8 @@ use crate::{Language, Protocol, Sniffer, StyleType};
 use iced::alignment::Vertical;
 use iced::widget::scrollable::Direction;
 use iced::widget::tooltip::Position;
-use iced::widget::{Column, Container, Row, Text, Tooltip};
-use iced::widget::{Rule, Scrollable, button, horizontal_space, vertical_space};
+use iced::widget::{Column, Container, Row, Space, Text, Tooltip};
+use iced::widget::{Rule, Scrollable, button};
 use iced::{Alignment, Font, Length, Padding};
 
 pub fn connection_details_page(
@@ -151,7 +151,7 @@ fn page_header<'a>(
 ) -> Container<'a, Message, StyleType> {
     Container::new(
         Row::new()
-            .push(horizontal_space())
+            .push(Space::new().width(Length::Fill))
             .push(
                 Text::new(connection_details_translation(language))
                     .font(font_headers)
@@ -186,7 +186,7 @@ fn col_info<'a>(
         .spacing(10)
         .padding(Padding::new(20.0).right(10).left(40))
         .width(Length::FillPortion(2))
-        .push(vertical_space())
+        .push(Space::new().height(Length::Fill))
         .push(
             Row::new()
                 .spacing(8)
@@ -262,7 +262,7 @@ fn col_info<'a>(
         );
     }
 
-    ret_val = ret_val.push(vertical_space());
+    ret_val = ret_val.push(Space::new().height(Length::Fill));
 
     ret_val
 }
@@ -394,11 +394,11 @@ fn assemble_widgets<'a>(
                 .width(Length::FillPortion(3))
                 .align_x(Alignment::Center)
                 .spacing(5)
-                .push(vertical_space())
+                .push(Space::new().height(Length::Fill))
                 .push(source_container)
                 .push(Icon::ArrowsDown.to_text())
                 .push(dest_container)
-                .push(vertical_space()),
+                .push(Space::new().height(Length::Fill)),
         )
 }
 

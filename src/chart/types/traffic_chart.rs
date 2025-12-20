@@ -3,7 +3,7 @@
 use std::cmp::min;
 use std::ops::Range;
 
-use iced::widget::{Column, Row, horizontal_space};
+use iced::widget::{Column, Row, Space};
 use iced::{Element, Length, Padding};
 use plotters::prelude::*;
 use plotters::series::LineSeries;
@@ -169,7 +169,7 @@ impl TrafficChart {
                     } else {
                         None
                     })
-                    .push(horizontal_space())
+                    .push(Space::new().width(Length::Fill))
                     .push(
                         iced::widget::Text::new(get_formatted_timestamp(ts_2))
                             .font(font)

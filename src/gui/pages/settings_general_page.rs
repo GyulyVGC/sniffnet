@@ -1,8 +1,6 @@
 use iced::widget::text::LineHeight;
 use iced::widget::tooltip::Position;
-use iced::widget::{
-    Column, Container, PickList, Row, Rule, Slider, Space, Text, Tooltip, button, vertical_space,
-};
+use iced::widget::{Column, Container, PickList, Row, Rule, Slider, Space, Text, Tooltip, button};
 use iced::{Alignment, Font, Length, Padding};
 
 use crate::gui::components::button::{button_open_file, row_open_link_tooltip};
@@ -48,7 +46,7 @@ pub fn settings_general_page(sniffer: &Sniffer) -> Container<'_, Message, StyleT
             language,
         ))
         .push(get_settings_tabs(SettingsPage::General, font, language))
-        .push(Space::with_height(10))
+        .push(Space::new().height(10))
         .push(column_all_general_setting(sniffer, font));
 
     Container::new(content)
@@ -81,7 +79,7 @@ fn column_all_general_setting(sniffer: &Sniffer, font: Font) -> Column<'_, Messa
                     .padding(10.0)
                     .class(ContainerType::Badge),
             )
-            .push(Space::with_height(10));
+            .push(Space::new().height(10));
     }
 
     column = column.push(mmdb_settings(
@@ -151,9 +149,9 @@ fn language_picklist<'a>(language: Language, font: Font) -> Container<'a, Messag
                 .size(FONT_SIZE_SUBTITLE)
                 .font(font),
         )
-        .push(vertical_space())
+        .push(Space::new().height(Length::Fill))
         .push(flag_row)
-        .push(Space::with_height(10))
+        .push(Space::new().height(10))
         .push(
             PickList::new(
                 &Language::ALL[..],
@@ -163,7 +161,7 @@ fn language_picklist<'a>(language: Language, font: Font) -> Container<'a, Messag
             .padding([2, 7])
             .font(font),
         )
-        .push(vertical_space());
+        .push(Space::new().height(Length::Fill));
 
     Container::new(content)
         .width(Length::Fill)
@@ -188,15 +186,15 @@ fn scale_factor_slider<'a>(
                     .size(FONT_SIZE_SUBTITLE)
                     .font(font),
             )
-            .push(vertical_space())
+            .push(Space::new().height(Length::Fill))
             .push(Text::new(format!("{:.0}%", scale_factor * 100.0)).font(font))
-            .push(Space::with_height(5))
+            .push(Space::new().height(5))
             .push(
                 Slider::new(-1.0..=1.0, slider_val, Message::ChangeScaleFactor)
                     .step(0.01)
                     .width(slider_width),
             )
-            .push(vertical_space()),
+            .push(Space::new().height(Length::Fill)),
     )
     .width(Length::Fill)
     .align_x(Alignment::Center)
@@ -212,7 +210,7 @@ fn need_help<'a>(language: Language, font: Font) -> Container<'a, Message, Style
                 .size(FONT_SIZE_SUBTITLE)
                 .font(font),
         )
-        .push(vertical_space())
+        .push(Space::new().height(Length::Fill))
         .push(
             Tooltip::new(
                 button(
@@ -233,7 +231,7 @@ fn need_help<'a>(language: Language, font: Font) -> Container<'a, Message, Style
             .gap(5)
             .class(ContainerType::Tooltip),
         )
-        .push(vertical_space());
+        .push(Space::new().height(Length::Fill));
 
     Container::new(content)
         .width(Length::Fill)

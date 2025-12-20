@@ -32,8 +32,8 @@ use iced::Length::FillPortion;
 use iced::widget::scrollable::Direction;
 use iced::widget::text::LineHeight;
 use iced::widget::tooltip::Position;
-use iced::widget::{Column, Container, Row, Rule, Scrollable, Text, Tooltip, horizontal_space};
-use iced::widget::{Space, button, vertical_space};
+use iced::widget::{Column, Container, Row, Rule, Scrollable, Text, Tooltip};
+use iced::widget::{Space, button};
 use iced::{Alignment, Font, Length, Padding};
 use std::cmp::max;
 
@@ -110,7 +110,7 @@ fn body_no_notifications_set<'a>(font: Font, language: Language) -> Column<'a, M
         .spacing(5)
         .align_x(Alignment::Center)
         .width(Length::Fill)
-        .push(vertical_space())
+        .push(Space::new().height(Length::Fill))
         .push(
             no_notifications_set_translation(language)
                 .align_x(Alignment::Center)
@@ -121,7 +121,7 @@ fn body_no_notifications_set<'a>(font: Font, language: Language) -> Column<'a, M
             language,
             SettingsPage::Notifications,
         ))
-        .push(Space::with_height(FillPortion(2)))
+        .push(Space::new().height(FillPortion(2)))
 }
 
 fn body_no_notifications_received(
@@ -134,14 +134,14 @@ fn body_no_notifications_received(
         .spacing(5)
         .align_x(Alignment::Center)
         .width(Length::Fill)
-        .push(vertical_space())
+        .push(Space::new().height(Length::Fill))
         .push(
             no_notifications_received_translation(language)
                 .align_x(Alignment::Center)
                 .font(font),
         )
         .push(Text::new(dots.to_owned()).font(font).size(50))
-        .push(Space::with_height(FillPortion(2)))
+        .push(Space::new().height(FillPortion(2)))
 }
 
 fn data_notification_log<'a>(
@@ -350,7 +350,7 @@ fn threshold_bar<'a>(
         .push(
             Column::new()
                 .spacing(1)
-                .push(Row::new().push(horizontal_space()).push(
+                .push(Row::new().push(Space::new().width(Length::Fill)).push(
                     Text::new(data_repr.formatted_string(data_info.tot_data(data_repr))).font(font),
                 ))
                 .push(get_bars(incoming_bar_len, outgoing_bar_len)),

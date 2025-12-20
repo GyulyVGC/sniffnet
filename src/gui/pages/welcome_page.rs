@@ -3,7 +3,7 @@ use crate::gui::styles::text::TextType;
 use crate::gui::types::message::Message;
 use crate::utils::types::icon::Icon;
 use iced::alignment::{Horizontal, Vertical};
-use iced::widget::{Column, Container, Space, Text, vertical_space};
+use iced::widget::{Column, Container, Space, Text};
 use iced::{Alignment, Font, Length};
 
 pub fn welcome_page<'a>(font: Font, x: u8) -> Container<'a, Message, StyleType> {
@@ -42,10 +42,10 @@ pub fn welcome_page<'a>(font: Font, x: u8) -> Container<'a, Message, StyleType> 
 
     let body = Column::new()
         .align_x(Alignment::Center)
-        .push(vertical_space())
+        .push(Space::new().height(Length::Fill))
         .push(icon.size(200).line_height(0.9).class(text_type))
         .push(text.font(font).size(75).class(text_type))
-        .push(Space::with_height(Length::FillPortion(2)));
+        .push(Space::new().height(Length::FillPortion(2)));
 
     Container::new(body)
         .height(Length::Fill)

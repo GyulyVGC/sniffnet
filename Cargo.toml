@@ -41,8 +41,8 @@ pcap = "2.4.0"
 etherparse = "0.19.0"
 chrono = { version = "0.4.42", default-features = false, features = ["clock"] }
 plotters = { version = "0.3.7", default-features = false, features = ["area_series", "line_series"] }
-iced = { version = "0.13.1", features = ["tokio", "svg", "advanced", "lazy", "image"] }
-plotters-iced = "0.11.0"
+iced = { version = "0.14.0", features = ["tokio", "svg", "advanced", "lazy", "image"] }
+plotters-iced = { git = "https://github.com/Joylei/plotters-iced.git", branch = "iced-0.14" }
 maxminddb = "0.27.1"
 confy = "2.0.0"
 serde = { version = "1.0.228", default-features = false, features = ["derive"] }

@@ -30,7 +30,7 @@ use iced::Length::FillPortion;
 use iced::widget::scrollable::Direction;
 use iced::widget::{
     Button, Checkbox, Column, Container, PickList, Row, Scrollable, Space, Text, TextInput, button,
-    center, vertical_space,
+    center,
 };
 use iced::{Alignment, Font, Length, Padding, alignment};
 
@@ -61,21 +61,21 @@ pub fn initial_page(sniffer: &Sniffer) -> Container<'_, Message, StyleType> {
     let right_col = Column::new()
         .width(FillPortion(1))
         .padding(10)
-        .push(Space::with_height(76))
+        .push(Space::new().height(76))
         .push(col_checkboxes)
-        .push(vertical_space())
+        .push(Space::new().height(Length::Fill))
         .push(button_start(
             font_headers,
             language,
             color_gradient,
             is_capture_source_consistent,
         ))
-        .push(vertical_space());
+        .push(Space::new().height(Length::Fill));
 
-    let body = Column::new().push(Space::with_height(5)).push(
+    let body = Column::new().push(Space::new().height(5)).push(
         Row::new()
             .push(col_data_source)
-            .push(Space::with_width(15))
+            .push(Space::new().width(15))
             .push(right_col),
     );
 

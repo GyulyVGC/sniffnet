@@ -4,7 +4,6 @@
 
 use std::borrow::Cow;
 
-use iced::advanced::graphics::image::image_rs::ImageFormat;
 #[cfg(target_os = "linux")]
 use iced::window::settings::PlatformSpecific;
 use iced::{Font, Pixels, application, window};

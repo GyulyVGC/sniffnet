@@ -1,7 +1,7 @@
 use std::cmp::min;
 use std::net::IpAddr;
 
-use iced::widget::{Column, Container, Row, Rule, Space, Text, vertical_space};
+use iced::widget::{Column, Container, Row, Rule, Space, Text};
 use iced::{Alignment, Font, Length};
 
 use crate::chart::types::donut_chart::donut_chart;
@@ -35,9 +35,9 @@ pub fn thumbnail_page(sniffer: &Sniffer) -> Container<'_, Message, StyleType> {
     if tot_packets == 0 {
         return Container::new(
             Column::new()
-                .push(vertical_space())
+                .push(Space::new().height(Length::Fill))
                 .push(Text::new(&sniffer.dots_pulse.0).font(font).size(50))
-                .push(Space::with_height(Length::FillPortion(2))),
+                .push(Space::new().height(Length::FillPortion(2))),
         )
         .width(Length::Fill)
         .align_x(Alignment::Center);

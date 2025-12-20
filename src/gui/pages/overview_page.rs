@@ -46,7 +46,6 @@ use iced::widget::text::LineHeight;
 use iced::widget::tooltip::Position;
 use iced::widget::{
     Button, Column, Container, Row, Rule, Scrollable, Space, Text, Tooltip, button,
-    horizontal_space, vertical_space,
 };
 use iced::{Alignment, Element, Font, Length, Padding};
 use std::fmt::Write;
@@ -165,12 +164,12 @@ fn body_no_packets<'a>(
         .padding(10)
         .spacing(10)
         .align_x(Alignment::Center)
-        .push(vertical_space())
+        .push(Space::new().height(Length::Fill))
         .push(icon_text)
-        .push(Space::with_height(15))
+        .push(Space::new().height(15))
         .push(nothing_to_see_text)
         .push(Text::new(dots.to_owned()).font(font).size(50))
-        .push(Space::with_height(FillPortion(2)))
+        .push(Space::new().height(FillPortion(2)))
 }
 
 fn body_pcap_error<'a>(
@@ -188,12 +187,12 @@ fn body_pcap_error<'a>(
         .padding(10)
         .spacing(10)
         .align_x(Alignment::Center)
-        .push(vertical_space())
+        .push(Space::new().height(Length::Fill))
         .push(Icon::Error.to_text().size(60))
-        .push(Space::with_height(15))
+        .push(Space::new().height(15))
         .push(error_text)
         .push(Text::new(dots.to_owned()).font(font).size(50))
-        .push(Space::with_height(FillPortion(2)))
+        .push(Space::new().height(FillPortion(2)))
 }
 
 fn row_report<'a>(sniffer: &Sniffer) -> Row<'a, Message, StyleType> {
@@ -266,7 +265,7 @@ fn col_host<'a>(sniffer: &Sniffer) -> Column<'a, Message, StyleType> {
     }
 
     if entries.len() >= 30 {
-        scroll_host = scroll_host.push(Space::with_height(25)).push(
+        scroll_host = scroll_host.push(Space::new().height(25)).push(
             Text::new(only_top_30_items_translation(language))
                 .font(font)
                 .align_x(Alignment::Center),
@@ -284,7 +283,7 @@ fn col_host<'a>(sniffer: &Sniffer) -> Column<'a, Message, StyleType> {
                         .class(TextType::Title)
                         .size(FONT_SIZE_TITLE),
                 )
-                .push(horizontal_space())
+                .push(Space::new().width(Length::Fill))
                 .push(sort_arrows(
                     sniffer.conf.host_sort_type,
                     Message::HostSortSelection,
@@ -334,7 +333,7 @@ fn col_service<'a>(sniffer: &Sniffer) -> Column<'a, Message, StyleType> {
     }
 
     if entries.len() >= 30 {
-        scroll_service = scroll_service.push(Space::with_height(25)).push(
+        scroll_service = scroll_service.push(Space::new().height(25)).push(
             Text::new(only_top_30_items_translation(language))
                 .font(font)
                 .align_x(Alignment::Center),
@@ -352,7 +351,7 @@ fn col_service<'a>(sniffer: &Sniffer) -> Column<'a, Message, StyleType> {
                         .class(TextType::Title)
                         .size(FONT_SIZE_TITLE),
                 )
-                .push(horizontal_space())
+                .push(Space::new().width(Length::Fill))
                 .push(sort_arrows(
                     sniffer.conf.service_sort_type,
                     Message::ServiceSortSelection,
@@ -403,7 +402,7 @@ pub fn host_bar<'a>(
                             })
                             .font(font),
                         )
-                        .push(horizontal_space())
+                        .push(Space::new().width(Length::Fill))
                         .push(
                             Text::new(
                                 data_repr
@@ -436,7 +435,7 @@ pub fn service_bar<'a>(
                 .push(
                     Row::new()
                         .push(Text::new(service.to_string()).font(font))
-                        .push(horizontal_space())
+                        .push(Space::new().width(Length::Fill))
                         .push(
                             Text::new(data_repr.formatted_string(data_info.tot_data(data_repr)))
                                 .font(font),
