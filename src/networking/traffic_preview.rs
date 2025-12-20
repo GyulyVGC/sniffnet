@@ -78,10 +78,13 @@ fn handle_devices_and_previews(
         }
         data.insert(dev_name.clone(), 0);
         traffic_preview.data.push((my_dev.clone(), 0));
-        let pcap_tx = pcap_tx.clone();
         let capture_source = CaptureSource::Device(my_dev);
         let capture_context = CaptureContext::new(&capture_source, None, &Filters::default());
         let my_link_type = capture_context.my_link_type();
+        if !my_link_type.is_supported() {
+            continue;
+        }
+        let pcap_tx = pcap_tx.clone();
         let thread_name = format!("thread_traffic_preview_{dev_name}");
         let dev_info = DevInfo {
             name: dev_name,
@@ -108,9 +111,6 @@ fn packet_stream(
     tx: &std::sync::mpsc::SyncSender<(Result<PacketOwned, pcap::Error>, Option<pcap::Stat>)>,
     dev_info: &DevInfo,
 ) {
-    if !dev_info.my_link_type.is_supported() {
-        return;
-    }
     loop {
         let packet_res = cap.next_packet();
         let packet_owned = packet_res.map(|p| PacketOwned {
