@@ -92,11 +92,11 @@ impl ScrollbarType {
             horizontal_rail,
             gap: None,
             auto_scroll: AutoScroll {
-            background: Background::Color(Color::TRANSPARENT),
-            border: Default::default(),
-            shadow: Default::default(),
-            icon: Default::default(),
-        },
+                background: Background::Color(Color::TRANSPARENT),
+                border: Default::default(),
+                shadow: Default::default(),
+                icon: Default::default(),
+            },
         }
     }
 
