@@ -50,7 +50,7 @@ pub fn initial_page(sniffer: &Sniffer) -> Container<'_, Message, StyleType> {
     let col_checkboxes = Column::new()
         .spacing(10)
         .push(get_filters_group(&sniffer.conf.filters, font, language))
-        .push_maybe(get_export_pcap_group_maybe(
+        .push(get_export_pcap_group_maybe(
             sniffer.conf.capture_source_picklist,
             &sniffer.conf.export_pcap,
             language,
@@ -194,9 +194,9 @@ fn get_col_adapter(sniffer: &Sniffer, font: Font) -> Column<'_, Message, StyleTy
                                             .class(TextType::Subtitle)
                                             .size(FONT_SIZE_SUBTITLE),
                                     )
-                                    .push_maybe(subtitle.map(|sub| Text::new(sub).font(font)))
-                                    .push_maybe(addresses_row)
-                                    .push_maybe(if chart.max_packets > 0.0 {
+                                    .push(subtitle.map(|sub| Text::new(sub).font(font)))
+                                    .push(addresses_row)
+                                    .push(if chart.max_packets > 0.0 {
                                         Some(chart.view())
                                     } else {
                                         None

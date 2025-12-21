@@ -160,7 +160,7 @@ impl TrafficChart {
                 Row::new()
                     .padding(Padding::new(8.0).bottom(15).left(55).right(25))
                     .width(Length::Fill)
-                    .push_maybe(if self.no_more_packets {
+                    .push(if self.no_more_packets {
                         Some(
                             iced::widget::Text::new(get_formatted_timestamp(ts_1))
                                 .font(font)
@@ -179,7 +179,7 @@ impl TrafficChart {
         };
         Column::new()
             .push(ChartWidget::new(self))
-            .push_maybe(x_labels)
+            .push(x_labels)
             .into()
     }
 

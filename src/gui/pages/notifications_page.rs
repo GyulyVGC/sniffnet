@@ -204,7 +204,7 @@ fn data_notification_log<'a>(
             logged_notification.id,
             logged_notification.is_expanded,
         ))
-        .push_maybe(data_notification_extra(logged_notification, font, language));
+        .push(data_notification_extra(logged_notification, font, language));
     Container::new(content_and_extra)
         .width(Length::Fill)
         .padding(15)
