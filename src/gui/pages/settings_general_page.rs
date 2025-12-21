@@ -97,7 +97,7 @@ fn column_all_general_setting(sniffer: &Sniffer, font: Font) -> Column<'_, Messa
 fn row_language_scale_factor<'a>(
     language: Language,
     font: Font,
-    scale_factor: f64,
+    scale_factor: f32,
 ) -> Row<'a, Message, StyleType> {
     Row::new()
         .align_y(Alignment::Start)
@@ -172,10 +172,9 @@ fn language_picklist<'a>(language: Language, font: Font) -> Container<'a, Messag
 fn scale_factor_slider<'a>(
     language: Language,
     font: Font,
-    scale_factor: f64,
+    scale_factor: f32,
 ) -> Container<'a, Message, StyleType> {
-    #[allow(clippy::cast_possible_truncation)]
-    let slider_width = 130.0 / scale_factor as f32;
+    let slider_width = 130.0 / scale_factor;
     let slider_val = scale_factor.log(3.0);
     Container::new(
         Column::new()

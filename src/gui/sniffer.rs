@@ -424,7 +424,7 @@ impl Sniffer {
                 self.conf.settings.color_gradient = gradient_type;
             }
             Message::ChangeScaleFactor(slider_val) => {
-                let scale_factor_str = format!("{:.1}", 3.0_f64.powf(slider_val));
+                let scale_factor_str = format!("{:.1}", 3.0_f32.powf(slider_val));
                 self.conf.settings.scale_factor = scale_factor_str.parse().unwrap_or(1.0);
             }
             Message::WindowMoved(x, y) => {
@@ -759,7 +759,7 @@ impl Sniffer {
         self.conf.settings.style
     }
 
-    pub fn scale_factor(&self) -> f64 {
+    pub fn scale_factor(&self) -> f32 {
         self.conf.settings.scale_factor
     }
 

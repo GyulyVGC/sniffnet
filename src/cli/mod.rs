@@ -55,7 +55,7 @@ pub fn handle_cli_args() -> Task<Message> {
         std::process::exit(0);
     }
 
-    let mut boot_task_chain = window::get_latest()
+    let mut boot_task_chain = window::latest()
         .map(Message::StartApp)
         .chain(Task::done(Message::Periodic));
     if let Some(adapter) = args.adapter {

@@ -214,7 +214,7 @@ fn get_palette_rule<'a>(
     palette: Palette,
     buttons_color: Color,
 ) -> Container<'a, Message, StyleType> {
-    let height = 25;
+    let height = 25.0;
 
     Container::new(
         Row::new()
@@ -242,7 +242,7 @@ fn get_palette_rule<'a>(
     .align_x(Alignment::Center)
     .align_y(Alignment::Center)
     .width(300.0 + 2.0 * BORDER_WIDTH)
-    .height(f32::from(height) + 1.7 * BORDER_WIDTH)
+    .height(height + 1.7 * BORDER_WIDTH)
     .class(ContainerType::Palette)
 }
 
