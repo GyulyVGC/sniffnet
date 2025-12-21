@@ -110,6 +110,7 @@ impl ButtonType {
                 },
                 _ => Shadow::default(),
             },
+            snap: false,
         }
     }
 
@@ -188,6 +189,7 @@ impl ButtonType {
                 ButtonType::SortArrowActive | ButtonType::SortArrows => colors.secondary,
                 _ => colors.text_body,
             },
+            snap: false,
         }
     }
 
@@ -224,6 +226,7 @@ impl ButtonType {
                     ..colors.text_headers
                 },
                 shadow: Shadow::default(),
+                snap: false,
             },
             ButtonType::Standard => Style {
                 background: Some(Background::Color(Color {
@@ -243,6 +246,7 @@ impl ButtonType {
                     ..colors.text_body
                 },
                 shadow: Shadow::default(),
+                snap: false,
             },
             _ => self.active(style),
         }

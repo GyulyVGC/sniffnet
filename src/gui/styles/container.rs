@@ -101,6 +101,7 @@ impl ContainerType {
                 },
             },
             shadow: Shadow::default(),
+            snap: false,
         }
     }
 }
