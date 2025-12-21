@@ -3,7 +3,7 @@
 #![allow(clippy::module_name_repetitions)]
 
 use iced::widget::pick_list::{Catalog, Status, Style};
-use iced::{Background, Border, Color};
+use iced::{Background, Border, Color, Shadow};
 
 use crate::StyleType;
 use crate::gui::styles::style_constants::BORDER_WIDTH;
@@ -32,6 +32,7 @@ impl PicklistType {
             },
             selected_text_color: colors.text_body,
             selected_background: Background::Color(mix_colors(ext.buttons_color, colors.primary)),
+            shadow: Shadow::default(),
         }
     }
 }
@@ -96,7 +97,7 @@ impl Catalog for StyleType {
 
     fn style(&self, class: &<Self as Catalog>::Class<'_>, status: Status) -> Style {
         match status {
-            Status::Active | Status::Opened => class.active(self),
+            Status::Active | Status::Opened { .. } => class.active(self),
             Status::Hovered => class.hovered(self),
         }
     }
