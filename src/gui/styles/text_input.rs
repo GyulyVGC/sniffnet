@@ -186,7 +186,7 @@ impl Catalog for StyleType {
             Status::Active => class.active(self),
             Status::Hovered => class.hovered(self),
             Status::Disabled => class.disabled(self),
-            Status::Focused => class.focused(self),
+            Status::Focused { .. } => class.focused(self),
         }
     }
 }
