@@ -3,7 +3,7 @@
 #![allow(clippy::module_name_repetitions)]
 
 use iced::widget::container;
-use iced::widget::scrollable::{Catalog, Rail, Status, Style};
+use iced::widget::scrollable::{AutoScroll, Catalog, Rail, Status, Style};
 use iced::widget::scrollable::{Scrollbar, Scroller};
 use iced::{Background, Border, Color};
 
@@ -25,10 +25,10 @@ impl ScrollbarType {
         let rail = Rail {
             background: Some(Background::Color(Color::TRANSPARENT)),
             scroller: Scroller {
-                color: Color {
+                background: Background::Color(Color {
                     a: ext.alpha_round_borders,
                     ..ext.buttons_color
-                },
+                }),
                 border: Border {
                     radius: BORDER_ROUNDED_RADIUS.into(),
                     width: 0.0,
@@ -47,6 +47,12 @@ impl ScrollbarType {
             vertical_rail: rail,
             horizontal_rail: rail,
             gap: None,
+            auto_scroll: AutoScroll {
+                background: Background::Color(Color::TRANSPARENT),
+                border: Default::default(),
+                shadow: Default::default(),
+                icon: Default::default(),
+            },
         }
     }
 
@@ -62,11 +68,11 @@ impl ScrollbarType {
                     ..ext.buttons_color
                 })),
                 scroller: Scroller {
-                    color: if is_over {
+                    background: Background::Color(if is_over {
                         colors.secondary
                     } else {
                         mix_colors(colors.secondary, ext.buttons_color)
-                    },
+                    }),
                     border: Border {
                         radius: BORDER_ROUNDED_RADIUS.into(),
                         width: 0.0,
@@ -85,6 +91,12 @@ impl ScrollbarType {
             vertical_rail,
             horizontal_rail,
             gap: None,
+            auto_scroll: AutoScroll {
+            background: Background::Color(Color::TRANSPARENT),
+            border: Default::default(),
+            shadow: Default::default(),
+            icon: Default::default(),
+        },
         }
     }
 
@@ -102,10 +114,11 @@ impl Catalog for StyleType {
 
     fn style(&self, class: &Self::Class<'_>, status: Status) -> Style {
         match status {
-            Status::Active => class.active(self),
+            Status::Active { .. } => class.active(self),
             Status::Hovered {
                 is_horizontal_scrollbar_hovered,
                 is_vertical_scrollbar_hovered,
+                ..
             } => class.hovered(
                 self,
                 is_horizontal_scrollbar_hovered,
@@ -114,6 +127,7 @@ impl Catalog for StyleType {
             Status::Dragged {
                 is_horizontal_scrollbar_dragged,
                 is_vertical_scrollbar_dragged,
+                ..
             } => class.hovered(
                 self,
                 is_horizontal_scrollbar_dragged,
