@@ -57,7 +57,6 @@ pub fn main() -> iced::Result {
     }
 
     let conf = CONF.clone();
-    let boot_task_chain = handle_cli_args();
 
     #[cfg(debug_assertions)]
     {
@@ -75,7 +74,7 @@ pub fn main() -> iced::Result {
     let ConfigWindow { size, position, .. } = conf.window;
 
     application(
-        move || (Sniffer::new(conf), boot_task_chain),
+        move || (Sniffer::new(conf.clone()), handle_cli_args()),
         Sniffer::update,
         Sniffer::view,
     )
@@ -102,7 +101,7 @@ pub fn main() -> iced::Result {
         resizable: true,
         decorations: true,
         transparent: false,
-        icon: window::icon::from_file_data(WINDOW_ICON, Some(ImageFormat::Png)).ok(),
+        icon: window::icon::from_file_data(WINDOW_ICON, None).ok(),
         #[cfg(target_os = "linux")]
         platform_specific: PlatformSpecific {
             application_id: String::from(SNIFFNET_LOWERCASE),

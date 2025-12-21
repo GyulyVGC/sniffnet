@@ -5,7 +5,7 @@
 use iced::widget::container;
 use iced::widget::scrollable::{AutoScroll, Catalog, Rail, Status, Style};
 use iced::widget::scrollable::{Scrollbar, Scroller};
-use iced::{Background, Border, Color};
+use iced::{Background, Border, Color, Shadow};
 
 use crate::StyleType;
 use crate::gui::styles::style_constants::BORDER_ROUNDED_RADIUS;
@@ -49,9 +49,9 @@ impl ScrollbarType {
             gap: None,
             auto_scroll: AutoScroll {
                 background: Background::Color(Color::TRANSPARENT),
-                border: Default::default(),
-                shadow: Default::default(),
-                icon: Default::default(),
+                border: Border::default(),
+                shadow: Shadow::default(),
+                icon: Color::default(),
             },
         }
     }
@@ -93,9 +93,9 @@ impl ScrollbarType {
             gap: None,
             auto_scroll: AutoScroll {
                 background: Background::Color(Color::TRANSPARENT),
-                border: Default::default(),
-                shadow: Default::default(),
-                icon: Default::default(),
+                border: Border::default(),
+                shadow: Shadow::default(),
+                icon: Color::default(),
             },
         }
     }

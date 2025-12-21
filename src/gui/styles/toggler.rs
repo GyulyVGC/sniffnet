@@ -83,9 +83,10 @@ impl Catalog for StyleType {
 
     fn style(&self, class: &Self::Class<'_>, status: Status) -> Style {
         match status {
-            Status::Active { is_toggled } => class.active(self, is_toggled),
+            Status::Active { is_toggled } | Status::Disabled { is_toggled } => {
+                class.active(self, is_toggled)
+            }
             Status::Hovered { is_toggled } => class.hovered(self, is_toggled),
-            Status::Disabled { is_toggled } => class.active(self, is_toggled),
         }
     }
 }
