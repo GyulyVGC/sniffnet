@@ -6,6 +6,7 @@ use crate::gui::components::types::my_modal::MyModal;
 use crate::gui::pages::overview_page::{get_bars, get_bars_length, host_bar, service_bar};
 use crate::gui::pages::types::settings_page::SettingsPage;
 use crate::gui::styles::container::ContainerType;
+use crate::gui::styles::rule::RuleType;
 use crate::gui::styles::scrollbar::ScrollbarType;
 use crate::gui::styles::style_constants::FONT_SIZE_FOOTER;
 use crate::gui::styles::text::TextType;
@@ -32,7 +33,7 @@ use iced::Length::FillPortion;
 use iced::widget::scrollable::Direction;
 use iced::widget::text::LineHeight;
 use iced::widget::tooltip::Position;
-use iced::widget::{Column, Container, Row, Scrollable, Text, Tooltip, rule};
+use iced::widget::{Column, Container, Row, Scrollable, Text, Tooltip};
 use iced::widget::{Space, button};
 use iced::{Alignment, Font, Length, Padding};
 use std::cmp::max;
@@ -437,7 +438,7 @@ fn data_notification_extra<'a>(
     Some(
         Row::new()
             .push(hosts_col)
-            .push(Container::new(rule::vertical(30)).height(height))
+            .push(Container::new(RuleType::Standard.vertical(30)).height(height))
             .push(services_col),
     )
 }

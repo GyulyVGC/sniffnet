@@ -1,5 +1,5 @@
 use iced::widget::scrollable::Direction;
-use iced::widget::{Button, Column, Container, Row, Scrollable, Text, rule};
+use iced::widget::{Button, Column, Container, Row, Scrollable, Text};
 use iced::widget::{Space, button, lazy};
 use iced::{Alignment, Color, Element, Font, Length, Padding};
 
@@ -221,22 +221,22 @@ fn get_palette_rule<'a>(
             .push(
                 Row::new()
                     .width(120)
-                    .push(rule::horizontal(height).class(RuleType::PaletteColor(palette.primary))),
+                    .push(RuleType::PaletteColor(palette.primary).horizontal(height)),
             )
             .push(
-                Row::new().width(80).push(
-                    rule::horizontal(height).class(RuleType::PaletteColor(palette.secondary)),
-                ),
+                Row::new()
+                    .width(80)
+                    .push(RuleType::PaletteColor(palette.secondary).horizontal(height)),
             )
             .push(
                 Row::new()
                     .width(60)
-                    .push(rule::horizontal(height).class(RuleType::PaletteColor(palette.outgoing))),
+                    .push(RuleType::PaletteColor(palette.outgoing).horizontal(height)),
             )
             .push(
                 Row::new()
                     .width(40)
-                    .push(rule::horizontal(height).class(RuleType::PaletteColor(buttons_color))),
+                    .push(RuleType::PaletteColor(buttons_color).horizontal(height)),
             ),
     )
     .align_x(Alignment::Center)

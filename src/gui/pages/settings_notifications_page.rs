@@ -1,5 +1,5 @@
 use iced::widget::scrollable::Direction;
-use iced::widget::{Button, Slider, rule};
+use iced::widget::{Button, Slider};
 use iced::widget::{Checkbox, Column, Container, Row, Scrollable, Space, Text, TextInput};
 use iced::{Alignment, Font, Length, Padding};
 
@@ -8,6 +8,7 @@ use crate::gui::components::tab::get_settings_tabs;
 use crate::gui::pages::types::settings_page::SettingsPage;
 use crate::gui::styles::button::ButtonType;
 use crate::gui::styles::container::ContainerType;
+use crate::gui::styles::rule::RuleType;
 use crate::gui::styles::scrollbar::ScrollbarType;
 use crate::gui::styles::style_constants::{FONT_SIZE_FOOTER, FONT_SIZE_SUBTITLE, FONT_SIZE_TITLE};
 use crate::gui::styles::text::TextType;
@@ -95,7 +96,8 @@ pub fn settings_notifications_page<'a>(sniffer: &Sniffer) -> Container<'a, Messa
                     font,
                 ))
                 .push(
-                    Container::new(rule::horizontal(10)).padding(Padding::ZERO.left(40).right(40)),
+                    Container::new(RuleType::Standard.horizontal(10))
+                        .padding(Padding::ZERO.left(40).right(40)),
                 )
                 .push(get_remote_notifications(
                     &notifications.remote_notifications,

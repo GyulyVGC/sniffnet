@@ -4,7 +4,7 @@ use iced::widget::scrollable::Direction;
 use iced::widget::text::LineHeight;
 use iced::widget::text_input::Side;
 use iced::widget::tooltip::Position;
-use iced::widget::{Button, Column, Container, Row, Scrollable, Text, TextInput, rule};
+use iced::widget::{Button, Column, Container, Row, Scrollable, Text, TextInput};
 use iced::widget::{ComboBox, Space, Toggler, Tooltip, button, combo_box, text_input};
 use iced::{Alignment, Font, Length, Padding, Pixels, alignment};
 
@@ -13,6 +13,7 @@ use crate::gui::components::types::my_modal::MyModal;
 use crate::gui::pages::overview_page::{get_bars, get_bars_length};
 use crate::gui::styles::button::ButtonType;
 use crate::gui::styles::container::ContainerType;
+use crate::gui::styles::rule::RuleType;
 use crate::gui::styles::scrollbar::ScrollbarType;
 use crate::gui::styles::style_constants::{FONT_SIZE_FOOTER, FONT_SIZE_SUBTITLE, ICONS};
 use crate::gui::styles::text::TextType;
@@ -77,7 +78,7 @@ pub fn inspect_page(sniffer: &Sniffer) -> Container<'_, Message, StyleType> {
             sniffer.conf.data_repr,
         ))
         .push(Space::new().height(4))
-        .push(rule::horizontal(5))
+        .push(RuleType::Standard.horizontal(5))
         .push(report);
 
     body = body
@@ -145,13 +146,13 @@ fn report<'a>(sniffer: &Sniffer) -> Column<'a, Message, StyleType> {
                 .height(Length::Fill)
                 .width(Length::Fill),
             )
-            .push(rule::horizontal(5))
+            .push(RuleType::Standard.horizontal(5))
             .push(get_agglomerates_row(
                 font,
                 agglomerate,
                 sniffer.conf.data_repr,
             ))
-            .push(rule::horizontal(5))
+            .push(RuleType::Standard.horizontal(5))
             .push(get_change_page_row(
                 font,
                 language,

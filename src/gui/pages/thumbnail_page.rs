@@ -1,12 +1,13 @@
 use std::cmp::min;
 use std::net::IpAddr;
 
-use iced::widget::{Column, Container, Row, Space, Text, rule};
+use iced::widget::{Column, Container, Row, Space, Text};
 use iced::{Alignment, Font, Length};
 
 use crate::chart::types::donut_chart::donut_chart;
 use crate::countries::country_utils::get_flag_tooltip;
 use crate::gui::sniffer::Sniffer;
+use crate::gui::styles::rule::RuleType;
 use crate::gui::styles::style_constants::FONT_SIZE_FOOTER;
 use crate::gui::styles::types::style_type::StyleType;
 use crate::gui::types::message::Message;
@@ -60,7 +61,6 @@ pub fn thumbnail_page(sniffer: &Sniffer) -> Container<'_, Message, StyleType> {
             font,
             sniffer.thumbnail,
         ))
-        // .push(Rule::vertical(10))
         .push(
             Container::new(sniffer.traffic_chart.view())
                 .height(Length::Fill)
@@ -77,7 +77,7 @@ pub fn thumbnail_page(sniffer: &Sniffer) -> Container<'_, Message, StyleType> {
             font,
             sniffer.conf.host_sort_type,
         ))
-        .push(rule::vertical(10))
+        .push(RuleType::Standard.vertical(10))
         .push(service_col(
             info_traffic,
             data_repr,
@@ -85,10 +85,7 @@ pub fn thumbnail_page(sniffer: &Sniffer) -> Container<'_, Message, StyleType> {
             sniffer.conf.service_sort_type,
         ));
 
-    let content = Column::new()
-        .push(charts)
-        // .push(Container::new(Rule::horizontal(10)).padding([0, 5]))
-        .push(report);
+    let content = Column::new().push(charts).push(report);
 
     Container::new(content)
 }

@@ -1,6 +1,6 @@
 use iced::widget::text::LineHeight;
 use iced::widget::tooltip::Position;
-use iced::widget::{Column, Container, PickList, Row, Slider, Space, Text, Tooltip, button, rule};
+use iced::widget::{Column, Container, PickList, Row, Slider, Space, Text, Tooltip, button};
 use iced::{Alignment, Font, Length, Padding};
 
 use crate::gui::components::button::{button_open_file, row_open_link_tooltip};
@@ -9,6 +9,7 @@ use crate::gui::pages::settings_notifications_page::settings_header;
 use crate::gui::pages::types::settings_page::SettingsPage;
 use crate::gui::styles::button::ButtonType;
 use crate::gui::styles::container::ContainerType;
+use crate::gui::styles::rule::RuleType;
 use crate::gui::styles::style_constants::FONT_SIZE_SUBTITLE;
 use crate::gui::styles::text::TextType;
 use crate::gui::types::message::Message;
@@ -70,7 +71,7 @@ fn column_all_general_setting(sniffer: &Sniffer, font: Font) -> Column<'_, Messa
         .align_x(Alignment::Center)
         .padding([5, 10])
         .push(row_language_scale_factor(language, font, scale_factor))
-        .push(rule::horizontal(25));
+        .push(RuleType::Standard.horizontal(25));
 
     if !is_editable {
         column = column
@@ -103,9 +104,9 @@ fn row_language_scale_factor<'a>(
         .align_y(Alignment::Start)
         .height(100)
         .push(language_picklist(language, font))
-        .push(rule::vertical(25))
+        .push(RuleType::Standard.vertical(25))
         .push(scale_factor_slider(language, font, scale_factor))
-        .push(rule::vertical(25))
+        .push(RuleType::Standard.vertical(25))
         .push(need_help(language, font))
 }
 

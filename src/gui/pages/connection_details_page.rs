@@ -3,6 +3,7 @@ use std::net::IpAddr;
 use crate::countries::country_utils::{get_computer_tooltip, get_flag_tooltip};
 use crate::gui::components::button::button_hide;
 use crate::gui::styles::container::ContainerType;
+use crate::gui::styles::rule::RuleType;
 use crate::gui::styles::scrollbar::ScrollbarType;
 use crate::gui::styles::style_constants::FONT_SIZE_TITLE;
 use crate::gui::styles::text::TextType;
@@ -39,7 +40,7 @@ use crate::{Language, Protocol, Sniffer, StyleType};
 use iced::alignment::Vertical;
 use iced::widget::scrollable::Direction;
 use iced::widget::tooltip::Position;
-use iced::widget::{Column, Container, Row, Space, Text, Tooltip, rule};
+use iced::widget::{Column, Container, Row, Space, Text, Tooltip};
 use iced::widget::{Scrollable, button};
 use iced::{Alignment, Font, Length, Padding};
 
@@ -276,7 +277,7 @@ fn get_host_info_col<'a>(
     let mut host_info_col = Column::new().spacing(4);
     if r_dns.parse::<IpAddr>().is_err() || (!host.asn.name.is_empty() && !host.asn.code.is_empty())
     {
-        host_info_col = host_info_col.push(rule::horizontal(10.0));
+        host_info_col = host_info_col.push(RuleType::Standard.horizontal(10));
     }
     if r_dns.parse::<IpAddr>().is_err() {
         host_info_col = host_info_col.push(TextType::highlighted_subtitle_with_desc(
@@ -352,7 +353,7 @@ fn get_src_or_dest_col<'a>(
                 .width(Length::Fill)
                 .align_x(Alignment::Center),
         )
-        .push(rule::horizontal(10.0))
+        .push(RuleType::Standard.horizontal(10))
         .push(
             Row::new()
                 .spacing(10)
