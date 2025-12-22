@@ -67,11 +67,9 @@ pub fn footer<'a>(
                         )
                         .push(Text::new("by ").size(FONT_SIZE_FOOTER))
                         .push(
-                            rich_text![
-                                span("Giuliano Bellini").underline(true) // .link(Message::OpenWebPage(WebPage::MyGitHub)),
-                            ]
-                            .on_link_click(|()| Message::OpenWebPage(WebPage::MyGitHub))
-                            .size(FONT_SIZE_FOOTER),
+                            rich_text![span("Giuliano Bellini").underline(true).link(())]
+                                .on_link_click(|()| Message::OpenWebPage(WebPage::MyGitHub))
+                                .size(FONT_SIZE_FOOTER),
                         ),
                 ),
         );
