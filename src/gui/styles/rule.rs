@@ -35,7 +35,7 @@ impl RuleType {
             },
             radius: 0.0.into(),
             fill_mode: FillMode::Full,
-            snap: false,
+            snap: true,
         }
     }
 
