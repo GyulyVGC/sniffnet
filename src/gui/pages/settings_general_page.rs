@@ -144,6 +144,7 @@ fn language_picklist<'a>(language: Language) -> Container<'a, Message, StyleType
                 Some(language),
                 Message::LanguageSelection,
             )
+            .menu_height(200)
             .padding([2, 7]),
         )
         .push(Space::new().height(Length::Fill));

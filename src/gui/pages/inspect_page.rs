@@ -458,6 +458,10 @@ fn filter_combobox(
             TextInputType::Standard
         });
 
+    if combo_box_state.options().len() >= 9 {
+        combobox = combobox.menu_height(200);
+    }
+
     if !is_filter_active {
         combobox = combobox.icon(text_input::Icon {
             font: ICONS,
