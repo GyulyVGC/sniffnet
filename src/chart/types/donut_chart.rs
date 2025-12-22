@@ -1,12 +1,12 @@
 use crate::gui::styles::donut::Catalog;
-use crate::gui::styles::style_constants::{FONT_SIZE_FOOTER, FONT_SIZE_SUBTITLE};
+use crate::gui::styles::style_constants::{FONT_SIZE_FOOTER, FONT_SIZE_SUBTITLE, SARASA_MONO};
 use crate::networking::types::data_representation::DataRepr;
 use iced::alignment::Vertical;
 use iced::widget::canvas::path::Arc;
 use iced::widget::canvas::{Frame, Text};
 use iced::widget::text::Alignment;
 use iced::widget::{Canvas, canvas};
-use iced::{Font, Length, Radians, Renderer, mouse};
+use iced::{Length, Radians, Renderer, mouse};
 use std::f32::consts;
 
 pub struct DonutChart {
@@ -14,7 +14,6 @@ pub struct DonutChart {
     incoming: u128,
     outgoing: u128,
     dropped: u128,
-    font: Font,
     thumbnail: bool,
 }
 
@@ -24,7 +23,6 @@ impl DonutChart {
         incoming: u128,
         outgoing: u128,
         dropped: u128,
-        font: Font,
         thumbnail: bool,
     ) -> Self {
         Self {
@@ -32,7 +30,6 @@ impl DonutChart {
             incoming,
             outgoing,
             dropped,
-            font,
             thumbnail,
         }
     }
@@ -126,7 +123,7 @@ impl<Message, Theme: Catalog> canvas::Program<Message, Theme> for DonutChart {
                 FONT_SIZE_SUBTITLE
             }
             .into(),
-            font: self.font,
+            font: SARASA_MONO,
             align_x: Alignment::Center,
             align_y: Vertical::Center,
             ..Default::default()
@@ -141,7 +138,6 @@ pub fn donut_chart<Message, Theme: Catalog>(
     incoming: u128,
     outgoing: u128,
     dropped: u128,
-    font: Font,
     thumbnail: bool,
 ) -> Canvas<DonutChart, Message, Theme, Renderer> {
     let size = if thumbnail {
@@ -150,7 +146,7 @@ pub fn donut_chart<Message, Theme: Catalog>(
         Length::Fixed(110.0)
     };
     iced::widget::canvas(DonutChart::new(
-        data_repr, incoming, outgoing, dropped, font, thumbnail,
+        data_repr, incoming, outgoing, dropped, thumbnail,
     ))
     .width(size)
     .height(size)

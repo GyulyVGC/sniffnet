@@ -1,7 +1,7 @@
 use iced::widget::text::LineHeight;
 use iced::widget::tooltip::Position;
 use iced::widget::{Column, Container, PickList, Row, Slider, Space, Text, Tooltip, button};
-use iced::{Alignment, Font, Length, Padding};
+use iced::{Alignment, Length, Padding};
 
 use crate::gui::components::button::{button_open_file, row_open_link_tooltip};
 use crate::gui::components::tab::get_settings_tabs;
@@ -29,26 +29,18 @@ use crate::{Language, Sniffer, StyleType};
 
 pub fn settings_general_page(sniffer: &Sniffer) -> Container<'_, Message, StyleType> {
     let Settings {
-        style,
         language,
         color_gradient,
         ..
     } = sniffer.conf.settings;
-    let font = style.get_extension().font;
-    let font_headers = style.get_extension().font_headers;
 
     let content = Column::new()
         .align_x(Alignment::Center)
         .width(Length::Fill)
-        .push(settings_header(
-            font,
-            font_headers,
-            color_gradient,
-            language,
-        ))
-        .push(get_settings_tabs(SettingsPage::General, font, language))
+        .push(settings_header(color_gradient, language))
+        .push(get_settings_tabs(SettingsPage::General, language))
         .push(Space::new().height(10))
-        .push(column_all_general_setting(sniffer, font));
+        .push(column_all_general_setting(sniffer));
 
     Container::new(content)
         .height(400)
@@ -56,7 +48,7 @@ pub fn settings_general_page(sniffer: &Sniffer) -> Container<'_, Message, StyleT
         .class(ContainerType::Modal)
 }
 
-fn column_all_general_setting(sniffer: &Sniffer, font: Font) -> Column<'_, Message, StyleType> {
+fn column_all_general_setting(sniffer: &Sniffer) -> Column<'_, Message, StyleType> {
     let Settings {
         language,
         scale_factor,
@@ -70,13 +62,13 @@ fn column_all_general_setting(sniffer: &Sniffer, font: Font) -> Column<'_, Messa
     let mut column = Column::new()
         .align_x(Alignment::Center)
         .padding([5, 10])
-        .push(row_language_scale_factor(language, font, scale_factor))
+        .push(row_language_scale_factor(language, scale_factor))
         .push(RuleType::Standard.horizontal(25));
 
     if !is_editable {
         column = column
             .push(
-                Container::new(Text::new(params_not_editable_translation(language)).font(font))
+                Container::new(Text::new(params_not_editable_translation(language)))
                     .padding(10.0)
                     .class(ContainerType::Badge),
             )
@@ -86,7 +78,6 @@ fn column_all_general_setting(sniffer: &Sniffer, font: Font) -> Column<'_, Messa
     column = column.push(mmdb_settings(
         is_editable,
         language,
-        font,
         &mmdb_country,
         &mmdb_asn,
         &sniffer.mmdb_readers,
@@ -97,20 +88,19 @@ fn column_all_general_setting(sniffer: &Sniffer, font: Font) -> Column<'_, Messa
 
 fn row_language_scale_factor<'a>(
     language: Language,
-    font: Font,
     scale_factor: f32,
 ) -> Row<'a, Message, StyleType> {
     Row::new()
         .align_y(Alignment::Start)
         .height(100)
-        .push(language_picklist(language, font))
+        .push(language_picklist(language))
         .push(RuleType::Standard.vertical(25))
-        .push(scale_factor_slider(language, font, scale_factor))
+        .push(scale_factor_slider(language, scale_factor))
         .push(RuleType::Standard.vertical(25))
-        .push(need_help(language, font))
+        .push(need_help(language))
 }
 
-fn language_picklist<'a>(language: Language, font: Font) -> Container<'a, Message, StyleType> {
+fn language_picklist<'a>(language: Language) -> Container<'a, Message, StyleType> {
     let mut flag_row = Row::new()
         .align_y(Alignment::Center)
         .spacing(10)
@@ -121,7 +111,6 @@ fn language_picklist<'a>(language: Language, font: Font) -> Container<'a, Messag
                 button(
                     Text::new("!")
                         .class(TextType::Danger)
-                        .font(font)
                         .align_y(Alignment::Center)
                         .align_x(Alignment::Center)
                         .size(15)
@@ -132,10 +121,7 @@ fn language_picklist<'a>(language: Language, font: Font) -> Container<'a, Messag
                 .height(20)
                 .width(20)
                 .class(ButtonType::Alert),
-                row_open_link_tooltip(
-                    "The selected language is not\nfully updated to version 1.4",
-                    font,
-                ),
+                row_open_link_tooltip("The selected language is not\nfully updated to version 1.4"),
                 Position::FollowCursor,
             )
             .class(ContainerType::Tooltip),
@@ -147,8 +133,7 @@ fn language_picklist<'a>(language: Language, font: Font) -> Container<'a, Messag
         .push(
             Text::new(language_translation(language))
                 .class(TextType::Subtitle)
-                .size(FONT_SIZE_SUBTITLE)
-                .font(font),
+                .size(FONT_SIZE_SUBTITLE),
         )
         .push(Space::new().height(Length::Fill))
         .push(flag_row)
@@ -159,8 +144,7 @@ fn language_picklist<'a>(language: Language, font: Font) -> Container<'a, Messag
                 Some(language),
                 Message::LanguageSelection,
             )
-            .padding([2, 7])
-            .font(font),
+            .padding([2, 7]),
         )
         .push(Space::new().height(Length::Fill));
 
@@ -172,7 +156,6 @@ fn language_picklist<'a>(language: Language, font: Font) -> Container<'a, Messag
 
 fn scale_factor_slider<'a>(
     language: Language,
-    font: Font,
     scale_factor: f32,
 ) -> Container<'a, Message, StyleType> {
     let slider_width = 130.0 / scale_factor;
@@ -183,11 +166,10 @@ fn scale_factor_slider<'a>(
             .push(
                 Text::new(zoom_translation(language))
                     .class(TextType::Subtitle)
-                    .size(FONT_SIZE_SUBTITLE)
-                    .font(font),
+                    .size(FONT_SIZE_SUBTITLE),
             )
             .push(Space::new().height(Length::Fill))
-            .push(Text::new(format!("{:.0}%", scale_factor * 100.0)).font(font))
+            .push(Text::new(format!("{:.0}%", scale_factor * 100.0)))
             .push(Space::new().height(5))
             .push(
                 Slider::new(-1.0..=1.0, slider_val, Message::ChangeScaleFactor)
@@ -201,14 +183,13 @@ fn scale_factor_slider<'a>(
     .align_y(Alignment::Center)
 }
 
-fn need_help<'a>(language: Language, font: Font) -> Container<'a, Message, StyleType> {
+fn need_help<'a>(language: Language) -> Container<'a, Message, StyleType> {
     let content = Column::new()
         .align_x(Alignment::Center)
         .push(
             Text::new(share_feedback_translation(language))
                 .class(TextType::Subtitle)
-                .size(FONT_SIZE_SUBTITLE)
-                .font(font),
+                .size(FONT_SIZE_SUBTITLE),
         )
         .push(Space::new().height(Length::Fill))
         .push(
@@ -225,7 +206,7 @@ fn need_help<'a>(language: Language, font: Font) -> Container<'a, Message, Style
                 .padding(Padding::new(2.0).top(5))
                 .height(40)
                 .width(60),
-                row_open_link_tooltip("GitHub Issues", font),
+                row_open_link_tooltip("GitHub Issues"),
                 Position::Right,
             )
             .gap(5)
@@ -242,7 +223,6 @@ fn need_help<'a>(language: Language, font: Font) -> Container<'a, Message, Style
 fn mmdb_settings<'a>(
     is_editable: bool,
     language: Language,
-    font: Font,
     country_path: &str,
     asn_path: &str,
     mmdb_readers: &MmdbReaders,
@@ -252,13 +232,11 @@ fn mmdb_settings<'a>(
         .align_x(Alignment::Center)
         .push(
             Text::new(mmdb_files_translation(language))
-                .font(font)
                 .class(TextType::Subtitle)
                 .size(FONT_SIZE_SUBTITLE),
         )
         .push(mmdb_selection_row(
             is_editable,
-            font,
             Message::CustomCountryDb,
             country_path,
             &mmdb_readers.country,
@@ -267,7 +245,6 @@ fn mmdb_settings<'a>(
         ))
         .push(mmdb_selection_row(
             is_editable,
-            font,
             Message::CustomAsnDb,
             asn_path,
             &mmdb_readers.asn,
@@ -278,7 +255,6 @@ fn mmdb_settings<'a>(
 
 fn mmdb_selection_row<'a>(
     is_editable: bool,
-    font: Font,
     message: fn(String) -> Message,
     custom_path: &str,
     mmdb_reader: &MmdbReader,
@@ -296,38 +272,33 @@ fn mmdb_selection_row<'a>(
 
     Row::new()
         .align_y(Alignment::Center)
-        .push(Text::new(format!("{caption}: ")).font(font))
+        .push(Text::new(format!("{caption}: ")))
         .push(
-            Text::new(get_path_termination_string(custom_path, 25))
-                .font(font)
-                .class(if is_error {
-                    TextType::Danger
-                } else {
-                    TextType::Standard
-                }),
+            Text::new(get_path_termination_string(custom_path, 25)).class(if is_error {
+                TextType::Danger
+            } else {
+                TextType::Standard
+            }),
         )
         .push(if custom_path.is_empty() {
             button_open_file(
                 custom_path.to_owned(),
                 FileInfo::Database,
                 language,
-                font,
                 is_editable,
                 message,
             )
         } else {
-            button_clear_mmdb(message, font, is_editable)
+            button_clear_mmdb(message, is_editable)
         })
 }
 
 fn button_clear_mmdb<'a>(
     message: fn(String) -> Message,
-    font: Font,
     is_editable: bool,
 ) -> Tooltip<'a, Message, StyleType> {
     let mut button = button(
         Text::new("×")
-            .font(font)
             .align_y(Alignment::Center)
             .align_x(Alignment::Center)
             .size(15)

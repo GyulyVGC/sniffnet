@@ -1,4 +1,3 @@
-use iced::Font;
 use iced::widget::Tooltip;
 use iced::widget::svg::Handle;
 use iced::widget::tooltip::Position;
@@ -322,7 +321,6 @@ pub fn get_flag_tooltip<'a>(
     country: Country,
     host_info: &DataInfoHost,
     language: Language,
-    font: Font,
     thumbnail: bool,
 ) -> Tooltip<'a, Message, StyleType> {
     let width = if thumbnail {
@@ -350,13 +348,9 @@ pub fn get_flag_tooltip<'a>(
     } else {
         ContainerType::Tooltip
     };
-    let mut tooltip = Tooltip::new(
-        content,
-        Text::new(actual_tooltip).font(font),
-        Position::FollowCursor,
-    )
-    .snap_within_viewport(true)
-    .class(tooltip_style);
+    let mut tooltip = Tooltip::new(content, Text::new(actual_tooltip), Position::FollowCursor)
+        .snap_within_viewport(true)
+        .class(tooltip_style);
 
     if width == FLAGS_WIDTH_SMALL {
         tooltip = tooltip.padding(3);
@@ -371,7 +365,6 @@ pub fn get_computer_tooltip<'a>(
     is_bogon: Option<&str>,
     traffic_type: TrafficType,
     language: Language,
-    font: Font,
 ) -> Tooltip<'a, Message, StyleType> {
     let content = Svg::new(Handle::from_memory(Vec::from(
         match (is_my_address, is_local, is_bogon, traffic_type) {
@@ -396,11 +389,7 @@ pub fn get_computer_tooltip<'a>(
         (false, false, None, TrafficType::Unicast) => unknown_translation(language).to_string(),
     };
 
-    Tooltip::new(
-        content,
-        Text::new(tooltip).font(font),
-        Position::FollowCursor,
-    )
-    .snap_within_viewport(true)
-    .class(ContainerType::Tooltip)
+    Tooltip::new(content, Text::new(tooltip), Position::FollowCursor)
+        .snap_within_viewport(true)
+        .class(ContainerType::Tooltip)
 }

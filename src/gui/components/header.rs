@@ -3,7 +3,7 @@
 use iced::widget::text::LineHeight;
 use iced::widget::tooltip::Position;
 use iced::widget::{Container, Row, Space, Text, Tooltip, button};
-use iced::{Alignment, Font, Length};
+use iced::{Alignment, Length};
 
 use crate::gui::components::tab::notifications_badge;
 use crate::gui::pages::types::settings_page::SettingsPage;
@@ -22,19 +22,14 @@ use crate::{Language, SNIFFNET_TITLECASE, StyleType};
 pub fn header(sniffer: &Sniffer) -> Container<'_, Message, StyleType> {
     let thumbnail = sniffer.thumbnail;
     let Settings {
-        style,
         language,
         color_gradient,
         ..
     } = sniffer.conf.settings;
-    let font = style.get_extension().font;
 
     if thumbnail {
-        let font_headers = style.get_extension().font_headers;
         let unread_notifications = sniffer.unread_notifications;
         return thumbnail_header(
-            font,
-            font_headers,
             language,
             color_gradient,
             unread_notifications,
@@ -57,7 +52,7 @@ pub fn header(sniffer: &Sniffer) -> Container<'_, Message, StyleType> {
             .padding([0, 20])
             .align_y(Alignment::Center)
             .push(if is_running {
-                Container::new(get_button_reset(font, language))
+                Container::new(get_button_reset(language))
             } else {
                 Container::new(Space::new().width(60))
             })
@@ -67,24 +62,24 @@ pub fn header(sniffer: &Sniffer) -> Container<'_, Message, StyleType> {
             .push(logo)
             .push(Space::new().width(20))
             .push(if is_running {
-                Container::new(get_button_freeze(font, language, sniffer.frozen, false))
+                Container::new(get_button_freeze(language, sniffer.frozen, false))
             } else {
                 Container::new(Space::new().width(40))
             })
             .push(if is_running {
-                Container::new(get_button_minimize(font, language, false))
+                Container::new(get_button_minimize(language, false))
             } else {
                 Container::new(Space::new().width(40))
             })
             .push(Space::new().width(Length::Fill))
-            .push(get_button_settings(font, language, last_opened_setting)),
+            .push(get_button_settings(language, last_opened_setting)),
     )
     .height(70)
     .align_y(Alignment::Center)
     .class(ContainerType::Gradient(color_gradient))
 }
 
-fn get_button_reset<'a>(font: Font, language: Language) -> Tooltip<'a, Message, StyleType> {
+fn get_button_reset<'a>(language: Language) -> Tooltip<'a, Message, StyleType> {
     let content = button(
         Icon::ArrowBack
             .to_text()
@@ -100,7 +95,7 @@ fn get_button_reset<'a>(font: Font, language: Language) -> Tooltip<'a, Message, 
 
     Tooltip::new(
         content,
-        Text::new(quit_analysis_translation(language)).font(font),
+        Text::new(quit_analysis_translation(language)),
         Position::Right,
     )
     .gap(5)
@@ -108,7 +103,6 @@ fn get_button_reset<'a>(font: Font, language: Language) -> Tooltip<'a, Message, 
 }
 
 pub fn get_button_settings<'a>(
-    font: Font,
     language: Language,
     open_overlay: SettingsPage,
 ) -> Tooltip<'a, Message, StyleType> {
@@ -126,7 +120,7 @@ pub fn get_button_settings<'a>(
 
     Tooltip::new(
         content,
-        Text::new(settings_translation(language)).font(font),
+        Text::new(settings_translation(language)),
         Position::Left,
     )
     .gap(5)
@@ -134,7 +128,6 @@ pub fn get_button_settings<'a>(
 }
 
 pub fn get_button_minimize<'a>(
-    font: Font,
     language: Language,
     thumbnail: bool,
 ) -> Tooltip<'a, Message, StyleType> {
@@ -168,17 +161,12 @@ pub fn get_button_minimize<'a>(
     .class(ButtonType::Thumbnail)
     .on_press(Message::ToggleThumbnail(false));
 
-    Tooltip::new(
-        content,
-        Text::new(tooltip).font(font),
-        Position::FollowCursor,
-    )
-    .gap(0)
-    .class(tooltip_style)
+    Tooltip::new(content, Text::new(tooltip), Position::FollowCursor)
+        .gap(0)
+        .class(tooltip_style)
 }
 
 pub fn get_button_freeze<'a>(
-    font: Font,
     language: Language,
     frozen: bool,
     thumbnail: bool,
@@ -211,18 +199,12 @@ pub fn get_button_freeze<'a>(
     .class(ButtonType::Thumbnail)
     .on_press(Message::Freeze);
 
-    Tooltip::new(
-        content,
-        Text::new(tooltip).font(font),
-        Position::FollowCursor,
-    )
-    .gap(0)
-    .class(tooltip_style)
+    Tooltip::new(content, Text::new(tooltip), Position::FollowCursor)
+        .gap(0)
+        .class(tooltip_style)
 }
 
 fn thumbnail_header<'a>(
-    font: Font,
-    font_headers: Font,
     language: Language,
     color_gradient: GradientType,
     unread_notifications: usize,
@@ -233,14 +215,14 @@ fn thumbnail_header<'a>(
             .align_y(Alignment::Center)
             .push(Space::new().width(Length::Fill))
             .push(Space::new().width(110))
-            .push(Text::new(SNIFFNET_TITLECASE).font(font_headers))
+            .push(Text::new(SNIFFNET_TITLECASE))
             .push(Space::new().width(10))
-            .push(get_button_freeze(font, language, frozen, true))
-            .push(get_button_minimize(font, language, true))
+            .push(get_button_freeze(language, frozen, true))
+            .push(get_button_minimize(language, true))
             .push(Space::new().width(Length::Fill))
             .push(if unread_notifications > 0 {
                 Container::new(
-                    notifications_badge(font, unread_notifications)
+                    notifications_badge(unread_notifications)
                         .class(ContainerType::HighlightedOnHeader),
                 )
                 .width(40)

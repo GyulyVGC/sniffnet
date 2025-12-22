@@ -2,7 +2,7 @@ use std::cmp::min;
 use std::net::IpAddr;
 
 use iced::widget::{Column, Container, Row, Space, Text};
-use iced::{Alignment, Font, Length};
+use iced::{Alignment, Length};
 
 use crate::chart::types::donut_chart::donut_chart;
 use crate::countries::country_utils::get_flag_tooltip;
@@ -11,7 +11,6 @@ use crate::gui::styles::rule::RuleType;
 use crate::gui::styles::style_constants::FONT_SIZE_FOOTER;
 use crate::gui::styles::types::style_type::StyleType;
 use crate::gui::types::message::Message;
-use crate::gui::types::settings::Settings;
 use crate::networking::types::data_representation::DataRepr;
 use crate::networking::types::host::{Host, ThumbnailHost};
 use crate::networking::types::info_traffic::InfoTraffic;
@@ -25,9 +24,6 @@ const MAX_CHARS_SERVICE: usize = 13;
 
 /// Computes the body of the thumbnail view
 pub fn thumbnail_page(sniffer: &Sniffer) -> Container<'_, Message, StyleType> {
-    let Settings { style, .. } = sniffer.conf.settings;
-    let font = style.get_extension().font;
-
     let tot_packets = sniffer
         .info_traffic
         .tot_data_info
@@ -37,7 +33,7 @@ pub fn thumbnail_page(sniffer: &Sniffer) -> Container<'_, Message, StyleType> {
         return Container::new(
             Column::new()
                 .push(Space::new().height(Length::Fill))
-                .push(Text::new(&sniffer.dots_pulse.0).font(font).size(50))
+                .push(Text::new(&sniffer.dots_pulse.0).size(50))
                 .push(Space::new().height(Length::FillPortion(2))),
         )
         .width(Length::Fill)
@@ -58,7 +54,6 @@ pub fn thumbnail_page(sniffer: &Sniffer) -> Container<'_, Message, StyleType> {
             in_data,
             out_data,
             dropped,
-            font,
             sniffer.thumbnail,
         ))
         .push(
@@ -74,14 +69,12 @@ pub fn thumbnail_page(sniffer: &Sniffer) -> Container<'_, Message, StyleType> {
         .push(host_col(
             info_traffic,
             data_repr,
-            font,
             sniffer.conf.host_sort_type,
         ))
         .push(RuleType::Standard.vertical(10))
         .push(service_col(
             info_traffic,
             data_repr,
-            font,
             sniffer.conf.service_sort_type,
         ));
 
@@ -93,7 +86,6 @@ pub fn thumbnail_page(sniffer: &Sniffer) -> Container<'_, Message, StyleType> {
 fn host_col<'a>(
     info_traffic: &InfoTraffic,
     data_repr: DataRepr,
-    font: Font,
     sort_type: SortType,
 ) -> Column<'a, Message, StyleType> {
     let mut host_col = Column::new()
@@ -117,12 +109,12 @@ fn host_col<'a>(
 
         thumbnail_hosts.push(thumbnail_host);
 
-        let flag = get_flag_tooltip(country, data_info_host, Language::default(), font, true);
+        let flag = get_flag_tooltip(country, data_info_host, Language::default(), true);
         let host_row = Row::new()
             .align_y(Alignment::Center)
             .spacing(5)
             .push(flag)
-            .push(Text::new(text).font(font).size(FONT_SIZE_FOOTER));
+            .push(Text::new(text).size(FONT_SIZE_FOOTER));
         host_col = host_col.push(host_row);
 
         if thumbnail_hosts.len() >= MAX_ENTRIES {
@@ -136,7 +128,6 @@ fn host_col<'a>(
 fn service_col<'a>(
     info_traffic: &InfoTraffic,
     data_repr: DataRepr,
-    font: Font,
     sort_type: SortType,
 ) -> Column<'a, Message, StyleType> {
     let mut service_col = Column::new().padding([0, 5]).spacing(3).width(Length::Fill);
@@ -144,9 +135,7 @@ fn service_col<'a>(
     let n_entry = min(services.len(), MAX_ENTRIES);
     for (service, _) in services.get(..n_entry).unwrap_or_default() {
         service_col = service_col.push(
-            Text::new(clip_text(&service.to_string(), MAX_CHARS_SERVICE))
-                .font(font)
-                .size(FONT_SIZE_FOOTER),
+            Text::new(clip_text(&service.to_string(), MAX_CHARS_SERVICE)).size(FONT_SIZE_FOOTER),
         );
     }
     service_col

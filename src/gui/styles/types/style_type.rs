@@ -1,11 +1,9 @@
 use iced::theme::{Base, Mode, Style};
-use plotters::prelude::FontStyle;
 use serde::{Deserialize, Serialize};
 
 use crate::gui::styles::style_constants::{
     DAY_PALETTE, DAY_PALETTE_EXTENSION, DEEP_SEA_PALETTE, DEEP_SEA_PALETTE_EXTENSION,
     MON_AMOUR_PALETTE, MON_AMOUR_PALETTE_EXTENSION, NIGHT_PALETTE, NIGHT_PALETTE_EXTENSION,
-    SARASA_MONO_BOLD,
 };
 use crate::gui::styles::types::custom_palette::ExtraStyles;
 use crate::gui::styles::types::palette::Palette;
@@ -104,14 +102,6 @@ impl StyleType {
             StyleType::DeepSea => DEEP_SEA_PALETTE_EXTENSION,
             StyleType::MonAmour => MON_AMOUR_PALETTE_EXTENSION,
             StyleType::Custom(style) => style.get_extension(),
-        }
-    }
-
-    pub fn get_font_weight(self) -> FontStyle {
-        if self.get_extension().font.eq(&SARASA_MONO_BOLD) {
-            FontStyle::Bold
-        } else {
-            FontStyle::Normal
         }
     }
 }
@@ -241,12 +231,8 @@ mod tests {
                 Token::Str("#c6d0f5"),
                 Token::Str("is_nightly"),
                 Token::Bool(true),
-                Token::Str("font"),
-                Token::Str("SARASA_MONO"),
-                Token::Str("font_headers"),
-                Token::Str("SARASA_MONO_BOLD"),
                 Token::Str("alpha_chart_badge"),
-                Token::F32(0.15),
+                Token::F32(0.3),
                 Token::Str("alpha_round_borders"),
                 Token::F32(0.3),
                 Token::Str("alpha_round_containers"),

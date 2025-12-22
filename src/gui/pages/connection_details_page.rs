@@ -42,7 +42,7 @@ use iced::widget::scrollable::Direction;
 use iced::widget::tooltip::Position;
 use iced::widget::{Column, Container, Row, Space, Text, Tooltip};
 use iced::widget::{Scrollable, button};
-use iced::{Alignment, Font, Length, Padding};
+use iced::{Alignment, Length, Padding};
 
 pub fn connection_details_page(
     sniffer: &Sniffer,
@@ -53,14 +53,11 @@ pub fn connection_details_page(
 
 fn page_content<'a>(sniffer: &Sniffer, key: &AddressPortPair) -> Container<'a, Message, StyleType> {
     let Settings {
-        style,
         language,
         color_gradient,
         ..
     } = sniffer.conf.settings;
     let data_repr = sniffer.conf.data_repr;
-    let font = style.get_extension().font;
-    let font_headers = style.get_extension().font_headers;
 
     let info_traffic = &sniffer.info_traffic;
     let val = info_traffic
@@ -75,30 +72,25 @@ fn page_content<'a>(sniffer: &Sniffer, key: &AddressPortPair) -> Container<'a, M
         .get(&host_option.clone().unwrap_or_default().1)
         .copied();
 
-    let header_and_content = Column::new().width(Length::Fill).push(page_header(
-        font,
-        font_headers,
-        color_gradient,
-        language,
-    ));
+    let header_and_content = Column::new()
+        .width(Length::Fill)
+        .push(page_header(color_gradient, language));
 
     let mut source_caption = Row::new().align_y(Alignment::Center).spacing(10).push(
         Text::new(source_translation(language))
-            .font(font)
             .size(FONT_SIZE_TITLE)
             .class(TextType::Title),
     );
     let mut dest_caption = Row::new().align_y(Alignment::Center).spacing(10).push(
         Text::new(destination_translation(language))
-            .font(font)
             .size(FONT_SIZE_TITLE)
             .class(TextType::Title),
     );
     let mut host_info_col = Column::new();
     if let Some((r_dns, host)) = host_option {
-        host_info_col = get_host_info_col(&r_dns, &host, font, language);
+        host_info_col = get_host_info_col(&r_dns, &host, language);
         let host_info = host_info_option.unwrap_or_default();
-        let flag = get_flag_tooltip(host.country, &host_info, language, font, false);
+        let flag = get_flag_tooltip(host.country, &host_info, language, false);
         let computer = get_local_tooltip(sniffer, &address_to_lookup, key);
         if address_to_lookup.eq(&key.source) {
             source_caption = source_caption.push(flag);
@@ -114,7 +106,6 @@ fn page_content<'a>(sniffer: &Sniffer, key: &AddressPortPair) -> Container<'a, M
         &key.source,
         key.sport,
         val.mac_address1.as_ref(),
-        font,
         language,
         &sniffer.timing_events,
     );
@@ -123,7 +114,6 @@ fn page_content<'a>(sniffer: &Sniffer, key: &AddressPortPair) -> Container<'a, M
         &key.dest,
         key.dport,
         val.mac_address2.as_ref(),
-        font,
         language,
         &sniffer.timing_events,
     );
@@ -134,7 +124,7 @@ fn page_content<'a>(sniffer: &Sniffer, key: &AddressPortPair) -> Container<'a, M
         dest_col = dest_col.push(host_info_col);
     }
 
-    let col_info = col_info(key, &val, data_repr, font, language);
+    let col_info = col_info(key, &val, data_repr, language);
 
     let content = assemble_widgets(col_info, source_col, dest_col);
 
@@ -145,8 +135,6 @@ fn page_content<'a>(sniffer: &Sniffer, key: &AddressPortPair) -> Container<'a, M
 }
 
 fn page_header<'a>(
-    font: Font,
-    font_headers: Font,
     color_gradient: GradientType,
     language: Language,
 ) -> Container<'a, Message, StyleType> {
@@ -155,13 +143,12 @@ fn page_header<'a>(
             .push(Space::new().width(Length::Fill))
             .push(
                 Text::new(connection_details_translation(language))
-                    .font(font_headers)
                     .size(FONT_SIZE_TITLE)
                     .width(Length::FillPortion(6))
                     .align_x(Alignment::Center),
             )
             .push(
-                Container::new(button_hide(Message::HideModal, language, font))
+                Container::new(button_hide(Message::HideModal, language))
                     .width(Length::Fill)
                     .align_x(Alignment::Center),
             ),
@@ -177,7 +164,6 @@ fn col_info<'a>(
     key: &AddressPortPair,
     val: &InfoAddressPortPair,
     data_repr: DataRepr,
-    font: Font,
     language: Language,
 ) -> Column<'a, Message, StyleType> {
     let is_icmp = key.protocol.eq(&Protocol::ICMP);
@@ -193,26 +179,21 @@ fn col_info<'a>(
                 .spacing(8)
                 .align_y(Vertical::Center)
                 .push(Icon::Clock.to_text())
-                .push(
-                    Text::new(format!(
-                        "{}\n{}",
-                        get_formatted_timestamp(val.initial_timestamp),
-                        get_formatted_timestamp(val.final_timestamp)
-                    ))
-                    .font(font),
-                ),
+                .push(Text::new(format!(
+                    "{}\n{}",
+                    get_formatted_timestamp(val.initial_timestamp),
+                    get_formatted_timestamp(val.final_timestamp)
+                ))),
         )
         .push(TextType::highlighted_subtitle_with_desc(
             protocol_translation(language),
             &key.protocol.to_string(),
-            font,
         ));
 
     if !is_icmp && !is_arp {
         ret_val = ret_val.push(TextType::highlighted_subtitle_with_desc(
             service_translation(language),
             &val.service.to_string(),
-            font,
         ));
     }
 
@@ -233,7 +214,6 @@ fn col_info<'a>(
                 String::new()
             }
             .as_ref()),
-        font,
     ));
 
     if is_icmp || is_arp {
@@ -241,20 +221,16 @@ fn col_info<'a>(
             Column::new()
                 .push(
                     Text::new(format!("{}:", messages_translation(language)))
-                        .class(TextType::Subtitle)
-                        .font(font),
+                        .class(TextType::Subtitle),
                 )
                 .push(Scrollable::with_direction(
                     Column::new()
                         .padding(Padding::ZERO.right(10).bottom(10))
-                        .push(
-                            Text::new(if is_icmp {
-                                IcmpType::pretty_print_types(&val.icmp_types)
-                            } else {
-                                ArpType::pretty_print_types(&val.arp_types)
-                            })
-                            .font(font),
-                        ),
+                        .push(Text::new(if is_icmp {
+                            IcmpType::pretty_print_types(&val.icmp_types)
+                        } else {
+                            ArpType::pretty_print_types(&val.arp_types)
+                        })),
                     Direction::Both {
                         vertical: ScrollbarType::properties(),
                         horizontal: ScrollbarType::properties(),
@@ -271,7 +247,6 @@ fn col_info<'a>(
 fn get_host_info_col<'a>(
     r_dns: &str,
     host: &Host,
-    font: Font,
     language: Language,
 ) -> Column<'a, Message, StyleType> {
     let mut host_info_col = Column::new().spacing(4);
@@ -283,14 +258,12 @@ fn get_host_info_col<'a>(
         host_info_col = host_info_col.push(TextType::highlighted_subtitle_with_desc(
             fqdn_translation(language),
             r_dns,
-            font,
         ));
     }
     if !host.asn.name.is_empty() && !host.asn.code.is_empty() {
         host_info_col = host_info_col.push(TextType::highlighted_subtitle_with_desc(
             administrative_entity_translation(language),
             &format!("{} (ASN {})", host.asn.name, host.asn.code),
-            font,
         ));
     }
     host_info_col
@@ -301,9 +274,7 @@ fn get_local_tooltip<'a>(
     address_to_lookup: &IpAddr,
     key: &AddressPortPair,
 ) -> Tooltip<'a, Message, StyleType> {
-    let Settings {
-        style, language, ..
-    } = sniffer.conf.settings;
+    let Settings { language, .. } = sniffer.conf.settings;
 
     let local_address = if address_to_lookup.eq(&key.source) {
         &key.dest
@@ -325,7 +296,6 @@ fn get_local_tooltip<'a>(
             TrafficDirection::Outgoing,
         ),
         language,
-        style.get_extension().font,
     )
 }
 
@@ -334,7 +304,6 @@ fn get_src_or_dest_col<'a>(
     ip: &IpAddr,
     port: Option<u16>,
     mac: Option<&String>,
-    font: Font,
     language: Language,
     timing_events: &TimingEvents,
 ) -> Column<'a, Message, StyleType> {
@@ -361,14 +330,12 @@ fn get_src_or_dest_col<'a>(
                 .push(TextType::highlighted_subtitle_with_desc(
                     address_caption,
                     &get_socket_address(ip, port),
-                    font,
                 ))
-                .push(get_button_copy(language, font, ip, timing_events)),
+                .push(get_button_copy(language, ip, timing_events)),
         )
         .push(TextType::highlighted_subtitle_with_desc(
             mac_address_translation(language),
             mac_str,
-            font,
         ))
 }
 
@@ -405,12 +372,11 @@ fn assemble_widgets<'a>(
 
 fn get_button_copy<'a>(
     language: Language,
-    font: Font,
     ip: &IpAddr,
     timing_events: &TimingEvents,
 ) -> Tooltip<'a, Message, StyleType> {
     let icon = if timing_events.was_just_copy_ip(ip) {
-        Text::new("✔").font(font).size(14)
+        Text::new("✔").size(14)
     } else {
         Icon::Copy.to_text().size(12)
     };
@@ -423,7 +389,7 @@ fn get_button_copy<'a>(
 
     Tooltip::new(
         content,
-        Text::new(format!("{} (IP)", copy_translation(language))).font(font),
+        Text::new(format!("{} (IP)", copy_translation(language))),
         Position::Right,
     )
     .gap(5)

@@ -1,7 +1,7 @@
 use iced::widget::scrollable::Direction;
 use iced::widget::{Button, Slider};
 use iced::widget::{Checkbox, Column, Container, Row, Scrollable, Space, Text, TextInput};
-use iced::{Alignment, Font, Length, Padding};
+use iced::{Alignment, Length, Padding};
 
 use crate::gui::components::button::button_hide;
 use crate::gui::components::tab::get_settings_tabs;
@@ -32,14 +32,11 @@ use crate::{Language, Sniffer, StyleType};
 
 pub fn settings_notifications_page<'a>(sniffer: &Sniffer) -> Container<'a, Message, StyleType> {
     let Settings {
-        style,
         language,
         color_gradient,
         mut notifications,
         ..
     } = sniffer.conf.settings.clone();
-    let font = style.get_extension().font;
-    let font_headers = style.get_extension().font_headers;
 
     // Use threshold that has not yet been applied, if available
     if let Some(temp_data_notification) = sniffer.timing_events.temp_threshold() {
@@ -51,21 +48,11 @@ pub fn settings_notifications_page<'a>(sniffer: &Sniffer) -> Container<'a, Messa
 
     let mut content = Column::new()
         .width(Length::Fill)
-        .push(settings_header(
-            font,
-            font_headers,
-            color_gradient,
-            language,
-        ))
-        .push(get_settings_tabs(
-            SettingsPage::Notifications,
-            font,
-            language,
-        ))
+        .push(settings_header(color_gradient, language))
+        .push(get_settings_tabs(SettingsPage::Notifications, language))
         .push(Space::new().height(15))
         .push(
             notifications_title_translation(language)
-                .font(font)
                 .class(TextType::Subtitle)
                 .size(FONT_SIZE_SUBTITLE)
                 .width(Length::Fill)
@@ -78,22 +65,17 @@ pub fn settings_notifications_page<'a>(sniffer: &Sniffer) -> Container<'a, Messa
         .spacing(10)
         .align_x(Alignment::Center)
         .width(Length::Fill)
-        .push(volume_slider(language, font, notifications.volume))
+        .push(volume_slider(language, notifications.volume))
         .push(Scrollable::with_direction(
             Column::new()
                 .padding(Padding::ZERO.bottom(10))
                 .spacing(10)
                 .align_x(Alignment::Center)
                 .width(Length::Fill)
-                .push(get_data_notify(
-                    notifications.data_notification,
-                    language,
-                    font,
-                ))
+                .push(get_data_notify(notifications.data_notification, language))
                 .push(get_favorite_notify(
                     notifications.favorite_notification,
                     language,
-                    font,
                 ))
                 .push(
                     Container::new(RuleType::Standard.horizontal(10))
@@ -102,7 +84,6 @@ pub fn settings_notifications_page<'a>(sniffer: &Sniffer) -> Container<'a, Messa
                 .push(get_remote_notifications(
                     &notifications.remote_notifications,
                     language,
-                    font,
                 )),
             Direction::Vertical(ScrollbarType::properties().margin(10)),
         ));
@@ -118,7 +99,6 @@ pub fn settings_notifications_page<'a>(sniffer: &Sniffer) -> Container<'a, Messa
 fn get_data_notify<'a>(
     data_notification: DataNotification,
     language: Language,
-    font: Font,
 ) -> Container<'a, Message, StyleType> {
     let checkbox = Checkbox::new(data_notification.threshold.is_some())
         .label(data_exceeded_translation(language))
@@ -141,8 +121,7 @@ fn get_data_notify<'a>(
                 )
             }
         })
-        .size(18)
-        .font(font);
+        .size(18);
 
     let mut ret_val = Column::new().spacing(15).push(checkbox);
 
@@ -152,14 +131,10 @@ fn get_data_notify<'a>(
             .width(700)
             .class(ContainerType::BorderedRound)
     } else {
-        let data_representation_row = row_data_representation(
-            data_notification,
-            language,
-            font,
-            data_notification.data_repr,
-        );
-        let input_row = input_group_bytes(data_notification, font, language);
-        let sound_row = sound_buttons(Notification::Data(data_notification), font, language);
+        let data_representation_row =
+            row_data_representation(data_notification, language, data_notification.data_repr);
+        let input_row = input_group_bytes(data_notification, language);
+        let sound_row = sound_buttons(Notification::Data(data_notification), language);
         ret_val = ret_val
             .push(sound_row)
             .push(data_representation_row)
@@ -175,7 +150,6 @@ fn get_data_notify<'a>(
 fn get_favorite_notify<'a>(
     favorite_notification: FavoriteNotification,
     language: Language,
-    font: Font,
 ) -> Container<'a, Message, StyleType> {
     let checkbox = Checkbox::new(favorite_notification.notify_on_favorite)
         .label(favorite_transmitted_translation(language))
@@ -189,17 +163,12 @@ fn get_favorite_notify<'a>(
                 false,
             )
         })
-        .size(18)
-        .font(font);
+        .size(18);
 
     let mut ret_val = Column::new().spacing(15).push(checkbox);
 
     if favorite_notification.notify_on_favorite {
-        let sound_row = sound_buttons(
-            Notification::Favorite(favorite_notification),
-            font,
-            language,
-        );
+        let sound_row = sound_buttons(Notification::Favorite(favorite_notification), language);
         ret_val = ret_val.push(sound_row);
         Container::new(ret_val)
             .padding(15)
@@ -216,13 +185,11 @@ fn get_favorite_notify<'a>(
 fn get_remote_notifications<'a>(
     remote_notifications: &RemoteNotifications,
     language: Language,
-    font: Font,
 ) -> Container<'a, Message, StyleType> {
     let checkbox = Checkbox::new(remote_notifications.is_active())
         .label(remote_notifications_translation(language))
         .on_toggle(move |_| Message::ToggleRemoteNotifications)
-        .size(18)
-        .font(font);
+        .size(18);
 
     let mut ret_val = Column::new().spacing(15).push(checkbox);
 
@@ -231,12 +198,11 @@ fn get_remote_notifications<'a>(
             .spacing(5)
             .align_y(Alignment::Center)
             .padding(Padding::ZERO.left(26))
-            .push(Text::new("URL:".to_string()).font(font))
+            .push(Text::new("URL:".to_string()))
             .push(
                 TextInput::new("https://example.com/notify", remote_notifications.url())
                     .on_input(Message::RemoteNotificationsUrl)
-                    .padding([2, 5])
-                    .font(font),
+                    .padding([2, 5]),
             );
         ret_val = ret_val.push(input_row);
         Container::new(ret_val)
@@ -253,7 +219,6 @@ fn get_remote_notifications<'a>(
 
 fn input_group_bytes<'a>(
     bytes_notification: DataNotification,
-    font: Font,
     language: Language,
 ) -> Container<'a, Message, StyleType> {
     let mut curr_threshold_str = (bytes_notification.threshold.unwrap_or_default()
@@ -264,7 +229,7 @@ fn input_group_bytes<'a>(
         .spacing(5)
         .align_y(Alignment::Center)
         .padding(Padding::ZERO.left(26))
-        .push(Text::new(format!("{}:", threshold_translation(language))).font(font))
+        .push(Text::new(format!("{}:", threshold_translation(language))))
         .push(
             TextInput::new(
                 "0",
@@ -279,12 +244,10 @@ fn input_group_bytes<'a>(
                 Message::UpdateNotificationSettings(Notification::Data(bytes_notification), false)
             })
             .padding([2, 5])
-            .font(font)
             .width(100),
         )
         .push(
             Text::new(per_second_translation(language))
-                .font(font)
                 .align_y(Alignment::Center)
                 .size(FONT_SIZE_FOOTER),
         );
@@ -293,16 +256,15 @@ fn input_group_bytes<'a>(
         .align_y(Alignment::Center)
 }
 
-fn volume_slider<'a>(
-    language: Language,
-    font: Font,
-    volume: u8,
-) -> Container<'a, Message, StyleType> {
+fn volume_slider<'a>(language: Language, volume: u8) -> Container<'a, Message, StyleType> {
     Container::new(
         Column::new()
             .spacing(5)
             .align_x(Alignment::Center)
-            .push(Text::new(format!("{}: {volume:^3}%", volume_translation(language))).font(font))
+            .push(Text::new(format!(
+                "{}: {volume:^3}%",
+                volume_translation(language)
+            )))
             .push(
                 Row::new()
                     .align_y(Alignment::Center)
@@ -336,7 +298,6 @@ fn volume_slider<'a>(
 
 fn sound_buttons<'a>(
     notification: Notification,
-    font: Font,
     language: Language,
 ) -> Row<'a, Message, StyleType> {
     let current_sound = match notification {
@@ -349,7 +310,7 @@ fn sound_buttons<'a>(
         .align_y(Alignment::Center)
         .spacing(5)
         .padding(Padding::ZERO.left(26))
-        .push(Text::new(format!("{}:", sound_translation(language))).font(font));
+        .push(Text::new(format!("{}:", sound_translation(language))));
 
     for option in Sound::ALL {
         let is_active = current_sound.eq(&option);
@@ -362,7 +323,7 @@ fn sound_buttons<'a>(
         ret_val = ret_val.push(
             Button::new(
                 option
-                    .get_text(font)
+                    .get_text()
                     .align_x(Alignment::Center)
                     .align_y(Alignment::Center),
             )
@@ -383,8 +344,6 @@ fn sound_buttons<'a>(
 }
 
 pub fn settings_header<'a>(
-    font: Font,
-    font_headers: Font,
     color_gradient: GradientType,
     language: Language,
 ) -> Container<'a, Message, StyleType> {
@@ -393,13 +352,12 @@ pub fn settings_header<'a>(
             .push(Space::new().width(Length::Fill))
             .push(
                 Text::new(settings_translation(language))
-                    .font(font_headers)
                     .size(FONT_SIZE_TITLE)
                     .width(Length::FillPortion(6))
                     .align_x(Alignment::Center),
             )
             .push(
-                Container::new(button_hide(Message::CloseSettings, language, font))
+                Container::new(button_hide(Message::CloseSettings, language))
                     .width(Length::Fill)
                     .align_x(Alignment::Center),
             ),
@@ -414,7 +372,6 @@ pub fn settings_header<'a>(
 fn row_data_representation<'a>(
     data_notification: DataNotification,
     language: Language,
-    font: Font,
     data_repr: DataRepr,
 ) -> Row<'a, Message, StyleType> {
     let mut ret_val = Row::new()
@@ -422,7 +379,10 @@ fn row_data_representation<'a>(
         .align_y(Alignment::Center)
         .spacing(5)
         .padding(Padding::ZERO.left(26))
-        .push(Text::new(format!("{}:", data_representation_translation(language))).font(font));
+        .push(Text::new(format!(
+            "{}:",
+            data_representation_translation(language)
+        )));
 
     for option in DataRepr::ALL {
         let is_active = data_repr.eq(&option);
@@ -431,8 +391,7 @@ fn row_data_representation<'a>(
                 Text::new(option.get_label(language).to_owned())
                     .size(FONT_SIZE_FOOTER)
                     .align_x(Alignment::Center)
-                    .align_y(Alignment::Center)
-                    .font(font),
+                    .align_y(Alignment::Center),
             )
             .padding(Padding::ZERO.left(15).right(15))
             .height(25)

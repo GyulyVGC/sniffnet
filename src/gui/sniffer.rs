@@ -657,16 +657,13 @@ impl Sniffer {
 
     pub fn view(&self) -> Element<'_, Message, StyleType> {
         let Settings {
-            style,
             language,
             color_gradient,
             ..
         } = self.conf.settings;
-        let font = style.get_extension().font;
-        let font_headers = style.get_extension().font_headers;
 
         if let Some((_, x)) = self.welcome {
-            return welcome_page(font, x).into();
+            return welcome_page(x).into();
         }
 
         let header = header(self);
@@ -694,8 +691,6 @@ impl Sniffer {
             self.thumbnail,
             language,
             color_gradient,
-            font,
-            font_headers,
             self.newer_release_available,
             &self.dots_pulse,
         );
@@ -720,23 +715,9 @@ impl Sniffer {
             }
             Some(m) => {
                 let overlay: Element<Message, StyleType> = match m {
-                    MyModal::Reset => get_exit_overlay(
-                        Message::Reset,
-                        color_gradient,
-                        font,
-                        font_headers,
-                        language,
-                    ),
-                    MyModal::Quit => get_exit_overlay(
-                        Message::Quit,
-                        color_gradient,
-                        font,
-                        font_headers,
-                        language,
-                    ),
-                    MyModal::ClearAll => {
-                        get_clear_all_overlay(color_gradient, font, font_headers, language)
-                    }
+                    MyModal::Reset => get_exit_overlay(Message::Reset, color_gradient, language),
+                    MyModal::Quit => get_exit_overlay(Message::Quit, color_gradient, language),
+                    MyModal::ClearAll => get_clear_all_overlay(color_gradient, language),
                     MyModal::ConnectionDetails(key) => connection_details_page(self, key),
                 }
                 .into();

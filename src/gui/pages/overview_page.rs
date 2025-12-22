@@ -14,7 +14,6 @@ use crate::gui::styles::rule::RuleType;
 use crate::gui::styles::scrollbar::ScrollbarType;
 use crate::gui::styles::style_constants::{FONT_SIZE_FOOTER, FONT_SIZE_TITLE};
 use crate::gui::styles::text::TextType;
-use crate::gui::styles::types::palette_extension::PaletteExtension;
 use crate::gui::types::filters::Filters;
 use crate::gui::types::message::Message;
 use crate::gui::types::settings::Settings;
@@ -45,16 +44,12 @@ use iced::widget::scrollable::Direction;
 use iced::widget::text::LineHeight;
 use iced::widget::tooltip::Position;
 use iced::widget::{Button, Column, Container, Row, Scrollable, Space, Text, Tooltip, button};
-use iced::{Alignment, Element, Font, Length, Padding};
+use iced::{Alignment, Element, Length, Padding};
 use std::fmt::Write;
 
 /// Computes the body of gui overview page
 pub fn overview_page(sniffer: &Sniffer) -> Container<'_, Message, StyleType> {
-    let Settings {
-        style, language, ..
-    } = sniffer.conf.settings;
-    let font = style.get_extension().font;
-    let font_headers = style.get_extension().font_headers;
+    let Settings { language, .. } = sniffer.conf.settings;
 
     let mut body = Column::new();
     let mut tab_and_body = Column::new().height(Length::Fill);
@@ -62,14 +57,12 @@ pub fn overview_page(sniffer: &Sniffer) -> Container<'_, Message, StyleType> {
     // some packets are there!
     let tabs = get_pages_tabs(
         RunningPage::Overview,
-        font,
-        font_headers,
         language,
         sniffer.unread_notifications,
     );
     tab_and_body = tab_and_body.push(tabs);
 
-    let container_chart = container_chart(sniffer, font);
+    let container_chart = container_chart(sniffer);
 
     let container_info = col_info(sniffer);
 
@@ -93,10 +86,7 @@ pub fn overview_page(sniffer: &Sniffer) -> Container<'_, Message, StyleType> {
 }
 
 pub fn waiting_page(sniffer: &Sniffer) -> Option<Container<'_, Message, StyleType>> {
-    let Settings {
-        style, language, ..
-    } = sniffer.conf.settings;
-    let font = style.get_extension().font;
+    let Settings { language, .. } = sniffer.conf.settings;
 
     let dots = &sniffer.dots_pulse.0;
 
@@ -107,10 +97,10 @@ pub fn waiting_page(sniffer: &Sniffer) -> Option<Container<'_, Message, StyleTyp
 
     let body = if let Some(error) = sniffer.pcap_error.as_ref() {
         // pcap threw an ERROR!
-        body_pcap_error(error, dots, language, font)
+        body_pcap_error(error, dots, language)
     } else if tot_packets == 0 {
         // no packets observed at all
-        body_no_packets(&sniffer.capture_source, font, language, dots)
+        body_no_packets(&sniffer.capture_source, language, dots)
     } else {
         return None;
     };
@@ -120,7 +110,6 @@ pub fn waiting_page(sniffer: &Sniffer) -> Option<Container<'_, Message, StyleTyp
 
 fn body_no_packets<'a>(
     cs: &CaptureSource,
-    font: Font,
     language: Language,
     dots: &str,
 ) -> Column<'a, Message, StyleType> {
@@ -130,30 +119,22 @@ fn body_no_packets<'a>(
     let (icon_text, nothing_to_see_text) = if !link_type.is_supported() {
         (
             Icon::Warning.to_text().size(60),
-            unsupported_link_type_translation(language, &cs_info)
-                .align_x(Alignment::Center)
-                .font(font),
+            unsupported_link_type_translation(language, &cs_info).align_x(Alignment::Center),
         )
     } else if matches!(cs, CaptureSource::File(_)) {
         (
             Icon::get_hourglass(dots.len()).size(60),
-            reading_from_pcap_translation(language, &cs_info)
-                .align_x(Alignment::Center)
-                .font(font),
+            reading_from_pcap_translation(language, &cs_info).align_x(Alignment::Center),
         )
     } else if cs.get_addresses().is_empty() {
         (
             Icon::Warning.to_text().size(60),
-            no_addresses_translation(language, &cs_info)
-                .align_x(Alignment::Center)
-                .font(font),
+            no_addresses_translation(language, &cs_info).align_x(Alignment::Center),
         )
     } else {
         (
             Icon::get_hourglass(dots.len()).size(60),
-            waiting_translation(language, &cs_info)
-                .align_x(Alignment::Center)
-                .font(font),
+            waiting_translation(language, &cs_info).align_x(Alignment::Center),
         )
     };
 
@@ -166,7 +147,7 @@ fn body_no_packets<'a>(
         .push(icon_text)
         .push(Space::new().height(15))
         .push(nothing_to_see_text)
-        .push(Text::new(dots.to_owned()).font(font).size(50))
+        .push(Text::new(dots.to_owned()).size(50))
         .push(Space::new().height(FillPortion(2)))
 }
 
@@ -174,11 +155,8 @@ fn body_pcap_error<'a>(
     pcap_error: &'a str,
     dots: &'a str,
     language: Language,
-    font: Font,
 ) -> Column<'a, Message, StyleType> {
-    let error_text = error_translation(language, pcap_error)
-        .align_x(Alignment::Center)
-        .font(font);
+    let error_text = error_translation(language, pcap_error).align_x(Alignment::Center);
 
     Column::new()
         .width(Length::Fill)
@@ -189,7 +167,7 @@ fn body_pcap_error<'a>(
         .push(Icon::Error.to_text().size(60))
         .push(Space::new().height(15))
         .push(error_text)
-        .push(Text::new(dots.to_owned()).font(font).size(50))
+        .push(Text::new(dots.to_owned()).size(50))
         .push(Space::new().height(FillPortion(2)))
 }
 
@@ -216,10 +194,7 @@ fn row_report<'a>(sniffer: &Sniffer) -> Row<'a, Message, StyleType> {
 }
 
 fn col_host<'a>(sniffer: &Sniffer) -> Column<'a, Message, StyleType> {
-    let Settings {
-        style, language, ..
-    } = sniffer.conf.settings;
-    let font = style.get_extension().font;
+    let Settings { language, .. } = sniffer.conf.settings;
     let data_repr = sniffer.conf.data_repr;
 
     let mut scroll_host = Column::new()
@@ -244,7 +219,6 @@ fn col_host<'a>(sniffer: &Sniffer) -> Column<'a, Message, StyleType> {
             data_info_host,
             data_repr,
             first_entry_data_info,
-            font,
             language,
         );
 
@@ -263,11 +237,9 @@ fn col_host<'a>(sniffer: &Sniffer) -> Column<'a, Message, StyleType> {
     }
 
     if entries.len() >= 30 {
-        scroll_host = scroll_host.push(Space::new().height(25)).push(
-            Text::new(only_top_30_items_translation(language))
-                .font(font)
-                .align_x(Alignment::Center),
-        );
+        scroll_host = scroll_host
+            .push(Space::new().height(25))
+            .push(Text::new(only_top_30_items_translation(language)).align_x(Alignment::Center));
     }
 
     Column::new()
@@ -277,7 +249,6 @@ fn col_host<'a>(sniffer: &Sniffer) -> Column<'a, Message, StyleType> {
                 .align_y(Alignment::Center)
                 .push(
                     Text::new(host_translation(language))
-                        .font(font)
                         .class(TextType::Title)
                         .size(FONT_SIZE_TITLE),
                 )
@@ -297,10 +268,7 @@ fn col_host<'a>(sniffer: &Sniffer) -> Column<'a, Message, StyleType> {
 }
 
 fn col_service<'a>(sniffer: &Sniffer) -> Column<'a, Message, StyleType> {
-    let Settings {
-        style, language, ..
-    } = sniffer.conf.settings;
-    let font = style.get_extension().font;
+    let Settings { language, .. } = sniffer.conf.settings;
     let data_repr = sniffer.conf.data_repr;
 
     let mut scroll_service = Column::new()
@@ -318,7 +286,7 @@ fn col_service<'a>(sniffer: &Sniffer) -> Column<'a, Message, StyleType> {
         .unwrap_or_default();
 
     for (service, data_info) in &entries {
-        let content = service_bar(service, data_info, data_repr, first_entry_data_info, font);
+        let content = service_bar(service, data_info, data_repr, first_entry_data_info);
 
         scroll_service = scroll_service.push(
             button(content)
@@ -331,11 +299,9 @@ fn col_service<'a>(sniffer: &Sniffer) -> Column<'a, Message, StyleType> {
     }
 
     if entries.len() >= 30 {
-        scroll_service = scroll_service.push(Space::new().height(25)).push(
-            Text::new(only_top_30_items_translation(language))
-                .font(font)
-                .align_x(Alignment::Center),
-        );
+        scroll_service = scroll_service
+            .push(Space::new().height(25))
+            .push(Text::new(only_top_30_items_translation(language)).align_x(Alignment::Center));
     }
 
     Column::new()
@@ -345,7 +311,6 @@ fn col_service<'a>(sniffer: &Sniffer) -> Column<'a, Message, StyleType> {
                 .align_y(Alignment::Center)
                 .push(
                     Text::new(service_translation(language))
-                        .font(font)
                         .class(TextType::Title)
                         .size(FONT_SIZE_TITLE),
                 )
@@ -369,7 +334,6 @@ pub fn host_bar<'a>(
     data_info_host: &DataInfoHost,
     data_repr: DataRepr,
     first_entry_data_info: DataInfo,
-    font: Font,
     language: Language,
 ) -> Row<'a, Message, StyleType> {
     let (incoming_bar_len, outgoing_bar_len) =
@@ -383,7 +347,6 @@ pub fn host_bar<'a>(
             host.country,
             data_info_host,
             language,
-            font,
             false,
         ))
         .push(
@@ -391,23 +354,16 @@ pub fn host_bar<'a>(
                 .spacing(1)
                 .push(
                     Row::new()
-                        .push(Text::new(host.domain.clone()).font(font))
-                        .push(
-                            Text::new(if host.asn.name.is_empty() {
-                                String::new()
-                            } else {
-                                format!(" - {}", host.asn.name)
-                            })
-                            .font(font),
-                        )
+                        .push(Text::new(host.domain.clone()))
+                        .push(Text::new(if host.asn.name.is_empty() {
+                            String::new()
+                        } else {
+                            format!(" - {}", host.asn.name)
+                        }))
                         .push(Space::new().width(Length::Fill))
-                        .push(
-                            Text::new(
-                                data_repr
-                                    .formatted_string(data_info_host.data_info.tot_data(data_repr)),
-                            )
-                            .font(font),
-                        ),
+                        .push(Text::new(data_repr.formatted_string(
+                            data_info_host.data_info.tot_data(data_repr),
+                        ))),
                 )
                 .push(get_bars(incoming_bar_len, outgoing_bar_len)),
         )
@@ -418,7 +374,6 @@ pub fn service_bar<'a>(
     data_info: &DataInfo,
     data_repr: DataRepr,
     first_entry_data_info: DataInfo,
-    font: Font,
 ) -> Row<'a, Message, StyleType> {
     let (incoming_bar_len, outgoing_bar_len) =
         get_bars_length(data_repr, &first_entry_data_info, data_info);
@@ -432,33 +387,24 @@ pub fn service_bar<'a>(
                 .spacing(1)
                 .push(
                     Row::new()
-                        .push(Text::new(service.to_string()).font(font))
+                        .push(Text::new(service.to_string()))
                         .push(Space::new().width(Length::Fill))
-                        .push(
-                            Text::new(data_repr.formatted_string(data_info.tot_data(data_repr)))
-                                .font(font),
-                        ),
+                        .push(Text::new(
+                            data_repr.formatted_string(data_info.tot_data(data_repr)),
+                        )),
                 )
                 .push(get_bars(incoming_bar_len, outgoing_bar_len)),
         )
 }
 
 fn col_info(sniffer: &Sniffer) -> Container<'_, Message, StyleType> {
-    let Settings {
-        style, language, ..
-    } = sniffer.conf.settings;
-    let PaletteExtension { font, .. } = style.get_extension();
+    let Settings { language, .. } = sniffer.conf.settings;
 
-    let col_device = col_device(
-        language,
-        font,
-        &sniffer.capture_source,
-        &sniffer.conf.filters,
-    );
+    let col_device = col_device(language, &sniffer.capture_source, &sniffer.conf.filters);
 
-    let col_data_representation = col_data_representation(language, font, sniffer.conf.data_repr);
+    let col_data_representation = col_data_representation(language, sniffer.conf.data_repr);
 
-    let donut_row = donut_row(language, font, sniffer);
+    let donut_row = donut_row(language, sniffer);
 
     let content = Column::new()
         .align_x(Alignment::Center)
@@ -486,7 +432,7 @@ fn col_info(sniffer: &Sniffer) -> Container<'_, Message, StyleType> {
         .class(ContainerType::BorderedRound)
 }
 
-fn container_chart(sniffer: &Sniffer, font: Font) -> Container<'_, Message, StyleType> {
+fn container_chart(sniffer: &Sniffer) -> Container<'_, Message, StyleType> {
     let Settings { language, .. } = sniffer.conf.settings;
     let traffic_chart = &sniffer.traffic_chart;
 
@@ -496,7 +442,6 @@ fn container_chart(sniffer: &Sniffer, font: Font) -> Container<'_, Message, Styl
             .push(
                 Row::new().padding([10, 0]).align_y(Alignment::Center).push(
                     traffic_rate_translation(language)
-                        .font(font)
                         .class(TextType::Title)
                         .size(FONT_SIZE_TITLE),
                 ),
@@ -511,7 +456,6 @@ fn container_chart(sniffer: &Sniffer, font: Font) -> Container<'_, Message, Styl
 
 fn col_device<'a>(
     language: Language,
-    font: Font,
     cs: &CaptureSource,
     filters: &'a Filters,
 ) -> Column<'a, Message, StyleType> {
@@ -524,11 +468,11 @@ fn col_device<'a>(
     let filters_desc: Element<Message, StyleType> = if filters.is_some_filter_active() {
         Row::new()
             .spacing(10)
-            .push(Text::new("BPF").font(font))
-            .push(get_info_tooltip(filters.bpf().to_string(), font))
+            .push(Text::new("BPF"))
+            .push(get_info_tooltip(filters.bpf().to_string()))
             .into()
     } else {
-        Text::new(none_translation(language)).font(font).into()
+        Text::new(none_translation(language)).into()
     };
 
     Column::new()
@@ -536,31 +480,23 @@ fn col_device<'a>(
         .spacing(10)
         .push(
             Column::new()
-                .push(
-                    Text::new(format!("{}:", cs.title(language)))
-                        .class(TextType::Subtitle)
-                        .font(font),
-                )
+                .push(Text::new(format!("{}:", cs.title(language))).class(TextType::Subtitle))
                 .push(
                     Row::new()
                         .spacing(10)
-                        .push(Text::new(format!("   {}", &cs_info)).font(font))
-                        .push(get_info_tooltip(
-                            link_type.full_print_on_one_line(language),
-                            font,
-                        )),
+                        .push(Text::new(format!("   {}", &cs_info)))
+                        .push(get_info_tooltip(link_type.full_print_on_one_line(language))),
                 ),
         )
         .push(
             Column::new()
                 .push(
                     Text::new(format!("{}:", active_filters_translation(language)))
-                        .class(TextType::Subtitle)
-                        .font(font),
+                        .class(TextType::Subtitle),
                 )
                 .push(
                     Row::new()
-                        .push(Text::new("   ".to_string()).font(font))
+                        .push(Text::new("   ".to_string()))
                         .push(filters_desc),
                 ),
         )
@@ -568,13 +504,11 @@ fn col_device<'a>(
 
 fn col_data_representation<'a>(
     language: Language,
-    font: Font,
     data_repr: DataRepr,
 ) -> Column<'a, Message, StyleType> {
     let mut ret_val = Column::new().spacing(5).push(
         Text::new(format!("{}:", data_representation_translation(language)))
-            .class(TextType::Subtitle)
-            .font(font),
+            .class(TextType::Subtitle),
     );
 
     let [bits, bytes, packets] = DataRepr::ALL.map(|option| {
@@ -583,8 +517,7 @@ fn col_data_representation<'a>(
             Text::new(option.get_label(language).to_owned())
                 .width(Length::Fill)
                 .align_x(Alignment::Center)
-                .align_y(Alignment::Center)
-                .font(font),
+                .align_y(Alignment::Center),
         )
         .width(Length::Fill)
         .height(33)
@@ -603,11 +536,7 @@ fn col_data_representation<'a>(
     ret_val
 }
 
-fn donut_row(
-    language: Language,
-    font: Font,
-    sniffer: &Sniffer,
-) -> Container<'_, Message, StyleType> {
+fn donut_row(language: Language, sniffer: &Sniffer) -> Container<'_, Message, StyleType> {
     let data_repr = sniffer.conf.data_repr;
 
     let (in_data, out_data, dropped) = sniffer.info_traffic.get_thumbnail_data(data_repr);
@@ -618,21 +547,18 @@ fn donut_row(
             in_data,
             data_repr,
             RuleType::Incoming,
-            font,
             language,
         ))
         .push(donut_legend_entry(
             out_data,
             data_repr,
             RuleType::Outgoing,
-            font,
             language,
         ))
         .push(donut_legend_entry(
             dropped,
             data_repr,
             RuleType::Dropped,
-            font,
             language,
         ));
 
@@ -644,7 +570,6 @@ fn donut_row(
             in_data,
             out_data,
             dropped,
-            font,
             sniffer.thumbnail,
         ))
         .push(legend_col);
@@ -660,7 +585,6 @@ fn donut_legend_entry<'a>(
     value: u128,
     data_repr: DataRepr,
     rule_type: RuleType,
-    font: Font,
     language: Language,
 ) -> Row<'a, Message, StyleType> {
     let value_text = data_repr.formatted_string(value);
@@ -676,7 +600,7 @@ fn donut_legend_entry<'a>(
         .spacing(10)
         .align_y(Alignment::Center)
         .push(Row::new().width(10).push(rule_type.horizontal(5)))
-        .push(Text::new(format!("{label}: {value_text}")).font(font))
+        .push(Text::new(format!("{label}: {value_text}")))
 }
 
 const MIN_BARS_LENGTH: f32 = 4.0;
@@ -779,12 +703,11 @@ fn get_star_button<'a>(is_favorite: bool, host: Host) -> Button<'a, Message, Sty
     .on_press(Message::AddOrRemoveFavorite(host, !is_favorite))
 }
 
-fn get_info_tooltip<'a>(info_str: String, font: Font) -> Tooltip<'a, Message, StyleType> {
+fn get_info_tooltip<'a>(info_str: String) -> Tooltip<'a, Message, StyleType> {
     Tooltip::new(
         Container::new(
             Text::new("i")
                 .size(FONT_SIZE_FOOTER)
-                .font(font)
                 .line_height(LineHeight::Relative(1.0)),
         )
         .align_x(Alignment::Center)
@@ -792,7 +715,7 @@ fn get_info_tooltip<'a>(info_str: String, font: Font) -> Tooltip<'a, Message, St
         .height(20)
         .width(20)
         .class(ContainerType::BadgeInfo),
-        Text::new(info_str).font(font),
+        Text::new(info_str),
         Position::FollowCursor,
     )
     .class(ContainerType::Tooltip)

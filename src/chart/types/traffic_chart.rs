@@ -152,7 +152,6 @@ impl TrafficChart {
         let x_labels = if self.is_live_capture || self.thumbnail {
             None
         } else {
-            let font = self.style.get_extension().font;
             let ts_1 = self.first_packet_timestamp;
             let mut ts_2 = ts_1;
             ts_2.add_secs(i64::from(self.ticks) - 1);
@@ -161,20 +160,12 @@ impl TrafficChart {
                     .padding(Padding::new(8.0).bottom(15).left(55).right(25))
                     .width(Length::Fill)
                     .push(if self.no_more_packets {
-                        Some(
-                            iced::widget::Text::new(get_formatted_timestamp(ts_1))
-                                .font(font)
-                                .size(12.5),
-                        )
+                        Some(iced::widget::Text::new(get_formatted_timestamp(ts_1)).size(12.5))
                     } else {
                         None
                     })
                     .push(Space::new().width(Length::Fill))
-                    .push(
-                        iced::widget::Text::new(get_formatted_timestamp(ts_2))
-                            .font(font)
-                            .size(12.5),
-                    ),
+                    .push(iced::widget::Text::new(get_formatted_timestamp(ts_2)).size(12.5)),
             )
         };
         Column::new()
@@ -250,7 +241,7 @@ impl TrafficChart {
     fn font<'a>(&self, size: f64) -> TextStyle<'a> {
         (FONT_FAMILY_NAME, size)
             .into_font()
-            .style(self.style.get_font_weight())
+            .style(FontStyle::Normal)
             .color(&to_rgb_color(self.style.get_palette().text_body))
     }
 
