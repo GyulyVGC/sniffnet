@@ -195,10 +195,10 @@ pub const MON_AMOUR_PALETTE_EXTENSION: PaletteExtension = PaletteExtension {
 };
 
 pub const SARASA_MONO_BOLD_BYTES: &[u8] =
-    include_bytes!("../../../resources/fonts/subset/sarasa-mono-sc-bold.subset.ttf");
+    include_bytes!("../../../resources/fonts/subset/sarasa-mono-sc-regular.subset.ttf");
 pub const SARASA_MONO_BOLD: Font = Font {
     family: Family::Name(FONT_FAMILY_NAME),
-    weight: Weight::Bold,
+    weight: Weight::Normal,
     stretch: Stretch::Normal,
     style: Style::Normal,
 };

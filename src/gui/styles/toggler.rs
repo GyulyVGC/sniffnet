@@ -40,7 +40,7 @@ impl TogglerType {
             },
             text_color: None,
             border_radius: None,
-            padding_ratio: 0.0,
+            padding_ratio: 0.1,
         }
     }
 
@@ -69,7 +69,7 @@ impl TogglerType {
             },
             text_color: None,
             border_radius: None,
-            padding_ratio: 0.0,
+            padding_ratio: 0.1,
         }
     }
 }

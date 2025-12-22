@@ -1,8 +1,10 @@
 use crate::gui::styles::donut::Catalog;
 use crate::gui::styles::style_constants::{FONT_SIZE_FOOTER, FONT_SIZE_SUBTITLE};
 use crate::networking::types::data_representation::DataRepr;
+use iced::alignment::Vertical;
 use iced::widget::canvas::path::Arc;
 use iced::widget::canvas::{Frame, Text};
+use iced::widget::text::Alignment;
 use iced::widget::{Canvas, canvas};
 use iced::{Font, Length, Radians, Renderer, mouse};
 use std::f32::consts;
@@ -125,6 +127,8 @@ impl<Message, Theme: Catalog> canvas::Program<Message, Theme> for DonutChart {
             }
             .into(),
             font: self.font,
+            align_x: Alignment::Center,
+            align_y: Vertical::Center,
             ..Default::default()
         });
 

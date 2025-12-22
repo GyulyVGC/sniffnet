@@ -10,7 +10,7 @@ use plotters::style::RGBColor;
 use serde::{Deserialize, Serialize};
 
 use crate::gui::styles::style_constants::{
-    NIGHT_PALETTE, RED_ALERT_COLOR_DAILY, RED_ALERT_COLOR_NIGHTLY, SARASA_MONO, SARASA_MONO_BOLD,
+    RED_ALERT_COLOR_DAILY, RED_ALERT_COLOR_NIGHTLY, SARASA_MONO, SARASA_MONO_BOLD,
 };
 use crate::gui::styles::types::color_remote::color_hash;
 use crate::gui::styles::types::palette_extension::PaletteExtension;
@@ -103,7 +103,7 @@ impl Palette {
         } else {
             SARASA_MONO
         };
-        let alpha_chart_badge = if is_nightly { 0.15 } else { 0.75 };
+        let alpha_chart_badge = if is_nightly { 0.3 } else { 0.5 };
         let alpha_round_borders = if is_nightly { 0.3 } else { 0.6 };
         let alpha_round_containers = if is_nightly { 0.12 } else { 0.24 };
         let buttons_color = self.generate_buttons_color();
@@ -194,12 +194,6 @@ pub fn mix_colors(color_1: Color, color_2: Color) -> Color {
         g: f32::midpoint(color_1.g, color_2.g),
         b: f32::midpoint(color_1.b, color_2.b),
         a: 1.0,
-    }
-}
-
-impl Default for Palette {
-    fn default() -> Self {
-        NIGHT_PALETTE
     }
 }
 
