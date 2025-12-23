@@ -30,7 +30,7 @@ use iced::Length::FillPortion;
 use iced::widget::scrollable::Direction;
 use iced::widget::{
     Button, Checkbox, Column, Container, PickList, Row, Scrollable, Space, Text, TextInput, button,
-    center,
+    center, row,
 };
 use iced::{Alignment, Length, Padding, alignment};
 
@@ -210,7 +210,7 @@ fn get_col_adapter(sniffer: &Sniffer) -> Column<'_, Message, StyleType> {
         })
 }
 
-fn get_addresses_row(my_dev: &MyDevice) -> Option<Row<'_, Message, StyleType>> {
+fn get_addresses_row(my_dev: &MyDevice) -> Option<row::Wrapping<'_, Message, StyleType>> {
     let addresses = my_dev.get_addresses();
     if addresses.is_empty() {
         return None;
@@ -224,7 +224,7 @@ fn get_addresses_row(my_dev: &MyDevice) -> Option<Row<'_, Message, StyleType>> {
                 .class(ContainerType::AdapterAddress),
         );
     }
-    Some(row)
+    Some(row.wrap())
 }
 
 fn get_adapter_title_subtitle(my_dev: &MyDevice) -> (String, Option<String>) {

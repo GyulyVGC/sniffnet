@@ -1,5 +1,5 @@
 use iced::widget::scrollable::Direction;
-use iced::widget::{Button, Slider};
+use iced::widget::{Button, Slider, row};
 use iced::widget::{Checkbox, Column, Container, Row, Scrollable, Space, Text, TextInput};
 use iced::{Alignment, Length, Padding};
 
@@ -30,6 +30,8 @@ use crate::translations::translations_5::remote_notifications_translation;
 use crate::utils::types::icon::Icon;
 use crate::{Language, Sniffer, StyleType};
 
+const CONTAINERS_WIDTH: f32 = 715.0;
+
 pub fn settings_notifications_page<'a>(sniffer: &Sniffer) -> Container<'a, Message, StyleType> {
     let Settings {
         language,
@@ -47,6 +49,7 @@ pub fn settings_notifications_page<'a>(sniffer: &Sniffer) -> Container<'a, Messa
     }
 
     let mut content = Column::new()
+        .align_x(Alignment::Center)
         .width(Length::Fill)
         .push(settings_header(color_gradient, language))
         .push(get_settings_tabs(SettingsPage::Notifications, language))
@@ -61,7 +64,6 @@ pub fn settings_notifications_page<'a>(sniffer: &Sniffer) -> Container<'a, Messa
         .push(Space::new().height(5));
 
     let volume_notification_col = Column::new()
-        .padding(Padding::new(5.0).bottom(0))
         .spacing(10)
         .align_x(Alignment::Center)
         .width(Length::Fill)
@@ -85,7 +87,7 @@ pub fn settings_notifications_page<'a>(sniffer: &Sniffer) -> Container<'a, Messa
                     &notifications.remote_notifications,
                     language,
                 )),
-            Direction::Vertical(ScrollbarType::properties().margin(10)),
+            Direction::Vertical(ScrollbarType::properties().margin(15)),
         ));
 
     content = content.push(volume_notification_col);
@@ -128,7 +130,7 @@ fn get_data_notify<'a>(
     if data_notification.threshold.is_none() {
         Container::new(ret_val)
             .padding(15)
-            .width(700)
+            .width(CONTAINERS_WIDTH)
             .class(ContainerType::BorderedRound)
     } else {
         let data_representation_row =
@@ -142,7 +144,7 @@ fn get_data_notify<'a>(
 
         Container::new(ret_val)
             .padding(15)
-            .width(700)
+            .width(CONTAINERS_WIDTH)
             .class(ContainerType::BorderedRound)
     }
 }
@@ -172,12 +174,12 @@ fn get_favorite_notify<'a>(
         ret_val = ret_val.push(sound_row);
         Container::new(ret_val)
             .padding(15)
-            .width(700)
+            .width(CONTAINERS_WIDTH)
             .class(ContainerType::BorderedRound)
     } else {
         Container::new(ret_val)
             .padding(15)
-            .width(700)
+            .width(CONTAINERS_WIDTH)
             .class(ContainerType::BorderedRound)
     }
 }
@@ -207,12 +209,12 @@ fn get_remote_notifications<'a>(
         ret_val = ret_val.push(input_row);
         Container::new(ret_val)
             .padding(15)
-            .width(700)
+            .width(CONTAINERS_WIDTH)
             .class(ContainerType::BorderedRound)
     } else {
         Container::new(ret_val)
             .padding(15)
-            .width(700)
+            .width(CONTAINERS_WIDTH)
             .class(ContainerType::BorderedRound)
     }
 }
@@ -299,7 +301,7 @@ fn volume_slider<'a>(language: Language, volume: u8) -> Container<'a, Message, S
 fn sound_buttons<'a>(
     notification: Notification,
     language: Language,
-) -> Row<'a, Message, StyleType> {
+) -> row::Wrapping<'a, Message, StyleType> {
     let current_sound = match notification {
         Notification::Data(n) => n.sound,
         Notification::Favorite(n) => n.sound,
@@ -340,7 +342,7 @@ fn sound_buttons<'a>(
             )),
         );
     }
-    ret_val
+    ret_val.wrap()
 }
 
 pub fn settings_header<'a>(
@@ -373,7 +375,7 @@ fn row_data_representation<'a>(
     data_notification: DataNotification,
     language: Language,
     data_repr: DataRepr,
-) -> Row<'a, Message, StyleType> {
+) -> row::Wrapping<'a, Message, StyleType> {
     let mut ret_val = Row::new()
         .width(Length::Shrink)
         .align_y(Alignment::Center)
@@ -409,5 +411,5 @@ fn row_data_representation<'a>(
             )),
         );
     }
-    ret_val
+    ret_val.wrap()
 }

@@ -1,5 +1,5 @@
 use iced::widget::scrollable::Direction;
-use iced::widget::{Button, Column, Container, Row, Scrollable, Text};
+use iced::widget::{Button, Column, Container, Row, Scrollable, Text, row};
 use iced::widget::{Space, button, lazy};
 use iced::{Alignment, Color, Element, Length, Padding};
 
@@ -57,24 +57,26 @@ pub fn settings_style_page(sniffer: &Sniffer) -> Container<'_, Message, StyleTyp
         .width(Length::Fill)
         .push(
             Row::new()
+                .spacing(15)
                 .push(get_palette_container(style, "Yeti".to_string(), Night))
-                .push(Space::new().width(15))
-                .push(get_palette_container(style, "Yeti".to_string(), Day)),
+                .push(get_palette_container(style, "Yeti".to_string(), Day))
+                .wrap(),
         )
         .push(Space::new().height(15))
         .push(
             Row::new()
+                .spacing(15)
                 .push(get_palette_container(
                     style,
                     "Deep Sea".to_string(),
                     DeepSea,
                 ))
-                .push(Space::new().width(15))
                 .push(get_palette_container(
                     style,
                     "Mon Amour".to_string(),
                     MonAmour,
-                )),
+                ))
+                .wrap(),
         )
         .push(Space::new().height(15));
     for children in get_extra_palettes(ExtraStyles::all_styles(), style) {
@@ -88,7 +90,7 @@ pub fn settings_style_page(sniffer: &Sniffer) -> Container<'_, Message, StyleTyp
 
     let styles_scroll = Scrollable::with_direction(
         styles_col,
-        Direction::Vertical(ScrollbarType::properties().margin(10)),
+        Direction::Vertical(ScrollbarType::properties().margin(15)),
     );
 
     content = content.push(styles_scroll);
@@ -102,7 +104,7 @@ pub fn settings_style_page(sniffer: &Sniffer) -> Container<'_, Message, StyleTyp
 fn gradients_row<'a>(
     color_gradient: GradientType,
     language: Language,
-) -> Row<'a, Message, StyleType> {
+) -> row::Wrapping<'a, Message, StyleType> {
     Row::new()
         .align_y(Alignment::Center)
         .spacing(10)
@@ -161,6 +163,7 @@ fn gradients_row<'a>(
             })
             .on_press(Message::GradientsSelection(GradientType::Wild)),
         )
+        .wrap()
 }
 
 fn get_palette_container<'a>(
@@ -261,9 +264,10 @@ fn get_extra_palettes<'a>(
         if let Some(second) = second {
             children.extend([
                 Row::new()
+                    .spacing(15)
                     .push(first)
-                    .push(Space::new().width(15))
                     .push(second)
+                    .wrap()
                     .into(),
                 <Space as Into<Element<Message, StyleType>>>::into(Space::new().height(15)),
             ]);
@@ -331,7 +335,7 @@ fn lazy_custom_style_input<'a>(
         } else {
             75
         })
-        .width(380)
+        .width(350)
         .padding(Padding::ZERO.top(10).bottom(5))
         .class(if is_custom_toml_style_set {
             ButtonType::BorderedRoundSelected
