@@ -9,7 +9,7 @@ use iced::{Alignment, Length, Padding};
 use crate::gui::components::button::row_open_link_tooltip;
 use crate::gui::styles::button::ButtonType;
 use crate::gui::styles::container::ContainerType;
-use crate::gui::styles::style_constants::{FONT_SIZE_FOOTER, FONT_SIZE_SUBTITLE};
+use crate::gui::styles::style_constants::{FONT_SIZE_FOOTER, FONT_SIZE_SUBTITLE, TOOLTIP_DELAY};
 use crate::gui::styles::text::TextType;
 use crate::gui::styles::types::gradient_type::GradientType;
 use crate::gui::styles::types::style_type::StyleType;
@@ -44,7 +44,7 @@ pub fn footer<'a>(
         .padding([0, 20])
         .align_y(Alignment::Center)
         .push(release_details_row)
-        .push(get_button_feedback())
+        .push(get_button_roadmap())
         .push(get_button_wiki())
         .push(get_button_github())
         .push(get_button_news())
@@ -80,7 +80,7 @@ pub fn footer<'a>(
         .class(ContainerType::Gradient(color_gradient))
 }
 
-fn get_button_feedback<'a>() -> Tooltip<'a, Message, StyleType> {
+fn get_button_roadmap<'a>() -> Tooltip<'a, Message, StyleType> {
     let content = button(
         Icon::Roadmap
             .to_text()
@@ -97,6 +97,7 @@ fn get_button_feedback<'a>() -> Tooltip<'a, Message, StyleType> {
     Tooltip::new(content, row_open_link_tooltip("Roadmap"), Position::Top)
         .gap(10)
         .class(ContainerType::Tooltip)
+        .delay(TOOLTIP_DELAY)
 }
 
 fn get_button_wiki<'a>() -> Tooltip<'a, Message, StyleType> {
@@ -116,6 +117,7 @@ fn get_button_wiki<'a>() -> Tooltip<'a, Message, StyleType> {
     Tooltip::new(content, row_open_link_tooltip("Wiki"), Position::Top)
         .gap(7.5)
         .class(ContainerType::Tooltip)
+        .delay(TOOLTIP_DELAY)
 }
 
 fn get_button_github<'a>() -> Tooltip<'a, Message, StyleType> {
@@ -134,6 +136,7 @@ fn get_button_github<'a>() -> Tooltip<'a, Message, StyleType> {
     Tooltip::new(content, row_open_link_tooltip("GitHub"), Position::Top)
         .gap(5)
         .class(ContainerType::Tooltip)
+        .delay(TOOLTIP_DELAY)
 }
 
 fn get_button_news<'a>() -> Tooltip<'a, Message, StyleType> {
@@ -152,6 +155,7 @@ fn get_button_news<'a>() -> Tooltip<'a, Message, StyleType> {
     Tooltip::new(content, row_open_link_tooltip("News"), Position::Top)
         .gap(7.5)
         .class(ContainerType::Tooltip)
+        .delay(TOOLTIP_DELAY)
 }
 
 fn get_button_sponsor<'a>() -> Tooltip<'a, Message, StyleType> {
@@ -171,6 +175,7 @@ fn get_button_sponsor<'a>() -> Tooltip<'a, Message, StyleType> {
     Tooltip::new(content, row_open_link_tooltip("Sponsor"), Position::Top)
         .gap(10)
         .class(ContainerType::Tooltip)
+        .delay(TOOLTIP_DELAY)
 }
 
 fn get_release_details<'a>(
@@ -210,7 +215,8 @@ fn get_release_details<'a>(
                 Position::Top,
             )
             .gap(7.5)
-            .class(ContainerType::Tooltip);
+            .class(ContainerType::Tooltip)
+            .delay(TOOLTIP_DELAY);
             ret_val = ret_val.push(Space::new().width(10)).push(tooltip);
         } else {
             // this is the latest release

@@ -2,6 +2,7 @@
 
 use iced::font::{Family, Stretch, Style, Weight};
 use iced::{Color, Font};
+use std::time::Duration;
 
 use crate::gui::sniffer::{FONT_FAMILY_NAME, ICON_FONT_FAMILY_NAME};
 use crate::gui::styles::types::palette::Palette;
@@ -224,3 +225,6 @@ pub const RED_ALERT_COLOR_DAILY: Color = Color {
     b: 0.0,
     a: 1.0,
 };
+
+// delays
+pub const TOOLTIP_DELAY: Duration = Duration::from_millis(300);

@@ -15,7 +15,9 @@ use crate::gui::styles::button::ButtonType;
 use crate::gui::styles::container::ContainerType;
 use crate::gui::styles::rule::RuleType;
 use crate::gui::styles::scrollbar::ScrollbarType;
-use crate::gui::styles::style_constants::{FONT_SIZE_FOOTER, FONT_SIZE_SUBTITLE, ICONS};
+use crate::gui::styles::style_constants::{
+    FONT_SIZE_FOOTER, FONT_SIZE_SUBTITLE, ICONS, TOOLTIP_DELAY,
+};
 use crate::gui::styles::text::TextType;
 use crate::gui::styles::text_input::TextInputType;
 use crate::gui::types::message::Message;
@@ -178,7 +180,8 @@ fn report_header_row(
             ContainerType::Tooltip
         };
         let title_tooltip = Tooltip::new(title_row, Text::new(tooltip_val), Position::FollowCursor)
-            .class(tooltip_style);
+            .class(tooltip_style)
+            .delay(TOOLTIP_DELAY);
 
         let mut col_header = Column::new()
             .align_x(Alignment::Center)

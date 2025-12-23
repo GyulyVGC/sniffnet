@@ -19,6 +19,7 @@ use crate::countries::flags_pictures::{
 };
 use crate::countries::types::country::Country;
 use crate::gui::styles::container::ContainerType;
+use crate::gui::styles::style_constants::TOOLTIP_DELAY;
 use crate::gui::styles::svg::SvgType;
 use crate::gui::types::message::Message;
 use crate::networking::types::data_info_host::DataInfoHost;
@@ -350,7 +351,8 @@ pub fn get_flag_tooltip<'a>(
     };
     let mut tooltip = Tooltip::new(content, Text::new(actual_tooltip), Position::FollowCursor)
         .snap_within_viewport(true)
-        .class(tooltip_style);
+        .class(tooltip_style)
+        .delay(TOOLTIP_DELAY);
 
     if width == FLAGS_WIDTH_SMALL {
         tooltip = tooltip.padding(3);
@@ -392,4 +394,5 @@ pub fn get_computer_tooltip<'a>(
     Tooltip::new(content, Text::new(tooltip), Position::FollowCursor)
         .snap_within_viewport(true)
         .class(ContainerType::Tooltip)
+        .delay(TOOLTIP_DELAY)
 }

@@ -12,7 +12,7 @@ use crate::gui::styles::button::ButtonType;
 use crate::gui::styles::container::ContainerType;
 use crate::gui::styles::rule::RuleType;
 use crate::gui::styles::scrollbar::ScrollbarType;
-use crate::gui::styles::style_constants::{FONT_SIZE_FOOTER, FONT_SIZE_TITLE};
+use crate::gui::styles::style_constants::{FONT_SIZE_FOOTER, FONT_SIZE_TITLE, TOOLTIP_DELAY};
 use crate::gui::styles::text::TextType;
 use crate::gui::types::filters::Filters;
 use crate::gui::types::message::Message;
@@ -719,6 +719,7 @@ fn get_info_tooltip<'a>(info_str: String) -> Tooltip<'a, Message, StyleType> {
         Position::FollowCursor,
     )
     .class(ContainerType::Tooltip)
+    .delay(TOOLTIP_DELAY)
 }
 
 fn sort_arrows<'a>(

@@ -10,6 +10,7 @@ use crate::gui::pages::types::settings_page::SettingsPage;
 use crate::gui::sniffer::Sniffer;
 use crate::gui::styles::button::ButtonType;
 use crate::gui::styles::container::ContainerType;
+use crate::gui::styles::style_constants::TOOLTIP_DELAY;
 use crate::gui::styles::types::gradient_type::GradientType;
 use crate::gui::types::message::Message;
 use crate::gui::types::settings::Settings;
@@ -100,6 +101,7 @@ fn get_button_reset<'a>(language: Language) -> Tooltip<'a, Message, StyleType> {
     )
     .gap(5)
     .class(ContainerType::Tooltip)
+    .delay(TOOLTIP_DELAY)
 }
 
 pub fn get_button_settings<'a>(
@@ -125,6 +127,7 @@ pub fn get_button_settings<'a>(
     )
     .gap(5)
     .class(ContainerType::Tooltip)
+    .delay(TOOLTIP_DELAY)
 }
 
 pub fn get_button_minimize<'a>(
@@ -164,6 +167,7 @@ pub fn get_button_minimize<'a>(
     Tooltip::new(content, Text::new(tooltip), Position::FollowCursor)
         .gap(0)
         .class(tooltip_style)
+        .delay(TOOLTIP_DELAY)
 }
 
 pub fn get_button_freeze<'a>(
@@ -202,6 +206,7 @@ pub fn get_button_freeze<'a>(
     Tooltip::new(content, Text::new(tooltip), Position::FollowCursor)
         .gap(0)
         .class(tooltip_style)
+        .delay(TOOLTIP_DELAY)
 }
 
 fn thumbnail_header<'a>(

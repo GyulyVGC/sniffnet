@@ -8,7 +8,7 @@ use crate::gui::pages::types::settings_page::SettingsPage;
 use crate::gui::styles::container::ContainerType;
 use crate::gui::styles::rule::RuleType;
 use crate::gui::styles::scrollbar::ScrollbarType;
-use crate::gui::styles::style_constants::FONT_SIZE_FOOTER;
+use crate::gui::styles::style_constants::{FONT_SIZE_FOOTER, TOOLTIP_DELAY};
 use crate::gui::styles::text::TextType;
 use crate::gui::types::message::Message;
 use crate::gui::types::settings::Settings;
@@ -253,6 +253,7 @@ fn get_button_clear_all<'a>(language: Language) -> Tooltip<'a, Message, StyleTyp
     )
     .gap(5)
     .class(ContainerType::Tooltip)
+    .delay(TOOLTIP_DELAY)
 }
 
 fn logged_notifications<'a>(sniffer: &Sniffer) -> Column<'a, Message, StyleType> {

@@ -10,7 +10,7 @@ use crate::gui::pages::types::settings_page::SettingsPage;
 use crate::gui::styles::button::ButtonType;
 use crate::gui::styles::container::ContainerType;
 use crate::gui::styles::rule::RuleType;
-use crate::gui::styles::style_constants::FONT_SIZE_SUBTITLE;
+use crate::gui::styles::style_constants::{FONT_SIZE_SUBTITLE, TOOLTIP_DELAY};
 use crate::gui::styles::text::TextType;
 use crate::gui::types::message::Message;
 use crate::gui::types::settings::Settings;
@@ -124,7 +124,8 @@ fn language_picklist<'a>(language: Language) -> Container<'a, Message, StyleType
                 row_open_link_tooltip("The selected language is not\nfully updated to version 1.4"),
                 Position::FollowCursor,
             )
-            .class(ContainerType::Tooltip),
+            .class(ContainerType::Tooltip)
+            .delay(TOOLTIP_DELAY),
         );
     }
 
@@ -211,7 +212,8 @@ fn need_help<'a>(language: Language) -> Container<'a, Message, StyleType> {
                 Position::Right,
             )
             .gap(5)
-            .class(ContainerType::Tooltip),
+            .class(ContainerType::Tooltip)
+            .delay(TOOLTIP_DELAY),
         )
         .push(Space::new().height(Length::Fill));
 
@@ -313,5 +315,5 @@ fn button_clear_mmdb<'a>(
         button = button.on_press(message(String::new()));
     }
 
-    Tooltip::new(button, "", Position::Right)
+    Tooltip::new(button, "", Position::Right).delay(TOOLTIP_DELAY)
 }

@@ -5,7 +5,7 @@ use crate::gui::components::button::button_hide;
 use crate::gui::styles::container::ContainerType;
 use crate::gui::styles::rule::RuleType;
 use crate::gui::styles::scrollbar::ScrollbarType;
-use crate::gui::styles::style_constants::FONT_SIZE_TITLE;
+use crate::gui::styles::style_constants::{FONT_SIZE_TITLE, TOOLTIP_DELAY};
 use crate::gui::styles::text::TextType;
 use crate::gui::styles::types::gradient_type::GradientType;
 use crate::gui::types::message::Message;
@@ -394,4 +394,5 @@ fn get_button_copy<'a>(
     )
     .gap(5)
     .class(ContainerType::Tooltip)
+    .delay(TOOLTIP_DELAY)
 }
