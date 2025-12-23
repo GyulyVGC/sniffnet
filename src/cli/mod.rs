@@ -55,12 +55,8 @@ pub fn handle_cli_args() -> Task<Message> {
         std::process::exit(0);
     }
 
-    let mut boot_task_chain = window::latest()
-        .map(Message::StartApp)
-        .chain(Task::done(Message::Periodic));
+    let mut boot_task_chain = window::latest().map(Message::StartApp);
     if let Some(adapter) = args.adapter {
-        // TODO: check if this works once #653 is fixed
-        // currently the link type and device name aren't displayed properly when starting from CLI
         boot_task_chain = boot_task_chain
             .chain(Task::done(Message::SetCaptureSource(
                 CaptureSourcePicklist::Device,

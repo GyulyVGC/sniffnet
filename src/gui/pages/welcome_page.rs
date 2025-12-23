@@ -6,7 +6,7 @@ use iced::alignment::{Horizontal, Vertical};
 use iced::widget::{Column, Container, Space, Text};
 use iced::{Alignment, Length};
 
-pub fn welcome_page<'a>(x: u8) -> Container<'a, Message, StyleType> {
+pub fn welcome_page<'a>(x: u8, thumbnail: bool) -> Container<'a, Message, StyleType> {
     let icon = match x {
         0..=3 | 20.. => Text::new(""),
         4 => Icon::Sniffnet1.to_text(),
@@ -40,11 +40,14 @@ pub fn welcome_page<'a>(x: u8) -> Container<'a, Message, StyleType> {
         11..=19 => TextType::Welcome(1.0),
     };
 
+    let icon_size = if thumbnail { 100 } else { 200 };
+    let text_size = if thumbnail { 40 } else { 75 };
+
     let body = Column::new()
         .align_x(Alignment::Center)
         .push(Space::new().height(Length::Fill))
-        .push(icon.size(200).line_height(0.9).class(text_type))
-        .push(text.size(75).class(text_type))
+        .push(icon.size(icon_size).line_height(0.9).class(text_type))
+        .push(text.size(text_size).class(text_type))
         .push(Space::new().height(Length::FillPortion(2)));
 
     Container::new(body)
