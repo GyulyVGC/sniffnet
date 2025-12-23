@@ -186,8 +186,6 @@ impl Sniffer {
     }
 
     fn keyboard_subscription(&self) -> Subscription<Message> {
-        const NO_MODIFIER: Modifiers = Modifiers::empty();
-
         if self.welcome.is_some() {
             return Subscription::none();
         }
@@ -226,7 +224,7 @@ impl Sniffer {
                         Key::Named(Named::Tab) => Some(Message::SwitchPage(false)),
                         _ => None,
                     },
-                    NO_MODIFIER => match key {
+                    Modifiers::NONE => match key {
                         Key::Named(Named::Enter) => Some(Message::ReturnKeyPressed),
                         Key::Named(Named::Escape) => Some(Message::EscKeyPressed),
                         Key::Named(Named::Tab) => Some(Message::SwitchPage(true)),
