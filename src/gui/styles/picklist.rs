@@ -97,8 +97,8 @@ impl Catalog for StyleType {
 
     fn style(&self, class: &<Self as Catalog>::Class<'_>, status: Status) -> Style {
         match status {
-            Status::Active | Status::Opened { .. } => class.active(self),
-            Status::Hovered => class.hovered(self),
+            Status::Active | Status::Opened { is_hovered: false } => class.active(self),
+            Status::Hovered | Status::Opened { is_hovered: true } => class.hovered(self),
         }
     }
 }
