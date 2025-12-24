@@ -27,25 +27,23 @@ use crate::report::get_report_entries::{get_host_entries, get_service_entries};
 use crate::report::types::search_parameters::SearchParameters;
 use crate::report::types::sort_type::SortType;
 use crate::translations::translations::{
-    active_filters_translation, error_translation, incoming_translation, no_addresses_translation,
-    none_translation, outgoing_translation, traffic_rate_translation, waiting_translation,
+    active_filters_translation, incoming_translation, none_translation, outgoing_translation,
+    traffic_rate_translation,
 };
 use crate::translations::translations_2::{
     data_representation_translation, dropped_translation, host_translation,
     only_top_30_items_translation,
 };
-use crate::translations::translations_3::{service_translation, unsupported_link_type_translation};
-use crate::translations::translations_4::reading_from_pcap_translation;
+use crate::translations::translations_3::service_translation;
 use crate::utils::types::icon::Icon;
 use crate::{Language, RunningPage, StyleType};
-use iced::Length::{Fill, FillPortion};
+use iced::Length::Fill;
 use iced::alignment::{Horizontal, Vertical};
 use iced::widget::scrollable::Direction;
 use iced::widget::text::LineHeight;
 use iced::widget::tooltip::Position;
 use iced::widget::{Button, Column, Container, Row, Scrollable, Space, Text, Tooltip, button};
 use iced::{Alignment, Element, Length, Padding};
-use std::fmt::Write;
 
 /// Computes the body of gui overview page
 pub fn overview_page(sniffer: &Sniffer) -> Container<'_, Message, StyleType> {
@@ -83,92 +81,6 @@ pub fn overview_page(sniffer: &Sniffer) -> Container<'_, Message, StyleType> {
         .push(container_report);
 
     Container::new(Column::new().push(tab_and_body.push(body))).height(Length::Fill)
-}
-
-pub fn waiting_page(sniffer: &Sniffer) -> Option<Container<'_, Message, StyleType>> {
-    let Settings { language, .. } = sniffer.conf.settings;
-
-    let dots = &sniffer.dots_pulse.0;
-
-    let tot_packets = sniffer
-        .info_traffic
-        .tot_data_info
-        .tot_data(DataRepr::Packets);
-
-    let body = if let Some(error) = sniffer.pcap_error.as_ref() {
-        // pcap threw an ERROR!
-        body_pcap_error(error, dots, language)
-    } else if tot_packets == 0 {
-        // no packets observed at all
-        body_no_packets(&sniffer.capture_source, language, dots)
-    } else {
-        return None;
-    };
-
-    Some(Container::new(Column::new().push(body)).height(Length::Fill))
-}
-
-fn body_no_packets<'a>(
-    cs: &CaptureSource,
-    language: Language,
-    dots: &str,
-) -> Column<'a, Message, StyleType> {
-    let link_type = cs.get_link_type();
-    let mut cs_info = cs.get_name();
-    let _ = write!(cs_info, "\n{}", link_type.full_print_on_one_line(language));
-    let (icon_text, nothing_to_see_text) = if !link_type.is_supported() {
-        (
-            Icon::Warning.to_text().size(60),
-            unsupported_link_type_translation(language, &cs_info).align_x(Alignment::Center),
-        )
-    } else if matches!(cs, CaptureSource::File(_)) {
-        (
-            Icon::get_hourglass(dots.len()).size(60),
-            reading_from_pcap_translation(language, &cs_info).align_x(Alignment::Center),
-        )
-    } else if cs.get_addresses().is_empty() {
-        (
-            Icon::Warning.to_text().size(60),
-            no_addresses_translation(language, &cs_info).align_x(Alignment::Center),
-        )
-    } else {
-        (
-            Icon::get_hourglass(dots.len()).size(60),
-            waiting_translation(language, &cs_info).align_x(Alignment::Center),
-        )
-    };
-
-    Column::new()
-        .width(Length::Fill)
-        .padding(10)
-        .spacing(10)
-        .align_x(Alignment::Center)
-        .push(Space::new().height(Length::Fill))
-        .push(icon_text)
-        .push(Space::new().height(15))
-        .push(nothing_to_see_text)
-        .push(Text::new(dots.to_owned()).size(50))
-        .push(Space::new().height(FillPortion(2)))
-}
-
-fn body_pcap_error<'a>(
-    pcap_error: &'a str,
-    dots: &'a str,
-    language: Language,
-) -> Column<'a, Message, StyleType> {
-    let error_text = error_translation(language, pcap_error).align_x(Alignment::Center);
-
-    Column::new()
-        .width(Length::Fill)
-        .padding(10)
-        .spacing(10)
-        .align_x(Alignment::Center)
-        .push(Space::new().height(Length::Fill))
-        .push(Icon::Error.to_text().size(60))
-        .push(Space::new().height(15))
-        .push(error_text)
-        .push(Text::new(dots.to_owned()).size(50))
-        .push(Space::new().height(FillPortion(2)))
 }
 
 fn row_report<'a>(sniffer: &Sniffer) -> Row<'a, Message, StyleType> {

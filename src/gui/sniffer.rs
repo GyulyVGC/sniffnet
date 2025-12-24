@@ -1,6 +1,6 @@
 //! Module defining the application structure: messages, updates, subscriptions.
 
-use crate::gui::pages::overview_page::waiting_page;
+use crate::gui::pages::waiting_page::waiting_page;
 use async_channel::Receiver;
 use iced::Event::{Keyboard, Window};
 use iced::keyboard::key::Named;

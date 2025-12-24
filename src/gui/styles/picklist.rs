@@ -24,14 +24,14 @@ impl PicklistType {
         let ext = style.get_extension();
         iced::overlay::menu::Style {
             text_color: colors.text_body,
-            background: Background::Color(ext.buttons_color),
+            background: Background::Color(mix_colors(ext.buttons_color, colors.primary)),
             border: Border {
                 width: BORDER_WIDTH,
                 radius: PICKLIST_BORDER_RADIUS.into(),
                 color: colors.secondary,
             },
             selected_text_color: colors.text_body,
-            selected_background: Background::Color(mix_colors(ext.buttons_color, colors.primary)),
+            selected_background: Background::Color(ext.buttons_color),
             shadow: Shadow::default(),
         }
     }
@@ -46,7 +46,7 @@ impl PicklistType {
             text_color: colors.text_body,
             placeholder_color: colors.text_body,
             handle_color: colors.text_body,
-            background: Background::Color(ext.buttons_color),
+            background: Background::Color(mix_colors(ext.buttons_color, colors.primary)),
             border: Border {
                 radius: PICKLIST_BORDER_RADIUS.into(),
                 width: 0.0,
@@ -63,7 +63,7 @@ impl PicklistType {
             text_color: colors.text_body,
             placeholder_color: colors.text_body,
             handle_color: colors.text_body,
-            background: Background::Color(mix_colors(ext.buttons_color, colors.primary)),
+            background: Background::Color(ext.buttons_color),
             border: Border {
                 radius: PICKLIST_BORDER_RADIUS.into(),
                 width: BORDER_WIDTH,
@@ -97,8 +97,8 @@ impl Catalog for StyleType {
 
     fn style(&self, class: &<Self as Catalog>::Class<'_>, status: Status) -> Style {
         match status {
-            Status::Active | Status::Opened { is_hovered: false } => class.active(self),
-            Status::Hovered | Status::Opened { is_hovered: true } => class.hovered(self),
+            Status::Active => class.active(self),
+            Status::Hovered | Status::Opened { .. } => class.hovered(self),
         }
     }
 }
