@@ -823,15 +823,8 @@ impl Sniffer {
             *my_dev = dev;
             chart.update_charts_data(packets);
         }
-        self.preview_charts.sort_by(|(_, c1), (_, c2)| {
-            if c1.max_packets > 0.0 && c2.max_packets == 0.0 {
-                std::cmp::Ordering::Less
-            } else if c1.max_packets == 0.0 && c2.max_packets > 0.0 {
-                std::cmp::Ordering::Greater
-            } else {
-                std::cmp::Ordering::Equal
-            }
-        });
+        self.preview_charts
+            .sort_by(|(_, c1), (_, c2)| c2.tot_packets.total_cmp(&c1.tot_packets));
     }
 
     /// Updates threshold if it hasn't been edited for a while

@@ -61,6 +61,15 @@ impl ChartSeries {
         }
         max
     }
+
+    /// Finds the total y values displayed in chart.
+    pub(super) fn get_tot(&self) -> f32 {
+        let mut tot = 0.0;
+        for key in &self.spline {
+            tot += key.value;
+        }
+        tot
+    }
 }
 
 pub(super) fn sample_spline(spline: &Spline<f32, f32>, multiplier: f32) -> Vec<(f32, f32)> {
