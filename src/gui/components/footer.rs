@@ -191,15 +191,9 @@ fn get_release_details<'a>(
     if let Some(boolean_response) = newer_release_available {
         if boolean_response {
             // a newer release is available on GitHub
-            let icon_size = match dots.len() {
-                2 => 16.0,
-                3 => 18.0,
-                _ => 14.0,
-            };
             let button = button(
-                Icon::Update
-                    .to_text()
-                    .size(icon_size)
+                Icon::get_update(dots.len())
+                    .size(21)
                     .align_x(Alignment::Center)
                     .align_y(Alignment::Center)
                     .line_height(LineHeight::Relative(0.8)),

@@ -53,7 +53,9 @@ pub enum Icon {
     Sun,
     ThumbnailOpen,
     ThumbnailClose,
-    Update,
+    Update1,
+    Update2,
+    Update3,
     Warning,
     Waves,
     Pause,
@@ -112,7 +114,9 @@ impl Icon {
             Icon::Book => 'B',
             Icon::Roadmap => '?',
             Icon::News => '>',
-            Icon::Update => '<',
+            Icon::Update1 => '\'',
+            Icon::Update2 => '%',
+            Icon::Update3 => '&',
             // Icon::Expand => 'p',
             // Icon::Collapse => 'q',
             Icon::Pause => '-',
@@ -129,6 +133,14 @@ impl Icon {
             2 => Icon::Hourglass2.to_text(),
             3 => Icon::Hourglass3.to_text(),
             _ => Icon::Hourglass1.to_text(),
+        }
+    }
+
+    pub fn get_update<'a>(num: usize) -> Text<'a, StyleType> {
+        match num {
+            2 => Icon::Update2.to_text(),
+            3 => Icon::Update3.to_text(),
+            _ => Icon::Update1.to_text(),
         }
     }
 }
