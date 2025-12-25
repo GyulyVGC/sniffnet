@@ -31,7 +31,7 @@ pub fn footer<'a>(
         return thumbnail_footer();
     }
 
-    let release_details_row = get_release_details(language, newer_release_available, &dots_pulse.0);
+    let release_details_row = get_release_details(language, newer_release_available);
 
     let heart_size = match dots_pulse.1 {
         1 => 17.0,
@@ -187,7 +187,6 @@ fn get_button_sponsor<'a>() -> Tooltip<'a, Message, StyleType> {
 fn get_release_details<'a>(
     language: Language,
     newer_release_available: Option<bool>,
-    dots: &str,
 ) -> Row<'a, Message, StyleType> {
     let mut ret_val = Row::new()
         .align_y(Alignment::Center)
@@ -198,8 +197,9 @@ fn get_release_details<'a>(
         if boolean_response {
             // a newer release is available on GitHub
             let button = button(
-                Icon::get_update(dots.len())
-                    .size(21)
+                Icon::NewerVersion
+                    .to_text()
+                    .size(23)
                     .align_x(Alignment::Center)
                     .align_y(Alignment::Center)
                     .line_height(LineHeight::Relative(0.8)),
