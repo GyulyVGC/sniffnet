@@ -1020,10 +1020,12 @@ impl Sniffer {
     }
 
     fn update_waiting_dots(&mut self) {
-        if self.dots_pulse.0.len() > 2 {
-            self.dots_pulse.0 = String::new();
+        if !self.frozen {
+            if self.dots_pulse.0.len() > 2 {
+                self.dots_pulse.0 = String::new();
+            }
+            self.dots_pulse.0 = ".".repeat(self.dots_pulse.0.len() + 1);
         }
-        self.dots_pulse.0 = ".".repeat(self.dots_pulse.0.len() + 1);
     }
 
     fn add_or_remove_favorite(&mut self, host: &Host, add: bool) {
@@ -1469,7 +1471,7 @@ mod tests {
     #[test]
     #[parallel] // needed to not collide with other tests generating configs files
     fn test_dots_pulse_update() {
-        // every kind of message will the integer, but only Periodic will update the string
+        // every kind of message will update the integer, but only Periodic will update the string
         let mut sniffer = Sniffer::new(Conf::default());
 
         assert_eq!(sniffer.dots_pulse, (".".to_string(), 0));
@@ -1491,6 +1493,20 @@ mod tests {
 
         sniffer.update(Message::Periodic);
         assert_eq!(sniffer.dots_pulse, (".".to_string(), 0));
+
+        // if frozen, string won't update
+        sniffer.frozen = true;
+
+        sniffer.update(Message::Periodic);
+        assert_eq!(sniffer.dots_pulse, (".".to_string(), 1));
+
+        sniffer.update(Message::BpfFilter(String::new()));
+        assert_eq!(sniffer.dots_pulse, (".".to_string(), 2));
+
+        sniffer.frozen = false;
+
+        sniffer.update(Message::Periodic);
+        assert_eq!(sniffer.dots_pulse, ("..".to_string(), 0));
     }
 
     #[test]
