@@ -68,10 +68,15 @@ pub fn button_open_file<'a>(
         .delay(TOOLTIP_DELAY)
 }
 
-pub fn row_open_link_tooltip<'a>(text: &'static str) -> Row<'a, Message, StyleType> {
+pub fn row_open_link_tooltip<'a>(str: &'static str) -> Row<'a, Message, StyleType> {
+    let text = if str.is_empty() {
+        None
+    } else {
+        Some(Text::new(str))
+    };
     Row::new()
         .align_y(Alignment::Center)
         .spacing(10)
-        .push(Text::new(text))
+        .push(text)
         .push(Icon::OpenLink.to_text().size(16).class(TextType::Title))
 }

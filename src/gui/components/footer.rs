@@ -67,9 +67,15 @@ pub fn footer<'a>(
                         )
                         .push(Text::new("by ").size(FONT_SIZE_FOOTER))
                         .push(
-                            rich_text![span("Giuliano Bellini").underline(true).link(())]
-                                .on_link_click(|()| Message::OpenWebPage(WebPage::MyGitHub))
-                                .size(FONT_SIZE_FOOTER),
+                            Tooltip::new(
+                                rich_text![span("Giuliano Bellini").underline(true).link(())]
+                                    .on_link_click(|()| Message::OpenWebPage(WebPage::MyGitHub))
+                                    .size(FONT_SIZE_FOOTER),
+                                row_open_link_tooltip(""),
+                                Position::FollowCursor,
+                            )
+                            .class(ContainerType::Tooltip)
+                            .delay(TOOLTIP_DELAY),
                         ),
                 ),
         );
