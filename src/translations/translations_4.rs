@@ -45,6 +45,7 @@ pub fn share_feedback_translation(language: Language) -> &'static str {
         Language::ID => "Berikan masukanmu",
         Language::EL => "Μοιραστείτε τα σχόλιά σας",
         Language::VI => "Chia sẻ phản hồi của bạn",
+        Language::UK => "Надіслати відгук",
         _ => "Share your feedback",
     }
 }
@@ -88,6 +89,7 @@ pub fn capture_file_translation(language: Language) -> &'static str {
         Language::ID => "File tangkapan",
         Language::ES => "Archivo de captura",
         Language::VI => "Bắt tệp tin",
+        Language::UK => "Захопити файл",
         _ => "Capture file",
     }
 }
@@ -109,6 +111,7 @@ pub fn select_capture_translation(language: Language) -> &'static str {
         Language::ZH_TW => "選擇擷取文件",
         Language::EL => "Επιλογή αρχείου καταγραφής",
         Language::VI => "Chọn tệp tin được bắt",
+        Language::UK => "Вибрати файл захоплення",
         _ => "Select capture file",
     }
 }
@@ -191,6 +194,11 @@ pub fn reading_from_pcap_translation<'a>(language: Language, file: &str) -> Text
                                  {file_name_translation}: {file}\n\n\
                                  Bạn có chắc tệp tin đã chọn không bị trống?"
         ),
+        Language::UK => format!(
+            "Зчитування пакетів із файлу...\n\n\
+                                 {file_name_translation}: {file}\n\n\
+                                 Ви впевнені, що обраний файл не порожній?"
+        ),
         _ => format!(
             "Reading packets from file...\n\n\
                                 {file_name_translation}: {file}\n\n\
@@ -215,6 +223,7 @@ pub fn data_exceeded_translation(language: Language) -> &'static str {
         Language::ID => "Ambang batas data terlampaui",
         Language::EL => "Υπέρβαση ορίου δεδομένων",
         Language::VI => "Đã vượt ngưỡng dữ liệu",
+        Language::UK => "Перевищено ліміт даних",
         _ => "Data threshold exceeded",
     }
 }
@@ -236,6 +245,7 @@ pub fn bits_exceeded_translation(language: Language) -> &'static str {
         Language::ZH_TW => "超出數據界限",
         Language::EL => "Υπέρβαση ορίου δυφίων",
         Language::VI => "Đã vượt ngưỡng bit",
+        Language::UK => "Перевищено ліміт бітів",
         _ => "Bits threshold exceeded",
     }
 }
@@ -257,6 +267,7 @@ pub fn bits_translation(language: Language) -> &'static str {
         Language::RO => "biți",
         Language::ZH_TW => "位元",
         Language::VI => "bit",
+        Language::UK => "біти",
         _ => "bits",
     }
 }
@@ -276,6 +287,7 @@ pub fn pause_translation(language: Language) -> &'static str {
         Language::ZH_TW => "暫停",
         Language::EL => "Παύση",
         Language::VI => "Tạm dừng",
+        Language::UK => "Пауза",
         _ => "Pause",
     }
 }
@@ -298,6 +310,7 @@ pub fn resume_translation(language: Language) -> &'static str {
         Language::ZH_TW => "繼續",
         Language::EL => "Συνέχεια",
         Language::VI => "Tiếp tục",
+        Language::UK => "Продовжити",
         _ => "Resume",
     }
 }
