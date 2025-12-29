@@ -94,7 +94,7 @@ impl ButtonType {
             text_color: match self {
                 ButtonType::Starred => Color::BLACK,
                 ButtonType::SortArrows => Color {
-                    a: if ext.is_nightly { 0.2 } else { 0.7 },
+                    a: ext.alpha_chart_badge,
                     ..colors.text_body
                 },
                 ButtonType::SortArrowActive => colors.secondary,

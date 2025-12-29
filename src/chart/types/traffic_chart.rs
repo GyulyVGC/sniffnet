@@ -337,13 +337,15 @@ impl Chart<Message> for TrafficChart {
             return;
         };
 
-        let buttons_color = to_rgb_color(self.style.get_extension().buttons_color);
+        let ext = self.style.get_extension();
+        let alpha = ext.alpha_chart_badge;
+        let buttons_color = to_rgb_color(ext.buttons_color);
 
         // chart mesh
         let _ = chart
             .configure_mesh()
             .axis_style(buttons_color)
-            .bold_line_style(buttons_color.mix(0.3))
+            .bold_line_style(buttons_color.mix(alpha.into()))
             .light_line_style(buttons_color.mix(0.0))
             .max_light_lines(0)
             .label_style(self.font(12.5))
@@ -385,7 +387,7 @@ impl Chart<Message> for TrafficChart {
             let _ = chart
                 .configure_series_labels()
                 .position(SeriesLabelPosition::UpperRight)
-                .background_style(buttons_color.mix(0.6))
+                .background_style(buttons_color.mix(alpha.into()))
                 .border_style(buttons_color.stroke_width(CHARTS_LINE_BORDER * 2))
                 .label_font(self.font(13.5))
                 .draw()
