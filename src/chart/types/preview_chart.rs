@@ -3,7 +3,7 @@ use std::ops::Range;
 use iced::Element;
 use iced::widget::Column;
 use plotters::prelude::*;
-use plotters_iced::{Chart, ChartBuilder, ChartWidget, DrawingBackend};
+use plotters_iced2::{Chart, ChartBuilder, ChartWidget, DrawingBackend};
 
 use crate::chart::types::chart_series::{ChartSeries, sample_spline};
 use crate::gui::styles::style_constants::CHARTS_LINE_BORDER;

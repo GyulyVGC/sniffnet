@@ -7,7 +7,7 @@ use iced::widget::{Column, Row, Space};
 use iced::{Element, Length, Padding};
 use plotters::prelude::*;
 use plotters::series::LineSeries;
-use plotters_iced::{Chart, ChartBuilder, ChartWidget, DrawingBackend};
+use plotters_iced2::{Chart, ChartBuilder, ChartWidget, DrawingBackend};
 use splines::Spline;
 
 use crate::chart::types::chart_series::{ChartSeries, sample_spline};

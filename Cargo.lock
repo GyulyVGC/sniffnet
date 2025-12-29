@@ -3737,9 +3737,10 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "df42e13c12958a16b3f7f4386b9ab1f3e7933914ecea48da7139435263a4172a"
 
 [[package]]
-name = "plotters-iced"
-version = "0.12.0"
-source = "git+https://github.com/Joylei/plotters-iced.git?branch=iced-0.14#3d14d7708a88c29236af5e65dbfac44cae04d79f"
+name = "plotters-iced2"
+version = "0.14.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "5b1039c8645f00d8a217cefe8ad37f3a8b268a51f7de5eff429b78920ad1a9ea"
 dependencies = [
  "iced_graphics",
  "iced_widget",
@@ -4834,7 +4835,7 @@ dependencies = [
  "phf_codegen",
  "phf_shared",
  "plotters",
- "plotters-iced",
+ "plotters-iced2",
  "reqwest",
  "rfd",
  "rodio",
