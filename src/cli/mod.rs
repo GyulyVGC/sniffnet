@@ -74,7 +74,6 @@ mod tests {
 
     use crate::gui::pages::types::running_page::RunningPage;
     use crate::gui::pages::types::settings_page::SettingsPage;
-    use crate::gui::styles::types::custom_palette::ExtraStyles;
     use crate::gui::styles::types::gradient_type::GradientType;
     use crate::gui::types::conf::Conf;
     use crate::gui::types::config_window::{PositionTuple, SizeTuple};
@@ -110,7 +109,7 @@ mod tests {
                     favorite_notification: Default::default(),
                     remote_notifications: Default::default(),
                 },
-                style: StyleType::Custom(ExtraStyles::DraculaDark),
+                style: StyleType::DraculaDark,
             },
             device: ConfigDevice {
                 device_name: "hey-hey".to_string(),

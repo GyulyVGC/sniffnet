@@ -1,0 +1,6 @@
+primary = "#f5f5dc"
+secondary = "#432c7a"
+outgoing = "#3aa6b9"
+text_body = "#000000"
+text_headers = "#ffffff"
+starred = "#d7a313ee"

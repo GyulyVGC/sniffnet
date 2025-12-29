@@ -34,7 +34,7 @@ use crate::gui::pages::thumbnail_page::thumbnail_page;
 use crate::gui::pages::types::running_page::RunningPage;
 use crate::gui::pages::types::settings_page::SettingsPage;
 use crate::gui::pages::welcome_page::welcome_page;
-use crate::gui::styles::types::custom_palette::{CustomPalette, ExtraStyles};
+use crate::gui::styles::types::custom_palette::CustomPalette;
 use crate::gui::styles::types::gradient_type::GradientType;
 use crate::gui::styles::types::palette::Palette;
 use crate::gui::types::conf::Conf;
@@ -501,9 +501,7 @@ impl Sniffer {
     fn load_style(&mut self, path: String) {
         self.conf.settings.style_path.clone_from(&path);
         if let Ok(palette) = Palette::from_file(path) {
-            let style = StyleType::Custom(ExtraStyles::CustomToml(CustomPalette::from_palette(
-                palette,
-            )));
+            let style = StyleType::Custom(CustomPalette::from_palette(palette));
             self.conf.settings.style = style;
             self.change_charts_style();
         }
@@ -1320,7 +1318,6 @@ mod tests {
     use crate::countries::types::country::Country;
     use crate::gui::components::types::my_modal::MyModal;
     use crate::gui::pages::types::settings_page::SettingsPage;
-    use crate::gui::styles::types::custom_palette::ExtraStyles;
     use crate::gui::styles::types::gradient_type::GradientType;
     use crate::gui::types::conf::Conf;
     use crate::gui::types::config_window::{PositionTuple, SizeTuple};
@@ -1444,21 +1441,21 @@ mod tests {
     fn test_correctly_update_style() {
         let mut sniffer = Sniffer::new(Conf::default());
 
-        sniffer.update(Message::Style(StyleType::MonAmour));
-        assert_eq!(sniffer.traffic_chart.style, StyleType::MonAmour);
-        assert_eq!(sniffer.conf.settings.style, StyleType::MonAmour);
-        sniffer.update(Message::Style(StyleType::Day));
-        assert_eq!(sniffer.traffic_chart.style, StyleType::Day);
-        assert_eq!(sniffer.conf.settings.style, StyleType::Day);
-        sniffer.update(Message::Style(StyleType::Night));
-        assert_eq!(sniffer.traffic_chart.style, StyleType::Night);
-        assert_eq!(sniffer.conf.settings.style, StyleType::Night);
-        sniffer.update(Message::Style(StyleType::DeepSea));
-        assert_eq!(sniffer.traffic_chart.style, StyleType::DeepSea);
-        assert_eq!(sniffer.conf.settings.style, StyleType::DeepSea);
-        sniffer.update(Message::Style(StyleType::DeepSea));
-        assert_eq!(sniffer.traffic_chart.style, StyleType::DeepSea);
-        assert_eq!(sniffer.conf.settings.style, StyleType::DeepSea);
+        sniffer.update(Message::Style(StyleType::A11yLight));
+        assert_eq!(sniffer.traffic_chart.style, StyleType::A11yLight);
+        assert_eq!(sniffer.conf.settings.style, StyleType::A11yLight);
+        sniffer.update(Message::Style(StyleType::DraculaLight));
+        assert_eq!(sniffer.traffic_chart.style, StyleType::DraculaLight);
+        assert_eq!(sniffer.conf.settings.style, StyleType::DraculaLight);
+        sniffer.update(Message::Style(StyleType::A11yDark));
+        assert_eq!(sniffer.traffic_chart.style, StyleType::A11yDark);
+        assert_eq!(sniffer.conf.settings.style, StyleType::A11yDark);
+        sniffer.update(Message::Style(StyleType::GruvboxDark));
+        assert_eq!(sniffer.traffic_chart.style, StyleType::GruvboxDark);
+        assert_eq!(sniffer.conf.settings.style, StyleType::GruvboxDark);
+        sniffer.update(Message::Style(StyleType::GruvboxDark));
+        assert_eq!(sniffer.traffic_chart.style, StyleType::GruvboxDark);
+        assert_eq!(sniffer.conf.settings.style, StyleType::GruvboxDark);
     }
 
     #[test]
@@ -2084,7 +2081,7 @@ mod tests {
             "{}/resources/themes/catppuccin.toml",
             env!("CARGO_MANIFEST_DIR")
         )));
-        sniffer.update(Message::Style(StyleType::Custom(ExtraStyles::DraculaDark)));
+        sniffer.update(Message::Style(StyleType::DraculaDark));
         sniffer.update(Message::ChangeVolume(100));
         sniffer.update(Message::WindowMoved(-10.0, 555.0));
         sniffer.update(Message::WindowResized(1000.0, 999.0));
@@ -2131,7 +2128,7 @@ mod tests {
                         favorite_notification: Default::default(),
                         remote_notifications: Default::default(),
                     },
-                    style: StyleType::Custom(ExtraStyles::DraculaDark),
+                    style: StyleType::DraculaDark,
                 },
                 window: ConfigWindow {
                     position: PositionTuple(-10.0, 555.0),

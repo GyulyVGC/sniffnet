@@ -3,7 +3,6 @@ use iced::widget::{Button, Column, Container, Row, Scrollable, Text, row};
 use iced::widget::{Space, button, lazy};
 use iced::{Alignment, Color, Element, Length, Padding};
 
-use crate::StyleType::{Day, DeepSea, MonAmour, Night};
 use crate::gui::components::button::button_open_file;
 use crate::gui::components::tab::get_settings_tabs;
 use crate::gui::pages::settings_notifications_page::settings_header;
@@ -14,7 +13,6 @@ use crate::gui::styles::rule::RuleType;
 use crate::gui::styles::scrollbar::ScrollbarType;
 use crate::gui::styles::style_constants::{BORDER_WIDTH, FONT_SIZE_SUBTITLE};
 use crate::gui::styles::text::TextType;
-use crate::gui::styles::types::custom_palette::ExtraStyles;
 use crate::gui::styles::types::gradient_type::GradientType;
 use crate::gui::styles::types::palette::Palette;
 use crate::gui::styles::types::palette_extension::PaletteExtension;
@@ -52,34 +50,8 @@ pub fn settings_style_page(sniffer: &Sniffer) -> Container<'_, Message, StyleTyp
         .push(gradients_row(color_gradient, language))
         .push(Space::new().height(15));
 
-    let mut styles_col = Column::new()
-        .align_x(Alignment::Center)
-        .width(Length::Fill)
-        .push(
-            Row::new()
-                .spacing(15)
-                .push(get_palette_container(style, "Yeti".to_string(), Night))
-                .push(get_palette_container(style, "Yeti".to_string(), Day))
-                .wrap(),
-        )
-        .push(Space::new().height(15))
-        .push(
-            Row::new()
-                .spacing(15)
-                .push(get_palette_container(
-                    style,
-                    "Deep Sea".to_string(),
-                    DeepSea,
-                ))
-                .push(get_palette_container(
-                    style,
-                    "Mon Amour".to_string(),
-                    MonAmour,
-                ))
-                .wrap(),
-        )
-        .push(Space::new().height(15));
-    for children in get_extra_palettes(ExtraStyles::all_styles(), style) {
+    let mut styles_col = Column::new().align_x(Alignment::Center).width(Length::Fill);
+    for children in get_extra_palettes(StyleType::all_styles(), style) {
         styles_col = styles_col.push(children);
     }
     styles_col = styles_col
@@ -243,13 +215,12 @@ fn get_palette_rule<'a>(
 
 // Buttons for each extra style arranged in rows of two
 fn get_extra_palettes<'a>(
-    styles: &[ExtraStyles],
+    styles: &[StyleType],
     current_style: StyleType,
 ) -> Vec<Element<'a, Message, StyleType>> {
     // Map each extra style into a palette container
     let mut styles = styles.iter().map(|&style| {
         let name = style.to_string();
-        let style = StyleType::Custom(style);
         get_palette_container(current_style, name, style)
     });
 
@@ -287,7 +258,7 @@ fn lazy_custom_style_input<'a>(
     custom_path: &str,
     style: StyleType,
 ) -> Button<'a, Message, StyleType> {
-    let is_custom_toml_style_set = matches!(style, StyleType::Custom(ExtraStyles::CustomToml(_)));
+    let is_custom_toml_style_set = matches!(style, StyleType::Custom(_));
 
     let custom_palette = Palette::from_file(custom_path);
     let is_error = if custom_path.is_empty() {
