@@ -46,7 +46,7 @@ plotters-iced = { git = "https://github.com/Joylei/plotters-iced.git", branch = 
 maxminddb = "0.27.1"
 confy = "2.0.0"
 serde = { version = "1.0.228", default-features = false, features = ["derive"] }
-serde_json = { version = "1.0.145", features = ["preserve_order"] }
+serde_json = { version = "1.0.148", features = ["preserve_order"] }
 rodio = { version = "0.21.1", default-features = false, features = ["mp3", "playback"] }
 dns-lookup = "3.0.1"
 toml = "0.9.10"
@@ -64,10 +64,10 @@ semver = "1.0.27"
 gag = "1.0.0"
 
 [target.'cfg(not(target_arch = "powerpc64"))'.dependencies]
-reqwest = { version = "0.12.26", default-features = false, features = ["json", "rustls-tls"] }
+reqwest = { version = "0.12.28", default-features = false, features = ["json", "rustls-tls"] }
 
 [target.'cfg(target_arch = "powerpc64")'.dependencies]
-reqwest = { version = "0.12.26", features = ["json"] }
+reqwest = { version = "0.12.28", features = ["json"] }
 
 #───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
 
