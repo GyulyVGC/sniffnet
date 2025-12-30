@@ -94,7 +94,7 @@ impl ButtonType {
             text_color: match self {
                 ButtonType::Starred => Color::BLACK,
                 ButtonType::SortArrows => Color {
-                    a: if ext.is_nightly { 0.2 } else { 0.7 },
+                    a: ext.alpha_chart_badge,
                     ..colors.text_body
                 },
                 ButtonType::SortArrowActive => colors.secondary,
@@ -110,6 +110,7 @@ impl ButtonType {
                 },
                 _ => Shadow::default(),
             },
+            snap: true,
         }
     }
 
@@ -188,6 +189,7 @@ impl ButtonType {
                 ButtonType::SortArrowActive | ButtonType::SortArrows => colors.secondary,
                 _ => colors.text_body,
             },
+            snap: true,
         }
     }
 
@@ -224,6 +226,7 @@ impl ButtonType {
                     ..colors.text_headers
                 },
                 shadow: Shadow::default(),
+                snap: true,
             },
             ButtonType::Standard => Style {
                 background: Some(Background::Color(Color {
@@ -243,6 +246,7 @@ impl ButtonType {
                     ..colors.text_body
                 },
                 shadow: Shadow::default(),
+                snap: true,
             },
             _ => self.active(style),
         }

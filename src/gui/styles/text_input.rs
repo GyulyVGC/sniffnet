@@ -41,7 +41,7 @@ impl TextInputType {
                 },
             },
             icon: Color {
-                a: if ext.is_nightly { 0.2 } else { 0.7 },
+                a: ext.alpha_chart_badge,
                 ..colors.text_body
             },
             placeholder: self.placeholder_color(style),
@@ -52,8 +52,7 @@ impl TextInputType {
 
     fn focused(&self, style: &StyleType) -> Style {
         let colors = style.get_palette();
-        // let ext = style.get_extension();
-        let is_nightly = style.get_extension().is_nightly;
+        let ext = style.get_extension();
         Style {
             background: Background::Color(colors.primary),
             border: Border {
@@ -65,7 +64,7 @@ impl TextInputType {
                                          // },
             },
             icon: Color {
-                a: if is_nightly { 0.2 } else { 0.7 },
+                a: ext.alpha_chart_badge,
                 ..colors.text_body
             },
             placeholder: self.placeholder_color(style),
@@ -77,9 +76,9 @@ impl TextInputType {
     #[allow(clippy::unused_self)]
     fn placeholder_color(&self, style: &StyleType) -> Color {
         let color = style.get_palette().text_body;
-        let is_nightly = style.get_extension().is_nightly;
+        let ext = style.get_extension();
         Color {
-            a: if is_nightly { 0.2 } else { 0.7 },
+            a: ext.alpha_chart_badge,
             ..color
         }
     }
@@ -92,9 +91,9 @@ impl TextInputType {
     #[allow(clippy::unused_self)]
     fn disabled_color(&self, style: &StyleType) -> Color {
         let color = style.get_palette().text_body;
-        let is_nightly = style.get_extension().is_nightly;
+        let ext = style.get_extension();
         Color {
-            a: if is_nightly { 0.2 } else { 0.7 },
+            a: ext.alpha_chart_badge,
             ..color
         }
     }
@@ -102,11 +101,7 @@ impl TextInputType {
     #[allow(clippy::unused_self)]
     fn selection_color(&self, style: &StyleType) -> Color {
         let color = style.get_palette().text_body;
-        let is_nightly = style.get_extension().is_nightly;
-        Color {
-            a: if is_nightly { 0.05 } else { 0.4 },
-            ..color
-        }
+        Color { a: 0.2, ..color }
     }
 
     fn hovered(&self, style: &StyleType) -> Style {
@@ -127,7 +122,7 @@ impl TextInputType {
                                          // },
             },
             icon: Color {
-                a: if ext.is_nightly { 0.2 } else { 0.7 },
+                a: ext.alpha_chart_badge,
                 ..colors.text_body
             },
             placeholder: self.placeholder_color(style),
@@ -164,7 +159,7 @@ impl TextInputType {
                 },
             },
             icon: Color {
-                a: if ext.is_nightly { 0.2 } else { 0.7 },
+                a: ext.alpha_chart_badge,
                 ..colors.text_body
             },
             placeholder: self.disabled_color(style),
@@ -186,7 +181,7 @@ impl Catalog for StyleType {
             Status::Active => class.active(self),
             Status::Hovered => class.hovered(self),
             Status::Disabled => class.disabled(self),
-            Status::Focused => class.focused(self),
+            Status::Focused { .. } => class.focused(self),
         }
     }
 }

@@ -4,7 +4,6 @@
 
 use std::borrow::Cow;
 
-use iced::advanced::graphics::image::image_rs::ImageFormat;
 #[cfg(target_os = "linux")]
 use iced::window::settings::PlatformSpecific;
 use iced::{Font, Pixels, application, window};
@@ -23,7 +22,7 @@ use translations::types::language::Language;
 use utils::formatted_strings::print_cli_welcome_message;
 
 use crate::gui::sniffer::FONT_FAMILY_NAME;
-use crate::gui::styles::style_constants::{ICONS_BYTES, SARASA_MONO_BOLD_BYTES, SARASA_MONO_BYTES};
+use crate::gui::styles::style_constants::{ICONS_BYTES, SARASA_MONO_BYTES};
 use crate::gui::types::conf::CONF;
 use crate::gui::types::config_window::{ConfigWindow, ToPosition, ToSize};
 
@@ -58,7 +57,6 @@ pub fn main() -> iced::Result {
     }
 
     let conf = CONF.clone();
-    let boot_task_chain = handle_cli_args();
 
     #[cfg(debug_assertions)]
     {
@@ -75,39 +73,41 @@ pub fn main() -> iced::Result {
 
     let ConfigWindow { size, position, .. } = conf.window;
 
-    application(SNIFFNET_TITLECASE, Sniffer::update, Sniffer::view)
-        .settings(iced::Settings {
-            // id needed for Linux Wayland; should match StartupWMClass in .desktop file; see issue #292
-            id: Some(String::from(SNIFFNET_LOWERCASE)),
-            fonts: vec![
-                Cow::Borrowed(SARASA_MONO_BYTES),
-                Cow::Borrowed(SARASA_MONO_BOLD_BYTES),
-                Cow::Borrowed(ICONS_BYTES),
-            ],
-            default_font: Font::with_name(FONT_FAMILY_NAME),
-            default_text_size: Pixels(FONT_SIZE_BODY),
-            antialiasing: true,
-        })
-        .window(window::Settings {
-            size: size.to_size(), // start size
-            position: position.to_position(),
-            min_size: None, // Some(ConfigWindow::MIN_SIZE.to_size()), // min size allowed
-            max_size: None,
-            visible: true,
-            resizable: true,
-            decorations: true,
-            transparent: false,
-            icon: window::icon::from_file_data(WINDOW_ICON, Some(ImageFormat::Png)).ok(),
-            #[cfg(target_os = "linux")]
-            platform_specific: PlatformSpecific {
-                application_id: String::from(SNIFFNET_LOWERCASE),
-                ..PlatformSpecific::default()
-            },
-            exit_on_close_request: false,
-            ..Default::default()
-        })
-        .subscription(Sniffer::subscription)
-        .theme(Sniffer::theme)
-        .scale_factor(Sniffer::scale_factor)
-        .run_with(move || (Sniffer::new(conf), boot_task_chain))
+    application(
+        move || (Sniffer::new(conf.clone()), handle_cli_args()),
+        Sniffer::update,
+        Sniffer::view,
+    )
+    .title(SNIFFNET_TITLECASE)
+    .settings(iced::Settings {
+        // id needed for Linux Wayland; should match StartupWMClass in .desktop file; see issue #292
+        id: Some(String::from(SNIFFNET_LOWERCASE)),
+        fonts: vec![Cow::Borrowed(SARASA_MONO_BYTES), Cow::Borrowed(ICONS_BYTES)],
+        default_font: Font::with_name(FONT_FAMILY_NAME),
+        default_text_size: Pixels(FONT_SIZE_BODY),
+        antialiasing: true,
+        vsync: true,
+    })
+    .window(window::Settings {
+        size: size.to_size(), // start size
+        position: position.to_position(),
+        min_size: None, // Some(ConfigWindow::MIN_SIZE.to_size()), // min size allowed
+        max_size: None,
+        visible: true,
+        resizable: true,
+        decorations: true,
+        transparent: false,
+        icon: window::icon::from_file_data(WINDOW_ICON, None).ok(),
+        #[cfg(target_os = "linux")]
+        platform_specific: PlatformSpecific {
+            application_id: String::from(SNIFFNET_LOWERCASE),
+            ..PlatformSpecific::default()
+        },
+        exit_on_close_request: false,
+        ..Default::default()
+    })
+    .subscription(Sniffer::subscription)
+    .theme(Sniffer::theme)
+    .scale_factor(Sniffer::scale_factor)
+    .run()
 }

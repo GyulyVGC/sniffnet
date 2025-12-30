@@ -95,7 +95,7 @@ pub enum Message {
     /// Enable or disable gradients
     GradientsSelection(GradientType),
     /// Set UI scale factor
-    ChangeScaleFactor(f64),
+    ChangeScaleFactor(f32),
     /// The app window position has been changed
     WindowMoved(f32, f32),
     /// The app window size has been changed

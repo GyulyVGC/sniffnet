@@ -3,11 +3,11 @@
 use std::cmp::min;
 use std::ops::Range;
 
-use iced::widget::{Column, Row, horizontal_space};
+use iced::widget::{Column, Row, Space};
 use iced::{Element, Length, Padding};
 use plotters::prelude::*;
 use plotters::series::LineSeries;
-use plotters_iced::{Chart, ChartBuilder, ChartWidget, DrawingBackend};
+use plotters_iced2::{Chart, ChartBuilder, ChartWidget, DrawingBackend};
 use splines::Spline;
 
 use crate::chart::types::chart_series::{ChartSeries, sample_spline};
@@ -152,7 +152,6 @@ impl TrafficChart {
         let x_labels = if self.is_live_capture || self.thumbnail {
             None
         } else {
-            let font = self.style.get_extension().font;
             let ts_1 = self.first_packet_timestamp;
             let mut ts_2 = ts_1;
             ts_2.add_secs(i64::from(self.ticks) - 1);
@@ -160,26 +159,18 @@ impl TrafficChart {
                 Row::new()
                     .padding(Padding::new(8.0).bottom(15).left(55).right(25))
                     .width(Length::Fill)
-                    .push_maybe(if self.no_more_packets {
-                        Some(
-                            iced::widget::Text::new(get_formatted_timestamp(ts_1))
-                                .font(font)
-                                .size(12.5),
-                        )
+                    .push(if self.no_more_packets {
+                        Some(iced::widget::Text::new(get_formatted_timestamp(ts_1)).size(12.5))
                     } else {
                         None
                     })
-                    .push(horizontal_space())
-                    .push(
-                        iced::widget::Text::new(get_formatted_timestamp(ts_2))
-                            .font(font)
-                            .size(12.5),
-                    ),
+                    .push(Space::new().width(Length::Fill))
+                    .push(iced::widget::Text::new(get_formatted_timestamp(ts_2)).size(12.5)),
             )
         };
         Column::new()
             .push(ChartWidget::new(self))
-            .push_maybe(x_labels)
+            .push(x_labels)
             .into()
     }
 
@@ -250,7 +241,7 @@ impl TrafficChart {
     fn font<'a>(&self, size: f64) -> TextStyle<'a> {
         (FONT_FAMILY_NAME, size)
             .into_font()
-            .style(self.style.get_font_weight())
+            .style(FontStyle::Normal)
             .color(&to_rgb_color(self.style.get_palette().text_body))
     }
 
@@ -346,13 +337,15 @@ impl Chart<Message> for TrafficChart {
             return;
         };
 
-        let buttons_color = to_rgb_color(self.style.get_extension().buttons_color);
+        let ext = self.style.get_extension();
+        let alpha = ext.alpha_chart_badge;
+        let buttons_color = to_rgb_color(ext.buttons_color);
 
         // chart mesh
         let _ = chart
             .configure_mesh()
             .axis_style(buttons_color)
-            .bold_line_style(buttons_color.mix(0.3))
+            .bold_line_style(buttons_color.mix(alpha.into()))
             .light_line_style(buttons_color.mix(0.0))
             .max_light_lines(0)
             .label_style(self.font(12.5))
@@ -394,7 +387,7 @@ impl Chart<Message> for TrafficChart {
             let _ = chart
                 .configure_series_labels()
                 .position(SeriesLabelPosition::UpperRight)
-                .background_style(buttons_color.mix(0.6))
+                .background_style(buttons_color.mix(alpha.into()))
                 .border_style(buttons_color.stroke_width(CHARTS_LINE_BORDER * 2))
                 .label_font(self.font(13.5))
                 .draw()

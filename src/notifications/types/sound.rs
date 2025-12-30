@@ -1,7 +1,6 @@
 use std::fmt;
 use std::thread;
 
-use iced::Font;
 use iced::widget::Text;
 use rodio::{Decoder, OutputStreamBuilder, Sink};
 use serde::{Deserialize, Serialize};
@@ -43,11 +42,11 @@ impl Sound {
         }
     }
 
-    pub fn get_text<'a>(self, font: Font) -> iced::widget::Text<'a, StyleType> {
+    pub fn get_text<'a>(self) -> iced::widget::Text<'a, StyleType> {
         match self {
-            Sound::Gulp => Text::new("Gulp").font(font),
-            Sound::Pop => Text::new("Pop").font(font),
-            Sound::Swhoosh => Text::new("Swhoosh").font(font),
+            Sound::Gulp => Text::new("Gulp"),
+            Sound::Pop => Text::new("Pop"),
+            Sound::Swhoosh => Text::new("Swhoosh"),
             Sound::None => Icon::Forbidden.to_text(),
         }
         .size(FONT_SIZE_FOOTER)

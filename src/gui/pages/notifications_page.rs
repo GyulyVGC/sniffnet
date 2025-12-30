@@ -6,8 +6,9 @@ use crate::gui::components::types::my_modal::MyModal;
 use crate::gui::pages::overview_page::{get_bars, get_bars_length, host_bar, service_bar};
 use crate::gui::pages::types::settings_page::SettingsPage;
 use crate::gui::styles::container::ContainerType;
+use crate::gui::styles::rule::RuleType;
 use crate::gui::styles::scrollbar::ScrollbarType;
-use crate::gui::styles::style_constants::FONT_SIZE_FOOTER;
+use crate::gui::styles::style_constants::{FONT_SIZE_FOOTER, TOOLTIP_DELAY};
 use crate::gui::styles::text::TextType;
 use crate::gui::types::message::Message;
 use crate::gui::types::settings::Settings;
@@ -32,21 +33,18 @@ use iced::Length::FillPortion;
 use iced::widget::scrollable::Direction;
 use iced::widget::text::LineHeight;
 use iced::widget::tooltip::Position;
-use iced::widget::{Column, Container, Row, Rule, Scrollable, Text, Tooltip, horizontal_space};
-use iced::widget::{Space, button, vertical_space};
-use iced::{Alignment, Font, Length, Padding};
+use iced::widget::{Column, Container, Row, Scrollable, Text, Tooltip};
+use iced::widget::{Space, button};
+use iced::{Alignment, Length, Padding};
 use std::cmp::max;
 
 /// Computes the body of gui notifications page
 pub fn notifications_page(sniffer: &Sniffer) -> Container<'_, Message, StyleType> {
     let Settings {
-        style,
         language,
         notifications,
         ..
     } = sniffer.conf.settings.clone();
-    let font = style.get_extension().font;
-    let font_headers = style.get_extension().font_headers;
 
     let mut tab_and_body = Column::new()
         .align_x(Alignment::Center)
@@ -54,8 +52,6 @@ pub fn notifications_page(sniffer: &Sniffer) -> Container<'_, Message, StyleType
 
     let tabs = get_pages_tabs(
         RunningPage::Notifications,
-        font,
-        font_headers,
         language,
         sniffer.unread_notifications,
     );
@@ -66,10 +62,10 @@ pub fn notifications_page(sniffer: &Sniffer) -> Container<'_, Message, StyleType
         && !notifications.favorite_notification.notify_on_favorite
         && sniffer.logged_notifications.0.is_empty()
     {
-        let body = body_no_notifications_set(font, language);
+        let body = body_no_notifications_set(language);
         tab_and_body = tab_and_body.push(body);
     } else if sniffer.logged_notifications.0.is_empty() {
-        let body = body_no_notifications_received(font, language, &sniffer.dots_pulse.0);
+        let body = body_no_notifications_received(language, &sniffer.dots_pulse.0);
         tab_and_body = tab_and_body.push(body);
     } else {
         let logged_notifications = logged_notifications(sniffer);
@@ -80,7 +76,7 @@ pub fn notifications_page(sniffer: &Sniffer) -> Container<'_, Message, StyleType
                 Container::new(if sniffer.logged_notifications.0.len() < 30 {
                     Text::new("")
                 } else {
-                    Text::new(only_last_30_translation(language)).font(font)
+                    Text::new(only_last_30_translation(language))
                 })
                 .width(150)
                 .height(Length::Fill)
@@ -92,7 +88,7 @@ pub fn notifications_page(sniffer: &Sniffer) -> Container<'_, Message, StyleType
                 Direction::Vertical(ScrollbarType::properties()),
             ))
             .push(
-                Container::new(get_button_clear_all(font, language))
+                Container::new(get_button_clear_all(language))
                     .width(150)
                     .height(Length::Fill)
                     .align_x(Alignment::Center)
@@ -104,28 +100,19 @@ pub fn notifications_page(sniffer: &Sniffer) -> Container<'_, Message, StyleType
     Container::new(Column::new().push(tab_and_body)).height(Length::Fill)
 }
 
-fn body_no_notifications_set<'a>(font: Font, language: Language) -> Column<'a, Message, StyleType> {
+fn body_no_notifications_set<'a>(language: Language) -> Column<'a, Message, StyleType> {
     Column::new()
         .padding(5)
         .spacing(5)
         .align_x(Alignment::Center)
         .width(Length::Fill)
-        .push(vertical_space())
-        .push(
-            no_notifications_set_translation(language)
-                .align_x(Alignment::Center)
-                .font(font),
-        )
-        .push(get_button_settings(
-            font,
-            language,
-            SettingsPage::Notifications,
-        ))
-        .push(Space::with_height(FillPortion(2)))
+        .push(Space::new().height(Length::Fill))
+        .push(no_notifications_set_translation(language).align_x(Alignment::Center))
+        .push(get_button_settings(language, SettingsPage::Notifications))
+        .push(Space::new().height(FillPortion(2)))
 }
 
 fn body_no_notifications_received(
-    font: Font,
     language: Language,
     dots: &str,
 ) -> Column<'_, Message, StyleType> {
@@ -134,21 +121,16 @@ fn body_no_notifications_received(
         .spacing(5)
         .align_x(Alignment::Center)
         .width(Length::Fill)
-        .push(vertical_space())
-        .push(
-            no_notifications_received_translation(language)
-                .align_x(Alignment::Center)
-                .font(font),
-        )
-        .push(Text::new(dots.to_owned()).font(font).size(50))
-        .push(Space::with_height(FillPortion(2)))
+        .push(Space::new().height(Length::Fill))
+        .push(no_notifications_received_translation(language).align_x(Alignment::Center))
+        .push(Text::new(dots.to_owned()).size(50))
+        .push(Space::new().height(FillPortion(2)))
 }
 
 fn data_notification_log<'a>(
     logged_notification: &DataThresholdExceeded,
     first_entry_data_info: DataInfo,
     language: Language,
-    font: Font,
 ) -> Container<'a, Message, StyleType> {
     let data_repr = logged_notification.data_repr;
     let data_string = data_repr.formatted_string(logged_notification.threshold.into());
@@ -177,25 +159,22 @@ fn data_notification_log<'a>(
                     Row::new()
                         .spacing(8)
                         .push(Icon::Clock.to_text())
-                        .push(Text::new(logged_notification.timestamp.clone()).font(font)),
+                        .push(Text::new(logged_notification.timestamp.clone())),
                 )
                 .push(
                     Text::new(data_repr.data_exceeded_translation(language).to_string())
-                        .class(TextType::Title)
-                        .font(font),
+                        .class(TextType::Title),
                 )
                 .push(
                     Text::new(threshold_str)
                         .class(TextType::Subtitle)
-                        .size(FONT_SIZE_FOOTER)
-                        .font(font),
+                        .size(FONT_SIZE_FOOTER),
                 ),
         )
         .push(threshold_bar(
             logged_notification,
             first_entry_data_info,
             language,
-            font,
         ));
     let content_and_extra = Column::new()
         .spacing(10)
@@ -204,7 +183,7 @@ fn data_notification_log<'a>(
             logged_notification.id,
             logged_notification.is_expanded,
         ))
-        .push_maybe(data_notification_extra(logged_notification, font, language));
+        .push(data_notification_extra(logged_notification, language));
     Container::new(content_and_extra)
         .width(Length::Fill)
         .padding(15)
@@ -216,14 +195,12 @@ fn favorite_notification_log<'a>(
     first_entry_data_info: DataInfo,
     data_repr: DataRepr,
     language: Language,
-    font: Font,
 ) -> Container<'a, Message, StyleType> {
     let host_bar = host_bar(
         &logged_notification.host,
         &logged_notification.data_info_host,
         data_repr,
         first_entry_data_info,
-        font,
         language,
     );
 
@@ -244,13 +221,9 @@ fn favorite_notification_log<'a>(
                     Row::new()
                         .spacing(8)
                         .push(Icon::Clock.to_text())
-                        .push(Text::new(logged_notification.timestamp.clone()).font(font)),
+                        .push(Text::new(logged_notification.timestamp.clone())),
                 )
-                .push(
-                    Text::new(favorite_transmitted_translation(language))
-                        .class(TextType::Title)
-                        .font(font),
-                ),
+                .push(Text::new(favorite_transmitted_translation(language)).class(TextType::Title)),
         )
         .push(host_bar);
 
@@ -260,7 +233,7 @@ fn favorite_notification_log<'a>(
         .class(ContainerType::BorderedRound)
 }
 
-fn get_button_clear_all<'a>(font: Font, language: Language) -> Tooltip<'a, Message, StyleType> {
+fn get_button_clear_all<'a>(language: Language) -> Tooltip<'a, Message, StyleType> {
     let content = button(
         Icon::Bin
             .to_text()
@@ -275,19 +248,17 @@ fn get_button_clear_all<'a>(font: Font, language: Language) -> Tooltip<'a, Messa
 
     Tooltip::new(
         content,
-        Text::new(clear_all_translation(language)).font(font),
+        Text::new(clear_all_translation(language)),
         Position::Top,
     )
     .gap(5)
     .class(ContainerType::Tooltip)
+    .delay(TOOLTIP_DELAY)
 }
 
 fn logged_notifications<'a>(sniffer: &Sniffer) -> Column<'a, Message, StyleType> {
-    let Settings {
-        style, language, ..
-    } = sniffer.conf.settings;
+    let Settings { language, .. } = sniffer.conf.settings;
     let data_repr = sniffer.conf.data_repr;
-    let font = style.get_extension().font;
     let mut ret_val = Column::new()
         .padding(Padding::ZERO.right(15))
         .spacing(10)
@@ -304,12 +275,7 @@ fn logged_notifications<'a>(sniffer: &Sniffer) -> Column<'a, Message, StyleType>
     for logged_notification in &sniffer.logged_notifications.0 {
         ret_val = ret_val.push(match logged_notification {
             LoggedNotification::DataThresholdExceeded(data_threshold_exceeded) => {
-                data_notification_log(
-                    data_threshold_exceeded,
-                    first_entry_data_info,
-                    language,
-                    font,
-                )
+                data_notification_log(data_threshold_exceeded, first_entry_data_info, language)
             }
             LoggedNotification::FavoriteTransmitted(favorite_transmitted) => {
                 favorite_notification_log(
@@ -317,7 +283,6 @@ fn logged_notifications<'a>(sniffer: &Sniffer) -> Column<'a, Message, StyleType>
                     first_entry_data_info,
                     data_repr,
                     language,
-                    font,
                 )
             }
         });
@@ -329,7 +294,6 @@ fn threshold_bar<'a>(
     logged_notification: &DataThresholdExceeded,
     first_entry_data_info: DataInfo,
     language: Language,
-    font: Font,
 ) -> Row<'a, Message, StyleType> {
     let data_repr = logged_notification.data_repr;
     let data_info = logged_notification.data_info;
@@ -345,14 +309,17 @@ fn threshold_bar<'a>(
             None,
             TrafficType::Unicast,
             language,
-            font,
         ))
         .push(
             Column::new()
                 .spacing(1)
-                .push(Row::new().push(horizontal_space()).push(
-                    Text::new(data_repr.formatted_string(data_info.tot_data(data_repr))).font(font),
-                ))
+                .push(
+                    Row::new()
+                        .push(Space::new().width(Length::Fill))
+                        .push(Text::new(
+                            data_repr.formatted_string(data_info.tot_data(data_repr)),
+                        )),
+                )
                 .push(get_bars(incoming_bar_len, outgoing_bar_len)),
         )
 }
@@ -384,7 +351,6 @@ fn button_expand<'a>(
 
 fn data_notification_extra<'a>(
     logged_notification: &DataThresholdExceeded,
-    font: Font,
     language: Language,
 ) -> Option<Row<'a, Message, StyleType>> {
     let max_entries = max(
@@ -411,7 +377,6 @@ fn data_notification_extra<'a>(
             data_info_host,
             logged_notification.data_repr,
             first_data_info_host,
-            font,
             language,
         );
         hosts_col = hosts_col.push(host_bar);
@@ -429,7 +394,6 @@ fn data_notification_extra<'a>(
             data_info,
             logged_notification.data_repr,
             first_data_info_service,
-            font,
         );
         services_col = services_col.push(service_bar);
     }
@@ -437,7 +401,7 @@ fn data_notification_extra<'a>(
     Some(
         Row::new()
             .push(hosts_col)
-            .push(Container::new(Rule::vertical(30)).height(height))
+            .push(Container::new(RuleType::Standard.vertical(30)).height(height))
             .push(services_col),
     )
 }

@@ -9,7 +9,7 @@ use crate::{Language, StyleType};
 pub struct Settings {
     pub color_gradient: GradientType,
     pub language: Language,
-    pub scale_factor: f64,
+    pub scale_factor: f32,
     pub mmdb_country: String,
     pub mmdb_asn: String,
     pub style_path: String,

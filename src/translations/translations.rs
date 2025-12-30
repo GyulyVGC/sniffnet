@@ -530,253 +530,205 @@ pub fn network_adapter_translation(language: Language) -> &'static str {
 }
 
 #[allow(clippy::too_many_lines)]
-pub fn no_addresses_translation<'a>(language: Language, adapter: &str) -> Text<'a, StyleType> {
-    let network_adapter_translation = network_adapter_translation(language);
-    Text::new(match language {
-        Language::EN => format!(
+pub fn no_addresses_translation(language: Language) -> &'static str {
+    match language {
+        Language::EN => {
             "No traffic can be observed because the adapter you selected has no active addresses...\n\n\
-                                 {network_adapter_translation}: {adapter}\n\n\
                                  If you are sure you are connected to the internet, try choosing a different adapter."
-        ),
-        Language::CS => format!(
+        }
+        Language::CS => {
             "Nelze sledovat žádný provoz, protože vybraný adaptér nemá žádné aktivní adresy...\n\n\
-                                 {network_adapter_translation}: {adapter}\n\n\
                                  Pokud jste si jisti, že jste připojeni k internetu, zkuste vybrat jiný adaptér."
-        ),
-        Language::IT => format!(
+        }
+        Language::IT => {
             "Non è osservabile alcun traffico perché l'adattatore di rete selezionato non ha indirizzi attivi...\n\n\
-                                {network_adapter_translation}: {adapter}\n\n\
                                 Se sei sicuro di essere connesso ad internet, prova a scegliere un adattatore diverso."
-        ),
-        Language::FR => format!(
+        }
+        Language::FR => {
             "Aucun trafic ne peut être observé, car la carte réseau que vous avez saisie n'a pas d'adresse...\n\n\
-                                {network_adapter_translation} : {adapter}\n\n\
                                 Si vous êtes sûr d'être connecté à internet, essayez une autre carte."
-        ),
-        Language::ES => format!(
+        }
+        Language::ES => {
             "No se puede observar ningún tráfico porque el adaptador seleccionado no tiene direcciones activas...\n\n\
-                                 {network_adapter_translation} : {adapter}\n\n\
                                  Si estás seguro de que estás conectado a Internet, prueba a elegir otro adaptador."
-        ),
-        Language::PL => format!(
+        }
+        Language::PL => {
             "Nie można zaobserwować żadnego ruchu, ponieważ wybrany adapter nie ma aktywnych adresów...\n\n\
-                                 {network_adapter_translation}: {adapter}\n\n\
                                  Jeśli jesteś pewien, że jesteś podłączony do internetu, spróbuj wybrać inny adapter."
-        ),
-        Language::DE => format!(
+        }
+        Language::DE => {
             "Es kann kein Netzwerkverkehr beobachtet werden, weil der Adapter keine aktiven Adressen hat...\n\n\
-                                 {network_adapter_translation}: {adapter}\n\n\
                                  Wenn du dir sicher bist, dass du mit dem Internet verbunden bist, probier einen anderen Adapter auszuwählen."
-        ),
-        Language::UK => format!(
+        }
+        Language::UK => {
             "Не зафіксовано жодного мережевого руху, тому що вибраний адаптер не має активних адрес... \n\n\
-                                 {network_adapter_translation}: {adapter}\n\n\
                                  Якщо ви впевнені, що підключені до інтернету, спробуйте вибрати інший адаптер."
-        ),
-        Language::ZH => format!(
+        }
+        Language::ZH => {
             "您选择的网络适配器当前无活动网络...\n\n\
-                                {network_adapter_translation}: {adapter}\n\n\
                                 如果您确信您已成功连接互联网, 请尝试选择其他网络适配器."
-        ),
-        Language::ZH_TW => format!(
+        }
+        Language::ZH_TW => {
             "無法觀察到任何流量，因為您選取的網路介面卡沒有有效的位址...\n\n\
-                                {network_adapter_translation}: {adapter}\n\n\
                                 如果您確定已連線至網際網路，請嘗試選取其他網路介面卡。"
-        ),
-        Language::RO => format!(
+        }
+        Language::RO => {
             "Niciun trafic nu poate fi observat deoarece adaptorul selectat nu are adrese active...\n\n\
-                                {network_adapter_translation}: {adapter}\n\n\
                                 Dacă sunteți sigur că sunteți conectat la internet, încercați să alegeți un alt adaptor."
-        ),
-        Language::KO => format!(
+        }
+        Language::KO => {
             "선택한 어댑터에 유효한 주소가 없기 때문에 트래픽을 확인할 수 없습니다...\n\n\
-                                {network_adapter_translation}: {adapter}\n\n\
                                 인터넷이 연결되어있다면 다른 어댑터로 시도해보세요."
-        ),
-        Language::TR => format!(
+        }
+        Language::TR => {
             "Seçtiğiniz adaptör aktif bir adrese sahip olmadığı için hiç bir trafik izlenemez...\n\n\
-                                 {network_adapter_translation}: {adapter}\n\n\
                                  Eğer gerçekten internete bağlı olduğunuza eminseniz, başka bir adaptör seçmeyi deneyiniz."
-        ),
-        Language::RU => format!(
+        }
+        Language::RU => {
             "Наблюдение за трафиком не возможно, потому что Вы выбрали интерфейс без активного адреса...\n\n\
-                                 {network_adapter_translation}: {adapter}\n\n\
                                  Если Вы уверены, что подключены к Интернету, попробуйте выбрать другой интерфейс."
-        ),
-        Language::PT => format!(
+        }
+        Language::PT => {
             "Não é possível observar tráfego porque o adaptador que selecionou não tem endereços ativos...\n\n\
-                                {network_adapter_translation}: {adapter}\n\n\
                                 Se tiver a certeza que está ligado à internet, tente escolher um adaptador diferente."
-        ),
-        Language::EL => format!(
+        }
+        Language::EL => {
             "Δεν μπορεί να ανιχνευθεί κίνηση επειδή ο προσαρμογέας που επέλεξες δεν έχει ενεργές διευθύνσεις...\n\n\
-                                 {network_adapter_translation}: {adapter}\n\n\
                                  Αν είσαι σίγουρος ότι είσαι συνδεδεμένος στο διαδίκτυο, δοκίμασε αν επιλέξεις έναν διαφορετικό προσαρμογέα."
-        ),
+        }
         // Language::FA => format!("هیچ آمد و شدی قابل مشاهده نیست چون مبدلی که انتخاب کرده اید هیچ نشانی فعالی ندارد...\n\n\
         //                         مبدل شبکه: {adapter}\n\n\
         //                         اگر مطمئن هستید به اینترنت وصل هستید، سعی کنید مبدل متفاوتی را انتخاب کنید."),
-        Language::SV => format!(
+        Language::SV => {
             "Det går inte att observa någon trafik eftersom den valda adaptern inte har några aktiva adresser ...\n\n\
-                                 {network_adapter_translation}: {adapter}\n\n\
                                  Om du är säker att du är ansluten till internet, testa att välja en annan adapter."
-        ),
-        Language::FI => format!(
+        }
+        Language::FI => {
             "Liikennettä ei voitu havainnoida, koska valitulla sovittimella ei ole aktiivista osoitetta...\n\n\
-                                 {network_adapter_translation}: {adapter}\n\n\
                                  Jos olet varma että sinulla on internet-yhteys, kokeile valita toinen verkkosovitin."
-        ),
-        Language::JA => format!(
+        }
+        Language::JA => {
             "選択されたアダプターが有効なアドレスを持っていないため、トラフィックを観測できていません...\n\n\
-                                {network_adapter_translation}: {adapter}\n\n\
                                 インターネットに接続しているか確認し、別のネットワーク アダプターを試してください。"
-        ),
-        Language::UZ => format!(
+        }
+        Language::UZ => {
             "Trafik kuzatilmaydi, chunki siz tanlagan adapterda faol manzillar yo'q...\n\n\
-                                {network_adapter_translation}: {adapter}\n\n\
                                 Internetga ulanganingizga ishonchingiz komil bo'lsa, boshqa adapterni tanlashga harakat qiling"
-        ),
-        Language::VI => format!(
+        }
+        Language::VI => {
             "Không thể quan sát lưu lượng nào vì adapter mà bạn chọn không địa chỉ hoạt động...\n\n\
-                                {network_adapter_translation}: {adapter}\n\n\
                                 Nếu bạn đã chắc chắn kết nối với internet, hãy thử chọn network adapter khác."
-        ),
-        Language::ID => format!(
+        }
+        Language::ID => {
             "Tidak ada sinyal yang bisa dilihat karena adapter yang kamu pilih tidak memiliki alamat yang aktif...\n\n\
-                                 {network_adapter_translation}: {adapter}\n\n\
                                  Jika kamu yakin kamu terhubung ke internet, coba untuk memilih adapter lainnya."
-        ),
-        Language::NL => format!(
+        }
+        Language::NL => {
             "Er kan geen verkeer worden waargenomen omdat de geselecteerde adapter geen actieve adressen heeft...\n\n\
-                                 {network_adapter_translation}: {adapter}\n\n\
                                  Als je zeker weet dat je verbonden bent met het internet, probeer dan een andere adapter te kiezen."
-        ),
-    })
+        }
+    }
 }
 
 #[allow(clippy::too_many_lines)]
-pub fn waiting_translation<'a>(language: Language, adapter: &str) -> Text<'a, StyleType> {
-    let network_adapter_translation = network_adapter_translation(language);
-    Text::new(match language {
-        Language::EN => format!(
+pub fn waiting_translation(language: Language) -> &'static str {
+    match language {
+        Language::EN => {
             "No traffic has been observed yet. Waiting for network packets...\n\n\
-                                 {network_adapter_translation}: {adapter}\n\n\
                                  Are you sure you are connected to the internet and you have selected the correct adapter?"
-        ),
-        Language::CS => format!(
+        }
+        Language::CS => {
             "Zatím nebyl zaznamenán žádný provoz. Čeká se na síťové pakety...\n\n\
-                                 {network_adapter_translation}: {adapter}\n\n\
                                  Jste si jisti, že jste připojeni k internetu a vybrali jste správný adaptér?"
-        ),
-        Language::IT => format!(
+        }
+        Language::IT => {
             "Nessun tipo di traffico è stato osservato finora. Attendo pacchetti di rete...\n\n\
-                                {network_adapter_translation}: {adapter}\n\n\
                                 Sei sicuro di esser connesso ad internet e di aver selezionato l'adattatore corretto?"
-        ),
-        Language::FR => format!(
+        }
+        Language::FR => {
             "Aucun trafic n'a été capturé pour le moment. En attente de paquets...\n\n\
-                                {network_adapter_translation} : {adapter}\n\n\
                                 Êtes-vous sûr d'être connecté à internet et d'avoir selectionné la bonne carte réseau ?"
-        ),
-        Language::ES => format!(
+        }
+        Language::ES => {
             "Aún no se ha captado tráfico. Esperando paquetes...\n\n\
-                                 {network_adapter_translation} : {adapter}\n\n\
                                  ¿Está seguro de que está conectado a Internet y ha seleccionado la tarjeta de red correcta?"
-        ),
-        Language::PL => format!(
+        }
+        Language::PL => {
             "Nie zaobserowano żadnego ruchu sieciowego. Oczekiwanie na pakiety...\n\n\
-                                 {network_adapter_translation}: {adapter}\n\n\
                                  Czy na pewno jesteś podłączony do internetu i wybrałeś właściwy adapter?"
-        ),
-        Language::DE => format!(
+        }
+        Language::DE => {
             "Noch kein Netzwerkverkehr beobachtet. Warten auf Pakete...\n\n\
-                                 {network_adapter_translation}: {adapter}\n\n\
                                  Bist du sicher, dass du mit dem Internet verbunden bist und den richtigen Adapter ausgewählt hast?"
-        ),
-        Language::UK => format!(
+        }
+        Language::UK => {
             "Не зафіксовано жодного мережевого руху. Очікування пакетів...\n\n\
-                                 {network_adapter_translation}: {adapter}\n\n\
                                  Чи ви дійсно підключені до інтернету і вибрали відповідний мережевий адаптер?"
-        ),
-        Language::ZH => format!(
+        }
+        Language::ZH => {
             "暂无流量数据. 等待网络活动中......\n\n\
-                                 {network_adapter_translation}: {adapter}\n\n\
                                  您确信您已成功连接到互联网, 并选择了当前正在使用的的网络适配器吗?"
-        ),
-        Language::ZH_TW => format!(
+        }
+        Language::ZH_TW => {
             "尚未觀察到任何流量。正在等待網路封包...\n\n\
-                                 {network_adapter_translation}: {adapter}\n\n\
                                  您確定已連線至網際網路，並已選取正確的網路介面卡嗎？"
-        ),
-        Language::RO => format!(
+        }
+        Language::RO => {
             "Nu a fost observat încă trafic. Se așteaptă pachetele de rețea...\n\n\
-                                {network_adapter_translation}: {adapter}\n\n\
                                 Ești sigur că ești conectat la internet și ai selectat adaptorul corect?"
-        ),
-        Language::KO => format!(
+        }
+        Language::KO => {
             "아직 트래픽이 관찰되지 않았습니다. 네트워크 패킷 대기 중...\n\n\
-                                {network_adapter_translation}: {adapter}\n\n\
                                 인터넷에 연결되어 있고 올바른 어댑터를 선택하셨습니까?"
-        ),
-        Language::TR => format!(
+        }
+        Language::TR => {
             "Henüz bir trafik algılanamadı. Ağ paketleri için bekleniyor...\n\n\
-                                 {network_adapter_translation}: {adapter}\n\n\
                                  İnternete bağlı olduğunuza ve doğru adaptörü seçtiğinize emin misiniz?"
-        ),
-        Language::RU => format!(
+        }
+        Language::RU => {
             "Трафик не обнаружен. Ожидаем сетевые пакеты...\n\n\
-                                 {network_adapter_translation}: {adapter}\n\n\
                                  Вы уверены, что подключены к Интернету и выбрали правильный интерфейс?"
-        ),
-        Language::PT => format!(
+        }
+        Language::PT => {
             "Ainda não foi observado tráfego. Aguardando por pacotes...\n\n\
-                                {network_adapter_translation}: {adapter}\n\n\
                                 Tem a certeza de que está ligado à internet e selecionou o adaptador correto?"
-        ),
-        Language::EL => format!(
+        }
+        Language::EL => {
             "Δεν έχει παρατηρηθεί κίνηση μέχρι στιγμής. Ανέμενε για πακέτα δικτύου...\n\n\
-                                 {network_adapter_translation}: {adapter}\n\n\
                                  Είσαι σίγουρος ότι είσαι συνδεδεμένος στο διαδίκτυο και ότι έχεις επιλέξει τον σωστό προσαρμογέα;"
-        ),
+        }
         // Language::FA => format!("هنوز هیچ آمد و شدی مشاهده نشده است. در حال انتظار برای بسته های شبکه...\n\n
         //                         مبدل شبکه: {adapter}\n\n
         //                         آیا مطمئن هستید به اینترنت وصل هستید و مبدل درست را انتخاب کرده اید؟"),
-        Language::SV => format!(
+        Language::SV => {
             "Ingen trafik har observerats ännu. Väntar på paket ...\n\n\
-                                 {network_adapter_translation}: {adapter}\n\n\
                                  Är du säker på att du är ansluten till internet och att du har valt rätt adapter?"
-        ),
-        Language::FI => format!(
+        }
+        Language::FI => {
             "Ei vielä havaittua liikennettä. Odotetaan verkkopaketteja...\n\n\
-                                 {network_adapter_translation}: {adapter}\n\n\
                                  Onhan sinulla varmasti internet-yhteys ja olet valinnut oikean verkkosovittimen."
-        ),
-        Language::JA => format!(
+        }
+        Language::JA => {
             "トラフィックがまだ観測できていません。ネットワーク パケットを待っています...\n\n\
-                                 {network_adapter_translation}: {adapter}\n\n\
                                  インターネットに接続していて、正しいアダプターを選択していますか?"
-        ),
-        Language::UZ => format!(
+        }
+        Language::UZ => {
             "Hali hech qanday trafik aniqlanmadi. Tarmoq paketlari kutilmoqda...\n\n\
-            {network_adapter_translation}: {adapter}\n\n\
-            Internetga ulanganingizga va to'g'ri adapterni tanlaganingizga ishonchingiz komilmi?"
-        ),
-        Language::VI => format!(
+                                 Internetga ulanganingizga va to'g'ri adapterni tanlaganingizga ishonchingiz komilmi?"
+        }
+        Language::VI => {
             "Chưa có lưu lượng để quan sát. Đang đợi các gói tin...\n\n\
-                                 {network_adapter_translation}: {adapter}\n\n\
                                  Bạn có chắc là đã kết nối với internet và đã chọn đúng network adapter?"
-        ),
-        Language::ID => format!(
+        }
+        Language::ID => {
             "Tidak ada sinyal yang bisa dipantau. Menunggu paket jaringan...\n\n\
-                                 {network_adapter_translation}: {adapter}\n\n\
                                  Apa kamu yakin kamu terhubung ke internet, dan memilih adapter yang benar?"
-        ),
-        Language::NL => format!(
+        }
+        Language::NL => {
             "Er is nog geen verkeer waargenomen. Wachten op netwerkpakketten...\n\n\
-                                 {network_adapter_translation}: {adapter}\n\n\
                                  Weet je zeker dat je verbonden bent met het internet en de juiste adapter hebt geselecteerd?"
-        ),
-    })
+        }
+    }
 }
 
 // #[allow(clippy::too_many_lines)]
@@ -1077,105 +1029,36 @@ pub fn waiting_translation<'a>(language: Language, adapter: &str) -> Text<'a, St
 //     })
 // }
 
-pub fn error_translation(language: Language, error: &str) -> Text<'_, StyleType> {
-    Text::new(match language {
-        Language::EN => format!(
-            "An error occurred! \n\n\
-                                {error}"
-        ),
-        Language::CS => format!(
-            "Vyskytla se chyba! \n\n\
-                                {error}"
-        ),
-        Language::IT => format!(
-            "Si è verificato un errore! \n\n\
-                                {error}"
-        ),
-        Language::FR => format!(
-            "Une erreur est survenue! \n\n\
-                                {error}"
-        ),
-        Language::ES => format!(
-            "¡Se ha producido un error! \n\n\
-                                {error}"
-        ),
-        Language::PL => format!(
-            "Wystąpił błąd! \n\n\
-                                {error}"
-        ),
-        Language::DE => format!(
-            "Es ist ein Fehler aufgetreten! \n\n\
-                                {error}"
-        ),
-        Language::UK => format!(
-            "Зʼявилась помилка! \n\n\
-                                {error}"
-        ),
-        Language::ZH => format!(
-            "发生了一些错误! \n\n\
-                                {error}"
-        ),
-        Language::ZH_TW => format!(
-            "發生錯誤！\n\n\
-                                {error}"
-        ),
-        Language::RO => format!(
-            "A apărut o eroare! \n\n\
-                                {error}"
-        ),
-        Language::KO => format!(
-            "오류가 발생하였습니다! \n\n\
-                                {error}"
-        ),
-        Language::TR => format!(
-            "Bir hata oluştu! \n\n\
-                                 {error}"
-        ),
-        Language::RU => format!(
-            "Произошла ошибка! \n\n\
-                                 {error}"
-        ),
-        Language::PT => format!(
-            "Ocorreu um erro! \n\n\
-                                {error}"
-        ),
-        Language::EL => format!(
-            "Κάποιο σφάλμα συνέβη! \n\n\
-                                {error}"
-        ),
+pub fn error_translation(language: Language) -> &'static str {
+    match language {
+        Language::EN => "An error occurred!",
+        Language::CS => "Vyskytla se chyba!",
+        Language::IT => "Si è verificato un errore!",
+        Language::FR => "Une erreur est survenue!",
+        Language::ES => "¡Se ha producido un error!",
+        Language::PL => "Wystąpił błąd!",
+        Language::DE => "Es ist ein Fehler aufgetreten!",
+        Language::UK => "Зʼявилась помилка!",
+        Language::ZH => "发生了一些错误!",
+        Language::ZH_TW => "發生錯誤！",
+        Language::RO => "A apărut o eroare!",
+        Language::KO => "오류가 발생하였습니다!",
+        Language::TR => "Bir hata oluştu!",
+        Language::RU => "Произошла ошибка!",
+        Language::PT => "Ocorreu um erro!",
+        Language::EL => "Κάποιο σφάλμα συνέβη!",
         // Language::FA => format!(
         //     "خطایی رخ داد! \n\n\
         //                         {error}"
         // ),
-        Language::SV => format!(
-            "Ett fel inträffade! \n\n\
-                                {error}"
-        ),
-        Language::FI => format!(
-            "Tapahtui virhe! \n\n\
-                                {error}"
-        ),
-        Language::JA => format!(
-            "エラーが発生しました! \n\n\
-                                {error}"
-        ),
-        Language::UZ => format!(
-            "Xatolik yuz berdi!\n\n\
-                                {error}"
-        ),
-        Language::VI => format!(
-            "Đã có lỗi xảy ra! \n\n\
-                                {error}"
-        ),
-        Language::ID => format!(
-            "Terjadi kesalahan! \n\n\
-                                {error}"
-        ),
-        Language::NL => format!(
-            "Er is een fout opgetreden! \n\n\
-                                {error}"
-        ),
-    })
+        Language::SV => "Ett fel inträffade!",
+        Language::FI => "Tapahtui virhe!",
+        Language::JA => "エラーが発生しました!",
+        Language::UZ => "Xatolik yuz berdi!",
+        Language::VI => "Đã có lỗi xảy ra!",
+        Language::ID => "Terjadi kesalahan!",
+        Language::NL => "Er is een fout opgetreden!",
+    }
 }
 
 // pub fn both_translation(language: Language) -> &'static str {

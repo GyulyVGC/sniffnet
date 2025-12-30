@@ -1,8 +1,8 @@
 //! Tab buttons to be used in the various pages just under the header
 
 use iced::widget::text::LineHeight;
-use iced::widget::{Button, Container, Row, Space, Text, button, horizontal_space};
-use iced::{Alignment, Font, Length, alignment};
+use iced::widget::{Button, Container, Row, Space, Text, button};
+use iced::{Alignment, Length, alignment};
 
 use crate::gui::pages::types::settings_page::SettingsPage;
 use crate::gui::styles::button::ButtonType;
@@ -14,7 +14,6 @@ use crate::{Language, RunningPage, StyleType};
 
 pub fn get_settings_tabs<'a>(
     active: SettingsPage,
-    font: Font,
     language: Language,
 ) -> Row<'a, Message, StyleType> {
     let mut tabs = Row::new()
@@ -25,15 +24,13 @@ pub fn get_settings_tabs<'a>(
 
     for page in &SettingsPage::ALL {
         let active = page.eq(&active);
-        tabs = tabs.push(new_settings_tab(*page, active, language, font));
+        tabs = tabs.push(new_settings_tab(*page, active, language));
     }
     tabs
 }
 
 pub fn get_pages_tabs<'a>(
     active: RunningPage,
-    font: Font,
-    font_headers: Font,
     language: Language,
     unread_notifications: usize,
 ) -> Row<'a, Message, StyleType> {
@@ -50,14 +47,7 @@ pub fn get_pages_tabs<'a>(
         } else {
             None
         };
-        tabs = tabs.push(new_page_tab(
-            *page,
-            active,
-            language,
-            font,
-            font_headers,
-            unread,
-        ));
+        tabs = tabs.push(new_page_tab(*page, active, language, unread));
     }
     tabs
 }
@@ -66,14 +56,12 @@ fn new_page_tab<'a>(
     page: RunningPage,
     active: bool,
     language: Language,
-    font: Font,
-    font_headers: Font,
     unread: Option<usize>,
 ) -> Button<'a, Message, StyleType> {
     let mut content = Row::new()
         .height(Length::Fill)
         .align_y(Alignment::Center)
-        .push(horizontal_space())
+        .push(Space::new().width(Length::Fill))
         .push(
             page.icon()
                 .size(15)
@@ -85,10 +73,9 @@ fn new_page_tab<'a>(
                 .align_x(alignment::Alignment::Center)
                 .align_y(alignment::Alignment::Center),
         )
-        .push(Space::with_width(10))
+        .push(Space::new().width(10))
         .push(
             Text::new(page.get_tab_label(language).to_string())
-                .font(font)
                 .size(FONT_SIZE_SUBTITLE)
                 .class(if active {
                     TextType::Title
@@ -103,11 +90,11 @@ fn new_page_tab<'a>(
         && num > 0
     {
         content = content
-            .push(Space::with_width(7))
-            .push(notifications_badge(font_headers, num));
+            .push(Space::new().width(7))
+            .push(notifications_badge(num));
     }
 
-    content = content.push(horizontal_space());
+    content = content.push(Space::new().width(Length::Fill));
 
     button(content)
         .height(if active { 35 } else { 30 })
@@ -125,12 +112,11 @@ fn new_settings_tab<'a>(
     page: SettingsPage,
     active: bool,
     language: Language,
-    font: Font,
 ) -> Button<'a, Message, StyleType> {
     let content = Row::new()
         .height(Length::Fill)
         .align_y(Alignment::Center)
-        .push(horizontal_space())
+        .push(Space::new().width(Length::Fill))
         .push(
             page.icon()
                 .size(15)
@@ -142,10 +128,9 @@ fn new_settings_tab<'a>(
                 .align_x(alignment::Alignment::Center)
                 .align_y(alignment::Alignment::Center),
         )
-        .push(Space::with_width(10))
+        .push(Space::new().width(10))
         .push(
             Text::new(page.get_tab_label(language).to_string())
-                .font(font)
                 .size(FONT_SIZE_SUBTITLE)
                 .class(if active {
                     TextType::Title
@@ -155,7 +140,7 @@ fn new_settings_tab<'a>(
                 .align_x(alignment::Alignment::Center)
                 .align_y(alignment::Alignment::Center),
         )
-        .push(horizontal_space());
+        .push(Space::new().width(Length::Fill));
 
     button(content)
         .height(if active { 35 } else { 30 })
@@ -169,13 +154,9 @@ fn new_settings_tab<'a>(
         .on_press(page.action())
 }
 
-pub fn notifications_badge<'a>(
-    font_headers: Font,
-    num: usize,
-) -> Container<'a, Message, StyleType> {
+pub fn notifications_badge<'a>(num: usize) -> Container<'a, Message, StyleType> {
     Container::new(
         Text::new(num.to_string())
-            .font(font_headers)
             .size(14)
             .line_height(LineHeight::Relative(1.0)),
     )

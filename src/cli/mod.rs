@@ -55,12 +55,8 @@ pub fn handle_cli_args() -> Task<Message> {
         std::process::exit(0);
     }
 
-    let mut boot_task_chain = window::get_latest()
-        .map(Message::StartApp)
-        .chain(Task::done(Message::Periodic));
+    let mut boot_task_chain = window::latest().map(Message::StartApp);
     if let Some(adapter) = args.adapter {
-        // TODO: check if this works once #653 is fixed
-        // currently the link type and device name aren't displayed properly when starting from CLI
         boot_task_chain = boot_task_chain
             .chain(Task::done(Message::SetCaptureSource(
                 CaptureSourcePicklist::Device,
@@ -78,7 +74,6 @@ mod tests {
 
     use crate::gui::pages::types::running_page::RunningPage;
     use crate::gui::pages::types::settings_page::SettingsPage;
-    use crate::gui::styles::types::custom_palette::ExtraStyles;
     use crate::gui::styles::types::gradient_type::GradientType;
     use crate::gui::types::conf::Conf;
     use crate::gui::types::config_window::{PositionTuple, SizeTuple};
@@ -114,7 +109,7 @@ mod tests {
                     favorite_notification: Default::default(),
                     remote_notifications: Default::default(),
                 },
-                style: StyleType::Custom(ExtraStyles::DraculaDark),
+                style: StyleType::DraculaDark,
             },
             device: ConfigDevice {
                 device_name: "hey-hey".to_string(),

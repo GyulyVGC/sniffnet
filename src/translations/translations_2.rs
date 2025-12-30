@@ -125,7 +125,7 @@ pub fn data_representation_translation(language: Language) -> &'static str {
         Language::FI => "Tietojen esitys",
         Language::DE => "Daten Darstellung",
         Language::TR => "Veri gösterimi",
-        // Language::FA => "بازنمایی داده ها", // TODO: or نمایندگی داده ها depending on context
+        // Language::FA => "بازنمایی داده ها",
         Language::ES => "Representación de los datos",
         Language::KO => "데이터 단위",
         Language::ZH => "图表数据",
@@ -465,7 +465,7 @@ pub fn administrative_entity_translation(language: Language) -> &'static str {
         Language::FI => "Autonomisen järjestelmän nimi",
         Language::DE => "Name des autonomen Systems",
         Language::TR => "Yönetim varlığı",
-        // Language::FA => "واحد اجرایی", // TODO: or واحد اداری depending on context
+        // Language::FA => "واحد اداری",
         Language::ES => "Nombre del sistema autónomo",
         Language::KO => "관리 엔티티",
         Language::ZH => "ASN 信息",

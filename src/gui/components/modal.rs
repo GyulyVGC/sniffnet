@@ -1,9 +1,8 @@
 use iced::alignment::Alignment;
 use iced::widget::{
-    Column, Container, Row, Space, Text, button, center, horizontal_space, mouse_area, opaque,
-    stack,
+    Column, Container, Row, Space, Text, button, center, mouse_area, opaque, stack,
 };
-use iced::{Element, Font, Length};
+use iced::{Element, Length};
 
 use crate::gui::components::button::button_hide;
 use crate::gui::styles::button::ButtonType;
@@ -20,28 +19,20 @@ use crate::{Language, StyleType};
 pub fn get_exit_overlay<'a>(
     message: Message,
     color_gradient: GradientType,
-    font: Font,
-    font_headers: Font,
     language: Language,
 ) -> Container<'a, Message, StyleType> {
-    let row_buttons = confirm_button_row(language, font, message);
+    let row_buttons = confirm_button_row(language, message);
 
     let content = Column::new()
         .align_x(Alignment::Center)
         .width(Length::Fill)
         .push(get_modal_header(
-            font,
-            font_headers,
             color_gradient,
             language,
             quit_analysis_translation(language),
         ))
-        .push(Space::with_height(20))
-        .push(
-            ask_quit_translation(language)
-                .align_x(Alignment::Center)
-                .font(font),
-        )
+        .push(Space::new().height(20))
+        .push(ask_quit_translation(language).align_x(Alignment::Center))
         .push(row_buttons);
 
     Container::new(content)
@@ -52,28 +43,20 @@ pub fn get_exit_overlay<'a>(
 
 pub fn get_clear_all_overlay<'a>(
     color_gradient: GradientType,
-    font: Font,
-    font_headers: Font,
     language: Language,
 ) -> Container<'a, Message, StyleType> {
-    let row_buttons = confirm_button_row(language, font, Message::ClearAllNotifications);
+    let row_buttons = confirm_button_row(language, Message::ClearAllNotifications);
 
     let content = Column::new()
         .align_x(Alignment::Center)
         .width(Length::Fill)
         .push(get_modal_header(
-            font,
-            font_headers,
             color_gradient,
             language,
             clear_all_translation(language),
         ))
-        .push(Space::with_height(20))
-        .push(
-            ask_clear_all_translation(language)
-                .align_x(Alignment::Center)
-                .font(font),
-        )
+        .push(Space::new().height(20))
+        .push(ask_clear_all_translation(language).align_x(Alignment::Center))
         .push(row_buttons);
 
     Container::new(content)
@@ -83,24 +66,21 @@ pub fn get_clear_all_overlay<'a>(
 }
 
 fn get_modal_header<'a>(
-    font: Font,
-    font_headers: Font,
     color_gradient: GradientType,
     language: Language,
     title: &'static str,
 ) -> Container<'a, Message, StyleType> {
     Container::new(
         Row::new()
-            .push(horizontal_space())
+            .push(Space::new().width(Length::Fill))
             .push(
                 Text::new(title)
-                    .font(font_headers)
                     .size(FONT_SIZE_TITLE)
                     .width(Length::FillPortion(6))
                     .align_x(Alignment::Center),
             )
             .push(
-                Container::new(button_hide(Message::HideModal, language, font))
+                Container::new(button_hide(Message::HideModal, language))
                     .width(Length::Fill)
                     .align_x(Alignment::Center),
             ),
@@ -112,18 +92,13 @@ fn get_modal_header<'a>(
     .class(ContainerType::Gradient(color_gradient))
 }
 
-fn confirm_button_row<'a>(
-    language: Language,
-    font: Font,
-    message: Message,
-) -> Row<'a, Message, StyleType> {
+fn confirm_button_row<'a>(language: Language, message: Message) -> Row<'a, Message, StyleType> {
     Row::new()
         .height(Length::Fill)
         .align_y(Alignment::Center)
         .push(
             button(
                 yes_translation(language)
-                    .font(font)
                     .align_y(Alignment::Center)
                     .align_x(Alignment::Center),
             )

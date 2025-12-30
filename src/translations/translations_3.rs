@@ -1,9 +1,6 @@
 #![allow(clippy::match_same_arms, clippy::match_wildcard_for_single_variants)]
 
-use iced::widget::Text;
-
-use crate::translations::translations::network_adapter_translation;
-use crate::{Language, StyleType};
+use crate::Language;
 
 // This is referred to settings (General settings)
 pub fn general_translation(language: Language) -> &'static str {
@@ -290,11 +287,8 @@ pub fn link_type_translation(language: Language) -> &'static str {
     }
 }
 
-pub fn unsupported_link_type_translation<'a>(
-    language: Language,
-    adapter: &str,
-) -> Text<'a, StyleType> {
-    let translation = match language {
+pub fn unsupported_link_type_translation(language: Language) -> &'static str {
+    match language {
         Language::EN => {
             "The link type associated with this adapter is not supported by Sniffnet yet..."
         }
@@ -353,12 +347,7 @@ pub fn unsupported_link_type_translation<'a>(
             "Ο τύπος σύνδεσης που σχετίζεται με αυτόν τον προσαρμογέα δεν υποστηρίζεται ακόμη από το Sniffnet..."
         }
         _ => "The link type associated with this adapter is not supported by Sniffnet yet...",
-    };
-
-    Text::new(format!(
-        "{translation}\n\n{}: {adapter}",
-        network_adapter_translation(language)
-    ))
+    }
 }
 
 pub fn style_from_file_translation(language: Language) -> &'static str {

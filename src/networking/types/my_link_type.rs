@@ -56,7 +56,9 @@ impl MyLinkType {
                     l.get_description().unwrap_or_else(|_| String::new())
                 )
             }
-            Self::NotYetAssigned => String::new(),
+            Self::NotYetAssigned => {
+                format!("{}: -", link_type_translation(language),)
+            }
         }
     }
 }

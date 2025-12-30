@@ -27,7 +27,7 @@ impl ConfigWindow {
     const MIN_SIZE_X: f32 = 100.0;
     const MIN_SIZE_Y: f32 = 100.0;
 
-    pub fn thumbnail_size(factor: f64) -> SizeTuple {
+    pub fn thumbnail_size(factor: f32) -> SizeTuple {
         Self::THUMBNAIL_SIZE.scale_and_check(factor)
     }
 }
@@ -82,13 +82,11 @@ impl ToSize for SizeTuple {
 }
 
 pub trait ScaleAndCheck {
-    fn scale_and_check(self, factor: f64) -> Self;
+    fn scale_and_check(self, factor: f32) -> Self;
 }
 
 impl ScaleAndCheck for SizeTuple {
-    fn scale_and_check(self, factor: f64) -> SizeTuple {
-        #[allow(clippy::cast_possible_truncation)]
-        let factor = factor as f32;
+    fn scale_and_check(self, factor: f32) -> SizeTuple {
         let mut x = self.0 * factor;
         let mut y = self.1 * factor;
         if x < ConfigWindow::MIN_SIZE_X {
@@ -102,9 +100,7 @@ impl ScaleAndCheck for SizeTuple {
 }
 
 impl ScaleAndCheck for PositionTuple {
-    fn scale_and_check(self, factor: f64) -> PositionTuple {
-        #[allow(clippy::cast_possible_truncation)]
-        let factor = factor as f32;
+    fn scale_and_check(self, factor: f32) -> PositionTuple {
         let mut x = self.0 * factor;
         let mut y = self.1 * factor;
         if x < ConfigWindow::MIN_POS_X {

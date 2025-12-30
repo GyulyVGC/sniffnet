@@ -59,7 +59,7 @@ impl ContainerType {
                     Background::Color(Color::TRANSPARENT)
                 }
                 ContainerType::ModalBackground => Background::Color(Color {
-                    a: 0.9,
+                    a: 0.75,
                     ..Color::BLACK
                 }),
                 ContainerType::AdapterAddress => Background::Color(Color {
@@ -101,6 +101,7 @@ impl ContainerType {
                 },
             },
             shadow: Shadow::default(),
+            snap: true,
         }
     }
 }

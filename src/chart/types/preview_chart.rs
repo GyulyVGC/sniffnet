@@ -3,7 +3,7 @@ use std::ops::Range;
 use iced::Element;
 use iced::widget::Column;
 use plotters::prelude::*;
-use plotters_iced::{Chart, ChartBuilder, ChartWidget, DrawingBackend};
+use plotters_iced2::{Chart, ChartBuilder, ChartWidget, DrawingBackend};
 
 use crate::chart::types::chart_series::{ChartSeries, sample_spline};
 use crate::gui::styles::style_constants::CHARTS_LINE_BORDER;
@@ -20,6 +20,8 @@ pub struct PreviewChart {
     pub packets: ChartSeries,
     /// Maximum number of packets per time interval (computed on last 30 intervals)
     pub max_packets: f32,
+    /// Total number of packets (last 30 seconds)
+    pub tot_packets: f32,
     /// Style of the chart
     pub style: StyleType,
 }
@@ -30,6 +32,7 @@ impl PreviewChart {
             ticks: 0,
             packets: ChartSeries::default(),
             max_packets: 0.0,
+            tot_packets: 0.0,
             style,
         }
     }
@@ -46,6 +49,7 @@ impl PreviewChart {
         // update traffic data
         self.packets.update_series(packets_point, true, false);
         self.max_packets = self.packets.get_max();
+        self.tot_packets = self.packets.get_tot();
     }
 
     pub fn view(&self) -> Element<'_, Message, StyleType> {
