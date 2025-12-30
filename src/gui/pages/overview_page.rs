@@ -148,7 +148,7 @@ fn col_host<'a>(sniffer: &Sniffer) -> Column<'a, Message, StyleType> {
         );
     }
 
-    if entries.len() > 30 {
+    if entries.len() >= 30 {
         scroll_host = scroll_host
             .push(Space::new().height(25))
             .push(Text::new(only_top_30_items_translation(language)).align_x(Alignment::Center));
@@ -210,7 +210,7 @@ fn col_service<'a>(sniffer: &Sniffer) -> Column<'a, Message, StyleType> {
         );
     }
 
-    if entries.len() > 30 {
+    if entries.len() >= 30 {
         scroll_service = scroll_service
             .push(Space::new().height(25))
             .push(Text::new(only_top_30_items_translation(language)).align_x(Alignment::Center));
