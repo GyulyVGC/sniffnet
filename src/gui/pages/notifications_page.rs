@@ -73,7 +73,7 @@ pub fn notifications_page(sniffer: &Sniffer) -> Container<'_, Message, StyleType
             .spacing(10)
             .padding(Padding::new(10.0).bottom(0))
             .push(
-                Container::new(if sniffer.logged_notifications.0.len() < 30 {
+                Container::new(if sniffer.logged_notifications.0.len() <= 30 {
                     Text::new("")
                 } else {
                     Text::new(only_last_30_translation(language))
