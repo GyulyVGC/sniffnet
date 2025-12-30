@@ -37,29 +37,29 @@ strip = true
 #═══════════════════════════════════════════════════════════════════════════════════════════════════════════════════════
 
 [dependencies]
-pcap = "2.4.0"
-etherparse = "0.19.0"
+async-channel = "2.5.0"
 chrono = "0.4.42"
-plotters = { version = "0.3.7", default-features = false, features = ["area_series", "line_series"] }
-iced = { version = "0.14.0", features = ["tokio", "svg", "advanced", "lazy", "image"] }
-plotters-iced2 = "0.14.0"
-maxminddb = "0.27.1"
+clap = { version = "4.5.53", features = ["derive"] }
 confy = "2.0.0"
-serde = { version = "1.0.228", features = ["derive"] }
-serde_json = { version = "1.0.148", features = ["preserve_order"] }
-rodio = { version = "0.21.1", default-features = false, features = ["mp3", "playback"] }
-dns-lookup = "3.0.1"
-toml = "0.9.10"
 ctrlc = { version = "3.5.1", features = ["termination"] }
-rfd = "0.16.0"
+dns-lookup = "3.0.1"
+etherparse = "0.19.0"
+iced = { version = "0.14.0", features = ["tokio", "svg", "advanced", "lazy", "image"] }
+maxminddb = "0.27.1"
+pcap = "2.4.0"
 phf = "0.13.1"
 phf_shared = "0.13.1"
-splines = "5.0.0"
-clap = { version = "4.5.53", features = ["derive"] }
-tokio = "1.48.0"
-async-channel = "2.5.0"
+plotters = { version = "0.3.7", default-features = false, features = ["area_series", "line_series"] }
+plotters-iced2 = "0.14.0"
+reqwest = { version = "0.13.1", features = ["json"] }
+rfd = "0.16.0"
+rodio = { version = "0.21.1", default-features = false, features = ["mp3", "playback"] }
 semver = "1.0.27"
-reqwest = { version = "0.13.0", features = ["json"] }
+serde = { version = "1.0.228", features = ["derive"] }
+serde_json = { version = "1.0.148", features = ["preserve_order"] }
+splines = "5.0.0"
+tokio = { version = "1.48.0", features = ["macros"] }
+toml = "0.9.10"
 
 [target.'cfg(windows)'.dependencies]
 gag = "1.0.0"
@@ -67,8 +67,8 @@ gag = "1.0.0"
 #───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
 
 [dev-dependencies]
-serde_test = "1.0.177"
 rstest = "0.26.1"
+serde_test = "1.0.177"
 serial_test = { version = "3.2.0", default-features = false }
 
 #───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
