@@ -37,6 +37,8 @@ pub struct InfoAddressPortPair {
     pub icmp_types: HashMap<IcmpType, usize>,
     /// Types of the ARP operations, with the relative count (this is empty if not ARP)
     pub arp_types: HashMap<ArpType, usize>,
+    /// Whether the remote address is blacklisted
+    pub is_blacklisted: bool,
 }
 
 impl InfoAddressPortPair {
@@ -45,6 +47,7 @@ impl InfoAddressPortPair {
         self.transmitted_packets += other.transmitted_packets;
         self.final_timestamp = other.final_timestamp;
         self.service = other.service;
+        self.is_blacklisted = other.is_blacklisted;
         self.traffic_direction = other.traffic_direction;
         for (icmp_type, count) in &other.icmp_types {
             self.icmp_types

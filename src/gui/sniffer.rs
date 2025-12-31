@@ -57,6 +57,7 @@ use crate::networking::types::data_representation::DataRepr;
 use crate::networking::types::host::{Host, HostMessage};
 use crate::networking::types::host_data_states::HostDataStates;
 use crate::networking::types::info_traffic::InfoTraffic;
+use crate::networking::types::ip_blacklist::IpBlacklist;
 use crate::networking::types::my_device::MyDevice;
 use crate::notifications::notify_and_log::notify_and_log;
 use crate::notifications::types::logged_notification::LoggedNotification;
@@ -121,6 +122,8 @@ pub struct Sniffer {
     pub page_number: usize,
     /// MMDB readers for country and ASN
     pub mmdb_readers: MmdbReaders,
+    /// IP blacklist
+    pub ip_blacklist: IpBlacklist,
     /// Time-related events
     pub timing_events: TimingEvents,
     /// Whether thumbnail mode is currently active
@@ -176,6 +179,7 @@ impl Sniffer {
                 country: Arc::new(MmdbReader::from(&mmdb_country, COUNTRY_MMDB)),
                 asn: Arc::new(MmdbReader::from(&mmdb_asn, ASN_MMDB)),
             },
+            ip_blacklist: IpBlacklist::default(), // load it later
             timing_events: TimingEvents::default(),
             thumbnail: false,
             id: None,
@@ -317,8 +321,10 @@ impl Sniffer {
             Message::ChangeScaleFactor(slider_val) => self.change_scale_factor(slider_val),
             Message::WindowMoved(x, y) => self.window_moved(x, y),
             Message::WindowResized(width, height) => return self.window_resized(width, height),
-            Message::CustomCountryDb(db) => self.custom_country_db(&db),
-            Message::CustomAsnDb(db) => self.custom_asn_db(&db),
+            Message::CustomCountryDb(db) => self.custom_country_db(db),
+            Message::CustomAsnDb(db) => self.custom_asn_db(db),
+            Message::LoadIpBlacklist(path) => return self.load_ip_blacklist(path),
+            Message::SetIpBlacklist(blacklist) => self.set_ip_blacklist(blacklist),
             Message::QuitWrapper => return self.quit_wrapper(),
             Message::Quit => return self.quit(),
             Message::Welcome => self.welcome(),
@@ -448,6 +454,7 @@ impl Sniffer {
             Sniffer::register_sigint_handler(),
             Task::perform(set_newer_release_status(), Message::SetNewerReleaseStatus),
             previews_task,
+            self.load_ip_blacklist(self.conf.settings.ip_blacklist.clone()),
         ])
     }
 
@@ -621,14 +628,26 @@ impl Sniffer {
         Task::none()
     }
 
-    fn custom_country_db(&mut self, db: &String) {
-        self.conf.settings.mmdb_country.clone_from(db);
-        self.mmdb_readers.country = Arc::new(MmdbReader::from(db, COUNTRY_MMDB));
+    fn custom_country_db(&mut self, db: String) {
+        self.mmdb_readers.country = Arc::new(MmdbReader::from(&db, COUNTRY_MMDB));
+        self.conf.settings.mmdb_country = db;
     }
 
-    fn custom_asn_db(&mut self, db: &String) {
-        self.conf.settings.mmdb_asn.clone_from(db);
-        self.mmdb_readers.asn = Arc::new(MmdbReader::from(db, ASN_MMDB));
+    fn custom_asn_db(&mut self, db: String) {
+        self.mmdb_readers.asn = Arc::new(MmdbReader::from(&db, ASN_MMDB));
+        self.conf.settings.mmdb_asn = db;
+    }
+
+    fn load_ip_blacklist(&mut self, path: String) -> Task<Message> {
+        self.conf.settings.ip_blacklist.clone_from(&path);
+        println!("Start loading...");
+        Task::perform(IpBlacklist::from_file(path), Message::SetIpBlacklist)
+    }
+
+    fn set_ip_blacklist(&mut self, blacklist: IpBlacklist) {
+        self.ip_blacklist = blacklist;
+        // TODO: fix this
+        self.welcome = None;
     }
 
     fn open_file(
@@ -915,6 +934,7 @@ impl Sniffer {
                 // no pcap error
                 let curr_cap_id = self.current_capture_rx.0;
                 let mmdb_readers = self.mmdb_readers.clone();
+                let ip_blacklist = self.ip_blacklist.clone();
                 self.capture_source
                     .set_link_type(capture_context.my_link_type());
                 self.capture_source.set_addresses();
@@ -932,6 +952,7 @@ impl Sniffer {
                             curr_cap_id,
                             capture_source,
                             &mmdb_readers,
+                            &ip_blacklist,
                             capture_context,
                             filters,
                             &tx,
@@ -1202,7 +1223,7 @@ impl Sniffer {
     fn welcome(&mut self) {
         if let Some((true, x)) = self.welcome {
             if x >= 19 {
-                self.welcome = None;
+                // self.welcome = None;
             } else {
                 self.welcome = Some((true, x + 1));
             }

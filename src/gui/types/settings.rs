@@ -12,6 +12,7 @@ pub struct Settings {
     pub scale_factor: f32,
     pub mmdb_country: String,
     pub mmdb_asn: String,
+    pub ip_blacklist: String,
     pub style_path: String,
     pub notifications: Notifications,
     // StyleType should be last in order to deserialize as a table properly
@@ -26,6 +27,7 @@ impl Default for Settings {
             scale_factor: 1.0,
             mmdb_country: String::new(),
             mmdb_asn: String::new(),
+            ip_blacklist: String::new(),
             style_path: String::new(),
             notifications: Notifications::default(),
             style: StyleType::default(),

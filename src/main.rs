@@ -73,6 +73,7 @@ pub fn main() -> iced::Result {
 
     let ConfigWindow { size, position, .. } = conf.window;
 
+    // TODO: handle CLI args before launching the GUI!
     application(
         move || (Sniffer::new(conf.clone()), handle_cli_args()),
         Sniffer::update,

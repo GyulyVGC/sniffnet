@@ -50,7 +50,7 @@ pub struct Conf {
 }
 
 impl Conf {
-    const FILE_NAME: &'static str = "conf";
+    pub(crate) const FILE_NAME: &'static str = "conf";
 
     /// This should only be used directly to load fresh configurations;
     /// use `CONF` instead to access the initial instance

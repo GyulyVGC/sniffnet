@@ -10,6 +10,7 @@ use crate::networking::types::capture_context::CaptureSourcePicklist;
 use crate::networking::types::data_representation::DataRepr;
 use crate::networking::types::host::{Host, HostMessage};
 use crate::networking::types::info_traffic::InfoTraffic;
+use crate::networking::types::ip_blacklist::IpBlacklist;
 use crate::notifications::types::notifications::Notification;
 use crate::report::types::search_parameters::SearchParameters;
 use crate::report::types::sort_type::SortType;
@@ -104,6 +105,10 @@ pub enum Message {
     CustomCountryDb(String),
     /// The ASN MMDB custom path has been updated
     CustomAsnDb(String),
+    /// Load IP blacklist from file
+    LoadIpBlacklist(String),
+    /// Set new IP blacklist content
+    SetIpBlacklist(IpBlacklist),
     /// Wrapper around the Quit message
     QuitWrapper,
     /// Save the configurations of the app and quit

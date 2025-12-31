@@ -14,6 +14,7 @@ use crate::networking::types::capture_context::CaptureSource;
 use crate::networking::types::icmp_type::{IcmpType, IcmpTypeV4, IcmpTypeV6};
 use crate::networking::types::info_address_port_pair::InfoAddressPortPair;
 use crate::networking::types::info_traffic::InfoTraffic;
+use crate::networking::types::ip_blacklist::IpBlacklist;
 use crate::networking::types::service::Service;
 use crate::networking::types::service_query::ServiceQuery;
 use crate::networking::types::traffic_direction::TrafficDirection;
@@ -261,9 +262,11 @@ pub fn modify_or_insert_in_map(
     icmp_type: IcmpType,
     arp_type: ArpType,
     exchanged_bytes: u128,
+    ip_blacklist: &IpBlacklist,
 ) -> (TrafficDirection, Service) {
     let mut traffic_direction = TrafficDirection::default();
     let mut service = Service::Unknown;
+    let mut is_blacklisted = false;
 
     if !info_traffic_msg.map.contains_key(key) {
         // first occurrence of key (in this time interval)
@@ -281,6 +284,12 @@ pub fn modify_or_insert_in_map(
         );
         // determine upper layer service
         service = get_service(key, traffic_direction, my_interface_addresses);
+        // check if the remote address is blacklisted
+        let address_to_lookup = get_address_to_lookup(key, traffic_direction);
+        is_blacklisted = ip_blacklist.contains(&address_to_lookup);
+        if is_blacklisted {
+            println!("Blacklisted IP detected: {}", address_to_lookup);
+        }
     }
 
     let timestamp = info_traffic_msg.last_packet_timestamp;
@@ -323,6 +332,7 @@ pub fn modify_or_insert_in_map(
             } else {
                 HashMap::new()
             },
+            is_blacklisted,
         });
 
     (new_info.traffic_direction, new_info.service)

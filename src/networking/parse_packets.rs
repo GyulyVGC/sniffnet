@@ -18,6 +18,7 @@ use crate::networking::types::data_info_host::DataInfoHost;
 use crate::networking::types::host::{Host, HostMessage};
 use crate::networking::types::icmp_type::IcmpType;
 use crate::networking::types::info_traffic::InfoTraffic;
+use crate::networking::types::ip_blacklist::IpBlacklist;
 use crate::networking::types::my_link_type::MyLinkType;
 use crate::networking::types::traffic_direction::TrafficDirection;
 use crate::utils::error_logger::{ErrorLogger, Location};
@@ -40,6 +41,7 @@ pub fn parse_packets(
     cap_id: usize,
     mut cs: CaptureSource,
     mmdb_readers: &MmdbReaders,
+    ip_blacklist: &IpBlacklist,
     capture_context: CaptureContext,
     filters: Filters,
     tx: &Sender<BackendTrafficMessage>,
@@ -175,6 +177,7 @@ pub fn parse_packets(
                         icmp_type,
                         arp_type,
                         exchanged_bytes,
+                        &ip_blacklist,
                     );
 
                     info_traffic_msg

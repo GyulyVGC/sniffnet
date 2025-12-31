@@ -17,6 +17,9 @@ struct Args {
     /// Start sniffing packets from the supplied network adapter
     #[arg(short, long, value_name = "NAME", default_missing_value = CONF.device.device_name.as_str(), num_args = 0..=1)]
     adapter: Option<String>,
+    /// Show the path to the configuration file
+    #[arg(short, long, exclusive = true)]
+    config_path: bool,
     #[cfg(all(windows, not(debug_assertions)))]
     /// Show the logs (stdout and stderr) of the most recent application run
     #[arg(short, long, exclusive = true)]
@@ -51,8 +54,23 @@ pub fn handle_cli_args() -> Task<Message> {
     if args.restore_default {
         if Conf::default().store().is_ok() {
             println!("Restored default settings");
+            std::process::exit(0);
+        } else {
+            eprintln!("Could not restore default settings");
+            std::process::exit(1);
         }
-        std::process::exit(0);
+    }
+
+    if args.config_path {
+        if let Ok(config_path) =
+            confy::get_configuration_file_path(SNIFFNET_LOWERCASE, Conf::FILE_NAME)
+        {
+            println!("Configuration file path: {}", config_path.display());
+            std::process::exit(0);
+        } else {
+            eprintln!("Could not retrieve configuration file path");
+            std::process::exit(1);
+        }
     }
 
     let mut boot_task_chain = window::latest().map(Message::StartApp);
