@@ -9,11 +9,11 @@ use iced::Color;
 use plotters::style::RGBColor;
 use serde::{Deserialize, Serialize};
 
+use super::color_remote::{deserialize_color, serialize_color};
 use crate::gui::styles::style_constants::{RED_ALERT_COLOR_DAILY, RED_ALERT_COLOR_NIGHTLY};
 use crate::gui::styles::types::color_remote::color_hash;
 use crate::gui::styles::types::palette_extension::PaletteExtension;
-
-use super::color_remote::{deserialize_color, serialize_color};
+use crate::gui::styles::types::style_type::StyleType;
 
 /// Set of colors to apply to GUI
 ///
@@ -23,6 +23,7 @@ use super::color_remote::{deserialize_color, serialize_color};
 /// - `text_headers` should be black or white and must have a strong contrast with `secondary`
 /// - `text_body` should be black or white and must have a strong contrast with `primary`
 #[derive(Debug, Clone, Copy, PartialEq, Deserialize, Serialize)]
+#[serde(default)]
 pub struct Palette {
     /// Main color of the GUI (background, hovered buttons, active tab)
     #[serde(
@@ -126,6 +127,12 @@ impl Palette {
             .map_err(serde::de::Error::custom)?;
 
         toml::de::from_str(&style_toml)
+    }
+}
+
+impl Default for Palette {
+    fn default() -> Self {
+        <StyleType as std::default::Default>::default().get_palette()
     }
 }
 

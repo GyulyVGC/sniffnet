@@ -14,7 +14,6 @@ pub struct Settings {
     pub mmdb_asn: String,
     pub style_path: String,
     pub notifications: Notifications,
-    // StyleType should be last in order to deserialize as a table properly
     pub style: StyleType,
 }
 

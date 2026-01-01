@@ -5,7 +5,8 @@ use serde::{Deserialize, Serialize};
 use crate::gui::styles::types::palette::Palette;
 use crate::gui::styles::types::palette_extension::PaletteExtension;
 
-#[derive(Clone, Copy, Debug, Hash, PartialEq, Serialize, Deserialize)]
+#[derive(Clone, Copy, Debug, Hash, PartialEq, Serialize, Deserialize, Default)]
+#[serde(default)]
 pub struct CustomPalette {
     #[serde(flatten)]
     pub(crate) palette: Palette,

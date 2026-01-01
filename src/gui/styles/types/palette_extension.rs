@@ -3,11 +3,12 @@ use std::hash::{Hash, Hasher};
 use iced::Color;
 use serde::{Deserialize, Serialize};
 
-use crate::gui::styles::types::color_remote::color_hash;
-
 use super::color_remote::{deserialize_color, serialize_color};
+use crate::gui::styles::types::color_remote::color_hash;
+use crate::gui::styles::types::style_type::StyleType;
 
 #[derive(Clone, Copy, Debug, PartialEq, Serialize, Deserialize)]
+#[serde(default)]
 pub struct PaletteExtension {
     pub is_nightly: bool,
     pub alpha_chart_badge: f32,
@@ -23,6 +24,12 @@ pub struct PaletteExtension {
         serialize_with = "serialize_color"
     )]
     pub red_alert_color: Color,
+}
+
+impl Default for PaletteExtension {
+    fn default() -> Self {
+        <StyleType as std::default::Default>::default().get_extension()
+    }
 }
 
 impl Hash for PaletteExtension {
