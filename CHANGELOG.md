@@ -6,6 +6,7 @@ All Sniffnet releases with the relative changes are documented in this file.
 - Add charts to preview network adapters traffic in initial page ([#1026](https://github.com/GyulyVGC/sniffnet/pull/1026) — fixes [#556](https://github.com/GyulyVGC/sniffnet/issues/556))
 - Add animated welcome screen ([#1002](https://github.com/GyulyVGC/sniffnet/pull/1002))
 - Migrate to Iced 0.14 ([#1032](https://github.com/GyulyVGC/sniffnet/pull/1032) — fixes [#589](https://github.com/GyulyVGC/sniffnet/issues/589), [#639](https://github.com/GyulyVGC/sniffnet/issues/639), [#653](https://github.com/GyulyVGC/sniffnet/issues/653), [#656](https://github.com/GyulyVGC/sniffnet/issues/656), [#675](https://github.com/GyulyVGC/sniffnet/issues/675))
+- Fix app configurations backward-compatibility when an existing field is updated
 - Return a PCAP error when trying to start a capture from an unknown adapter name
 
 ## [1.4.2] - 2025-11-04

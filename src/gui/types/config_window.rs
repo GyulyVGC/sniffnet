@@ -1,22 +1,32 @@
+use crate::gui::types::conf::deserialize_or_default;
 use iced::window::Position;
 use iced::{Point, Size};
 use serde::{Deserialize, Serialize};
 
-#[derive(Serialize, Deserialize, Copy, Clone, PartialEq, Debug)]
+#[derive(Serialize, Deserialize, Copy, Clone, PartialEq, Debug, Default)]
 pub struct PositionTuple(pub f32, pub f32);
+
 #[derive(Serialize, Deserialize, Copy, Clone, PartialEq, Debug)]
 pub struct SizeTuple(pub f32, pub f32);
 
-#[derive(Serialize, Deserialize, Copy, Clone, PartialEq, Debug)]
+impl Default for SizeTuple {
+    fn default() -> Self {
+        Self(1190.0, 670.0)
+    }
+}
+
+#[derive(Serialize, Deserialize, Copy, Clone, PartialEq, Debug, Default)]
 #[serde(default)]
 pub struct ConfigWindow {
+    #[serde(deserialize_with = "deserialize_or_default")]
     pub position: PositionTuple,
+    #[serde(deserialize_with = "deserialize_or_default")]
     pub size: SizeTuple,
+    #[serde(deserialize_with = "deserialize_or_default")]
     pub thumbnail_position: PositionTuple,
 }
 
 impl ConfigWindow {
-    pub const DEFAULT_SIZE: SizeTuple = SizeTuple(1190.0, 670.0);
     const THUMBNAIL_SIZE: SizeTuple = SizeTuple(360.0, 222.0);
 
     const MIN_POS_X: f32 = -50.0;
@@ -29,16 +39,6 @@ impl ConfigWindow {
 
     pub fn thumbnail_size(factor: f32) -> SizeTuple {
         Self::THUMBNAIL_SIZE.scale_and_check(factor)
-    }
-}
-
-impl Default for ConfigWindow {
-    fn default() -> Self {
-        Self {
-            position: PositionTuple(0.0, 0.0),
-            size: ConfigWindow::DEFAULT_SIZE,
-            thumbnail_position: PositionTuple(0.0, 0.0),
-        }
     }
 }
 

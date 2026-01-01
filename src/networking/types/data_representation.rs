@@ -59,9 +59,10 @@ impl DataRepr {
 }
 
 /// Represents a Byte or bit multiple for displaying values in a human-readable format.
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize, Default)]
 pub enum ByteMultiple {
     /// A Byte
+    #[default]
     B,
     /// 10^3 Bytes
     KB,
