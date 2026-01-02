@@ -165,7 +165,9 @@ fn get_col_adapter(sniffer: &Sniffer) -> Column<'_, Message, StyleType> {
         } else {
             Scrollable::with_direction(
                 sniffer.preview_charts.iter().fold(
-                    Column::new().padding(Padding::ZERO.right(13)).spacing(5),
+                    Column::new()
+                        .padding(Padding::ZERO.right(13).bottom(10))
+                        .spacing(5),
                     |scroll_adapters, (my_dev, chart)| {
                         let name = my_dev.get_name();
                         let addresses_row = get_addresses_row(my_dev);
