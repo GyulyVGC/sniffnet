@@ -174,9 +174,13 @@ fn scale_factor_slider<'a>(
             .push(Text::new(format!("{:.0}%", scale_factor * 100.0)))
             .push(Space::new().height(5))
             .push(
-                Slider::new(-1.0..=1.0, slider_val, Message::ChangeScaleFactor)
-                    .step(0.01)
-                    .width(slider_width),
+                Slider::new(-1.0..=1.0, slider_val, |slider_val| {
+                    let scale_factor_str = format!("{:.1}", 3.0_f32.powf(slider_val));
+                    let scale_factor = scale_factor_str.parse().unwrap_or(1.0);
+                    Message::ChangeScaleFactor(scale_factor)
+                })
+                .step(0.01)
+                .width(slider_width),
             )
             .push(Space::new().height(Length::Fill)),
     )

@@ -18,7 +18,15 @@ const HEX_STR_BASE_LEN: usize = 7;
 // #aabbccdd is nine bytes long
 const HEX_STR_ALPHA_LEN: usize = 9;
 
+#[allow(clippy::unnecessary_wraps)]
 pub(super) fn deserialize_color<'de, D>(deserializer: D) -> Result<Color, D::Error>
+where
+    D: Deserializer<'de>,
+{
+    Ok(deserialize_color_inner(deserializer).unwrap_or(Color::BLACK))
+}
+
+fn deserialize_color_inner<'de, D>(deserializer: D) -> Result<Color, D::Error>
 where
     D: Deserializer<'de>,
 {
@@ -109,7 +117,7 @@ where
 mod tests {
     use iced::Color;
     use serde::{Deserialize, Serialize};
-    use serde_test::{Token, assert_de_tokens_error, assert_tokens};
+    use serde_test::{Token, assert_de_tokens, assert_tokens};
 
     use super::{deserialize_color, serialize_color};
 
@@ -155,7 +163,7 @@ mod tests {
     const CATPPUCCIN_PINK_TOO_LONG: &str = "#f5c2e7f5c2e7f5";
     const INVALID_COLOR: &str = "#cal✘";
 
-    // Test if deserializing and serializing a color works.
+    // test if deserializing and serializing a color works.
     #[test]
     fn test_working_color_round_trip() {
         assert_tokens(
@@ -164,7 +172,7 @@ mod tests {
         );
     }
 
-    // Test if deserializing and serializing a color with an alpha channel works.
+    // test if deserializing and serializing a color with an alpha channel works.
     #[test]
     fn test_working_color_with_alpha_round_trip() {
         assert_tokens(
@@ -173,39 +181,58 @@ mod tests {
         );
     }
 
-    // Missing octothorpe should fail.
+    // missing octothorpe should fail -> use Color::BLACK
     #[test]
     fn test_no_octothrope_color_rt() {
-        assert_de_tokens_error::<DelegateTest>(
+        assert_de_tokens(
+            &DelegateTest {
+                color: Color::BLACK,
+            },
             &[Token::Str(CATPPUCCIN_PINK_NO_OCTO)],
-            "invalid value: character `%`, expected #",
         );
     }
 
-    // A hex color that is missing components should panic.
+    // a hex color that is missing components should fail -> use Color::BLACK
     #[test]
     fn test_len_too_small_color_de() {
-        assert_de_tokens_error::<DelegateTest>(
+        assert_de_tokens(
+            &DelegateTest {
+                color: Color::BLACK,
+            },
             &[Token::Str(CATPPUCCIN_PINK_TRUNCATED)],
-            "invalid length 5, expected 7 or 9",
         );
     }
 
-    // A hex string that is too long shouldn't deserialize
+    // a hex string that is too long should fail -> use Color::BLACK
     #[test]
     fn test_len_too_large_color_de() {
-        assert_de_tokens_error::<DelegateTest>(
+        assert_de_tokens(
+            &DelegateTest {
+                color: Color::BLACK,
+            },
             &[Token::Str(CATPPUCCIN_PINK_TOO_LONG)],
-            "invalid length 15, expected 7 or 9",
         );
     }
 
-    // Invalid hexadecimal should panic
+    // invalid hexadecimal should fail -> use Color::BLACK
     #[test]
     fn test_invalid_hex_color_de() {
-        assert_de_tokens_error::<DelegateTest>(
+        assert_de_tokens(
+            &DelegateTest {
+                color: Color::BLACK,
+            },
             &[Token::Str(INVALID_COLOR)],
-            "invalid value: string \"#cal✘\", expected valid hexadecimal",
+        );
+    }
+
+    // not string should fail -> use Color::BLACK
+    #[test]
+    fn test_no_string_color_de() {
+        assert_de_tokens(
+            &DelegateTest {
+                color: Color::BLACK,
+            },
+            &[Token::I8(12)],
         );
     }
 }

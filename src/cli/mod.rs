@@ -76,7 +76,7 @@ mod tests {
     use crate::gui::pages::types::settings_page::SettingsPage;
     use crate::gui::styles::types::gradient_type::GradientType;
     use crate::gui::types::conf::Conf;
-    use crate::gui::types::config_window::{PositionTuple, SizeTuple};
+    use crate::gui::types::config_window::ConfigWindow;
     use crate::gui::types::export_pcap::ExportPcap;
     use crate::gui::types::filters::Filters;
     use crate::gui::types::settings::Settings;
@@ -85,7 +85,7 @@ mod tests {
     use crate::networking::types::data_representation::DataRepr;
     use crate::notifications::types::notifications::Notifications;
     use crate::report::types::sort_type::SortType;
-    use crate::{ConfigWindow, Language, Sniffer, StyleType};
+    use crate::{Language, Sniffer, StyleType};
 
     #[test]
     #[serial]
@@ -114,11 +114,7 @@ mod tests {
             device: ConfigDevice {
                 device_name: "hey-hey".to_string(),
             },
-            window: ConfigWindow {
-                position: PositionTuple(440.0, 99.0),
-                size: SizeTuple(452.0, 870.0),
-                thumbnail_position: PositionTuple(20.0, 20.0),
-            },
+            window: ConfigWindow::new((452.0, 870.0), (440.0, 99.0), (20.0, 20.0)),
             capture_source_picklist: CaptureSourcePicklist::File,
             report_sort_type: SortType::Ascending,
             host_sort_type: SortType::Descending,

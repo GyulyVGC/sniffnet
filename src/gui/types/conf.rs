@@ -18,6 +18,25 @@ use serde::{Deserialize, Deserializer, Serialize};
 
 pub static CONF: std::sync::LazyLock<Conf> = std::sync::LazyLock::new(Conf::load);
 
+/// Application configurations structure
+///
+/// This structure holds all the configuration parameters for the application,
+/// and is serialized/deserialized using `confy` crate to store/load from disk.
+///
+/// ### IMPORTANT NOTE
+///
+/// In order to load it in a robust, fault-tolerant, backward-compatible way,
+/// there are various constraints to be satisfied when deserializing:
+/// - missing fields must be filled with default values
+///   - the main struct and all nested structs must implement `Default` and be annotated with `#[serde(default)]`
+///   - this populates missing fields from the struct's `Default` implementation
+/// - invalid fields must be replaced with default values
+///   - all fields must be annotated with `#[serde(deserialize_with = "deserialize_or_default")]`
+///   - this populates invalid fields from the field's type `Default` implementation
+/// - extra fields must be ignored
+///   - this is the default behavior of `serde`
+/// - right after deserialization, certain fields must be sanitized
+///   - this is to ensure that fields deserialized correctly but with "weird" values are fixed
 #[derive(Serialize, Deserialize, Default, Clone, PartialEq, Debug)]
 #[serde(default)]
 pub struct Conf {
@@ -69,13 +88,30 @@ impl Conf {
     /// This should only be used directly to load fresh configurations;
     /// use `CONF` instead to access the initial instance
     #[cfg(not(test))]
-    pub fn load() -> Self {
-        if let Ok(conf) = confy::load::<Conf>(SNIFFNET_LOWERCASE, Self::FILE_NAME) {
+    fn load() -> Self {
+        let mut conf = if let Ok(conf) = confy::load::<Conf>(SNIFFNET_LOWERCASE, Self::FILE_NAME) {
             conf
         } else {
             let _ = Conf::default().store();
             Conf::default()
+        };
+
+        // sanitize Conf...
+
+        // check scale factor validity
+        if !(0.3..=3.0).contains(&conf.settings.scale_factor) {
+            conf.settings.scale_factor = 1.0;
         }
+
+        // sanitize window parameters
+        conf.window.sanitize(conf.settings.scale_factor);
+
+        // check sound volume validity
+        if !(0..=100).contains(&conf.settings.notifications.volume) {
+            conf.settings.notifications.volume = 50;
+        }
+
+        conf
     }
 
     #[cfg(not(test))]

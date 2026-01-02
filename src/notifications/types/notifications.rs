@@ -24,7 +24,7 @@ pub struct Notifications {
 impl Default for Notifications {
     fn default() -> Self {
         Notifications {
-            volume: 60,
+            volume: 50,
             data_notification: DataNotification::default(),
             favorite_notification: FavoriteNotification::default(),
             remote_notifications: RemoteNotifications::default(),

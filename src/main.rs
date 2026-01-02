@@ -4,16 +4,16 @@
 
 use std::borrow::Cow;
 
-#[cfg(target_os = "linux")]
-use iced::window::settings::PlatformSpecific;
-use iced::{Font, Pixels, application, window};
-
 use chart::types::traffic_chart::TrafficChart;
 use cli::handle_cli_args;
 use gui::pages::types::running_page::RunningPage;
 use gui::sniffer::Sniffer;
 use gui::styles::style_constants::FONT_SIZE_BODY;
 use gui::styles::types::style_type::StyleType;
+use iced::window::Position;
+#[cfg(target_os = "linux")]
+use iced::window::settings::PlatformSpecific;
+use iced::{Font, Pixels, application, window};
 use networking::types::data_representation::ByteMultiple;
 use networking::types::info_traffic::InfoTraffic;
 use networking::types::protocol::Protocol;
@@ -24,7 +24,6 @@ use utils::formatted_strings::print_cli_welcome_message;
 use crate::gui::sniffer::FONT_FAMILY_NAME;
 use crate::gui::styles::style_constants::{ICONS_BYTES, SARASA_MONO_BYTES};
 use crate::gui::types::conf::CONF;
-use crate::gui::types::config_window::{ConfigWindow, ToPosition, ToSize};
 
 mod chart;
 mod cli;
@@ -71,8 +70,10 @@ pub fn main() -> iced::Result {
 
     print_cli_welcome_message();
 
-    let ConfigWindow { size, position, .. } = conf.window;
+    let size = conf.window.size();
+    let position = Position::Specific(conf.window.position());
 
+    // TODO: parse CLI args before launching GUI
     application(
         move || (Sniffer::new(conf.clone()), handle_cli_args()),
         Sniffer::update,
@@ -89,8 +90,8 @@ pub fn main() -> iced::Result {
         vsync: true,
     })
     .window(window::Settings {
-        size: size.to_size(), // start size
-        position: position.to_position(),
+        size, // start size
+        position,
         min_size: None, // Some(ConfigWindow::MIN_SIZE.to_size()), // min size allowed
         max_size: None,
         visible: true,
