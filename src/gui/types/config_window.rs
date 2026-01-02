@@ -19,9 +19,9 @@ impl Default for SizeTuple {
 #[serde(default)]
 pub struct ConfigWindow {
     #[serde(deserialize_with = "deserialize_or_default")]
-    pub position: PositionTuple,
-    #[serde(deserialize_with = "deserialize_or_default")]
     pub size: SizeTuple,
+    #[serde(deserialize_with = "deserialize_or_default")]
+    pub position: PositionTuple,
     #[serde(deserialize_with = "deserialize_or_default")]
     pub thumbnail_position: PositionTuple,
 }

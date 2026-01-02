@@ -21,45 +21,46 @@ pub static CONF: std::sync::LazyLock<Conf> = std::sync::LazyLock::new(Conf::load
 #[derive(Serialize, Deserialize, Default, Clone, PartialEq, Debug)]
 #[serde(default)]
 pub struct Conf {
-    /// Parameters from settings pages
-    #[serde(deserialize_with = "deserialize_or_default")]
-    pub settings: Settings,
-    /// Last selected network device name
-    #[serde(deserialize_with = "deserialize_or_default")]
-    pub device: ConfigDevice,
-    /// Window configuration, such as size and position
-    #[serde(deserialize_with = "deserialize_or_default")]
-    pub window: ConfigWindow,
     /// Capture source picklist, to select the source of the capture
     #[serde(deserialize_with = "deserialize_or_default")]
     pub capture_source_picklist: CaptureSourcePicklist,
-    /// BPF filter program to be applied to the capture
+    /// Import path for PCAP file
     #[serde(deserialize_with = "deserialize_or_default")]
-    pub filters: Filters,
-    /// Report sort type (inspect page)
-    #[serde(deserialize_with = "deserialize_or_default")]
-    pub report_sort_type: SortType,
-    /// Host sort type (overview page)
-    #[serde(deserialize_with = "deserialize_or_default")]
-    pub host_sort_type: SortType,
-    /// Service sort type (overview page)
-    #[serde(deserialize_with = "deserialize_or_default")]
-    pub service_sort_type: SortType,
+    pub import_pcap_path: String,
     /// Remembers the last opened setting page
     #[serde(deserialize_with = "deserialize_or_default")]
     pub last_opened_setting: SettingsPage,
     /// Remembers the last opened running page
     #[serde(deserialize_with = "deserialize_or_default")]
     pub last_opened_page: RunningPage,
-    /// Information about PCAP file export
-    #[serde(deserialize_with = "deserialize_or_default")]
-    pub export_pcap: ExportPcap,
-    /// Import path for PCAP file
-    #[serde(deserialize_with = "deserialize_or_default")]
-    pub import_pcap_path: String,
     /// Data representation
     #[serde(deserialize_with = "deserialize_or_default")]
     pub data_repr: DataRepr,
+    /// Host sort type (overview page)
+    #[serde(deserialize_with = "deserialize_or_default")]
+    pub host_sort_type: SortType,
+    /// Service sort type (overview page)
+    #[serde(deserialize_with = "deserialize_or_default")]
+    pub service_sort_type: SortType,
+    /// Report sort type (inspect page)
+    #[serde(deserialize_with = "deserialize_or_default")]
+    pub report_sort_type: SortType,
+    // ---------------------------------------------------------------------------------------------
+    /// Window configuration, such as size and position
+    #[serde(deserialize_with = "deserialize_or_default")]
+    pub window: ConfigWindow,
+    /// Last selected network device name
+    #[serde(deserialize_with = "deserialize_or_default")]
+    pub device: ConfigDevice,
+    /// BPF filter program to be applied to the capture
+    #[serde(deserialize_with = "deserialize_or_default")]
+    pub filters: Filters,
+    /// Information about PCAP file export
+    #[serde(deserialize_with = "deserialize_or_default")]
+    pub export_pcap: ExportPcap,
+    /// Parameters from settings pages
+    #[serde(deserialize_with = "deserialize_or_default")]
+    pub settings: Settings,
 }
 
 impl Conf {

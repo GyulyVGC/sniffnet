@@ -11,6 +11,7 @@ use crate::notifications::types::sound::Sound;
 pub struct Notifications {
     #[serde(deserialize_with = "deserialize_or_default")]
     pub volume: u8,
+    // ---------------------------------------------------------------------------------------------
     #[serde(deserialize_with = "deserialize_or_default")]
     pub data_notification: DataNotification,
     #[serde(deserialize_with = "deserialize_or_default")]
@@ -43,6 +44,9 @@ pub enum Notification {
 #[derive(Clone, Eq, PartialEq, Serialize, Deserialize, Debug, Copy)]
 #[serde(default)]
 pub struct DataNotification {
+    /// The sound to emit
+    #[serde(deserialize_with = "deserialize_or_default")]
+    pub sound: Sound,
     /// Data representation
     #[serde(deserialize_with = "deserialize_or_default")]
     pub data_repr: DataRepr,
@@ -52,9 +56,6 @@ pub struct DataNotification {
     /// B, KB, MB or GB
     #[serde(deserialize_with = "deserialize_or_default")]
     pub byte_multiple: ByteMultiple,
-    /// The sound to emit
-    #[serde(deserialize_with = "deserialize_or_default")]
-    pub sound: Sound,
     /// The last used Some value for the threshold field
     #[serde(deserialize_with = "deserialize_or_default")]
     pub previous_threshold: u64,
@@ -63,10 +64,10 @@ pub struct DataNotification {
 impl Default for DataNotification {
     fn default() -> Self {
         DataNotification {
-            data_repr: DataRepr::Bytes,
+            data_repr: DataRepr::default(),
             threshold: None,
             byte_multiple: ByteMultiple::KB,
-            sound: Sound::Pop,
+            sound: Sound::Gulp,
             previous_threshold: 800_000,
         }
     }

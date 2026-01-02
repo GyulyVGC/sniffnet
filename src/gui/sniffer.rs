@@ -1055,10 +1055,10 @@ impl Sniffer {
                     || temp_threshold.previous_threshold != previous_threshold
                 {
                     temp_threshold = DataNotification {
+                        sound,
                         data_repr,
                         threshold,
                         byte_multiple,
-                        sound,
                         previous_threshold,
                     };
                     self.timing_events.threshold_adjust_now(temp_threshold);
@@ -1816,7 +1816,7 @@ mod tests {
             data_repr: DataRepr::Bytes,
             threshold: None,
             byte_multiple: ByteMultiple::KB,
-            sound: Sound::Pop,
+            sound: Sound::Gulp,
             previous_threshold: 800000,
         };
 
@@ -1824,7 +1824,7 @@ mod tests {
             data_repr: DataRepr::Bytes,
             threshold: Some(800_000),
             byte_multiple: ByteMultiple::GB,
-            sound: Sound::Pop,
+            sound: Sound::Gulp,
             previous_threshold: 800_000,
         };
 
