@@ -1,4 +1,6 @@
+use crate::gui::pages::overview_page::col_device;
 use crate::gui::sniffer::Sniffer;
+use crate::gui::styles::container::ContainerType;
 use crate::gui::styles::types::style_type::StyleType;
 use crate::gui::types::message::Message;
 use crate::gui::types::settings::Settings;
@@ -11,7 +13,7 @@ use crate::translations::translations_3::unsupported_link_type_translation;
 use crate::translations::translations_4::reading_from_pcap_translation;
 use crate::utils::types::icon::Icon;
 use iced::widget::{Column, Container, Space, Text};
-use iced::{Alignment, FillPortion, Length};
+use iced::{Alignment, Length};
 
 pub fn waiting_page(sniffer: &Sniffer) -> Option<Container<'_, Message, StyleType>> {
     let Settings { language, .. } = sniffer.conf.settings;
@@ -56,24 +58,35 @@ pub fn waiting_page(sniffer: &Sniffer) -> Option<Container<'_, Message, StyleTyp
             waiting_translation(language).to_string(),
         )
     };
-    let all_text = format!(
-        "{}: {}\n{}\n\n{nothing_to_see_text}",
-        cs.title(language),
-        cs.get_name(),
-        link_type.full_print_on_one_line(language)
-    );
+
+    let nothing_to_see_col = Column::new()
+        .align_x(Alignment::Center)
+        .push(icon_text)
+        .push(Space::new().height(25))
+        .push(Text::new(nothing_to_see_text).align_x(Alignment::Center))
+        .push(Text::new(dots.to_owned()).size(50));
 
     Some(Container::new(
         Column::new()
             .width(Length::Fill)
             .padding(10)
-            .spacing(10)
             .align_x(Alignment::Center)
             .push(Space::new().height(Length::Fill))
-            .push(icon_text)
-            .push(Space::new().height(15))
-            .push(Text::new(all_text).align_x(Alignment::Center))
-            .push(Text::new(dots.to_owned()).size(50))
-            .push(Space::new().height(FillPortion(2))),
+            .push(
+                Container::new(
+                    col_device(language, cs, &sniffer.conf.filters).height(Length::Shrink),
+                )
+                .padding([15, 30])
+                .class(ContainerType::BorderedRound),
+            )
+            .push(Space::new().height(20))
+            .push(
+                Container::new(nothing_to_see_col)
+                    .align_x(Alignment::Center)
+                    .width(Length::Fill)
+                    .padding(15)
+                    .class(ContainerType::BorderedRound),
+            )
+            .push(Space::new().height(Length::FillPortion(2))),
     ))
 }

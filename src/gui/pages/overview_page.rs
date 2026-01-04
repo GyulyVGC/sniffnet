@@ -366,7 +366,7 @@ fn container_chart(sniffer: &Sniffer) -> Container<'_, Message, StyleType> {
     .class(ContainerType::BorderedRound)
 }
 
-fn col_device<'a>(
+pub(crate) fn col_device<'a>(
     language: Language,
     cs: &CaptureSource,
     filters: &'a Filters,
