@@ -822,6 +822,15 @@
       "contributions": [
         "translation"
       ]
+    },
+    {
+      "login": "tonywhelan",
+      "name": "Tony",
+      "avatar_url": "https://avatars.githubusercontent.com/u/5572784?v=4",
+      "profile": "https://github.com/tonywhelan",
+      "contributions": [
+        "financial"
+      ]
     }
   ],
   "contributorsPerLine": 7,
