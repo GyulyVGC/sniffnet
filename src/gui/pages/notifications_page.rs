@@ -260,7 +260,7 @@ fn logged_notifications<'a>(sniffer: &Sniffer) -> Column<'a, Message, StyleType>
     let Settings { language, .. } = sniffer.conf.settings;
     let data_repr = sniffer.conf.data_repr;
     let mut ret_val = Column::new()
-        .padding(Padding::ZERO.right(15))
+        .padding(Padding::ZERO.right(15).bottom(10))
         .spacing(10)
         .align_x(Alignment::Center);
 

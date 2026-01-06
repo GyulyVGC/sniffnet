@@ -7,6 +7,7 @@ use crate::chart::types::donut_chart::donut_chart;
 use crate::countries::country_utils::get_flag_tooltip;
 use crate::countries::flags_pictures::{FLAGS_HEIGHT_BIG, FLAGS_WIDTH_BIG};
 use crate::gui::components::tab::get_pages_tabs;
+use crate::gui::pages::initial_page::get_addresses_row;
 use crate::gui::sniffer::Sniffer;
 use crate::gui::styles::button::ButtonType;
 use crate::gui::styles::container::ContainerType;
@@ -366,9 +367,9 @@ fn container_chart(sniffer: &Sniffer) -> Container<'_, Message, StyleType> {
     .class(ContainerType::BorderedRound)
 }
 
-fn col_device<'a>(
+pub(crate) fn col_device<'a>(
     language: Language,
-    cs: &CaptureSource,
+    cs: &'a CaptureSource,
     filters: &'a Filters,
 ) -> Column<'a, Message, StyleType> {
     let link_type = cs.get_link_type();
@@ -381,7 +382,7 @@ fn col_device<'a>(
         Row::new()
             .spacing(10)
             .push(Text::new("BPF"))
-            .push(get_info_tooltip(filters.bpf().to_string()))
+            .push(get_info_tooltip(Text::new(filters.bpf()).into()))
             .into()
     } else {
         Text::new(none_translation(language)).into()
@@ -397,7 +398,13 @@ fn col_device<'a>(
                     Row::new()
                         .spacing(10)
                         .push(Text::new(format!("   {}", &cs_info)))
-                        .push(get_info_tooltip(link_type.full_print_on_one_line(language))),
+                        .push(get_info_tooltip(
+                            Column::new()
+                                .spacing(10)
+                                .push(Text::new(link_type.full_print_on_one_line(language)))
+                                .push(get_addresses_row(link_type, cs.get_addresses()))
+                                .into(),
+                        )),
                 ),
         )
         .push(
@@ -615,7 +622,7 @@ fn get_star_button<'a>(is_favorite: bool, host: Host) -> Button<'a, Message, Sty
     .on_press(Message::AddOrRemoveFavorite(host, !is_favorite))
 }
 
-fn get_info_tooltip<'a>(info_str: String) -> Tooltip<'a, Message, StyleType> {
+fn get_info_tooltip(tooltip_content: Element<Message, StyleType>) -> Tooltip<Message, StyleType> {
     Tooltip::new(
         Container::new(
             Text::new("i")
@@ -627,7 +634,7 @@ fn get_info_tooltip<'a>(info_str: String) -> Tooltip<'a, Message, StyleType> {
         .height(20)
         .width(20)
         .class(ContainerType::BadgeInfo),
-        Text::new(info_str),
+        tooltip_content,
         Position::FollowCursor,
     )
     .class(ContainerType::Tooltip)

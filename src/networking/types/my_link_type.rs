@@ -50,10 +50,14 @@ impl MyLinkType {
             | Self::LinuxSll2(l)
             | Self::Unsupported(l) => {
                 format!(
-                    "{}: {} ({})",
+                    "{}: {}{}",
                     link_type_translation(language),
                     l.get_name().unwrap_or_else(|_| l.0.to_string()),
-                    l.get_description().unwrap_or_else(|_| String::new())
+                    if let Ok(desc) = l.get_description() {
+                        format!(" ({desc})")
+                    } else {
+                        String::new()
+                    }
                 )
             }
             Self::NotYetAssigned => {

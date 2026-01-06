@@ -8,69 +8,49 @@
 use std::hash::{Hash, Hasher};
 
 use iced::Color;
-use serde::{
-    Deserialize, Deserializer, Serializer,
-    de::{Error as DeErrorTrait, Unexpected},
-};
+use serde::{Deserialize, Deserializer, Serializer};
 
 // #aabbcc is seven bytes long
 const HEX_STR_BASE_LEN: usize = 7;
 // #aabbccdd is nine bytes long
 const HEX_STR_ALPHA_LEN: usize = 9;
 
+#[allow(clippy::unnecessary_wraps)]
 pub(super) fn deserialize_color<'de, D>(deserializer: D) -> Result<Color, D::Error>
 where
     D: Deserializer<'de>,
 {
-    // Field should be a hex string i.e. #aabbcc
-    let hex = String::deserialize(deserializer)?;
+    Ok(deserialize_color_inner(deserializer).unwrap_or(Color::BLACK))
+}
 
-    // The string should be seven bytes long (octothorpe + six hex chars).
-    // Safety: Hexadecimal is ASCII so bytes are okay here.
+fn deserialize_color_inner<'de, D>(deserializer: D) -> Option<Color>
+where
+    D: Deserializer<'de>,
+{
+    let hex = String::deserialize(deserializer).ok()?;
+
     let hex_len = hex.len();
     if hex_len == HEX_STR_BASE_LEN || hex_len == HEX_STR_ALPHA_LEN {
-        let color = hex
-            .strip_prefix('#') // Remove the octothorpe or fail
-            .ok_or_else(|| {
-                DeErrorTrait::invalid_value(
-                    Unexpected::Char(hex.chars().next().unwrap_or_default()),
-                    &"#",
-                )
-            })?
-            // Iterating over bytes is safe because hex is ASCII.
-            // If the hex is not ASCII or invalid hex, then the iterator will short circuit and fail on `from_str_radix`
-            // TODO: This can be cleaned up when `iter_array_chunks` is stabilized (https://github.com/rust-lang/rust/issues/100450)
-            .bytes()
-            .step_by(2) // Step by every first hex char of the two char sequence
-            .zip(hex.bytes().skip(2).step_by(2)) // Step by every second hex char
-            .map(|(first, second)| {
-                // Parse hex strings
-                let maybe_hex = [first, second];
-                std::str::from_utf8(&maybe_hex)
-                    .map_err(|_| {
-                        DeErrorTrait::invalid_value(Unexpected::Str(&hex), &"valid hexadecimal")
-                    })
-                    .and_then(|s| {
-                        u8::from_str_radix(s, 16)
-                            .map_err(DeErrorTrait::custom)
-                            .map(|rgb| f32::from(rgb) / 255.0)
-                    })
-            })
-            .collect::<Result<Vec<f32>, _>>()?;
+        let digits_str = hex.strip_prefix('#')?;
 
-        // Alpha isn't always part of the color scheme. The resulting Vec should always have at least three elements.
-        // Accessing the first three elements without [slice::get] is okay because I checked the length of the hex string earlier.
-        Ok(Color {
-            r: color[0],
-            g: color[1],
-            b: color[2],
-            a: *color.get(3).unwrap_or(&1.0),
+        let r_str = digits_str.get(0..2)?;
+        let g_str = digits_str.get(2..4)?;
+        let b_str = digits_str.get(4..6)?;
+        let a_str = digits_str.get(6..8).unwrap_or("ff");
+
+        let r = u8::from_str_radix(r_str, 16).ok()?;
+        let g = u8::from_str_radix(g_str, 16).ok()?;
+        let b = u8::from_str_radix(b_str, 16).ok()?;
+        let a = u8::from_str_radix(a_str, 16).ok()?;
+
+        Some(Color {
+            r: f32::from(r) / 255.0,
+            g: f32::from(g) / 255.0,
+            b: f32::from(b) / 255.0,
+            a: f32::from(a) / 255.0,
         })
     } else {
-        Err(DeErrorTrait::invalid_length(
-            hex_len,
-            &&*format!("{HEX_STR_BASE_LEN} or {HEX_STR_ALPHA_LEN}"),
-        ))
+        None
     }
 }
 
@@ -109,7 +89,7 @@ where
 mod tests {
     use iced::Color;
     use serde::{Deserialize, Serialize};
-    use serde_test::{Token, assert_de_tokens_error, assert_tokens};
+    use serde_test::{Token, assert_de_tokens, assert_tokens};
 
     use super::{deserialize_color, serialize_color};
 
@@ -155,7 +135,7 @@ mod tests {
     const CATPPUCCIN_PINK_TOO_LONG: &str = "#f5c2e7f5c2e7f5";
     const INVALID_COLOR: &str = "#cal✘";
 
-    // Test if deserializing and serializing a color works.
+    // test if deserializing and serializing a color works.
     #[test]
     fn test_working_color_round_trip() {
         assert_tokens(
@@ -164,7 +144,7 @@ mod tests {
         );
     }
 
-    // Test if deserializing and serializing a color with an alpha channel works.
+    // test if deserializing and serializing a color with an alpha channel works.
     #[test]
     fn test_working_color_with_alpha_round_trip() {
         assert_tokens(
@@ -173,39 +153,58 @@ mod tests {
         );
     }
 
-    // Missing octothorpe should fail.
+    // missing octothorpe should fail -> use Color::BLACK
     #[test]
     fn test_no_octothrope_color_rt() {
-        assert_de_tokens_error::<DelegateTest>(
+        assert_de_tokens(
+            &DelegateTest {
+                color: Color::BLACK,
+            },
             &[Token::Str(CATPPUCCIN_PINK_NO_OCTO)],
-            "invalid value: character `%`, expected #",
         );
     }
 
-    // A hex color that is missing components should panic.
+    // a hex color that is missing components should fail -> use Color::BLACK
     #[test]
     fn test_len_too_small_color_de() {
-        assert_de_tokens_error::<DelegateTest>(
+        assert_de_tokens(
+            &DelegateTest {
+                color: Color::BLACK,
+            },
             &[Token::Str(CATPPUCCIN_PINK_TRUNCATED)],
-            "invalid length 5, expected 7 or 9",
         );
     }
 
-    // A hex string that is too long shouldn't deserialize
+    // a hex string that is too long should fail -> use Color::BLACK
     #[test]
     fn test_len_too_large_color_de() {
-        assert_de_tokens_error::<DelegateTest>(
+        assert_de_tokens(
+            &DelegateTest {
+                color: Color::BLACK,
+            },
             &[Token::Str(CATPPUCCIN_PINK_TOO_LONG)],
-            "invalid length 15, expected 7 or 9",
         );
     }
 
-    // Invalid hexadecimal should panic
+    // invalid hexadecimal should fail -> use Color::BLACK
     #[test]
     fn test_invalid_hex_color_de() {
-        assert_de_tokens_error::<DelegateTest>(
+        assert_de_tokens(
+            &DelegateTest {
+                color: Color::BLACK,
+            },
             &[Token::Str(INVALID_COLOR)],
-            "invalid value: string \"#cal✘\", expected valid hexadecimal",
+        );
+    }
+
+    // not string should fail -> use Color::BLACK
+    #[test]
+    fn test_no_string_color_de() {
+        assert_de_tokens(
+            &DelegateTest {
+                color: Color::BLACK,
+            },
+            &[Token::I8(12)],
         );
     }
 }

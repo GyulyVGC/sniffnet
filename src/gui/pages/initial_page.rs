@@ -16,6 +16,7 @@ use crate::gui::types::message::Message;
 use crate::gui::types::settings::Settings;
 use crate::networking::types::capture_context::{CaptureSource, CaptureSourcePicklist};
 use crate::networking::types::my_device::MyDevice;
+use crate::networking::types::my_link_type::MyLinkType;
 use crate::translations::translations::{network_adapter_translation, start_translation};
 use crate::translations::translations_3::{
     directory_translation, export_capture_translation, file_name_translation,
@@ -33,6 +34,7 @@ use iced::widget::{
     center, row,
 };
 use iced::{Alignment, Length, Padding, alignment};
+use pcap::Address;
 
 /// Computes the body of gui initial page
 pub fn initial_page(sniffer: &Sniffer) -> Container<'_, Message, StyleType> {
@@ -165,10 +167,13 @@ fn get_col_adapter(sniffer: &Sniffer) -> Column<'_, Message, StyleType> {
         } else {
             Scrollable::with_direction(
                 sniffer.preview_charts.iter().fold(
-                    Column::new().padding(Padding::ZERO.right(13)).spacing(5),
+                    Column::new()
+                        .padding(Padding::ZERO.right(13).bottom(10))
+                        .spacing(5),
                     |scroll_adapters, (my_dev, chart)| {
                         let name = my_dev.get_name();
-                        let addresses_row = get_addresses_row(my_dev);
+                        let addresses_row =
+                            get_addresses_row(my_dev.get_link_type(), my_dev.get_addresses());
                         let (title, subtitle) = get_adapter_title_subtitle(my_dev);
                         scroll_adapters.push(
                             Button::new(
@@ -210,11 +215,19 @@ fn get_col_adapter(sniffer: &Sniffer) -> Column<'_, Message, StyleType> {
         })
 }
 
-fn get_addresses_row(my_dev: &MyDevice) -> Option<row::Wrapping<'_, Message, StyleType>> {
-    let addresses = my_dev.get_addresses();
-    if addresses.is_empty() {
+pub(crate) fn get_addresses_row(
+    link_type: MyLinkType,
+    addresses: &Vec<Address>,
+) -> Option<row::Wrapping<'_, Message, StyleType>> {
+    if addresses.is_empty()
+        || matches!(
+            link_type,
+            MyLinkType::LinuxSll(_) | MyLinkType::LinuxSll2(_)
+        )
+    {
         return None;
     }
+
     let mut row = Row::new().spacing(5);
     for addr in addresses {
         let address_string = addr.addr.to_string();

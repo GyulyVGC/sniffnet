@@ -3,7 +3,7 @@ use crate::gui::styles::style_constants::{FONT_SIZE_FOOTER, FONT_SIZE_SUBTITLE, 
 use crate::networking::types::data_representation::DataRepr;
 use iced::alignment::Vertical;
 use iced::widget::canvas::path::Arc;
-use iced::widget::canvas::{Frame, Text};
+use iced::widget::canvas::{Frame, Stroke, Text};
 use iced::widget::text::Alignment;
 use iced::widget::{Canvas, canvas};
 use iced::{Length, Radians, Renderer, mouse};
@@ -91,28 +91,34 @@ impl<Message, Theme: Catalog> canvas::Program<Message, Theme> for DonutChart {
     ) -> Vec<canvas::Geometry> {
         let mut frame = Frame::new(renderer, bounds.size());
         let center = frame.center();
-        let radius = (frame.width().min(frame.height()) / 2.0) * 0.9;
+
+        let thickness = 6.0;
+        let radius = (frame.width().min(frame.height()) / 2.0) * 0.9 - thickness / 2.0;
 
         let style = <Theme as Catalog>::style(theme, &<Theme as Catalog>::default());
         let colors = [style.incoming, style.outgoing, style.dropped];
 
         for ((start_angle, end_angle), color) in self.angles().into_iter().zip(colors) {
             let path = canvas::Path::new(|builder| {
+                // build path using just an arc with thickness, because iced's paths are limited:
+                // - no single close path can be constructed as the one we want (drawing an arc starts a new sub-path)
+                // - counter-clockwise arcs are not supported
                 builder.arc(Arc {
                     center,
                     radius,
                     start_angle,
                     end_angle,
                 });
-                builder.line_to(center);
-                builder.close();
             });
 
-            frame.fill(&path, color);
+            let stroke = Stroke {
+                style: canvas::stroke::Style::Solid(color),
+                width: thickness,
+                ..Default::default()
+            };
+            frame.stroke(&path, stroke);
         }
 
-        let inner_circle = canvas::Path::circle(center, radius - 6.0);
-        frame.fill(&inner_circle, style.background);
         frame.fill_text(Text {
             content: self.title().clone(),
             position: center,

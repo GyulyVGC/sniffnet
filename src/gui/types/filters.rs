@@ -1,9 +1,12 @@
+use crate::gui::types::conf::deserialize_or_default;
 use serde::{Deserialize, Serialize};
 
 #[derive(Serialize, Deserialize, Clone, PartialEq, Debug, Default)]
 #[serde(default)]
 pub struct Filters {
+    #[serde(deserialize_with = "deserialize_or_default")]
     pub(crate) expanded: bool,
+    #[serde(deserialize_with = "deserialize_or_default")]
     pub(crate) bpf: String,
 }
 

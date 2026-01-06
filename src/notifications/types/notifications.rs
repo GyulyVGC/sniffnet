@@ -1,6 +1,7 @@
 use serde::{Deserialize, Serialize};
 
 use crate::ByteMultiple;
+use crate::gui::types::conf::deserialize_or_default;
 use crate::networking::types::data_representation::DataRepr;
 use crate::notifications::types::sound::Sound;
 
@@ -8,17 +9,22 @@ use crate::notifications::types::sound::Sound;
 #[derive(Clone, Serialize, Deserialize, PartialEq, Debug)]
 #[serde(default)]
 pub struct Notifications {
+    #[serde(deserialize_with = "deserialize_or_default")]
     pub volume: u8,
+    // ---------------------------------------------------------------------------------------------
+    #[serde(deserialize_with = "deserialize_or_default")]
     pub data_notification: DataNotification,
+    #[serde(deserialize_with = "deserialize_or_default")]
     pub favorite_notification: FavoriteNotification,
     #[allow(clippy::struct_field_names)]
+    #[serde(deserialize_with = "deserialize_or_default")]
     pub remote_notifications: RemoteNotifications,
 }
 
 impl Default for Notifications {
     fn default() -> Self {
         Notifications {
-            volume: 60,
+            volume: 50,
             data_notification: DataNotification::default(),
             favorite_notification: FavoriteNotification::default(),
             remote_notifications: RemoteNotifications::default(),
@@ -38,25 +44,30 @@ pub enum Notification {
 #[derive(Clone, Eq, PartialEq, Serialize, Deserialize, Debug, Copy)]
 #[serde(default)]
 pub struct DataNotification {
+    /// The sound to emit
+    #[serde(deserialize_with = "deserialize_or_default")]
+    pub sound: Sound,
     /// Data representation
+    #[serde(deserialize_with = "deserialize_or_default")]
     pub data_repr: DataRepr,
     /// Threshold of received + sent bytes; if exceeded a notification is emitted
+    #[serde(deserialize_with = "deserialize_or_default")]
     pub threshold: Option<u64>,
     /// B, KB, MB or GB
+    #[serde(deserialize_with = "deserialize_or_default")]
     pub byte_multiple: ByteMultiple,
-    /// The sound to emit
-    pub sound: Sound,
     /// The last used Some value for the threshold field
+    #[serde(deserialize_with = "deserialize_or_default")]
     pub previous_threshold: u64,
 }
 
 impl Default for DataNotification {
     fn default() -> Self {
         DataNotification {
-            data_repr: DataRepr::Bytes,
+            data_repr: DataRepr::default(),
             threshold: None,
             byte_multiple: ByteMultiple::KB,
-            sound: Sound::Pop,
+            sound: Sound::Gulp,
             previous_threshold: 800_000,
         }
     }
@@ -109,8 +120,10 @@ impl DataNotification {
 #[serde(default)]
 pub struct FavoriteNotification {
     /// Flag to determine if this notification is enabled
+    #[serde(deserialize_with = "deserialize_or_default")]
     pub notify_on_favorite: bool,
     /// The sound to emit
+    #[serde(deserialize_with = "deserialize_or_default")]
     pub sound: Sound,
 }
 
@@ -145,8 +158,10 @@ impl FavoriteNotification {
 #[serde(default)]
 pub struct RemoteNotifications {
     /// Flag to determine if remote notifications are enabled
+    #[serde(deserialize_with = "deserialize_or_default")]
     is_active: bool,
     /// The URL to send notifications to
+    #[serde(deserialize_with = "deserialize_or_default")]
     url: String,
 }
 

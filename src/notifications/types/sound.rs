@@ -12,9 +12,10 @@ use crate::utils::types::icon::Icon;
 use crate::{StyleType, location};
 
 /// Enum representing the possible notification sounds.
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize, Default)]
 pub enum Sound {
     Gulp,
+    #[default]
     Pop,
     Swhoosh,
     None,

@@ -38,9 +38,6 @@ use crate::gui::styles::types::custom_palette::CustomPalette;
 use crate::gui::styles::types::gradient_type::GradientType;
 use crate::gui::styles::types::palette::Palette;
 use crate::gui::types::conf::Conf;
-use crate::gui::types::config_window::{
-    ConfigWindow, PositionTuple, ScaleAndCheck, SizeTuple, ToPoint, ToSize,
-};
 use crate::gui::types::message::Message;
 use crate::gui::types::settings::Settings;
 use crate::gui::types::timing_events::TimingEvents;
@@ -75,6 +72,11 @@ use crate::{StyleType, TrafficChart, location};
 
 pub const FONT_FAMILY_NAME: &str = "Sarasa Mono SC for Sniffnet";
 pub const ICON_FONT_FAMILY_NAME: &str = "Icons for Sniffnet";
+
+const THUMBNAIL_SIZE: Size = Size {
+    width: 360.0,
+    height: 222.0,
+};
 
 /// Struct on which the GUI is based
 ///
@@ -603,25 +605,25 @@ impl Sniffer {
         self.conf.settings.color_gradient = gradient_type;
     }
 
-    fn change_scale_factor(&mut self, slider_val: f32) {
-        let scale_factor_str = format!("{:.1}", 3.0_f32.powf(slider_val));
-        self.conf.settings.scale_factor = scale_factor_str.parse().unwrap_or(1.0);
+    fn change_scale_factor(&mut self, scale_factor: f32) {
+        let old = self.conf.settings.scale_factor;
+        self.conf.settings.scale_factor = scale_factor;
+        self.conf.window.scale_size(old, scale_factor);
     }
 
     fn window_moved(&mut self, x: f32, y: f32) {
         let scale_factor = self.conf.settings.scale_factor;
-        let scaled = PositionTuple(x, y).scale_and_check(scale_factor);
         if self.thumbnail {
-            self.conf.window.thumbnail_position = scaled;
+            self.conf.window.set_thumbnail_position(x, y, scale_factor);
         } else {
-            self.conf.window.position = scaled;
+            self.conf.window.set_position(x, y, scale_factor);
         }
     }
 
     fn window_resized(&mut self, width: f32, height: f32) -> Task<Message> {
         if !self.thumbnail {
             let scale_factor = self.conf.settings.scale_factor;
-            self.conf.window.size = SizeTuple(width, height).scale_and_check(scale_factor);
+            self.conf.window.set_size(width, height, scale_factor);
         } else if !self.timing_events.was_just_thumbnail_enter() {
             return self.toggle_thumbnail(true);
         }
@@ -689,15 +691,14 @@ impl Sniffer {
         self.traffic_chart.thumbnail = self.thumbnail;
 
         if self.thumbnail {
-            let scale_factor = self.conf.settings.scale_factor;
-            let size = ConfigWindow::thumbnail_size(scale_factor).to_size();
-            let position = self.conf.window.thumbnail_position;
+            let size = THUMBNAIL_SIZE;
+            let position = self.conf.window.thumbnail_position();
             self.timing_events.thumbnail_enter_now();
             Task::batch([
                 window::maximize(window_id, false),
                 window::toggle_decorations(window_id),
                 window::resize(window_id, size),
-                window::move_to(window_id, position.to_point()),
+                window::move_to(window_id, position),
                 window::set_level(window_id, Level::AlwaysOnTop),
             ])
         } else {
@@ -712,8 +713,8 @@ impl Sniffer {
                 window::set_level(window_id, Level::Normal),
             ];
             if !triggered_by_resize {
-                let size = self.conf.window.size.to_size();
-                let position = self.conf.window.position.to_point();
+                let size = self.conf.window.size();
+                let position = self.conf.window.position();
                 commands.push(window::move_to(window_id, position));
                 commands.push(window::resize(window_id, size));
             }
@@ -751,7 +752,8 @@ impl Sniffer {
         let scale_factor = self.conf.settings.scale_factor;
         if !(scale_factor > 2.99 && increase || scale_factor < 0.31 && !increase) {
             let delta = if increase { 0.1 } else { -0.1 };
-            self.conf.settings.scale_factor += delta;
+            let new = scale_factor + delta;
+            self.change_scale_factor(new);
         }
     }
 
@@ -1076,10 +1078,10 @@ impl Sniffer {
                     || temp_threshold.previous_threshold != previous_threshold
                 {
                     temp_threshold = DataNotification {
+                        sound,
                         data_repr,
                         threshold,
                         byte_multiple,
-                        sound,
                         previous_threshold,
                     };
                     self.timing_events.threshold_adjust_now(temp_threshold);
@@ -1329,19 +1331,19 @@ impl Sniffer {
 mod tests {
     #![allow(unused_must_use)]
 
+    use iced::{Point, Size};
+    use serial_test::{parallel, serial};
     use std::collections::{HashSet, VecDeque};
     use std::fs::remove_file;
     use std::path::Path;
     use std::time::Duration;
-
-    use serial_test::{parallel, serial};
 
     use crate::countries::types::country::Country;
     use crate::gui::components::types::my_modal::MyModal;
     use crate::gui::pages::types::settings_page::SettingsPage;
     use crate::gui::styles::types::gradient_type::GradientType;
     use crate::gui::types::conf::Conf;
-    use crate::gui::types::config_window::{PositionTuple, SizeTuple};
+    use crate::gui::types::config_window::ConfigWindow;
     use crate::gui::types::export_pcap::ExportPcap;
     use crate::gui::types::filters::Filters;
     use crate::gui::types::message::Message;
@@ -1361,7 +1363,7 @@ mod tests {
     };
     use crate::notifications::types::sound::Sound;
     use crate::report::types::sort_type::SortType;
-    use crate::{ByteMultiple, ConfigWindow, Language, RunningPage, Sniffer, StyleType};
+    use crate::{ByteMultiple, Language, RunningPage, Sniffer, StyleType};
 
     // helpful to clean up files generated from tests
     impl Drop for Sniffer {
@@ -1837,7 +1839,7 @@ mod tests {
             data_repr: DataRepr::Bytes,
             threshold: None,
             byte_multiple: ByteMultiple::KB,
-            sound: Sound::Pop,
+            sound: Sound::Gulp,
             previous_threshold: 800000,
         };
 
@@ -1845,7 +1847,7 @@ mod tests {
             data_repr: DataRepr::Bytes,
             threshold: Some(800_000),
             byte_multiple: ByteMultiple::GB,
-            sound: Sound::Pop,
+            sound: Sound::Gulp,
             previous_threshold: 800_000,
         };
 
@@ -1876,8 +1878,7 @@ mod tests {
         };
 
         // initial default state
-        assert_eq!(sniffer.conf.settings.notifications.volume, 60);
-        assert_eq!(sniffer.conf.settings.notifications.volume, 60);
+        assert_eq!(sniffer.conf.settings.notifications.volume, 50);
         assert_eq!(
             sniffer.conf.settings.notifications.data_notification,
             bytes_notification_init
@@ -2095,7 +2096,7 @@ mod tests {
         // change some conf by sending messages
         sniffer.update(Message::GradientsSelection(GradientType::Wild));
         sniffer.update(Message::LanguageSelection(Language::ZH));
-        sniffer.update(Message::ChangeScaleFactor(0.0));
+        sniffer.update(Message::ChangeScaleFactor(0.5));
         sniffer.update(Message::CustomCountryDb("countrymmdb".to_string()));
         sniffer.update(Message::CustomAsnDb("asnmmdb".to_string()));
         sniffer.update(Message::LoadStyle(format!(
@@ -2136,7 +2137,7 @@ mod tests {
                 settings: Settings {
                     color_gradient: GradientType::Wild,
                     language: Language::ZH,
-                    scale_factor: 1.0,
+                    scale_factor: 0.5,
                     mmdb_country: "countrymmdb".to_string(),
                     mmdb_asn: "asnmmdb".to_string(),
                     style_path: format!(
@@ -2151,11 +2152,7 @@ mod tests {
                     },
                     style: StyleType::DraculaDark,
                 },
-                window: ConfigWindow {
-                    position: PositionTuple(-10.0, 555.0),
-                    size: SizeTuple(1000.0, 999.0),
-                    thumbnail_position: PositionTuple(40.0, 40.0),
-                },
+                window: ConfigWindow::new((1000.0, 999.0), (-5.0, 277.5), (20.0, 20.0)),
                 device: ConfigDevice::default(),
                 capture_source_picklist: CaptureSourcePicklist::File,
                 filters: Filters {
@@ -2185,34 +2182,46 @@ mod tests {
         assert!(!sniffer.thumbnail);
         let factor = sniffer.conf.settings.scale_factor;
         assert_eq!(factor, 1.0);
-        assert_eq!(sniffer.conf.window.size, SizeTuple(1190.0, 670.0));
         assert_eq!(
-            ConfigWindow::thumbnail_size(factor),
-            SizeTuple(360.0, 222.0)
+            sniffer.conf.window.size(),
+            Size {
+                width: 1190.0,
+                height: 670.0
+            }
         );
 
         sniffer.update(Message::WindowResized(850.0, 600.0));
-        assert_eq!(sniffer.conf.window.size, SizeTuple(850.0, 600.0));
+        assert_eq!(
+            sniffer.conf.window.size(),
+            Size {
+                width: 850.0,
+                height: 600.0
+            }
+        );
 
-        sniffer.update(Message::ChangeScaleFactor(0.369));
+        sniffer.update(Message::ChangeScaleFactor(1.5));
         let factor = sniffer.conf.settings.scale_factor;
         assert_eq!(factor, 1.5);
-        assert_eq!(
-            ConfigWindow::thumbnail_size(factor),
-            SizeTuple(540.0, 333.0)
-        );
         sniffer.update(Message::WindowResized(1000.0, 800.0));
-        assert_eq!(sniffer.conf.window.size, SizeTuple(1500.0, 1200.0));
+        assert_eq!(
+            sniffer.conf.window.size(),
+            Size {
+                width: 1000.0,
+                height: 800.0
+            }
+        );
 
-        sniffer.update(Message::ChangeScaleFactor(-0.631));
+        sniffer.update(Message::ChangeScaleFactor(0.5));
         let factor = sniffer.conf.settings.scale_factor;
         assert_eq!(factor, 0.5);
-        assert_eq!(
-            ConfigWindow::thumbnail_size(factor),
-            SizeTuple(180.0, 111.0)
-        );
         sniffer.update(Message::WindowResized(1000.0, 800.0));
-        assert_eq!(sniffer.conf.window.size, SizeTuple(500.0, 400.0));
+        assert_eq!(
+            sniffer.conf.window.size(),
+            Size {
+                width: 1000.0,
+                height: 800.0
+            }
+        );
     }
 
     #[test]
@@ -2221,56 +2230,56 @@ mod tests {
         let mut sniffer = Sniffer::new(Conf::default());
         assert!(!sniffer.thumbnail);
         assert_eq!(sniffer.conf.settings.scale_factor, 1.0);
-        assert_eq!(sniffer.conf.window.position, PositionTuple(0.0, 0.0));
+        assert_eq!(sniffer.conf.window.position(), Point { x: 0.0, y: 0.0 });
         assert_eq!(
-            sniffer.conf.window.thumbnail_position,
-            PositionTuple(0.0, 0.0)
+            sniffer.conf.window.thumbnail_position(),
+            Point { x: 0.0, y: 0.0 }
         );
 
         sniffer.update(Message::WindowMoved(850.0, 600.0));
-        assert_eq!(sniffer.conf.window.position, PositionTuple(850.0, 600.0));
+        assert_eq!(sniffer.conf.window.position(), Point { x: 850.0, y: 600.0 });
         assert_eq!(
-            sniffer.conf.window.thumbnail_position,
-            PositionTuple(0.0, 0.0)
+            sniffer.conf.window.thumbnail_position(),
+            Point { x: 0.0, y: 0.0 }
         );
         sniffer.thumbnail = true;
         sniffer.update(Message::WindowMoved(400.0, 600.0));
-        assert_eq!(sniffer.conf.window.position, PositionTuple(850.0, 600.0));
+        assert_eq!(sniffer.conf.window.position(), Point { x: 850.0, y: 600.0 });
         assert_eq!(
-            sniffer.conf.window.thumbnail_position,
-            PositionTuple(400.0, 600.0)
+            sniffer.conf.window.thumbnail_position(),
+            Point { x: 400.0, y: 600.0 }
         );
 
-        sniffer.update(Message::ChangeScaleFactor(0.369));
+        sniffer.update(Message::ChangeScaleFactor(1.5));
         assert_eq!(sniffer.conf.settings.scale_factor, 1.5);
         sniffer.update(Message::WindowMoved(20.0, 40.0));
-        assert_eq!(sniffer.conf.window.position, PositionTuple(850.0, 600.0));
+        assert_eq!(sniffer.conf.window.position(), Point { x: 850.0, y: 600.0 });
         assert_eq!(
-            sniffer.conf.window.thumbnail_position,
-            PositionTuple(30.0, 60.0)
+            sniffer.conf.window.thumbnail_position(),
+            Point { x: 30.0, y: 60.0 }
         );
         sniffer.thumbnail = false;
         sniffer.update(Message::WindowMoved(-20.0, 300.0));
-        assert_eq!(sniffer.conf.window.position, PositionTuple(-30.0, 450.0));
+        assert_eq!(sniffer.conf.window.position(), Point { x: -30.0, y: 450.0 });
         assert_eq!(
-            sniffer.conf.window.thumbnail_position,
-            PositionTuple(30.0, 60.0)
+            sniffer.conf.window.thumbnail_position(),
+            Point { x: 30.0, y: 60.0 }
         );
 
-        sniffer.update(Message::ChangeScaleFactor(-0.631));
+        sniffer.update(Message::ChangeScaleFactor(0.5));
         assert_eq!(sniffer.conf.settings.scale_factor, 0.5);
         sniffer.update(Message::WindowMoved(500.0, -100.0));
-        assert_eq!(sniffer.conf.window.position, PositionTuple(250.0, -50.0));
+        assert_eq!(sniffer.conf.window.position(), Point { x: 250.0, y: -50.0 });
         assert_eq!(
-            sniffer.conf.window.thumbnail_position,
-            PositionTuple(30.0, 60.0)
+            sniffer.conf.window.thumbnail_position(),
+            Point { x: 30.0, y: 60.0 }
         );
         sniffer.thumbnail = true;
         sniffer.update(Message::WindowMoved(-2.0, -34.0));
-        assert_eq!(sniffer.conf.window.position, PositionTuple(250.0, -50.0));
+        assert_eq!(sniffer.conf.window.position(), Point { x: 250.0, y: -50.0 });
         assert_eq!(
-            sniffer.conf.window.thumbnail_position,
-            PositionTuple(-1.0, -17.0)
+            sniffer.conf.window.thumbnail_position(),
+            Point { x: -1.0, y: -17.0 }
         );
     }
 

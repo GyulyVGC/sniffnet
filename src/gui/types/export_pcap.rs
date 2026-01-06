@@ -1,11 +1,16 @@
 use serde::{Deserialize, Serialize};
 use std::path::PathBuf;
 
+use crate::gui::types::conf::deserialize_or_default;
+
 #[derive(Serialize, Deserialize, Clone, PartialEq, Debug)]
 #[serde(default)]
 pub struct ExportPcap {
+    #[serde(deserialize_with = "deserialize_or_default")]
     pub(crate) enabled: bool,
+    #[serde(deserialize_with = "deserialize_or_default")]
     pub(crate) file_name: String,
+    #[serde(deserialize_with = "deserialize_or_default")]
     pub(crate) directory: String,
 }
 
