@@ -11967,6 +11967,7 @@ fs-qos	41111/tcp
 fs-qos	41111/udp
 tentacle	41121/tcp
 z-wave-s	41230/tcp
+tailscale	41641/udp
 crestron-cip	41794/tcp
 crestron-cip	41794/udp
 crestron-ctp	41795/tcp
