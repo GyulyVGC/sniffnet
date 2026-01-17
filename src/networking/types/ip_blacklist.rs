@@ -30,4 +30,8 @@ impl IpBlacklist {
     pub fn contains(&self, ip: &IpAddr) -> bool {
         self.ips.contains(ip)
     }
+
+    pub fn is_empty(&self) -> bool {
+        self.ips.is_empty()
+    }
 }

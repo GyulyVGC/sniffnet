@@ -350,63 +350,63 @@ pub fn unsupported_link_type_translation(language: Language) -> &'static str {
     }
 }
 
-pub fn style_from_file_translation(language: Language) -> &'static str {
-    match language {
-        Language::EN => "Select style from a file",
-        Language::CS => "Výběr stylu ze souboru",
-        // Language::FA => "انتخاب شیوه از یک پرونده",
-        Language::ES => "Selecciona el estilo desde un archivo",
-        Language::IT => "Seleziona lo stile da un file",
-        Language::FR => "Sélectionner un style à partir d'un fichier",
-        Language::DE => "Stil aus einer Datei wählen",
-        Language::PL => "Wybierz styl z pliku",
-        Language::RU => "Выберите тему из файла",
-        Language::RO => "Selectează tema dintr-un fișier",
-        Language::JA => "ファイルからスタイルを選択してください",
-        Language::UZ => "Fayldan uslubni tanlang",
-        Language::SV => "Välj stil från en fil",
-        Language::VI => "Chọn chủ đề từ file của bạn",
-        Language::ZH => "从文件中选择样式",
-        Language::ZH_TW => "從檔案中選擇佈景主題",
-        Language::KO => "파일에서 스타일을 선택하세요",
-        Language::TR => "Dosyadan bir görünüm seç",
-        Language::PT => "Selecionar estilo a partir de um arquivo",
-        Language::UK => "Виберіть стиль з файлу",
-        Language::ID => "Pilih model / gaya dari berkas",
-        Language::NL => "Selecteer stijl vanuit een bestand",
-        Language::EL => "Επιλογή στυλ από αρχείο",
-        _ => "Select style from a file",
-    }
-}
+// pub fn style_from_file_translation(language: Language) -> &'static str {
+//     match language {
+//         Language::EN => "Select style from a file",
+//         Language::CS => "Výběr stylu ze souboru",
+//         // Language::FA => "انتخاب شیوه از یک پرونده",
+//         Language::ES => "Selecciona el estilo desde un archivo",
+//         Language::IT => "Seleziona lo stile da un file",
+//         Language::FR => "Sélectionner un style à partir d'un fichier",
+//         Language::DE => "Stil aus einer Datei wählen",
+//         Language::PL => "Wybierz styl z pliku",
+//         Language::RU => "Выберите тему из файла",
+//         Language::RO => "Selectează tema dintr-un fișier",
+//         Language::JA => "ファイルからスタイルを選択してください",
+//         Language::UZ => "Fayldan uslubni tanlang",
+//         Language::SV => "Välj stil från en fil",
+//         Language::VI => "Chọn chủ đề từ file của bạn",
+//         Language::ZH => "从文件中选择样式",
+//         Language::ZH_TW => "從檔案中選擇佈景主題",
+//         Language::KO => "파일에서 스타일을 선택하세요",
+//         Language::TR => "Dosyadan bir görünüm seç",
+//         Language::PT => "Selecionar estilo a partir de um arquivo",
+//         Language::UK => "Виберіть стиль з файлу",
+//         Language::ID => "Pilih model / gaya dari berkas",
+//         Language::NL => "Selecteer stijl vanuit een bestand",
+//         Language::EL => "Επιλογή στυλ από αρχείο",
+//         _ => "Select style from a file",
+//     }
+// }
 
-pub fn database_from_file_translation(language: Language) -> &'static str {
-    match language {
-        Language::EN => "Select database file",
-        Language::CS => "Výběr souboru databáze",
-        // Language::FA => "پرونده پایگاه داده را انتخاب کنید",
-        Language::ES => "Selecciona un archivo de base de datos",
-        Language::IT => "Seleziona file di database",
-        Language::FR => "Sélection d'un fichier de base de données",
-        Language::DE => "Datenbank Datei auswählen",
-        Language::PL => "Wybierz plik bazy danych",
-        Language::RU => "Выберите файл базы данных",
-        Language::RO => "Selectează fișier bază de date",
-        Language::JA => "データベース ファイルを選択してください",
-        Language::UZ => "Ma'lumotlar bazasi faylini tanlang",
-        Language::SV => "Välj databasfil",
-        Language::VI => "Chọn tập tin cơ sở dữ liệu",
-        Language::ZH => "选择数据库文件",
-        Language::ZH_TW => "選擇資料庫檔案",
-        Language::KO => "데이터베이스 파일 선택",
-        Language::TR => "Veri tabanı dosyası seç",
-        Language::PT => "Selecione um arquivo de base de dados",
-        Language::UK => "Виберіть файл бази даних",
-        Language::ID => "Pilih berkas database",
-        Language::NL => "Selecteer database bestand",
-        Language::EL => "Επιλογή αρχείου βάσης δεδομένων",
-        _ => "Select database file",
-    }
-}
+// pub fn database_from_file_translation(language: Language) -> &'static str {
+//     match language {
+//         Language::EN => "Select database file",
+//         Language::CS => "Výběr souboru databáze",
+//         // Language::FA => "پرونده پایگاه داده را انتخاب کنید",
+//         Language::ES => "Selecciona un archivo de base de datos",
+//         Language::IT => "Seleziona file di database",
+//         Language::FR => "Sélection d'un fichier de base de données",
+//         Language::DE => "Datenbank Datei auswählen",
+//         Language::PL => "Wybierz plik bazy danych",
+//         Language::RU => "Выберите файл базы данных",
+//         Language::RO => "Selectează fișier bază de date",
+//         Language::JA => "データベース ファイルを選択してください",
+//         Language::UZ => "Ma'lumotlar bazasi faylini tanlang",
+//         Language::SV => "Välj databasfil",
+//         Language::VI => "Chọn tập tin cơ sở dữ liệu",
+//         Language::ZH => "选择数据库文件",
+//         Language::ZH_TW => "選擇資料庫檔案",
+//         Language::KO => "데이터베이스 파일 선택",
+//         Language::TR => "Veri tabanı dosyası seç",
+//         Language::PT => "Selecione um arquivo de base de dados",
+//         Language::UK => "Виберіть файл бази даних",
+//         Language::ID => "Pilih berkas database",
+//         Language::NL => "Selecteer database bestand",
+//         Language::EL => "Επιλογή αρχείου βάσης δεδομένων",
+//         _ => "Select database file",
+//     }
+// }
 
 pub fn filter_by_host_translation(language: Language) -> &'static str {
     match language {
@@ -520,7 +520,7 @@ pub fn directory_translation(language: Language) -> &'static str {
     }
 }
 
-pub fn select_directory_translation(language: Language) -> &'static str {
+pub fn select_dest_directory_translation(language: Language) -> &'static str {
     match language {
         Language::EN => "Select destination directory",
         Language::CS => "Výběr cílové složky",

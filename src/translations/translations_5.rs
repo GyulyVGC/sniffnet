@@ -29,3 +29,11 @@ pub fn remote_notifications_translation(language: Language) -> &'static str {
         _ => "Remote notifications",
     }
 }
+
+pub fn ip_blacklist_translation(language: Language) -> &'static str {
+    match language {
+        Language::EN => "IP blacklist",
+        Language::IT => "Blacklist IP",
+        _ => "IP blacklist",
+    }
+}
