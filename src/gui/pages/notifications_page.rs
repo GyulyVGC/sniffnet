@@ -19,7 +19,7 @@ use crate::networking::types::host::Host;
 use crate::networking::types::service::Service;
 use crate::networking::types::traffic_type::TrafficType;
 use crate::notifications::types::logged_notification::{
-    DataThresholdExceeded, FavoriteTransmitted, LoggedNotification,
+    BlacklistedTransmitted, DataThresholdExceeded, FavoriteTransmitted, LoggedNotification,
 };
 use crate::report::types::sort_type::SortType;
 use crate::translations::translations::{
@@ -60,6 +60,9 @@ pub fn notifications_page(sniffer: &Sniffer) -> Container<'_, Message, StyleType
 
     if notifications.data_notification.threshold.is_none()
         && !notifications.favorite_notification.notify_on_favorite
+        && !notifications
+            .ip_blacklist_notification
+            .notify_on_blacklisted
         && sniffer.logged_notifications.0.is_empty()
     {
         let body = body_no_notifications_set(language);
@@ -233,6 +236,48 @@ fn favorite_notification_log<'a>(
         .class(ContainerType::BorderedRound)
 }
 
+fn blacklisted_notification_log<'a>(
+    logged_notification: &BlacklistedTransmitted,
+    first_entry_data_info: DataInfo,
+    data_repr: DataRepr,
+    language: Language,
+) -> Container<'a, Message, StyleType> {
+    let blacklisted_bar = blacklisted_bar(
+        &logged_notification,
+        data_repr,
+        first_entry_data_info,
+        language,
+    );
+
+    let content = Row::new()
+        .spacing(30)
+        .align_y(Alignment::Center)
+        .push(
+            Icon::Forbidden
+                .to_text()
+                .size(80)
+                .line_height(LineHeight::Relative(1.0)),
+        )
+        .push(
+            Column::new()
+                .width(250)
+                .spacing(7)
+                .push(
+                    Row::new()
+                        .spacing(8)
+                        .push(Icon::Clock.to_text())
+                        .push(Text::new(logged_notification.timestamp.clone())),
+                )
+                .push(Text::new(favorite_transmitted_translation(language)).class(TextType::Title)),
+        )
+        .push(blacklisted_bar);
+
+    Container::new(content)
+        .width(Length::Fill)
+        .padding(15)
+        .class(ContainerType::BorderedRound)
+}
+
 fn get_button_clear_all<'a>(language: Language) -> Tooltip<'a, Message, StyleType> {
     let content = button(
         Icon::Bin
@@ -285,6 +330,14 @@ fn logged_notifications<'a>(sniffer: &Sniffer) -> Column<'a, Message, StyleType>
                     language,
                 )
             }
+            LoggedNotification::BlacklistedTransmitted(blacklisted_transmitted) => {
+                blacklisted_notification_log(
+                    blacklisted_transmitted,
+                    first_entry_data_info,
+                    data_repr,
+                    language,
+                )
+            }
         });
     }
     ret_val
@@ -315,6 +368,43 @@ fn threshold_bar<'a>(
                 .spacing(1)
                 .push(
                     Row::new()
+                        .push(Space::new().width(Length::Fill))
+                        .push(Text::new(
+                            data_repr.formatted_string(data_info.tot_data(data_repr)),
+                        )),
+                )
+                .push(get_bars(incoming_bar_len, outgoing_bar_len)),
+        )
+}
+
+fn blacklisted_bar<'a>(
+    logged_notification: &BlacklistedTransmitted,
+    data_repr: DataRepr,
+    first_entry_data_info: DataInfo,
+    language: Language,
+) -> Row<'a, Message, StyleType> {
+    let data_info = logged_notification.data_info;
+    let (incoming_bar_len, outgoing_bar_len) =
+        get_bars_length(data_repr, &first_entry_data_info, &data_info);
+
+    let info_str = logged_notification.ip.to_string();
+
+    Row::new()
+        .align_y(Alignment::Center)
+        .spacing(5)
+        .push(get_computer_tooltip(
+            true,
+            true,
+            None,
+            TrafficType::Unicast,
+            language,
+        ))
+        .push(
+            Column::new()
+                .spacing(1)
+                .push(
+                    Row::new()
+                        .push(Text::new(info_str))
                         .push(Space::new().width(Length::Fill))
                         .push(Text::new(
                             data_repr.formatted_string(data_info.tot_data(data_repr)),

@@ -1,11 +1,15 @@
+use crate::networking::types::address_port_pair::AddressPortPair;
 use crate::networking::types::data_info::DataInfo;
 use crate::networking::types::data_info_host::DataInfoHost;
 use crate::networking::types::data_representation::DataRepr;
 use crate::networking::types::host::Host;
+use crate::networking::types::info_address_port_pair::InfoAddressPortPair;
 use crate::networking::types::service::Service;
 use crate::translations::translations::favorite_transmitted_translation;
+use crate::translations::translations_5::blacklisted_transmitted_translation;
 use crate::translations::types::language::Language;
 use serde_json::json;
+use std::net::IpAddr;
 
 /// Enum representing the possible notification events.
 #[derive(Clone)]
@@ -14,6 +18,8 @@ pub enum LoggedNotification {
     DataThresholdExceeded(DataThresholdExceeded),
     /// Favorite connection exchanged data
     FavoriteTransmitted(FavoriteTransmitted),
+    /// Blacklisted connection exchanged data
+    BlacklistedTransmitted(BlacklistedTransmitted),
 }
 
 impl LoggedNotification {
@@ -21,6 +27,7 @@ impl LoggedNotification {
         match self {
             LoggedNotification::DataThresholdExceeded(d) => d.id,
             LoggedNotification::FavoriteTransmitted(f) => f.id,
+            LoggedNotification::BlacklistedTransmitted(b) => b.id,
         }
     }
 
@@ -28,13 +35,15 @@ impl LoggedNotification {
         match self {
             LoggedNotification::DataThresholdExceeded(d) => d.data_info,
             LoggedNotification::FavoriteTransmitted(f) => f.data_info_host.data_info,
+            LoggedNotification::BlacklistedTransmitted(b) => b.data_info,
         }
     }
 
     pub fn expand(&mut self, expand: bool) {
         match self {
             LoggedNotification::DataThresholdExceeded(d) => d.is_expanded = expand,
-            LoggedNotification::FavoriteTransmitted(_) => {}
+            LoggedNotification::FavoriteTransmitted(_)
+            | LoggedNotification::BlacklistedTransmitted(_) => {}
         }
     }
 
@@ -42,6 +51,7 @@ impl LoggedNotification {
         match self {
             LoggedNotification::DataThresholdExceeded(d) => d.to_json(),
             LoggedNotification::FavoriteTransmitted(f) => f.to_json(),
+            LoggedNotification::BlacklistedTransmitted(b) => b.to_json(),
         }
     }
 }
@@ -59,7 +69,7 @@ pub struct DataThresholdExceeded {
 }
 
 impl DataThresholdExceeded {
-    pub fn to_json(&self) -> String {
+    fn to_json(&self) -> String {
         json!({
             "info": self.data_repr.data_exceeded_translation(Language::EN),
             "timestamp": self.timestamp,
@@ -79,7 +89,7 @@ pub struct FavoriteTransmitted {
 }
 
 impl FavoriteTransmitted {
-    pub fn to_json(&self) -> String {
+    fn to_json(&self) -> String {
         json!({
             "info": favorite_transmitted_translation(Language::EN),
             "timestamp": self.timestamp,
@@ -89,6 +99,33 @@ impl FavoriteTransmitted {
                 "asn": self.host.asn.name,
             },
             "data": DataRepr::Bytes.formatted_string(self.data_info_host.data_info.tot_data(DataRepr::Bytes)),
+        })
+        .to_string()
+    }
+}
+
+#[derive(Clone)]
+pub struct BlacklistedTransmitted {
+    pub(crate) id: usize,
+    // pub(crate) k: AddressPortPair,
+    // pub(crate) v: InfoAddressPortPair,
+    pub(crate) ip: IpAddr,
+    pub(crate) data_info: DataInfo,
+    pub(crate) timestamp: String,
+}
+
+impl BlacklistedTransmitted {
+    fn to_json(&self) -> String {
+        json!({
+            "info": blacklisted_transmitted_translation(Language::EN),
+            "timestamp": self.timestamp,
+            // TODO
+            // "favorite": {
+            //     "country": self.host.country.to_string(),
+            //     "domain": self.host.domain,
+            //     "asn": self.host.asn.name,
+            // },
+            // "data": DataRepr::Bytes.formatted_string(self.data_info.data_info.tot_data(DataRepr::Bytes)),
         })
         .to_string()
     }

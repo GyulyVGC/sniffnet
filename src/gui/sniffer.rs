@@ -876,6 +876,7 @@ impl Sniffer {
             &msg,
             &self.favorite_hosts,
             &self.capture_source,
+            &self.addresses_resolved,
         );
         if self.thumbnail
             || self
@@ -1106,6 +1107,11 @@ impl Sniffer {
             Notification::Favorite(favorite_notification) => {
                 self.conf.settings.notifications.favorite_notification = favorite_notification;
                 favorite_notification.sound
+            }
+            Notification::IpBlacklist(ip_blacklist_notification) => {
+                self.conf.settings.notifications.ip_blacklist_notification =
+                    ip_blacklist_notification;
+                ip_blacklist_notification.sound
             }
         };
         if emit_sound {

@@ -6,6 +6,7 @@ use std::collections::HashMap;
 
 use crate::Service;
 use crate::networking::types::arp_type::ArpType;
+use crate::networking::types::data_info::DataInfo;
 use crate::networking::types::data_representation::DataRepr;
 use crate::networking::types::icmp_type::IcmpType;
 use crate::networking::types::traffic_direction::TrafficDirection;
@@ -81,6 +82,16 @@ impl InfoAddressPortPair {
                 .cmp(&self.transmitted_data(data_repr)),
             SortType::Neutral => other.final_timestamp.cmp(&self.final_timestamp),
         }
+    }
+
+    pub fn data_info(&self) -> DataInfo {
+        let mut data_info = DataInfo::default();
+        data_info.add_packets(
+            self.transmitted_packets,
+            self.transmitted_bytes,
+            self.traffic_direction,
+        );
+        data_info
     }
 }
 

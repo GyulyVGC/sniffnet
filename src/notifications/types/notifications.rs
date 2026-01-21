@@ -16,6 +16,8 @@ pub struct Notifications {
     pub data_notification: DataNotification,
     #[serde(deserialize_with = "deserialize_or_default")]
     pub favorite_notification: FavoriteNotification,
+    #[serde(deserialize_with = "deserialize_or_default")]
+    pub ip_blacklist_notification: IpBlacklistNotification,
     #[allow(clippy::struct_field_names)]
     #[serde(deserialize_with = "deserialize_or_default")]
     pub remote_notifications: RemoteNotifications,
@@ -27,6 +29,7 @@ impl Default for Notifications {
             volume: 50,
             data_notification: DataNotification::default(),
             favorite_notification: FavoriteNotification::default(),
+            ip_blacklist_notification: IpBlacklistNotification::default(),
             remote_notifications: RemoteNotifications::default(),
         }
     }
@@ -39,6 +42,8 @@ pub enum Notification {
     Data(DataNotification),
     /// Favorites notification
     Favorite(FavoriteNotification),
+    /// IP Blacklist notification
+    IpBlacklist(IpBlacklistNotification),
 }
 
 #[derive(Clone, Eq, PartialEq, Serialize, Deserialize, Debug, Copy)]
@@ -149,6 +154,44 @@ impl FavoriteNotification {
     pub fn off(sound: Sound) -> Self {
         FavoriteNotification {
             notify_on_favorite: false,
+            sound,
+        }
+    }
+}
+
+#[derive(Clone, Eq, PartialEq, Serialize, Deserialize, Debug, Copy)]
+#[serde(default)]
+pub struct IpBlacklistNotification {
+    /// Flag to determine if this notification is enabled
+    #[serde(deserialize_with = "deserialize_or_default")]
+    pub notify_on_blacklisted: bool,
+    /// The sound to emit
+    #[serde(deserialize_with = "deserialize_or_default")]
+    pub sound: Sound,
+}
+
+impl Default for IpBlacklistNotification {
+    fn default() -> Self {
+        IpBlacklistNotification {
+            notify_on_blacklisted: false,
+            sound: Sound::Swhoosh,
+        }
+    }
+}
+
+impl IpBlacklistNotification {
+    /// Constructor when the notification is in use
+    pub fn on(sound: Sound) -> Self {
+        IpBlacklistNotification {
+            notify_on_blacklisted: true,
+            sound,
+        }
+    }
+
+    /// Constructor when the notification is not in use. Note that sound is used here for caching, although it won't actively be used.
+    pub fn off(sound: Sound) -> Self {
+        IpBlacklistNotification {
+            notify_on_blacklisted: false,
             sound,
         }
     }
@@ -269,6 +312,38 @@ mod tests {
             FavoriteNotification::off(Sound::None),
             FavoriteNotification {
                 notify_on_favorite: false,
+                sound: Sound::None
+            }
+        );
+    }
+
+    #[test]
+    fn test_can_instantiate_blacklist_notification() {
+        assert_eq!(
+            IpBlacklistNotification::on(Sound::Gulp),
+            IpBlacklistNotification {
+                notify_on_blacklisted: true,
+                sound: Sound::Gulp
+            }
+        );
+        assert_eq!(
+            IpBlacklistNotification::on(Sound::Swhoosh),
+            IpBlacklistNotification {
+                notify_on_blacklisted: true,
+                sound: Sound::Swhoosh
+            }
+        );
+        assert_eq!(
+            IpBlacklistNotification::off(Sound::Pop),
+            IpBlacklistNotification {
+                notify_on_blacklisted: false,
+                sound: Sound::Pop
+            }
+        );
+        assert_eq!(
+            IpBlacklistNotification::off(Sound::None),
+            IpBlacklistNotification {
+                notify_on_blacklisted: false,
                 sound: Sound::None
             }
         );

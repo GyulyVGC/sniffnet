@@ -1,11 +1,14 @@
+use crate::networking::manage_packets::get_address_to_lookup;
+use crate::networking::types::address_port_pair::AddressPortPair;
 use crate::networking::types::capture_context::CaptureSource;
 use crate::networking::types::data_info::DataInfo;
 use crate::networking::types::data_info_host::DataInfoHost;
 use crate::networking::types::data_representation::DataRepr;
 use crate::networking::types::host::Host;
+use crate::networking::types::info_address_port_pair::InfoAddressPortPair;
 use crate::networking::types::service::Service;
 use crate::notifications::types::logged_notification::{
-    DataThresholdExceeded, FavoriteTransmitted, LoggedNotification,
+    BlacklistedTransmitted, DataThresholdExceeded, FavoriteTransmitted, LoggedNotification,
 };
 use crate::notifications::types::notifications::{Notifications, RemoteNotifications};
 use crate::notifications::types::sound::{Sound, play};
@@ -15,7 +18,8 @@ use crate::utils::formatted_strings::APP_VERSION;
 use crate::utils::formatted_strings::get_formatted_timestamp;
 use crate::{InfoTraffic, SNIFFNET_LOWERCASE, location};
 use std::cmp::min;
-use std::collections::{HashSet, VecDeque};
+use std::collections::{HashMap, HashSet, VecDeque};
+use std::net::IpAddr;
 
 /// Checks if one or more notifications have to be emitted and logs them.
 ///
@@ -26,6 +30,7 @@ pub fn notify_and_log(
     info_traffic_msg: &InfoTraffic,
     favorites: &HashSet<Host>,
     cs: &CaptureSource,
+    addresses_resolved: &HashMap<IpAddr, (String, Host)>,
 ) -> usize {
     let mut sound_to_play = Sound::None;
     let emitted_notifications_prev = logged_notifications.1;
@@ -79,6 +84,50 @@ pub fn notify_and_log(
                     data_info_host,
                     timestamp: get_formatted_timestamp(timestamp),
                 });
+
+                //log this notification
+                logged_notifications.1 += 1;
+                if logged_notifications.0.len() >= 30 {
+                    logged_notifications.0.pop_back();
+                }
+                logged_notifications.0.push_front(notification.clone());
+
+                // send remote notification
+                send_remote_notification(notification, notifications.remote_notifications.clone());
+            }
+
+            // register sound to play
+            if sound_to_play.eq(&Sound::None) {
+                sound_to_play = notifications.favorite_notification.sound;
+            }
+        }
+    }
+
+    // IP blacklist
+    if notifications
+        .ip_blacklist_notification
+        .notify_on_blacklisted
+    {
+        let blacklisted_last_interval: HashSet<(IpAddr, DataInfo)> = info_traffic_msg
+            .map
+            .iter()
+            .filter(|(_, v)| v.is_blacklisted)
+            .map(|(k, v)| {
+                let address_to_lookup = &get_address_to_lookup(k, v.traffic_direction);
+                // let r_dns_host = addresses_resolved.get(address_to_lookup);
+                let data_info = v.data_info();
+                (address_to_lookup.clone(), data_info)
+            })
+            .collect();
+        if !blacklisted_last_interval.is_empty() {
+            for (k, v) in blacklisted_last_interval {
+                let notification =
+                    LoggedNotification::BlacklistedTransmitted(BlacklistedTransmitted {
+                        id: logged_notifications.1,
+                        ip: k,
+                        data_info: v,
+                        timestamp: get_formatted_timestamp(timestamp),
+                    });
 
                 //log this notification
                 logged_notifications.1 += 1;

@@ -1,5 +1,5 @@
 /// Enum representing the possible traffic direction (incoming or outgoing).
-#[derive(Clone, Copy, PartialEq, Eq, Debug, Default)]
+#[derive(Clone, Copy, PartialEq, Eq, Debug, Default, Hash)]
 pub enum TrafficDirection {
     /// Incoming traffic (from remote address to local interface)
     #[default]

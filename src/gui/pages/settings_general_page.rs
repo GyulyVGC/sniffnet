@@ -67,7 +67,8 @@ fn column_all_general_setting(sniffer: &Sniffer) -> Column<'_, Message, StyleTyp
         .align_x(Alignment::Center)
         .padding([5, 10])
         .push(row_language_scale_factor(language, scale_factor))
-        .push(RuleType::Standard.horizontal(25));
+        .push(RuleType::Standard.horizontal(25))
+        .push(Space::new().height(10));
 
     if !is_editable {
         column = column

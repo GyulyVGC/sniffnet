@@ -37,3 +37,11 @@ pub fn ip_blacklist_translation(language: Language) -> &'static str {
         _ => "IP blacklist",
     }
 }
+
+pub fn blacklisted_transmitted_translation(language: Language) -> &'static str {
+    match language {
+        Language::EN => "New data exchanged from a blacklisted IP",
+        Language::IT => "Nuovi dati scambiati dai un IP in blacklist",
+        _ => "New data exchanged from a blacklisted IP",
+    }
+}
