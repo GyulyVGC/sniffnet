@@ -36,6 +36,7 @@ pub fn notify_and_log(
     let emitted_notifications_prev = logged_notifications.1;
     let timestamp = info_traffic_msg.last_packet_timestamp;
     let data_info = info_traffic_msg.tot_data_info;
+
     // data threshold
     if let Some(threshold) = notifications.data_notification.threshold {
         let data_repr = notifications.data_notification.data_repr;
@@ -105,17 +106,22 @@ pub fn notify_and_log(
 
     // IP blacklist
     if notifications.ip_blacklist_notification.is_active {
-        let blacklisted_last_interval: HashSet<(IpAddr, DataInfo)> = info_traffic_msg
+        let mut blacklisted_last_interval: HashMap<IpAddr, DataInfo> = HashMap::new();
+        for (k, v) in info_traffic_msg
             .map
             .iter()
             .filter(|(_, v)| v.is_blacklisted)
-            .map(|(k, v)| {
-                let address_to_lookup = &get_address_to_lookup(k, v.traffic_direction);
-                // let r_dns_host = addresses_resolved.get(address_to_lookup);
-                let data_info = v.data_info();
-                (address_to_lookup.clone(), data_info)
-            })
-            .collect();
+        {
+            let address_to_lookup = &get_address_to_lookup(k, v.traffic_direction);
+            // let r_dns_host = addresses_resolved.get(address_to_lookup);
+            let data_info = v.data_info();
+            blacklisted_last_interval
+                .entry(*address_to_lookup)
+                .and_modify(|existing_data_info| {
+                    existing_data_info.refresh(data_info);
+                })
+                .or_insert(data_info);
+        }
         if !blacklisted_last_interval.is_empty() {
             for (k, v) in blacklisted_last_interval {
                 let notification =
@@ -139,7 +145,7 @@ pub fn notify_and_log(
 
             // register sound to play
             if sound_to_play.eq(&Sound::None) {
-                sound_to_play = notifications.favorite_notification.sound;
+                sound_to_play = notifications.ip_blacklist_notification.sound;
             }
         }
     }
