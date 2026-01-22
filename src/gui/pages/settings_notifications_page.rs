@@ -17,8 +17,7 @@ use crate::gui::types::message::Message;
 use crate::gui::types::settings::Settings;
 use crate::networking::types::data_representation::DataRepr;
 use crate::notifications::types::notifications::{
-    DataNotification, FavoriteNotification, IpBlacklistNotification, Notification,
-    RemoteNotifications,
+    DataNotification, Notification, RemoteNotifications, SimpleNotification,
 };
 use crate::notifications::types::sound::Sound;
 use crate::translations::translations::{
@@ -157,17 +156,17 @@ fn get_data_notify<'a>(
 }
 
 fn get_favorite_notify<'a>(
-    favorite_notification: FavoriteNotification,
+    favorite_notification: SimpleNotification,
     language: Language,
 ) -> Container<'a, Message, StyleType> {
-    let checkbox = Checkbox::new(favorite_notification.notify_on_favorite)
+    let checkbox = Checkbox::new(favorite_notification.is_active)
         .label(favorite_transmitted_translation(language))
         .on_toggle(move |toggled| {
             Message::UpdateNotificationSettings(
                 if toggled {
-                    Notification::Favorite(FavoriteNotification::on(favorite_notification.sound))
+                    Notification::Favorite(SimpleNotification::on(favorite_notification.sound))
                 } else {
-                    Notification::Favorite(FavoriteNotification::off(favorite_notification.sound))
+                    Notification::Favorite(SimpleNotification::off(favorite_notification.sound))
                 },
                 false,
             )
@@ -176,7 +175,7 @@ fn get_favorite_notify<'a>(
 
     let mut ret_val = Column::new().spacing(15).push(checkbox);
 
-    if favorite_notification.notify_on_favorite {
+    if favorite_notification.is_active {
         let sound_row = sound_buttons(Notification::Favorite(favorite_notification), language);
         ret_val = ret_val.push(sound_row);
         Container::new(ret_val)
@@ -192,19 +191,19 @@ fn get_favorite_notify<'a>(
 }
 
 fn get_ip_blacklist_notify<'a>(
-    ip_blacklist_notification: IpBlacklistNotification,
+    ip_blacklist_notification: SimpleNotification,
     language: Language,
 ) -> Container<'a, Message, StyleType> {
-    let checkbox = Checkbox::new(ip_blacklist_notification.notify_on_blacklisted)
+    let checkbox = Checkbox::new(ip_blacklist_notification.is_active)
         .label(blacklisted_transmitted_translation(language))
         .on_toggle(move |toggled| {
             Message::UpdateNotificationSettings(
                 if toggled {
-                    Notification::IpBlacklist(IpBlacklistNotification::on(
+                    Notification::IpBlacklist(SimpleNotification::on(
                         ip_blacklist_notification.sound,
                     ))
                 } else {
-                    Notification::IpBlacklist(IpBlacklistNotification::off(
+                    Notification::IpBlacklist(SimpleNotification::off(
                         ip_blacklist_notification.sound,
                     ))
                 },
@@ -215,7 +214,7 @@ fn get_ip_blacklist_notify<'a>(
 
     let mut ret_val = Column::new().spacing(15).push(checkbox);
 
-    if ip_blacklist_notification.notify_on_blacklisted {
+    if ip_blacklist_notification.is_active {
         let sound_row = sound_buttons(
             Notification::IpBlacklist(ip_blacklist_notification),
             language,
@@ -369,10 +368,10 @@ fn sound_buttons<'a>(
         let message_value = match notification {
             Notification::Data(n) => Notification::Data(DataNotification { sound: option, ..n }),
             Notification::Favorite(n) => {
-                Notification::Favorite(FavoriteNotification { sound: option, ..n })
+                Notification::Favorite(SimpleNotification { sound: option, ..n })
             }
             Notification::IpBlacklist(n) => {
-                Notification::IpBlacklist(IpBlacklistNotification { sound: option, ..n })
+                Notification::IpBlacklist(SimpleNotification { sound: option, ..n })
             }
         };
         ret_val = ret_val.push(

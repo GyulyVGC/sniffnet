@@ -27,6 +27,7 @@ use crate::translations::translations::{
     no_notifications_set_translation, only_last_30_translation, per_second_translation,
     threshold_translation,
 };
+use crate::translations::translations_5::blacklisted_transmitted_translation;
 use crate::utils::types::icon::Icon;
 use crate::{Language, RunningPage, Sniffer, StyleType};
 use iced::Length::FillPortion;
@@ -59,10 +60,8 @@ pub fn notifications_page(sniffer: &Sniffer) -> Container<'_, Message, StyleType
     tab_and_body = tab_and_body.push(tabs);
 
     if notifications.data_notification.threshold.is_none()
-        && !notifications.favorite_notification.notify_on_favorite
-        && !notifications
-            .ip_blacklist_notification
-            .notify_on_blacklisted
+        && !notifications.favorite_notification.is_active
+        && !notifications.ip_blacklist_notification.is_active
         && sniffer.logged_notifications.0.is_empty()
     {
         let body = body_no_notifications_set(language);
@@ -268,7 +267,9 @@ fn blacklisted_notification_log<'a>(
                         .push(Icon::Clock.to_text())
                         .push(Text::new(logged_notification.timestamp.clone())),
                 )
-                .push(Text::new(favorite_transmitted_translation(language)).class(TextType::Title)),
+                .push(
+                    Text::new(blacklisted_transmitted_translation(language)).class(TextType::Title),
+                ),
         )
         .push(blacklisted_bar);
 

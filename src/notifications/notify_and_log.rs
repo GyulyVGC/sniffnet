@@ -69,7 +69,7 @@ pub fn notify_and_log(
     }
 
     // from favorites
-    if notifications.favorite_notification.notify_on_favorite {
+    if notifications.favorite_notification.is_active {
         let favorites_last_interval: HashSet<(Host, DataInfoHost)> = info_traffic_msg
             .hosts
             .iter()
@@ -104,10 +104,7 @@ pub fn notify_and_log(
     }
 
     // IP blacklist
-    if notifications
-        .ip_blacklist_notification
-        .notify_on_blacklisted
-    {
+    if notifications.ip_blacklist_notification.is_active {
         let blacklisted_last_interval: HashSet<(IpAddr, DataInfo)> = info_traffic_msg
             .map
             .iter()
