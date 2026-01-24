@@ -391,7 +391,7 @@ fn blacklisted_bar<'a>(
 
     let flag = get_flag_tooltip(host.country, data_info_host, language, false);
     let ip_str = logged_notification.ip.to_string();
-    let info_str = host.to_host_blacklist_string();
+    let info_str = host.to_blacklist_string();
 
     Row::new()
         .align_y(Alignment::Center)

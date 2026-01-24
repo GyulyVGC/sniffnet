@@ -15,10 +15,9 @@ pub struct Host {
     pub country: Country,
 }
 
-// TODO: test these functions
 impl Host {
     /// Used in the host bars
-    pub fn to_host_entry_string(&self) -> String {
+    pub fn to_entry_string(&self) -> String {
         let mut ret_val = self.domain.clone();
         if !self.asn.name.is_empty() {
             ret_val.push_str(" - ");
@@ -28,7 +27,7 @@ impl Host {
     }
 
     /// Used in the blacklist notifications
-    pub fn to_host_blacklist_string(&self) -> String {
+    pub fn to_blacklist_string(&self) -> String {
         let domain = &self.domain;
         let asn = &self.asn.name;
         let mut ret_val = String::new();
@@ -76,7 +75,7 @@ impl ThumbnailHost {
                 asn
             };
         Self {
-            country: host.country.clone(),
+            country: host.country,
             text: clip_text(unclipped, max_text_chars),
         }
     }
@@ -104,6 +103,78 @@ mod tests {
             },
             country: Default::default(),
         }
+    }
+
+    #[test]
+    fn test_host_to_entry_string() {
+        let host = host_for_tests("iphone-di-doofenshmirtz.local", "AS1234");
+        assert_eq!(
+            host.to_entry_string(),
+            "iphone-di-doofenshmirtz.local - AS1234"
+        );
+
+        let host = host_for_tests("", "");
+        assert_eq!(host.to_entry_string(), "");
+
+        let host = host_for_tests("192.168.1.113", "AS1234");
+        assert_eq!(host.to_entry_string(), "192.168.1.113 - AS1234");
+
+        let host = host_for_tests("192.168.1.113", "");
+        assert_eq!(host.to_entry_string(), "192.168.1.113");
+
+        let host = host_for_tests("", "FASTLY");
+        assert_eq!(host.to_entry_string(), " - FASTLY");
+
+        let host = host_for_tests("::", "GOOGLE");
+        assert_eq!(host.to_entry_string(), ":: - GOOGLE");
+
+        let host = host_for_tests("::f", "AKAMAI-TECHNOLOGIES-INCORPORATED");
+        assert_eq!(
+            host.to_entry_string(),
+            "::f - AKAMAI-TECHNOLOGIES-INCORPORATED"
+        );
+
+        let host = host_for_tests("::g", "GOOGLE");
+        assert_eq!(host.to_entry_string(), "::g - GOOGLE");
+
+        let host = host_for_tests(" ", "GOOGLE");
+        assert_eq!(host.to_entry_string(), "  - GOOGLE");
+    }
+
+    #[test]
+    fn test_host_to_blacklist_string() {
+        let host = host_for_tests("iphone-di-doofenshmirtz.local", "AS1234");
+        assert_eq!(
+            host.to_blacklist_string(),
+            "(iphone-di-doofenshmirtz.local - AS1234)"
+        );
+
+        let host = host_for_tests("", "");
+        assert_eq!(host.to_blacklist_string(), "");
+
+        let host = host_for_tests("192.168.1.113", "AS1234");
+        assert_eq!(host.to_blacklist_string(), "(AS1234)");
+
+        let host = host_for_tests("192.168.1.113", "");
+        assert_eq!(host.to_blacklist_string(), "");
+
+        let host = host_for_tests("", "FASTLY");
+        assert_eq!(host.to_blacklist_string(), "(FASTLY)");
+
+        let host = host_for_tests("::", "GOOGLE");
+        assert_eq!(host.to_blacklist_string(), "(GOOGLE)");
+
+        let host = host_for_tests("::f", "AKAMAI-TECHNOLOGIES-INCORPORATED");
+        assert_eq!(
+            host.to_blacklist_string(),
+            "(AKAMAI-TECHNOLOGIES-INCORPORATED)"
+        );
+
+        let host = host_for_tests("::g", "GOOGLE");
+        assert_eq!(host.to_blacklist_string(), "(::g - GOOGLE)");
+
+        let host = host_for_tests(" ", "GOOGLE");
+        assert_eq!(host.to_blacklist_string(), "(GOOGLE)");
     }
 
     #[test]
