@@ -1366,7 +1366,7 @@ mod tests {
         DataThresholdExceeded, LoggedNotification,
     };
     use crate::notifications::types::notifications::{
-        DataNotification, FavoriteNotification, Notification, Notifications,
+        DataNotification, Notification, Notifications, SimpleNotification,
     };
     use crate::notifications::types::sound::Sound;
     use crate::report::types::sort_type::SortType;
@@ -1874,14 +1874,24 @@ mod tests {
             previous_threshold: 800_000,
         };
 
-        let fav_notification_init = FavoriteNotification {
-            notify_on_favorite: false,
+        let fav_notification_init = SimpleNotification {
+            is_active: false,
+            sound: Sound::Pop,
+        };
+
+        let fav_notification_new = SimpleNotification {
+            is_active: true,
+            sound: Sound::Pop,
+        };
+
+        let blacklist_notification_init = SimpleNotification {
+            is_active: false,
             sound: Sound::Swhoosh,
         };
 
-        let fav_notification_new = FavoriteNotification {
-            notify_on_favorite: true,
-            sound: Sound::Pop,
+        let blacklist_notification_new = SimpleNotification {
+            is_active: true,
+            sound: Sound::Gulp,
         };
 
         // initial default state
@@ -1893,6 +1903,14 @@ mod tests {
         assert_eq!(
             sniffer.conf.settings.notifications.favorite_notification,
             fav_notification_init
+        );
+        assert_eq!(
+            sniffer
+                .conf
+                .settings
+                .notifications
+                .ip_blacklist_notification,
+            blacklist_notification_init
         );
 
         // change volume
@@ -1907,14 +1925,13 @@ mod tests {
             sniffer.conf.settings.notifications.favorite_notification,
             fav_notification_init,
         );
-
         assert_eq!(
-            sniffer.conf.settings.notifications.data_notification,
-            bytes_notification_init
-        );
-        assert_eq!(
-            sniffer.conf.settings.notifications.favorite_notification,
-            fav_notification_init
+            sniffer
+                .conf
+                .settings
+                .notifications
+                .ip_blacklist_notification,
+            blacklist_notification_init
         );
 
         // Toggle on bytes notifications
@@ -1952,6 +1969,14 @@ mod tests {
             sniffer.conf.settings.notifications.favorite_notification,
             fav_notification_init,
         );
+        assert_eq!(
+            sniffer
+                .conf
+                .settings
+                .notifications
+                .ip_blacklist_notification,
+            blacklist_notification_init,
+        );
 
         // change favorite notifications
         sniffer.update(Message::UpdateNotificationSettings(
@@ -1975,6 +2000,21 @@ mod tests {
         assert_eq!(
             sniffer.conf.settings.notifications.favorite_notification,
             fav_notification_new
+        );
+
+        // change favorite notifications
+        sniffer.update(Message::UpdateNotificationSettings(
+            Notification::IpBlacklist(blacklist_notification_new),
+            true,
+        ));
+
+        assert_eq!(
+            sniffer
+                .conf
+                .settings
+                .notifications
+                .ip_blacklist_notification,
+            blacklist_notification_new,
         );
     }
 
@@ -2129,6 +2169,7 @@ mod tests {
         sniffer.update(Message::SetPcapImport("/test.pcap".to_string()));
         sniffer.update(Message::ChangeRunningPage(RunningPage::Notifications));
         sniffer.update(Message::DataReprSelection(DataRepr::Bits));
+        sniffer.update(Message::LoadIpBlacklist("blacklist_file.csv".to_string()));
 
         // force saving configs by quitting the app
         sniffer.welcome = Some((false, 0));
@@ -2153,11 +2194,10 @@ mod tests {
                     ),
                     notifications: Notifications {
                         volume: 100,
-                        data_notification: Default::default(),
-                        favorite_notification: Default::default(),
-                        remote_notifications: Default::default(),
+                        ..Notifications::default()
                     },
                     style: StyleType::DraculaDark,
+                    ip_blacklist: "blacklist_file.csv".to_string(),
                 },
                 window: ConfigWindow::new((1000.0, 999.0), (-5.0, 277.5), (20.0, 20.0)),
                 device: ConfigDevice::default(),

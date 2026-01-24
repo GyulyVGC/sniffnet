@@ -126,8 +126,10 @@ mod tests {
                     data_notification: Default::default(),
                     favorite_notification: Default::default(),
                     remote_notifications: Default::default(),
+                    ip_blacklist_notification: Default::default(),
                 },
                 style: StyleType::DraculaDark,
+                ip_blacklist: "some-path".to_string(),
             },
             device: ConfigDevice {
                 device_name: "hey-hey".to_string(),

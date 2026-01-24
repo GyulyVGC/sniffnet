@@ -11,11 +11,12 @@ use crate::gui::styles::style_constants::FONT_SIZE_FOOTER;
 use crate::gui::styles::types::style_type::StyleType;
 use crate::gui::types::message::Message;
 use crate::networking::types::data_representation::DataRepr;
-use crate::networking::types::host::{Host, ThumbnailHost};
+use crate::networking::types::host::ThumbnailHost;
 use crate::networking::types::info_traffic::InfoTraffic;
 use crate::report::get_report_entries::{get_host_entries, get_service_entries};
 use crate::report::types::sort_type::SortType;
 use crate::translations::types::language::Language;
+use crate::utils::formatted_strings::clip_text;
 
 const MAX_ENTRIES: usize = 4;
 const MAX_CHARS_HOST: usize = 26;
@@ -95,12 +96,9 @@ fn host_col<'a>(
     let mut thumbnail_hosts = Vec::new();
 
     for (host, data_info_host) in &hosts {
-        let text = host_text(host);
-        let country = host.country;
-        let thumbnail_host = ThumbnailHost {
-            country,
-            text: text.clone(),
-        };
+        let thumbnail_host = ThumbnailHost::from_host(host, MAX_CHARS_HOST);
+        let country = thumbnail_host.country;
+        let text = thumbnail_host.text.clone();
 
         if thumbnail_hosts.contains(&thumbnail_host) {
             continue;
@@ -138,121 +136,4 @@ fn service_col<'a>(
         );
     }
     service_col
-}
-
-fn host_text(host: &Host) -> String {
-    clip_text(host.to_host_thumbnail_string(), MAX_CHARS_HOST)
-}
-
-fn clip_text(text: &str, max_chars: usize) -> String {
-    let text = text.trim();
-    let chars = text.chars().collect::<Vec<char>>();
-    let tot_len = chars.len();
-    let slice_len = min(max_chars, tot_len);
-
-    let suspensions = if tot_len > max_chars { "…" } else { "" };
-    let slice = if tot_len > max_chars {
-        &chars[..slice_len - 2]
-    } else {
-        &chars[..slice_len]
-    }
-    .iter()
-    .collect::<String>();
-
-    [slice.trim(), suspensions].concat()
-}
-
-#[cfg(test)]
-mod tests {
-    use crate::gui::pages::thumbnail_page::{
-        MAX_CHARS_HOST, MAX_CHARS_SERVICE, clip_text, host_text,
-    };
-    use crate::networking::types::asn::Asn;
-    use crate::networking::types::host::Host;
-
-    fn host_for_tests(domain: &str, asn: &str) -> Host {
-        Host {
-            domain: domain.to_string(),
-            asn: Asn {
-                name: asn.to_string(),
-                code: "512".to_string(),
-            },
-            country: Default::default(),
-        }
-    }
-
-    #[test]
-    fn test_clip_text() {
-        assert_eq!(
-            clip_text("iphone-di-doofenshmirtz.local", MAX_CHARS_HOST),
-            "iphone-di-doofenshmirtz.…"
-        );
-        assert_eq!(clip_text("github.com", MAX_CHARS_HOST), "github.com");
-
-        assert_eq!(clip_text("https6789012", MAX_CHARS_SERVICE), "https6789012");
-        assert_eq!(
-            clip_text("https67890123", MAX_CHARS_SERVICE),
-            "https67890123"
-        );
-        assert_eq!(
-            clip_text("https678901234", MAX_CHARS_SERVICE),
-            "https678901…"
-        );
-        assert_eq!(
-            clip_text("https6789012345", MAX_CHARS_SERVICE),
-            "https678901…"
-        );
-
-        assert_eq!(
-            clip_text("protocol with space", MAX_CHARS_SERVICE),
-            "protocol wi…"
-        );
-        assert_eq!(
-            clip_text("protocol90 23456", MAX_CHARS_SERVICE),
-            "protocol90…"
-        );
-
-        assert_eq!(
-            clip_text("      \n\t    sniffnet.net       ", MAX_CHARS_HOST),
-            "sniffnet.net"
-        );
-        assert_eq!(
-            clip_text("        protocol90 23456    \n      ", MAX_CHARS_SERVICE),
-            "protocol90…"
-        );
-        assert_eq!(
-            clip_text("        protocol90 23456          ", MAX_CHARS_HOST),
-            "protocol90 23456"
-        );
-    }
-
-    #[test]
-    fn test_host_text() {
-        let host = host_for_tests("iphone-di-doofenshmirtz.local", "AS1234");
-        assert_eq!(host_text(&host), "iphone-di-doofenshmirtz.…");
-
-        let host = host_for_tests("", "");
-        assert_eq!(host_text(&host), "");
-
-        let host = host_for_tests("192.168.1.113", "AS1234");
-        assert_eq!(host_text(&host), "AS1234");
-
-        let host = host_for_tests("192.168.1.113", "");
-        assert_eq!(host_text(&host), "192.168.1.113");
-
-        let host = host_for_tests("", "FASTLY");
-        assert_eq!(host_text(&host), "FASTLY");
-
-        let host = host_for_tests("::", "GOOGLE");
-        assert_eq!(host_text(&host), "GOOGLE");
-
-        let host = host_for_tests("::f", "AKAMAI-TECHNOLOGIES-INCORPORATED");
-        assert_eq!(host_text(&host), "AKAMAI-TECHNOLOGIES-INCO…");
-
-        let host = host_for_tests("::g", "GOOGLE");
-        assert_eq!(host_text(&host), "::g");
-
-        let host = host_for_tests(" ", "GOOGLE");
-        assert_eq!(host_text(&host), "GOOGLE");
-    }
 }
