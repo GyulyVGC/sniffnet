@@ -1,5 +1,4 @@
 use std::cmp::min;
-use std::net::IpAddr;
 
 use iced::widget::{Column, Container, Row, Space, Text};
 use iced::{Alignment, Length};
@@ -142,17 +141,7 @@ fn service_col<'a>(
 }
 
 fn host_text(host: &Host) -> String {
-    let domain = &host.domain;
-    let asn = &host.asn.name;
-
-    let text = if asn.is_empty() || (!domain.trim().is_empty() && domain.parse::<IpAddr>().is_err())
-    {
-        domain
-    } else {
-        asn
-    };
-
-    clip_text(text, MAX_CHARS_HOST)
+    clip_text(&host.to_host_thumbnail_string(), MAX_CHARS_HOST)
 }
 
 fn clip_text(text: &str, max_chars: usize) -> String {

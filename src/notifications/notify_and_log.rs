@@ -1,11 +1,9 @@
 use crate::networking::manage_packets::get_address_to_lookup;
-use crate::networking::types::address_port_pair::AddressPortPair;
 use crate::networking::types::capture_context::CaptureSource;
 use crate::networking::types::data_info::DataInfo;
 use crate::networking::types::data_info_host::DataInfoHost;
 use crate::networking::types::data_representation::DataRepr;
 use crate::networking::types::host::Host;
-use crate::networking::types::info_address_port_pair::InfoAddressPortPair;
 use crate::networking::types::service::Service;
 use crate::notifications::types::logged_notification::{
     BlacklistedTransmitted, DataThresholdExceeded, FavoriteTransmitted, LoggedNotification,
@@ -31,6 +29,7 @@ pub fn notify_and_log(
     favorites: &HashSet<Host>,
     cs: &CaptureSource,
     addresses_resolved: &HashMap<IpAddr, (String, Host)>,
+    info_traffic: &InfoTraffic,
 ) -> usize {
     let mut sound_to_play = Sound::None;
     let emitted_notifications_prev = logged_notifications.1;
@@ -106,29 +105,37 @@ pub fn notify_and_log(
 
     // IP blacklist
     if notifications.ip_blacklist_notification.is_active {
-        let mut blacklisted_last_interval: HashMap<IpAddr, DataInfo> = HashMap::new();
+        let mut blacklisted_last_interval: HashMap<IpAddr, (Host, DataInfoHost)> = HashMap::new();
         for (k, v) in info_traffic_msg
             .map
             .iter()
             .filter(|(_, v)| v.is_blacklisted)
         {
             let address_to_lookup = &get_address_to_lookup(k, v.traffic_direction);
-            // let r_dns_host = addresses_resolved.get(address_to_lookup);
-            let data_info = v.data_info();
+            let host = addresses_resolved
+                .get(address_to_lookup)
+                .cloned()
+                .unwrap_or_default()
+                .1;
+            let mut data_info_host = info_traffic.hosts.get(&host).cloned().unwrap_or_default();
+            data_info_host.data_info = v.data_info();
             blacklisted_last_interval
                 .entry(*address_to_lookup)
-                .and_modify(|existing_data_info| {
-                    existing_data_info.refresh(data_info);
+                .and_modify(|(_, existing_data_info_host)| {
+                    existing_data_info_host
+                        .data_info
+                        .refresh(data_info_host.data_info);
                 })
-                .or_insert(data_info);
+                .or_insert((host, data_info_host));
         }
         if !blacklisted_last_interval.is_empty() {
-            for (k, v) in blacklisted_last_interval {
+            for (ip, (host, data_info_host)) in blacklisted_last_interval {
                 let notification =
                     LoggedNotification::BlacklistedTransmitted(BlacklistedTransmitted {
                         id: logged_notifications.1,
-                        ip: k,
-                        data_info: v,
+                        ip,
+                        host,
+                        data_info_host,
                         timestamp: get_formatted_timestamp(timestamp),
                     });
 

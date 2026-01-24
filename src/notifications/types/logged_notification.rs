@@ -1,9 +1,7 @@
-use crate::networking::types::address_port_pair::AddressPortPair;
 use crate::networking::types::data_info::DataInfo;
 use crate::networking::types::data_info_host::DataInfoHost;
 use crate::networking::types::data_representation::DataRepr;
 use crate::networking::types::host::Host;
-use crate::networking::types::info_address_port_pair::InfoAddressPortPair;
 use crate::networking::types::service::Service;
 use crate::translations::translations::favorite_transmitted_translation;
 use crate::translations::translations_5::blacklisted_transmitted_translation;
@@ -35,7 +33,7 @@ impl LoggedNotification {
         match self {
             LoggedNotification::DataThresholdExceeded(d) => d.data_info,
             LoggedNotification::FavoriteTransmitted(f) => f.data_info_host.data_info,
-            LoggedNotification::BlacklistedTransmitted(b) => b.data_info,
+            LoggedNotification::BlacklistedTransmitted(b) => b.data_info_host.data_info,
         }
     }
 
@@ -107,10 +105,9 @@ impl FavoriteTransmitted {
 #[derive(Clone)]
 pub struct BlacklistedTransmitted {
     pub(crate) id: usize,
-    // pub(crate) k: AddressPortPair,
-    // pub(crate) v: InfoAddressPortPair,
     pub(crate) ip: IpAddr,
-    pub(crate) data_info: DataInfo,
+    pub(crate) host: Host,
+    pub(crate) data_info_host: DataInfoHost,
     pub(crate) timestamp: String,
 }
 

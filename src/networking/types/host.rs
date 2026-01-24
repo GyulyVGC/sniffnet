@@ -14,6 +14,54 @@ pub struct Host {
     pub country: Country,
 }
 
+impl Host {
+    /// Used in the host bars
+    pub fn to_host_entry_string(&self) -> String {
+        let mut ret_val = self.domain.clone();
+        if !self.asn.name.is_empty() {
+            ret_val.push_str(" - ");
+            ret_val.push_str(&self.asn.name);
+        }
+        ret_val
+    }
+
+    /// Used in the thumbnail
+    pub fn to_host_thumbnail_string(&self) -> String {
+        let domain = &self.domain;
+        let asn = &self.asn.name;
+        if asn.is_empty() || (!domain.trim().is_empty() && domain.parse::<IpAddr>().is_err()) {
+            domain
+        } else {
+            asn
+        }
+        .to_string()
+    }
+
+    /// Used in the blacklist notifications
+    pub fn to_host_blacklist_string(&self) -> String {
+        let domain = &self.domain;
+        let asn = &self.asn.name;
+        let mut ret_val = String::new();
+
+        if !domain.trim().is_empty() && domain.parse::<IpAddr>().is_err() {
+            ret_val.push_str(domain);
+        }
+
+        if !asn.is_empty() {
+            if !ret_val.is_empty() {
+                ret_val.push_str(" - ");
+            }
+            ret_val.push_str(asn);
+        }
+
+        if ret_val.is_empty() {
+            String::new()
+        } else {
+            format!("({ret_val})")
+        }
+    }
+}
+
 /// Struct to represent a network host for representation in the thumbnail
 ///
 /// This is necessary to remove possible duplicates in the thumbnail host list

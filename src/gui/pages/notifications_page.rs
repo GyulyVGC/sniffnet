@@ -1,4 +1,4 @@
-use crate::countries::country_utils::get_computer_tooltip;
+use crate::countries::country_utils::{get_computer_tooltip, get_flag_tooltip};
 use crate::countries::flags_pictures::FLAGS_HEIGHT_BIG;
 use crate::gui::components::header::get_button_settings;
 use crate::gui::components::tab::get_pages_tabs;
@@ -384,32 +384,32 @@ fn blacklisted_bar<'a>(
     first_entry_data_info: DataInfo,
     language: Language,
 ) -> Row<'a, Message, StyleType> {
-    let data_info = logged_notification.data_info;
+    let data_info_host = &logged_notification.data_info_host;
+    let host = &logged_notification.host;
     let (incoming_bar_len, outgoing_bar_len) =
-        get_bars_length(data_repr, &first_entry_data_info, &data_info);
+        get_bars_length(data_repr, &first_entry_data_info, &data_info_host.data_info);
 
-    let info_str = logged_notification.ip.to_string();
+    let flag = get_flag_tooltip(host.country, data_info_host, language, false);
+    let ip_str = logged_notification.ip.to_string();
+    let info_str = host.to_host_blacklist_string();
 
     Row::new()
         .align_y(Alignment::Center)
         .spacing(5)
-        .push(get_computer_tooltip(
-            true,
-            true,
-            None,
-            TrafficType::Unicast,
-            language,
-        ))
+        .push(flag)
         .push(
             Column::new()
                 .spacing(1)
                 .push(
                     Row::new()
-                        .push(Text::new(info_str))
+                        .align_y(Alignment::End)
+                        .push(Text::new(ip_str))
+                        .push(Space::new().width(8))
+                        .push(Text::new(info_str).size(FONT_SIZE_FOOTER))
                         .push(Space::new().width(Length::Fill))
-                        .push(Text::new(
-                            data_repr.formatted_string(data_info.tot_data(data_repr)),
-                        )),
+                        .push(Text::new(data_repr.formatted_string(
+                            data_info_host.data_info.tot_data(data_repr),
+                        ))),
                 )
                 .push(get_bars(incoming_bar_len, outgoing_bar_len)),
         )
