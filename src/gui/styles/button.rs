@@ -30,7 +30,6 @@ pub enum ButtonType {
     SortArrows,
     SortArrowActive,
     Thumbnail,
-    Blacklisted,
 }
 
 impl ButtonType {
@@ -52,10 +51,6 @@ impl ButtonType {
                 | ButtonType::NotStarred
                 | ButtonType::SortArrows
                 | ButtonType::SortArrowActive => Background::Color(Color::TRANSPARENT),
-                ButtonType::Blacklisted => Background::Color(Color {
-                    a: 0.2,
-                    ..ext.red_alert_color
-                }),
                 ButtonType::Gradient(GradientType::None) => Background::Color(colors.secondary),
                 ButtonType::Gradient(gradient_type) => Background::Gradient(get_gradient_buttons(
                     &colors,
@@ -67,7 +62,7 @@ impl ButtonType {
             }),
             border: Border {
                 radius: match self {
-                    ButtonType::Neutral | ButtonType::Blacklisted => 0.0.into(),
+                    ButtonType::Neutral => 0.0.into(),
                     ButtonType::TabActive | ButtonType::TabInactive => Radius::new(0).bottom(30),
                     ButtonType::BorderedRound
                     | ButtonType::BorderedRoundSelected
@@ -83,7 +78,6 @@ impl ButtonType {
                     | ButtonType::Starred
                     | ButtonType::NotStarred
                     | ButtonType::Neutral
-                    | ButtonType::Blacklisted
                     | ButtonType::Thumbnail => 0.0,
                     ButtonType::BorderedRound => BORDER_WIDTH * 2.0,
                     _ => BORDER_WIDTH,
@@ -126,7 +120,6 @@ impl ButtonType {
         button::Style {
             shadow: match self {
                 ButtonType::Neutral
-                | ButtonType::Blacklisted
                 | ButtonType::SortArrows
                 | ButtonType::SortArrowActive
                 | ButtonType::Thumbnail => Shadow::default(),
@@ -151,10 +144,6 @@ impl ButtonType {
                     a: ext.alpha_round_borders,
                     ..ext.buttons_color
                 }),
-                ButtonType::Blacklisted => Background::Color(Color {
-                    a: 0.3,
-                    ..ext.red_alert_color
-                }),
                 ButtonType::Gradient(GradientType::None) => {
                     Background::Color(mix_colors(colors.primary, colors.secondary))
                 }
@@ -166,7 +155,7 @@ impl ButtonType {
             }),
             border: Border {
                 radius: match self {
-                    ButtonType::Neutral | ButtonType::Blacklisted => 0.0.into(),
+                    ButtonType::Neutral => 0.0.into(),
                     ButtonType::TabActive | ButtonType::TabInactive => Radius::new(0).bottom(30),
                     ButtonType::BorderedRound
                     | ButtonType::BorderedRoundSelected
@@ -191,10 +180,6 @@ impl ButtonType {
                         ..ext.buttons_color
                     },
                     ButtonType::Neutral => ext.buttons_color,
-                    ButtonType::Blacklisted => Color {
-                        a: 0.5,
-                        ..ext.red_alert_color
-                    },
                     _ => colors.secondary,
                 },
             },

@@ -14,6 +14,7 @@ pub struct Host {
     pub country: Country,
 }
 
+// TODO: test these functions
 impl Host {
     /// Used in the host bars
     pub fn to_host_entry_string(&self) -> String {

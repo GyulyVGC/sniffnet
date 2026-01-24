@@ -119,11 +119,7 @@ fn report<'a>(sniffer: &Sniffer) -> Column<'a, Message, StyleType> {
             .on_press(Message::ShowModal(MyModal::ConnectionDetails(
                 report_entry.0,
             )))
-            .class(if report_entry.1.is_blacklisted {
-                ButtonType::Blacklisted
-            } else {
-                ButtonType::Neutral
-            }),
+            .class(ButtonType::Neutral),
         );
     }
     if results_number > 0 {
@@ -292,6 +288,7 @@ fn row_report_entry<'a>(
     ret_val
 }
 
+// TODO: add only blacklisted checkbox and remove title
 fn host_filters_col<'a>(
     search_params: &'a SearchParameters,
     host_states: &'a HostStates,

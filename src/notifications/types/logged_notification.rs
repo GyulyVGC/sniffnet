@@ -116,13 +116,13 @@ impl BlacklistedTransmitted {
         json!({
             "info": blacklisted_transmitted_translation(Language::EN),
             "timestamp": self.timestamp,
-            // TODO
-            // "favorite": {
-            //     "country": self.host.country.to_string(),
-            //     "domain": self.host.domain,
-            //     "asn": self.host.asn.name,
-            // },
-            // "data": DataRepr::Bytes.formatted_string(self.data_info.data_info.tot_data(DataRepr::Bytes)),
+            "ip": self.ip.to_string(),
+            "host": {
+                "country": self.host.country.to_string(),
+                "domain": self.host.domain,
+                "asn": self.host.asn.name,
+            },
+            "data": DataRepr::Bytes.formatted_string(self.data_info_host.data_info.tot_data(DataRepr::Bytes)),
         })
         .to_string()
     }
