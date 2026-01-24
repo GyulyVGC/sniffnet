@@ -117,7 +117,7 @@ pub fn notify_and_log(
                 .cloned()
                 .unwrap_or_default()
                 .1;
-            let mut data_info_host = info_traffic.hosts.get(&host).cloned().unwrap_or_default();
+            let mut data_info_host = info_traffic.hosts.get(&host).copied().unwrap_or_default();
             data_info_host.data_info = v.data_info();
             blacklisted_last_interval
                 .entry(*address_to_lookup)

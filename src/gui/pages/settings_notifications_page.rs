@@ -352,8 +352,7 @@ fn sound_buttons<'a>(
 ) -> row::Wrapping<'a, Message, StyleType> {
     let current_sound = match notification {
         Notification::Data(n) => n.sound,
-        Notification::Favorite(n) => n.sound,
-        Notification::IpBlacklist(n) => n.sound,
+        Notification::Favorite(n) | Notification::IpBlacklist(n) => n.sound,
     };
 
     let mut ret_val = Row::new()

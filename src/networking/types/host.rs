@@ -27,7 +27,7 @@ impl Host {
     }
 
     /// Used in the thumbnail
-    pub fn to_host_thumbnail_string(&self) -> String {
+    pub fn to_host_thumbnail_string(&self) -> &str {
         let domain = &self.domain;
         let asn = &self.asn.name;
         if asn.is_empty() || (!domain.trim().is_empty() && domain.parse::<IpAddr>().is_err()) {
@@ -35,7 +35,6 @@ impl Host {
         } else {
             asn
         }
-        .to_string()
     }
 
     /// Used in the blacklist notifications

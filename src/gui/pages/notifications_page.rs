@@ -242,7 +242,7 @@ fn blacklisted_notification_log<'a>(
     language: Language,
 ) -> Container<'a, Message, StyleType> {
     let blacklisted_bar = blacklisted_bar(
-        &logged_notification,
+        logged_notification,
         data_repr,
         first_entry_data_info,
         language,

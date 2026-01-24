@@ -141,7 +141,7 @@ fn service_col<'a>(
 }
 
 fn host_text(host: &Host) -> String {
-    clip_text(&host.to_host_thumbnail_string(), MAX_CHARS_HOST)
+    clip_text(host.to_host_thumbnail_string(), MAX_CHARS_HOST)
 }
 
 fn clip_text(text: &str, max_chars: usize) -> String {

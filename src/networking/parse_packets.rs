@@ -177,7 +177,7 @@ pub fn parse_packets(
                         icmp_type,
                         arp_type,
                         exchanged_bytes,
-                        &ip_blacklist,
+                        ip_blacklist,
                     );
 
                     info_traffic_msg
