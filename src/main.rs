@@ -5,7 +5,6 @@
 use std::borrow::Cow;
 
 use chart::types::traffic_chart::TrafficChart;
-use cli::handle_cli_args;
 use gui::pages::types::running_page::RunningPage;
 use gui::sniffer::Sniffer;
 use gui::styles::style_constants::FONT_SIZE_BODY;
@@ -56,6 +55,7 @@ pub fn main() -> iced::Result {
     }
 
     let conf = CONF.clone();
+    let args = cli::Args::handle();
 
     #[cfg(debug_assertions)]
     {
@@ -73,9 +73,8 @@ pub fn main() -> iced::Result {
     let size = conf.window.size();
     let position = Position::Specific(conf.window.position());
 
-    // TODO: parse CLI args before launching GUI
     application(
-        move || (Sniffer::new(conf.clone()), handle_cli_args()),
+        move || (Sniffer::new(conf.clone()), args.get_boot_task_chain()),
         Sniffer::update,
         Sniffer::view,
     )
