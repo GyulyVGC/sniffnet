@@ -578,7 +578,7 @@ impl Sniffer {
 
     fn update_page_number(&mut self, increment: bool) {
         if increment {
-            if self.page_number < get_searched_entries(self).1.div_ceil(20) {
+            if self.page_number < get_searched_entries(self).1.div_ceil(30) {
                 self.page_number = self.page_number.checked_add(1).unwrap_or(1);
             }
         } else if self.page_number > 1 {

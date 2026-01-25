@@ -38,7 +38,6 @@ use crate::translations::translations_5::only_show_blacklisted_translation;
 use crate::utils::types::icon::Icon;
 use crate::{Language, RunningPage, Sniffer, StyleType};
 
-// TODO: 30 items pagination
 // TODO: clear all filters button
 
 /// Computes the body of gui inspect page
@@ -103,7 +102,7 @@ fn report<'a>(sniffer: &Sniffer) -> Column<'a, Message, StyleType> {
         .align_x(Alignment::Start);
 
     let mut scroll_report = Column::new().align_x(Alignment::Start);
-    let start_entry_num = (sniffer.page_number.saturating_sub(1)) * 20 + 1;
+    let start_entry_num = (sniffer.page_number.saturating_sub(1)) * 30 + 1;
     let end_entry_num = start_entry_num + search_results.len() - 1;
     for report_entry in search_results {
         scroll_report = scroll_report.push(
@@ -585,7 +584,7 @@ fn get_change_page_row<'a>(
             end_entry_num,
             results_number,
         )))
-        .push(if page_number < results_number.div_ceil(20) {
+        .push(if page_number < results_number.div_ceil(30) {
             Container::new(get_button_change_page(true).width(25))
         } else {
             Container::new(Space::new().width(25))
