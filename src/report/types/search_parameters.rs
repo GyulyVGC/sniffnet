@@ -5,7 +5,7 @@ use crate::networking::types::info_address_port_pair::InfoAddressPortPair;
 use crate::networking::types::service::Service;
 
 /// Used to express the search filters applied to GUI inspect page
-#[derive(Clone, Debug, Default, Hash)]
+#[derive(Clone, Debug, Default, Hash, Eq, PartialEq)]
 pub struct SearchParameters {
     /// IP address (source)
     pub address_src: String,
@@ -27,6 +27,8 @@ pub struct SearchParameters {
     pub as_name: String,
     /// Whether to display only favorites
     pub only_favorites: bool,
+    /// Whether to display only blacklisted
+    pub only_blacklisted: bool,
 }
 
 impl SearchParameters {
@@ -53,25 +55,20 @@ impl SearchParameters {
             return false;
         }
 
+        // check blacklisted filter
+        if self.only_blacklisted && !value.is_blacklisted {
+            return false;
+        }
+
         // if arrived at this point all filters are satisfied
         true
     }
 
-    pub fn is_some_host_filter_active(&self) -> bool {
+    fn is_some_host_filter_active(&self) -> bool {
         self.only_favorites
             || !self.country.is_empty()
             || !self.as_name.is_empty()
             || !self.domain.is_empty()
-    }
-
-    pub fn reset_host_filters(&self) -> Self {
-        Self {
-            country: String::new(),
-            domain: String::new(),
-            as_name: String::new(),
-            only_favorites: false,
-            ..self.clone()
-        }
     }
 
     pub fn new_host_search(host: &Host) -> Self {

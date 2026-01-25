@@ -15,9 +15,7 @@ use crate::gui::styles::button::ButtonType;
 use crate::gui::styles::container::ContainerType;
 use crate::gui::styles::rule::RuleType;
 use crate::gui::styles::scrollbar::ScrollbarType;
-use crate::gui::styles::style_constants::{
-    FONT_SIZE_FOOTER, FONT_SIZE_SUBTITLE, ICONS, TOOLTIP_DELAY,
-};
+use crate::gui::styles::style_constants::{FONT_SIZE_FOOTER, ICONS, TOOLTIP_DELAY};
 use crate::gui::styles::text::TextType;
 use crate::gui::styles::text_input::TextInputType;
 use crate::gui::types::message::Message;
@@ -33,12 +31,15 @@ use crate::report::types::report_col::ReportCol;
 use crate::report::types::search_parameters::{FilterInputType, SearchParameters};
 use crate::report::types::sort_type::SortType;
 use crate::translations::translations_2::{
-    administrative_entity_translation, country_translation, domain_name_translation,
-    no_search_results_translation, only_show_favorites_translation, showing_results_translation,
+    country_translation, domain_name_translation, no_search_results_translation,
+    only_show_favorites_translation, showing_results_translation,
 };
-use crate::translations::translations_3::filter_by_host_translation;
+use crate::translations::translations_5::only_show_blacklisted_translation;
 use crate::utils::types::icon::Icon;
 use crate::{Language, RunningPage, Sniffer, StyleType};
+
+// TODO: 30 items pagination
+// TODO: clear all filters button
 
 /// Computes the body of gui inspect page
 pub fn inspect_page(sniffer: &Sniffer) -> Container<'_, Message, StyleType> {
@@ -73,15 +74,11 @@ pub fn inspect_page(sniffer: &Sniffer) -> Container<'_, Message, StyleType> {
         .push(report);
 
     body = body
-        .push(
-            Container::new(host_filters_col(
-                &sniffer.search,
-                &sniffer.host_data_states.states,
-                language,
-            ))
-            .padding(10)
-            .class(ContainerType::BorderedRound),
-        )
+        .push(additional_filters_row(
+            &sniffer.search,
+            &sniffer.host_data_states.states,
+            language,
+        ))
         .push(
             Container::new(col_report)
                 .align_y(Alignment::Center)
@@ -288,22 +285,26 @@ fn row_report_entry<'a>(
     ret_val
 }
 
-// TODO: add only blacklisted checkbox and remove title
-fn host_filters_col<'a>(
+fn additional_filters_row<'a>(
     search_params: &'a SearchParameters,
     host_states: &'a HostStates,
     language: Language,
-) -> Column<'a, Message, StyleType> {
-    let search_params2 = search_params.clone();
-
-    let mut title_row = Row::new().spacing(10).align_y(Alignment::Center).push(
-        Text::new(filter_by_host_translation(language))
-            .class(TextType::Subtitle)
-            .size(FONT_SIZE_SUBTITLE),
-    );
-    if search_params.is_some_host_filter_active() {
-        title_row = title_row.push(button_clear_filter(search_params.reset_host_filters()));
-    }
+) -> Row<'a, Message, StyleType> {
+    let clear_all_filters = if SearchParameters::default().eq(search_params) {
+        None
+    } else {
+        Some(
+            Container::new(
+                Row::new()
+                    .align_y(Alignment::Center)
+                    .spacing(10)
+                    .push(Icon::Funnel.to_text())
+                    .push(button_clear_filter(SearchParameters::default())),
+            )
+            .padding(Padding::new(5.0).left(10))
+            .class(ContainerType::Badge),
+        )
+    };
 
     let combobox_country = filter_combobox(
         FilterInputType::Country,
@@ -341,50 +342,52 @@ fn host_filters_col<'a>(
     let container_as_name = Row::new()
         .spacing(5)
         .align_y(Alignment::Center)
-        .push(Text::new(format!(
-            "{}:",
-            administrative_entity_translation(language)
-        )))
+        .push(Text::new("ASN:"))
         .push(combobox_as_name);
 
-    let col1 = Column::new()
-        .align_x(Alignment::Start)
-        .spacing(5)
-        .push(
-            Container::new(
-                Toggler::new(search_params.only_favorites)
-                    .label(only_show_favorites_translation(language).to_owned())
-                    .on_toggle(move |toggled| {
-                        Message::Search(SearchParameters {
-                            only_favorites: toggled,
-                            ..search_params2.clone()
-                        })
-                    })
-                    .width(Length::Shrink)
-                    .spacing(5)
-                    .size(23),
-            )
-            .padding([5, 0]),
-        )
-        .push(container_domain);
+    let favorites_only = toggler_filter(
+        search_params.only_favorites,
+        |new_value| {
+            Message::Search(SearchParameters {
+                only_favorites: new_value,
+                ..search_params.clone()
+            })
+        },
+        Icon::Star.codepoint(),
+        only_show_favorites_translation(language),
+    );
 
-    let col2 = Column::new()
-        .align_x(Alignment::Start)
-        .spacing(5)
-        .push(container_country)
-        .push(container_as_name);
+    let blacklisted_only = toggler_filter(
+        search_params.only_blacklisted,
+        |new_value| {
+            Message::Search(SearchParameters {
+                only_blacklisted: new_value,
+                ..search_params.clone()
+            })
+        },
+        Icon::Forbidden.codepoint(),
+        only_show_blacklisted_translation(language),
+    );
 
-    Column::new()
-        .align_x(Alignment::Start)
-        .push(title_row)
-        .push(Space::new().height(10))
-        .push(
-            Row::new()
-                .align_y(Alignment::Center)
-                .spacing(30)
-                .push(col1)
-                .push(col2),
-        )
+    let container = Container::new(
+        Row::new()
+            .align_y(Alignment::Center)
+            .spacing(30)
+            .push(blacklisted_only)
+            .push(favorites_only)
+            .push(container_country)
+            .push(container_domain)
+            .push(container_as_name)
+            .wrap()
+            .vertical_spacing(5),
+    )
+    .padding(10)
+    .class(ContainerType::BorderedRound);
+
+    Row::new()
+        .spacing(10)
+        .push(container)
+        .push(clear_all_filters)
 }
 
 fn filter_input<'a>(
@@ -496,6 +499,30 @@ fn filter_combobox(
         } else {
             ContainerType::Standard
         })
+}
+
+fn toggler_filter<'a>(
+    is_toggled: bool,
+    toggle_fn: impl Fn(bool) -> Message + 'a,
+    icon: char,
+    tooltip: &'static str,
+) -> Tooltip<'a, Message, StyleType> {
+    Tooltip::new(
+        Container::new(
+            Toggler::new(is_toggled)
+                .label(icon)
+                .font(ICONS)
+                .on_toggle(toggle_fn)
+                .width(Length::Shrink)
+                .spacing(5)
+                .size(23),
+        )
+        .padding([5, 0]),
+        tooltip,
+        Position::FollowCursor,
+    )
+    .class(ContainerType::Tooltip)
+    .delay(TOOLTIP_DELAY)
 }
 
 fn get_button_change_page<'a>(increment: bool) -> Button<'a, Message, StyleType> {

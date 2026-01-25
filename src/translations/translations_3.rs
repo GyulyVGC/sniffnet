@@ -408,34 +408,34 @@ pub fn unsupported_link_type_translation(language: Language) -> &'static str {
 //     }
 // }
 
-pub fn filter_by_host_translation(language: Language) -> &'static str {
-    match language {
-        Language::EN => "Filter by network host",
-        Language::CS => "Filtrovat podle síťového hostitele",
-        // Language::FA => "صافی بر اساس میزبان شبکه",
-        Language::ES => "Filtra por host de red",
-        Language::IT => "Filtra per host di rete",
-        Language::FR => "Filtrer par réseau hôte",
-        Language::DE => "Nach Netzwerk-Host filtern",
-        Language::PL => "Filtruj według hosta sieciowego",
-        Language::RU => "Фильтр по сетевому хосту",
-        Language::RO => "Filtrează după host-ul de rețea",
-        Language::JA => "ネットワーク ホストでフィルター",
-        Language::UZ => "Tarmoq xosti bo'yicha filtrlash",
-        Language::SV => "Filtrera efter nätverksvärd",
-        Language::VI => "Lọc bởi máy chủ mạng",
-        Language::ZH => "按网络主机筛选",
-        Language::ZH_TW => "依網路主機篩選",
-        Language::KO => "네트워크 호스트로 필터링",
-        Language::TR => "Ağ sunucusuna göre filtrele",
-        Language::PT => "Filtrar por host de rede",
-        Language::UK => "Фільтр за хостом мережі",
-        Language::ID => "Filter berdasarkan jaringan asal",
-        Language::NL => "Filteren op netwerk host",
-        Language::EL => "Φίλτρο ανά διακομιστή δικτύου",
-        _ => "Filter by network host",
-    }
-}
+// pub fn filter_by_host_translation(language: Language) -> &'static str {
+//     match language {
+//         Language::EN => "Filter by network host",
+//         Language::CS => "Filtrovat podle síťového hostitele",
+//         // Language::FA => "صافی بر اساس میزبان شبکه",
+//         Language::ES => "Filtra por host de red",
+//         Language::IT => "Filtra per host di rete",
+//         Language::FR => "Filtrer par réseau hôte",
+//         Language::DE => "Nach Netzwerk-Host filtern",
+//         Language::PL => "Filtruj według hosta sieciowego",
+//         Language::RU => "Фильтр по сетевому хосту",
+//         Language::RO => "Filtrează după host-ul de rețea",
+//         Language::JA => "ネットワーク ホストでフィルター",
+//         Language::UZ => "Tarmoq xosti bo'yicha filtrlash",
+//         Language::SV => "Filtrera efter nätverksvärd",
+//         Language::VI => "Lọc bởi máy chủ mạng",
+//         Language::ZH => "按网络主机筛选",
+//         Language::ZH_TW => "依網路主機篩選",
+//         Language::KO => "네트워크 호스트로 필터링",
+//         Language::TR => "Ağ sunucusuna göre filtrele",
+//         Language::PT => "Filtrar por host de rede",
+//         Language::UK => "Фільтр за хостом мережі",
+//         Language::ID => "Filter berdasarkan jaringan asal",
+//         Language::NL => "Filteren op netwerk host",
+//         Language::EL => "Φίλτρο ανά διακομιστή δικτύου",
+//         _ => "Filter by network host",
+//     }
+// }
 
 pub fn service_translation(language: Language) -> &'static str {
     match language {

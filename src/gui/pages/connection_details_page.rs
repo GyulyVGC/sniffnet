@@ -27,8 +27,8 @@ use crate::translations::translations::{
     protocol_translation,
 };
 use crate::translations::translations_2::{
-    administrative_entity_translation, connection_details_translation, destination_translation,
-    fqdn_translation, mac_address_translation, socket_address_translation, source_translation,
+    connection_details_translation, destination_translation, fqdn_translation,
+    mac_address_translation, socket_address_translation, source_translation,
     transmitted_data_translation,
 };
 use crate::translations::translations_3::{
@@ -262,8 +262,8 @@ fn get_host_info_col<'a>(
     }
     if !host.asn.name.is_empty() && !host.asn.code.is_empty() {
         host_info_col = host_info_col.push(TextType::highlighted_subtitle_with_desc(
-            administrative_entity_translation(language),
-            &format!("{} (ASN {})", host.asn.name, host.asn.code),
+            "ASN",
+            &format!("{} ({})", host.asn.name, host.asn.code),
         ));
     }
     host_info_col

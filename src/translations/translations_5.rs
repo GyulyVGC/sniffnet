@@ -45,3 +45,11 @@ pub fn blacklisted_transmitted_translation(language: Language) -> &'static str {
         _ => "New data exchanged from a blacklisted IP",
     }
 }
+
+pub fn only_show_blacklisted_translation(language: Language) -> &'static str {
+    match language {
+        Language::EN => "Only show blacklisted",
+        Language::IT => "Mostra solo in blacklist",
+        _ => "Only show blacklisted",
+    }
+}
