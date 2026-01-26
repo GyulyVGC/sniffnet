@@ -6,7 +6,7 @@ use iced::widget::text_input::Side;
 use iced::widget::tooltip::Position;
 use iced::widget::{Button, Column, Container, Row, Scrollable, Text, TextInput};
 use iced::widget::{ComboBox, Space, Toggler, Tooltip, button, combo_box, text_input};
-use iced::{Alignment, Length, Padding, Pixels, alignment};
+use iced::{Alignment, Element, Length, Padding, Pixels, alignment};
 
 use crate::gui::components::tab::get_pages_tabs;
 use crate::gui::components::types::my_modal::MyModal;
@@ -37,8 +37,6 @@ use crate::translations::translations_2::{
 use crate::translations::translations_5::only_show_blacklisted_translation;
 use crate::utils::types::icon::Icon;
 use crate::{Language, RunningPage, Sniffer, StyleType};
-
-// TODO: clear all filters button
 
 /// Computes the body of gui inspect page
 pub fn inspect_page(sniffer: &Sniffer) -> Container<'_, Message, StyleType> {
@@ -289,21 +287,25 @@ fn additional_filters_row<'a>(
     host_states: &'a HostStates,
     language: Language,
 ) -> Row<'a, Message, StyleType> {
-    let clear_all_filters = if SearchParameters::default().eq(search_params) {
-        None
-    } else {
-        Some(
+    let clear_all_filters: Element<'a, Message, StyleType> =
+        if SearchParameters::default().eq(search_params) {
+            Space::new().width(Length::Fill).into()
+        } else {
             Container::new(
-                Row::new()
-                    .align_y(Alignment::Center)
-                    .spacing(10)
-                    .push(Icon::Funnel.to_text())
-                    .push(button_clear_filter(SearchParameters::default())),
+                Container::new(
+                    Row::new()
+                        .align_y(Alignment::Center)
+                        .spacing(10)
+                        .push(Icon::Funnel.to_text())
+                        .push(button_clear_filter(SearchParameters::default())),
+                )
+                .padding(Padding::new(5.0).left(10))
+                .class(ContainerType::Badge),
             )
-            .padding(Padding::new(5.0).left(10))
-            .class(ContainerType::Badge),
-        )
-    };
+            .padding(Padding::ZERO.left(30))
+            .width(Length::Fill)
+            .into()
+        };
 
     let combobox_country = filter_combobox(
         FilterInputType::Country,
@@ -384,7 +386,8 @@ fn additional_filters_row<'a>(
     .class(ContainerType::BorderedRound);
 
     Row::new()
-        .spacing(10)
+        .align_y(Alignment::Center)
+        .push(Space::new().width(Length::Fill))
         .push(container)
         .push(clear_all_filters)
 }
