@@ -7,7 +7,55 @@ use crate::translations::translations::favorite_transmitted_translation;
 use crate::translations::translations_5::blacklisted_transmitted_translation;
 use crate::translations::types::language::Language;
 use serde_json::json;
+use std::collections::VecDeque;
 use std::net::IpAddr;
+
+#[derive(Default)]
+pub struct LoggedNotifications {
+    /// Logged notifications during this capture session (max 30 kept)
+    notifications: VecDeque<LoggedNotification>,
+    /// Total number of notifications ever logged during this capture session
+    total_notifications: usize,
+}
+
+impl LoggedNotifications {
+    pub fn push(&mut self, notification: &LoggedNotification) {
+        self.total_notifications += 1;
+        if self.notifications.len() >= 30 {
+            self.notifications.pop_back();
+        }
+        self.notifications.push_front(notification.clone());
+    }
+
+    pub fn tot(&self) -> usize {
+        self.total_notifications
+    }
+
+    pub fn is_empty(&self) -> bool {
+        self.notifications.is_empty()
+    }
+
+    pub fn len(&self) -> usize {
+        self.notifications.len()
+    }
+
+    pub fn notifications(&self) -> &VecDeque<LoggedNotification> {
+        &self.notifications
+    }
+
+    pub fn notifications_mut(&mut self) -> &mut VecDeque<LoggedNotification> {
+        &mut self.notifications
+    }
+
+    pub fn clear_notifications(&mut self) {
+        self.notifications = VecDeque::new();
+    }
+
+    #[cfg(test)]
+    pub fn set_notifications(&mut self, notifications: VecDeque<LoggedNotification>) {
+        self.notifications = notifications;
+    }
+}
 
 /// Enum representing the possible notification events.
 #[derive(Clone)]

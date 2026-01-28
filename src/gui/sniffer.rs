@@ -10,7 +10,7 @@ use iced::widget::{Column, center};
 use iced::window::{Id, Level};
 use iced::{Element, Point, Size, Subscription, Task, window};
 use rfd::FileHandle;
-use std::collections::{HashMap, HashSet, VecDeque};
+use std::collections::{HashMap, HashSet};
 use std::net::IpAddr;
 use std::path::PathBuf;
 use std::sync::Arc;
@@ -57,7 +57,7 @@ use crate::networking::types::info_traffic::InfoTraffic;
 use crate::networking::types::ip_blacklist::IpBlacklist;
 use crate::networking::types::my_device::MyDevice;
 use crate::notifications::notify_and_log::notify_and_log;
-use crate::notifications::types::logged_notification::LoggedNotification;
+use crate::notifications::types::logged_notification::LoggedNotifications;
 use crate::notifications::types::notifications::{DataNotification, Notification};
 use crate::notifications::types::sound::{Sound, play};
 use crate::report::get_report_entries::get_searched_entries;
@@ -98,7 +98,7 @@ pub struct Sniffer {
     /// Collection of the favorite hosts
     pub favorite_hosts: HashSet<Host>,
     /// Log of the displayed notifications, with the total number of notifications for this capture
-    pub logged_notifications: (VecDeque<LoggedNotification>, usize),
+    pub logged_notifications: LoggedNotifications,
     /// Reports if a newer release of the software is available on GitHub
     pub newer_release_available: Option<bool>,
     /// Network device to be analyzed, or PCAP file to be imported
@@ -165,7 +165,7 @@ impl Sniffer {
             info_traffic: InfoTraffic::default(),
             addresses_resolved: HashMap::new(),
             favorite_hosts: HashSet::new(),
-            logged_notifications: (VecDeque::new(), 0),
+            logged_notifications: LoggedNotifications::default(),
             newer_release_available: None,
             capture_source,
             pcap_error: None,
@@ -569,7 +569,7 @@ impl Sniffer {
     }
 
     fn clear_all_notifications(&mut self) {
-        self.logged_notifications.0 = VecDeque::new();
+        self.logged_notifications.clear_notifications();
         self.modal = None;
     }
 
@@ -805,7 +805,7 @@ impl Sniffer {
     fn expand_notification(&mut self, id: usize, expand: bool) {
         if let Some(n) = self
             .logged_notifications
-            .0
+            .notifications_mut()
             .iter_mut()
             .find(|n| n.id() == id)
         {
@@ -1009,7 +1009,7 @@ impl Sniffer {
         self.info_traffic = InfoTraffic::default();
         self.addresses_resolved = HashMap::new();
         self.favorite_hosts = HashSet::new();
-        self.logged_notifications = (VecDeque::new(), 0);
+        self.logged_notifications = LoggedNotifications::default();
         self.pcap_error = None;
         self.traffic_chart = TrafficChart::new(style, language, self.conf.data_repr);
         self.modal = None;
@@ -1262,7 +1262,7 @@ impl Sniffer {
         if self
             .running_page
             .is_some_and(|p| p.eq(&RunningPage::Notifications))
-            && !self.logged_notifications.0.is_empty()
+            && !self.logged_notifications.is_empty()
         {
             self.show_modal(MyModal::ClearAll);
         }
@@ -2036,8 +2036,9 @@ mod tests {
     #[parallel] // needed to not collide with other tests generating configs files
     fn test_clear_all_notifications() {
         let mut sniffer = Sniffer::new(Conf::default());
-        sniffer.logged_notifications.0 =
-            VecDeque::from([LoggedNotification::DataThresholdExceeded(
+        sniffer
+            .logged_notifications
+            .set_notifications(VecDeque::from([LoggedNotification::DataThresholdExceeded(
                 DataThresholdExceeded {
                     id: 1,
                     data_repr: DataRepr::Packets,
@@ -2048,15 +2049,15 @@ mod tests {
                     hosts: Vec::new(),
                     is_expanded: false,
                 },
-            )]);
+            )]));
 
         assert_eq!(sniffer.modal, None);
         sniffer.update(Message::ShowModal(MyModal::ClearAll));
         assert_eq!(sniffer.modal, Some(MyModal::ClearAll));
-        assert_eq!(sniffer.logged_notifications.0.len(), 1);
+        assert_eq!(sniffer.logged_notifications.len(), 1);
         sniffer.update(Message::ClearAllNotifications);
         assert_eq!(sniffer.modal, None);
-        assert_eq!(sniffer.logged_notifications.0.len(), 0);
+        assert_eq!(sniffer.logged_notifications.len(), 0);
     }
 
     #[test]

@@ -62,11 +62,11 @@ pub fn notifications_page(sniffer: &Sniffer) -> Container<'_, Message, StyleType
     if notifications.data_notification.threshold.is_none()
         && !notifications.favorite_notification.is_active
         && !notifications.ip_blacklist_notification.is_active
-        && sniffer.logged_notifications.0.is_empty()
+        && sniffer.logged_notifications.is_empty()
     {
         let body = body_no_notifications_set(language);
         tab_and_body = tab_and_body.push(body);
-    } else if sniffer.logged_notifications.0.is_empty() {
+    } else if sniffer.logged_notifications.is_empty() {
         let body = body_no_notifications_received(language, &sniffer.dots_pulse.0);
         tab_and_body = tab_and_body.push(body);
     } else {
@@ -75,7 +75,7 @@ pub fn notifications_page(sniffer: &Sniffer) -> Container<'_, Message, StyleType
             .spacing(10)
             .padding(Padding::new(10.0).bottom(0))
             .push(
-                Container::new(if sniffer.logged_notifications.0.len() < 30 {
+                Container::new(if sniffer.logged_notifications.len() < 30 {
                     Text::new("")
                 } else {
                     Text::new(only_last_30_translation(language))
@@ -312,13 +312,13 @@ fn logged_notifications<'a>(sniffer: &Sniffer) -> Column<'a, Message, StyleType>
 
     let first_entry_data_info = sniffer
         .logged_notifications
-        .0
+        .notifications()
         .iter()
         .map(LoggedNotification::data_info)
         .max_by(|d1, d2| d1.compare(d2, SortType::Ascending, data_repr))
         .unwrap_or_default();
 
-    for logged_notification in &sniffer.logged_notifications.0 {
+    for logged_notification in sniffer.logged_notifications.notifications() {
         ret_val = ret_val.push(match logged_notification {
             LoggedNotification::DataThresholdExceeded(data_threshold_exceeded) => {
                 data_notification_log(data_threshold_exceeded, first_entry_data_info, language)

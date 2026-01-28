@@ -7,6 +7,7 @@ use crate::networking::types::host::Host;
 use crate::networking::types::service::Service;
 use crate::notifications::types::logged_notification::{
     BlacklistedTransmitted, DataThresholdExceeded, FavoriteTransmitted, LoggedNotification,
+    LoggedNotifications,
 };
 use crate::notifications::types::notifications::{Notifications, RemoteNotifications};
 use crate::notifications::types::sound::{Sound, play};
@@ -16,14 +17,14 @@ use crate::utils::formatted_strings::APP_VERSION;
 use crate::utils::formatted_strings::get_formatted_timestamp;
 use crate::{InfoTraffic, SNIFFNET_LOWERCASE, location};
 use std::cmp::min;
-use std::collections::{HashMap, HashSet, VecDeque};
+use std::collections::{HashMap, HashSet};
 use std::net::IpAddr;
 
 /// Checks if one or more notifications have to be emitted and logs them.
 ///
 /// It returns the number of new notifications emitted
 pub fn notify_and_log(
-    logged_notifications: &mut (VecDeque<LoggedNotification>, usize),
+    logged_notifications: &mut LoggedNotifications,
     notifications: &Notifications,
     info_traffic_msg: &InfoTraffic,
     favorites: &HashSet<Host>,
@@ -32,7 +33,7 @@ pub fn notify_and_log(
     info_traffic: &InfoTraffic,
 ) -> usize {
     let mut sound_to_play = Sound::None;
-    let emitted_notifications_prev = logged_notifications.1;
+    let emitted_notifications_prev = logged_notifications.tot();
     let timestamp = info_traffic_msg.last_packet_timestamp;
     let data_info = info_traffic_msg.tot_data_info;
 
@@ -41,7 +42,7 @@ pub fn notify_and_log(
         let data_repr = notifications.data_notification.data_repr;
         if data_info.tot_data(data_repr) > u128::from(threshold) {
             let notification = LoggedNotification::DataThresholdExceeded(DataThresholdExceeded {
-                id: logged_notifications.1,
+                id: logged_notifications.tot(),
                 data_repr,
                 threshold: notifications.data_notification.previous_threshold,
                 data_info,
@@ -52,11 +53,7 @@ pub fn notify_and_log(
             });
 
             //log this notification
-            logged_notifications.1 += 1;
-            if logged_notifications.0.len() >= 30 {
-                logged_notifications.0.pop_back();
-            }
-            logged_notifications.0.push_front(notification.clone());
+            logged_notifications.push(&notification);
 
             // send remote notification
             send_remote_notification(notification, notifications.remote_notifications.clone());
@@ -79,18 +76,14 @@ pub fn notify_and_log(
         if !favorites_last_interval.is_empty() {
             for (host, data_info_host) in favorites_last_interval {
                 let notification = LoggedNotification::FavoriteTransmitted(FavoriteTransmitted {
-                    id: logged_notifications.1,
+                    id: logged_notifications.tot(),
                     host,
                     data_info_host,
                     timestamp: get_formatted_timestamp(timestamp),
                 });
 
                 //log this notification
-                logged_notifications.1 += 1;
-                if logged_notifications.0.len() >= 30 {
-                    logged_notifications.0.pop_back();
-                }
-                logged_notifications.0.push_front(notification.clone());
+                logged_notifications.push(&notification);
 
                 // send remote notification
                 send_remote_notification(notification, notifications.remote_notifications.clone());
@@ -132,7 +125,7 @@ pub fn notify_and_log(
             for (ip, (host, data_info_host)) in blacklisted_last_interval {
                 let notification =
                     LoggedNotification::BlacklistedTransmitted(BlacklistedTransmitted {
-                        id: logged_notifications.1,
+                        id: logged_notifications.tot(),
                         ip,
                         host,
                         data_info_host,
@@ -140,11 +133,7 @@ pub fn notify_and_log(
                     });
 
                 //log this notification
-                logged_notifications.1 += 1;
-                if logged_notifications.0.len() >= 30 {
-                    logged_notifications.0.pop_back();
-                }
-                logged_notifications.0.push_front(notification.clone());
+                logged_notifications.push(&notification);
 
                 // send remote notification
                 send_remote_notification(notification, notifications.remote_notifications.clone());
@@ -162,7 +151,7 @@ pub fn notify_and_log(
         play(sound_to_play, notifications.volume);
     }
 
-    logged_notifications.1 - emitted_notifications_prev
+    logged_notifications.tot() - emitted_notifications_prev
 }
 
 fn hosts_list(info_traffic_msg: &InfoTraffic, data_repr: DataRepr) -> Vec<(Host, DataInfoHost)> {
