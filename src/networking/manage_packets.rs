@@ -254,6 +254,7 @@ pub fn get_service(
 }
 
 /// Function to insert the source and destination of a packet into the map containing the analyzed traffic
+#[allow(clippy::too_many_arguments)]
 pub fn modify_or_insert_in_map(
     info_traffic_msg: &mut InfoTraffic,
     key: &AddressPortPair,
@@ -287,9 +288,6 @@ pub fn modify_or_insert_in_map(
         // check if the remote address is blacklisted
         let address_to_lookup = get_address_to_lookup(key, traffic_direction);
         is_blacklisted = ip_blacklist.contains(&address_to_lookup);
-        if is_blacklisted {
-            println!("Blacklisted IP detected: {}", address_to_lookup);
-        }
     }
 
     let timestamp = info_traffic_msg.last_packet_timestamp;

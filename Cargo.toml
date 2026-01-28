@@ -58,7 +58,7 @@ semver = "1.0.27"
 serde = { version = "1.0.228", features = ["derive"] }
 serde_json = { version = "1.0.148", features = ["preserve_order"] }
 splines = "5.0.0"
-tokio = { version = "1.48.0", features = ["macros"] }
+tokio = { version = "1.48.0", features = ["macros", "fs"] }
 toml = "0.9.10"
 
 [target.'cfg(windows)'.dependencies]

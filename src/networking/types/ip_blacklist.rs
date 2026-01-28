@@ -1,5 +1,4 @@
 use std::collections::HashSet;
-use std::fs;
 use std::net::IpAddr;
 use std::sync::Arc;
 
@@ -11,7 +10,7 @@ pub struct IpBlacklist {
 
 impl IpBlacklist {
     pub async fn from_file(path: String) -> Self {
-        let Ok(buf) = fs::read_to_string(&path) else {
+        let Ok(buf) = tokio::fs::read_to_string(&path).await else {
             return IpBlacklist::default();
         };
         let mut set = HashSet::new();
