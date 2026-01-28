@@ -327,7 +327,7 @@ fn blacklist_selection<'a>(
     let is_error = if custom_path.is_empty() {
         false
     } else {
-        ip_blacklist.is_empty()
+        ip_blacklist.is_invalid()
     };
 
     let message = Message::LoadIpBlacklist;

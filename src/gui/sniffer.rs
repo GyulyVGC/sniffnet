@@ -6,7 +6,7 @@ use iced::Event::{Keyboard, Window};
 use iced::keyboard::key::Named;
 use iced::keyboard::{Event, Key, Modifiers};
 use iced::mouse::Event::ButtonPressed;
-use iced::widget::Column;
+use iced::widget::{Column, center};
 use iced::window::{Id, Level};
 use iced::{Element, Point, Size, Subscription, Task, window};
 use rfd::FileHandle;
@@ -67,6 +67,7 @@ use crate::translations::types::language::Language;
 use crate::utils::check_updates::set_newer_release_status;
 use crate::utils::error_logger::{ErrorLogger, Location};
 use crate::utils::types::file_info::FileInfo;
+use crate::utils::types::icon::Icon;
 use crate::utils::types::web_page::WebPage;
 use crate::{StyleType, TrafficChart, location};
 
@@ -192,7 +193,7 @@ impl Sniffer {
     }
 
     fn keyboard_subscription(&self) -> Subscription<Message> {
-        if self.welcome.is_some() {
+        if self.welcome.is_some() || self.ip_blacklist.is_loading() {
             return Subscription::none();
         }
 
@@ -403,7 +404,7 @@ impl Sniffer {
         let content: Element<Message, StyleType> =
             Column::new().push(header).push(body).push(footer).into();
 
-        match self.modal.clone() {
+        let ret_val: Element<'_, Message, StyleType> = match self.modal.clone() {
             None => {
                 if let Some(settings_page) = self.settings_page {
                     let overlay: Element<Message, StyleType> = match settings_page {
@@ -429,6 +430,16 @@ impl Sniffer {
 
                 modal(content, overlay, Message::HideModal)
             }
+        };
+
+        if self.ip_blacklist.is_loading() {
+            let overlay = Into::<Element<Message, StyleType>>::into(center(
+                Icon::get_hourglass(self.dots_pulse.0.len()).size(60),
+            ));
+
+            modal(ret_val, overlay, None)
+        } else {
+            ret_val
         }
     }
 
@@ -642,14 +653,17 @@ impl Sniffer {
 
     fn load_ip_blacklist(&mut self, path: String) -> Task<Message> {
         self.conf.settings.ip_blacklist.clone_from(&path);
-        println!("Start loading...");
-        Task::perform(IpBlacklist::from_file(path), Message::SetIpBlacklist)
+        if path.is_empty() {
+            self.ip_blacklist = IpBlacklist::default();
+            Task::none()
+        } else {
+            self.ip_blacklist.start_loading();
+            Task::perform(IpBlacklist::from_file(path), Message::SetIpBlacklist)
+        }
     }
 
     fn set_ip_blacklist(&mut self, blacklist: IpBlacklist) {
         self.ip_blacklist = blacklist;
-        // TODO: fix this
-        self.welcome = None;
     }
 
     fn open_file(
@@ -1232,7 +1246,7 @@ impl Sniffer {
     fn welcome(&mut self) {
         if let Some((true, x)) = self.welcome {
             if x >= 19 {
-                // self.welcome = None;
+                self.welcome = None;
             } else {
                 self.welcome = Some((true, x + 1));
             }
