@@ -520,7 +520,7 @@ impl Sniffer {
 
     fn load_style(&mut self, path: String) {
         self.conf.settings.style_path.clone_from(&path);
-        if let Ok(palette) = Palette::from_file(path) {
+        if let Some(palette) = Palette::from_file(path) {
             let style = StyleType::Custom(CustomPalette::from_palette(palette));
             self.conf.settings.style = style;
             self.change_charts_style();

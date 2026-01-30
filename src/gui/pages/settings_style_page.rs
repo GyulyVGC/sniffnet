@@ -264,7 +264,7 @@ fn lazy_custom_style_input<'a>(
     let is_error = if custom_path.is_empty() {
         false
     } else {
-        custom_palette.is_err()
+        custom_palette.is_none()
     };
 
     let button_row = Row::new()
@@ -296,12 +296,12 @@ fn lazy_custom_style_input<'a>(
             style.get_palette(),
             style.get_extension().buttons_color,
         ));
-    } else if let Ok(palette) = custom_palette {
+    } else if let Some(palette) = custom_palette {
         content = content.push(get_palette_rule(palette, palette.generate_buttons_color()));
     }
 
     Button::new(content)
-        .height(if custom_palette.is_ok() || is_custom_toml_style_set {
+        .height(if custom_palette.is_some() || is_custom_toml_style_set {
             110
         } else {
             75
