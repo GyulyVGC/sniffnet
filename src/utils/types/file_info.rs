@@ -16,9 +16,8 @@ impl FileInfo {
         match self {
             FileInfo::Style => vec!["toml"],
             FileInfo::Database => vec!["mmdb"],
-            FileInfo::Directory => vec![],
             FileInfo::PcapImport => vec!["pcap", "pcapng", "cap"],
-            FileInfo::Blacklist => vec!["txt", "csv"],
+            FileInfo::Directory | FileInfo::Blacklist => vec![],
         }
     }
 

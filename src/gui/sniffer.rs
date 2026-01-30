@@ -1287,10 +1287,14 @@ impl Sniffer {
             dialog.pick_folder().await
         } else {
             let extensions = file_info.get_extensions();
-            dialog
-                .add_filter(format!("{extensions:?}"), &extensions)
-                .pick_file()
-                .await
+            if extensions.is_empty() {
+                dialog.pick_file().await
+            } else {
+                dialog
+                    .add_filter(format!("{extensions:?}"), &extensions)
+                    .pick_file()
+                    .await
+            }
         }
         .unwrap_or_else(|| FileHandle::from(PathBuf::from(&old_file)));
 
