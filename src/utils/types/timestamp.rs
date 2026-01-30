@@ -1,4 +1,4 @@
-#[derive(Clone, Default, Debug, Copy, Eq, PartialEq, Hash)]
+#[derive(Clone, Default, Debug, Copy, Eq, PartialEq)]
 pub struct Timestamp {
     secs: i64,
     usecs: i64,
