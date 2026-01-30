@@ -17,7 +17,7 @@ pub(crate) struct Args {
     /// Start sniffing packets from the supplied network adapter
     #[arg(short, long, value_name = "NAME", default_missing_value = CONF.device.device_name.as_str(), num_args = 0..=1)]
     adapter: Option<String>,
-    /// Show the path to the configuration file
+    /// Print the path to the configuration file
     #[arg(short, long, exclusive = true)]
     config_path: bool,
     #[cfg(all(windows, not(debug_assertions)))]
