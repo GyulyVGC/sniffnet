@@ -891,7 +891,6 @@ impl Sniffer {
             &self.favorite_hosts,
             &self.capture_source,
             &self.addresses_resolved,
-            &self.info_traffic,
         );
         if self.thumbnail
             || self
