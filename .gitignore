@@ -57,3 +57,6 @@ $RECYCLE.BIN/
 ### Custom... ###
 lcov.info
 *.pcap
+node_modules
+package.json
+yarn.lock

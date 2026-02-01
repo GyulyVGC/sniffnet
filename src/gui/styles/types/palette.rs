@@ -1,21 +1,17 @@
 //! Module defining the `Colors` struct, which defines the colors in use in the GUI.
 
-use std::fs::File;
 use std::hash::{Hash, Hasher};
-use std::io::{BufReader, Read};
 use std::path::Path;
 
 use iced::Color;
 use plotters::style::RGBColor;
 use serde::{Deserialize, Serialize};
 
-use crate::gui::styles::style_constants::{
-    NIGHT_PALETTE, RED_ALERT_COLOR_DAILY, RED_ALERT_COLOR_NIGHTLY, SARASA_MONO, SARASA_MONO_BOLD,
-};
+use super::color_remote::{deserialize_color, deserialize_color_inner, serialize_color};
+use crate::gui::styles::style_constants::{RED_ALERT_COLOR_DAILY, RED_ALERT_COLOR_NIGHTLY};
 use crate::gui::styles::types::color_remote::color_hash;
 use crate::gui::styles::types::palette_extension::PaletteExtension;
-
-use super::color_remote::{deserialize_color, serialize_color};
+use crate::gui::styles::types::style_type::StyleType;
 
 /// Set of colors to apply to GUI
 ///
@@ -25,6 +21,7 @@ use super::color_remote::{deserialize_color, serialize_color};
 /// - `text_headers` should be black or white and must have a strong contrast with `secondary`
 /// - `text_body` should be black or white and must have a strong contrast with `primary`
 #[derive(Debug, Clone, Copy, PartialEq, Deserialize, Serialize)]
+#[serde(default)]
 pub struct Palette {
     /// Main color of the GUI (background, hovered buttons, active tab)
     #[serde(
@@ -87,23 +84,8 @@ impl Palette {
 
     pub fn generate_palette_extension(self) -> PaletteExtension {
         let primary = self.primary;
-        let text_body = self.text_body;
-        let text_headers = self.text_headers;
-        let is_text_body_dark = text_body.r + text_body.g + text_body.b <= 1.5;
-        let is_text_headers_dark = text_headers.r + text_headers.g + text_headers.b <= 1.5;
-
         let is_nightly = primary.r + primary.g + primary.b <= 1.5;
-        let font = if is_text_body_dark {
-            SARASA_MONO_BOLD
-        } else {
-            SARASA_MONO
-        };
-        let font_headers = if is_text_headers_dark {
-            SARASA_MONO_BOLD
-        } else {
-            SARASA_MONO
-        };
-        let alpha_chart_badge = if is_nightly { 0.15 } else { 0.75 };
+        let alpha_chart_badge = if is_nightly { 0.3 } else { 0.5 };
         let alpha_round_borders = if is_nightly { 0.3 } else { 0.6 };
         let alpha_round_containers = if is_nightly { 0.12 } else { 0.24 };
         let buttons_color = self.generate_buttons_color();
@@ -115,8 +97,6 @@ impl Palette {
 
         PaletteExtension {
             is_nightly,
-            font,
-            font_headers,
             alpha_chart_badge,
             alpha_round_borders,
             alpha_round_containers,
@@ -129,22 +109,36 @@ impl Palette {
     ///
     /// # Arguments
     /// * `path` - Path to a UTF-8 encoded file containing a custom style as TOML.
-    pub fn from_file<P>(path: P) -> Result<Self, toml::de::Error>
+    pub fn from_file<P>(path: P) -> Option<Self>
     where
         P: AsRef<Path>,
     {
-        // Try to open the file at `path`
-        let mut toml_reader = File::open(path)
-            .map_err(serde::de::Error::custom)
-            .map(BufReader::new)?;
+        let toml_str = std::fs::read_to_string(path).ok()?;
 
-        // Read the ostensible TOML
-        let mut style_toml = String::new();
-        toml_reader
-            .read_to_string(&mut style_toml)
-            .map_err(serde::de::Error::custom)?;
+        // manually deserialize it,
+        // because using the derived impl accepts as valid everything (for config purposes)
+        let toml: toml::Value = toml::from_str(&toml_str).ok()?;
+        let primary = toml.get("primary").cloned()?;
+        let secondary = toml.get("secondary").cloned()?;
+        let outgoing = toml.get("outgoing").cloned()?;
+        let starred = toml.get("starred").cloned()?;
+        let text_headers = toml.get("text_headers").cloned()?;
+        let text_body = toml.get("text_body").cloned()?;
 
-        toml::de::from_str(&style_toml)
+        Some(Self {
+            primary: deserialize_color_inner(primary)?,
+            secondary: deserialize_color_inner(secondary)?,
+            outgoing: deserialize_color_inner(outgoing)?,
+            starred: deserialize_color_inner(starred)?,
+            text_headers: deserialize_color_inner(text_headers)?,
+            text_body: deserialize_color_inner(text_body)?,
+        })
+    }
+}
+
+impl Default for Palette {
+    fn default() -> Self {
+        <StyleType as std::default::Default>::default().get_palette()
     }
 }
 
@@ -197,20 +191,12 @@ pub fn mix_colors(color_1: Color, color_2: Color) -> Color {
     }
 }
 
-impl Default for Palette {
-    fn default() -> Self {
-        NIGHT_PALETTE
-    }
-}
-
 #[cfg(test)]
 mod tests {
     use iced::Color;
     use iced::color;
 
-    use crate::gui::styles::style_constants::{
-        RED_ALERT_COLOR_DAILY, RED_ALERT_COLOR_NIGHTLY, SARASA_MONO, SARASA_MONO_BOLD,
-    };
+    use crate::gui::styles::style_constants::{RED_ALERT_COLOR_DAILY, RED_ALERT_COLOR_NIGHTLY};
     use crate::gui::styles::types::palette_extension::PaletteExtension;
 
     use super::Palette;
@@ -236,12 +222,10 @@ mod tests {
     }
 
     #[test]
-    fn custompalette_from_file_de() -> Result<(), toml::de::Error> {
+    fn custompalette_from_file_de() {
         let style = catppuccin_style();
-        let style_de = Palette::from_file(style_path("catppuccin"))?;
-
+        let style_de = Palette::from_file(style_path("catppuccin")).unwrap();
         assert_eq!(style, style_de);
-        Ok(())
     }
 
     #[test]
@@ -289,9 +273,7 @@ mod tests {
             palette.generate_palette_extension(),
             PaletteExtension {
                 is_nightly: true,
-                font: SARASA_MONO,
-                font_headers: SARASA_MONO_BOLD,
-                alpha_chart_badge: 0.15,
+                alpha_chart_badge: 0.3,
                 alpha_round_borders: 0.3,
                 alpha_round_containers: 0.12,
                 buttons_color: Color {
@@ -350,9 +332,7 @@ mod tests {
             palette.generate_palette_extension(),
             PaletteExtension {
                 is_nightly: false,
-                font: SARASA_MONO,
-                font_headers: SARASA_MONO_BOLD,
-                alpha_chart_badge: 0.75,
+                alpha_chart_badge: 0.5,
                 alpha_round_borders: 0.6,
                 alpha_round_containers: 0.24,
                 buttons_color: Color {
@@ -364,5 +344,17 @@ mod tests {
                 red_alert_color: RED_ALERT_COLOR_DAILY,
             }
         )
+    }
+
+    #[test]
+    fn test_palette_from_not_existing_file_fails() {
+        let result = Palette::from_file("non_existent_file.toml");
+        assert!(result.is_none());
+    }
+
+    #[test]
+    fn test_palette_from_invalid_file_fails() {
+        let result = Palette::from_file("Cargo.toml");
+        assert!(result.is_none());
     }
 }

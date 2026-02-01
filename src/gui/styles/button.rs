@@ -64,7 +64,9 @@ impl ButtonType {
                 radius: match self {
                     ButtonType::Neutral => 0.0.into(),
                     ButtonType::TabActive | ButtonType::TabInactive => Radius::new(0).bottom(30),
-                    ButtonType::BorderedRound | ButtonType::BorderedRoundSelected => 12.0.into(),
+                    ButtonType::BorderedRound
+                    | ButtonType::BorderedRoundSelected
+                    | ButtonType::Gradient(_) => 12.0.into(),
                     ButtonType::Starred | ButtonType::NotStarred => 100.0.into(),
                     _ => BORDER_BUTTON_RADIUS.into(),
                 },
@@ -92,7 +94,7 @@ impl ButtonType {
             text_color: match self {
                 ButtonType::Starred => Color::BLACK,
                 ButtonType::SortArrows => Color {
-                    a: if ext.is_nightly { 0.2 } else { 0.7 },
+                    a: ext.alpha_chart_badge,
                     ..colors.text_body
                 },
                 ButtonType::SortArrowActive => colors.secondary,
@@ -108,6 +110,7 @@ impl ButtonType {
                 },
                 _ => Shadow::default(),
             },
+            snap: true,
         }
     }
 
@@ -154,7 +157,9 @@ impl ButtonType {
                 radius: match self {
                     ButtonType::Neutral => 0.0.into(),
                     ButtonType::TabActive | ButtonType::TabInactive => Radius::new(0).bottom(30),
-                    ButtonType::BorderedRound | ButtonType::BorderedRoundSelected => 12.0.into(),
+                    ButtonType::BorderedRound
+                    | ButtonType::BorderedRoundSelected
+                    | ButtonType::Gradient(_) => 12.0.into(),
                     ButtonType::Starred | ButtonType::NotStarred => 100.0.into(),
                     _ => BORDER_BUTTON_RADIUS.into(),
                 },
@@ -184,6 +189,7 @@ impl ButtonType {
                 ButtonType::SortArrowActive | ButtonType::SortArrows => colors.secondary,
                 _ => colors.text_body,
             },
+            snap: true,
         }
     }
 
@@ -208,7 +214,7 @@ impl ButtonType {
                     _ => Background::Color(ext.buttons_color),
                 }),
                 border: Border {
-                    radius: BORDER_BUTTON_RADIUS.into(),
+                    radius: 12.0.into(),
                     width: BORDER_WIDTH,
                     color: Color {
                         a: ext.alpha_chart_badge,
@@ -216,10 +222,11 @@ impl ButtonType {
                     },
                 },
                 text_color: Color {
-                    a: ext.alpha_chart_badge,
+                    a: 0.5,
                     ..colors.text_headers
                 },
                 shadow: Shadow::default(),
+                snap: true,
             },
             ButtonType::Standard => Style {
                 background: Some(Background::Color(Color {
@@ -239,6 +246,7 @@ impl ButtonType {
                     ..colors.text_body
                 },
                 shadow: Shadow::default(),
+                snap: true,
             },
             _ => self.active(style),
         }

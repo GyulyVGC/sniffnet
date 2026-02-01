@@ -2,9 +2,12 @@ use std::collections::HashMap;
 use std::ffi::{CStr, c_int};
 use std::net::{IpAddr, Ipv4Addr, Ipv6Addr};
 
-use etherparse::{EtherType, LaxPacketHeaders, LinkHeader, NetHeaders, TransportHeader};
+use etherparse::{
+    ArpHardwareId, EtherType, LaxPacketHeaders, LinkHeader, NetHeaders, TransportHeader,
+};
 use pcap::Address;
 
+use crate::Protocol;
 use crate::networking::types::address_port_pair::AddressPortPair;
 use crate::networking::types::arp_type::ArpType;
 use crate::networking::types::bogon::is_bogon;
@@ -13,14 +16,11 @@ use crate::networking::types::icmp_type::{IcmpType, IcmpTypeV4, IcmpTypeV6};
 use crate::networking::types::info_address_port_pair::InfoAddressPortPair;
 use crate::networking::types::info_traffic::InfoTraffic;
 use crate::networking::types::packet_filters_fields::PacketFiltersFields;
-use crate::networking::types::process::Process;
 use crate::networking::types::service::Service;
 use crate::networking::types::service_query::ServiceQuery;
 use crate::networking::types::traffic_direction::TrafficDirection;
 use crate::networking::types::traffic_type::TrafficType;
 use crate::{IpVersion, Protocol};
-use iced::widget::Image;
-use iced::widget::image::Handle;
 use std::fmt::Write;
 use std::path::Path;
 use std::process::Command;
@@ -35,8 +35,9 @@ pub fn analyze_headers(
     exchanged_bytes: &mut u128,
     icmp_type: &mut IcmpType,
     arp_type: &mut ArpType,
-    packet_filters_fields: &mut PacketFiltersFields,
 ) -> Option<AddressPortPair> {
+    let mut retval = AddressPortPair::default();
+
     analyze_link_header(
         headers.link,
         &mut mac_addresses.0,
@@ -49,9 +50,8 @@ pub fn analyze_headers(
     if !analyze_network_header(
         headers.net,
         exchanged_bytes,
-        &mut packet_filters_fields.ip_version,
-        &mut packet_filters_fields.source,
-        &mut packet_filters_fields.dest,
+        &mut retval.source,
+        &mut retval.dest,
         arp_type,
     ) {
         return None;
@@ -60,22 +60,16 @@ pub fn analyze_headers(
     if !is_arp
         && !analyze_transport_header(
             headers.transport,
-            &mut packet_filters_fields.sport,
-            &mut packet_filters_fields.dport,
-            &mut packet_filters_fields.protocol,
+            &mut retval.sport,
+            &mut retval.dport,
+            &mut retval.protocol,
             icmp_type,
         )
     {
         return None;
     }
 
-    Some(AddressPortPair::new(
-        packet_filters_fields.source,
-        packet_filters_fields.sport,
-        packet_filters_fields.dest,
-        packet_filters_fields.dport,
-        packet_filters_fields.protocol,
-    ))
+    Some(retval)
 }
 
 /// This function analyzes the data link layer header passed as parameter and updates variables
@@ -87,13 +81,28 @@ fn analyze_link_header(
     mac_address2: &mut Option<String>,
     exchanged_bytes: &mut u128,
 ) {
-    if let Some(LinkHeader::Ethernet2(header)) = link_header {
-        *exchanged_bytes += 14;
-        *mac_address1 = Some(mac_from_dec_to_hex(header.source));
-        *mac_address2 = Some(mac_from_dec_to_hex(header.destination));
-    } else {
-        *mac_address1 = None;
-        *mac_address2 = None;
+    match link_header {
+        Some(LinkHeader::Ethernet2(header)) => {
+            *exchanged_bytes += 14;
+            *mac_address1 = Some(mac_from_dec_to_hex(header.source));
+            *mac_address2 = Some(mac_from_dec_to_hex(header.destination));
+        }
+        Some(LinkHeader::LinuxSll(header)) => {
+            *exchanged_bytes += 16;
+            *mac_address1 = if header.sender_address_valid_length == 6
+                && header.arp_hrd_type == ArpHardwareId::ETHERNET
+                && let Ok(sender) = header.sender_address[0..6].try_into()
+            {
+                Some(mac_from_dec_to_hex(sender))
+            } else {
+                None
+            };
+            *mac_address2 = None;
+        }
+        None => {
+            *mac_address1 = None;
+            *mac_address2 = None;
+        }
     }
 }
 
@@ -103,21 +112,18 @@ fn analyze_link_header(
 fn analyze_network_header(
     network_header: Option<NetHeaders>,
     exchanged_bytes: &mut u128,
-    network_protocol: &mut IpVersion,
     address1: &mut IpAddr,
     address2: &mut IpAddr,
     arp_type: &mut ArpType,
 ) -> bool {
     match network_header {
         Some(NetHeaders::Ipv4(ipv4header, _)) => {
-            *network_protocol = IpVersion::IPv4;
             *address1 = IpAddr::from(ipv4header.source);
             *address2 = IpAddr::from(ipv4header.destination);
             *exchanged_bytes += u128::from(ipv4header.total_len);
             true
         }
         Some(NetHeaders::Ipv6(ipv6header, _)) => {
-            *network_protocol = IpVersion::IPv6;
             *address1 = IpAddr::from(ipv6header.source);
             *address2 = IpAddr::from(ipv6header.destination);
             *exchanged_bytes += u128::from(40 + ipv6header.payload_length);
@@ -126,7 +132,6 @@ fn analyze_network_header(
         Some(NetHeaders::Arp(arp_packet)) => {
             match arp_packet.proto_addr_type {
                 EtherType::IPV4 => {
-                    *network_protocol = IpVersion::IPv4;
                     *address1 =
                         match TryInto::<[u8; 4]>::try_into(arp_packet.sender_protocol_addr()) {
                             Ok(source) => IpAddr::from(source),
@@ -139,7 +144,6 @@ fn analyze_network_header(
                         };
                 }
                 EtherType::IPV6 => {
-                    *network_protocol = IpVersion::IPv6;
                     *address1 =
                         match TryInto::<[u8; 16]>::try_into(arp_packet.sender_protocol_addr()) {
                             Ok(source) => IpAddr::from(source),
@@ -157,7 +161,7 @@ fn analyze_network_header(
             *arp_type = ArpType::from_etherparse(arp_packet.operation);
             true
         }
-        _ => false,
+        None => false,
     }
 }
 
@@ -198,7 +202,7 @@ fn analyze_transport_header(
             *icmp_type = IcmpTypeV6::from_etherparse(&icmpv6_header.icmp_type);
             true
         }
-        _ => false,
+        None => false,
     }
 }
 
@@ -211,10 +215,10 @@ pub fn get_service(
         return Service::NotApplicable;
     }
 
-    let Some(port1) = key.port1 else {
+    let Some(port1) = key.sport else {
         return Service::NotApplicable;
     };
-    let Some(port2) = key.port2 else {
+    let Some(port2) = key.dport else {
         return Service::NotApplicable;
     };
 
@@ -238,7 +242,7 @@ pub fn get_service(
         .get(&ServiceQuery(port2, key.protocol))
         .unwrap_or(&unknown);
 
-    let dest_ip = key.address2;
+    let dest_ip = key.dest;
     let bonus_dest = traffic_direction.eq(&TrafficDirection::Outgoing)
         || dest_ip.is_multicast()
         || is_broadcast_address(&dest_ip, my_interface_addresses);
@@ -254,6 +258,7 @@ pub fn get_service(
 }
 
 /// Function to insert the source and destination of a packet into the map containing the analyzed traffic
+#[allow(clippy::too_many_arguments)]
 pub fn modify_or_insert_in_map(
     info_traffic_msg: &mut InfoTraffic,
     key: &AddressPortPair,
@@ -262,26 +267,31 @@ pub fn modify_or_insert_in_map(
     icmp_type: IcmpType,
     arp_type: ArpType,
     exchanged_bytes: u128,
+    ip_blacklist: &IpBlacklist,
 ) -> (TrafficDirection, Service) {
     let mut traffic_direction = TrafficDirection::default();
     let mut service = Service::Unknown;
+    let mut is_blacklisted = false;
 
     if !info_traffic_msg.map.contains_key(key) {
         // first occurrence of key (in this time interval)
 
         let my_interface_addresses = cs.get_addresses();
         // determine traffic direction
-        let source_ip = &key.address1;
-        let destination_ip = &key.address2;
+        let source_ip = &key.source;
+        let destination_ip = &key.dest;
         traffic_direction = get_traffic_direction(
             source_ip,
             destination_ip,
-            key.port1,
-            key.port2,
+            key.sport,
+            key.dport,
             my_interface_addresses,
         );
         // determine upper layer service
         service = get_service(key, traffic_direction, my_interface_addresses);
+        // check if the remote address is blacklisted
+        let address_to_lookup = get_address_to_lookup(key, traffic_direction);
+        is_blacklisted = ip_blacklist.contains(&address_to_lookup);
     }
 
     let timestamp = info_traffic_msg.last_packet_timestamp;
@@ -329,6 +339,7 @@ pub fn modify_or_insert_in_map(
             } else {
                 HashMap::new()
             },
+            is_blacklisted,
         });
 
     (new_info.traffic_direction, new_info.service)
@@ -348,14 +359,15 @@ fn get_traffic_direction(
         .collect();
 
     // first let's handle TCP and UDP loopback
-    if source_ip.is_loopback() && destination_ip.is_loopback() {
-        if let (Some(sport), Some(dport)) = (source_port, dest_port) {
-            return if sport > dport {
-                TrafficDirection::Outgoing
-            } else {
-                TrafficDirection::Incoming
-            };
-        }
+    if source_ip.is_loopback()
+        && destination_ip.is_loopback()
+        && let (Some(sport), Some(dport)) = (source_port, dest_port)
+    {
+        return if sport > dport {
+            TrafficDirection::Outgoing
+        } else {
+            TrafficDirection::Incoming
+        };
     }
 
     // if interface_addresses is empty, check if the IP is a bogon (useful when importing pcap files)
@@ -510,8 +522,8 @@ fn mac_from_dec_to_hex(mac_dec: [u8; 6]) -> String {
 
 pub fn get_address_to_lookup(key: &AddressPortPair, traffic_direction: TrafficDirection) -> IpAddr {
     match traffic_direction {
-        TrafficDirection::Outgoing => key.address2,
-        TrafficDirection::Incoming => key.address1,
+        TrafficDirection::Outgoing => key.dest,
+        TrafficDirection::Incoming => key.source,
     }
 }
 
@@ -1517,7 +1529,7 @@ mod tests {
 
     #[test]
     fn test_get_service_not_applicable() {
-        for p in Protocol::ALL {
+        for p in [Protocol::TCP, Protocol::UDP, Protocol::ICMP, Protocol::ARP] {
             for d in [TrafficDirection::Incoming, TrafficDirection::Outgoing] {
                 for (p1, p2) in [(None, Some(443)), (None, None), (Some(443), None)] {
                     let key = AddressPortPair::new(

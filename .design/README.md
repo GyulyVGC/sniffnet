@@ -1,5 +1,5 @@
 <div align="center">
-<p align="center"><a href="https://github.com/GyulyVGC/sniffnet"><img alt="Sniffnet" src="https://github.com/GyulyVGC/sniffnet/blob/main/resources/repository/logo_repository.png?raw=true" width="100%"/></a></p>
+<p align="center"><a href="https://github.com/GyulyVGC/sniffnet"><img alt="Sniffnet" src="https://github.com/GyulyVGC/sniffnet/blob/main/resources/repository/header_repository.png?raw=true" width="100%"/></a></p>
   <h1>Design Guidelines & Resources</h1>
   <p>A collection of design contribution guidelines and resources for Sniffnet.</p>
 </div>

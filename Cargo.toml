@@ -1,6 +1,6 @@
 [package]
 name = "sniffnet"
-version = "1.4.0"
+version = "1.4.2"
 authors = ["Giuliano Bellini <gyulyvgc99@gmail.com>"]
 edition = "2024"
 description = "Application to comfortably monitor your network traffic"
@@ -37,51 +37,49 @@ strip = true
 #═══════════════════════════════════════════════════════════════════════════════════════════════════════════════════════
 
 [dependencies]
-pcap = "2.2.0"
-etherparse = "0.18.0"
-chrono = { version = "0.4.41", default-features = false, features = ["clock"] }
-plotters = { version = "0.3.7", default-features = false, features = ["area_series", "line_series"] }
-iced = { version = "0.13.1", features = ["tokio", "svg", "advanced", "lazy", "image"] }
-plotters-iced = "0.11.0"
-maxminddb = "0.26.0"
-confy = "1.0.0"
-serde = { version = "1.0.219", default-features = false, features = ["derive"] }
-rodio = { version = "0.20.1", default-features = false, features = ["mp3"] }
-dns-lookup = "2.0.4"
-toml = "0.9.1"
-ctrlc = { version = "3.4.7", features = ["termination"] }
-rfd = "0.15.3"
-phf = "0.12.1"
-phf_shared = "0.12.1"
-splines = "5.0.0"
-clap = { version = "4.5.41", features = ["derive"] }
-tokio = { version = "1.46.1", features = ["macros"] }
 async-channel = "2.5.0"
+chrono = "0.4.43"
+clap = { version = "4.5.56", features = ["derive"] }
+confy = "2.0.0"
+ctrlc = { version = "3.5.1", features = ["termination"] }
+dns-lookup = "3.0.1"
+etherparse = "0.19.0"
+iced = { version = "0.14.0", features = ["tokio", "svg", "advanced", "lazy", "image"] }
+maxminddb = "0.27.1"
+pcap = "2.4.0"
+phf = "0.13.1"
+phf_shared = "0.13.1"
+plotters = { version = "0.3.7", default-features = false, features = ["area_series", "line_series"] }
+plotters-iced2 = "0.14.0"
+reqwest = { version = "0.13.1", features = ["json"] }
+rfd = "0.17.2"
+rodio = { version = "0.21.1", default-features = false, features = ["mp3", "playback"] }
+semver = "1.0.27"
+serde = { version = "1.0.228", features = ["derive"] }
+serde_json = { version = "1.0.149", features = ["preserve_order"] }
+splines = "5.0.0"
+tokio = { version = "1.49.0", features = ["macros", "fs"] }
+toml = "0.9.11"
+
 listeners = { path = "../listeners" }
 picon = { path = "../picon" }
 
 [target.'cfg(windows)'.dependencies]
 gag = "1.0.0"
 
-[target.'cfg(not(target_arch = "powerpc64"))'.dependencies]
-reqwest = { version = "0.12.22", default-features = false, features = ["json", "rustls-tls"] }
-
-[target.'cfg(target_arch = "powerpc64")'.dependencies]
-reqwest = { version = "0.12.22", features = ["json"] }
-
 #───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
 
 [dev-dependencies]
+rstest = "0.26.1"
 serde_test = "1.0.177"
-rstest = "0.25.0"
-serial_test = { version = "3.2.0", default-features = false }
+serial_test = { version = "3.3.1", default-features = false }
 
 #───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
 
 [build-dependencies]
-phf_codegen = "0.12.1"
-phf_shared = "0.12.1"
-rustrict = { version = "0.7.35", default-features = false, features = ["censor"] }
+phf_codegen = "0.13.1"
+phf_shared = "0.13.1"
+rustrict = { version = "0.7.38", default-features = false, features = ["censor"] }
 
 [target."cfg(windows)".build-dependencies]
 winres = "0.1.12"
@@ -126,7 +124,6 @@ assets = [
 
 [package.metadata.generate-rpm]
 post_install_script = "setcap cap_net_raw,cap_net_admin=eip /usr/bin/sniffnet"
-pre_uninstall_script = "setcap '' /usr/bin/sniffnet"
 assets = [
     { source = "target/release/sniffnet", dest = "/usr/bin/", mode = "755" },
     { source = "resources/packaging/linux/sniffnet.desktop", dest = "/usr/share/applications/", mode = "644" },

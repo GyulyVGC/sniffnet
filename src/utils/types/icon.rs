@@ -32,6 +32,7 @@ pub enum Icon {
     Inspect,
     Lightning,
     Moon,
+    NewerVersion,
     News,
     Notification,
     OpenLink,
@@ -39,9 +40,13 @@ pub enum Icon {
     PacketsThreshold,
     // Restore,
     Roadmap,
-    Rocket,
+    // Rocket,
     Settings,
     Sniffnet,
+    Sniffnet1,
+    Sniffnet2,
+    Sniffnet3,
+    Sniffnet4,
     SortAscending,
     SortDescending,
     SortNeutral,
@@ -49,9 +54,13 @@ pub enum Icon {
     Sun,
     ThumbnailOpen,
     ThumbnailClose,
-    Update,
+    // Update1,
+    // Update2,
+    // Update3,
     Warning,
     Waves,
+    Pause,
+    Resume,
 }
 
 impl Icon {
@@ -85,9 +94,13 @@ impl Icon {
             Icon::Overview => 'd',
             Icon::PacketsThreshold => '\\',
             // Icon::Restore => 'k',
-            Icon::Rocket => 'S',
+            // Icon::Rocket => 'S',
             Icon::Settings => 'a',
             Icon::Sniffnet => 'A',
+            Icon::Sniffnet1 => '!',
+            Icon::Sniffnet2 => '"',
+            Icon::Sniffnet3 => '#',
+            Icon::Sniffnet4 => '$',
             Icon::Star => 'g',
             Icon::Warning => 'T',
             Icon::Waves => 'y',
@@ -102,9 +115,14 @@ impl Icon {
             Icon::Book => 'B',
             Icon::Roadmap => '?',
             Icon::News => '>',
-            Icon::Update => '<',
+            Icon::NewerVersion => '(',
+            // Icon::Update1 => '\'',
+            // Icon::Update2 => '%',
+            // Icon::Update3 => '&',
             // Icon::Expand => 'p',
             // Icon::Collapse => 'q',
+            Icon::Pause => '-',
+            Icon::Resume => '+',
         }
     }
 
@@ -119,4 +137,12 @@ impl Icon {
             _ => Icon::Hourglass1.to_text(),
         }
     }
+
+    // pub fn get_update<'a>(num: usize) -> Text<'a, StyleType> {
+    //     match num {
+    //         2 => Icon::Update2.to_text(),
+    //         3 => Icon::Update3.to_text(),
+    //         _ => Icon::Update1.to_text(),
+    //     }
+    // }
 }

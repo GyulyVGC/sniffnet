@@ -6,8 +6,8 @@ use serde::{Deserialize, Serialize};
 
 use crate::StyleType;
 use crate::countries::flags_pictures::{
-    CN, DE, ES, FI, FLAGS_WIDTH_BIG, FR, GB, GR, ID, IT, JP, KR, PL, PT, RO, RU, SE, TR, TW, UA,
-    UZ, VN,
+    CN, CZ, DE, ES, FI, FLAGS_WIDTH_BIG, FR, GB, GR, ID, IT, JP, KR, NL, PL, PT, RO, RU, SE, TR,
+    TW, UA, UZ, VN,
 };
 
 /// This enum defines the available languages.
@@ -59,11 +59,16 @@ pub enum Language {
     VI,
     /// Indonesian
     ID,
+    /// Dutch
+    NL,
+    /// Czech
+    CS,
 }
 
 impl Language {
-    pub const ALL: [Language; 21] = [
+    pub const ALL: [Language; 23] = [
         Language::EN,
+        Language::CS,
         Language::DE,
         Language::EL,
         Language::ES,
@@ -73,6 +78,7 @@ impl Language {
         Language::IT,
         Language::JA,
         Language::KO,
+        Language::NL,
         Language::PL,
         Language::PT,
         Language::RO,
@@ -110,12 +116,31 @@ impl Language {
             Language::UZ => UZ,
             Language::VI => VN,
             Language::ID => ID,
+            Language::NL => NL,
+            Language::CS => CZ,
         })))
         .width(FLAGS_WIDTH_BIG)
     }
 
     pub fn is_up_to_date(self) -> bool {
-        matches!(self, Language::EN | Language::IT)
+        matches!(
+            self,
+            Language::EN
+                | Language::IT
+                | Language::NL
+                | Language::DE
+                | Language::UZ
+                | Language::ZH
+                | Language::JA
+                | Language::FR
+                | Language::EL
+                | Language::RO
+                | Language::ZH_TW
+                | Language::ID
+                | Language::ES
+                | Language::CS
+                | Language::VI
+        )
     }
 }
 
@@ -144,6 +169,8 @@ impl fmt::Display for Language {
             Language::UZ => "O'zbekcha",
             Language::VI => "Tiếng Việt",
             Language::ID => "Bahasa Indonesia",
+            Language::NL => "Nederlands",
+            Language::CS => "Čeština",
         };
         write!(f, "{self:?} - {lang_str}")
     }

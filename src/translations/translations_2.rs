@@ -1,10 +1,9 @@
-#![allow(clippy::match_same_arms, clippy::match_wildcard_for_single_variants)]
-
 use crate::Language;
 
 pub fn new_version_available_translation(language: Language) -> &'static str {
     match language {
         Language::EN => "A newer version is available!",
+        Language::CS => "Je k dispozici novější verze!",
         Language::IT => "Una versione più recente è disponibile!",
         Language::RU => "Новая версия доступна!",
         Language::EL => "Μια νεότερη έκδοση είναι διαθέσιμη!",
@@ -26,12 +25,14 @@ pub fn new_version_available_translation(language: Language) -> &'static str {
         Language::PT => "Uma nova versão está disponível!",
         Language::VI => "Phiên bản mới đã sẵn sàng!",
         Language::ID => "Versi baru tersedia!",
+        Language::NL => "Een nieuwere versie is beschikbaar!",
     }
 }
 
 pub fn inspect_translation(language: Language) -> &'static str {
     match language {
         Language::EN => "Inspect",
+        Language::CS => "Kontrola",
         Language::IT => "Ispeziona",
         Language::FR => "Inspecter",
         Language::ES => "Inspeccionar",
@@ -52,13 +53,15 @@ pub fn inspect_translation(language: Language) -> &'static str {
         Language::PT => "Inspecionar",
         Language::VI => "Quan sát",
         Language::ID => "Memeriksa",
-        _ => "Inspect",
+        Language::NL => "Inspecteren",
+        Language::EL => "Επιθεώρηση",
     }
 }
 
 pub fn connection_details_translation(language: Language) -> &'static str {
     match language {
         Language::EN => "Connection details",
+        Language::CS => "Podrobnosti spojení",
         Language::IT => "Dettagli della connessione",
         Language::RU => "Подробнее о соединении",
         Language::SV => "Anslutningsdetaljer",
@@ -75,11 +78,12 @@ pub fn connection_details_translation(language: Language) -> &'static str {
         Language::PL => "Szczegóły połączenia",
         Language::FR => "Détails de la connexion",
         Language::JA => "接続の詳細",
-        Language::UZ => "Ulanish tafsilotlari",
+        Language::UZ => "Ulanish ma'lumotlari",
         Language::PT => "Detalhes da conexão",
         Language::VI => "Thông tin kết nối",
         Language::ID => "Rincian koneksi",
-        _ => "Connection details",
+        Language::NL => "Verbindingsdetails",
+        Language::EL => "Λεπτομέρειες σύνδεσης",
     }
 }
 
@@ -87,11 +91,12 @@ pub fn connection_details_translation(language: Language) -> &'static str {
 pub fn dropped_translation(language: Language) -> &'static str {
     match language {
         Language::EN => "Dropped",
+        Language::CS => "Zahozené",
         Language::IT => "Persi",
         Language::RU => "Потеряно",
         Language::SV => "Tappade",
         Language::FI => "Pudotetut",
-        Language::DE => "Verlorene",
+        Language::DE | Language::NL => "Verloren",
         Language::TR => "Düşen",
         // Language::FA => "رها شده",
         Language::ES | Language::PT => "Perdidos",
@@ -106,20 +111,21 @@ pub fn dropped_translation(language: Language) -> &'static str {
         Language::UZ => "Yig'ilgan",
         Language::VI => "Mất",
         Language::ID => "Dihapus",
-        _ => "Dropped",
+        Language::EL => "Απορριμμένα",
     }
 }
 
 pub fn data_representation_translation(language: Language) -> &'static str {
     match language {
         Language::EN => "Data representation",
+        Language::CS => "Prezentace dat",
         Language::IT => "Rappresentazione dei dati",
         Language::RU => "Показывать в виде", // there is selector below: "байтов" or "пакетов"
         Language::SV => "Datarepresentation",
         Language::FI => "Tietojen esitys",
         Language::DE => "Daten Darstellung",
         Language::TR => "Veri gösterimi",
-        // Language::FA => "بازنمایی داده ها", // TODO: or نمایندگی داده ها depending on context
+        // Language::FA => "بازنمایی داده ها",
         Language::ES => "Representación de los datos",
         Language::KO => "데이터 단위",
         Language::ZH => "图表数据",
@@ -133,13 +139,15 @@ pub fn data_representation_translation(language: Language) -> &'static str {
         Language::PT => "Representação dos dados",
         Language::VI => "Miêu tả dữ liệu",
         Language::ID => "Penyajian ulang data",
-        _ => "Data representation",
+        Language::NL => "Gegevensweergave",
+        Language::EL => "Αναπαράσταση δεδομένων",
     }
 }
 
 pub fn host_translation(language: Language) -> &'static str {
     match language {
         Language::EN => "Network host",
+        Language::CS => "Síťová adresa",
         Language::IT => "Host di rete",
         Language::RU => "Сетевой хост",
         Language::SV => "Nätverksvärd",
@@ -160,13 +168,15 @@ pub fn host_translation(language: Language) -> &'static str {
         Language::PT => "Host da rede",
         Language::VI => "Máy chủ",
         Language::ID => "Jaringan asal",
-        _ => "Network host",
+        Language::NL => "Netwerk host",
+        Language::EL => "Κόμβος δικτύου",
     }
 }
 
 pub fn only_top_30_items_translation(language: Language) -> &'static str {
     match language {
         Language::EN => "Only the top 30 items are displayed here",
+        Language::CS => "Zde je zobrazeno pouze prvních 30 položek",
         Language::IT => "Solo i 30 maggiori elementi sono mostrati qui",
         Language::RU => "Показываются только первые 30 элементов",
         Language::SV => "Endast de 30 främsta föremål visas här",
@@ -187,13 +197,15 @@ pub fn only_top_30_items_translation(language: Language) -> &'static str {
         Language::PT => "Apenas os 30 melhores unid são expostos aqui",
         Language::VI => "Chỉ có 30 mục gần nhất được hiển thị ở đây",
         Language::ID => "Hanya 30 teratas yang ditampilkan disini",
-        _ => "Only the top 30 items are displayed here",
+        Language::NL => "Alleen de bovenste 30 items worden hier weergegeven",
+        Language::EL => "Εμφανίζονται μόνο τα κορυφαία 30 στοιχεία",
     }
 }
 
 // pub fn sort_by_translation(language: Language) -> &'static str {
 //     match language {
 //         Language::EN => "Sort by",
+//         Language::CS => "Seřazeno podle",
 //         Language::IT => "Ordina per",
 //         Language::RU => "Сортировка",
 //         Language::SV => "Sortera efter",
@@ -212,6 +224,7 @@ pub fn only_top_30_items_translation(language: Language) -> &'static str {
 //         Language::JA => "ソート",
 //         Language::UZ => "Saralash turi",
 //         Language::ID => "Urut berdasarkan",
+//         Language::NL => "Sorteren op",
 //         _ => "Sort by",
 //     }
 // }
@@ -219,6 +232,7 @@ pub fn only_top_30_items_translation(language: Language) -> &'static str {
 pub fn local_translation(language: Language) -> &'static str {
     match language {
         Language::EN => "Local network",
+        Language::CS => "Místní síť",
         Language::IT => "Rete locale",
         Language::RU => "Локальная сеть",
         Language::SV => "Lokalt nätverk",
@@ -239,13 +253,15 @@ pub fn local_translation(language: Language) -> &'static str {
         Language::PT => "Rede local",
         Language::VI => "Mạng nội bộ",
         Language::ID => "Jaringan lokal",
-        _ => "Local network",
+        Language::NL => "Lokaal netwerk",
+        Language::EL => "Τοπικό δίκτυο",
     }
 }
 
 pub fn unknown_translation(language: Language) -> &'static str {
     match language {
         Language::EN => "Unknown location",
+        Language::CS => "Neznámá lokalita",
         Language::IT => "Localizzazione sconosciuta",
         Language::RU => "Неизвестный регион",
         Language::SV => "Okänd plats",
@@ -266,13 +282,15 @@ pub fn unknown_translation(language: Language) -> &'static str {
         Language::PT => "Localização desconhecida",
         Language::VI => "Không rõ địa điểm",
         Language::ID => "Lokasi tidak diketahui",
-        _ => "Unknown location",
+        Language::NL => "Onbekende locatie",
+        Language::EL => "Άγνωστη τοποθεσία",
     }
 }
 
 pub fn your_network_adapter_translation(language: Language) -> &'static str {
     match language {
         Language::EN => "Your network adapter",
+        Language::CS => "Síťový adaptér",
         Language::IT => "La tua scheda di rete",
         Language::RU => "Ваш сетевой адаптер",
         Language::SV => "Din nätverksadapter",
@@ -293,13 +311,15 @@ pub fn your_network_adapter_translation(language: Language) -> &'static str {
         Language::PT => "Seu adaptador de rede",
         Language::VI => "Network adapter của bạn",
         Language::ID => "Adaptor jaringan kamu",
-        _ => "Your network adapter",
+        Language::NL => "Uw netwerkadapter",
+        Language::EL => "Ο προσαρμογέας δικτύου σας",
     }
 }
 
 pub fn socket_address_translation(language: Language) -> &'static str {
     match language {
         Language::EN => "Socket address",
+        Language::CS => "Adresa soketu",
         Language::IT => "Indirizzo del socket",
         Language::RU => "Адрес сокета",
         Language::SV => "Socketadress",
@@ -320,13 +340,15 @@ pub fn socket_address_translation(language: Language) -> &'static str {
         Language::PT => "Endereço da socket",
         Language::VI => "Địa chỉ socket",
         Language::ID => "Alamat sambungan",
-        _ => "Socket address",
+        Language::NL => "Socket adres",
+        Language::EL => "Διεύθυνση υποδοχής",
     }
 }
 
 pub fn mac_address_translation(language: Language) -> &'static str {
     match language {
         Language::EN => "MAC address",
+        Language::CS => "MAC adresa",
         Language::IT => "Indirizzo MAC",
         Language::RU => "MAC адрес",
         Language::SV => "MAC-adress",
@@ -347,13 +369,15 @@ pub fn mac_address_translation(language: Language) -> &'static str {
         Language::PT => "Endereço MAC",
         Language::VI => "Địa chỉ MAC",
         Language::ID => "Alamat MAC",
-        _ => "MAC address",
+        Language::NL => "MAC-adres",
+        Language::EL => "Διεύθυνση MAC",
     }
 }
 
 pub fn source_translation(language: Language) -> &'static str {
     match language {
-        Language::EN => "Source",
+        Language::EN | Language::FR => "Source",
+        Language::CS => "Zdroj",
         Language::IT => "Sorgente",
         Language::RU => "Источник",
         Language::SV => "Källa",
@@ -368,19 +392,20 @@ pub fn source_translation(language: Language) -> &'static str {
         Language::UK => "Джерело",
         Language::RO => "Sursă",
         Language::PL => "Źródło",
-        Language::FR => "Source",
         Language::JA => "送信元",
         Language::UZ => "Manba",
         Language::PT => "Fonte",
         Language::VI => "Nguồn",
         Language::ID => "Asal",
-        _ => "Source",
+        Language::NL => "Bron",
+        Language::EL => "Πηγή",
     }
 }
 
 pub fn destination_translation(language: Language) -> &'static str {
     match language {
-        Language::EN | Language::SV => "Destination",
+        Language::EN | Language::SV | Language::FR => "Destination",
+        Language::CS => "Cíl",
         Language::IT => "Destinazione",
         Language::RU => "Получатель",
         Language::FI => "Määränpää",
@@ -394,18 +419,19 @@ pub fn destination_translation(language: Language) -> &'static str {
         Language::UK => "Призначення",
         Language::RO => "Destinație",
         Language::PL => "Miejsce docelowe",
-        Language::FR => "Destination",
         Language::JA => "送信先",
         Language::UZ => "Qabul qiluvchi",
         Language::VI => "Đích",
         Language::ID => "Tujuan",
-        _ => "Destination",
+        Language::NL => "Bestemming",
+        Language::EL => "Προορισμός",
     }
 }
 
 pub fn fqdn_translation(language: Language) -> &'static str {
     match language {
         Language::EN => "Fully qualified domain name",
+        Language::CS => "Plně kvalifikované doménové jméno",
         Language::IT => "Nome di dominio completo",
         Language::RU => "Полное доменное имя",
         Language::SV => "Fullständigt domännamn",
@@ -415,8 +441,7 @@ pub fn fqdn_translation(language: Language) -> &'static str {
         // Language::FA => "نام دامنه جامع الشرایط",
         Language::ES => "Nombre de dominio completo",
         Language::KO => "절대 도메인 네임",
-        Language::ZH | Language::JA => "FQDN",
-        Language::ZH_TW => "FQDN",
+        Language::ZH | Language::JA | Language::ZH_TW => "FQDN",
         Language::UK => "Повністю визначене доменне ім'я",
         Language::RO => "Nume de domeniu complet calificat",
         Language::PL => "Pełna nazwa domeny",
@@ -425,40 +450,44 @@ pub fn fqdn_translation(language: Language) -> &'static str {
         Language::PT => "Nome de domínio completo",
         Language::VI => "Tên miền đầy đủ",
         Language::ID => "Nama domain yang memenuhi syarat",
-        _ => "Fully qualified domain name",
+        Language::NL => "Volledig gekwalificeerde domeinnaam",
+        Language::EL => "Πλήρως προσδιορισμένο όνομα τομέα",
     }
 }
 
-pub fn administrative_entity_translation(language: Language) -> &'static str {
-    match language {
-        Language::EN => "Autonomous System name",
-        Language::IT => "Nome del sistema autonomo",
-        Language::RU => "Имя автономной системы",
-        Language::SV => "Administrativ enhet",
-        Language::FI => "Autonomisen järjestelmän nimi",
-        Language::DE => "Name des autonomen Systems",
-        Language::TR => "Yönetim varlığı",
-        // Language::FA => "واحد اجرایی", // TODO: or واحد اداری depending on context
-        Language::ES => "Nombre del sistema autónomo",
-        Language::KO => "관리 엔티티",
-        Language::ZH => "ASN 信息",
-        Language::ZH_TW => "ASN 資訊",
-        Language::UK => "Адміністративна одиниця",
-        Language::RO => "Numele sistemului autonom",
-        Language::PL => "Nazwa autonomicznego systemu",
-        Language::FR => "Nom du système autonome",
-        Language::JA => "AS 名",
-        Language::UZ => "Avtonom tizim nomi",
-        Language::PT => "Entidade administrativa",
-        Language::VI => "Tên Autonomous System",
-        Language::ID => "Nama System Otomatis",
-        _ => "Autonomous System name",
-    }
-}
+// pub fn administrative_entity_translation(language: Language) -> &'static str {
+//     match language {
+//         Language::EN => "Autonomous System name",
+//         Language::CS => "Jméno autonomního systému",
+//         Language::IT => "Nome del sistema autonomo",
+//         Language::RU => "Имя автономной системы",
+//         Language::SV => "Administrativ enhet",
+//         Language::FI => "Autonomisen järjestelmän nimi",
+//         Language::DE => "Name des autonomen Systems",
+//         Language::TR => "Yönetim varlığı",
+//         // Language::FA => "واحد اداری",
+//         Language::ES => "Nombre del sistema autónomo",
+//         Language::KO => "관리 엔티티",
+//         Language::ZH => "ASN 信息",
+//         Language::ZH_TW => "ASN 資訊",
+//         Language::UK => "Адміністративна одиниця",
+//         Language::RO => "Numele sistemului autonom",
+//         Language::PL => "Nazwa autonomicznego systemu",
+//         Language::FR => "Nom du système autonome",
+//         Language::JA => "AS 名",
+//         Language::UZ => "Avtonom tizim nomi",
+//         Language::PT => "Entidade administrativa",
+//         Language::VI => "Tên Autonomous System",
+//         Language::ID => "Nama System Otomatis",
+//         Language::NL => "Naam van het autonome systeem",
+//         Language::EL => "Όνομα αυτόνομου συστήματος",
+//     }
+// }
 
 pub fn transmitted_data_translation(language: Language) -> &'static str {
     match language {
         Language::EN => "Transmitted data",
+        Language::CS => "Přenesená data",
         Language::IT => "Dati trasmessi",
         Language::RU => "Передано данных",
         Language::SV => "Överförd data",
@@ -479,18 +508,19 @@ pub fn transmitted_data_translation(language: Language) -> &'static str {
         Language::PT => "Dados transmitidos",
         Language::VI => "Dữ liệu được truyền",
         Language::ID => "Data terkirim",
-        _ => "Transmitted data",
+        Language::NL => "Verzonden gegevens",
+        Language::EL => "Μεταδιδόμενα δεδομένα",
     }
 }
 
 pub fn country_translation(language: Language) -> &'static str {
     match language {
         Language::EN => "Country",
+        Language::CS => "Země",
         Language::IT => "Paese",
         Language::RU => "Страна",
-        Language::SV => "Land",
+        Language::SV | Language::DE | Language::NL => "Land",
         Language::FI => "Maa",
-        Language::DE => "Land",
         Language::TR => "Ülke",
         // Language::FA => "کشور",
         Language::ES | Language::PT => "País",
@@ -505,13 +535,14 @@ pub fn country_translation(language: Language) -> &'static str {
         Language::UZ => "Davlat",
         Language::VI => "Quốc gia",
         Language::ID => "Negara",
-        _ => "Country",
+        Language::EL => "Χώρα",
     }
 }
 
 pub fn domain_name_translation(language: Language) -> &'static str {
     match language {
         Language::EN => "Domain name",
+        Language::CS => "Doménové jméno",
         Language::IT => "Nome di dominio",
         Language::RU => "Доменное имя",
         Language::SV => "Domännamn",
@@ -532,13 +563,15 @@ pub fn domain_name_translation(language: Language) -> &'static str {
         Language::PT => "Nome do domínio",
         Language::VI => "Tên miền",
         Language::ID => "Nama Domain",
-        _ => "Domain name",
+        Language::NL => "Domeinnaam",
+        Language::EL => "Όνομα τομέα",
     }
 }
 
 pub fn only_show_favorites_translation(language: Language) -> &'static str {
     match language {
         Language::EN => "Only show favorites",
+        Language::CS => "Zobrazit pouze oblíbené",
         Language::IT => "Mostra solo i preferiti",
         Language::RU => "Показывать только избранные",
         Language::SV => "Visa endast favoriter",
@@ -559,13 +592,15 @@ pub fn only_show_favorites_translation(language: Language) -> &'static str {
         Language::PT => "Apenas mostrar os favoritos",
         Language::VI => "Chỉ hiển thị mục ưa thích",
         Language::ID => "Hanya tunjukkan favorit",
-        _ => "Only show favorites",
+        Language::NL => "Toon alleen favorieten",
+        Language::EL => "Εμφάνιση μόνο αγαπημένων",
     }
 }
 
 // pub fn search_filters_translation(language: Language) -> &'static str {
 //     match language {
 //         Language::EN => "Search filters",
+//         Language::CS => "Vyhledávací filtry",
 //         Language::IT => "Filtri di ricerca",
 //         Language::RU => "Фильтры для поиска",
 //         Language::SV => "Sökfilter",
@@ -585,6 +620,7 @@ pub fn only_show_favorites_translation(language: Language) -> &'static str {
 //         Language::UZ => "Qidiruv filtrlari",
 //         Language::PT => "Filtros de busca",
 //         Language::ID => "Filter Pencarian",
+//         Language::NL => "Zoekfilters",
 //         _ => "Search filters",
 //     }
 // }
@@ -592,6 +628,7 @@ pub fn only_show_favorites_translation(language: Language) -> &'static str {
 pub fn no_search_results_translation(language: Language) -> &'static str {
     match language {
         Language::EN => "No result available according to the specified search filters",
+        Language::CS => "Podle zadaných vyhledávacích filtrů není k dispozici žádný výsledek",
         Language::IT => "Nessun risultato disponibile secondo i filtri di ricerca specificati",
         Language::RU => "Ничего не найдено после применения выбранных фильтров",
         Language::SV => "Inga resultat tillgängliga utifrån de angivna sökfilterna",
@@ -612,7 +649,10 @@ pub fn no_search_results_translation(language: Language) -> &'static str {
         Language::PT => "Nenhum resultado disponível de acordo com os filtros selecionados",
         Language::VI => "Không có kết quả nào theo các bộ lọc được chỉ định",
         Language::ID => "Tidak ada hasil berdasarkan filter pencarian spesifik",
-        _ => "No result available according to the specified search filters",
+        Language::NL => "Geen resultaten beschikbaar volgens de opgegeven zoekfilters",
+        Language::EL => {
+            "Δεν υπάρχουν διαθέσιμα αποτελέσματα σύμφωνα με τα καθορισμένα φίλτρα αναζήτησης"
+        }
     }
 }
 
@@ -624,6 +664,7 @@ pub fn showing_results_translation(
 ) -> String {
     match language {
         Language::EN => format!("Showing {start}-{end} of {total} total results"),
+        Language::CS => format!("Zobrazení {start}-{end} z celkových {total} výsledků"),
         Language::IT => format!("Sono mostrati {start}-{end} di {total} risultati totali"),
         Language::RU => format!("Показываются {start}-{end} из {total} общего числа результатов"),
         Language::SV => format!("Visar {start}-{end} av {total} totala resultat"),
@@ -644,14 +685,17 @@ pub fn showing_results_translation(
         Language::PT => format!("Mostrando {start}-{end} de {total} resultados totais"),
         Language::VI => format!("Đang hiển thị {start}-{end} của {total} tổng số kết quả"),
         Language::ID => format!("Menampilkan {start}-{end} dari {total} semua hasil"),
-        _ => format!("Showing {start}-{end} of {total} total results"),
+        Language::NL => {
+            format!("{start}-{end} van de {total} totale resultaten worden weergegeven")
+        }
+        Language::EL => format!("Εμφάνιση {start}-{end} από {total} συνολικά αποτελέσματα"),
     }
 }
 
-#[allow(dead_code)]
 pub fn color_gradients_translation(language: Language) -> &'static str {
     match language {
         Language::EN => "Apply color gradients",
+        Language::CS => "Použít barevné přechody",
         Language::IT => "Applica sfumature di colore",
         Language::RU => "Применить цветовой градиент", // recheck
         Language::SV => "Applicera färggradient",
@@ -672,6 +716,7 @@ pub fn color_gradients_translation(language: Language) -> &'static str {
         Language::PT => "Aplicar gradientes de cor",
         Language::VI => "Áp dụng color gradients",
         Language::ID => "Aplikasikan gradasi warna",
-        _ => "Apply color gradients",
+        Language::NL => "Kleurverlopen toepassen",
+        Language::EL => "Εφαρμογή χρωματικών διαβαθμίσεων",
     }
 }

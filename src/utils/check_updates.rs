@@ -1,5 +1,7 @@
-use crate::SNIFFNET_LOWERCASE;
+use crate::utils::error_logger::{ErrorLogger, Location};
 use crate::utils::formatted_strings::APP_VERSION;
+use crate::{SNIFFNET_LOWERCASE, location};
+use semver::Version;
 use serde::Deserialize;
 use std::time::Duration;
 
@@ -16,7 +18,11 @@ pub async fn set_newer_release_status() -> Option<bool> {
 
 /// Checks if a newer release of Sniffnet is available on GitHub
 async fn is_newer_release_available(max_retries: u8, seconds_between_retries: u8) -> Option<bool> {
-    let client = reqwest::Client::new();
+    let client = reqwest::Client::builder()
+        .user_agent(format!("{SNIFFNET_LOWERCASE}-{APP_VERSION}"))
+        .build()
+        .log_err(location!())
+        .ok()?;
     let response = client
         .get("https://api.github.com/repos/GyulyVGC/sniffnet/releases/latest")
         .header("User-agent", format!("{SNIFFNET_LOWERCASE}-{APP_VERSION}"))
@@ -48,23 +54,13 @@ async fn is_newer_release_available(max_retries: u8, seconds_between_retries: u8
             .name;
         latest_version = latest_version.trim().to_string();
 
-        // release name sample: v1.1.2
-        // TODO: support versions with numbers of more than 1 digit
-        let latest_version_as_bytes = latest_version.as_bytes();
-        if latest_version.len() == 6
-            && latest_version.starts_with('v')
-            && char::from(latest_version_as_bytes[1]).is_numeric()
-            && char::from(latest_version_as_bytes[2]).eq(&'.')
-            && char::from(latest_version_as_bytes[3]).is_numeric()
-            && char::from(latest_version_as_bytes[4]).eq(&'.')
-            && char::from(latest_version_as_bytes[5]).is_numeric()
+        // release name sample: v1.2.3
+        let stripped = latest_version.trim_start_matches('v');
+
+        if let (Ok(latest_semver), Ok(current_semver)) =
+            (Version::parse(stripped), Version::parse(APP_VERSION))
         {
-            latest_version.remove(0);
-            return if latest_version.gt(&APP_VERSION.to_string()) {
-                Some(true)
-            } else {
-                Some(false)
-            };
+            return Some(latest_semver > current_semver);
         }
     }
     let retries_left = max_retries - 1;

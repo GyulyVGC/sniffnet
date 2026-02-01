@@ -13,7 +13,7 @@ pub enum TextInputType {
     #[default]
     Standard,
     Badge,
-    Error,
+    // Error,
 }
 
 const TEXT_INPUT_BORDER_RADIUS: f32 = 5.0;
@@ -25,7 +25,8 @@ impl TextInputType {
         Style {
             background: Background::Color(match self {
                 TextInputType::Badge => Color::TRANSPARENT,
-                _ => Color {
+                // TextInputType::Error |
+                TextInputType::Standard => Color {
                     a: ext.alpha_round_borders,
                     ..ext.buttons_color
                 },
@@ -36,11 +37,11 @@ impl TextInputType {
                 color: match self {
                     TextInputType::Badge => Color::TRANSPARENT,
                     TextInputType::Standard => ext.buttons_color,
-                    TextInputType::Error => ext.red_alert_color,
+                    // TextInputType::Error => ext.red_alert_color,
                 },
             },
             icon: Color {
-                a: if ext.is_nightly { 0.2 } else { 0.7 },
+                a: ext.alpha_chart_badge,
                 ..colors.text_body
             },
             placeholder: self.placeholder_color(style),
@@ -52,19 +53,18 @@ impl TextInputType {
     fn focused(&self, style: &StyleType) -> Style {
         let colors = style.get_palette();
         let ext = style.get_extension();
-        let is_nightly = style.get_extension().is_nightly;
         Style {
             background: Background::Color(colors.primary),
             border: Border {
                 radius: TEXT_INPUT_BORDER_RADIUS.into(),
                 width: BORDER_WIDTH,
-                color: match self {
-                    TextInputType::Error => ext.red_alert_color,
-                    _ => colors.secondary,
-                },
+                color: colors.secondary, // match self {
+                                         // TextInputType::Error => ext.red_alert_color,
+                                         //     _ => colors.secondary,
+                                         // },
             },
             icon: Color {
-                a: if is_nightly { 0.2 } else { 0.7 },
+                a: ext.alpha_chart_badge,
                 ..colors.text_body
             },
             placeholder: self.placeholder_color(style),
@@ -76,9 +76,9 @@ impl TextInputType {
     #[allow(clippy::unused_self)]
     fn placeholder_color(&self, style: &StyleType) -> Color {
         let color = style.get_palette().text_body;
-        let is_nightly = style.get_extension().is_nightly;
+        let ext = style.get_extension();
         Color {
-            a: if is_nightly { 0.2 } else { 0.7 },
+            a: ext.alpha_chart_badge,
             ..color
         }
     }
@@ -91,9 +91,9 @@ impl TextInputType {
     #[allow(clippy::unused_self)]
     fn disabled_color(&self, style: &StyleType) -> Color {
         let color = style.get_palette().text_body;
-        let is_nightly = style.get_extension().is_nightly;
+        let ext = style.get_extension();
         Color {
-            a: if is_nightly { 0.2 } else { 0.7 },
+            a: ext.alpha_chart_badge,
             ..color
         }
     }
@@ -101,11 +101,7 @@ impl TextInputType {
     #[allow(clippy::unused_self)]
     fn selection_color(&self, style: &StyleType) -> Color {
         let color = style.get_palette().text_body;
-        let is_nightly = style.get_extension().is_nightly;
-        Color {
-            a: if is_nightly { 0.05 } else { 0.4 },
-            ..color
-        }
+        Color { a: 0.2, ..color }
     }
 
     fn hovered(&self, style: &StyleType) -> Style {
@@ -114,18 +110,19 @@ impl TextInputType {
         Style {
             background: Background::Color(match self {
                 TextInputType::Badge => Color::TRANSPARENT,
-                _ => ext.buttons_color,
+                // TextInputType::Error |
+                TextInputType::Standard => ext.buttons_color,
             }),
             border: Border {
                 radius: TEXT_INPUT_BORDER_RADIUS.into(),
                 width: BORDER_WIDTH,
-                color: match self {
-                    TextInputType::Error => ext.red_alert_color,
-                    _ => colors.secondary,
-                },
+                color: colors.secondary, // match self {
+                                         // TextInputType::Error => ext.red_alert_color,
+                                         //     _ => colors.secondary,
+                                         // },
             },
             icon: Color {
-                a: if ext.is_nightly { 0.2 } else { 0.7 },
+                a: ext.alpha_chart_badge,
                 ..colors.text_body
             },
             placeholder: self.placeholder_color(style),
@@ -140,7 +137,8 @@ impl TextInputType {
         Style {
             background: Background::Color(match self {
                 TextInputType::Badge => Color::TRANSPARENT,
-                _ => Color {
+                // TextInputType::Error |
+                TextInputType::Standard => Color {
                     a: ext.alpha_round_containers,
                     ..ext.buttons_color
                 },
@@ -154,14 +152,14 @@ impl TextInputType {
                         a: ext.alpha_round_borders,
                         ..ext.buttons_color
                     },
-                    TextInputType::Error => Color {
-                        a: ext.alpha_round_borders,
-                        ..ext.red_alert_color
-                    },
+                    // TextInputType::Error => Color {
+                    //     a: ext.alpha_round_borders,
+                    //     ..ext.red_alert_color
+                    // },
                 },
             },
             icon: Color {
-                a: if ext.is_nightly { 0.2 } else { 0.7 },
+                a: ext.alpha_chart_badge,
                 ..colors.text_body
             },
             placeholder: self.disabled_color(style),
@@ -183,7 +181,7 @@ impl Catalog for StyleType {
             Status::Active => class.active(self),
             Status::Hovered => class.hovered(self),
             Status::Disabled => class.disabled(self),
-            Status::Focused => class.focused(self),
+            Status::Focused { .. } => class.focused(self),
         }
     }
 }

@@ -5,36 +5,40 @@ use crate::gui::components::types::my_modal::MyModal;
 use crate::gui::pages::types::running_page::RunningPage;
 use crate::gui::pages::types::settings_page::SettingsPage;
 use crate::gui::styles::types::gradient_type::GradientType;
+use crate::networking::traffic_preview::TrafficPreview;
+use crate::networking::types::capture_context::CaptureSourcePicklist;
+use crate::networking::types::data_representation::DataRepr;
 use crate::networking::types::host::{Host, HostMessage};
 use crate::networking::types::info_traffic::InfoTraffic;
+use crate::networking::types::ip_blacklist::IpBlacklist;
 use crate::notifications::types::notifications::Notification;
 use crate::report::types::search_parameters::SearchParameters;
 use crate::report::types::sort_type::SortType;
 use crate::utils::types::file_info::FileInfo;
 use crate::utils::types::web_page::WebPage;
-use crate::{ChartType, IpVersion, Language, Protocol, ReportSortType, StyleType};
+use crate::{Language, StyleType};
 
 #[derive(Debug, Clone)]
 /// Messages types that permit reacting to application interactions/subscriptions
 pub enum Message {
     /// Run tasks to initialize the app
     StartApp(Option<window::Id>),
+    /// Animate welcome page
+    Welcome,
     /// Sent by the backend parsing packets; includes the capture id, new data, new hosts batched data, and whether an offline capture has finished
     TickRun(usize, InfoTraffic, Vec<HostMessage>, bool),
+    /// Capture source selected from the picklist
+    SetCaptureSource(CaptureSourcePicklist),
     /// Select network device
     DeviceSelection(String),
-    /// Select IP filter
-    IpVersionSelection(IpVersion, bool),
-    /// Select protocol filter
-    ProtocolSelection(Protocol, bool),
-    /// Changed address filter
-    AddressFilter(String),
-    /// Changed port filter
-    PortFilter(String),
-    /// Select chart type to be displayed
-    ChartSelection(ChartType),
+    /// Toggle BPF filter checkbox
+    ToggleFilters,
+    /// Change BPF filter string
+    BpfFilter(String),
+    /// Select data representation to use
+    DataReprSelection(DataRepr),
     /// Select report sort type to be displayed (inspect page)
-    ReportSortSelection(ReportSortType),
+    ReportSortSelection(SortType),
     /// Select host sort type to be displayed (overview page)
     HostSortSelection(SortType),
     /// Select service sort type to be displayed (overview page)
@@ -94,7 +98,7 @@ pub enum Message {
     /// Enable or disable gradients
     GradientsSelection(GradientType),
     /// Set UI scale factor
-    ChangeScaleFactor(f64),
+    ChangeScaleFactor(f32),
     /// The app window position has been changed
     WindowMoved(f32, f32),
     /// The app window size has been changed
@@ -103,6 +107,10 @@ pub enum Message {
     CustomCountryDb(String),
     /// The ASN MMDB custom path has been updated
     CustomAsnDb(String),
+    /// Load IP blacklist from file
+    LoadIpBlacklist(String),
+    /// Set new IP blacklist content
+    SetIpBlacklist(IpBlacklist),
     /// Wrapper around the Quit message
     QuitWrapper,
     /// Save the configurations of the app and quit
@@ -123,6 +131,8 @@ pub enum Message {
     Drag,
     /// Ctrl+T keys have been pressed
     CtrlTPressed,
+    /// Ctrl+Space keys have been pressed
+    CtrlSpacePressed,
     /// Edit scale factor via keyboard shortcut
     ScaleFactorShortcut(bool),
     /// Set new release status
@@ -137,4 +147,12 @@ pub enum Message {
     Periodic,
     /// Expand or collapse the given logged notification
     ExpandNotification(usize, bool),
+    /// Toggle remote notifications
+    ToggleRemoteNotifications,
+    /// The remote notifications URL has been updated
+    RemoteNotificationsUrl(String),
+    /// Pause or resume live capture
+    Freeze,
+    /// Traffic preview
+    TrafficPreview(TrafficPreview),
 }

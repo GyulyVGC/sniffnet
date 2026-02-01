@@ -3,17 +3,14 @@ use std::ops::RangeInclusive;
 use std::str::FromStr;
 
 #[derive(Debug, Eq, PartialEq, Clone)]
-pub(crate) struct AddressCollection {
+pub(crate) struct IpCollection {
     ips: Vec<IpAddr>,
     ranges: Vec<RangeInclusive<IpAddr>>,
 }
 
-impl AddressCollection {
+impl IpCollection {
     const SEPARATOR: char = ',';
     const RANGE_SEPARATOR: char = '-';
-
-    pub const PLACEHOLDER_STR: &'static str =
-        "0.0.0.0-255.255.255.255, ::-ffff:ffff:ffff:ffff:ffff:ffff:ffff:ffff";
 
     pub(crate) fn new(str: &str) -> Option<Self> {
         let str = str.replace(' ', "");
@@ -62,9 +59,9 @@ impl AddressCollection {
     }
 }
 
-impl Default for AddressCollection {
+impl Default for IpCollection {
     fn default() -> Self {
-        AddressCollection {
+        IpCollection {
             ips: vec![],
             ranges: vec![
                 RangeInclusive::new(
@@ -89,11 +86,11 @@ mod tests {
     use std::ops::RangeInclusive;
     use std::str::FromStr;
 
-    use crate::networking::types::ip_collection::AddressCollection;
+    use crate::networking::types::ip_collection::IpCollection;
 
     #[test]
     fn test_default_collection_contains_everything() {
-        let collection = AddressCollection::default();
+        let collection = IpCollection::default();
         assert!(collection.contains(&IpAddr::from_str("1.1.1.1").unwrap()));
         assert!(collection.contains(&IpAddr::from_str("0.0.0.0").unwrap()));
         assert!(collection.contains(&IpAddr::from_str("255.255.255.255").unwrap()));
@@ -116,8 +113,8 @@ mod tests {
     #[test]
     fn test_new_collections_1() {
         assert_eq!(
-            AddressCollection::new("1.1.1.1,2.2.2.2").unwrap(),
-            AddressCollection {
+            IpCollection::new("1.1.1.1,2.2.2.2").unwrap(),
+            IpCollection {
                 ips: vec![
                     IpAddr::from_str("1.1.1.1").unwrap(),
                     IpAddr::from_str("2.2.2.2").unwrap()
@@ -127,11 +124,9 @@ mod tests {
         );
 
         assert_eq!(
-            AddressCollection::new(
-                "1.1.1.1, 2.2.2.2, 3.3.3.3 - 5.5.5.5, 10.0.0.1-10.0.0.255,9.9.9.9",
-            )
-            .unwrap(),
-            AddressCollection {
+            IpCollection::new("1.1.1.1, 2.2.2.2, 3.3.3.3 - 5.5.5.5, 10.0.0.1-10.0.0.255,9.9.9.9",)
+                .unwrap(),
+            IpCollection {
                 ips: vec![
                     IpAddr::from_str("1.1.1.1").unwrap(),
                     IpAddr::from_str("2.2.2.2").unwrap(),
@@ -151,8 +146,8 @@ mod tests {
         );
 
         assert_eq!(
-            AddressCollection::new("  aaaa::ffff,bbbb::1-cccc::2").unwrap(),
-            AddressCollection {
+            IpCollection::new("  aaaa::ffff,bbbb::1-cccc::2").unwrap(),
+            IpCollection {
                 ips: vec![IpAddr::from_str("aaaa::ffff").unwrap(),],
                 ranges: vec![RangeInclusive::new(
                     IpAddr::from_str("bbbb::1").unwrap(),
@@ -165,8 +160,8 @@ mod tests {
     #[test]
     fn test_new_collections_2() {
         assert_eq!(
-            AddressCollection::new("1.1.1.1,2.2.2.2, 8.8.8.8   ").unwrap(),
-            AddressCollection {
+            IpCollection::new("1.1.1.1,2.2.2.2, 8.8.8.8   ").unwrap(),
+            IpCollection {
                 ips: vec![
                     IpAddr::from_str("1.1.1.1").unwrap(),
                     IpAddr::from_str("2.2.2.2").unwrap(),
@@ -177,8 +172,8 @@ mod tests {
         );
 
         assert_eq!(
-            AddressCollection::new("  1.1.1.1 -1.1.1.1").unwrap(),
-            AddressCollection {
+            IpCollection::new("  1.1.1.1 -1.1.1.1").unwrap(),
+            IpCollection {
                 ips: vec![],
                 ranges: vec![RangeInclusive::new(
                     IpAddr::from_str("1.1.1.1").unwrap(),
@@ -188,9 +183,9 @@ mod tests {
         );
 
         assert_eq!(
-            AddressCollection::new("1.1.1.1,2.2.2.2,3.3.3.3-5.5.5.5,10.0.0.1-10.0.0.255,9.9.9.9",)
+            IpCollection::new("1.1.1.1,2.2.2.2,3.3.3.3-5.5.5.5,10.0.0.1-10.0.0.255,9.9.9.9",)
                 .unwrap(),
-            AddressCollection {
+            IpCollection {
                 ips: vec![
                     IpAddr::from_str("1.1.1.1").unwrap(),
                     IpAddr::from_str("2.2.2.2").unwrap(),
@@ -210,8 +205,8 @@ mod tests {
         );
 
         assert_eq!(
-            AddressCollection::new("aaaa::ffff,bbbb::1-cccc::2,ff::dd").unwrap(),
-            AddressCollection {
+            IpCollection::new("aaaa::ffff,bbbb::1-cccc::2,ff::dd").unwrap(),
+            IpCollection {
                 ips: vec![
                     IpAddr::from_str("aaaa::ffff").unwrap(),
                     IpAddr::from_str("ff::dd").unwrap()
@@ -227,32 +222,32 @@ mod tests {
     #[test]
     fn test_new_collections_invalid() {
         assert_eq!(
-            AddressCollection::new("1.1.1.1,2.2.2.2,3.3.3.3-5.5.5.5,10.0.0.1-10.0.0.255,9.9.9"),
+            IpCollection::new("1.1.1.1,2.2.2.2,3.3.3.3-5.5.5.5,10.0.0.1-10.0.0.255,9.9.9"),
             None
         );
 
         assert_eq!(
-            AddressCollection::new("1.1.1.1,2.2.2.2,3.3.3.3-5.5.5.5,10.0.0.1:10.0.0.255,9.9.9.9"),
+            IpCollection::new("1.1.1.1,2.2.2.2,3.3.3.3-5.5.5.5,10.0.0.1:10.0.0.255,9.9.9.9"),
             None
         );
 
-        assert_eq!(AddressCollection::new("1.1.1.1-aa::ff"), None);
+        assert_eq!(IpCollection::new("1.1.1.1-aa::ff"), None);
 
-        assert_eq!(AddressCollection::new("aa::ff-1.1.1.1"), None);
+        assert_eq!(IpCollection::new("aa::ff-1.1.1.1"), None);
 
-        assert_eq!(AddressCollection::new("aa::ff-aa::ee"), None);
+        assert_eq!(IpCollection::new("aa::ff-aa::ee"), None);
 
-        assert_eq!(AddressCollection::new("1.1.1.1-1.1.0.1"), None);
+        assert_eq!(IpCollection::new("1.1.1.1-1.1.0.1"), None);
 
-        assert_eq!(AddressCollection::new("1.1.1.1-2.2.2.2-3.3.3.3"), None);
+        assert_eq!(IpCollection::new("1.1.1.1-2.2.2.2-3.3.3.3"), None);
 
-        assert_eq!(AddressCollection::new("1.1.1.1-2.2.2.2-"), None);
+        assert_eq!(IpCollection::new("1.1.1.1-2.2.2.2-"), None);
     }
 
     #[test]
     fn test_ip_collection_contains() {
         let collection =
-            AddressCollection::new("1.1.1.1,2.2.2.2,3.3.3.3-5.5.5.5,10.0.0.1-10.0.0.255,9.9.9.9")
+            IpCollection::new("1.1.1.1,2.2.2.2,3.3.3.3-5.5.5.5,10.0.0.1-10.0.0.255,9.9.9.9")
                 .unwrap();
         assert!(collection.contains(&IpAddr::from_str("1.1.1.1").unwrap()));
         assert!(collection.contains(&IpAddr::from_str("2.2.2.2").unwrap()));
@@ -268,12 +263,12 @@ mod tests {
         assert!(!collection.contains(&IpAddr::from_str("9.9.9.10").unwrap()));
         assert!(!collection.contains(&IpAddr::from_str("3.3.3.2").unwrap()));
 
-        let collection_2 = AddressCollection::new("1.1.1.0-1.1.9.0").unwrap();
+        let collection_2 = IpCollection::new("1.1.1.0-1.1.9.0").unwrap();
         assert!(!collection_2.contains(&IpAddr::from_str("1.1.100.5").unwrap()));
         assert!(collection_2.contains(&IpAddr::from_str("1.1.3.255").unwrap()));
 
         // check that ipv4 range doesn't contain ipv6
-        let collection_3 = AddressCollection::new("0.0.0.0-255.255.255.255").unwrap();
+        let collection_3 = IpCollection::new("0.0.0.0-255.255.255.255").unwrap();
         assert!(!collection_3.contains(&IpAddr::from_str("::").unwrap()));
         assert!(!collection_3.contains(&IpAddr::from_str("1111::2222").unwrap()));
     }
@@ -281,7 +276,7 @@ mod tests {
     #[test]
     fn test_ip_collection_contains_ipv6() {
         let collection =
-                AddressCollection::new( "2001:db8:1234:0000:0000:0000:0000:0000-2001:db8:1234:ffff:ffff:ffff:ffff:ffff,daa::aad,caa::aac").unwrap();
+                IpCollection::new( "2001:db8:1234:0000:0000:0000:0000:0000-2001:db8:1234:ffff:ffff:ffff:ffff:ffff,daa::aad,caa::aac").unwrap();
         assert!(
             collection
                 .contains(&IpAddr::from_str("2001:db8:1234:0000:0000:0000:0000:0000").unwrap())
@@ -315,14 +310,14 @@ mod tests {
         assert!(!collection.contains(&IpAddr::from_str("da::aad").unwrap()));
         assert!(!collection.contains(&IpAddr::from_str("caa::aab").unwrap()));
 
-        let collection_2 = AddressCollection::new("aa::bb-aa:1::00").unwrap();
+        let collection_2 = IpCollection::new("aa::bb-aa:1::00").unwrap();
         assert!(!collection_2.contains(&IpAddr::from_str("aa:11::0").unwrap()));
         assert!(collection_2.contains(&IpAddr::from_str("aa::bc").unwrap()));
         assert!(collection_2.contains(&IpAddr::from_str("aa::bbcc").unwrap()));
         assert!(collection_2.contains(&IpAddr::from_str("00aa:0001::00").unwrap()));
 
         // check that ipv6 range doesn't contain ipv4
-        let collection_3 = AddressCollection::new("0000::0000-ffff::8888").unwrap();
+        let collection_3 = IpCollection::new("0000::0000-ffff::8888").unwrap();
         assert!(!collection_3.contains(&IpAddr::from_str("192.168.1.1").unwrap()));
         assert!(!collection_3.contains(&IpAddr::from_str("0.0.0.0").unwrap()));
     }

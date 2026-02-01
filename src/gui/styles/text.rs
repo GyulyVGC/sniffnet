@@ -4,9 +4,9 @@
 
 use crate::StyleType;
 use crate::gui::types::message::Message;
+use iced::Color;
 use iced::widget::text::{Catalog, Style};
 use iced::widget::{Column, Text};
-use iced::{Color, Font};
 
 #[derive(Copy, Clone, Default, PartialEq)]
 pub enum TextType {
@@ -18,6 +18,7 @@ pub enum TextType {
     Subtitle,
     Danger,
     Sponsor,
+    Welcome(f32),
 }
 
 /// Returns a formatted caption followed by subtitle, new line, tab, and desc
@@ -25,15 +26,10 @@ impl TextType {
     pub fn highlighted_subtitle_with_desc<'a>(
         subtitle: &str,
         desc: &str,
-        font: Font,
     ) -> Column<'a, Message, StyleType> {
         Column::new()
-            .push(
-                Text::new(format!("{subtitle}:"))
-                    .class(TextType::Subtitle)
-                    .font(font),
-            )
-            .push(Text::new(format!("   {desc}")).font(font))
+            .push(Text::new(format!("{subtitle}:")).class(TextType::Subtitle))
+            .push(Text::new(format!("   {desc}")))
     }
 
     fn appearance(self, style: &StyleType) -> Style {
@@ -70,6 +66,12 @@ pub fn highlight(style: &StyleType, element: TextType) -> Color {
                 b: c * (1.0 - p1) + secondary.b * p1,
                 a: 1.0,
             }
+        }
+        TextType::Welcome(mut n) => {
+            if !(0.0..=1.0).contains(&n) {
+                n = 1.0;
+            }
+            Color { a: n, ..secondary }
         }
         TextType::Incoming => colors.secondary,
         TextType::Outgoing => colors.outgoing,

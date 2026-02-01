@@ -1,15 +1,8 @@
 use std::cmp::min;
 use std::net::IpAddr;
 
-use crate::Language;
-use crate::networking::types::filters::Filters;
-use crate::translations::translations::{
-    address_translation, ip_version_translation, protocol_translation,
-};
-use crate::translations::translations_3::{invalid_filters_translation, port_translation};
 use crate::utils::types::timestamp::Timestamp;
 use chrono::{Local, TimeZone};
-use std::fmt::Write;
 
 /// Application version number (to be displayed in gui footer)
 pub const APP_VERSION: &str = env!("CARGO_PKG_VERSION");
@@ -26,61 +19,6 @@ pub const APP_VERSION: &str = env!("CARGO_PKG_VERSION");
 //         format!("{:.1}%", 100.0 * filtered_float / observed_float)
 //     }
 // }
-
-pub fn get_invalid_filters_string(filters: &Filters, language: Language) -> String {
-    let mut ret_val = format!("{}:", invalid_filters_translation(language));
-    if !filters.ip_version_valid() {
-        let _ = write!(ret_val, "\n • {}", ip_version_translation(language));
-    }
-    if !filters.protocol_valid() {
-        let _ = write!(ret_val, "\n • {}", protocol_translation(language));
-    }
-    if !filters.address_valid() {
-        let _ = write!(ret_val, "\n • {}", address_translation(language));
-    }
-    if !filters.port_valid() {
-        let _ = write!(ret_val, "\n • {}", port_translation(language));
-    }
-    ret_val
-}
-
-/// Computes the string representing the active filters
-pub fn get_active_filters_string(filters: &Filters, language: Language) -> String {
-    let mut filters_string = String::new();
-    if filters.ip_version_active() {
-        let _ = writeln!(
-            filters_string,
-            "• {}: {}",
-            ip_version_translation(language),
-            filters.pretty_print_ip()
-        );
-    }
-    if filters.protocol_active() {
-        let _ = writeln!(
-            filters_string,
-            "• {}: {}",
-            protocol_translation(language),
-            filters.pretty_print_protocol()
-        );
-    }
-    if filters.address_active() {
-        let _ = writeln!(
-            filters_string,
-            "• {}: {}",
-            address_translation(language),
-            filters.address_str
-        );
-    }
-    if filters.port_active() {
-        let _ = writeln!(
-            filters_string,
-            "• {}: {}",
-            port_translation(language),
-            filters.port_str
-        );
-    }
-    filters_string
-}
 
 pub fn print_cli_welcome_message() {
     let ver = APP_VERSION;
@@ -199,6 +137,24 @@ pub fn redirect_stdout_stderr_to_file()
     None
 }
 
+pub fn clip_text(text: &str, max_chars: usize) -> String {
+    let text = text.trim();
+    let chars = text.chars().collect::<Vec<char>>();
+    let tot_len = chars.len();
+    let slice_len = min(max_chars, tot_len);
+
+    let suspensions = if tot_len > max_chars { "…" } else { "" };
+    let slice = if tot_len > max_chars {
+        &chars[..slice_len - 2]
+    } else {
+        &chars[..slice_len]
+    }
+    .iter()
+    .collect::<String>();
+
+    [slice.trim(), suspensions].concat()
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -270,5 +226,35 @@ mod tests {
         assert_eq!(f(".."), "..");
         assert_eq!(f("..."), "..");
         assert_eq!(f("no_dots_in_this"), "no_dots_in_this");
+    }
+
+    #[test]
+    fn test_clip_text() {
+        assert_eq!(
+            clip_text("iphone-di-doofenshmirtz.local", 26),
+            "iphone-di-doofenshmirtz.…"
+        );
+        assert_eq!(clip_text("github.com", 26), "github.com");
+
+        assert_eq!(clip_text("https6789012", 13), "https6789012");
+        assert_eq!(clip_text("https67890123", 13), "https67890123");
+        assert_eq!(clip_text("https678901234", 13), "https678901…");
+        assert_eq!(clip_text("https6789012345", 13), "https678901…");
+
+        assert_eq!(clip_text("protocol with space", 13), "protocol wi…");
+        assert_eq!(clip_text("protocol90 23456", 13), "protocol90…");
+
+        assert_eq!(
+            clip_text("      \n\t    sniffnet.net       ", 26),
+            "sniffnet.net"
+        );
+        assert_eq!(
+            clip_text("        protocol90 23456    \n      ", 12),
+            "protocol90…"
+        );
+        assert_eq!(
+            clip_text("        protocol90 23456          ", 26),
+            "protocol90 23456"
+        );
     }
 }

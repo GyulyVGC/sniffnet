@@ -1,0 +1,6 @@
+Lorem ipsum dolor
+7.7.7.999
+invalid_ip_address
+12.12.1
+300.300.300.300
+example.com

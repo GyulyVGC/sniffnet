@@ -1,5 +1,22 @@
 //! Module defining the application structure: messages, updates, subscriptions.
 
+use async_channel::Receiver;
+use iced::Event::{Keyboard, Window};
+use iced::keyboard::key::Named;
+use iced::keyboard::{Event, Key, Modifiers};
+use iced::mouse::Event::ButtonPressed;
+use iced::widget::Column;
+use iced::window::{Id, Level};
+use iced::{Element, Point, Size, Subscription, Task, window};
+use pcap::Device;
+use rfd::FileHandle;
+use std::collections::{HashMap, HashSet, VecDeque};
+use std::net::IpAddr;
+use std::path::PathBuf;
+use std::sync::Arc;
+use std::thread;
+use std::time::Duration;
+
 use crate::configs::types::config_window::{
     ConfigWindow, PositionTuple, ScaleAndCheck, SizeTuple, ToPoint, ToSize,
 };
@@ -18,10 +35,13 @@ use crate::gui::pages::settings_style_page::settings_style_page;
 use crate::gui::pages::thumbnail_page::thumbnail_page;
 use crate::gui::pages::types::running_page::RunningPage;
 use crate::gui::pages::types::settings_page::SettingsPage;
-use crate::gui::styles::types::custom_palette::{CustomPalette, ExtraStyles};
+use crate::gui::pages::welcome_page::welcome_page;
+use crate::gui::styles::types::custom_palette::CustomPalette;
+use crate::gui::styles::types::gradient_type::GradientType;
 use crate::gui::styles::types::palette::Palette;
-use crate::gui::types::export_pcap::ExportPcap;
+use crate::gui::types::conf::Conf;
 use crate::gui::types::message::Message;
+use crate::gui::types::settings::Settings;
 use crate::gui::types::timing_events::TimingEvents;
 use crate::mmdb::asn::ASN_MMDB;
 use crate::mmdb::country::COUNTRY_MMDB;
@@ -30,59 +50,48 @@ use crate::networking::manage_packets::get_local_port;
 use crate::networking::parse_packets::BackendTrafficMessage;
 use crate::networking::parse_packets::parse_packets;
 use crate::networking::types::capture_context::{CaptureContext, CaptureSource, MyPcapImport};
-use crate::networking::types::data_info::DataInfo;
 use crate::networking::types::filters::Filters;
 use crate::networking::types::host::{Host, HostMessage};
 use crate::networking::types::host_data_states::HostDataStates;
 use crate::networking::types::info_traffic::InfoTraffic;
-use crate::networking::types::ip_collection::AddressCollection;
+use crate::networking::types::ip_blacklist::IpBlacklist;
 use crate::networking::types::my_device::MyDevice;
 use crate::networking::types::port_collection::PortCollection;
-use crate::networking::types::process::Process;
-use crate::networking::types::protocol::Protocol;
-use crate::networking::types::service::Service;
 use crate::notifications::notify_and_log::notify_and_log;
-use crate::notifications::types::logged_notification::LoggedNotification;
+use crate::notifications::types::logged_notification::LoggedNotifications;
 use crate::notifications::types::notifications::{DataNotification, Notification};
 use crate::notifications::types::sound::{Sound, play};
 use crate::report::get_report_entries::get_searched_entries;
-use crate::report::types::report_sort_type::ReportSortType;
 use crate::report::types::search_parameters::SearchParameters;
 use crate::report::types::sort_type::SortType;
 use crate::translations::types::language::Language;
 use crate::utils::check_updates::set_newer_release_status;
 use crate::utils::error_logger::{ErrorLogger, Location};
 use crate::utils::types::file_info::FileInfo;
+use crate::utils::types::icon::Icon;
 use crate::utils::types::web_page::WebPage;
 use crate::{ConfigSettings, Configs, StyleType, TrafficChart, location};
-use async_channel::Receiver;
-use iced::Event::{Keyboard, Window};
-use iced::keyboard::key::Named;
-use iced::keyboard::{Event, Key, Modifiers};
-use iced::mouse::Event::ButtonPressed;
-use iced::widget::{Column, image};
-use iced::window::{Id, Level};
-use iced::{Element, Point, Size, Subscription, Task, window};
-use pcap::Device;
-use rfd::FileHandle;
-use std::collections::{HashMap, HashSet, VecDeque};
-use std::net::IpAddr;
-use std::path::PathBuf;
-use std::sync::Arc;
-use std::thread;
-use std::time::Duration;
 
 pub const FONT_FAMILY_NAME: &str = "Sarasa Mono SC for Sniffnet";
 pub const ICON_FONT_FAMILY_NAME: &str = "Icons for Sniffnet";
 
-/// Struct on which the gui is based
+const THUMBNAIL_SIZE: Size = Size {
+    width: 360.0,
+    height: 222.0,
+};
+
+/// Struct on which the GUI is based
 ///
-/// It contains gui statuses and network traffic statistics
+/// It carries statuses, network traffic statistics, and more
 pub struct Sniffer {
-    /// Application's configurations: settings, window properties, name of last device sniffed
-    pub configs: Configs,
+    /// Parameters that are persistent across runs
+    pub conf: Conf,
+    /// Are we during welcome / quit animation? None if not, true if welcome, false if quit
+    pub welcome: Option<(bool, u8)>,
     /// Capture receiver clone (to close the channel after every run), with the current capture id (to ignore pending messages from previous captures)
     pub current_capture_rx: (usize, Option<Receiver<BackendTrafficMessage>>),
+    /// Preview captures receiver clone (to close the channel when starting the analysis)
+    pub preview_captures_rx: Option<Receiver<TrafficPreview>>,
     /// Capture data
     pub info_traffic: InfoTraffic,
     /// Map of the resolved addresses with their full rDNS value and the corresponding host
@@ -90,37 +99,25 @@ pub struct Sniffer {
     /// Collection of the favorite hosts
     pub favorite_hosts: HashSet<Host>,
     /// Log of the displayed notifications, with the total number of notifications for this capture
-    pub logged_notifications: (VecDeque<LoggedNotification>, usize),
+    pub logged_notifications: LoggedNotifications,
     /// Reports if a newer release of the software is available on GitHub
     pub newer_release_available: Option<bool>,
     /// Network device to be analyzed, or PCAP file to be imported
     pub capture_source: CaptureSource,
-    /// List of network devices
-    pub my_devices: Vec<MyDevice>,
-    /// Active filters on the observed traffic
-    pub filters: Filters,
     /// Signals if a pcap error occurred
     pub pcap_error: Option<String>,
     /// Messages status
     pub dots_pulse: (String, u8),
-    /// Chart displayed
+    /// Traffic chart displayed in the Overview page
     pub traffic_chart: TrafficChart,
-    /// Report sort type (inspect page)
-    pub report_sort_type: ReportSortType,
-    /// Host sort type (overview page)
-    pub host_sort_type: SortType,
-    /// Service sort type (overview page)
-    pub service_sort_type: SortType,
-    /// Process sort type (overview page)
-    pub process_sort_type: SortType,
+    /// Traffic preview charts displayed in the initial page
+    pub preview_charts: Vec<(MyDevice, PreviewChart)>,
     /// Currently displayed modal; None if no modal is displayed
     pub modal: Option<MyModal>,
     /// Currently displayed settings page; None if settings is closed
     pub settings_page: Option<SettingsPage>,
-    /// Remembers the last opened setting page
-    pub last_opened_setting: SettingsPage,
-    /// Defines the current running page
-    pub running_page: RunningPage,
+    /// Defines the current running page; None if initial page
+    pub running_page: Option<RunningPage>,
     /// Number of unread notifications
     pub unread_notifications: usize,
     /// Search parameters of inspect page
@@ -129,18 +126,20 @@ pub struct Sniffer {
     pub page_number: usize,
     /// MMDB readers for country and ASN
     pub mmdb_readers: MmdbReaders,
+    /// IP blacklist
+    pub ip_blacklist: IpBlacklist,
     /// Time-related events
     pub timing_events: TimingEvents,
-    /// Information about PCAP file export
-    pub export_pcap: ExportPcap,
     /// Whether thumbnail mode is currently active
     pub thumbnail: bool,
     /// Window id
     pub id: Option<Id>,
     /// Host data for filter dropdowns (comboboxes)
     pub host_data_states: HostDataStates,
-    /// Import path for PCAP file
-    pub import_pcap_path: String,
+    /// Flag reporting whether the packet capture is frozen
+    pub frozen: bool,
+    /// Sender to freeze the packet capture
+    pub freeze_tx: Option<tokio::sync::broadcast::Sender<()>>,
 
     /// TODO:
     /// make both fields part of InfoTraffic, and send them from the backend
@@ -154,37 +153,39 @@ pub struct Sniffer {
 }
 
 impl Sniffer {
-    pub fn new(configs: Configs) -> Self {
-        let ConfigSettings {
+    pub fn new(conf: Conf) -> Self {
+        let Settings {
             style,
             language,
             mmdb_country,
             mmdb_asn,
             ..
-        } = configs.settings.clone();
-        let device = configs.device.to_my_device();
+        } = conf.settings.clone();
+        let data_repr = conf.data_repr;
+        let capture_source = CaptureSource::from_conf(&conf);
+        let preview_charts = pcap::Device::list()
+            .unwrap_or_default()
+            .into_iter()
+            .map(|dev| (MyDevice::from_pcap_device(dev), PreviewChart::new(style)))
+            .collect();
         Self {
-            configs,
+            conf,
+            welcome: Some((true, 0)),
             current_capture_rx: (0, None),
+            preview_captures_rx: None,
             info_traffic: InfoTraffic::default(),
             addresses_resolved: HashMap::new(),
             favorite_hosts: HashSet::new(),
-            logged_notifications: (VecDeque::new(), 0),
+            logged_notifications: LoggedNotifications::default(),
             newer_release_available: None,
-            capture_source: CaptureSource::Device(device),
-            my_devices: Vec::new(),
-            filters: Filters::default(),
+            capture_source,
             pcap_error: None,
             dots_pulse: (".".to_string(), 0),
-            traffic_chart: TrafficChart::new(style, language),
-            report_sort_type: ReportSortType::default(),
-            host_sort_type: SortType::default(),
-            service_sort_type: SortType::default(),
-            process_sort_type: SortType::default(),
+            traffic_chart: TrafficChart::new(style, language, data_repr),
+            preview_charts,
             modal: None,
             settings_page: None,
-            last_opened_setting: SettingsPage::Notifications,
-            running_page: RunningPage::Init,
+            running_page: None,
             unread_notifications: 0,
             search: SearchParameters::default(),
             page_number: 1,
@@ -192,12 +193,14 @@ impl Sniffer {
                 country: Arc::new(MmdbReader::from(&mmdb_country, COUNTRY_MMDB)),
                 asn: Arc::new(MmdbReader::from(&mmdb_asn, ASN_MMDB)),
             },
+            ip_blacklist: IpBlacklist::default(), // load it later
             timing_events: TimingEvents::default(),
-            export_pcap: ExportPcap::default(),
             thumbnail: false,
             id: None,
             host_data_states: HostDataStates::default(),
-            import_pcap_path: String::new(),
+            frozen: false,
+            freeze_tx: None,
+
             listeners: HashMap::new(),
             processes: HashMap::new(),
             picons: HashMap::new(),
@@ -205,7 +208,9 @@ impl Sniffer {
     }
 
     fn keyboard_subscription(&self) -> Subscription<Message> {
-        const NO_MODIFIER: Modifiers = Modifiers::empty();
+        if self.welcome.is_some() || self.ip_blacklist.is_loading() {
+            return Subscription::none();
+        }
 
         if self.thumbnail {
             iced::event::listen_with(|event, _, _| match event {
@@ -216,6 +221,7 @@ impl Sniffer {
                 }) => match key.as_ref() {
                     Key::Character("q") => Some(Message::QuitWrapper),
                     Key::Character("t") => Some(Message::CtrlTPressed),
+                    Key::Named(Named::Space) => Some(Message::CtrlSpacePressed),
                     _ => None,
                 },
                 _ => None,
@@ -226,6 +232,7 @@ impl Sniffer {
                     Modifiers::COMMAND => match key.as_ref() {
                         Key::Character("q") => Some(Message::QuitWrapper),
                         Key::Character("t") => Some(Message::CtrlTPressed),
+                        Key::Named(Named::Space) => Some(Message::CtrlSpacePressed),
                         Key::Character(",") => Some(Message::OpenLastSettings),
                         Key::Named(Named::Backspace) => Some(Message::ResetButtonPressed),
                         Key::Character("d") => Some(Message::CtrlDPressed),
@@ -239,7 +246,7 @@ impl Sniffer {
                         Key::Named(Named::Tab) => Some(Message::SwitchPage(false)),
                         _ => None,
                     },
-                    NO_MODIFIER => match key {
+                    Modifiers::NONE => match key {
                         Key::Named(Named::Enter) => Some(Message::ReturnKeyPressed),
                         Key::Named(Named::Escape) => Some(Message::EscKeyPressed),
                         Key::Named(Named::Tab) => Some(Message::SwitchPage(true)),
@@ -263,8 +270,17 @@ impl Sniffer {
         }
     }
 
-    fn time_subscription() -> Subscription<Message> {
-        iced::time::every(Duration::from_millis(1000)).map(|_| Message::Periodic)
+    fn time_subscription(&self) -> Subscription<Message> {
+        if let Some((w, _)) = self.welcome {
+            let sub = iced::time::every(Duration::from_millis(100));
+            if w {
+                sub.map(|_| Message::Welcome)
+            } else {
+                sub.map(|_| Message::Quit)
+            }
+        } else {
+            iced::time::every(Duration::from_millis(1000)).map(|_| Message::Periodic)
+        }
     }
 
     fn window_subscription() -> Subscription<Message> {
@@ -282,322 +298,94 @@ impl Sniffer {
     pub fn update(&mut self, message: Message) -> Task<Message> {
         self.dots_pulse.1 = (self.dots_pulse.1 + 1) % 3;
         match message {
-            Message::StartApp(id) => {
-                self.id = id;
-                return Task::batch([
-                    Sniffer::register_sigint_handler(),
-                    Task::perform(set_newer_release_status(), Message::SetNewerReleaseStatus),
-                ]);
-            }
+            Message::StartApp(id) => return self.start_app(id),
             Message::TickRun(cap_id, msg, host_msgs, no_more_packets) => {
-                if cap_id == self.current_capture_rx.0 {
-                    for host_msg in host_msgs {
-                        self.handle_new_host(host_msg);
-                    }
-                    self.refresh_data(msg, no_more_packets);
-                }
+                self.tick_run(cap_id, msg, host_msgs, no_more_packets);
             }
-            Message::DeviceSelection(name) => self.set_device(&name),
-            Message::IpVersionSelection(version, insert) => {
-                if insert {
-                    self.filters.ip_versions.insert(version);
-                } else {
-                    self.filters.ip_versions.remove(&version);
-                }
-            }
-            Message::ProtocolSelection(protocol, insert) => {
-                if insert {
-                    self.filters.protocols.insert(protocol);
-                } else {
-                    self.filters.protocols.remove(&protocol);
-                }
-            }
-            Message::AddressFilter(value) => {
-                if let Some(collection) = AddressCollection::new(&value) {
-                    self.filters.address_collection = collection;
-                }
-                self.filters.address_str = value;
-            }
-            Message::PortFilter(value) => {
-                if let Some(collection) = PortCollection::new(&value) {
-                    self.filters.port_collection = collection;
-                }
-                self.filters.port_str = value;
-            }
-            Message::ChartSelection(unit) => self.traffic_chart.change_kind(unit),
-            Message::ReportSortSelection(sort) => {
-                self.page_number = 1;
-                self.report_sort_type = sort;
-            }
-            Message::OpenWebPage(web_page) => Self::open_web(&web_page),
+            Message::DeviceSelection(name) => self.device_selection(&name),
+            Message::SetCaptureSource(cs_pick) => self.set_capture_source(cs_pick),
+            Message::ToggleFilters => self.toggle_filters(),
+            Message::BpfFilter(value) => self.bpf_filter(value),
+            Message::DataReprSelection(unit) => self.data_repr_selection(unit),
+            Message::ReportSortSelection(sort) => self.report_sort_selection(sort),
+            Message::OpenWebPage(web_page) => Self::open_web_page(&web_page),
             Message::Start => return self.start(),
-            Message::Reset => self.reset(),
-            Message::Style(style) => {
-                self.configs.settings.style = style;
-                self.traffic_chart.change_style(style);
-            }
-            Message::LoadStyle(path) => {
-                self.configs.settings.style_path.clone_from(&path);
-                if let Ok(palette) = Palette::from_file(path) {
-                    let style = StyleType::Custom(ExtraStyles::CustomToml(
-                        CustomPalette::from_palette(palette),
-                    ));
-                    self.configs.settings.style = style;
-                    self.traffic_chart.change_style(style);
-                }
-            }
+            Message::Reset => return self.reset(),
+            Message::Style(style) => self.style(style),
+            Message::LoadStyle(path) => self.load_style(path),
             Message::AddOrRemoveFavorite(host, add) => self.add_or_remove_favorite(&host, add),
-            Message::ShowModal(modal) => {
-                if self.settings_page.is_none() && self.modal.is_none() {
-                    self.modal = Some(modal);
-                }
-            }
-            Message::HideModal => self.modal = None,
-            Message::OpenSettings(settings_page) => {
-                if self.modal.is_none() {
-                    self.settings_page = Some(settings_page);
-                }
-            }
-            Message::OpenLastSettings => {
-                if self.modal.is_none() && self.settings_page.is_none() {
-                    self.settings_page = Some(self.last_opened_setting);
-                }
-            }
+            Message::ShowModal(modal) => self.show_modal(modal),
+            Message::HideModal => self.hide_modal(),
+            Message::OpenSettings(settings_page) => self.open_settings(settings_page),
+            Message::OpenLastSettings => self.open_last_settings(),
             Message::CloseSettings => self.close_settings(),
-            Message::ChangeRunningPage(running_page) => {
-                self.running_page = running_page;
-                if running_page.eq(&RunningPage::Notifications) {
-                    self.unread_notifications = 0;
-                }
-            }
-            Message::LanguageSelection(language) => {
-                self.configs.settings.language = language;
-                self.traffic_chart.change_language(language);
-            }
+            Message::ChangeRunningPage(running_page) => self.change_running_page(running_page),
+            Message::LanguageSelection(language) => self.language_selection(language),
             Message::UpdateNotificationSettings(notification, emit_sound) => {
                 self.update_notifications_settings(notification, emit_sound);
             }
-            Message::ChangeVolume(volume) => {
-                play(Sound::Pop, volume);
-                self.configs.settings.notifications.volume = volume;
-            }
-            Message::ClearAllNotifications => {
-                self.logged_notifications.0 = VecDeque::new();
-                self.modal = None;
-            }
-            Message::SwitchPage(next) => {
-                // To prevent SwitchPage be triggered when using `Alt` + `Tab` to switch back,
-                // first check if user switch back just now, and ignore the request for a short time.
-                if !self.timing_events.was_just_focus() {
-                    self.switch_page(next);
-                }
-            }
-            Message::ReturnKeyPressed => return self.shortcut_return(),
-            Message::EscKeyPressed => return self.shortcut_esc(),
+            Message::ChangeVolume(volume) => self.change_volume(volume),
+            Message::ClearAllNotifications => self.clear_all_notifications(),
+            Message::SwitchPage(next) => self.switch_page(next),
+            Message::ReturnKeyPressed => return self.return_key_pressed(),
+            Message::EscKeyPressed => self.esc_key_pressed(),
             Message::ResetButtonPressed => return self.reset_button_pressed(),
-            Message::CtrlDPressed => return self.shortcut_ctrl_d(),
-            Message::Search(parameters) => {
-                // update comboboxes
-                let host_data = &mut self.host_data_states.data;
-                host_data.countries.1 = self.search.country != parameters.country;
-                host_data.asns.1 = self.search.as_name != parameters.as_name;
-                host_data.domains.1 = self.search.domain != parameters.domain;
-                self.host_data_states.update_states(&parameters);
-
-                self.page_number = 1;
-                self.running_page = RunningPage::Inspect;
-                self.search = parameters;
-            }
-            Message::UpdatePageNumber(increment) => {
-                if increment {
-                    if self.page_number < get_searched_entries(self).1.div_ceil(20) {
-                        self.page_number = self.page_number.checked_add(1).unwrap_or(1);
-                    }
-                } else if self.page_number > 1 {
-                    self.page_number = self.page_number.checked_sub(1).unwrap_or(1);
-                }
-            }
-            Message::ArrowPressed(increment) => {
-                if self.running_page.eq(&RunningPage::Inspect)
-                    && self.settings_page.is_none()
-                    && self.modal.is_none()
-                {
-                    return Task::done(Message::UpdatePageNumber(increment));
-                }
-            }
-            Message::WindowFocused => self.timing_events.focus_now(),
-            Message::GradientsSelection(gradient_type) => {
-                self.configs.settings.color_gradient = gradient_type;
-            }
-            Message::ChangeScaleFactor(slider_val) => {
-                let scale_factor_str = format!("{:.1}", 3.0_f64.powf(slider_val));
-                self.configs.settings.scale_factor = scale_factor_str.parse().unwrap_or(1.0);
-            }
-            Message::WindowMoved(x, y) => {
-                let scale_factor = self.configs.settings.scale_factor;
-                let scaled = PositionTuple(x, y).scale_and_check(scale_factor);
-                if self.thumbnail {
-                    self.configs.window.thumbnail_position = scaled;
-                } else {
-                    self.configs.window.position = scaled;
-                }
-            }
-            Message::WindowResized(width, height) => {
-                if !self.thumbnail {
-                    let scale_factor = self.configs.settings.scale_factor;
-                    self.configs.window.size =
-                        SizeTuple(width, height).scale_and_check(scale_factor);
-                } else if !self.timing_events.was_just_thumbnail_enter() {
-                    return Task::done(Message::ToggleThumbnail(true));
-                }
-            }
-            Message::CustomCountryDb(db) => {
-                self.configs.settings.mmdb_country.clone_from(&db);
-                self.mmdb_readers.country = Arc::new(MmdbReader::from(&db, COUNTRY_MMDB));
-            }
-            Message::CustomAsnDb(db) => {
-                self.configs.settings.mmdb_asn.clone_from(&db);
-                self.mmdb_readers.asn = Arc::new(MmdbReader::from(&db, ASN_MMDB));
-            }
+            Message::CtrlDPressed => self.ctrl_d_pressed(),
+            Message::Search(parameters) => self.search(parameters),
+            Message::UpdatePageNumber(increment) => self.update_page_number(increment),
+            Message::ArrowPressed(increment) => self.arrow_pressed(increment),
+            Message::WindowFocused => self.window_focused(),
+            Message::GradientsSelection(gradient_type) => self.gradients_selection(gradient_type),
+            Message::ChangeScaleFactor(slider_val) => self.change_scale_factor(slider_val),
+            Message::WindowMoved(x, y) => self.window_moved(x, y),
+            Message::WindowResized(width, height) => return self.window_resized(width, height),
+            Message::CustomCountryDb(db) => self.custom_country_db(db),
+            Message::CustomAsnDb(db) => self.custom_asn_db(db),
+            Message::LoadIpBlacklist(path) => return self.load_ip_blacklist(path),
+            Message::SetIpBlacklist(blacklist) => self.set_ip_blacklist(blacklist),
             Message::QuitWrapper => return self.quit_wrapper(),
-            Message::Quit => {
-                let _ = self.configs.clone().store();
-                return window::close(self.id.unwrap_or_else(Id::unique));
-            }
-            Message::CopyIp(ip) => {
-                self.timing_events.copy_ip_now(ip);
-                return iced::clipboard::write(ip.to_string());
-            }
+            Message::Quit => return self.quit(),
+            Message::Welcome => self.welcome(),
+            Message::CopyIp(ip) => return self.copy_ip(ip),
             Message::OpenFile(old_file, file_info, consumer_message) => {
-                return Task::perform(
-                    Self::open_file(old_file, file_info, self.configs.settings.language),
-                    consumer_message,
-                );
+                return self.open_file(old_file, file_info, consumer_message);
             }
-            Message::HostSortSelection(sort_type) => {
-                self.host_sort_type = sort_type;
-            }
-            Message::ServiceSortSelection(sort_type) => {
-                self.service_sort_type = sort_type;
-            }
-            Message::ProcessSortSelection(sort_type) => {
-                self.process_sort_type = sort_type;
-            }
-            Message::ToggleExportPcap => {
-                self.export_pcap.toggle();
-            }
-            Message::OutputPcapDir(path) => {
-                self.export_pcap.set_directory(path);
-            }
-            Message::OutputPcapFile(name) => {
-                self.export_pcap.set_file_name(&name);
-            }
+            Message::HostSortSelection(sort_type) => self.host_sort_selection(sort_type),
+            Message::ServiceSortSelection(sort_type) => self.service_sort_selection(sort_type),
+            Message::ToggleExportPcap => self.toggle_export_pcap(),
+            Message::OutputPcapDir(path) => self.output_pcap_dir(path),
+            Message::OutputPcapFile(name) => self.output_pcap_file(&name),
             Message::ToggleThumbnail(triggered_by_resize) => {
-                let window_id = self.id.unwrap_or_else(Id::unique);
-
-                self.thumbnail = !self.thumbnail;
-                self.traffic_chart.thumbnail = self.thumbnail;
-
-                return if self.thumbnail {
-                    let scale_factor = self.configs.settings.scale_factor;
-                    let size = ConfigWindow::thumbnail_size(scale_factor).to_size();
-                    let position = self.configs.window.thumbnail_position;
-                    self.timing_events.thumbnail_enter_now();
-                    Task::batch([
-                        window::maximize(window_id, false),
-                        window::toggle_decorations(window_id),
-                        window::resize(window_id, size),
-                        window::move_to(window_id, position.to_point()),
-                        window::change_level(window_id, Level::AlwaysOnTop),
-                    ])
-                } else {
-                    if self.running_page.eq(&RunningPage::Notifications) {
-                        self.unread_notifications = 0;
-                    }
-                    let mut commands = vec![
-                        window::toggle_decorations(window_id),
-                        window::change_level(window_id, Level::Normal),
-                    ];
-                    if !triggered_by_resize {
-                        let size = self.configs.window.size.to_size();
-                        let position = self.configs.window.position.to_point();
-                        commands.push(window::move_to(window_id, position));
-                        commands.push(window::resize(window_id, size));
-                    }
-                    Task::batch(commands)
-                };
+                return self.toggle_thumbnail(triggered_by_resize);
             }
-            Message::Drag => {
-                let was_just_thumbnail_click = self.timing_events.was_just_thumbnail_click();
-                self.timing_events.thumbnail_click_now();
-                if was_just_thumbnail_click {
-                    return window::drag(self.id.unwrap_or_else(Id::unique));
-                }
-            }
-            Message::CtrlTPressed => {
-                if self.running_page.ne(&RunningPage::Init)
-                    && self.settings_page.is_none()
-                    && self.modal.is_none()
-                    && !self.timing_events.was_just_thumbnail_enter()
-                {
-                    return Task::done(Message::ToggleThumbnail(false));
-                }
-            }
-            Message::ScaleFactorShortcut(increase) => {
-                let scale_factor = self.configs.settings.scale_factor;
-                if !(scale_factor > 2.99 && increase || scale_factor < 0.31 && !increase) {
-                    let delta = if increase { 0.1 } else { -0.1 };
-                    self.configs.settings.scale_factor += delta;
-                }
-            }
-            Message::SetNewerReleaseStatus(status) => self.newer_release_available = status,
-            Message::SetPcapImport(path) => {
-                if !path.is_empty() {
-                    self.import_pcap_path.clone_from(&path);
-                    self.capture_source = CaptureSource::File(MyPcapImport::new(path));
-                }
-            }
-            Message::PendingHosts(cap_id, host_msgs) => {
-                if cap_id == self.current_capture_rx.0 {
-                    for host_msg in host_msgs {
-                        self.handle_new_host(host_msg);
-                    }
-                }
-            }
-            Message::OfflineGap(cap_id, gap) => {
-                if cap_id == self.current_capture_rx.0 {
-                    self.traffic_chart.push_offline_gap_to_splines(gap);
-                }
-            }
-            Message::Periodic => {
-                self.update_waiting_dots();
-                self.fetch_devices();
-                self.update_threshold();
-                self.fetch_listeners();
-            }
-            Message::ExpandNotification(id, expand) => {
-                if let Some(n) = self
-                    .logged_notifications
-                    .0
-                    .iter_mut()
-                    .find(|n| n.id() == id)
-                {
-                    n.expand(expand);
-                }
-            }
+            Message::Drag => return self.drag(),
+            Message::CtrlTPressed => return self.ctrl_t_pressed(),
+            Message::CtrlSpacePressed => self.ctrl_space_pressed(),
+            Message::ScaleFactorShortcut(increase) => self.scale_factor_shortcut(increase),
+            Message::SetNewerReleaseStatus(status) => self.set_newer_release_status(status),
+            Message::SetPcapImport(path) => self.set_pcap_import(path),
+            Message::PendingHosts(cap_id, host_msgs) => self.pending_hosts(cap_id, host_msgs),
+            Message::OfflineGap(cap_id, gap) => self.offline_gap(cap_id, gap),
+            Message::Periodic => self.periodic(),
+            Message::ExpandNotification(id, expand) => self.expand_notification(id, expand),
+            Message::ToggleRemoteNotifications => self.toggle_remote_notifications(),
+            Message::RemoteNotificationsUrl(url) => self.remote_notifications_url(&url),
+            Message::Freeze => self.freeze(),
+            Message::TrafficPreview(msg) => self.traffic_preview(msg),
         }
         Task::none()
     }
 
-    pub fn view(&self) -> Element<Message, StyleType> {
-        let ConfigSettings {
-            style,
+    pub fn view(&self) -> Element<'_, Message, StyleType> {
+        let Settings {
             language,
             color_gradient,
             ..
-        } = self.configs.settings;
-        let font = style.get_extension().font;
-        let font_headers = style.get_extension().font_headers;
+        } = self.conf.settings;
+
+        if let Some((_, x)) = self.welcome {
+            return welcome_page(x, self.thumbnail).into();
+        }
 
         let header = header(self);
 
@@ -605,10 +393,18 @@ impl Sniffer {
             thumbnail_page(self)
         } else {
             match self.running_page {
-                RunningPage::Init => initial_page(self),
-                RunningPage::Overview => overview_page(self),
-                RunningPage::Inspect => inspect_page(self),
-                RunningPage::Notifications => notifications_page(self),
+                None => initial_page(self),
+                Some(running_page) => {
+                    if let Some(waiting_page) = waiting_page(self) {
+                        waiting_page
+                    } else {
+                        match running_page {
+                            RunningPage::Overview => overview_page(self),
+                            RunningPage::Inspect => inspect_page(self),
+                            RunningPage::Notifications => notifications_page(self),
+                        }
+                    }
+                }
             }
         };
 
@@ -616,16 +412,14 @@ impl Sniffer {
             self.thumbnail,
             language,
             color_gradient,
-            font,
-            font_headers,
             self.newer_release_available,
-            self.dots_pulse.1,
+            &self.dots_pulse,
         );
 
         let content: Element<Message, StyleType> =
             Column::new().push(header).push(body).push(footer).into();
 
-        match self.modal.clone() {
+        let ret_val: Element<'_, Message, StyleType> = match self.modal.clone() {
             None => {
                 if let Some(settings_page) = self.settings_page {
                     let overlay: Element<Message, StyleType> = match settings_page {
@@ -642,29 +436,25 @@ impl Sniffer {
             }
             Some(m) => {
                 let overlay: Element<Message, StyleType> = match m {
-                    MyModal::Reset => get_exit_overlay(
-                        Message::Reset,
-                        color_gradient,
-                        font,
-                        font_headers,
-                        language,
-                    ),
-                    MyModal::Quit => get_exit_overlay(
-                        Message::Quit,
-                        color_gradient,
-                        font,
-                        font_headers,
-                        language,
-                    ),
-                    MyModal::ClearAll => {
-                        get_clear_all_overlay(color_gradient, font, font_headers, language)
-                    }
+                    MyModal::Reset => get_exit_overlay(Message::Reset, color_gradient, language),
+                    MyModal::Quit => get_exit_overlay(Message::Quit, color_gradient, language),
+                    MyModal::ClearAll => get_clear_all_overlay(color_gradient, language),
                     MyModal::ConnectionDetails(key) => connection_details_page(self, key),
                 }
                 .into();
 
                 modal(content, overlay, Message::HideModal)
             }
+        };
+
+        if self.ip_blacklist.is_loading() {
+            let overlay = Into::<Element<Message, StyleType>>::into(center(
+                Icon::get_hourglass(self.dots_pulse.0.len()).size(60),
+            ));
+
+            modal(ret_val, overlay, None)
+        } else {
+            ret_val
         }
     }
 
@@ -672,17 +462,417 @@ impl Sniffer {
         Subscription::batch([
             self.keyboard_subscription(),
             self.mouse_subscription(),
-            Sniffer::time_subscription(),
+            self.time_subscription(),
             Sniffer::window_subscription(),
         ])
     }
 
     pub fn theme(&self) -> StyleType {
-        self.configs.settings.style
+        self.conf.settings.style
     }
 
-    pub fn scale_factor(&self) -> f64 {
-        self.configs.settings.scale_factor
+    pub fn scale_factor(&self) -> f32 {
+        self.conf.settings.scale_factor
+    }
+
+    fn start_app(&mut self, id: Option<Id>) -> Task<Message> {
+        self.id = id;
+        let previews_task = self.start_traffic_previews();
+        Task::batch([
+            Sniffer::register_sigint_handler(),
+            Task::perform(set_newer_release_status(), Message::SetNewerReleaseStatus),
+            previews_task,
+            self.load_ip_blacklist(self.conf.settings.ip_blacklist.clone()),
+        ])
+    }
+
+    fn tick_run(
+        &mut self,
+        cap_id: usize,
+        msg: InfoTraffic,
+        host_msgs: Vec<HostMessage>,
+        no_more_packets: bool,
+    ) {
+        if cap_id == self.current_capture_rx.0 {
+            for host_msg in host_msgs {
+                self.handle_new_host(host_msg);
+            }
+            self.refresh_data(msg, no_more_packets);
+        }
+    }
+
+    fn set_capture_source(&mut self, cs_pick: CaptureSourcePicklist) {
+        self.conf.capture_source_picklist = cs_pick;
+        if cs_pick == CaptureSourcePicklist::File {
+            self.set_pcap_import(self.conf.import_pcap_path.clone());
+        } else {
+            self.device_selection(&self.conf.device.device_name.clone());
+        }
+    }
+
+    fn toggle_filters(&mut self) {
+        self.conf.filters.toggle();
+    }
+
+    fn bpf_filter(&mut self, value: String) {
+        self.conf.filters.set_bpf(value);
+    }
+
+    fn data_repr_selection(&mut self, unit: DataRepr) {
+        self.conf.data_repr = unit;
+        self.traffic_chart.change_kind(unit);
+    }
+
+    fn report_sort_selection(&mut self, sort: SortType) {
+        self.page_number = 1;
+        self.conf.report_sort_type = sort;
+    }
+
+    fn style(&mut self, style: StyleType) {
+        self.conf.settings.style = style;
+        self.change_charts_style();
+    }
+
+    fn load_style(&mut self, path: String) {
+        self.conf.settings.style_path.clone_from(&path);
+        if let Some(palette) = Palette::from_file(path) {
+            let style = StyleType::Custom(CustomPalette::from_palette(palette));
+            self.conf.settings.style = style;
+            self.change_charts_style();
+        }
+    }
+
+    fn show_modal(&mut self, modal: MyModal) {
+        if self.settings_page.is_none() && self.modal.is_none() {
+            self.modal = Some(modal);
+        }
+    }
+
+    fn hide_modal(&mut self) {
+        self.modal = None;
+    }
+
+    fn open_settings(&mut self, settings_page: SettingsPage) {
+        if self.modal.is_none() {
+            self.settings_page = Some(settings_page);
+            self.conf.last_opened_setting = settings_page;
+        }
+    }
+
+    fn open_last_settings(&mut self) {
+        if self.modal.is_none() && self.settings_page.is_none() {
+            self.settings_page = Some(self.conf.last_opened_setting);
+        }
+    }
+
+    fn change_running_page(&mut self, running_page: RunningPage) {
+        self.running_page = Some(running_page);
+        self.conf.last_opened_page = running_page;
+        if running_page.eq(&RunningPage::Notifications) {
+            self.unread_notifications = 0;
+        }
+    }
+
+    fn language_selection(&mut self, language: Language) {
+        self.conf.settings.language = language;
+        self.traffic_chart.change_language(language);
+    }
+
+    fn change_volume(&mut self, volume: u8) {
+        play(Sound::Pop, volume);
+        self.conf.settings.notifications.volume = volume;
+    }
+
+    fn clear_all_notifications(&mut self) {
+        self.logged_notifications.clear_notifications();
+        self.modal = None;
+    }
+
+    fn search(&mut self, parameters: SearchParameters) {
+        // update comboboxes
+        let host_data = &mut self.host_data_states.data;
+        host_data.countries.1 = self.search.country != parameters.country;
+        host_data.asns.1 = self.search.as_name != parameters.as_name;
+        host_data.domains.1 = self.search.domain != parameters.domain;
+        self.host_data_states.update_states(&parameters);
+
+        self.page_number = 1;
+        self.running_page = Some(RunningPage::Inspect);
+        self.conf.last_opened_page = RunningPage::Inspect;
+        self.search = parameters;
+    }
+
+    fn update_page_number(&mut self, increment: bool) {
+        if increment {
+            if self.page_number < get_searched_entries(self).1.div_ceil(30) {
+                self.page_number = self.page_number.checked_add(1).unwrap_or(1);
+            }
+        } else if self.page_number > 1 {
+            self.page_number = self.page_number.checked_sub(1).unwrap_or(1);
+        }
+    }
+
+    fn arrow_pressed(&mut self, increment: bool) {
+        if self
+            .running_page
+            .is_some_and(|p| p.eq(&RunningPage::Inspect))
+            && self.settings_page.is_none()
+            && self.modal.is_none()
+        {
+            self.update_page_number(increment);
+        }
+    }
+
+    fn window_focused(&mut self) {
+        self.timing_events.focus_now();
+    }
+
+    fn gradients_selection(&mut self, gradient_type: GradientType) {
+        self.conf.settings.color_gradient = gradient_type;
+    }
+
+    fn change_scale_factor(&mut self, scale_factor: f32) {
+        let old = self.conf.settings.scale_factor;
+        self.conf.settings.scale_factor = scale_factor;
+        self.conf.window.scale_size(old, scale_factor);
+    }
+
+    fn window_moved(&mut self, x: f32, y: f32) {
+        let scale_factor = self.conf.settings.scale_factor;
+        if self.thumbnail {
+            self.conf.window.set_thumbnail_position(x, y, scale_factor);
+        } else {
+            self.conf.window.set_position(x, y, scale_factor);
+        }
+    }
+
+    fn window_resized(&mut self, width: f32, height: f32) -> Task<Message> {
+        if !self.thumbnail {
+            let scale_factor = self.conf.settings.scale_factor;
+            self.conf.window.set_size(width, height, scale_factor);
+        } else if !self.timing_events.was_just_thumbnail_enter() {
+            return self.toggle_thumbnail(true);
+        }
+        Task::none()
+    }
+
+    fn custom_country_db(&mut self, db: String) {
+        self.mmdb_readers.country = Arc::new(MmdbReader::from(&db, COUNTRY_MMDB));
+        self.conf.settings.mmdb_country = db;
+    }
+
+    fn custom_asn_db(&mut self, db: String) {
+        self.mmdb_readers.asn = Arc::new(MmdbReader::from(&db, ASN_MMDB));
+        self.conf.settings.mmdb_asn = db;
+    }
+
+    fn load_ip_blacklist(&mut self, path: String) -> Task<Message> {
+        self.conf.settings.ip_blacklist.clone_from(&path);
+        if path.is_empty() {
+            self.ip_blacklist = IpBlacklist::default();
+            Task::none()
+        } else {
+            self.ip_blacklist.start_loading();
+            Task::perform(IpBlacklist::from_file(path), Message::SetIpBlacklist)
+        }
+    }
+
+    fn set_ip_blacklist(&mut self, blacklist: IpBlacklist) {
+        self.ip_blacklist = blacklist;
+    }
+
+    fn open_file(
+        &mut self,
+        old_file: String,
+        file_info: FileInfo,
+        consumer_message: fn(String) -> Message,
+    ) -> Task<Message> {
+        Task::perform(
+            Self::open_file_inner(old_file, file_info, self.conf.settings.language),
+            consumer_message,
+        )
+    }
+
+    fn host_sort_selection(&mut self, sort_type: SortType) {
+        self.conf.host_sort_type = sort_type;
+    }
+
+    fn service_sort_selection(&mut self, sort_type: SortType) {
+        self.conf.service_sort_type = sort_type;
+    }
+
+    fn toggle_export_pcap(&mut self) {
+        self.conf.export_pcap.toggle();
+    }
+
+    fn output_pcap_dir(&mut self, path: String) {
+        self.conf.export_pcap.set_directory(path);
+    }
+
+    fn output_pcap_file(&mut self, name: &str) {
+        self.conf.export_pcap.set_file_name(name);
+    }
+
+    fn toggle_thumbnail(&mut self, triggered_by_resize: bool) -> Task<Message> {
+        let window_id = self.id.unwrap_or_else(Id::unique);
+
+        self.thumbnail = !self.thumbnail;
+        self.traffic_chart.thumbnail = self.thumbnail;
+
+        if self.thumbnail {
+            let size = THUMBNAIL_SIZE;
+            let position = self.conf.window.thumbnail_position();
+            self.timing_events.thumbnail_enter_now();
+            Task::batch([
+                window::maximize(window_id, false),
+                window::toggle_decorations(window_id),
+                window::resize(window_id, size),
+                window::move_to(window_id, position),
+                window::set_level(window_id, Level::AlwaysOnTop),
+            ])
+        } else {
+            if self
+                .running_page
+                .is_some_and(|p| p.eq(&RunningPage::Notifications))
+            {
+                self.unread_notifications = 0;
+            }
+            let mut commands = vec![
+                window::toggle_decorations(window_id),
+                window::set_level(window_id, Level::Normal),
+            ];
+            if !triggered_by_resize {
+                let size = self.conf.window.size();
+                let position = self.conf.window.position();
+                commands.push(window::move_to(window_id, position));
+                commands.push(window::resize(window_id, size));
+            }
+            Task::batch(commands)
+        }
+    }
+
+    fn drag(&mut self) -> Task<Message> {
+        let was_just_thumbnail_click = self.timing_events.was_just_thumbnail_click();
+        self.timing_events.thumbnail_click_now();
+        if was_just_thumbnail_click {
+            return window::drag(self.id.unwrap_or_else(Id::unique));
+        }
+        Task::none()
+    }
+
+    fn ctrl_t_pressed(&mut self) -> Task<Message> {
+        if self.running_page.is_some()
+            && self.settings_page.is_none()
+            && self.modal.is_none()
+            && !self.timing_events.was_just_thumbnail_enter()
+        {
+            return self.toggle_thumbnail(false);
+        }
+        Task::none()
+    }
+
+    fn ctrl_space_pressed(&mut self) {
+        if self.running_page.is_some() && self.settings_page.is_none() && self.modal.is_none() {
+            self.freeze();
+        }
+    }
+
+    fn scale_factor_shortcut(&mut self, increase: bool) {
+        let scale_factor = self.conf.settings.scale_factor;
+        if !(scale_factor > 2.99 && increase || scale_factor < 0.31 && !increase) {
+            let delta = if increase { 0.1 } else { -0.1 };
+            let new = scale_factor + delta;
+            self.change_scale_factor(new);
+        }
+    }
+
+    fn set_newer_release_status(&mut self, status: Option<bool>) {
+        self.newer_release_available = status;
+    }
+
+    fn set_pcap_import(&mut self, path: String) {
+        if !path.is_empty() {
+            self.conf.import_pcap_path.clone_from(&path);
+            self.capture_source = CaptureSource::File(MyPcapImport::new(path));
+        }
+    }
+
+    fn pending_hosts(&mut self, cap_id: usize, host_msgs: Vec<HostMessage>) {
+        if cap_id == self.current_capture_rx.0 {
+            for host_msg in host_msgs {
+                self.handle_new_host(host_msg);
+            }
+        }
+    }
+
+    fn offline_gap(&mut self, cap_id: usize, gap: u32) {
+        if cap_id == self.current_capture_rx.0 {
+            self.traffic_chart.push_offline_gap_to_splines(gap);
+        }
+    }
+
+    fn periodic(&mut self) {
+        self.update_waiting_dots();
+        self.capture_source.set_addresses();
+        self.update_threshold();
+    }
+
+    fn expand_notification(&mut self, id: usize, expand: bool) {
+        if let Some(n) = self
+            .logged_notifications
+            .notifications_mut()
+            .iter_mut()
+            .find(|n| n.id() == id)
+        {
+            n.expand(expand);
+        }
+    }
+
+    fn toggle_remote_notifications(&mut self) {
+        self.conf
+            .settings
+            .notifications
+            .remote_notifications
+            .toggle();
+    }
+
+    fn remote_notifications_url(&mut self, url: &str) {
+        self.conf
+            .settings
+            .notifications
+            .remote_notifications
+            .set_url(url);
+    }
+
+    fn freeze(&mut self) {
+        self.frozen = !self.frozen;
+        if let Some(tx) = &self.freeze_tx {
+            let _ = tx.send(());
+        }
+    }
+
+    fn traffic_preview(&mut self, msg: TrafficPreview) {
+        self.preview_charts.retain(|(my_dev, _)| {
+            msg.data
+                .iter()
+                .any(|(d, _)| d.get_name().eq(my_dev.get_name()))
+        });
+        for (dev, packets) in msg.data {
+            let Some((my_dev, chart)) = self
+                .preview_charts
+                .iter_mut()
+                .find(|(my_dev, _)| my_dev.get_name().eq(dev.get_name()))
+            else {
+                let mut chart = PreviewChart::new(self.conf.settings.style);
+                chart.update_charts_data(packets);
+                self.preview_charts.push((dev, chart));
+                continue;
+            };
+            *my_dev = dev;
+            chart.update_charts_data(packets);
+        }
+        self.preview_charts
+            .sort_by(|(_, c1), (_, c2)| c2.tot_packets.total_cmp(&c1.tot_packets));
     }
 
     /// Updates threshold if it hasn't been edited for a while
@@ -690,17 +880,13 @@ impl Sniffer {
         // Ignore if just edited
         if let Some(temp_threshold) = self.timing_events.threshold_adjust_expired_take() {
             // Apply the temporary threshold to the actual config
-            self.configs
-                .settings
-                .notifications
-                .data_notification
-                .threshold = temp_threshold.threshold;
-            self.configs
+            self.conf.settings.notifications.data_notification.threshold = temp_threshold.threshold;
+            self.conf
                 .settings
                 .notifications
                 .data_notification
                 .byte_multiple = temp_threshold.byte_multiple;
-            self.configs
+            self.conf
                 .settings
                 .notifications
                 .data_notification
@@ -759,34 +945,31 @@ impl Sniffer {
 
     fn refresh_data(&mut self, mut msg: InfoTraffic, no_more_packets: bool) {
         self.info_traffic.refresh(&mut msg);
-        if self.info_traffic.tot_data_info.tot_packets() == 0 {
+        if self.info_traffic.tot_data_info.tot_data(DataRepr::Packets) == 0 {
             return;
         }
         let emitted_notifications = notify_and_log(
             &mut self.logged_notifications,
-            self.configs.settings.notifications,
+            &self.conf.settings.notifications,
             &msg,
             &self.favorite_hosts,
             &self.capture_source,
+            &self.addresses_resolved,
         );
-        if self.thumbnail || self.running_page.ne(&RunningPage::Notifications) {
+        if self.thumbnail
+            || self
+                .running_page
+                .is_some_and(|p| p.ne(&RunningPage::Notifications))
+        {
             self.unread_notifications += emitted_notifications;
         }
         self.traffic_chart.update_charts_data(&msg, no_more_packets);
 
-        if let CaptureSource::Device(device) = &self.capture_source {
-            let current_device_name = device.get_name().clone();
-            // update ConfigDevice stored if different from last sniffed device
-            let last_device_name_sniffed = self.configs.device.device_name.clone();
-            if current_device_name.ne(&last_device_name_sniffed) {
-                self.configs.device.device_name = current_device_name;
-            }
-        }
         // update host dropdowns
         self.host_data_states.update_states(&self.search);
     }
 
-    fn open_web(web_page: &WebPage) {
+    fn open_web_page(web_page: &WebPage) {
         let url = web_page.get_url();
 
         #[cfg(target_os = "windows")]
@@ -808,110 +991,134 @@ impl Sniffer {
     }
 
     fn start(&mut self) -> Task<Message> {
-        if matches!(&self.capture_source, CaptureSource::Device(_)) {
-            let current_device_name = &self.capture_source.get_name();
-            self.set_device(current_device_name);
-        }
-        let pcap_path = self.export_pcap.full_path();
-        let capture_context = CaptureContext::new(&self.capture_source, pcap_path.as_ref());
-        self.pcap_error = capture_context.error().map(ToString::to_string);
-        self.running_page = RunningPage::Overview;
+        if self.is_capture_source_consistent() {
+            // close captures preview channel to kill previous preview captures
+            if let Some(rx) = &self.preview_captures_rx {
+                rx.close();
+            }
+            self.preview_captures_rx = None;
+            self.preview_charts
+                .iter_mut()
+                .for_each(|(_, chart)| *chart = PreviewChart::new(self.conf.settings.style));
 
-        if capture_context.error().is_none() {
-            // no pcap error
-            let curr_cap_id = self.current_capture_rx.0;
-            let filters = self.filters.clone();
-            let mmdb_readers = self.mmdb_readers.clone();
-            self.capture_source
-                .set_link_type(capture_context.my_link_type());
-            let capture_source = self.capture_source.clone();
-            self.traffic_chart
-                .change_capture_source(matches!(capture_source, CaptureSource::Device(_)));
-            let (tx, rx) = async_channel::unbounded();
-            let _ = thread::Builder::new()
-                .name("thread_parse_packets".to_string())
-                .spawn(move || {
-                    parse_packets(
-                        curr_cap_id,
-                        capture_source,
-                        &filters,
-                        &mmdb_readers,
-                        capture_context,
-                        &tx,
-                    );
-                })
-                .log_err(location!());
-            self.current_capture_rx.1 = Some(rx.clone());
-            return Task::run(rx, |backend_msg| match backend_msg {
-                BackendTrafficMessage::TickRun(cap_id, msg, host_msg, no_more_packets) => {
-                    Message::TickRun(cap_id, msg, host_msg, no_more_packets)
-                }
-                BackendTrafficMessage::PendingHosts(cap_id, host_msg) => {
-                    Message::PendingHosts(cap_id, host_msg)
-                }
-                BackendTrafficMessage::OfflineGap(cap_id, gap) => Message::OfflineGap(cap_id, gap),
-            });
+            if matches!(&self.capture_source, CaptureSource::Device(_)) {
+                let current_device_name = &self.capture_source.get_name();
+                self.device_selection(current_device_name);
+            }
+            let pcap_path = self.conf.export_pcap.full_path();
+            let capture_context =
+                CaptureContext::new(&self.capture_source, pcap_path.as_ref(), &self.conf.filters);
+            self.pcap_error = capture_context.error().map(ToString::to_string);
+            self.running_page = Some(self.conf.last_opened_page);
+
+            if capture_context.error().is_none() {
+                // no pcap error
+                let curr_cap_id = self.current_capture_rx.0;
+                let mmdb_readers = self.mmdb_readers.clone();
+                let ip_blacklist = self.ip_blacklist.clone();
+                self.capture_source
+                    .set_link_type(capture_context.my_link_type());
+                self.capture_source.set_addresses();
+                let capture_source = self.capture_source.clone();
+                self.traffic_chart
+                    .change_capture_source(matches!(capture_source, CaptureSource::Device(_)));
+                let (tx, rx) = async_channel::unbounded();
+                let (freeze_tx, freeze_rx) = tokio::sync::broadcast::channel(1_048_575);
+                let freeze_rx2 = freeze_tx.subscribe();
+                let filters = self.conf.filters.clone();
+                let _ = thread::Builder::new()
+                    .name("thread_parse_packets".to_string())
+                    .spawn(move || {
+                        parse_packets(
+                            curr_cap_id,
+                            capture_source,
+                            &mmdb_readers,
+                            &ip_blacklist,
+                            capture_context,
+                            filters,
+                            &tx,
+                            (freeze_rx, freeze_rx2),
+                        );
+                    })
+                    .log_err(location!());
+                self.current_capture_rx.1 = Some(rx.clone());
+                self.freeze_tx = Some(freeze_tx);
+                return Task::run(rx, |backend_msg| match backend_msg {
+                    BackendTrafficMessage::TickRun(cap_id, msg, host_msg, no_more_packets) => {
+                        Message::TickRun(cap_id, msg, host_msg, no_more_packets)
+                    }
+                    BackendTrafficMessage::PendingHosts(cap_id, host_msg) => {
+                        Message::PendingHosts(cap_id, host_msg)
+                    }
+                    BackendTrafficMessage::OfflineGap(cap_id, gap) => {
+                        Message::OfflineGap(cap_id, gap)
+                    }
+                });
+            }
         }
         Task::none()
     }
 
-    fn reset(&mut self) {
+    fn reset(&mut self) -> Task<Message> {
         // close capture channel to kill previous captures
         if let Some(rx) = &self.current_capture_rx.1 {
             rx.close();
         }
-        let ConfigSettings {
+        let Settings {
             style, language, ..
-        } = self.configs.settings;
+        } = self.conf.settings;
         // increment capture id to ignore pending messages from previous captures
         self.current_capture_rx = (self.current_capture_rx.0 + 1, None);
         self.info_traffic = InfoTraffic::default();
         self.addresses_resolved = HashMap::new();
         self.favorite_hosts = HashSet::new();
-        self.logged_notifications = (VecDeque::new(), 0);
+        self.logged_notifications = LoggedNotifications::default();
         self.pcap_error = None;
-        self.traffic_chart = TrafficChart::new(style, language);
-        self.report_sort_type = ReportSortType::default();
-        self.host_sort_type = SortType::default();
-        self.service_sort_type = SortType::default();
+        self.traffic_chart = TrafficChart::new(style, language, self.conf.data_repr);
         self.modal = None;
         self.settings_page = None;
-        self.running_page = RunningPage::Init;
+        self.running_page = None;
         self.unread_notifications = 0;
         self.search = SearchParameters::default();
         self.page_number = 1;
         self.thumbnail = false;
         self.host_data_states = HostDataStates::default();
+        self.frozen = false;
+        self.freeze_tx = None;
+        self.start_traffic_previews()
     }
 
-    fn set_device(&mut self, name: &str) {
-        for my_dev in &self.my_devices {
+    fn start_traffic_previews(&mut self) -> Task<Message> {
+        let (tx, rx) = async_channel::unbounded();
+        let _ = thread::Builder::new()
+            .name("thread_traffic_preview".to_string())
+            .spawn(move || {
+                traffic_preview(&tx);
+            })
+            .log_err(location!());
+        self.preview_captures_rx = Some(rx.clone());
+        Task::run(rx, |traffic_preview| {
+            Message::TrafficPreview(traffic_preview)
+        })
+    }
+
+    fn device_selection(&mut self, name: &str) {
+        for (my_dev, _) in &self.preview_charts {
             if my_dev.get_name().eq(&name) {
+                self.conf.device.device_name = name.to_string();
                 self.capture_source = CaptureSource::Device(my_dev.clone());
                 break;
             }
         }
     }
 
-    fn fetch_devices(&mut self) {
-        self.my_devices.clear();
-        for dev in Device::list().log_err(location!()).unwrap_or_default() {
-            if matches!(&self.capture_source, CaptureSource::Device(_))
-                && dev.name.eq(&self.capture_source.get_name())
-            {
-                // refresh active addresses
-                self.capture_source.set_addresses(dev.addresses.clone());
-            }
-            let my_dev = MyDevice::from_pcap_device(dev);
-            self.my_devices.push(my_dev);
-        }
-    }
-
     fn update_waiting_dots(&mut self) {
-        if self.dots_pulse.0.len() > 2 {
-            self.dots_pulse.0 = String::new();
+        if !self.frozen {
+            if self.dots_pulse.0.len() > 2 {
+                self.dots_pulse.0 = String::new();
+            }
+            self.dots_pulse.0 = ".".repeat(self.dots_pulse.0.len() + 1);
         }
-        self.dots_pulse.0 = ".".repeat(self.dots_pulse.0.len() + 1);
     }
 
     fn add_or_remove_favorite(&mut self, host: &Host, add: bool) {
@@ -927,10 +1134,7 @@ impl Sniffer {
     }
 
     fn close_settings(&mut self) {
-        if let Some(page) = self.settings_page {
-            self.last_opened_setting = page;
-            self.settings_page = None;
-        }
+        self.settings_page = None;
     }
 
     /// Don't update adjustments to threshold immediately:
@@ -938,10 +1142,10 @@ impl Sniffer {
     /// Threshold adjustments are saved in `self.timing_events.threshold_adjust` and then applied
     /// after timeout
     fn update_notifications_settings(&mut self, notification: Notification, emit_sound: bool) {
-        let notifications = self.configs.settings.notifications;
+        let data_notification = self.conf.settings.notifications.data_notification;
         let sound = match notification {
             Notification::Data(DataNotification {
-                chart_type,
+                data_repr,
                 threshold,
                 byte_multiple,
                 sound,
@@ -953,46 +1157,43 @@ impl Sniffer {
                     || temp_threshold.previous_threshold != previous_threshold
                 {
                     temp_threshold = DataNotification {
-                        chart_type,
+                        sound,
+                        data_repr,
                         threshold,
                         byte_multiple,
-                        sound,
                         previous_threshold,
                     };
                     self.timing_events.threshold_adjust_now(temp_threshold);
                 }
-                if threshold.is_some() != notifications.data_notification.threshold.is_some() {
-                    self.configs
-                        .settings
-                        .notifications
-                        .data_notification
-                        .threshold = threshold;
-                    self.configs
+                if threshold.is_some() != data_notification.threshold.is_some() {
+                    self.conf.settings.notifications.data_notification.threshold = threshold;
+                    self.conf
                         .settings
                         .notifications
                         .data_notification
                         .byte_multiple = byte_multiple;
-                    self.configs
+                    self.conf
                         .settings
                         .notifications
                         .data_notification
                         .previous_threshold = previous_threshold;
                 }
-                self.configs.settings.notifications.data_notification.sound = sound;
-                self.configs
-                    .settings
-                    .notifications
-                    .data_notification
-                    .chart_type = chart_type;
+                self.conf.settings.notifications.data_notification.sound = sound;
+                self.conf.settings.notifications.data_notification.data_repr = data_repr;
                 sound
             }
             Notification::Favorite(favorite_notification) => {
-                self.configs.settings.notifications.favorite_notification = favorite_notification;
+                self.conf.settings.notifications.favorite_notification = favorite_notification;
                 favorite_notification.sound
+            }
+            Notification::IpBlacklist(ip_blacklist_notification) => {
+                self.conf.settings.notifications.ip_blacklist_notification =
+                    ip_blacklist_notification;
+                ip_blacklist_notification.sound
             }
         };
         if emit_sound {
-            play(sound, self.configs.settings.notifications.volume);
+            play(sound, self.conf.settings.notifications.volume);
         }
     }
 
@@ -1001,107 +1202,136 @@ impl Sniffer {
         if let Some(temp_threshold) = self.timing_events.temp_threshold() {
             temp_threshold
         } else {
-            let notifications = self.configs.settings.notifications;
-            notifications.data_notification
+            self.conf.settings.notifications.data_notification
         }
     }
 
     fn switch_page(&mut self, next: bool) {
-        match (self.running_page, self.settings_page, self.modal.is_none()) {
-            (_, Some(current_setting), true) => {
-                // Settings opened
-                if next {
-                    self.settings_page = Some(current_setting.next());
-                } else {
-                    self.settings_page = Some(current_setting.previous());
-                }
-            }
-            (
-                RunningPage::Inspect | RunningPage::Notifications | RunningPage::Overview,
-                None,
-                true,
-            ) => {
-                // Running with no overlays
-                if self.info_traffic.tot_data_info.tot_packets() > 0 {
-                    // Running with no overlays and some packets filtered
-                    self.running_page = if next {
-                        self.running_page.next()
+        // To prevent SwitchPage be triggered when using `Alt` + `Tab` to switch back,
+        // first check if user switch back just now, and ignore the request for a short time.
+        if !self.timing_events.was_just_focus() {
+            match (self.running_page, self.settings_page, self.modal.is_none()) {
+                (_, Some(current_setting), true) => {
+                    // Settings opened
+                    let new_setting = if next {
+                        current_setting.next()
                     } else {
-                        self.running_page.previous()
+                        current_setting.previous()
                     };
-                    if self.running_page.eq(&RunningPage::Notifications) {
-                        self.unread_notifications = 0;
+                    self.settings_page = Some(new_setting);
+                    self.conf.last_opened_setting = new_setting;
+                }
+                (Some(current_page), None, true) => {
+                    // Running with no overlays
+                    if self.info_traffic.tot_data_info.tot_data(DataRepr::Packets) > 0 {
+                        // Running with no overlays and some packets
+                        let new_page = if next {
+                            current_page.next()
+                        } else {
+                            current_page.previous()
+                        };
+                        self.running_page = Some(new_page);
+                        self.conf.last_opened_page = new_page;
+                        if self
+                            .running_page
+                            .is_some_and(|p| p.eq(&RunningPage::Notifications))
+                        {
+                            self.unread_notifications = 0;
+                        }
                     }
                 }
+                (_, _, _) => {}
             }
-            (_, _, _) => {}
         }
     }
 
-    fn shortcut_return(&mut self) -> Task<Message> {
-        if self.running_page.eq(&RunningPage::Init)
-            && self.settings_page.is_none()
-            && self.modal.is_none()
-        {
-            if self.filters.are_valid() {
-                return Task::done(Message::Start);
-            }
+    fn return_key_pressed(&mut self) -> Task<Message> {
+        if self.running_page.is_none() && self.settings_page.is_none() && self.modal.is_none() {
+            return self.start();
         } else if self.modal.eq(&Some(MyModal::Reset)) {
-            return Task::done(Message::Reset);
+            return self.reset();
         } else if self.modal.eq(&Some(MyModal::Quit)) {
-            return Task::done(Message::Quit);
+            return self.quit();
         } else if self.modal.eq(&Some(MyModal::ClearAll)) {
-            return Task::done(Message::ClearAllNotifications);
+            self.clear_all_notifications();
         }
         Task::none()
     }
 
-    fn shortcut_esc(&mut self) -> Task<Message> {
+    fn esc_key_pressed(&mut self) {
         if self.modal.is_some() {
-            return Task::done(Message::HideModal);
+            self.hide_modal();
         } else if self.settings_page.is_some() {
-            return Task::done(Message::CloseSettings);
+            self.close_settings();
         }
-        Task::none()
     }
 
     // also called when the backspace shortcut is pressed
     fn reset_button_pressed(&mut self) -> Task<Message> {
-        if self.running_page.ne(&RunningPage::Init) {
-            return if self.info_traffic.all_packets == 0 && self.settings_page.is_none() {
-                Task::done(Message::Reset)
-            } else {
-                Task::done(Message::ShowModal(MyModal::Reset))
-            };
+        if self.running_page.is_some() {
+            let tot_packets = self.info_traffic.tot_data_info.tot_data(DataRepr::Packets);
+            if tot_packets == 0 && self.settings_page.is_none() {
+                return self.reset();
+            }
+            self.show_modal(MyModal::Reset);
         }
         Task::none()
     }
 
     fn quit_wrapper(&mut self) -> Task<Message> {
-        if self.running_page.eq(&RunningPage::Init) || self.info_traffic.all_packets == 0 {
-            Task::done(Message::Quit)
+        let tot_packets = self.info_traffic.tot_data_info.tot_data(DataRepr::Packets);
+        if self.running_page.is_none() || tot_packets == 0 {
+            self.quit()
         } else if self.thumbnail {
-            // TODO: uncomment once issue #653 is fixed
-            // Task::done(Message::ToggleThumbnail(false))
-            //     .chain(Task::done(Message::ShowModal(MyModal::Quit)))
-            Task::done(Message::Quit)
-        } else {
-            Task::done(Message::HideModal)
-                .chain(Task::done(Message::CloseSettings))
+            self.toggle_thumbnail(false)
                 .chain(Task::done(Message::ShowModal(MyModal::Quit)))
+        } else {
+            self.hide_modal();
+            self.close_settings();
+            self.show_modal(MyModal::Quit);
+            Task::none()
         }
     }
 
-    fn shortcut_ctrl_d(&mut self) -> Task<Message> {
-        if self.running_page.eq(&RunningPage::Notifications)
-            && !self.logged_notifications.0.is_empty()
-        {
-            return Task::done(Message::ShowModal(MyModal::ClearAll));
+    fn quit(&mut self) -> Task<Message> {
+        if self.welcome.is_none() {
+            self.welcome = Some((false, 13));
+        } else if let Some((false, x)) = self.welcome {
+            if x <= 2 {
+                let _ = self.conf.clone().store();
+                return window::close(self.id.unwrap_or_else(Id::unique));
+            }
+            self.welcome = Some((false, x.saturating_sub(1)));
         }
         Task::none()
     }
 
-    async fn open_file(old_file: String, file_info: FileInfo, language: Language) -> String {
+    fn welcome(&mut self) {
+        if let Some((true, x)) = self.welcome {
+            if x >= 19 {
+                self.welcome = None;
+            } else {
+                self.welcome = Some((true, x + 1));
+            }
+        }
+    }
+
+    fn copy_ip(&mut self, ip: IpAddr) -> Task<Message> {
+        self.timing_events.copy_ip_now(ip);
+        iced::clipboard::write(ip.to_string())
+    }
+
+    fn ctrl_d_pressed(&mut self) {
+        if self
+            .running_page
+            .is_some_and(|p| p.eq(&RunningPage::Notifications))
+            && !self.logged_notifications.is_empty()
+        {
+            self.show_modal(MyModal::ClearAll);
+        }
+    }
+
+    async fn open_file_inner(old_file: String, file_info: FileInfo, language: Language) -> String {
         let starting_directory = if old_file.is_empty() {
             std::env::var("HOME").unwrap_or_default()
         } else if file_info == FileInfo::Directory {
@@ -1120,10 +1350,14 @@ impl Sniffer {
             dialog.pick_folder().await
         } else {
             let extensions = file_info.get_extensions();
-            dialog
-                .add_filter(format!("{extensions:?}"), &extensions)
-                .pick_file()
-                .await
+            if extensions.is_empty() {
+                dialog.pick_file().await
+            } else {
+                dialog
+                    .add_filter(format!("{extensions:?}"), &extensions)
+                    .pick_file()
+                    .await
+            }
         }
         .unwrap_or_else(|| FileHandle::from(PathBuf::from(&old_file)));
 
@@ -1164,247 +1398,182 @@ impl Sniffer {
 
         Task::run(rx, |()| Message::Quit)
     }
+
+    pub fn is_capture_source_consistent(&self) -> bool {
+        self.conf.capture_source_picklist == CaptureSourcePicklist::Device
+            && matches!(self.capture_source, CaptureSource::Device(_))
+            || self.conf.capture_source_picklist == CaptureSourcePicklist::File
+                && matches!(self.capture_source, CaptureSource::File(_))
+    }
+
+    fn change_charts_style(&mut self) {
+        let style = self.conf.settings.style;
+        self.traffic_chart.change_style(style);
+        for (_, chart) in &mut self.preview_charts {
+            chart.change_style(style);
+        }
+    }
 }
 
 #[cfg(test)]
 mod tests {
     #![allow(unused_must_use)]
 
+    use iced::{Point, Size};
+    use serial_test::{parallel, serial};
     use std::collections::{HashSet, VecDeque};
     use std::fs::remove_file;
     use std::path::Path;
     use std::time::Duration;
 
-    use serial_test::{parallel, serial};
-
-    use crate::configs::types::config_window::{PositionTuple, SizeTuple};
     use crate::countries::types::country::Country;
     use crate::gui::components::types::my_modal::MyModal;
     use crate::gui::pages::types::settings_page::SettingsPage;
-    use crate::gui::styles::types::custom_palette::ExtraStyles;
     use crate::gui::styles::types::gradient_type::GradientType;
+    use crate::gui::types::conf::Conf;
+    use crate::gui::types::config_window::ConfigWindow;
+    use crate::gui::types::export_pcap::ExportPcap;
+    use crate::gui::types::filters::Filters;
     use crate::gui::types::message::Message;
+    use crate::gui::types::settings::Settings;
     use crate::gui::types::timing_events::TimingEvents;
+    use crate::networking::types::capture_context::CaptureSourcePicklist;
+    use crate::networking::types::config_device::ConfigDevice;
     use crate::networking::types::data_info::DataInfo;
+    use crate::networking::types::data_representation::DataRepr;
     use crate::networking::types::host::Host;
     use crate::networking::types::traffic_direction::TrafficDirection;
     use crate::notifications::types::logged_notification::{
         DataThresholdExceeded, LoggedNotification,
     };
     use crate::notifications::types::notifications::{
-        DataNotification, FavoriteNotification, Notification, Notifications,
+        DataNotification, Notification, Notifications, SimpleNotification,
     };
     use crate::notifications::types::sound::Sound;
-    use crate::report::types::report_col::ReportCol;
     use crate::report::types::sort_type::SortType;
-    use crate::{
-        ByteMultiple, ChartType, ConfigDevice, ConfigSettings, ConfigWindow, Configs, IpVersion,
-        Language, Protocol, ReportSortType, RunningPage, Sniffer, StyleType,
-    };
+    use crate::{ByteMultiple, Language, RunningPage, Sniffer, StyleType};
 
     // helpful to clean up files generated from tests
     impl Drop for Sniffer {
         fn drop(&mut self) {
-            let settings_path_str = ConfigSettings::test_path();
-            let settings_path = Path::new(&settings_path_str);
-            if settings_path.exists() {
-                remove_file(ConfigSettings::test_path()).unwrap();
-            }
-
-            let device_path_str = ConfigDevice::test_path();
-            let device_path = Path::new(&device_path_str);
-            if device_path.exists() {
-                remove_file(ConfigDevice::test_path()).unwrap();
-            }
-
-            let window_path_str = ConfigWindow::test_path();
-            let window_path = Path::new(&window_path_str);
-            if window_path.exists() {
-                remove_file(ConfigWindow::test_path()).unwrap();
+            let conf_path_str = Conf::test_path();
+            let conf_path = Path::new(&conf_path_str);
+            if conf_path.exists() {
+                remove_file(Conf::test_path()).unwrap();
             }
         }
     }
 
     #[test]
     #[parallel] // needed to not collide with other tests generating configs files
-    fn test_correctly_update_ip_version() {
-        let mut sniffer = Sniffer::new(Configs::default());
-
-        assert_eq!(sniffer.filters.ip_versions, HashSet::from(IpVersion::ALL));
-        sniffer.update(Message::IpVersionSelection(IpVersion::IPv6, true));
-        assert_eq!(sniffer.filters.ip_versions, HashSet::from(IpVersion::ALL));
-        sniffer.update(Message::IpVersionSelection(IpVersion::IPv4, false));
-        assert_eq!(
-            sniffer.filters.ip_versions,
-            HashSet::from([IpVersion::IPv6])
-        );
-        sniffer.update(Message::IpVersionSelection(IpVersion::IPv6, false));
-        assert_eq!(sniffer.filters.ip_versions, HashSet::new());
-    }
-
-    #[test]
-    #[parallel] // needed to not collide with other tests generating configs files
-    fn test_correctly_update_protocol() {
-        let mut sniffer = Sniffer::new(Configs::default());
-
-        assert_eq!(sniffer.filters.protocols, HashSet::from(Protocol::ALL));
-        sniffer.update(Message::ProtocolSelection(Protocol::UDP, true));
-        assert_eq!(sniffer.filters.protocols, HashSet::from(Protocol::ALL));
-        sniffer.update(Message::ProtocolSelection(Protocol::UDP, false));
-        assert_eq!(
-            sniffer.filters.protocols,
-            HashSet::from([Protocol::TCP, Protocol::ICMP, Protocol::ARP])
-        );
-        sniffer.update(Message::ProtocolSelection(Protocol::TCP, false));
-        assert_eq!(
-            sniffer.filters.protocols,
-            HashSet::from([Protocol::ICMP, Protocol::ARP])
-        );
-        sniffer.update(Message::ProtocolSelection(Protocol::ICMP, false));
-        assert_eq!(sniffer.filters.protocols, HashSet::from([Protocol::ARP]));
-        sniffer.update(Message::ProtocolSelection(Protocol::ARP, false));
-        assert_eq!(sniffer.filters.protocols, HashSet::new());
-        sniffer.update(Message::ProtocolSelection(Protocol::UDP, true));
-        assert_eq!(sniffer.filters.protocols, HashSet::from([Protocol::UDP]));
-    }
-
-    #[test]
-    #[parallel] // needed to not collide with other tests generating configs files
     fn test_correctly_update_chart_kind() {
-        let mut sniffer = Sniffer::new(Configs::default());
+        let mut sniffer = Sniffer::new(Conf::default());
 
-        assert_eq!(sniffer.traffic_chart.chart_type, ChartType::Bytes);
-        sniffer.update(Message::ChartSelection(ChartType::Packets));
-        assert_eq!(sniffer.traffic_chart.chart_type, ChartType::Packets);
-        sniffer.update(Message::ChartSelection(ChartType::Packets));
-        assert_eq!(sniffer.traffic_chart.chart_type, ChartType::Packets);
-        sniffer.update(Message::ChartSelection(ChartType::Bytes));
-        assert_eq!(sniffer.traffic_chart.chart_type, ChartType::Bytes);
+        assert_eq!(sniffer.traffic_chart.data_repr, DataRepr::Bytes);
+        assert_eq!(sniffer.conf.data_repr, DataRepr::Bytes);
+        sniffer.update(Message::DataReprSelection(DataRepr::Packets));
+        assert_eq!(sniffer.traffic_chart.data_repr, DataRepr::Packets);
+        assert_eq!(sniffer.conf.data_repr, DataRepr::Packets);
+        sniffer.update(Message::DataReprSelection(DataRepr::Packets));
+        assert_eq!(sniffer.traffic_chart.data_repr, DataRepr::Packets);
+        assert_eq!(sniffer.conf.data_repr, DataRepr::Packets);
+        sniffer.update(Message::DataReprSelection(DataRepr::Bytes));
+        assert_eq!(sniffer.traffic_chart.data_repr, DataRepr::Bytes);
+        assert_eq!(sniffer.conf.data_repr, DataRepr::Bytes);
+        sniffer.update(Message::DataReprSelection(DataRepr::Bits));
+        assert_eq!(sniffer.traffic_chart.data_repr, DataRepr::Bits);
+        assert_eq!(sniffer.conf.data_repr, DataRepr::Bits);
     }
 
     #[test]
     #[parallel] // needed to not collide with other tests generating configs files
     fn test_correctly_update_report_sort_kind() {
-        let mut sniffer = Sniffer::new(Configs::default());
+        let mut sniffer = Sniffer::new(Conf::default());
 
-        let sort = ReportSortType {
-            byte_sort: SortType::Neutral,
-            packet_sort: SortType::Neutral,
-        };
+        let sort = SortType::Neutral;
 
-        assert_eq!(sniffer.report_sort_type, sort);
+        assert_eq!(sniffer.conf.report_sort_type, sort);
+        sniffer.update(Message::ReportSortSelection(sort.next_sort()));
+        assert_eq!(sniffer.conf.report_sort_type, SortType::Descending);
+        sniffer.update(Message::ReportSortSelection(sort.next_sort().next_sort()));
+        assert_eq!(sniffer.conf.report_sort_type, SortType::Ascending);
         sniffer.update(Message::ReportSortSelection(
-            sort.next_sort(&ReportCol::Bytes),
+            sort.next_sort().next_sort().next_sort(),
         ));
-        assert_eq!(
-            sniffer.report_sort_type,
-            ReportSortType {
-                byte_sort: SortType::Descending,
-                packet_sort: SortType::Neutral
-            }
-        );
-        sniffer.update(Message::ReportSortSelection(
-            sort.next_sort(&ReportCol::Bytes)
-                .next_sort(&ReportCol::Bytes),
-        ));
-        assert_eq!(
-            sniffer.report_sort_type,
-            ReportSortType {
-                byte_sort: SortType::Ascending,
-                packet_sort: SortType::Neutral
-            }
-        );
-        sniffer.update(Message::ReportSortSelection(
-            sort.next_sort(&ReportCol::Bytes)
-                .next_sort(&ReportCol::Packets),
-        ));
-        assert_eq!(
-            sniffer.report_sort_type,
-            ReportSortType {
-                byte_sort: SortType::Neutral,
-                packet_sort: SortType::Descending
-            }
-        );
-        sniffer.update(Message::ReportSortSelection(
-            sort.next_sort(&ReportCol::Bytes)
-                .next_sort(&ReportCol::Bytes)
-                .next_sort(&ReportCol::Bytes),
-        ));
-        assert_eq!(
-            sniffer.report_sort_type,
-            ReportSortType {
-                byte_sort: SortType::Neutral,
-                packet_sort: SortType::Neutral
-            }
-        );
+        assert_eq!(sniffer.conf.report_sort_type, SortType::Neutral);
     }
 
     #[test]
     #[parallel] // needed to not collide with other tests generating configs files
     fn test_correctly_update_host_sort_kind() {
-        let mut sniffer = Sniffer::new(Configs::default());
+        let mut sniffer = Sniffer::new(Conf::default());
 
         let mut sort = SortType::Neutral;
 
-        assert_eq!(sniffer.host_sort_type, sort);
+        assert_eq!(sniffer.conf.host_sort_type, sort);
 
         sort = sort.next_sort();
         sniffer.update(Message::HostSortSelection(sort));
-        assert_eq!(sniffer.host_sort_type, SortType::Descending);
+        assert_eq!(sniffer.conf.host_sort_type, SortType::Descending);
 
         sort = sort.next_sort();
         sniffer.update(Message::HostSortSelection(sort));
-        assert_eq!(sniffer.host_sort_type, SortType::Ascending);
+        assert_eq!(sniffer.conf.host_sort_type, SortType::Ascending);
 
         sort = sort.next_sort();
         sniffer.update(Message::HostSortSelection(sort));
-        assert_eq!(sniffer.host_sort_type, SortType::Neutral);
+        assert_eq!(sniffer.conf.host_sort_type, SortType::Neutral);
     }
 
     #[test]
     #[parallel] // needed to not collide with other tests generating configs files
     fn test_correctly_update_service_sort_kind() {
-        let mut sniffer = Sniffer::new(Configs::default());
+        let mut sniffer = Sniffer::new(Conf::default());
 
         let mut sort = SortType::Neutral;
 
-        assert_eq!(sniffer.service_sort_type, sort);
+        assert_eq!(sniffer.conf.service_sort_type, sort);
 
         sort = sort.next_sort();
         sniffer.update(Message::ServiceSortSelection(sort));
-        assert_eq!(sniffer.service_sort_type, SortType::Descending);
+        assert_eq!(sniffer.conf.service_sort_type, SortType::Descending);
 
         sort = sort.next_sort();
         sniffer.update(Message::ServiceSortSelection(sort));
-        assert_eq!(sniffer.service_sort_type, SortType::Ascending);
+        assert_eq!(sniffer.conf.service_sort_type, SortType::Ascending);
 
         sort = sort.next_sort();
         sniffer.update(Message::ServiceSortSelection(sort));
-        assert_eq!(sniffer.service_sort_type, SortType::Neutral);
+        assert_eq!(sniffer.conf.service_sort_type, SortType::Neutral);
     }
 
     #[test]
     #[parallel] // needed to not collide with other tests generating configs files
     fn test_correctly_update_style() {
-        let mut sniffer = Sniffer::new(Configs::default());
+        let mut sniffer = Sniffer::new(Conf::default());
 
-        sniffer.update(Message::Style(StyleType::MonAmour));
-        assert_eq!(sniffer.configs.settings.style, StyleType::MonAmour);
-        sniffer.update(Message::Style(StyleType::Day));
-        assert_eq!(sniffer.configs.settings.style, StyleType::Day);
-        sniffer.update(Message::Style(StyleType::Night));
-        assert_eq!(sniffer.configs.settings.style, StyleType::Night);
-        sniffer.update(Message::Style(StyleType::DeepSea));
-        assert_eq!(sniffer.configs.settings.style, StyleType::DeepSea);
-        sniffer.update(Message::Style(StyleType::DeepSea));
-        assert_eq!(sniffer.configs.settings.style, StyleType::DeepSea);
+        sniffer.update(Message::Style(StyleType::A11yLight));
+        assert_eq!(sniffer.traffic_chart.style, StyleType::A11yLight);
+        assert_eq!(sniffer.conf.settings.style, StyleType::A11yLight);
+        sniffer.update(Message::Style(StyleType::DraculaLight));
+        assert_eq!(sniffer.traffic_chart.style, StyleType::DraculaLight);
+        assert_eq!(sniffer.conf.settings.style, StyleType::DraculaLight);
+        sniffer.update(Message::Style(StyleType::A11yDark));
+        assert_eq!(sniffer.traffic_chart.style, StyleType::A11yDark);
+        assert_eq!(sniffer.conf.settings.style, StyleType::A11yDark);
+        sniffer.update(Message::Style(StyleType::GruvboxDark));
+        assert_eq!(sniffer.traffic_chart.style, StyleType::GruvboxDark);
+        assert_eq!(sniffer.conf.settings.style, StyleType::GruvboxDark);
+        sniffer.update(Message::Style(StyleType::GruvboxDark));
+        assert_eq!(sniffer.traffic_chart.style, StyleType::GruvboxDark);
+        assert_eq!(sniffer.conf.settings.style, StyleType::GruvboxDark);
     }
 
     #[test]
     #[parallel] // needed to not collide with other tests generating configs files
     fn test_dots_pulse_update() {
-        // every kind of message will the integer, but only Periodic will update the string
-        let mut sniffer = Sniffer::new(Configs::default());
+        // every kind of message will update the integer, but only Periodic will update the string
+        let mut sniffer = Sniffer::new(Conf::default());
 
         assert_eq!(sniffer.dots_pulse, (".".to_string(), 0));
 
@@ -1425,12 +1594,26 @@ mod tests {
 
         sniffer.update(Message::Periodic);
         assert_eq!(sniffer.dots_pulse, (".".to_string(), 0));
+
+        // if frozen, string won't update
+        sniffer.frozen = true;
+
+        sniffer.update(Message::Periodic);
+        assert_eq!(sniffer.dots_pulse, (".".to_string(), 1));
+
+        sniffer.update(Message::BpfFilter(String::new()));
+        assert_eq!(sniffer.dots_pulse, (".".to_string(), 2));
+
+        sniffer.frozen = false;
+
+        sniffer.update(Message::Periodic);
+        assert_eq!(sniffer.dots_pulse, ("..".to_string(), 0));
     }
 
     #[test]
     #[parallel] // needed to not collide with other tests generating configs files
     fn test_modify_favorite_connections() {
-        let mut sniffer = Sniffer::new(Configs::default());
+        let mut sniffer = Sniffer::new(Conf::default());
         // remove 1
         sniffer.update(Message::AddOrRemoveFavorite(
             Host {
@@ -1611,16 +1794,22 @@ mod tests {
     #[test]
     #[parallel] // needed to not collide with other tests generating configs files
     fn test_show_and_hide_modal_and_settings() {
-        let mut sniffer = Sniffer::new(Configs::default());
+        let mut sniffer = Sniffer::new(Conf::default());
 
         assert_eq!(sniffer.modal, None);
         assert_eq!(sniffer.settings_page, None);
-        assert_eq!(sniffer.last_opened_setting, SettingsPage::Notifications);
+        assert_eq!(
+            sniffer.conf.last_opened_setting,
+            SettingsPage::Notifications
+        );
         // open settings
         sniffer.update(Message::OpenLastSettings);
         assert_eq!(sniffer.modal, None);
         assert_eq!(sniffer.settings_page, Some(SettingsPage::Notifications));
-        assert_eq!(sniffer.last_opened_setting, SettingsPage::Notifications);
+        assert_eq!(
+            sniffer.conf.last_opened_setting,
+            SettingsPage::Notifications
+        );
         // switch settings page
         sniffer.update(Message::OpenSettings(SettingsPage::Appearance));
         assert_eq!(sniffer.modal, None);
@@ -1632,17 +1821,17 @@ mod tests {
         sniffer.update(Message::ShowModal(MyModal::Quit));
         assert_eq!(sniffer.modal, None);
         assert_eq!(sniffer.settings_page, Some(SettingsPage::General));
-        assert_eq!(sniffer.last_opened_setting, SettingsPage::Notifications);
+        assert_eq!(sniffer.conf.last_opened_setting, SettingsPage::General);
         // close settings
         sniffer.update(Message::CloseSettings);
         assert_eq!(sniffer.modal, None);
         assert_eq!(sniffer.settings_page, None);
-        assert_eq!(sniffer.last_opened_setting, SettingsPage::General);
+        assert_eq!(sniffer.conf.last_opened_setting, SettingsPage::General);
         // reopen settings
         sniffer.update(Message::OpenLastSettings);
         assert_eq!(sniffer.modal, None);
         assert_eq!(sniffer.settings_page, Some(SettingsPage::General));
-        assert_eq!(sniffer.last_opened_setting, SettingsPage::General);
+        assert_eq!(sniffer.conf.last_opened_setting, SettingsPage::General);
         // switch settings page
         sniffer.update(Message::OpenSettings(SettingsPage::Appearance));
         assert_eq!(sniffer.modal, None);
@@ -1651,66 +1840,66 @@ mod tests {
         sniffer.update(Message::CloseSettings);
         assert_eq!(sniffer.modal, None);
         assert_eq!(sniffer.settings_page, None);
-        assert_eq!(sniffer.last_opened_setting, SettingsPage::Appearance);
+        assert_eq!(sniffer.conf.last_opened_setting, SettingsPage::Appearance);
 
         // open clear all modal
         sniffer.update(Message::ShowModal(MyModal::ClearAll));
         assert_eq!(sniffer.modal, Some(MyModal::ClearAll));
         assert_eq!(sniffer.settings_page, None);
-        assert_eq!(sniffer.last_opened_setting, SettingsPage::Appearance);
+        assert_eq!(sniffer.conf.last_opened_setting, SettingsPage::Appearance);
         // try opening settings with clear all modal opened
         sniffer.update(Message::OpenLastSettings);
         assert_eq!(sniffer.modal, Some(MyModal::ClearAll));
         assert_eq!(sniffer.settings_page, None);
-        assert_eq!(sniffer.last_opened_setting, SettingsPage::Appearance);
+        assert_eq!(sniffer.conf.last_opened_setting, SettingsPage::Appearance);
         // try opening quit modal with clear all modal opened
         sniffer.update(Message::ShowModal(MyModal::Quit));
         assert_eq!(sniffer.modal, Some(MyModal::ClearAll));
         assert_eq!(sniffer.settings_page, None);
-        assert_eq!(sniffer.last_opened_setting, SettingsPage::Appearance);
+        assert_eq!(sniffer.conf.last_opened_setting, SettingsPage::Appearance);
         // close clear all modal
         sniffer.update(Message::HideModal);
         assert_eq!(sniffer.modal, None);
         assert_eq!(sniffer.settings_page, None);
-        assert_eq!(sniffer.last_opened_setting, SettingsPage::Appearance);
+        assert_eq!(sniffer.conf.last_opened_setting, SettingsPage::Appearance);
 
         // open quit modal
         sniffer.update(Message::ShowModal(MyModal::Quit));
         assert_eq!(sniffer.modal, Some(MyModal::Quit));
         assert_eq!(sniffer.settings_page, None);
-        assert_eq!(sniffer.last_opened_setting, SettingsPage::Appearance);
+        assert_eq!(sniffer.conf.last_opened_setting, SettingsPage::Appearance);
         // try opening settings with clear all modal opened
         sniffer.update(Message::OpenLastSettings);
         assert_eq!(sniffer.modal, Some(MyModal::Quit));
         assert_eq!(sniffer.settings_page, None);
-        assert_eq!(sniffer.last_opened_setting, SettingsPage::Appearance);
+        assert_eq!(sniffer.conf.last_opened_setting, SettingsPage::Appearance);
         // try opening clear all modal with quit modal opened
         sniffer.update(Message::ShowModal(MyModal::ClearAll));
         assert_eq!(sniffer.modal, Some(MyModal::Quit));
         assert_eq!(sniffer.settings_page, None);
-        assert_eq!(sniffer.last_opened_setting, SettingsPage::Appearance);
+        assert_eq!(sniffer.conf.last_opened_setting, SettingsPage::Appearance);
         // close quit modal
         sniffer.update(Message::HideModal);
         assert_eq!(sniffer.modal, None);
         assert_eq!(sniffer.settings_page, None);
-        assert_eq!(sniffer.last_opened_setting, SettingsPage::Appearance);
+        assert_eq!(sniffer.conf.last_opened_setting, SettingsPage::Appearance);
     }
 
     #[test]
     #[parallel] // needed to not collide with other tests generating configs files
     fn test_correctly_update_language() {
-        let mut sniffer = Sniffer::new(Configs::default());
+        let mut sniffer = Sniffer::new(Conf::default());
 
-        assert_eq!(sniffer.configs.settings.language, Language::EN);
+        assert_eq!(sniffer.conf.settings.language, Language::EN);
         assert_eq!(sniffer.traffic_chart.language, Language::EN);
         sniffer.update(Message::LanguageSelection(Language::IT));
-        assert_eq!(sniffer.configs.settings.language, Language::IT);
+        assert_eq!(sniffer.conf.settings.language, Language::IT);
         assert_eq!(sniffer.traffic_chart.language, Language::IT);
         sniffer.update(Message::LanguageSelection(Language::IT));
-        assert_eq!(sniffer.configs.settings.language, Language::IT);
+        assert_eq!(sniffer.conf.settings.language, Language::IT);
         assert_eq!(sniffer.traffic_chart.language, Language::IT);
         sniffer.update(Message::LanguageSelection(Language::ZH));
-        assert_eq!(sniffer.configs.settings.language, Language::ZH);
+        assert_eq!(sniffer.conf.settings.language, Language::ZH);
         assert_eq!(sniffer.traffic_chart.language, Language::ZH);
     }
 
@@ -1732,26 +1921,26 @@ mod tests {
             // Simulate an update to apply the settings
             sniffer.update(Message::Periodic);
         }
-        let mut sniffer = Sniffer::new(Configs::default());
+        let mut sniffer = Sniffer::new(Conf::default());
 
         let bytes_notification_init = DataNotification {
-            chart_type: ChartType::Bytes,
+            data_repr: DataRepr::Bytes,
             threshold: None,
             byte_multiple: ByteMultiple::KB,
-            sound: Sound::Pop,
+            sound: Sound::Gulp,
             previous_threshold: 800000,
         };
 
         let bytes_notification_toggled_on = DataNotification {
-            chart_type: ChartType::Bytes,
+            data_repr: DataRepr::Bytes,
             threshold: Some(800_000),
             byte_multiple: ByteMultiple::GB,
-            sound: Sound::Pop,
+            sound: Sound::Gulp,
             previous_threshold: 800_000,
         };
 
         let bytes_notification_adjusted_threshold_sound_off = DataNotification {
-            chart_type: ChartType::Bytes,
+            data_repr: DataRepr::Bytes,
             threshold: Some(3),
             byte_multiple: ByteMultiple::KB,
             sound: Sound::None,
@@ -1759,55 +1948,71 @@ mod tests {
         };
 
         let bytes_notification_sound_off_only = DataNotification {
-            chart_type: ChartType::Bytes,
+            data_repr: DataRepr::Bytes,
             threshold: Some(800_000),
             byte_multiple: ByteMultiple::GB,
             sound: Sound::None,
             previous_threshold: 800_000,
         };
 
-        let fav_notification_init = FavoriteNotification {
-            notify_on_favorite: false,
-            sound: Sound::Swhoosh,
-        };
-
-        let fav_notification_new = FavoriteNotification {
-            notify_on_favorite: true,
+        let fav_notification_init = SimpleNotification {
+            is_active: false,
             sound: Sound::Pop,
         };
 
+        let fav_notification_new = SimpleNotification {
+            is_active: true,
+            sound: Sound::Pop,
+        };
+
+        let blacklist_notification_init = SimpleNotification {
+            is_active: false,
+            sound: Sound::Swhoosh,
+        };
+
+        let blacklist_notification_new = SimpleNotification {
+            is_active: true,
+            sound: Sound::Gulp,
+        };
+
         // initial default state
-        assert_eq!(sniffer.configs.settings.notifications.volume, 60);
-        assert_eq!(sniffer.configs.settings.notifications.volume, 60);
+        assert_eq!(sniffer.conf.settings.notifications.volume, 50);
         assert_eq!(
-            sniffer.configs.settings.notifications.data_notification,
+            sniffer.conf.settings.notifications.data_notification,
             bytes_notification_init
         );
         assert_eq!(
-            sniffer.configs.settings.notifications.favorite_notification,
+            sniffer.conf.settings.notifications.favorite_notification,
             fav_notification_init
+        );
+        assert_eq!(
+            sniffer
+                .conf
+                .settings
+                .notifications
+                .ip_blacklist_notification,
+            blacklist_notification_init
         );
 
         // change volume
         sniffer.update(Message::ChangeVolume(95));
 
-        assert_eq!(sniffer.configs.settings.notifications.volume, 95);
+        assert_eq!(sniffer.conf.settings.notifications.volume, 95);
         assert_eq!(
-            sniffer.configs.settings.notifications.data_notification,
+            sniffer.conf.settings.notifications.data_notification,
             bytes_notification_init,
         );
         assert_eq!(
-            sniffer.configs.settings.notifications.favorite_notification,
+            sniffer.conf.settings.notifications.favorite_notification,
             fav_notification_init,
         );
-
         assert_eq!(
-            sniffer.configs.settings.notifications.data_notification,
-            bytes_notification_init
-        );
-        assert_eq!(
-            sniffer.configs.settings.notifications.favorite_notification,
-            fav_notification_init
+            sniffer
+                .conf
+                .settings
+                .notifications
+                .ip_blacklist_notification,
+            blacklist_notification_init
         );
 
         // Toggle on bytes notifications
@@ -1818,7 +2023,7 @@ mod tests {
 
         // Verify that toggling threshold is applied immediately
         assert_eq!(
-            sniffer.configs.settings.notifications.data_notification,
+            sniffer.conf.settings.notifications.data_notification,
             bytes_notification_toggled_on,
         );
 
@@ -1830,20 +2035,28 @@ mod tests {
         // Verify adjusted threshold is not applied before timeout expires,
         // and rest is applied immediately
         assert_eq!(
-            sniffer.configs.settings.notifications.data_notification,
+            sniffer.conf.settings.notifications.data_notification,
             bytes_notification_sound_off_only,
         );
 
         expire_notifications_timeout(&mut sniffer);
 
-        assert_eq!(sniffer.configs.settings.notifications.volume, 95);
+        assert_eq!(sniffer.conf.settings.notifications.volume, 95);
         assert_eq!(
-            sniffer.configs.settings.notifications.data_notification,
+            sniffer.conf.settings.notifications.data_notification,
             bytes_notification_adjusted_threshold_sound_off
         );
         assert_eq!(
-            sniffer.configs.settings.notifications.favorite_notification,
+            sniffer.conf.settings.notifications.favorite_notification,
             fav_notification_init,
+        );
+        assert_eq!(
+            sniffer
+                .conf
+                .settings
+                .notifications
+                .ip_blacklist_notification,
+            blacklist_notification_init,
         );
 
         // change favorite notifications
@@ -1855,31 +2068,47 @@ mod tests {
         // Verify threshold is not applied before timeout expires,
         // and rest is applied immediately
         assert_eq!(
-            sniffer.configs.settings.notifications.favorite_notification,
+            sniffer.conf.settings.notifications.favorite_notification,
             fav_notification_new,
         );
 
         // And the rest is intact
-        assert_eq!(sniffer.configs.settings.notifications.volume, 95);
+        assert_eq!(sniffer.conf.settings.notifications.volume, 95);
         assert_eq!(
-            sniffer.configs.settings.notifications.data_notification,
+            sniffer.conf.settings.notifications.data_notification,
             bytes_notification_adjusted_threshold_sound_off
         );
         assert_eq!(
-            sniffer.configs.settings.notifications.favorite_notification,
+            sniffer.conf.settings.notifications.favorite_notification,
             fav_notification_new
+        );
+
+        // change favorite notifications
+        sniffer.update(Message::UpdateNotificationSettings(
+            Notification::IpBlacklist(blacklist_notification_new),
+            true,
+        ));
+
+        assert_eq!(
+            sniffer
+                .conf
+                .settings
+                .notifications
+                .ip_blacklist_notification,
+            blacklist_notification_new,
         );
     }
 
     #[test]
     #[parallel] // needed to not collide with other tests generating configs files
     fn test_clear_all_notifications() {
-        let mut sniffer = Sniffer::new(Configs::default());
-        sniffer.logged_notifications.0 =
-            VecDeque::from([LoggedNotification::DataThresholdExceeded(
+        let mut sniffer = Sniffer::new(Conf::default());
+        sniffer
+            .logged_notifications
+            .set_notifications(VecDeque::from([LoggedNotification::DataThresholdExceeded(
                 DataThresholdExceeded {
                     id: 1,
-                    chart_type: ChartType::Packets,
+                    data_repr: DataRepr::Packets,
                     threshold: 0,
                     data_info: DataInfo::default(),
                     timestamp: "".to_string(),
@@ -1887,54 +2116,67 @@ mod tests {
                     hosts: Vec::new(),
                     is_expanded: false,
                 },
-            )]);
+            )]));
 
         assert_eq!(sniffer.modal, None);
         sniffer.update(Message::ShowModal(MyModal::ClearAll));
         assert_eq!(sniffer.modal, Some(MyModal::ClearAll));
-        assert_eq!(sniffer.logged_notifications.0.len(), 1);
+        assert_eq!(sniffer.logged_notifications.len(), 1);
         sniffer.update(Message::ClearAllNotifications);
         assert_eq!(sniffer.modal, None);
-        assert_eq!(sniffer.logged_notifications.0.len(), 0);
+        assert_eq!(sniffer.logged_notifications.len(), 0);
     }
 
     #[test]
     #[parallel] // needed to not collide with other tests generating configs files
     fn test_correctly_switch_running_and_settings_pages() {
-        let mut sniffer = Sniffer::new(Configs::default());
+        let mut sniffer = Sniffer::new(Conf::default());
 
         // initial status
         assert_eq!(sniffer.settings_page, None);
         assert_eq!(sniffer.modal, None);
-        assert_eq!(sniffer.running_page, RunningPage::Init);
+        assert!(sniffer.running_page.is_none());
         // nothing changes
         sniffer.update(Message::SwitchPage(true));
         assert_eq!(sniffer.settings_page, None);
+        assert_eq!(
+            sniffer.conf.last_opened_setting,
+            SettingsPage::Notifications
+        );
         assert_eq!(sniffer.modal, None);
-        assert_eq!(sniffer.running_page, RunningPage::Init);
+        assert!(sniffer.running_page.is_none());
         // switch settings
         sniffer.update(Message::OpenLastSettings);
         assert_eq!(sniffer.settings_page, Some(SettingsPage::Notifications));
-        assert_eq!(sniffer.running_page, RunningPage::Init);
+        assert_eq!(
+            sniffer.conf.last_opened_setting,
+            SettingsPage::Notifications
+        );
+        assert!(sniffer.running_page.is_none());
         sniffer.update(Message::SwitchPage(false));
         assert_eq!(sniffer.settings_page, Some(SettingsPage::General));
+        assert_eq!(sniffer.conf.last_opened_setting, SettingsPage::General);
         assert_eq!(sniffer.modal, None);
-        assert_eq!(sniffer.running_page, RunningPage::Init);
+        assert!(sniffer.running_page.is_none());
         sniffer.update(Message::SwitchPage(true));
         assert_eq!(sniffer.settings_page, Some(SettingsPage::Notifications));
+        assert_eq!(
+            sniffer.conf.last_opened_setting,
+            SettingsPage::Notifications
+        );
         assert_eq!(sniffer.modal, None);
-        assert_eq!(sniffer.running_page, RunningPage::Init);
+        assert!(sniffer.running_page.is_none());
         sniffer.update(Message::CloseSettings);
         assert_eq!(sniffer.settings_page, None);
-        assert_eq!(sniffer.running_page, RunningPage::Init);
+        assert!(sniffer.running_page.is_none());
         // change state to running
-        sniffer.running_page = RunningPage::Overview;
+        sniffer.running_page = Some(RunningPage::Overview);
         assert_eq!(sniffer.settings_page, None);
         assert_eq!(sniffer.modal, None);
-        assert_eq!(sniffer.running_page, RunningPage::Overview);
+        assert_eq!(sniffer.running_page, Some(RunningPage::Overview));
         // switch with closed setting and no packets received => nothing changes
         sniffer.update(Message::SwitchPage(true));
-        assert_eq!(sniffer.running_page, RunningPage::Overview);
+        assert_eq!(sniffer.running_page, Some(RunningPage::Overview));
         assert_eq!(sniffer.settings_page, None);
         // switch with closed setting and some packets received => change running page
         sniffer
@@ -1942,139 +2184,122 @@ mod tests {
             .tot_data_info
             .add_packet(0, TrafficDirection::Outgoing);
         sniffer.update(Message::SwitchPage(true));
-        assert_eq!(sniffer.running_page, RunningPage::Inspect);
+        assert_eq!(sniffer.running_page, Some(RunningPage::Inspect));
         assert_eq!(sniffer.settings_page, None);
         // switch with opened settings => change settings
         sniffer.update(Message::OpenLastSettings);
-        assert_eq!(sniffer.running_page, RunningPage::Inspect);
+        assert_eq!(sniffer.running_page, Some(RunningPage::Inspect));
         assert_eq!(sniffer.settings_page, Some(SettingsPage::Notifications));
+        assert_eq!(
+            sniffer.conf.last_opened_setting,
+            SettingsPage::Notifications
+        );
         sniffer.update(Message::SwitchPage(true));
-        assert_eq!(sniffer.running_page, RunningPage::Inspect);
+        assert_eq!(sniffer.running_page, Some(RunningPage::Inspect));
         assert_eq!(sniffer.settings_page, Some(SettingsPage::Appearance));
+        assert_eq!(sniffer.conf.last_opened_setting, SettingsPage::Appearance);
 
         // focus the window and try to switch => nothing changes
         sniffer.update(Message::WindowFocused);
         sniffer.update(Message::SwitchPage(true));
-        assert_eq!(sniffer.running_page, RunningPage::Inspect);
+        assert_eq!(sniffer.running_page, Some(RunningPage::Inspect));
         assert_eq!(sniffer.settings_page, Some(SettingsPage::Appearance));
     }
 
     #[test]
     #[serial] // needed to not collide with other tests generating configs files
-    fn test_config_settings() {
-        let path_string = ConfigSettings::test_path();
+    fn test_conf() {
+        let path_string = Conf::test_path();
         let path = Path::new(&path_string);
 
         assert!(!path.exists());
 
-        let mut sniffer = Sniffer::new(Configs::load());
+        let mut sniffer = Sniffer::new(Conf::load());
 
         assert!(path.exists());
 
         // check that the current settings are the default ones
-        let settings_start = sniffer.configs.settings.clone();
-        assert_eq!(
-            settings_start,
-            ConfigSettings {
-                color_gradient: GradientType::None,
-                language: Language::EN,
-                scale_factor: 1.0,
-                mmdb_country: "".to_string(),
-                mmdb_asn: "".to_string(),
-                style_path: "".to_string(),
-                notifications: Notifications {
-                    volume: 60,
-                    data_notification: Default::default(),
-                    favorite_notification: Default::default()
-                },
-                style: StyleType::Custom(ExtraStyles::A11yDark)
-            }
-        );
+        let conf_start = sniffer.conf.clone();
+        assert_eq!(conf_start, Conf::default(),);
 
-        // change some configs by sending messages
+        // change some conf by sending messages
         sniffer.update(Message::GradientsSelection(GradientType::Wild));
         sniffer.update(Message::LanguageSelection(Language::ZH));
-        sniffer.update(Message::ChangeScaleFactor(0.0));
+        sniffer.update(Message::ChangeScaleFactor(0.5));
         sniffer.update(Message::CustomCountryDb("countrymmdb".to_string()));
         sniffer.update(Message::CustomAsnDb("asnmmdb".to_string()));
         sniffer.update(Message::LoadStyle(format!(
             "{}/resources/themes/catppuccin.toml",
             env!("CARGO_MANIFEST_DIR")
         )));
-        sniffer.update(Message::Style(StyleType::Custom(ExtraStyles::DraculaDark)));
+        sniffer.update(Message::Style(StyleType::DraculaDark));
         sniffer.update(Message::ChangeVolume(100));
-
-        // quit the app by sending a CloseRequested message
-        sniffer.update(Message::Quit);
-
-        assert!(path.exists());
-
-        // check that updated configs are inherited by a new sniffer instance
-        let settings_end = Sniffer::new(Configs::load()).configs.settings.clone();
-        assert_eq!(
-            settings_end,
-            ConfigSettings {
-                color_gradient: GradientType::Wild,
-                language: Language::ZH,
-                scale_factor: 1.0,
-                mmdb_country: "countrymmdb".to_string(),
-                mmdb_asn: "asnmmdb".to_string(),
-                style_path: format!(
-                    "{}/resources/themes/catppuccin.toml",
-                    env!("CARGO_MANIFEST_DIR")
-                ),
-                notifications: Notifications {
-                    volume: 100,
-                    data_notification: Default::default(),
-                    favorite_notification: Default::default()
-                },
-                style: StyleType::Custom(ExtraStyles::DraculaDark)
-            }
-        );
-    }
-
-    #[test]
-    #[serial] // needed to not collide with other tests generating configs files
-    fn test_config_window() {
-        let path_string = ConfigWindow::test_path();
-        let path = Path::new(&path_string);
-
-        assert!(!path.exists());
-
-        let mut sniffer = Sniffer::new(Configs::load());
-
-        assert!(path.exists());
-
-        // check that the current window properties are the default ones
-        let window_start = sniffer.configs.window;
-        assert_eq!(
-            window_start,
-            ConfigWindow {
-                position: PositionTuple(0.0, 0.0),
-                size: SizeTuple(1190.0, 670.0),
-                thumbnail_position: PositionTuple(0.0, 0.0),
-            }
-        );
-
-        // change window properties by sending messages
         sniffer.update(Message::WindowMoved(-10.0, 555.0));
         sniffer.update(Message::WindowResized(1000.0, 999.0));
         sniffer.thumbnail = true;
         sniffer.update(Message::WindowMoved(40.0, 40.0));
+        sniffer.update(Message::SetCaptureSource(CaptureSourcePicklist::File));
+        sniffer.update(Message::ToggleFilters);
+        sniffer.update(Message::BpfFilter("tcp or udp".to_string()));
+        sniffer.update(Message::ReportSortSelection(SortType::Ascending));
+        sniffer.update(Message::HostSortSelection(SortType::Descending));
+        sniffer.update(Message::ServiceSortSelection(SortType::Descending));
+        sniffer.update(Message::OpenSettings(SettingsPage::Appearance));
+        sniffer.update(Message::ToggleExportPcap);
+        sniffer.update(Message::OutputPcapFile("test.cap".to_string()));
+        sniffer.update(Message::OutputPcapDir("/".to_string()));
+        sniffer.update(Message::SetPcapImport("/test.pcap".to_string()));
+        sniffer.update(Message::ChangeRunningPage(RunningPage::Notifications));
+        sniffer.update(Message::DataReprSelection(DataRepr::Bits));
+        sniffer.update(Message::LoadIpBlacklist("blacklist_file.csv".to_string()));
 
-        // quit the app by sending a CloseRequested message
+        // force saving configs by quitting the app
+        sniffer.welcome = Some((false, 0));
         sniffer.update(Message::Quit);
 
         assert!(path.exists());
 
         // check that updated configs are inherited by a new sniffer instance
-        let window_end = Sniffer::new(Configs::load()).configs.window.clone();
+        let conf_end = Sniffer::new(Conf::load()).conf.clone();
         assert_eq!(
-            window_end,
-            ConfigWindow {
-                position: PositionTuple(-10.0, 555.0),
-                size: SizeTuple(1000.0, 999.0),
-                thumbnail_position: PositionTuple(40.0, 40.0),
+            conf_end,
+            Conf {
+                settings: Settings {
+                    color_gradient: GradientType::Wild,
+                    language: Language::ZH,
+                    scale_factor: 0.5,
+                    mmdb_country: "countrymmdb".to_string(),
+                    mmdb_asn: "asnmmdb".to_string(),
+                    style_path: format!(
+                        "{}/resources/themes/catppuccin.toml",
+                        env!("CARGO_MANIFEST_DIR")
+                    ),
+                    notifications: Notifications {
+                        volume: 100,
+                        ..Notifications::default()
+                    },
+                    style: StyleType::DraculaDark,
+                    ip_blacklist: "blacklist_file.csv".to_string(),
+                },
+                window: ConfigWindow::new((1000.0, 999.0), (-5.0, 277.5), (20.0, 20.0)),
+                device: ConfigDevice::default(),
+                capture_source_picklist: CaptureSourcePicklist::File,
+                filters: Filters {
+                    expanded: true,
+                    bpf: "tcp or udp".to_string(),
+                },
+                report_sort_type: SortType::Ascending,
+                host_sort_type: SortType::Descending,
+                service_sort_type: SortType::Descending,
+                last_opened_setting: SettingsPage::Appearance,
+                last_opened_page: RunningPage::Notifications,
+                export_pcap: ExportPcap {
+                    enabled: true,
+                    file_name: "test.cap".to_string(),
+                    directory: "/".to_string()
+                },
+                import_pcap_path: "/test.pcap".to_string(),
+                data_repr: DataRepr::Bits,
             }
         );
     }
@@ -2082,103 +2307,115 @@ mod tests {
     #[test]
     #[parallel] // needed to not collide with other tests generating configs files
     fn test_window_resized() {
-        let mut sniffer = Sniffer::new(Configs::default());
+        let mut sniffer = Sniffer::new(Conf::default());
         assert!(!sniffer.thumbnail);
-        let factor = sniffer.configs.settings.scale_factor;
+        let factor = sniffer.conf.settings.scale_factor;
         assert_eq!(factor, 1.0);
-        assert_eq!(sniffer.configs.window.size, SizeTuple(1190.0, 670.0));
         assert_eq!(
-            ConfigWindow::thumbnail_size(factor),
-            SizeTuple(360.0, 222.0)
+            sniffer.conf.window.size(),
+            Size {
+                width: 1190.0,
+                height: 670.0
+            }
         );
 
         sniffer.update(Message::WindowResized(850.0, 600.0));
-        assert_eq!(sniffer.configs.window.size, SizeTuple(850.0, 600.0));
+        assert_eq!(
+            sniffer.conf.window.size(),
+            Size {
+                width: 850.0,
+                height: 600.0
+            }
+        );
 
-        sniffer.update(Message::ChangeScaleFactor(0.369));
-        let factor = sniffer.configs.settings.scale_factor;
+        sniffer.update(Message::ChangeScaleFactor(1.5));
+        let factor = sniffer.conf.settings.scale_factor;
         assert_eq!(factor, 1.5);
-        assert_eq!(
-            ConfigWindow::thumbnail_size(factor),
-            SizeTuple(540.0, 333.0)
-        );
         sniffer.update(Message::WindowResized(1000.0, 800.0));
-        assert_eq!(sniffer.configs.window.size, SizeTuple(1500.0, 1200.0));
+        assert_eq!(
+            sniffer.conf.window.size(),
+            Size {
+                width: 1000.0,
+                height: 800.0
+            }
+        );
 
-        sniffer.update(Message::ChangeScaleFactor(-0.631));
-        let factor = sniffer.configs.settings.scale_factor;
+        sniffer.update(Message::ChangeScaleFactor(0.5));
+        let factor = sniffer.conf.settings.scale_factor;
         assert_eq!(factor, 0.5);
-        assert_eq!(
-            ConfigWindow::thumbnail_size(factor),
-            SizeTuple(180.0, 111.0)
-        );
         sniffer.update(Message::WindowResized(1000.0, 800.0));
-        assert_eq!(sniffer.configs.window.size, SizeTuple(500.0, 400.0));
+        assert_eq!(
+            sniffer.conf.window.size(),
+            Size {
+                width: 1000.0,
+                height: 800.0
+            }
+        );
     }
 
     #[test]
     #[parallel] // needed to not collide with other tests generating configs files
     fn test_window_moved() {
-        let mut sniffer = Sniffer::new(Configs::default());
+        let mut sniffer = Sniffer::new(Conf::default());
         assert!(!sniffer.thumbnail);
-        assert_eq!(sniffer.configs.settings.scale_factor, 1.0);
-        assert_eq!(sniffer.configs.window.position, PositionTuple(0.0, 0.0));
+        assert_eq!(sniffer.conf.settings.scale_factor, 1.0);
+        assert_eq!(sniffer.conf.window.position(), Point { x: 0.0, y: 0.0 });
         assert_eq!(
-            sniffer.configs.window.thumbnail_position,
-            PositionTuple(0.0, 0.0)
+            sniffer.conf.window.thumbnail_position(),
+            Point { x: 0.0, y: 0.0 }
         );
 
         sniffer.update(Message::WindowMoved(850.0, 600.0));
-        assert_eq!(sniffer.configs.window.position, PositionTuple(850.0, 600.0));
+        assert_eq!(sniffer.conf.window.position(), Point { x: 850.0, y: 600.0 });
         assert_eq!(
-            sniffer.configs.window.thumbnail_position,
-            PositionTuple(0.0, 0.0)
+            sniffer.conf.window.thumbnail_position(),
+            Point { x: 0.0, y: 0.0 }
         );
         sniffer.thumbnail = true;
         sniffer.update(Message::WindowMoved(400.0, 600.0));
-        assert_eq!(sniffer.configs.window.position, PositionTuple(850.0, 600.0));
+        assert_eq!(sniffer.conf.window.position(), Point { x: 850.0, y: 600.0 });
         assert_eq!(
-            sniffer.configs.window.thumbnail_position,
-            PositionTuple(400.0, 600.0)
+            sniffer.conf.window.thumbnail_position(),
+            Point { x: 400.0, y: 600.0 }
         );
 
-        sniffer.update(Message::ChangeScaleFactor(0.369));
-        assert_eq!(sniffer.configs.settings.scale_factor, 1.5);
+        sniffer.update(Message::ChangeScaleFactor(1.5));
+        assert_eq!(sniffer.conf.settings.scale_factor, 1.5);
         sniffer.update(Message::WindowMoved(20.0, 40.0));
-        assert_eq!(sniffer.configs.window.position, PositionTuple(850.0, 600.0));
+        assert_eq!(sniffer.conf.window.position(), Point { x: 850.0, y: 600.0 });
         assert_eq!(
-            sniffer.configs.window.thumbnail_position,
-            PositionTuple(30.0, 60.0)
+            sniffer.conf.window.thumbnail_position(),
+            Point { x: 30.0, y: 60.0 }
         );
         sniffer.thumbnail = false;
         sniffer.update(Message::WindowMoved(-20.0, 300.0));
-        assert_eq!(sniffer.configs.window.position, PositionTuple(-30.0, 450.0));
+        assert_eq!(sniffer.conf.window.position(), Point { x: -30.0, y: 450.0 });
         assert_eq!(
-            sniffer.configs.window.thumbnail_position,
-            PositionTuple(30.0, 60.0)
+            sniffer.conf.window.thumbnail_position(),
+            Point { x: 30.0, y: 60.0 }
         );
 
-        sniffer.update(Message::ChangeScaleFactor(-0.631));
-        assert_eq!(sniffer.configs.settings.scale_factor, 0.5);
+        sniffer.update(Message::ChangeScaleFactor(0.5));
+        assert_eq!(sniffer.conf.settings.scale_factor, 0.5);
         sniffer.update(Message::WindowMoved(500.0, -100.0));
-        assert_eq!(sniffer.configs.window.position, PositionTuple(250.0, -50.0));
+        assert_eq!(sniffer.conf.window.position(), Point { x: 250.0, y: -50.0 });
         assert_eq!(
-            sniffer.configs.window.thumbnail_position,
-            PositionTuple(30.0, 60.0)
+            sniffer.conf.window.thumbnail_position(),
+            Point { x: 30.0, y: 60.0 }
         );
         sniffer.thumbnail = true;
         sniffer.update(Message::WindowMoved(-2.0, -34.0));
-        assert_eq!(sniffer.configs.window.position, PositionTuple(250.0, -50.0));
+        assert_eq!(sniffer.conf.window.position(), Point { x: 250.0, y: -50.0 });
         assert_eq!(
-            sniffer.configs.window.thumbnail_position,
-            PositionTuple(-1.0, -17.0)
+            sniffer.conf.window.thumbnail_position(),
+            Point { x: -1.0, y: -17.0 }
         );
     }
 
     #[test]
     #[parallel] // needed to not collide with other tests generating configs files
     fn test_toggle_thumbnail() {
-        let mut sniffer = Sniffer::new(Configs::default());
+        let mut sniffer = Sniffer::new(Conf::default());
         assert!(!sniffer.thumbnail);
         assert!(!sniffer.traffic_chart.thumbnail);
 
@@ -2205,21 +2442,21 @@ mod tests {
     #[test]
     #[parallel] // needed to not collide with other tests generating configs files
     fn test_scale_factor_shortcut() {
-        let mut sniffer = Sniffer::new(Configs::default());
-        assert_eq!(sniffer.configs.settings.scale_factor, 1.0);
+        let mut sniffer = Sniffer::new(Conf::default());
+        assert_eq!(sniffer.conf.settings.scale_factor, 1.0);
 
         sniffer.update(Message::ScaleFactorShortcut(true));
-        assert_eq!(sniffer.configs.settings.scale_factor, 1.1);
+        assert_eq!(sniffer.conf.settings.scale_factor, 1.1);
         sniffer.update(Message::ScaleFactorShortcut(false));
-        assert_eq!(sniffer.configs.settings.scale_factor, 1.0);
+        assert_eq!(sniffer.conf.settings.scale_factor, 1.0);
         sniffer.update(Message::ScaleFactorShortcut(false));
-        assert_eq!(sniffer.configs.settings.scale_factor, 0.9);
+        assert_eq!(sniffer.conf.settings.scale_factor, 0.9);
 
         for _ in 0..100 {
             sniffer.update(Message::ScaleFactorShortcut(true));
         }
         assert_eq!(
-            format!("{:.2}", sniffer.configs.settings.scale_factor),
+            format!("{:.2}", sniffer.conf.settings.scale_factor),
             "3.00".to_string()
         );
 
@@ -2227,7 +2464,7 @@ mod tests {
             sniffer.update(Message::ScaleFactorShortcut(false));
         }
         assert_eq!(
-            format!("{:.2}", sniffer.configs.settings.scale_factor),
+            format!("{:.2}", sniffer.conf.settings.scale_factor),
             "0.30".to_string()
         );
     }

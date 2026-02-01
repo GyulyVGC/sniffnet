@@ -6,7 +6,7 @@ use crate::networking::types::process::Process;
 use crate::networking::types::service::Service;
 
 /// Used to express the search filters applied to GUI inspect page
-#[derive(Clone, Debug, Default, Hash)]
+#[derive(Clone, Debug, Default, Hash, Eq, PartialEq)]
 pub struct SearchParameters {
     /// IP address (source)
     pub address_src: String,
@@ -30,6 +30,8 @@ pub struct SearchParameters {
     pub as_name: String,
     /// Whether to display only favorites
     pub only_favorites: bool,
+    /// Whether to display only blacklisted
+    pub only_blacklisted: bool,
 }
 
 impl SearchParameters {
@@ -56,25 +58,20 @@ impl SearchParameters {
             return false;
         }
 
+        // check blacklisted filter
+        if self.only_blacklisted && !value.is_blacklisted {
+            return false;
+        }
+
         // if arrived at this point all filters are satisfied
         true
     }
 
-    pub fn is_some_host_filter_active(&self) -> bool {
+    fn is_some_host_filter_active(&self) -> bool {
         self.only_favorites
             || !self.country.is_empty()
             || !self.as_name.is_empty()
             || !self.domain.is_empty()
-    }
-
-    pub fn reset_host_filters(&self) -> Self {
-        Self {
-            country: String::new(),
-            domain: String::new(),
-            as_name: String::new(),
-            only_favorites: false,
-            ..self.clone()
-        }
     }
 
     pub fn new_host_search(host: &Host) -> Self {
@@ -177,17 +174,17 @@ impl FilterInputType {
         r_dns_host: Option<&(String, Host)>,
     ) -> String {
         match self {
-            FilterInputType::AddressSrc => key.address1.to_string(),
+            FilterInputType::AddressSrc => key.source.to_string(),
             FilterInputType::PortSrc => {
-                if let Some(port) = key.port1 {
+                if let Some(port) = key.sport {
                     port.to_string()
                 } else {
                     "-".to_string()
                 }
             }
-            FilterInputType::AddressDst => key.address2.to_string(),
+            FilterInputType::AddressDst => key.dest.to_string(),
             FilterInputType::PortDst => {
-                if let Some(port) = key.port2 {
+                if let Some(port) = key.dport {
                     port.to_string()
                 } else {
                     "-".to_string()
@@ -204,13 +201,13 @@ impl FilterInputType {
             FilterInputType::Domain => r_dns_host
                 .unwrap_or(&(String::new(), Host::default()))
                 .0
-                .to_string(),
+                .clone(),
             FilterInputType::AsName => r_dns_host
                 .unwrap_or(&(String::new(), Host::default()))
                 .1
                 .asn
                 .name
-                .to_string(),
+                .clone(),
         }
     }
 

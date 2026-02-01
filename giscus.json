@@ -1,0 +1,5 @@
+{
+  "origins": ["https://sniffnet.net"],
+  "originsRegex": ["http://localhost:[0-9]+"],
+  "defaultCommentOrder": "oldest"
+}

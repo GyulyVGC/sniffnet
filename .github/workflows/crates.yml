@@ -1,0 +1,14 @@
+name: Crates
+
+on:
+  workflow_dispatch:
+
+jobs:
+  crates:
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v6
+      - uses: dtolnay/rust-toolchain@stable
+
+      - name: Publish to crates.io
+        run: cargo publish --token ${{ secrets.CRATES_TOKEN }}

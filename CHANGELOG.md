@@ -2,6 +2,51 @@
 
 All Sniffnet releases with the relative changes are documented in this file.
 
+## [UNRELEASED]
+- Add charts to preview network adapters traffic in initial page ([#1026](https://github.com/GyulyVGC/sniffnet/pull/1026) — fixes [#556](https://github.com/GyulyVGC/sniffnet/issues/556))
+- Support custom IP blacklists ([#1055](https://github.com/GyulyVGC/sniffnet/pull/1055) — fixes [#729](https://github.com/GyulyVGC/sniffnet/issues/729))
+- Add animated welcome screen ([#1002](https://github.com/GyulyVGC/sniffnet/pull/1002))
+- New command line option `--config_path` to print the path of the app configuration file
+- Migrate to Iced 0.14 ([#1032](https://github.com/GyulyVGC/sniffnet/pull/1032) — fixes [#589](https://github.com/GyulyVGC/sniffnet/issues/589), [#639](https://github.com/GyulyVGC/sniffnet/issues/639), [#653](https://github.com/GyulyVGC/sniffnet/issues/653), [#656](https://github.com/GyulyVGC/sniffnet/issues/656), [#675](https://github.com/GyulyVGC/sniffnet/issues/675))
+- Added various sanity checks when loading app configurations from file (window properties, scale factor, themes, notifications volume)
+- Fix app configurations backward-compatibility when an existing field is updated or invalid
+- Return a PCAP error when trying to start a capture from an unknown adapter name
+
+## [1.4.2] - 2025-11-04
+- Send remote notifications via webhook ([#991](https://github.com/GyulyVGC/sniffnet/pull/991) — fixes [#841](https://github.com/GyulyVGC/sniffnet/issues/841))
+- Pause and resume packet captures ([#992](https://github.com/GyulyVGC/sniffnet/pull/992) — fixes [#551](https://github.com/GyulyVGC/sniffnet/issues/551))
+- Added Czech translation 🇨🇿 ([#960](https://github.com/GyulyVGC/sniffnet/pull/960))
+- Improve update checks using `semver` ([#891](https://github.com/GyulyVGC/sniffnet/pull/891))
+- Build the app also for Windows ARM64 (fixes [#988](https://github.com/GyulyVGC/sniffnet/issues/988))
+- Updated some of the existing translations to v1.4:
+  - Spanish ([#955](https://github.com/GyulyVGC/sniffnet/pull/955))
+  - Vietnamese ([#982](https://github.com/GyulyVGC/sniffnet/pull/982))
+- Fix data representation not being saved as a configuration
+- Fix AppImage error with `libpcap` dependency ([#971](https://github.com/GyulyVGC/sniffnet/pull/971))
+- Fix Sniffnet wrapper script on macOS to use a relative path to the executable ([#948](https://github.com/GyulyVGC/sniffnet/pull/948) — fixes [#898](https://github.com/GyulyVGC/sniffnet/issues/898))
+- Remove pre-uninstall script from Linux RPM package (fixes [#989](https://github.com/GyulyVGC/sniffnet/issues/989))
+
+## [1.4.1] - 2025-09-13
+- Enhanced traffic filtering capabilities: Berkeley Packet Filter ([#937](https://github.com/GyulyVGC/sniffnet/pull/937) — fixes [#810](https://github.com/GyulyVGC/sniffnet/issues/810))
+- Added support for `Linux SLL` link type, enabling to monitor the `any` interface on Linux ([#945](https://github.com/GyulyVGC/sniffnet/pull/945))
+- Added _bits_ data representation ([#936](https://github.com/GyulyVGC/sniffnet/pull/936) — fixes [#506](https://github.com/GyulyVGC/sniffnet/issues/506))
+- An AppImage of Sniffnet is now available ([#859](https://github.com/GyulyVGC/sniffnet/pull/859) — fixes [#900](https://github.com/GyulyVGC/sniffnet/issues/900))
+- Added Dutch translation 🇳🇱 ([#854](https://github.com/GyulyVGC/sniffnet/pull/854))
+- Improved configurations persistence across different runs of the app ([#938](https://github.com/GyulyVGC/sniffnet/pull/938) — fixes [#507](https://github.com/GyulyVGC/sniffnet/issues/507))
+- The Windows Installer is now signed with a code signing certificate provided by the [SignPath Foundation](https://signpath.org/) ([#897](https://github.com/GyulyVGC/sniffnet/pull/897) — fixes [#894](https://github.com/GyulyVGC/sniffnet/issues/894))
+- Updated some of the existing translations to v1.4: 
+  - German ([#833](https://github.com/GyulyVGC/sniffnet/pull/833))
+  - Uzbek ([#834](https://github.com/GyulyVGC/sniffnet/pull/834))
+  - Simplified Chinese ([#838](https://github.com/GyulyVGC/sniffnet/pull/838))
+  - Japanese ([#849](https://github.com/GyulyVGC/sniffnet/pull/849))
+  - French ([#864](https://github.com/GyulyVGC/sniffnet/pull/864))
+  - Greek ([#879](https://github.com/GyulyVGC/sniffnet/pull/879))
+  - Romanian ([#890](https://github.com/GyulyVGC/sniffnet/pull/890))
+  - Traditional Chinese (Taiwan) ([#904](https://github.com/GyulyVGC/sniffnet/pull/904))
+  - Indonesian ([#909](https://github.com/GyulyVGC/sniffnet/pull/909))
+- Fix live chart not being updated when packets aren't captured on Linux ([#957](https://github.com/GyulyVGC/sniffnet/pull/957) — fixes [#951](https://github.com/GyulyVGC/sniffnet/issues/951))
+- Fix support for IPinfo's databases (the most recent version renamed the `country` field to `country_code`)
+
 ## [1.4.0] - 2025-06-27
 - Import PCAP files ([#795](https://github.com/GyulyVGC/sniffnet/pull/795) — fixes [#283](https://github.com/GyulyVGC/sniffnet/issues/283))
 - Donut chart reporting overall traffic statistics ([#756](https://github.com/GyulyVGC/sniffnet/pull/756) — fixes [#687](https://github.com/GyulyVGC/sniffnet/issues/687))

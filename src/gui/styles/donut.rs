@@ -12,21 +12,11 @@ impl DonutType {
     fn active(&self, style: &StyleType) -> Style {
         let colors = style.get_palette();
         let ext = style.get_extension();
-        let primary = colors.primary;
-        let buttons = ext.buttons_color;
-        let background = Color {
-            r: primary.r + (buttons.r - primary.r) * ext.alpha_round_containers,
-            g: primary.g + (buttons.g - primary.g) * ext.alpha_round_containers,
-            b: primary.b + (buttons.b - primary.b) * ext.alpha_round_containers,
-            a: 1.0,
-        };
         Style {
-            background,
             incoming: colors.secondary,
             outgoing: colors.outgoing,
             text_color: colors.text_body,
-            filtered_out: ext.buttons_color,
-            dropped: ext.red_alert_color,
+            dropped: ext.buttons_color,
         }
     }
 }
@@ -44,11 +34,9 @@ impl Catalog for StyleType {
 }
 
 pub struct Style {
-    pub(crate) background: Color,
     pub(crate) text_color: Color,
     pub(crate) incoming: Color,
     pub(crate) outgoing: Color,
-    pub(crate) filtered_out: Color,
     pub(crate) dropped: Color,
 }
 

@@ -30,7 +30,9 @@ impl MmdbCountryEntryInner<'_> {
             Self::Standard(StandardCountryEntry {
                 country: Some(StandardCountryEntryInner { iso_code: Some(c) }),
             })
-            | Self::Ipinfo(IpinfoCountryEntry { country: Some(c) }) => Country::from_str(c),
+            | Self::Ipinfo(IpinfoCountryEntry {
+                country_code: Some(c),
+            }) => Country::from_str(c),
             _ => Country::ZZ,
         }
     }
@@ -49,5 +51,5 @@ struct StandardCountryEntryInner<'a> {
 
 #[derive(Deserialize)]
 struct IpinfoCountryEntry<'a> {
-    country: Option<&'a str>,
+    country_code: Option<&'a str>,
 }

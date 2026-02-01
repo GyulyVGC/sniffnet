@@ -1,0 +1,9 @@
+app: Sniffnet
+ingredients:
+  dist: buster
+  packages:
+    - libpcap0.8
+  sources:
+    - deb https://archive.debian.org/debian buster main
+  debs:
+    - /target/REPLACE_TAG
