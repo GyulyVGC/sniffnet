@@ -53,3 +53,11 @@ pub fn only_show_blacklisted_translation(language: Language) -> &'static str {
         _ => "Only show blacklisted",
     }
 }
+
+pub fn process_translation(language: Language) -> &'static str {
+    match language {
+        Language::EN => "Process",
+        Language::IT => "Processo",
+        _ => "Process",
+    }
+}

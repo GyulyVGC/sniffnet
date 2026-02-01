@@ -37,9 +37,8 @@ use crate::translations::translations_2::{
     data_representation_translation, dropped_translation, host_translation,
     only_top_30_items_translation,
 };
-use crate::translations::translations_3::{service_translation, unsupported_link_type_translation};
-use crate::translations::translations_4::{excluded_translation, reading_from_pcap_translation};
-use crate::utils::formatted_strings::get_active_filters_string;
+use crate::translations::translations_3::service_translation;
+use crate::translations::translations_5::process_translation;
 use crate::utils::types::icon::Icon;
 use crate::{Language, RunningPage, StyleType};
 use iced::Length::Fill;
@@ -48,11 +47,9 @@ use iced::widget::scrollable::Direction;
 use iced::widget::text::LineHeight;
 use iced::widget::tooltip::Position;
 use iced::widget::{
-    Button, Column, Container, Row, Rule, Scrollable, Space, Text, Tooltip, button,
-    horizontal_space, vertical_space,
+    Button, Column, Container, Image, Row, Scrollable, Space, Text, Tooltip, button,
 };
-use iced::{Alignment, Font, Length, Padding};
-use std::fmt::Write;
+use iced::{Alignment, Element, Length, Padding};
 
 /// Computes the body of gui overview page
 pub fn overview_page(sniffer: &Sniffer) -> Container<'_, Message, StyleType> {
@@ -94,6 +91,7 @@ pub fn overview_page(sniffer: &Sniffer) -> Container<'_, Message, StyleType> {
 
 fn row_report<'a>(sniffer: &Sniffer) -> Row<'a, Message, StyleType> {
     let col_host = col_host(sniffer);
+    let col_service = col_service(sniffer);
     let col_process = col_process(sniffer);
 
     Row::new()
@@ -101,6 +99,13 @@ fn row_report<'a>(sniffer: &Sniffer) -> Row<'a, Message, StyleType> {
         .push(
             Container::new(col_host)
                 .width(Length::FillPortion(6))
+                .height(Length::Fill)
+                .padding(Padding::new(10.0).top(0).bottom(5))
+                .class(ContainerType::BorderedRound),
+        )
+        .push(
+            Container::new(col_service)
+                .width(Length::FillPortion(3))
                 .height(Length::Fill)
                 .padding(Padding::new(10.0).top(0).bottom(5))
                 .class(ContainerType::BorderedRound),
@@ -256,20 +261,21 @@ fn col_service<'a>(sniffer: &Sniffer) -> Column<'a, Message, StyleType> {
 }
 
 fn col_process<'a>(sniffer: &Sniffer) -> Column<'a, Message, StyleType> {
-    let ConfigSettings {
-        style, language, ..
-    } = sniffer.configs.settings;
-    let font = style.get_extension().font;
-    let chart_type = sniffer.traffic_chart.chart_type;
+    let Settings { language, .. } = sniffer.conf.settings;
+    let data_repr = sniffer.traffic_chart.data_repr;
 
     let mut scroll_process = Column::new()
         .padding(Padding::ZERO.right(11.0))
         .align_x(Alignment::Center);
-    let entries = get_process_entries(&sniffer.processes, chart_type, sniffer.process_sort_type);
+    let entries = get_process_entries(
+        &sniffer.processes,
+        data_repr,
+        sniffer.conf.process_sort_type,
+    );
     let first_entry_data_info = entries
         .iter()
         .map(|&(_, d)| d)
-        .max_by(|d1, d2| d1.compare(&d2, SortType::Ascending, chart_type))
+        .max_by(|d1, d2| d1.compare(&d2, SortType::Ascending, data_repr))
         .unwrap_or_default();
 
     for (process, data_info) in &entries {
@@ -280,9 +286,8 @@ fn col_process<'a>(sniffer: &Sniffer) -> Column<'a, Message, StyleType> {
         let content = simpler_bar(
             process.to_string(),
             data_info,
-            chart_type,
+            data_repr,
             first_entry_data_info,
-            font,
         );
 
         scroll_process = scroll_process.push(
@@ -290,7 +295,7 @@ fn col_process<'a>(sniffer: &Sniffer) -> Column<'a, Message, StyleType> {
                 Row::new()
                     .spacing(5)
                     .align_y(Vertical::Center)
-                    .push_maybe(
+                    .push(
                         sniffer
                             .picons
                             .get(&listener_process.path)
@@ -308,11 +313,9 @@ fn col_process<'a>(sniffer: &Sniffer) -> Column<'a, Message, StyleType> {
     }
 
     if entries.len() >= 30 {
-        scroll_process = scroll_process.push(Space::with_height(25)).push(
-            Text::new(only_top_30_items_translation(language))
-                .font(font)
-                .align_x(Alignment::Center),
-        );
+        scroll_process = scroll_process
+            .push(Space::new().height(25))
+            .push(Text::new(only_top_30_items_translation(language)).align_x(Alignment::Center));
     }
 
     Column::new()
@@ -322,13 +325,12 @@ fn col_process<'a>(sniffer: &Sniffer) -> Column<'a, Message, StyleType> {
                 .align_y(Alignment::Center)
                 .push(
                     Text::new(process_translation(language))
-                        .font(font)
                         .class(TextType::Title)
                         .size(FONT_SIZE_TITLE),
                 )
-                .push(horizontal_space())
+                .push(Space::new().width(Length::Fill))
                 .push(sort_arrows(
-                    sniffer.process_sort_type,
+                    sniffer.conf.process_sort_type,
                     Message::ProcessSortSelection,
                 )),
         )
@@ -395,7 +397,7 @@ pub fn simpler_bar<'a>(
                 .spacing(1)
                 .push(
                     Row::new()
-                        .push(Text::new(service.to_string()))
+                        .push(Text::new(item))
                         .push(Space::new().width(Length::Fill))
                         .push(Text::new(
                             data_repr.formatted_string(data_info.tot_data(data_repr)),

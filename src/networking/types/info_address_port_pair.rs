@@ -13,7 +13,6 @@ use crate::networking::types::process::Process;
 use crate::networking::types::traffic_direction::TrafficDirection;
 use crate::report::types::sort_type::SortType;
 use crate::utils::types::timestamp::Timestamp;
-use std::collections::HashMap;
 
 /// Struct useful to format the output report file and to keep track of statistics about the sniffed traffic.
 ///

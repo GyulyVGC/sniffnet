@@ -1,5 +1,4 @@
 use std::collections::HashMap;
-use std::ffi::{CStr, c_int};
 use std::net::{IpAddr, Ipv4Addr, Ipv6Addr};
 
 use etherparse::{
@@ -15,15 +14,13 @@ use crate::networking::types::capture_context::CaptureSource;
 use crate::networking::types::icmp_type::{IcmpType, IcmpTypeV4, IcmpTypeV6};
 use crate::networking::types::info_address_port_pair::InfoAddressPortPair;
 use crate::networking::types::info_traffic::InfoTraffic;
-use crate::networking::types::packet_filters_fields::PacketFiltersFields;
+use crate::networking::types::ip_blacklist::IpBlacklist;
+use crate::networking::types::process::Process;
 use crate::networking::types::service::Service;
 use crate::networking::types::service_query::ServiceQuery;
 use crate::networking::types::traffic_direction::TrafficDirection;
 use crate::networking::types::traffic_type::TrafficType;
-use crate::{IpVersion, Protocol};
 use std::fmt::Write;
-use std::path::Path;
-use std::process::Command;
 
 include!(concat!(env!("OUT_DIR"), "/services.rs"));
 
@@ -529,8 +526,8 @@ pub fn get_address_to_lookup(key: &AddressPortPair, traffic_direction: TrafficDi
 
 pub fn get_local_port(key: &AddressPortPair, traffic_direction: TrafficDirection) -> Option<u16> {
     match traffic_direction {
-        TrafficDirection::Outgoing => key.port1,
-        TrafficDirection::Incoming => key.port2,
+        TrafficDirection::Outgoing => key.sport,
+        TrafficDirection::Incoming => key.dport,
     }
 }
 
