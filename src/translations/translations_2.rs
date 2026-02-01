@@ -455,34 +455,34 @@ pub fn fqdn_translation(language: Language) -> &'static str {
     }
 }
 
-pub fn administrative_entity_translation(language: Language) -> &'static str {
-    match language {
-        Language::EN => "Autonomous System name",
-        Language::CS => "Jméno autonomního systému",
-        Language::IT => "Nome del sistema autonomo",
-        Language::RU => "Имя автономной системы",
-        Language::SV => "Administrativ enhet",
-        Language::FI => "Autonomisen järjestelmän nimi",
-        Language::DE => "Name des autonomen Systems",
-        Language::TR => "Yönetim varlığı",
-        // Language::FA => "واحد اداری",
-        Language::ES => "Nombre del sistema autónomo",
-        Language::KO => "관리 엔티티",
-        Language::ZH => "ASN 信息",
-        Language::ZH_TW => "ASN 資訊",
-        Language::UK => "Адміністративна одиниця",
-        Language::RO => "Numele sistemului autonom",
-        Language::PL => "Nazwa autonomicznego systemu",
-        Language::FR => "Nom du système autonome",
-        Language::JA => "AS 名",
-        Language::UZ => "Avtonom tizim nomi",
-        Language::PT => "Entidade administrativa",
-        Language::VI => "Tên Autonomous System",
-        Language::ID => "Nama System Otomatis",
-        Language::NL => "Naam van het autonome systeem",
-        Language::EL => "Όνομα αυτόνομου συστήματος",
-    }
-}
+// pub fn administrative_entity_translation(language: Language) -> &'static str {
+//     match language {
+//         Language::EN => "Autonomous System name",
+//         Language::CS => "Jméno autonomního systému",
+//         Language::IT => "Nome del sistema autonomo",
+//         Language::RU => "Имя автономной системы",
+//         Language::SV => "Administrativ enhet",
+//         Language::FI => "Autonomisen järjestelmän nimi",
+//         Language::DE => "Name des autonomen Systems",
+//         Language::TR => "Yönetim varlığı",
+//         // Language::FA => "واحد اداری",
+//         Language::ES => "Nombre del sistema autónomo",
+//         Language::KO => "관리 엔티티",
+//         Language::ZH => "ASN 信息",
+//         Language::ZH_TW => "ASN 資訊",
+//         Language::UK => "Адміністративна одиниця",
+//         Language::RO => "Numele sistemului autonom",
+//         Language::PL => "Nazwa autonomicznego systemu",
+//         Language::FR => "Nom du système autonome",
+//         Language::JA => "AS 名",
+//         Language::UZ => "Avtonom tizim nomi",
+//         Language::PT => "Entidade administrativa",
+//         Language::VI => "Tên Autonomous System",
+//         Language::ID => "Nama System Otomatis",
+//         Language::NL => "Naam van het autonome systeem",
+//         Language::EL => "Όνομα αυτόνομου συστήματος",
+//     }
+// }
 
 pub fn transmitted_data_translation(language: Language) -> &'static str {
     match language {

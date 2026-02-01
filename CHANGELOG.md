@@ -4,7 +4,9 @@ All Sniffnet releases with the relative changes are documented in this file.
 
 ## [UNRELEASED]
 - Add charts to preview network adapters traffic in initial page ([#1026](https://github.com/GyulyVGC/sniffnet/pull/1026) — fixes [#556](https://github.com/GyulyVGC/sniffnet/issues/556))
+- Support custom IP blacklists ([#1055](https://github.com/GyulyVGC/sniffnet/pull/1055) — fixes [#729](https://github.com/GyulyVGC/sniffnet/issues/729))
 - Add animated welcome screen ([#1002](https://github.com/GyulyVGC/sniffnet/pull/1002))
+- New command line option `--config_path` to print the path of the app configuration file
 - Migrate to Iced 0.14 ([#1032](https://github.com/GyulyVGC/sniffnet/pull/1032) — fixes [#589](https://github.com/GyulyVGC/sniffnet/issues/589), [#639](https://github.com/GyulyVGC/sniffnet/issues/639), [#653](https://github.com/GyulyVGC/sniffnet/issues/653), [#656](https://github.com/GyulyVGC/sniffnet/issues/656), [#675](https://github.com/GyulyVGC/sniffnet/issues/675))
 - Added various sanity checks when loading app configurations from file (window properties, scale factor, themes, notifications volume)
 - Fix app configurations backward-compatibility when an existing field is updated or invalid

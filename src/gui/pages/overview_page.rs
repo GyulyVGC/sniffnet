@@ -267,12 +267,7 @@ pub fn host_bar<'a>(
                 .spacing(1)
                 .push(
                     Row::new()
-                        .push(Text::new(host.domain.clone()))
-                        .push(Text::new(if host.asn.name.is_empty() {
-                            String::new()
-                        } else {
-                            format!(" - {}", host.asn.name)
-                        }))
+                        .push(Text::new(host.to_entry_string()))
                         .push(Space::new().width(Length::Fill))
                         .push(Text::new(data_repr.formatted_string(
                             data_info_host.data_info.tot_data(data_repr),

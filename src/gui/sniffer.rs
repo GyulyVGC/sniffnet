@@ -6,11 +6,11 @@ use iced::Event::{Keyboard, Window};
 use iced::keyboard::key::Named;
 use iced::keyboard::{Event, Key, Modifiers};
 use iced::mouse::Event::ButtonPressed;
-use iced::widget::Column;
+use iced::widget::{Column, center};
 use iced::window::{Id, Level};
 use iced::{Element, Point, Size, Subscription, Task, window};
 use rfd::FileHandle;
-use std::collections::{HashMap, HashSet, VecDeque};
+use std::collections::{HashMap, HashSet};
 use std::net::IpAddr;
 use std::path::PathBuf;
 use std::sync::Arc;
@@ -54,9 +54,10 @@ use crate::networking::types::data_representation::DataRepr;
 use crate::networking::types::host::{Host, HostMessage};
 use crate::networking::types::host_data_states::HostDataStates;
 use crate::networking::types::info_traffic::InfoTraffic;
+use crate::networking::types::ip_blacklist::IpBlacklist;
 use crate::networking::types::my_device::MyDevice;
 use crate::notifications::notify_and_log::notify_and_log;
-use crate::notifications::types::logged_notification::LoggedNotification;
+use crate::notifications::types::logged_notification::LoggedNotifications;
 use crate::notifications::types::notifications::{DataNotification, Notification};
 use crate::notifications::types::sound::{Sound, play};
 use crate::report::get_report_entries::get_searched_entries;
@@ -66,6 +67,7 @@ use crate::translations::types::language::Language;
 use crate::utils::check_updates::set_newer_release_status;
 use crate::utils::error_logger::{ErrorLogger, Location};
 use crate::utils::types::file_info::FileInfo;
+use crate::utils::types::icon::Icon;
 use crate::utils::types::web_page::WebPage;
 use crate::{StyleType, TrafficChart, location};
 
@@ -96,7 +98,7 @@ pub struct Sniffer {
     /// Collection of the favorite hosts
     pub favorite_hosts: HashSet<Host>,
     /// Log of the displayed notifications, with the total number of notifications for this capture
-    pub logged_notifications: (VecDeque<LoggedNotification>, usize),
+    pub logged_notifications: LoggedNotifications,
     /// Reports if a newer release of the software is available on GitHub
     pub newer_release_available: Option<bool>,
     /// Network device to be analyzed, or PCAP file to be imported
@@ -123,6 +125,8 @@ pub struct Sniffer {
     pub page_number: usize,
     /// MMDB readers for country and ASN
     pub mmdb_readers: MmdbReaders,
+    /// IP blacklist
+    pub ip_blacklist: IpBlacklist,
     /// Time-related events
     pub timing_events: TimingEvents,
     /// Whether thumbnail mode is currently active
@@ -161,7 +165,7 @@ impl Sniffer {
             info_traffic: InfoTraffic::default(),
             addresses_resolved: HashMap::new(),
             favorite_hosts: HashSet::new(),
-            logged_notifications: (VecDeque::new(), 0),
+            logged_notifications: LoggedNotifications::default(),
             newer_release_available: None,
             capture_source,
             pcap_error: None,
@@ -178,6 +182,7 @@ impl Sniffer {
                 country: Arc::new(MmdbReader::from(&mmdb_country, COUNTRY_MMDB)),
                 asn: Arc::new(MmdbReader::from(&mmdb_asn, ASN_MMDB)),
             },
+            ip_blacklist: IpBlacklist::default(), // load it later
             timing_events: TimingEvents::default(),
             thumbnail: false,
             id: None,
@@ -188,7 +193,7 @@ impl Sniffer {
     }
 
     fn keyboard_subscription(&self) -> Subscription<Message> {
-        if self.welcome.is_some() {
+        if self.welcome.is_some() || self.ip_blacklist.is_loading() {
             return Subscription::none();
         }
 
@@ -319,8 +324,10 @@ impl Sniffer {
             Message::ChangeScaleFactor(slider_val) => self.change_scale_factor(slider_val),
             Message::WindowMoved(x, y) => self.window_moved(x, y),
             Message::WindowResized(width, height) => return self.window_resized(width, height),
-            Message::CustomCountryDb(db) => self.custom_country_db(&db),
-            Message::CustomAsnDb(db) => self.custom_asn_db(&db),
+            Message::CustomCountryDb(db) => self.custom_country_db(db),
+            Message::CustomAsnDb(db) => self.custom_asn_db(db),
+            Message::LoadIpBlacklist(path) => return self.load_ip_blacklist(path),
+            Message::SetIpBlacklist(blacklist) => self.set_ip_blacklist(blacklist),
             Message::QuitWrapper => return self.quit_wrapper(),
             Message::Quit => return self.quit(),
             Message::Welcome => self.welcome(),
@@ -397,7 +404,7 @@ impl Sniffer {
         let content: Element<Message, StyleType> =
             Column::new().push(header).push(body).push(footer).into();
 
-        match self.modal.clone() {
+        let ret_val: Element<'_, Message, StyleType> = match self.modal.clone() {
             None => {
                 if let Some(settings_page) = self.settings_page {
                     let overlay: Element<Message, StyleType> = match settings_page {
@@ -423,6 +430,16 @@ impl Sniffer {
 
                 modal(content, overlay, Message::HideModal)
             }
+        };
+
+        if self.ip_blacklist.is_loading() {
+            let overlay = Into::<Element<Message, StyleType>>::into(center(
+                Icon::get_hourglass(self.dots_pulse.0.len()).size(60),
+            ));
+
+            modal(ret_val, overlay, None)
+        } else {
+            ret_val
         }
     }
 
@@ -450,6 +467,7 @@ impl Sniffer {
             Sniffer::register_sigint_handler(),
             Task::perform(set_newer_release_status(), Message::SetNewerReleaseStatus),
             previews_task,
+            self.load_ip_blacklist(self.conf.settings.ip_blacklist.clone()),
         ])
     }
 
@@ -502,7 +520,7 @@ impl Sniffer {
 
     fn load_style(&mut self, path: String) {
         self.conf.settings.style_path.clone_from(&path);
-        if let Ok(palette) = Palette::from_file(path) {
+        if let Some(palette) = Palette::from_file(path) {
             let style = StyleType::Custom(CustomPalette::from_palette(palette));
             self.conf.settings.style = style;
             self.change_charts_style();
@@ -551,7 +569,7 @@ impl Sniffer {
     }
 
     fn clear_all_notifications(&mut self) {
-        self.logged_notifications.0 = VecDeque::new();
+        self.logged_notifications.clear_notifications();
         self.modal = None;
     }
 
@@ -571,7 +589,7 @@ impl Sniffer {
 
     fn update_page_number(&mut self, increment: bool) {
         if increment {
-            if self.page_number < get_searched_entries(self).1.div_ceil(20) {
+            if self.page_number < get_searched_entries(self).1.div_ceil(30) {
                 self.page_number = self.page_number.checked_add(1).unwrap_or(1);
             }
         } else if self.page_number > 1 {
@@ -623,14 +641,29 @@ impl Sniffer {
         Task::none()
     }
 
-    fn custom_country_db(&mut self, db: &String) {
-        self.conf.settings.mmdb_country.clone_from(db);
-        self.mmdb_readers.country = Arc::new(MmdbReader::from(db, COUNTRY_MMDB));
+    fn custom_country_db(&mut self, db: String) {
+        self.mmdb_readers.country = Arc::new(MmdbReader::from(&db, COUNTRY_MMDB));
+        self.conf.settings.mmdb_country = db;
     }
 
-    fn custom_asn_db(&mut self, db: &String) {
-        self.conf.settings.mmdb_asn.clone_from(db);
-        self.mmdb_readers.asn = Arc::new(MmdbReader::from(db, ASN_MMDB));
+    fn custom_asn_db(&mut self, db: String) {
+        self.mmdb_readers.asn = Arc::new(MmdbReader::from(&db, ASN_MMDB));
+        self.conf.settings.mmdb_asn = db;
+    }
+
+    fn load_ip_blacklist(&mut self, path: String) -> Task<Message> {
+        self.conf.settings.ip_blacklist.clone_from(&path);
+        if path.is_empty() {
+            self.ip_blacklist = IpBlacklist::default();
+            Task::none()
+        } else {
+            self.ip_blacklist.start_loading();
+            Task::perform(IpBlacklist::from_file(path), Message::SetIpBlacklist)
+        }
+    }
+
+    fn set_ip_blacklist(&mut self, blacklist: IpBlacklist) {
+        self.ip_blacklist = blacklist;
     }
 
     fn open_file(
@@ -772,7 +805,7 @@ impl Sniffer {
     fn expand_notification(&mut self, id: usize, expand: bool) {
         if let Some(n) = self
             .logged_notifications
-            .0
+            .notifications_mut()
             .iter_mut()
             .find(|n| n.id() == id)
         {
@@ -857,6 +890,7 @@ impl Sniffer {
             &msg,
             &self.favorite_hosts,
             &self.capture_source,
+            &self.addresses_resolved,
         );
         if self.thumbnail
             || self
@@ -917,6 +951,7 @@ impl Sniffer {
                 // no pcap error
                 let curr_cap_id = self.current_capture_rx.0;
                 let mmdb_readers = self.mmdb_readers.clone();
+                let ip_blacklist = self.ip_blacklist.clone();
                 self.capture_source
                     .set_link_type(capture_context.my_link_type());
                 self.capture_source.set_addresses();
@@ -934,6 +969,7 @@ impl Sniffer {
                             curr_cap_id,
                             capture_source,
                             &mmdb_readers,
+                            &ip_blacklist,
                             capture_context,
                             filters,
                             &tx,
@@ -972,7 +1008,7 @@ impl Sniffer {
         self.info_traffic = InfoTraffic::default();
         self.addresses_resolved = HashMap::new();
         self.favorite_hosts = HashSet::new();
-        self.logged_notifications = (VecDeque::new(), 0);
+        self.logged_notifications = LoggedNotifications::default();
         self.pcap_error = None;
         self.traffic_chart = TrafficChart::new(style, language, self.conf.data_repr);
         self.modal = None;
@@ -1085,6 +1121,11 @@ impl Sniffer {
             Notification::Favorite(favorite_notification) => {
                 self.conf.settings.notifications.favorite_notification = favorite_notification;
                 favorite_notification.sound
+            }
+            Notification::IpBlacklist(ip_blacklist_notification) => {
+                self.conf.settings.notifications.ip_blacklist_notification =
+                    ip_blacklist_notification;
+                ip_blacklist_notification.sound
             }
         };
         if emit_sound {
@@ -1220,7 +1261,7 @@ impl Sniffer {
         if self
             .running_page
             .is_some_and(|p| p.eq(&RunningPage::Notifications))
-            && !self.logged_notifications.0.is_empty()
+            && !self.logged_notifications.is_empty()
         {
             self.show_modal(MyModal::ClearAll);
         }
@@ -1245,10 +1286,14 @@ impl Sniffer {
             dialog.pick_folder().await
         } else {
             let extensions = file_info.get_extensions();
-            dialog
-                .add_filter(format!("{extensions:?}"), &extensions)
-                .pick_file()
-                .await
+            if extensions.is_empty() {
+                dialog.pick_file().await
+            } else {
+                dialog
+                    .add_filter(format!("{extensions:?}"), &extensions)
+                    .pick_file()
+                    .await
+            }
         }
         .unwrap_or_else(|| FileHandle::from(PathBuf::from(&old_file)));
 
@@ -1338,7 +1383,7 @@ mod tests {
         DataThresholdExceeded, LoggedNotification,
     };
     use crate::notifications::types::notifications::{
-        DataNotification, FavoriteNotification, Notification, Notifications,
+        DataNotification, Notification, Notifications, SimpleNotification,
     };
     use crate::notifications::types::sound::Sound;
     use crate::report::types::sort_type::SortType;
@@ -1846,14 +1891,24 @@ mod tests {
             previous_threshold: 800_000,
         };
 
-        let fav_notification_init = FavoriteNotification {
-            notify_on_favorite: false,
+        let fav_notification_init = SimpleNotification {
+            is_active: false,
+            sound: Sound::Pop,
+        };
+
+        let fav_notification_new = SimpleNotification {
+            is_active: true,
+            sound: Sound::Pop,
+        };
+
+        let blacklist_notification_init = SimpleNotification {
+            is_active: false,
             sound: Sound::Swhoosh,
         };
 
-        let fav_notification_new = FavoriteNotification {
-            notify_on_favorite: true,
-            sound: Sound::Pop,
+        let blacklist_notification_new = SimpleNotification {
+            is_active: true,
+            sound: Sound::Gulp,
         };
 
         // initial default state
@@ -1865,6 +1920,14 @@ mod tests {
         assert_eq!(
             sniffer.conf.settings.notifications.favorite_notification,
             fav_notification_init
+        );
+        assert_eq!(
+            sniffer
+                .conf
+                .settings
+                .notifications
+                .ip_blacklist_notification,
+            blacklist_notification_init
         );
 
         // change volume
@@ -1879,14 +1942,13 @@ mod tests {
             sniffer.conf.settings.notifications.favorite_notification,
             fav_notification_init,
         );
-
         assert_eq!(
-            sniffer.conf.settings.notifications.data_notification,
-            bytes_notification_init
-        );
-        assert_eq!(
-            sniffer.conf.settings.notifications.favorite_notification,
-            fav_notification_init
+            sniffer
+                .conf
+                .settings
+                .notifications
+                .ip_blacklist_notification,
+            blacklist_notification_init
         );
 
         // Toggle on bytes notifications
@@ -1924,6 +1986,14 @@ mod tests {
             sniffer.conf.settings.notifications.favorite_notification,
             fav_notification_init,
         );
+        assert_eq!(
+            sniffer
+                .conf
+                .settings
+                .notifications
+                .ip_blacklist_notification,
+            blacklist_notification_init,
+        );
 
         // change favorite notifications
         sniffer.update(Message::UpdateNotificationSettings(
@@ -1948,14 +2018,30 @@ mod tests {
             sniffer.conf.settings.notifications.favorite_notification,
             fav_notification_new
         );
+
+        // change favorite notifications
+        sniffer.update(Message::UpdateNotificationSettings(
+            Notification::IpBlacklist(blacklist_notification_new),
+            true,
+        ));
+
+        assert_eq!(
+            sniffer
+                .conf
+                .settings
+                .notifications
+                .ip_blacklist_notification,
+            blacklist_notification_new,
+        );
     }
 
     #[test]
     #[parallel] // needed to not collide with other tests generating configs files
     fn test_clear_all_notifications() {
         let mut sniffer = Sniffer::new(Conf::default());
-        sniffer.logged_notifications.0 =
-            VecDeque::from([LoggedNotification::DataThresholdExceeded(
+        sniffer
+            .logged_notifications
+            .set_notifications(VecDeque::from([LoggedNotification::DataThresholdExceeded(
                 DataThresholdExceeded {
                     id: 1,
                     data_repr: DataRepr::Packets,
@@ -1966,15 +2052,15 @@ mod tests {
                     hosts: Vec::new(),
                     is_expanded: false,
                 },
-            )]);
+            )]));
 
         assert_eq!(sniffer.modal, None);
         sniffer.update(Message::ShowModal(MyModal::ClearAll));
         assert_eq!(sniffer.modal, Some(MyModal::ClearAll));
-        assert_eq!(sniffer.logged_notifications.0.len(), 1);
+        assert_eq!(sniffer.logged_notifications.len(), 1);
         sniffer.update(Message::ClearAllNotifications);
         assert_eq!(sniffer.modal, None);
-        assert_eq!(sniffer.logged_notifications.0.len(), 0);
+        assert_eq!(sniffer.logged_notifications.len(), 0);
     }
 
     #[test]
@@ -2101,6 +2187,7 @@ mod tests {
         sniffer.update(Message::SetPcapImport("/test.pcap".to_string()));
         sniffer.update(Message::ChangeRunningPage(RunningPage::Notifications));
         sniffer.update(Message::DataReprSelection(DataRepr::Bits));
+        sniffer.update(Message::LoadIpBlacklist("blacklist_file.csv".to_string()));
 
         // force saving configs by quitting the app
         sniffer.welcome = Some((false, 0));
@@ -2125,11 +2212,10 @@ mod tests {
                     ),
                     notifications: Notifications {
                         volume: 100,
-                        data_notification: Default::default(),
-                        favorite_notification: Default::default(),
-                        remote_notifications: Default::default(),
+                        ..Notifications::default()
                     },
                     style: StyleType::DraculaDark,
+                    ip_blacklist: "blacklist_file.csv".to_string(),
                 },
                 window: ConfigWindow::new((1000.0, 999.0), (-5.0, 277.5), (20.0, 20.0)),
                 device: ConfigDevice::default(),

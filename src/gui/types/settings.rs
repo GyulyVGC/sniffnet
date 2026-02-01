@@ -20,6 +20,8 @@ pub struct Settings {
     pub mmdb_country: String,
     #[serde(deserialize_with = "deserialize_or_default")]
     pub mmdb_asn: String,
+    #[serde(deserialize_with = "deserialize_or_default")]
+    pub ip_blacklist: String,
     // ---------------------------------------------------------------------------------------------
     #[serde(deserialize_with = "deserialize_or_default")]
     pub notifications: Notifications,
@@ -35,6 +37,7 @@ impl Default for Settings {
             scale_factor: 1.0,
             mmdb_country: String::new(),
             mmdb_asn: String::new(),
+            ip_blacklist: String::new(),
             style_path: String::new(),
             notifications: Notifications::default(),
             style: StyleType::default(),

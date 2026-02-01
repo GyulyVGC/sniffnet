@@ -6,6 +6,7 @@ use std::collections::HashMap;
 
 use crate::Service;
 use crate::networking::types::arp_type::ArpType;
+use crate::networking::types::data_info::DataInfo;
 use crate::networking::types::data_representation::DataRepr;
 use crate::networking::types::icmp_type::IcmpType;
 use crate::networking::types::traffic_direction::TrafficDirection;
@@ -37,6 +38,8 @@ pub struct InfoAddressPortPair {
     pub icmp_types: HashMap<IcmpType, usize>,
     /// Types of the ARP operations, with the relative count (this is empty if not ARP)
     pub arp_types: HashMap<ArpType, usize>,
+    /// Whether the remote address is blacklisted
+    pub is_blacklisted: bool,
 }
 
 impl InfoAddressPortPair {
@@ -45,6 +48,7 @@ impl InfoAddressPortPair {
         self.transmitted_packets += other.transmitted_packets;
         self.final_timestamp = other.final_timestamp;
         self.service = other.service;
+        self.is_blacklisted = other.is_blacklisted;
         self.traffic_direction = other.traffic_direction;
         for (icmp_type, count) in &other.icmp_types {
             self.icmp_types
@@ -78,6 +82,16 @@ impl InfoAddressPortPair {
                 .cmp(&self.transmitted_data(data_repr)),
             SortType::Neutral => other.final_timestamp.cmp(&self.final_timestamp),
         }
+    }
+
+    pub fn data_info(&self) -> DataInfo {
+        let mut data_info = DataInfo::default();
+        data_info.add_packets(
+            self.transmitted_packets,
+            self.transmitted_bytes,
+            self.traffic_direction,
+        );
+        data_info
     }
 }
 

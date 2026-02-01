@@ -15,7 +15,9 @@ pub struct Notifications {
     #[serde(deserialize_with = "deserialize_or_default")]
     pub data_notification: DataNotification,
     #[serde(deserialize_with = "deserialize_or_default")]
-    pub favorite_notification: FavoriteNotification,
+    pub favorite_notification: SimpleNotification,
+    #[serde(deserialize_with = "deserialize_or_default")]
+    pub ip_blacklist_notification: SimpleNotification,
     #[allow(clippy::struct_field_names)]
     #[serde(deserialize_with = "deserialize_or_default")]
     pub remote_notifications: RemoteNotifications,
@@ -26,7 +28,14 @@ impl Default for Notifications {
         Notifications {
             volume: 50,
             data_notification: DataNotification::default(),
-            favorite_notification: FavoriteNotification::default(),
+            favorite_notification: SimpleNotification {
+                is_active: false,
+                sound: Sound::Pop,
+            },
+            ip_blacklist_notification: SimpleNotification {
+                is_active: false,
+                sound: Sound::Swhoosh,
+            },
             remote_notifications: RemoteNotifications::default(),
         }
     }
@@ -38,7 +47,9 @@ pub enum Notification {
     /// Data notification
     Data(DataNotification),
     /// Favorites notification
-    Favorite(FavoriteNotification),
+    Favorite(SimpleNotification),
+    /// IP Blacklist notification
+    IpBlacklist(SimpleNotification),
 }
 
 #[derive(Clone, Eq, PartialEq, Serialize, Deserialize, Debug, Copy)]
@@ -116,39 +127,30 @@ impl DataNotification {
     }
 }
 
-#[derive(Clone, Eq, PartialEq, Serialize, Deserialize, Debug, Copy)]
+#[derive(Clone, Eq, PartialEq, Serialize, Deserialize, Debug, Copy, Default)]
 #[serde(default)]
-pub struct FavoriteNotification {
+pub struct SimpleNotification {
     /// Flag to determine if this notification is enabled
     #[serde(deserialize_with = "deserialize_or_default")]
-    pub notify_on_favorite: bool,
+    pub is_active: bool,
     /// The sound to emit
     #[serde(deserialize_with = "deserialize_or_default")]
     pub sound: Sound,
 }
 
-impl Default for FavoriteNotification {
-    fn default() -> Self {
-        FavoriteNotification {
-            notify_on_favorite: false,
-            sound: Sound::Swhoosh,
-        }
-    }
-}
-
-impl FavoriteNotification {
+impl SimpleNotification {
     /// Constructor when the notification is in use
     pub fn on(sound: Sound) -> Self {
-        FavoriteNotification {
-            notify_on_favorite: true,
+        Self {
+            is_active: true,
             sound,
         }
     }
 
     /// Constructor when the notification is not in use. Note that sound is used here for caching, although it won't actively be used.
     pub fn off(sound: Sound) -> Self {
-        FavoriteNotification {
-            notify_on_favorite: false,
+        Self {
+            is_active: false,
             sound,
         }
     }
@@ -243,32 +245,32 @@ mod tests {
     }
 
     #[test]
-    fn test_can_instantiate_favourite_notification() {
+    fn test_can_instantiate_simple_notification() {
         assert_eq!(
-            FavoriteNotification::on(Sound::Gulp),
-            FavoriteNotification {
-                notify_on_favorite: true,
+            SimpleNotification::on(Sound::Gulp),
+            SimpleNotification {
+                is_active: true,
                 sound: Sound::Gulp
             }
         );
         assert_eq!(
-            FavoriteNotification::on(Sound::Swhoosh),
-            FavoriteNotification {
-                notify_on_favorite: true,
+            SimpleNotification::on(Sound::Swhoosh),
+            SimpleNotification {
+                is_active: true,
                 sound: Sound::Swhoosh
             }
         );
         assert_eq!(
-            FavoriteNotification::off(Sound::Pop),
-            FavoriteNotification {
-                notify_on_favorite: false,
+            SimpleNotification::off(Sound::Pop),
+            SimpleNotification {
+                is_active: false,
                 sound: Sound::Pop
             }
         );
         assert_eq!(
-            FavoriteNotification::off(Sound::None),
-            FavoriteNotification {
-                notify_on_favorite: false,
+            SimpleNotification::off(Sound::None),
+            SimpleNotification {
+                is_active: false,
                 sound: Sound::None
             }
         );

@@ -12,6 +12,7 @@ pub mod host_data_states;
 pub mod icmp_type;
 pub mod info_address_port_pair;
 pub mod info_traffic;
+pub mod ip_blacklist;
 pub mod ip_collection;
 pub mod my_device;
 pub mod my_link_type;

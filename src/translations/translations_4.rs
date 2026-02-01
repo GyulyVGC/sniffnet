@@ -89,24 +89,24 @@ pub fn capture_file_translation(language: Language) -> &'static str {
     }
 }
 
-pub fn select_capture_translation(language: Language) -> &'static str {
+pub fn select_file_translation(language: Language) -> &'static str {
     match language {
-        Language::EN => "Select capture file",
-        Language::CS => "Výběr souboru se záznamem",
-        Language::IT => "Seleziona file di cattura",
-        Language::FR => "Sélectionner un fichier de capture",
-        Language::JA => "キャプチャファイルを選択",
-        Language::ZH => "选择捕获文件",
-        Language::NL => "Selecteer capture bestand",
-        Language::ES => "Seleccionar archivo de captura",
-        Language::RO => "Selectează fișierul de captură",
-        Language::DE => "Aufzeichnungsdatei auswählen",
-        Language::UZ => "Tahlil faylini tanlang",
-        Language::ID => "Pilih file tangkapan",
-        Language::ZH_TW => "選擇擷取文件",
-        Language::EL => "Επιλογή αρχείου καταγραφής",
-        Language::VI => "Chọn tệp tin được bắt",
-        _ => "Select capture file",
+        Language::EN => "Select file",
+        Language::CS => "Výběr souboru",
+        Language::IT => "Seleziona file",
+        Language::FR => "Sélectionner fichier",
+        Language::JA => "ファイルを選択",
+        Language::ZH => "选择文件",
+        Language::NL => "Selecteer bestand",
+        Language::ES => "Seleccionar archivo",
+        Language::RO => "Selectează fișierul",
+        Language::DE => "Datei auswählen",
+        Language::UZ => "Faylini tanlang",
+        Language::ID => "Pilih file",
+        Language::ZH_TW => "選擇文件",
+        Language::EL => "Επιλογή αρχείου",
+        Language::VI => "Chọn tệp",
+        _ => "Select file",
     }
 }
 

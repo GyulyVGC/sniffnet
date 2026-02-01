@@ -51,11 +51,11 @@ pub fn get_searched_entries(
         a.compare(b, sniffer.conf.report_sort_type, sniffer.conf.data_repr)
     });
 
-    let upper_bound = min(sniffer.page_number * 20, all_results.len());
+    let upper_bound = min(sniffer.page_number * 30, all_results.len());
 
     (
         all_results
-            .get((sniffer.page_number.saturating_sub(1)) * 20..upper_bound)
+            .get((sniffer.page_number.saturating_sub(1)) * 30..upper_bound)
             .unwrap_or_default()
             .iter()
             .map(|&(key, val)| (key.to_owned(), val.to_owned()))

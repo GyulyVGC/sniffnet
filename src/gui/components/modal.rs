@@ -113,14 +113,11 @@ fn confirm_button_row<'a>(language: Language, message: Message) -> Row<'a, Messa
 pub fn modal<'a>(
     base: Element<'a, Message, StyleType>,
     content: Element<'a, Message, StyleType>,
-    on_blur: Message,
+    on_blur: impl Into<Option<Message>>,
 ) -> Element<'a, Message, StyleType> {
-    stack![
-        base,
-        opaque(
-            mouse_area(center(opaque(content)).class(ContainerType::ModalBackground))
-                .on_press(on_blur)
-        )
-    ]
-    .into()
+    let mut mouse_area = mouse_area(center(opaque(content)).class(ContainerType::ModalBackground));
+    if let Some(message) = on_blur.into() {
+        mouse_area = mouse_area.on_press(message);
+    }
+    stack![base, opaque(mouse_area)].into()
 }

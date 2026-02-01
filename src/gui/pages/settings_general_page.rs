@@ -15,12 +15,14 @@ use crate::gui::styles::text::TextType;
 use crate::gui::types::message::Message;
 use crate::gui::types::settings::Settings;
 use crate::mmdb::types::mmdb_reader::{MmdbReader, MmdbReaders};
+use crate::networking::types::ip_blacklist::IpBlacklist;
 use crate::translations::translations::language_translation;
 use crate::translations::translations_2::country_translation;
 use crate::translations::translations_3::{
     mmdb_files_translation, params_not_editable_translation, zoom_translation,
 };
 use crate::translations::translations_4::share_feedback_translation;
+use crate::translations::translations_5::ip_blacklist_translation;
 use crate::utils::formatted_strings::get_path_termination_string;
 use crate::utils::types::file_info::FileInfo;
 use crate::utils::types::icon::Icon;
@@ -54,8 +56,10 @@ fn column_all_general_setting(sniffer: &Sniffer) -> Column<'_, Message, StyleTyp
         scale_factor,
         mmdb_country,
         mmdb_asn,
+        ip_blacklist: ip_blacklist_str,
         ..
     } = sniffer.conf.settings.clone();
+    let ip_blacklist = &sniffer.ip_blacklist;
 
     let is_editable = sniffer.running_page.is_none();
 
@@ -63,7 +67,8 @@ fn column_all_general_setting(sniffer: &Sniffer) -> Column<'_, Message, StyleTyp
         .align_x(Alignment::Center)
         .padding([5, 10])
         .push(row_language_scale_factor(language, scale_factor))
-        .push(RuleType::Standard.horizontal(25));
+        .push(RuleType::Standard.horizontal(25))
+        .push(Space::new().height(10));
 
     if !is_editable {
         column = column
@@ -75,13 +80,25 @@ fn column_all_general_setting(sniffer: &Sniffer) -> Column<'_, Message, StyleTyp
             .push(Space::new().height(10));
     }
 
-    column = column.push(mmdb_settings(
-        is_editable,
-        language,
-        &mmdb_country,
-        &mmdb_asn,
-        &sniffer.mmdb_readers,
-    ));
+    let import_files_row = Row::new()
+        .align_y(Alignment::Start)
+        .height(100)
+        .push(mmdb_settings(
+            is_editable,
+            language,
+            &mmdb_country,
+            &mmdb_asn,
+            &sniffer.mmdb_readers,
+        ))
+        .push(RuleType::Standard.vertical(25))
+        .push(blacklist_selection(
+            is_editable,
+            &ip_blacklist_str,
+            ip_blacklist,
+            language,
+        ));
+
+    column = column.push(import_files_row);
 
     column
 }
@@ -235,6 +252,7 @@ fn mmdb_settings<'a>(
     mmdb_readers: &MmdbReaders,
 ) -> Column<'a, Message, StyleType> {
     Column::new()
+        .width(Length::Fill)
         .spacing(5)
         .align_x(Alignment::Center)
         .push(
@@ -298,6 +316,53 @@ fn mmdb_selection_row<'a>(
         } else {
             button_clear_mmdb(message, is_editable)
         })
+}
+
+fn blacklist_selection<'a>(
+    is_editable: bool,
+    custom_path: &str,
+    ip_blacklist: &IpBlacklist,
+    language: Language,
+) -> Column<'a, Message, StyleType> {
+    let is_error = if custom_path.is_empty() {
+        false
+    } else {
+        ip_blacklist.is_invalid()
+    };
+
+    let message = Message::LoadIpBlacklist;
+
+    Column::new()
+        .width(Length::Fill)
+        .spacing(5)
+        .align_x(Alignment::Center)
+        .push(
+            Text::new(ip_blacklist_translation(language))
+                .class(TextType::Subtitle)
+                .size(FONT_SIZE_SUBTITLE),
+        )
+        .push(
+            Row::new()
+                .align_y(Alignment::Center)
+                .push(
+                    Text::new(get_path_termination_string(custom_path, 25)).class(if is_error {
+                        TextType::Danger
+                    } else {
+                        TextType::Standard
+                    }),
+                )
+                .push(if custom_path.is_empty() {
+                    button_open_file(
+                        custom_path.to_owned(),
+                        FileInfo::Blacklist,
+                        language,
+                        is_editable,
+                        message,
+                    )
+                } else {
+                    button_clear_mmdb(message, is_editable)
+                }),
+        )
 }
 
 fn button_clear_mmdb<'a>(

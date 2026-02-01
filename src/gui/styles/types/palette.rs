@@ -1,15 +1,13 @@
 //! Module defining the `Colors` struct, which defines the colors in use in the GUI.
 
-use std::fs::File;
 use std::hash::{Hash, Hasher};
-use std::io::{BufReader, Read};
 use std::path::Path;
 
 use iced::Color;
 use plotters::style::RGBColor;
 use serde::{Deserialize, Serialize};
 
-use super::color_remote::{deserialize_color, serialize_color};
+use super::color_remote::{deserialize_color, deserialize_color_inner, serialize_color};
 use crate::gui::styles::style_constants::{RED_ALERT_COLOR_DAILY, RED_ALERT_COLOR_NIGHTLY};
 use crate::gui::styles::types::color_remote::color_hash;
 use crate::gui::styles::types::palette_extension::PaletteExtension;
@@ -111,22 +109,30 @@ impl Palette {
     ///
     /// # Arguments
     /// * `path` - Path to a UTF-8 encoded file containing a custom style as TOML.
-    pub fn from_file<P>(path: P) -> Result<Self, toml::de::Error>
+    pub fn from_file<P>(path: P) -> Option<Self>
     where
         P: AsRef<Path>,
     {
-        // Try to open the file at `path`
-        let mut toml_reader = File::open(path)
-            .map_err(serde::de::Error::custom)
-            .map(BufReader::new)?;
+        let toml_str = std::fs::read_to_string(path).ok()?;
 
-        // Read the ostensible TOML
-        let mut style_toml = String::new();
-        toml_reader
-            .read_to_string(&mut style_toml)
-            .map_err(serde::de::Error::custom)?;
+        // manually deserialize it,
+        // because using the derived impl accepts as valid everything (for config purposes)
+        let toml: toml::Value = toml::from_str(&toml_str).ok()?;
+        let primary = toml.get("primary").cloned()?;
+        let secondary = toml.get("secondary").cloned()?;
+        let outgoing = toml.get("outgoing").cloned()?;
+        let starred = toml.get("starred").cloned()?;
+        let text_headers = toml.get("text_headers").cloned()?;
+        let text_body = toml.get("text_body").cloned()?;
 
-        toml::de::from_str(&style_toml)
+        Some(Self {
+            primary: deserialize_color_inner(primary)?,
+            secondary: deserialize_color_inner(secondary)?,
+            outgoing: deserialize_color_inner(outgoing)?,
+            starred: deserialize_color_inner(starred)?,
+            text_headers: deserialize_color_inner(text_headers)?,
+            text_body: deserialize_color_inner(text_body)?,
+        })
     }
 }
 
@@ -216,12 +222,10 @@ mod tests {
     }
 
     #[test]
-    fn custompalette_from_file_de() -> Result<(), toml::de::Error> {
+    fn custompalette_from_file_de() {
         let style = catppuccin_style();
-        let style_de = Palette::from_file(style_path("catppuccin"))?;
-
+        let style_de = Palette::from_file(style_path("catppuccin")).unwrap();
         assert_eq!(style, style_de);
-        Ok(())
     }
 
     #[test]
@@ -340,5 +344,17 @@ mod tests {
                 red_alert_color: RED_ALERT_COLOR_DAILY,
             }
         )
+    }
+
+    #[test]
+    fn test_palette_from_not_existing_file_fails() {
+        let result = Palette::from_file("non_existent_file.toml");
+        assert!(result.is_none());
+    }
+
+    #[test]
+    fn test_palette_from_invalid_file_fails() {
+        let result = Palette::from_file("Cargo.toml");
+        assert!(result.is_none());
     }
 }

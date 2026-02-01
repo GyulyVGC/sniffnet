@@ -13,10 +13,13 @@ use iced::{Task, window};
     version = APP_VERSION,
     about = "Application to comfortably monitor your network traffic"
 )]
-struct Args {
+pub(crate) struct Args {
     /// Start sniffing packets from the supplied network adapter
     #[arg(short, long, value_name = "NAME", default_missing_value = CONF.device.device_name.as_str(), num_args = 0..=1)]
     adapter: Option<String>,
+    /// Print the path to the configuration file
+    #[arg(short, long, exclusive = true)]
+    config_path: bool,
     #[cfg(all(windows, not(debug_assertions)))]
     /// Show the logs (stdout and stderr) of the most recent application run
     #[arg(short, long, exclusive = true)]
@@ -26,46 +29,68 @@ struct Args {
     restore_default: bool,
 }
 
-pub fn handle_cli_args() -> Task<Message> {
-    let args = Args::parse();
+impl Args {
+    /// Handle and return CLI arguments
+    pub fn handle() -> Self {
+        let args = Args::parse();
 
-    #[cfg(all(windows, not(debug_assertions)))]
-    if let Some(logs_file) = crate::utils::formatted_strings::get_logs_file_path() {
-        if args.logs {
-            std::process::Command::new("explorer")
-                .arg(logs_file)
-                .spawn()
-                .unwrap()
-                .wait()
-                .unwrap_or_default();
-            std::process::exit(0);
-        } else {
-            // truncate logs file
-            let _ = std::fs::OpenOptions::new()
-                .write(true)
-                .truncate(true)
-                .open(logs_file);
+        #[cfg(all(windows, not(debug_assertions)))]
+        if let Some(logs_file) = crate::utils::formatted_strings::get_logs_file_path() {
+            if args.logs {
+                std::process::Command::new("explorer")
+                    .arg(logs_file)
+                    .spawn()
+                    .unwrap()
+                    .wait()
+                    .unwrap_or_default();
+                std::process::exit(0);
+            } else {
+                // truncate logs file
+                let _ = std::fs::OpenOptions::new()
+                    .write(true)
+                    .truncate(true)
+                    .open(logs_file);
+            }
         }
-    }
 
-    if args.restore_default {
-        if Conf::default().store().is_ok() {
-            println!("Restored default settings");
+        if args.restore_default {
+            if Conf::default().store().is_ok() {
+                println!("Restored default settings");
+                std::process::exit(0);
+            } else {
+                eprintln!("Could not restore default settings");
+                std::process::exit(1);
+            }
         }
-        std::process::exit(0);
+
+        if args.config_path {
+            if let Ok(config_path) =
+                confy::get_configuration_file_path(SNIFFNET_LOWERCASE, Conf::FILE_NAME)
+            {
+                println!("{}", config_path.display());
+                std::process::exit(0);
+            } else {
+                eprintln!("Could not retrieve configuration file path");
+                std::process::exit(1);
+            }
+        }
+
+        args
     }
 
-    let mut boot_task_chain = window::latest().map(Message::StartApp);
-    if let Some(adapter) = args.adapter {
-        boot_task_chain = boot_task_chain
-            .chain(Task::done(Message::SetCaptureSource(
-                CaptureSourcePicklist::Device,
-            )))
-            .chain(Task::done(Message::DeviceSelection(adapter)))
-            .chain(Task::done(Message::Start));
-    }
+    pub fn get_boot_task_chain(&self) -> Task<Message> {
+        let mut boot_task_chain = window::latest().map(Message::StartApp);
+        if let Some(adapter) = self.adapter.clone() {
+            boot_task_chain = boot_task_chain
+                .chain(Task::done(Message::SetCaptureSource(
+                    CaptureSourcePicklist::Device,
+                )))
+                .chain(Task::done(Message::DeviceSelection(adapter)))
+                .chain(Task::done(Message::Start));
+        }
 
-    boot_task_chain
+        boot_task_chain
+    }
 }
 
 #[cfg(test)]
@@ -108,8 +133,10 @@ mod tests {
                     data_notification: Default::default(),
                     favorite_notification: Default::default(),
                     remote_notifications: Default::default(),
+                    ip_blacklist_notification: Default::default(),
                 },
                 style: StyleType::DraculaDark,
+                ip_blacklist: "some-path".to_string(),
             },
             device: ConfigDevice {
                 device_name: "hey-hey".to_string(),

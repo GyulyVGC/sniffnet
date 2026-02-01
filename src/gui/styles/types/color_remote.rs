@@ -23,7 +23,7 @@ where
     Ok(deserialize_color_inner(deserializer).unwrap_or(Color::BLACK))
 }
 
-fn deserialize_color_inner<'de, D>(deserializer: D) -> Option<Color>
+pub(super) fn deserialize_color_inner<'de, D>(deserializer: D) -> Option<Color>
 where
     D: Deserializer<'de>,
 {

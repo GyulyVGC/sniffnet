@@ -1,4 +1,4 @@
-use crate::countries::country_utils::get_computer_tooltip;
+use crate::countries::country_utils::{get_computer_tooltip, get_flag_tooltip};
 use crate::countries::flags_pictures::FLAGS_HEIGHT_BIG;
 use crate::gui::components::header::get_button_settings;
 use crate::gui::components::tab::get_pages_tabs;
@@ -19,7 +19,7 @@ use crate::networking::types::host::Host;
 use crate::networking::types::service::Service;
 use crate::networking::types::traffic_type::TrafficType;
 use crate::notifications::types::logged_notification::{
-    DataThresholdExceeded, FavoriteTransmitted, LoggedNotification,
+    BlacklistedTransmitted, DataThresholdExceeded, FavoriteTransmitted, LoggedNotification,
 };
 use crate::report::types::sort_type::SortType;
 use crate::translations::translations::{
@@ -27,6 +27,7 @@ use crate::translations::translations::{
     no_notifications_set_translation, only_last_30_translation, per_second_translation,
     threshold_translation,
 };
+use crate::translations::translations_5::blacklisted_transmitted_translation;
 use crate::utils::types::icon::Icon;
 use crate::{Language, RunningPage, Sniffer, StyleType};
 use iced::Length::FillPortion;
@@ -59,12 +60,13 @@ pub fn notifications_page(sniffer: &Sniffer) -> Container<'_, Message, StyleType
     tab_and_body = tab_and_body.push(tabs);
 
     if notifications.data_notification.threshold.is_none()
-        && !notifications.favorite_notification.notify_on_favorite
-        && sniffer.logged_notifications.0.is_empty()
+        && !notifications.favorite_notification.is_active
+        && !notifications.ip_blacklist_notification.is_active
+        && sniffer.logged_notifications.is_empty()
     {
         let body = body_no_notifications_set(language);
         tab_and_body = tab_and_body.push(body);
-    } else if sniffer.logged_notifications.0.is_empty() {
+    } else if sniffer.logged_notifications.is_empty() {
         let body = body_no_notifications_received(language, &sniffer.dots_pulse.0);
         tab_and_body = tab_and_body.push(body);
     } else {
@@ -73,7 +75,7 @@ pub fn notifications_page(sniffer: &Sniffer) -> Container<'_, Message, StyleType
             .spacing(10)
             .padding(Padding::new(10.0).bottom(0))
             .push(
-                Container::new(if sniffer.logged_notifications.0.len() < 30 {
+                Container::new(if sniffer.logged_notifications.len() < 30 {
                     Text::new("")
                 } else {
                     Text::new(only_last_30_translation(language))
@@ -233,6 +235,50 @@ fn favorite_notification_log<'a>(
         .class(ContainerType::BorderedRound)
 }
 
+fn blacklisted_notification_log<'a>(
+    logged_notification: &BlacklistedTransmitted,
+    first_entry_data_info: DataInfo,
+    data_repr: DataRepr,
+    language: Language,
+) -> Container<'a, Message, StyleType> {
+    let blacklisted_bar = blacklisted_bar(
+        logged_notification,
+        data_repr,
+        first_entry_data_info,
+        language,
+    );
+
+    let content = Row::new()
+        .spacing(30)
+        .align_y(Alignment::Center)
+        .push(
+            Icon::Forbidden
+                .to_text()
+                .size(80)
+                .line_height(LineHeight::Relative(1.0)),
+        )
+        .push(
+            Column::new()
+                .width(250)
+                .spacing(7)
+                .push(
+                    Row::new()
+                        .spacing(8)
+                        .push(Icon::Clock.to_text())
+                        .push(Text::new(logged_notification.timestamp.clone())),
+                )
+                .push(
+                    Text::new(blacklisted_transmitted_translation(language)).class(TextType::Title),
+                ),
+        )
+        .push(blacklisted_bar);
+
+    Container::new(content)
+        .width(Length::Fill)
+        .padding(15)
+        .class(ContainerType::BorderedRound)
+}
+
 fn get_button_clear_all<'a>(language: Language) -> Tooltip<'a, Message, StyleType> {
     let content = button(
         Icon::Bin
@@ -266,13 +312,13 @@ fn logged_notifications<'a>(sniffer: &Sniffer) -> Column<'a, Message, StyleType>
 
     let first_entry_data_info = sniffer
         .logged_notifications
-        .0
+        .notifications()
         .iter()
         .map(LoggedNotification::data_info)
         .max_by(|d1, d2| d1.compare(d2, SortType::Ascending, data_repr))
         .unwrap_or_default();
 
-    for logged_notification in &sniffer.logged_notifications.0 {
+    for logged_notification in sniffer.logged_notifications.notifications() {
         ret_val = ret_val.push(match logged_notification {
             LoggedNotification::DataThresholdExceeded(data_threshold_exceeded) => {
                 data_notification_log(data_threshold_exceeded, first_entry_data_info, language)
@@ -280,6 +326,14 @@ fn logged_notifications<'a>(sniffer: &Sniffer) -> Column<'a, Message, StyleType>
             LoggedNotification::FavoriteTransmitted(favorite_transmitted) => {
                 favorite_notification_log(
                     favorite_transmitted,
+                    first_entry_data_info,
+                    data_repr,
+                    language,
+                )
+            }
+            LoggedNotification::BlacklistedTransmitted(blacklisted_transmitted) => {
+                blacklisted_notification_log(
+                    blacklisted_transmitted,
                     first_entry_data_info,
                     data_repr,
                     language,
@@ -319,6 +373,43 @@ fn threshold_bar<'a>(
                         .push(Text::new(
                             data_repr.formatted_string(data_info.tot_data(data_repr)),
                         )),
+                )
+                .push(get_bars(incoming_bar_len, outgoing_bar_len)),
+        )
+}
+
+fn blacklisted_bar<'a>(
+    logged_notification: &BlacklistedTransmitted,
+    data_repr: DataRepr,
+    first_entry_data_info: DataInfo,
+    language: Language,
+) -> Row<'a, Message, StyleType> {
+    let data_info_host = &logged_notification.data_info_host;
+    let host = &logged_notification.host;
+    let (incoming_bar_len, outgoing_bar_len) =
+        get_bars_length(data_repr, &first_entry_data_info, &data_info_host.data_info);
+
+    let flag = get_flag_tooltip(host.country, data_info_host, language, false);
+    let ip_str = logged_notification.ip.to_string();
+    let info_str = host.to_blacklist_string();
+
+    Row::new()
+        .align_y(Alignment::Center)
+        .spacing(5)
+        .push(flag)
+        .push(
+            Column::new()
+                .spacing(1)
+                .push(
+                    Row::new()
+                        .align_y(Alignment::End)
+                        .push(Text::new(ip_str))
+                        .push(Space::new().width(8))
+                        .push(Text::new(info_str).size(FONT_SIZE_FOOTER))
+                        .push(Space::new().width(Length::Fill))
+                        .push(Text::new(data_repr.formatted_string(
+                            data_info_host.data_info.tot_data(data_repr),
+                        ))),
                 )
                 .push(get_bars(incoming_bar_len, outgoing_bar_len)),
         )
