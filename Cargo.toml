@@ -38,8 +38,8 @@ strip = true
 
 [dependencies]
 async-channel = "2.5.0"
-chrono = "0.4.42"
-clap = { version = "4.5.53", features = ["derive"] }
+chrono = "0.4.43"
+clap = { version = "4.5.56", features = ["derive"] }
 confy = "2.0.0"
 ctrlc = { version = "3.5.1", features = ["termination"] }
 dns-lookup = "3.0.1"
@@ -52,14 +52,14 @@ phf_shared = "0.13.1"
 plotters = { version = "0.3.7", default-features = false, features = ["area_series", "line_series"] }
 plotters-iced2 = "0.14.0"
 reqwest = { version = "0.13.1", features = ["json"] }
-rfd = "0.16.0"
+rfd = "0.17.2"
 rodio = { version = "0.21.1", default-features = false, features = ["mp3", "playback"] }
 semver = "1.0.27"
 serde = { version = "1.0.228", features = ["derive"] }
-serde_json = { version = "1.0.148", features = ["preserve_order"] }
+serde_json = { version = "1.0.149", features = ["preserve_order"] }
 splines = "5.0.0"
-tokio = { version = "1.48.0", features = ["macros", "fs"] }
-toml = "0.9.10"
+tokio = { version = "1.49.0", features = ["macros", "fs"] }
+toml = "0.9.11"
 
 [target.'cfg(windows)'.dependencies]
 gag = "1.0.0"
@@ -69,14 +69,14 @@ gag = "1.0.0"
 [dev-dependencies]
 rstest = "0.26.1"
 serde_test = "1.0.177"
-serial_test = { version = "3.2.0", default-features = false }
+serial_test = { version = "3.3.1", default-features = false }
 
 #───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
 
 [build-dependencies]
 phf_codegen = "0.13.1"
 phf_shared = "0.13.1"
-rustrict = { version = "0.7.37", default-features = false, features = ["censor"] }
+rustrict = { version = "0.7.38", default-features = false, features = ["censor"] }
 
 [target."cfg(windows)".build-dependencies]
 winres = "0.1.12"
