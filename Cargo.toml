@@ -41,7 +41,7 @@ async-channel = "2.5.0"
 chrono = "0.4.43"
 clap = { version = "4.5.56", features = ["derive"] }
 confy = "2.0.0"
-ctrlc = { version = "3.5.1", features = ["termination"] }
+ctrlc = { version = "3.5.2", features = ["termination"] }
 dns-lookup = "3.0.1"
 etherparse = "0.19.0"
 iced = { version = "0.14.0", features = ["tokio", "svg", "advanced", "lazy", "image"] }
