@@ -59,7 +59,7 @@ serde = { version = "1.0.228", features = ["derive"] }
 serde_json = { version = "1.0.149", features = ["preserve_order"] }
 splines = "5.0.0"
 tokio = { version = "1.49.0", features = ["macros", "fs"] }
-toml = "0.9.11"
+toml = "0.9.12"
 
 [target.'cfg(windows)'.dependencies]
 gag = "1.0.0"
