@@ -39,7 +39,7 @@ strip = true
 [dependencies]
 async-channel = "2.5.0"
 chrono = "0.4.43"
-clap = { version = "4.5.56", features = ["derive"] }
+clap = { version = "4.5.58", features = ["derive"] }
 confy = "2.0.0"
 ctrlc = { version = "3.5.1", features = ["termination"] }
 dns-lookup = "3.0.1"
