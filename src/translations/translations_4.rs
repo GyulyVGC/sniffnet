@@ -21,6 +21,7 @@ pub fn reserved_address_translation(language: Language, info: &str) -> String {
         Language::ID => format!("Alamat disimpan ({info})"),
         Language::EL => format!("Δεσμευμένη διεύθυνση ({info})"),
         Language::VI => format!("Địa chỉ dự trữ ({info})"),
+        Language::SV => format!("Reserverad adress ({info})"),
         _ => format!("Reserved address ({info})"),
     }
 }
@@ -42,6 +43,7 @@ pub fn share_feedback_translation(language: Language) -> &'static str {
         Language::ID => "Berikan masukanmu",
         Language::EL => "Μοιραστείτε τα σχόλιά σας",
         Language::VI => "Chia sẻ phản hồi của bạn",
+        Language::SV => "Dela din feedback",
         _ => "Share your feedback",
     }
 }
@@ -85,6 +87,7 @@ pub fn capture_file_translation(language: Language) -> &'static str {
         Language::ID => "File tangkapan",
         Language::ES => "Archivo de captura",
         Language::VI => "Bắt tệp tin",
+        Language::SV => "Inspelningsfil",
         _ => "Capture file",
     }
 }
@@ -106,6 +109,7 @@ pub fn select_file_translation(language: Language) -> &'static str {
         Language::ZH_TW => "選擇文件",
         Language::EL => "Επιλογή αρχείου",
         Language::VI => "Chọn tệp",
+        Language::SV => "Välj fil",
         _ => "Select file",
     }
 }
@@ -172,6 +176,10 @@ pub fn reading_from_pcap_translation(language: Language) -> &'static str {
             "Đang đọc gói tin từ tệp...\n\n\
                                  Bạn có chắc tệp tin đã chọn không bị trống?"
         }
+        Language::SV => {
+            "Läser paket från fil...\n\n\
+                                Är du säker på att filen du valde inte är tom?"
+        }
         _ => {
             "Reading packets from file...\n\n\
                                 Are you sure the file you selected isn't empty?"
@@ -195,6 +203,7 @@ pub fn data_exceeded_translation(language: Language) -> &'static str {
         Language::ID => "Ambang batas data terlampaui",
         Language::EL => "Υπέρβαση ορίου δεδομένων",
         Language::VI => "Đã vượt ngưỡng dữ liệu",
+        Language::SV => "Datagräns överskriden",
         _ => "Data threshold exceeded",
     }
 }
@@ -216,6 +225,7 @@ pub fn bits_exceeded_translation(language: Language) -> &'static str {
         Language::ZH_TW => "超出數據界限",
         Language::EL => "Υπέρβαση ορίου δυφίων",
         Language::VI => "Đã vượt ngưỡng bit",
+        Language::SV => "Bitgräns överskriden",
         _ => "Bits threshold exceeded",
     }
 }
@@ -228,7 +238,8 @@ pub fn bits_translation(language: Language) -> &'static str {
         | Language::DE
         | Language::FR
         | Language::ID
-        | Language::ES => "bits",
+        | Language::ES
+        | Language::SV => "bits",
         Language::CS => "bity",
         Language::JA => "ビット",
         Language::ZH => "比特",
@@ -246,7 +257,7 @@ pub fn pause_translation(language: Language) -> &'static str {
     match language {
         Language::EN | Language::DE | Language::FR => "Pause",
         Language::CS => "Pauza",
-        Language::IT | Language::ES => "Pausa",
+        Language::IT | Language::ES | Language::SV => "Pausa",
         Language::JA => "一時停止",
         Language::ZH => "暂停",
         Language::NL => "Pauzeren",
@@ -278,6 +289,7 @@ pub fn resume_translation(language: Language) -> &'static str {
         Language::ZH_TW => "繼續",
         Language::EL => "Συνέχεια",
         Language::VI => "Tiếp tục",
+        Language::SV => "Återuppta",
         _ => "Resume",
     }
 }
