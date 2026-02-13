@@ -840,6 +840,15 @@
       "contributions": [
         "bug"
       ]
+    },
+    {
+      "login": "antoncxx",
+      "name": "Anton Liashkevich",
+      "avatar_url": "https://avatars.githubusercontent.com/u/36372201?v=4",
+      "profile": "https://github.com/antoncxx",
+      "contributions": [
+        "code"
+      ]
     }
   ],
   "contributorsPerLine": 7,
