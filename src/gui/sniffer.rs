@@ -1,22 +1,5 @@
 //! Module defining the application structure: messages, updates, subscriptions.
 
-use crate::gui::pages::waiting_page::waiting_page;
-use async_channel::Receiver;
-use iced::Event::{Keyboard, Window};
-use iced::keyboard::key::Named;
-use iced::keyboard::{Event, Key, Modifiers};
-use iced::mouse::Event::ButtonPressed;
-use iced::widget::{Column, center};
-use iced::window::{Id, Level};
-use iced::{Element, Point, Size, Subscription, Task, window};
-use rfd::FileHandle;
-use std::collections::{HashMap, HashSet};
-use std::net::IpAddr;
-use std::path::PathBuf;
-use std::sync::Arc;
-use std::thread;
-use std::time::Duration;
-
 use crate::chart::types::preview_chart::PreviewChart;
 use crate::gui::components::footer::footer;
 use crate::gui::components::header::header;
@@ -33,6 +16,7 @@ use crate::gui::pages::settings_style_page::settings_style_page;
 use crate::gui::pages::thumbnail_page::thumbnail_page;
 use crate::gui::pages::types::running_page::RunningPage;
 use crate::gui::pages::types::settings_page::SettingsPage;
+use crate::gui::pages::waiting_page::waiting_page;
 use crate::gui::pages::welcome_page::welcome_page;
 use crate::gui::styles::types::custom_palette::CustomPalette;
 use crate::gui::styles::types::gradient_type::GradientType;
@@ -44,18 +28,22 @@ use crate::gui::types::timing_events::TimingEvents;
 use crate::mmdb::asn::ASN_MMDB;
 use crate::mmdb::country::COUNTRY_MMDB;
 use crate::mmdb::types::mmdb_reader::{MmdbReader, MmdbReaders};
+use crate::networking::manage_packets::get_local_port;
 use crate::networking::parse_packets::BackendTrafficMessage;
 use crate::networking::parse_packets::parse_packets;
 use crate::networking::traffic_preview::{TrafficPreview, traffic_preview};
 use crate::networking::types::capture_context::{
     CaptureContext, CaptureSource, CaptureSourcePicklist, MyPcapImport,
 };
+use crate::networking::types::data_info::DataInfo;
 use crate::networking::types::data_representation::DataRepr;
 use crate::networking::types::host::{Host, HostMessage};
 use crate::networking::types::host_data_states::HostDataStates;
 use crate::networking::types::info_traffic::InfoTraffic;
 use crate::networking::types::ip_blacklist::IpBlacklist;
 use crate::networking::types::my_device::MyDevice;
+use crate::networking::types::process::Process;
+use crate::networking::types::protocol::Protocol;
 use crate::notifications::notify_and_log::notify_and_log;
 use crate::notifications::types::logged_notification::LoggedNotifications;
 use crate::notifications::types::notifications::{DataNotification, Notification};
@@ -70,6 +58,21 @@ use crate::utils::types::file_info::FileInfo;
 use crate::utils::types::icon::Icon;
 use crate::utils::types::web_page::WebPage;
 use crate::{StyleType, TrafficChart, location};
+use async_channel::Receiver;
+use iced::Event::{Keyboard, Window};
+use iced::keyboard::key::Named;
+use iced::keyboard::{Event, Key, Modifiers};
+use iced::mouse::Event::ButtonPressed;
+use iced::widget::{Column, center, image};
+use iced::window::{Id, Level};
+use iced::{Element, Point, Size, Subscription, Task, window};
+use rfd::FileHandle;
+use std::collections::{HashMap, HashSet};
+use std::net::IpAddr;
+use std::path::PathBuf;
+use std::sync::Arc;
+use std::thread;
+use std::time::Duration;
 
 pub const FONT_FAMILY_NAME: &str = "Sarasa Mono SC for Sniffnet";
 pub const ICON_FONT_FAMILY_NAME: &str = "Icons for Sniffnet";
@@ -139,6 +142,16 @@ pub struct Sniffer {
     pub frozen: bool,
     /// Sender to freeze the packet capture
     pub freeze_tx: Option<tokio::sync::broadcast::Sender<()>>,
+
+    /// TODO:
+    /// make both fields part of InfoTraffic, and send them from the backend
+    /// for what concerns listeners, send only the new ones (so that we can update the past unassigned traffic)
+    /// Listener processes
+    pub listeners: HashMap<(u16, listeners::Protocol), listeners::Process>,
+    /// Processes with their DataInfo
+    pub processes: HashMap<Process, DataInfo>,
+    /// Process icons
+    pub picons: HashMap<String, image::Handle>,
 }
 
 impl Sniffer {
@@ -189,6 +202,10 @@ impl Sniffer {
             host_data_states: HostDataStates::default(),
             frozen: false,
             freeze_tx: None,
+
+            listeners: HashMap::new(),
+            processes: HashMap::new(),
+            picons: HashMap::new(),
         }
     }
 
@@ -337,6 +354,7 @@ impl Sniffer {
             }
             Message::HostSortSelection(sort_type) => self.host_sort_selection(sort_type),
             Message::ServiceSortSelection(sort_type) => self.service_sort_selection(sort_type),
+            Message::ProcessSortSelection(sort_type) => self.process_sort_selection(sort_type),
             Message::ToggleExportPcap => self.toggle_export_pcap(),
             Message::OutputPcapDir(path) => self.output_pcap_dir(path),
             Message::OutputPcapFile(name) => self.output_pcap_file(&name),
@@ -686,6 +704,10 @@ impl Sniffer {
         self.conf.service_sort_type = sort_type;
     }
 
+    fn process_sort_selection(&mut self, sort_type: SortType) {
+        self.conf.process_sort_type = sort_type;
+    }
+
     fn toggle_export_pcap(&mut self) {
         self.conf.export_pcap.toggle();
     }
@@ -876,6 +898,55 @@ impl Sniffer {
                 .notifications
                 .data_notification
                 .previous_threshold = temp_threshold.previous_threshold;
+        }
+    }
+
+    fn fetch_listeners(&mut self) {
+        let Ok(curr_listeners) = listeners::get_all() else {
+            return;
+        };
+        for l in curr_listeners.into_iter().filter(|l| l.socket.port() != 0) {
+            let port = l.socket.port();
+            let protocol = l.protocol;
+            let path = l.process.path.clone();
+            self.listeners.insert((port, protocol), l.process);
+
+            if !self.picons.contains_key(&path) {
+                let bytes = picon::get_icon_by_path(&path);
+                let handle = image::Handle::from_bytes(bytes.bytes);
+                self.picons.insert(path, handle);
+            }
+        }
+
+        for (k, v) in self
+            .info_traffic
+            .map
+            .iter_mut()
+            .filter(|(_, v)| v.process == Process::Unknown)
+        {
+            let protocol = match k.protocol {
+                Protocol::TCP => listeners::Protocol::TCP,
+                Protocol::UDP => listeners::Protocol::UDP,
+                _ => continue,
+            };
+            let local_port = get_local_port(k, v.traffic_direction).unwrap_or_default();
+            let Some(p) = self.listeners.get(&(local_port, protocol)) else {
+                continue;
+            };
+            let process = Process::Known(p.clone());
+            v.process = process.clone();
+            self.processes
+                .entry(process)
+                .and_modify(|x| {
+                    x.add_packets(
+                        v.transmitted_packets,
+                        v.transmitted_bytes,
+                        v.traffic_direction,
+                    )
+                })
+                .or_insert_with(|| {
+                    DataInfo::new_with_first_packet(v.transmitted_bytes, v.traffic_direction)
+                });
         }
     }
 

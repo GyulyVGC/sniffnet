@@ -23,8 +23,10 @@ use crate::networking::types::data_info::DataInfo;
 use crate::networking::types::data_info_host::DataInfoHost;
 use crate::networking::types::data_representation::DataRepr;
 use crate::networking::types::host::Host;
-use crate::networking::types::service::Service;
-use crate::report::get_report_entries::{get_host_entries, get_service_entries};
+use crate::networking::types::process::Process;
+use crate::report::get_report_entries::{
+    get_host_entries, get_process_entries, get_service_entries,
+};
 use crate::report::types::search_parameters::SearchParameters;
 use crate::report::types::sort_type::SortType;
 use crate::translations::translations::{
@@ -36,6 +38,7 @@ use crate::translations::translations_2::{
     only_top_30_items_translation,
 };
 use crate::translations::translations_3::service_translation;
+use crate::translations::translations_5::process_translation;
 use crate::utils::types::icon::Icon;
 use crate::{Language, RunningPage, StyleType};
 use iced::Length::Fill;
@@ -43,7 +46,9 @@ use iced::alignment::{Horizontal, Vertical};
 use iced::widget::scrollable::Direction;
 use iced::widget::text::LineHeight;
 use iced::widget::tooltip::Position;
-use iced::widget::{Button, Column, Container, Row, Scrollable, Space, Text, Tooltip, button};
+use iced::widget::{
+    Button, Column, Container, Image, Row, Scrollable, Space, Text, Tooltip, button,
+};
 use iced::{Alignment, Element, Length, Padding};
 
 /// Computes the body of gui overview page
@@ -87,19 +92,27 @@ pub fn overview_page(sniffer: &Sniffer) -> Container<'_, Message, StyleType> {
 fn row_report<'a>(sniffer: &Sniffer) -> Row<'a, Message, StyleType> {
     let col_host = col_host(sniffer);
     let col_service = col_service(sniffer);
+    let col_process = col_process(sniffer);
 
     Row::new()
         .spacing(10)
         .push(
             Container::new(col_host)
-                .width(Length::FillPortion(5))
+                .width(Length::FillPortion(6))
                 .height(Length::Fill)
                 .padding(Padding::new(10.0).top(0).bottom(5))
                 .class(ContainerType::BorderedRound),
         )
         .push(
             Container::new(col_service)
-                .width(Length::FillPortion(2))
+                .width(Length::FillPortion(3))
+                .height(Length::Fill)
+                .padding(Padding::new(10.0).top(0).bottom(5))
+                .class(ContainerType::BorderedRound),
+        )
+        .push(
+            Container::new(col_process)
+                .width(Length::FillPortion(4))
                 .height(Length::Fill)
                 .padding(Padding::new(10.0).top(0).bottom(5))
                 .class(ContainerType::BorderedRound),
@@ -199,7 +212,12 @@ fn col_service<'a>(sniffer: &Sniffer) -> Column<'a, Message, StyleType> {
         .unwrap_or_default();
 
     for (service, data_info) in &entries {
-        let content = service_bar(service, data_info, data_repr, first_entry_data_info);
+        let content = simpler_bar(
+            service.to_string(),
+            data_info,
+            data_repr,
+            first_entry_data_info,
+        );
 
         scroll_service = scroll_service.push(
             button(content)
@@ -242,6 +260,89 @@ fn col_service<'a>(sniffer: &Sniffer) -> Column<'a, Message, StyleType> {
         )
 }
 
+fn col_process<'a>(sniffer: &Sniffer) -> Column<'a, Message, StyleType> {
+    let Settings { language, .. } = sniffer.conf.settings;
+    let data_repr = sniffer.traffic_chart.data_repr;
+
+    let mut scroll_process = Column::new()
+        .padding(Padding::ZERO.right(11.0))
+        .align_x(Alignment::Center);
+    let entries = get_process_entries(
+        &sniffer.processes,
+        data_repr,
+        sniffer.conf.process_sort_type,
+    );
+    let first_entry_data_info = entries
+        .iter()
+        .map(|&(_, d)| d)
+        .max_by(|d1, d2| d1.compare(&d2, SortType::Ascending, data_repr))
+        .unwrap_or_default();
+
+    for (process, data_info) in &entries {
+        let Process::Known(listener_process) = process else {
+            continue;
+        };
+
+        let content = simpler_bar(
+            process.to_string(),
+            data_info,
+            data_repr,
+            first_entry_data_info,
+        );
+
+        scroll_process = scroll_process.push(
+            button(
+                Row::new()
+                    .spacing(5)
+                    .align_y(Vertical::Center)
+                    .push(
+                        sniffer
+                            .picons
+                            .get(&listener_process.path)
+                            .clone()
+                            .map(|h| Image::new(h).height(FLAGS_HEIGHT_BIG)),
+                    )
+                    .push(content),
+            )
+            .padding(Padding::new(5.0).right(15).left(10))
+            .on_press(Message::Search(SearchParameters::new_process_search(
+                process,
+            )))
+            .class(ButtonType::Neutral),
+        );
+    }
+
+    if entries.len() >= 30 {
+        scroll_process = scroll_process
+            .push(Space::new().height(25))
+            .push(Text::new(only_top_30_items_translation(language)).align_x(Alignment::Center));
+    }
+
+    Column::new()
+        .push(
+            Row::new()
+                .height(45)
+                .align_y(Alignment::Center)
+                .push(
+                    Text::new(process_translation(language))
+                        .class(TextType::Title)
+                        .size(FONT_SIZE_TITLE),
+                )
+                .push(Space::new().width(Length::Fill))
+                .push(sort_arrows(
+                    sniffer.conf.process_sort_type,
+                    Message::ProcessSortSelection,
+                )),
+        )
+        .push(
+            Scrollable::with_direction(
+                scroll_process,
+                Direction::Vertical(ScrollbarType::properties()),
+            )
+            .width(Length::Fill),
+        )
+}
+
 pub fn host_bar<'a>(
     host: &Host,
     data_info_host: &DataInfoHost,
@@ -277,8 +378,9 @@ pub fn host_bar<'a>(
         )
 }
 
-pub fn service_bar<'a>(
-    service: &Service,
+// used for services and processes
+pub fn simpler_bar<'a>(
+    item: String,
     data_info: &DataInfo,
     data_repr: DataRepr,
     first_entry_data_info: DataInfo,
@@ -295,7 +397,7 @@ pub fn service_bar<'a>(
                 .spacing(1)
                 .push(
                     Row::new()
-                        .push(Text::new(service.to_string()))
+                        .push(Text::new(item))
                         .push(Space::new().width(Length::Fill))
                         .push(Text::new(
                             data_repr.formatted_string(data_info.tot_data(data_repr)),

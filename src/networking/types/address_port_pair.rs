@@ -14,7 +14,7 @@ pub struct AddressPortPair {
     pub dest: IpAddr,
     /// Transport layer destination port number (in the range 0..=65535).
     pub dport: Option<u16>,
-    ///  Transport layer protocol carried through the associate address:port pair (TCP or UPD).
+    ///  Transport layer protocol carried through the associate address:port pair (TCP, UPD, ICMP, or ARP).
     pub protocol: Protocol,
 }
 

@@ -61,6 +61,9 @@ splines = "5.0.0"
 tokio = { version = "1.49.0", features = ["macros", "fs"] }
 toml = "0.9.11"
 
+listeners = { path = "../listeners" }
+picon = { path = "../picon" }
+
 [target.'cfg(windows)'.dependencies]
 gag = "1.0.0"
 

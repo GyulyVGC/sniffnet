@@ -2,6 +2,7 @@ use crate::countries::types::country::Country;
 use crate::networking::types::address_port_pair::AddressPortPair;
 use crate::networking::types::host::Host;
 use crate::networking::types::info_address_port_pair::InfoAddressPortPair;
+use crate::networking::types::process::Process;
 use crate::networking::types::service::Service;
 
 /// Used to express the search filters applied to GUI inspect page
@@ -19,6 +20,8 @@ pub struct SearchParameters {
     pub proto: String,
     /// Service
     pub service: String,
+    /// Process
+    pub process: String,
     /// Country
     pub country: String,
     /// Domain
@@ -90,6 +93,13 @@ impl SearchParameters {
             ..SearchParameters::default()
         }
     }
+
+    pub fn new_process_search(process: &Process) -> Self {
+        Self {
+            process: process.to_string_with_equal_prefix(),
+            ..SearchParameters::default()
+        }
+    }
 }
 
 #[derive(Copy, Clone)]
@@ -100,19 +110,21 @@ pub enum FilterInputType {
     PortDst,
     Proto,
     Service,
+    Process,
     Country,
     Domain,
     AsName,
 }
 
 impl FilterInputType {
-    pub const ALL: [FilterInputType; 9] = [
+    pub const ALL: [FilterInputType; 10] = [
         Self::AddressSrc,
         Self::PortSrc,
         Self::AddressDst,
         Self::PortDst,
         Self::Proto,
         Self::Service,
+        Self::Process,
         Self::Country,
         Self::Domain,
         Self::AsName,
@@ -148,6 +160,7 @@ impl FilterInputType {
             FilterInputType::PortDst => &search_params.port_dst,
             FilterInputType::Proto => &search_params.proto,
             FilterInputType::Service => &search_params.service,
+            FilterInputType::Process => &search_params.process,
             FilterInputType::Country => &search_params.country,
             FilterInputType::Domain => &search_params.domain,
             FilterInputType::AsName => &search_params.as_name,
@@ -179,6 +192,7 @@ impl FilterInputType {
             }
             FilterInputType::Proto => key.protocol.to_string(),
             FilterInputType::Service => value.service.to_string(),
+            FilterInputType::Process => value.process.to_string(),
             FilterInputType::Country => r_dns_host
                 .unwrap_or(&(String::new(), Host::default()))
                 .1
@@ -221,6 +235,10 @@ impl FilterInputType {
             },
             FilterInputType::Service => SearchParameters {
                 service: String::new(),
+                ..search_params.clone()
+            },
+            FilterInputType::Process => SearchParameters {
+                process: String::new(),
                 ..search_params.clone()
             },
             FilterInputType::Domain => SearchParameters {
@@ -266,6 +284,10 @@ impl FilterInputType {
             },
             FilterInputType::Service => SearchParameters {
                 service: new_value.trim().to_string(),
+                ..search_params.clone()
+            },
+            FilterInputType::Process => SearchParameters {
+                process: new_value,
                 ..search_params.clone()
             },
             FilterInputType::Domain => SearchParameters {

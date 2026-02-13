@@ -15,6 +15,7 @@ use crate::networking::types::icmp_type::{IcmpType, IcmpTypeV4, IcmpTypeV6};
 use crate::networking::types::info_address_port_pair::InfoAddressPortPair;
 use crate::networking::types::info_traffic::InfoTraffic;
 use crate::networking::types::ip_blacklist::IpBlacklist;
+use crate::networking::types::process::Process;
 use crate::networking::types::service::Service;
 use crate::networking::types::service_query::ServiceQuery;
 use crate::networking::types::traffic_direction::TrafficDirection;
@@ -319,6 +320,11 @@ pub fn modify_or_insert_in_map(
             initial_timestamp: timestamp,
             final_timestamp: timestamp,
             service,
+            process: if matches!(key.protocol, Protocol::ICMP | Protocol::ARP) {
+                Process::NotApplicable
+            } else {
+                Process::Unknown
+            },
             traffic_direction,
             icmp_types: if key.protocol.eq(&Protocol::ICMP) {
                 HashMap::from([(icmp_type, 1)])
@@ -515,6 +521,13 @@ pub fn get_address_to_lookup(key: &AddressPortPair, traffic_direction: TrafficDi
     match traffic_direction {
         TrafficDirection::Outgoing => key.dest,
         TrafficDirection::Incoming => key.source,
+    }
+}
+
+pub fn get_local_port(key: &AddressPortPair, traffic_direction: TrafficDirection) -> Option<u16> {
+    match traffic_direction {
+        TrafficDirection::Outgoing => key.sport,
+        TrafficDirection::Incoming => key.dport,
     }
 }
 
