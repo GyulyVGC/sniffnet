@@ -1,13 +1,1 @@
-<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="60" height="48" role="img"
-     aria-label="Windows">
-    <title>Windows</title>
-    <g shape-rendering="crispEdges">
-        <rect stroke-width="2px" stroke="#a0e8f8" width="60" height="48" fill="#0f1e3c"/>
-    </g>
-    <g fill="#a0e8f8" text-anchor="middle" font-family="Verdana,Geneva,DejaVu Sans,sans-serif"
-       text-rendering="geometricPrecision" font-size="10">
-        <image x="19" y="7" width="22" height="22"
-               xlink:href="data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0idXRmLTgiPz48IS0tIFVwbG9hZGVkIHRvOiBTVkcgUmVwbywgd3d3LnN2Z3JlcG8uY29tLCBHZW5lcmF0b3I6IFNWRyBSZXBvIE1peGVyIFRvb2xzIC0tPgo8c3ZnIGZpbGw9IiNhMGU4ZjgiIHdpZHRoPSI4MDBweCIgaGVpZ2h0PSI4MDBweCIgdmlld0JveD0iMCAwIDUxMiA1MTIiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PHRpdGxlPmlvbmljb25zLXY1X2xvZ29zPC90aXRsZT48cGF0aCBkPSJNNDgwLDI2NUgyMzJWNDQ0bDI0OCwzNlYyNjVaIi8+PHBhdGggZD0iTTIxNiwyNjVIMzJWNDE1bDE4NCwyNi43VjI2NVoiLz48cGF0aCBkPSJNNDgwLDMyLDIzMiw2Ny40VjI0OUg0ODBWMzJaIi8+PHBhdGggZD0iTTIxNiw2OS43LDMyLDk2VjI0OUgyMTZWNjkuN1oiLz48L3N2Zz4="/>
-        <text text-anchor="start" x="4" y="41" fill="#a0e8f8" font-weight="bold">Windows</text>
-    </g>
-</svg>
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="60" height="48" aria-label="Windows" role="img"><title>Windows</title><g shape-rendering="crispEdges"><rect width="60" height="48" fill="#0f1e3c" stroke="#a0e8f8" stroke-width="2"/></g><g fill="#a0e8f8" font-family="Verdana,Geneva,DejaVu Sans,sans-serif" font-size="10" text-anchor="middle" text-rendering="geometricPrecision"><image width="22" height="22" x="19" y="7" xlink:href="data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0idXRmLTgiPz48IS0tIFVwbG9hZGVkIHRvOiBTVkcgUmVwbywgd3d3LnN2Z3JlcG8uY29tLCBHZW5lcmF0b3I6IFNWRyBSZXBvIE1peGVyIFRvb2xzIC0tPgo8c3ZnIGZpbGw9IiNhMGU4ZjgiIHdpZHRoPSI4MDBweCIgaGVpZ2h0PSI4MDBweCIgdmlld0JveD0iMCAwIDUxMiA1MTIiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PHRpdGxlPmlvbmljb25zLXY1X2xvZ29zPC90aXRsZT48cGF0aCBkPSJNNDgwLDI2NUgyMzJWNDQ0bDI0OCwzNlYyNjVaIi8+PHBhdGggZD0iTTIxNiwyNjVIMzJWNDE1bDE4NCwyNi43VjI2NVoiLz48cGF0aCBkPSJNNDgwLDMyLDIzMiw2Ny40VjI0OUg0ODBWMzJaIi8+PHBhdGggZD0iTTIxNiw2OS43LDMyLDk2VjI0OUgyMTZWNjkuN1oiLz48L3N2Zz4="/><text x="4" y="41" fill="#a0e8f8" font-weight="bold" text-anchor="start">Windows</text></g></svg>
