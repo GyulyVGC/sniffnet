@@ -35,22 +35,20 @@ Translated in:<br>
 </picture>
 </p>
 
-
 ## _Support Sniffnet's development_ 💖
 
 <i>Sniffnet is completely free, open-source software which needs lots of effort and time to develop and maintain.
 
 If you appreciate Sniffnet, [sponsor the project](https://github.com/sponsors/GyulyVGC) to support its [growth](https://github.com/GyulyVGC/sniffnet/blob/main/ROADMAP.md).
 
-A special shout-out to these awesome organizations and folks who are sponsoring Sniffnet:</i><br><br>
+A special shout-out to these awesome organizations and folks who are sponsoring Sniffnet:</i>
 
 <div>
 <a href="https://www.recall.ai/careers?ashby_jid=7b02811e-bc91-4ef2-925d-f56a5acac13b&utm_source=github&utm_medium=sponsorship&utm_campaign=sniffnet" title="recall.ai">
 <img height="60" src="https://github.com/user-attachments/assets/d35e304c-6bed-4167-b5c7-4e1b1992ddf3" />
 </a><br>
 <blockquote><i>Processing over 3TB/s of video at peak load, <a href="https://www.recall.ai/careers?ashby_jid=7b02811e-bc91-4ef2-925d-f56a5acac13b&utm_source=github&utm_medium=sponsorship&utm_campaign=sniffnet">now hiring in SF</a></i></blockquote>
-</div><br>
-
+</div>
 
 <p>
 <a href="https://nlnet.nl" title="NLnet"><img src="https://nlnet.nl/logo/logo.svg" width="60px" alt="NLnet"/></a>&nbsp;&nbsp;
@@ -61,7 +59,6 @@ A special shout-out to these awesome organizations and folks who are sponsoring 
 <a href="https://github.com/ZEROF" title="ZEROF"><img src="https://avatars.githubusercontent.com/ZEROF?v=4" width="60px" alt="ZEROF"/></a>&nbsp;&nbsp;
 <a href="https://www.janwalter.org/" title="Jan Walter"><img src="https://avatars.githubusercontent.com/wahn?v=4" width="60px" alt="Jan Walter"/></a>
 </p>
-
 
 ## Download
 
@@ -164,7 +161,6 @@ ICED_BACKEND=tiny-skia
 
 </details>
 
-
 ## Acknowledgements
 
 - A big shout-out to [all the contributors](https://github.com/GyulyVGC/sniffnet/blob/main/CONTRIBUTORS.md) of Sniffnet!
@@ -173,7 +169,6 @@ ICED_BACKEND=tiny-skia
 - Free code signing for Windows Installer is provided by [SignPath.io](https://about.signpath.io/), certificate by [SignPath Foundation](https://signpath.org/)
 - [Sniffnet](https://ads.fund/token/0xadfc251f8ef00ceaeca2b5c1882dabe5db0833df) project is supported by ADS.FUND
 - Last but not least, thanks to [every single stargazer](https://github.com/GyulyVGC/sniffnet/stargazers): all forms of support made it possible to keep improving Sniffnet!
-
 
 ## Stay in the loop
 
