@@ -45,7 +45,7 @@ A special shout-out to these awesome organizations and folks who are sponsoring 
 
 <table><tr><td>
 <a href="https://www.recall.ai/careers?ashby_jid=7b02811e-bc91-4ef2-925d-f56a5acac13b&utm_source=github&utm_medium=sponsorship&utm_campaign=sniffnet" title="recall.ai">
-<img height="60" src="https://github.com/user-attachments/assets/d35e304c-6bed-4167-b5c7-4e1b1992ddf3" />
+<img height="60" src="https://github.com/user-attachments/assets/5b46a13e-19e5-4924-9801-f142b651cf49" />
 </a><br>
 <blockquote><i>Processing over 3TB/s of video at peak load, <a href="https://www.recall.ai/careers?ashby_jid=7b02811e-bc91-4ef2-925d-f56a5acac13b&utm_source=github&utm_medium=sponsorship&utm_campaign=sniffnet">now hiring in SF</a></i></blockquote>
 </td></tr></table>
