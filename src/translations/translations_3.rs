@@ -22,7 +22,7 @@ pub fn general_translation(language: Language) -> &'static str {
         Language::ZH_TW => "一般",
         Language::KO => "일반",
         Language::TR => "Genel",
-        Language::PT => "Geral",
+        Language::PT | Language::PT_BR => "Geral",
         Language::UK => "Загальні",
         Language::ID => "Umum",
         Language::NL => "Algemeen",
@@ -40,6 +40,7 @@ pub fn zoom_translation(language: Language) -> &'static str {
         | Language::DE
         | Language::RO
         | Language::PT
+        | Language::PT_BR
         | Language::NL
         | Language::SV => "Zoom",
         Language::CS => "Přiblížení",
@@ -80,7 +81,7 @@ pub fn mmdb_files_translation(language: Language) -> &'static str {
         Language::ZH_TW => "資料庫檔案",
         Language::KO => "데이터베이스 파일",
         Language::TR => "Veri tabanı dosyaları",
-        Language::PT => "Arquivos da base de dados",
+        Language::PT | Language::PT_BR => "Arquivos da base de dados",
         Language::UK => "Файли бази даних",
         Language::ID => "Berkas database",
         Language::NL => "Database bestanden",
@@ -109,7 +110,9 @@ pub fn params_not_editable_translation(language: Language) -> &'static str {
         Language::ZH_TW => "以下參數在分析期間無法修改",
         Language::KO => "분석 중 다음의 매개변수들은 수정할 수 없습니다",
         Language::TR => "Analiz sırasında bu parametrelere müdahale edilemez",
-        Language::PT => "Os seguintes parâmetros não podem ser modificados durante a análise",
+        Language::PT | Language::PT_BR => {
+            "Os seguintes parâmetros não podem ser modificados durante a análise"
+        }
         Language::UK => "Наступні параметри не можна змінювати під час аналізу трафіку",
         Language::ID => "Parameter berikut tidak bisa diubah saat dianalisa",
         Language::NL => "De volgende parameters kunnen niet worden aangepast tijdens de analyse",
@@ -125,7 +128,7 @@ pub fn custom_style_translation(language: Language) -> &'static str {
         Language::EN => "Custom style",
         Language::CS => "Vlastní styl",
         // Language::FA => "شیوه سفارشی",
-        Language::ES | Language::PT => "Estilo personalizado",
+        Language::ES | Language::PT | Language::PT_BR => "Estilo personalizado",
         Language::IT => "Stile personalizzato",
         Language::FR => "Style personnalisé",
         Language::DE => "Benutzerdefinierter Stil",
@@ -166,7 +169,7 @@ pub fn copy_translation(language: Language) -> &'static str {
         Language::ZH_TW => "複製",
         Language::KO => "복사",
         Language::TR => "Kopyala",
-        Language::PT => "Copiar",
+        Language::PT | Language::PT_BR => "Copiar",
         Language::UK => "Копіювати",
         Language::ID => "Salin",
         Language::NL => "Kopiëren",
@@ -188,7 +191,7 @@ pub fn port_translation(language: Language) -> &'static str {
         | Language::TR => "Port",
         // Language::FA => "درگاه",
         Language::ES => "Puerto",
-        Language::IT | Language::PT => "Porta",
+        Language::IT | Language::PT | Language::PT_BR => "Porta",
         Language::RU => "Порт",
         Language::JA => "ポート",
         Language::VI => "Cổng",
@@ -250,7 +253,7 @@ pub fn messages_translation(language: Language) -> &'static str {
         Language::ZH_TW => "訊息",
         Language::KO => "메시지",
         Language::TR => "Mesajlar",
-        Language::PT => "Mensagens",
+        Language::PT | Language::PT_BR => "Mensagens",
         Language::UK => "Повідомлення",
         Language::ID => "Pesan",
         Language::NL => "Berichten",
@@ -279,7 +282,7 @@ pub fn link_type_translation(language: Language) -> &'static str {
         Language::ZH_TW => "連線類型",
         Language::KO => "링크 유형",
         Language::TR => "Link türü",
-        Language::PT => "Tipo de conexão",
+        Language::PT | Language::PT_BR => "Tipo de conexão",
         Language::UK => "Різновид зʼєднання",
         Language::ID => "Tipe koneksi",
         Language::EL => "Τύπος σύνδεσης",
@@ -331,7 +334,7 @@ pub fn unsupported_link_type_translation(language: Language) -> &'static str {
         Language::TR => {
             "Bu adaptör ile ilişkilendirilmiş link türü henüz Sniffnet tarafından desteklenmiyor..."
         }
-        Language::PT => {
+        Language::PT | Language::PT_BR => {
             "O tipo de conexão associado com este adaptador não é suportado pelo Sniffnet ainda..."
         }
         Language::UK => {
@@ -454,7 +457,7 @@ pub fn service_translation(language: Language) -> &'static str {
         Language::ZH_TW => "服務",
         Language::KO => "서비스",
         Language::TR => "Servis",
-        Language::PT => "Serviço",
+        Language::PT | Language::PT_BR => "Serviço",
         Language::UK => "Сервіс",
         Language::ID => "Layanan",
         Language::NL => "Dienst",
@@ -482,7 +485,8 @@ pub fn export_capture_translation(language: Language) -> &'static str {
         Language::ZH_TW => "匯出擷取的檔案",
         Language::KO => "캡처 파일 내보내기",
         Language::TR => "Yakalanan dosyayı dışa aktar",
-        Language::PT => "Exportar arquivo capturado",
+        Language::PT => "Exportar ficheiro de captura",
+        Language::PT_BR => "Exportar arquivo de captura",
         Language::UK => "Експорт файлу захоплення",
         Language::ID => "Ekspor data tangkapan",
         Language::ES => "Exportar archivo de captura",
@@ -510,7 +514,7 @@ pub fn directory_translation(language: Language) -> &'static str {
         Language::ZH_TW => "目錄",
         Language::KO => "디렉토리",
         Language::TR => "Klasör",
-        Language::PT => "Diretório",
+        Language::PT | Language::PT_BR => "Diretório",
         Language::UK => "Тека",
         Language::ID => "Direktori",
         Language::ES => "Directorio",
@@ -539,7 +543,7 @@ pub fn select_dest_directory_translation(language: Language) -> &'static str {
         Language::ZH_TW => "選擇目的目錄",
         Language::KO => "대상 디렉토리 선택",
         Language::TR => "Hedef klasörü seç",
-        Language::PT => "Selecionar diretório de destino",
+        Language::PT | Language::PT_BR => "Selecionar diretório de destino",
         Language::UK => "Виберіть теку призначення",
         Language::ID => "Pilih direktori tujuan",
         Language::ES => "Selecciona el directorio de destino",
@@ -568,7 +572,8 @@ pub fn file_name_translation(language: Language) -> &'static str {
         Language::ZH_TW => "檔案名稱",
         Language::KO => "파일 이름",
         Language::TR => "Dosya adı",
-        Language::PT => "Nome do arquivo",
+        Language::PT => "Nome do ficheiro",
+        Language::PT_BR => "Nome do arquivo",
         Language::UK => "Назва файлу",
         Language::ID => "Nama berkas",
         Language::ES => "Nombre del archivo",
@@ -597,7 +602,7 @@ pub fn thumbnail_mode_translation(language: Language) -> &'static str {
         Language::ZH_TW => "縮圖模式",
         Language::KO => "썸네일 모드",
         Language::TR => "Küçük resim modu",
-        Language::PT | Language::ES => "Modo miniatura",
+        Language::PT | Language::ES | Language::PT_BR => "Modo miniatura",
         Language::UK => "Режим мініатюри",
         Language::ID => "Mode gambar kecil",
         Language::NL => "Miniatuur modus",
