@@ -849,6 +849,15 @@
       "contributions": [
         "code"
       ]
+    },
+    {
+      "login": "recallai",
+      "name": "Recall.ai",
+      "avatar_url": "https://avatars.githubusercontent.com/u/88795516?v=4",
+      "profile": "https://www.recall.ai/",
+      "contributions": [
+        "financial"
+      ]
     }
   ],
   "contributorsPerLine": 7,
