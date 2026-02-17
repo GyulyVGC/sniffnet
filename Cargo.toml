@@ -39,19 +39,19 @@ strip = true
 [dependencies]
 async-channel = "2.5.0"
 chrono = "0.4.43"
-clap = { version = "4.5.56", features = ["derive"] }
+clap = { version = "4.5.59", features = ["derive"] }
 confy = "2.0.0"
-ctrlc = { version = "3.5.1", features = ["termination"] }
+ctrlc = { version = "3.5.2", features = ["termination"] }
 dns-lookup = "3.0.1"
 etherparse = "0.19.0"
 iced = { version = "0.14.0", features = ["tokio", "svg", "advanced", "lazy", "image"] }
-maxminddb = "0.27.1"
+maxminddb = "0.27.3"
 pcap = "2.4.0"
 phf = "0.13.1"
 phf_shared = "0.13.1"
 plotters = { version = "0.3.7", default-features = false, features = ["area_series", "line_series"] }
 plotters-iced2 = "0.14.0"
-reqwest = { version = "0.13.1", features = ["json"] }
+reqwest = { version = "0.13.2", features = ["json"] }
 rfd = "0.17.2"
 rodio = { version = "0.21.1", default-features = false, features = ["mp3", "playback"] }
 semver = "1.0.27"
@@ -59,7 +59,7 @@ serde = { version = "1.0.228", features = ["derive"] }
 serde_json = { version = "1.0.149", features = ["preserve_order"] }
 splines = "5.0.0"
 tokio = { version = "1.49.0", features = ["macros", "fs"] }
-toml = "0.9.11"
+toml = "1.0.2"
 
 [target.'cfg(windows)'.dependencies]
 gag = "1.0.0"
