@@ -38,15 +38,21 @@ Translated in:<br>
 
 ## _Support Sniffnet's development_ 💖
 
-<i>Sniffnet is completely free, open-source software which needs lots of effort and time to develop and maintain.</i>
+<i>Sniffnet is completely free, open-source software which needs lots of effort and time to develop and maintain.
 
-<i>If you appreciate Sniffnet, [consider sponsoring](https://github.com/sponsors/GyulyVGC):
-your support will enable a constant growth with [new features and functionalities](https://github.com/GyulyVGC/sniffnet/blob/main/ROADMAP.md).<br>
-Do you want to help the project in an alternative way? You can also head to the [official store](https://grindhouse.dev/collections/sniffnet) and put your hands on some cool merchandise!</i>
+If you appreciate Sniffnet, [sponsor the project](https://github.com/sponsors/GyulyVGC) to support its [growth](https://github.com/GyulyVGC/sniffnet/blob/main/ROADMAP.md).
 
-<i>A special mention goes to these awesome organizations and folks who are sponsoring Sniffnet:</i>
+A special shout-out to these awesome organizations and folks who are sponsoring Sniffnet:</i><br><br>
 
-<p align="center">
+<div>
+<a href="https://www.recall.ai/careers?ashby_jid=7b02811e-bc91-4ef2-925d-f56a5acac13b&utm_source=github&utm_medium=sponsorship&utm_campaign=sniffnet" title="recall.ai">
+<img height="60" src="https://github.com/user-attachments/assets/d35e304c-6bed-4167-b5c7-4e1b1992ddf3" />
+</a><br>
+<blockquote><i>Processing over 3TB/s of video at peak load, <a href="https://www.recall.ai/careers?ashby_jid=7b02811e-bc91-4ef2-925d-f56a5acac13b&utm_source=github&utm_medium=sponsorship&utm_campaign=sniffnet">now hiring in SF</a></i></blockquote>
+</div><br>
+
+
+<p>
 <a href="https://nlnet.nl" title="NLnet"><img src="https://nlnet.nl/logo/logo.svg" width="60px" alt="NLnet"/></a>&nbsp;&nbsp;
 <a href="https://ads.fund" title="ADS Fund"><img src="https://avatars.githubusercontent.com/ADS-Fund?v=4" width="60px" alt="ADS Fund"/></a>&nbsp;&nbsp;
 <a href="https://ipinfo.io" title="IPinfo"><img src="https://avatars.githubusercontent.com/ipinfo?v=4" width="60px" alt="IPinfo"/></a>&nbsp;&nbsp;
