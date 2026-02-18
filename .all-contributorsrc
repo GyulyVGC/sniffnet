@@ -858,6 +858,15 @@
       "contributions": [
         "financial"
       ]
+    },
+    {
+      "login": "farsheed",
+      "name": "Farsheed Atef",
+      "avatar_url": "https://avatars.githubusercontent.com/u/1152100?v=4",
+      "profile": "https://github.com/Farsheed",
+      "contributions": [
+        "ideas"
+      ]
     }
   ],
   "contributorsPerLine": 7,
