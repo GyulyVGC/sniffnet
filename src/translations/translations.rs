@@ -105,6 +105,7 @@ pub fn start_translation(language: Language) -> &'static str {
         Language::TR => "Başla!",
         Language::RU => "Начать!",
         Language::PT => "Começar!",
+        Language::PT_BR => "Iniciar!",
         Language::EL => "Ξεκίνα!",
         // Language::FA => "شروع!",
         Language::SV => "Starta!",
@@ -130,7 +131,7 @@ pub fn address_translation(language: Language) -> &'static str {
         Language::RO => "Adresă",
         Language::KO => "주소",
         Language::RU => "Адрес",
-        Language::PT => "Endereço",
+        Language::PT | Language::PT_BR => "Endereço",
         Language::EL => "Διεύθυνση",
         // Language::FA => "نشانی",
         Language::SV => "Adress",
@@ -230,7 +231,7 @@ pub fn protocol_translation(language: Language) -> &'static str {
         Language::EN | Language::RO | Language::NL => "Protocol",
         Language::IT => "Protocollo",
         Language::FR => "Protocole",
-        Language::ES | Language::PT => "Protocolo",
+        Language::ES | Language::PT | Language::PT_BR => "Protocolo",
         Language::PL => "Protokół",
         Language::DE | Language::SV => "Protokoll",
         Language::UK | Language::RU => "Протокол",
@@ -264,7 +265,7 @@ pub fn traffic_rate_translation<'a>(language: Language) -> Text<'a, StyleType> {
         Language::KO => "트레픽 속도",
         Language::TR => "Trafik oranı",
         Language::RU => "Cкорость трафика",
-        Language::PT => "Taxa de tráfego",
+        Language::PT | Language::PT_BR => "Taxa de tráfego",
         Language::EL => "Ρυθμός κίνησης",
         // Language::FA => "نرخ آمد و شد",
         Language::SV => "Datafrekvens",
@@ -318,7 +319,7 @@ pub fn settings_translation(language: Language) -> &'static str {
         Language::KO => "설정",
         Language::TR => "Ayarlar",
         Language::RU => "Настройки",
-        Language::PT => "Configurações",
+        Language::PT | Language::PT_BR => "Configurações",
         Language::EL => "Ρυθμίσεις",
         // Language::FA => "پیکربندی",
         Language::SV => "Inställningar",
@@ -346,7 +347,7 @@ pub fn yes_translation<'a>(language: Language) -> Text<'a, StyleType> {
         Language::KO => "네",
         Language::TR => "Evet",
         Language::RU => "Да",
-        Language::PT => "Sim",
+        Language::PT | Language::PT_BR => "Sim",
         Language::EL => "Ναι",
         // Language::FA => "بله",
         Language::FI => "Kyllä",
@@ -374,6 +375,7 @@ pub fn ask_quit_translation<'a>(language: Language) -> Text<'a, StyleType> {
         Language::TR => "Bu analizden çıkmak istediğine emin misin?",
         Language::RU => "Вы уверены, что хотите выйти из текущего анализа?",
         Language::PT => "Tem a certeza que deseja sair desta análise?",
+        Language::PT_BR => "Tem certeza que deseja sair desta análise?",
         Language::EL => "Είστε βέβαιοι ότι θέλετε να τερματίσετε την ανάλυση;",
         // Language::FA => "آیا مطمئن هستید می خواهید از این تحلیل خارج شوید؟",
         Language::SV => "Är du säker på att du vill avsluta analysen?",
@@ -402,7 +404,7 @@ pub fn quit_analysis_translation(language: Language) -> &'static str {
         Language::KO => "분석종료",
         Language::TR => "Analizden çık",
         Language::RU => "Закончить анализ",
-        Language::PT => "Sair da análise",
+        Language::PT | Language::PT_BR => "Sair da análise",
         Language::EL => "Έξοδος ανάλυσης",
         // Language::FA => "خروج از تحلیل",
         Language::SV => "Avsluta analys",
@@ -432,6 +434,7 @@ pub fn ask_clear_all_translation<'a>(language: Language) -> Text<'a, StyleType> 
         Language::TR => "Bildirimleri temizlemek istediğine emin misin?",
         Language::RU => "Вы уверены, что хотите удлить все уведомления?",
         Language::PT => "Tem a certeza que deseja eliminar as notificações?",
+        Language::PT_BR => "Tem certeza que deseja limpar as notificações?",
         Language::EL => "Είστε βέβαιοι ότι θέλετε να εκκαθαρίσετε τις ειδοποιήσεις;",
         // Language::FA => "آیا مطمئن هستید می خواهید اعلان ها را پاک کنید؟",
         Language::SV => "Är du säker på att du vill radera notifikationerna?",
@@ -459,7 +462,7 @@ pub fn clear_all_translation(language: Language) -> &'static str {
         Language::KO => "모두 지우기",
         Language::TR => "Hepsini temizle",
         Language::RU => "Очистить всё",
-        Language::PT => "Limpar tudo",
+        Language::PT | Language::PT_BR => "Limpar tudo",
         Language::EL => "Εκκαθάριση όλων",
         // Language::FA => "پاک کردن همه",
         Language::SV => "Radera alla",
@@ -489,6 +492,7 @@ pub fn hide_translation(language: Language) -> &'static str {
         Language::TR => "Gizle",
         Language::RU => "Скрыть",
         Language::PT => "Esconder",
+        Language::PT_BR => "Ocultar",
         Language::EL => "Κλείσιμο",
         // Language::FA => "پنهان کردن",
         Language::SV => "Göm",
@@ -517,7 +521,7 @@ pub fn network_adapter_translation(language: Language) -> &'static str {
         Language::KO => "네트워크 어뎁터",
         Language::TR => "Ağ adaptörü",
         Language::RU => "Сетевой интерфейс",
-        Language::PT => "Adaptador de rede",
+        Language::PT | Language::PT_BR => "Adaptador de rede",
         Language::EL => "Προσαρμογέας δικτύου",
         // Language::FA => "مبدل شبکه",
         Language::SV => "Nätverksadapter",
@@ -591,6 +595,10 @@ pub fn no_addresses_translation(language: Language) -> &'static str {
         Language::PT => {
             "Não é possível observar tráfego porque o adaptador que selecionou não tem endereços ativos...\n\n\
                                 Se tiver a certeza que está ligado à internet, tente escolher um adaptador diferente."
+        }
+        Language::PT_BR => {
+            "Não é possível observar tráfego porque o adaptador que selecionou não tem endereços ativos...\n\n\
+                                Se tiver certeza que está conectado à internet, tente escolher um adaptador diferente."
         }
         Language::EL => {
             "Δεν μπορεί να ανιχνευθεί κίνηση επειδή ο προσαρμογέας που επέλεξες δεν έχει ενεργές διευθύνσεις...\n\n\
@@ -692,6 +700,10 @@ pub fn waiting_translation(language: Language) -> &'static str {
         Language::PT => {
             "Ainda não foi observado tráfego. Aguardando por pacotes...\n\n\
                                 Tem a certeza de que está ligado à internet e selecionou o adaptador correto?"
+        }
+        Language::PT_BR => {
+            "Ainda não foi observado tráfego. Aguardando por pacotes...\n\n\
+                                Tem certeza de que está conectado à internet e selecionou o adaptador correto?"
         }
         Language::EL => {
             "Δεν έχει παρατηρηθεί κίνηση μέχρι στιγμής. Ανέμενε για πακέτα δικτύου...\n\n\
@@ -1045,7 +1057,7 @@ pub fn error_translation(language: Language) -> &'static str {
         Language::KO => "오류가 발생하였습니다!",
         Language::TR => "Bir hata oluştu!",
         Language::RU => "Произошла ошибка!",
-        Language::PT => "Ocorreu um erro!",
+        Language::PT | Language::PT_BR => "Ocorreu um erro!",
         Language::EL => "Κάποιο σφάλμα συνέβη!",
         // Language::FA => format!(
         //     "خطایی رخ داد! \n\n\
@@ -1151,7 +1163,7 @@ pub fn packets_translation(language: Language) -> &'static str {
         Language::KO => "패킷",
         Language::TR | Language::SV | Language::ID => "paket",
         Language::RU => "пакетов",
-        Language::PT => "pacotes",
+        Language::PT | Language::PT_BR => "pacotes",
         Language::EL => "πακέτα",
         // Language::FA => "بسته ها",
         Language::FI => "paketit",
@@ -1197,6 +1209,7 @@ pub fn bytes_translation(language: Language) -> &'static str {
         | Language::IT
         | Language::ES
         | Language::PT
+        | Language::PT_BR
         | Language::EL
         | Language::SV
         | Language::VI
@@ -1372,6 +1385,7 @@ pub fn notifications_title_translation<'a>(language: Language) -> Text<'a, Style
         Language::TR => "Bildirimlerinizi özelleştirin",
         Language::RU => "Настройка уведомлений",
         Language::PT => "Personalize as suas notificações",
+        Language::PT_BR => "Personalize suas notificações",
         Language::EL => "Εξατομίκευση ειδοποιήσεων",
         // Language::FA => "اعلان های خود را سفارشی کنید",
         Language::SV => "Anpassa dina notifikationer",
@@ -1400,7 +1414,7 @@ pub fn appearance_title_translation<'a>(language: Language) -> Text<'a, StyleTyp
         Language::KO => "태마를 선택하세요",
         Language::TR => "Favori temanızı seçin",
         Language::RU => "Выберите предпочительную тему",
-        Language::PT => "Escolha o seu tema favorito",
+        Language::PT | Language::PT_BR => "Escolha o seu tema favorito",
         Language::EL => "Επιλέξτε το αγαπημένο σας θέμα",
         // Language::FA => "زمینه دلخواه خود را انتخاب کنید",
         Language::SV => "Välj ditt favorittema",
@@ -1429,7 +1443,7 @@ pub fn active_filters_translation(language: Language) -> &'static str {
         Language::KO => "활성화된 필터",
         Language::TR => "Aktif filtreler",
         Language::RU => "Выбранные фильтры",
-        Language::PT => "Filtros ativos",
+        Language::PT | Language::PT_BR => "Filtros ativos",
         Language::EL => "Ενεργά φίλτρα",
         // Language::FA => "صافی های فعال",
         Language::SV => "Aktiva filter",
@@ -1458,7 +1472,7 @@ pub fn none_translation(language: Language) -> &'static str {
         Language::KO => "없음",
         Language::TR => "hiç biri",
         Language::RU => "ничего",
-        Language::PT => "nenhum",
+        Language::PT | Language::PT_BR => "nenhum",
         Language::EL => "κανένα",
         // Language::FA => "هیچ کدام",
         Language::SV => "inga",
@@ -1602,6 +1616,7 @@ pub fn incoming_translation(language: Language) -> &'static str {
         Language::TR => "Gelen",
         Language::RU => "Входящий",
         Language::PT => "Entrando",
+        Language::PT_BR => "Entrada",
         Language::EL => "Εισερχόμενα",
         // Language::FA => "ورودی",
         Language::SV => "Inkommande",
@@ -1630,6 +1645,7 @@ pub fn outgoing_translation(language: Language) -> &'static str {
         Language::TR => "Giden",
         Language::RU => "Исходящий",
         Language::PT => "Saindo",
+        Language::PT_BR => "Saída",
         Language::EL => "Εξερχόμενα",
         // Language::FA => "خروجی",
         Language::SV => "Utgående",
@@ -1656,7 +1672,7 @@ pub fn notifications_translation(language: Language) -> &'static str {
         Language::KO => "알림",
         Language::TR => "Bildirimler",
         Language::RU => "Уведомления",
-        Language::PT => "Notificações",
+        Language::PT | Language::PT_BR => "Notificações",
         Language::EL => "Ειδοποιήσεις",
         // Language::FA => "اعلان ها",
         Language::SV => "Notifikationer",
@@ -1672,7 +1688,7 @@ pub fn style_translation(language: Language) -> &'static str {
     match language {
         Language::EN | Language::FR => "Style",
         Language::IT => "Stile",
-        Language::ES | Language::PT => "Estilo",
+        Language::ES | Language::PT | Language::PT_BR => "Estilo",
         Language::PL | Language::CS => "Styl",
         Language::RO | Language::TR | Language::SV => "Stil",
         Language::DE => "Design",
@@ -1697,7 +1713,7 @@ pub fn language_translation(language: Language) -> &'static str {
         Language::CS => "Jazyk",
         Language::IT => "Lingua",
         Language::FR => "Langue",
-        Language::ES => "Idioma",
+        Language::ES | Language::PT_BR => "Idioma",
         Language::PL => "Język",
         Language::DE => "Sprache",
         Language::UK => "Мова",
@@ -1736,7 +1752,7 @@ pub fn overview_translation(language: Language) -> &'static str {
         Language::KO => "개요",
         Language::TR => "Ön izleme",
         Language::RU => "Обзор",
-        Language::PT => "Visão geral",
+        Language::PT | Language::PT_BR => "Visão geral",
         Language::EL => "Επισκόπηση",
         // Language::FA => "نمای کلی",
         Language::SV => "Översikt",
@@ -1813,7 +1829,7 @@ pub fn per_second_translation(language: Language) -> &'static str {
         Language::CS => "(za sekundu)",
         Language::IT => "(al secondo)",
         Language::FR => "(par seconde)",
-        Language::ES | Language::PT => "(por segundo)",
+        Language::ES | Language::PT | Language::PT_BR => "(por segundo)",
         Language::PL => "(na sekundę)",
         Language::DE => "(pro Sekunde)",
         Language::UK => "(на секунду)",
@@ -1909,7 +1925,7 @@ pub fn threshold_translation(language: Language) -> &'static str {
         Language::KO => "임계값",
         Language::TR => "Eşik",
         Language::RU => "Порог",
-        Language::PT => "Limite",
+        Language::PT | Language::PT_BR => "Limite",
         Language::EL => "όριο",
         // Language::FA => "آستانه",
         Language::SV => "Gräns",
@@ -1924,7 +1940,12 @@ pub fn threshold_translation(language: Language) -> &'static str {
 
 pub fn volume_translation(language: Language) -> &'static str {
     match language {
-        Language::EN | Language::IT | Language::FR | Language::PT | Language::NL => "Volume",
+        Language::EN
+        | Language::IT
+        | Language::FR
+        | Language::PT
+        | Language::PT_BR
+        | Language::NL => "Volume",
         Language::CS => "Hlasitost",
         Language::ES => "Volumen",
         Language::PL => "Głośność",
@@ -1961,7 +1982,7 @@ pub fn sound_translation(language: Language) -> &'static str {
         Language::RO => "Sunet",
         Language::KO => "사운드",
         Language::TR => "Ses",
-        Language::PT => "Som",
+        Language::PT | Language::PT_BR => "Som",
         Language::EL => "Ήχος",
         // Language::FA => "صدا",
         Language::SV => "Ljud",
@@ -1989,7 +2010,7 @@ pub fn bytes_exceeded_translation(language: Language) -> &'static str {
         Language::KO => "바이트 임계값 초과",
         Language::TR => "Bayt eşik değeri aşıldı",
         Language::RU => "Порог в байтах превышен",
-        Language::PT => "Limite de bytes excedido",
+        Language::PT | Language::PT_BR => "Limite de bytes excedido",
         Language::EL => "Το όριο των bytes ξεπεράστηκε",
         // Language::FA => "آستانه بایت فراتر رفت",
         Language::SV => "Gräns för bytes överskriden",
@@ -2047,7 +2068,7 @@ pub fn packets_exceeded_translation(language: Language) -> &'static str {
         Language::KO => "패킷 임계값 초과",
         Language::TR => "Paket eşik değeri aşıldı",
         Language::RU => "Порог по числу пакетов превышен",
-        Language::PT => "Limite de pacotes excedido",
+        Language::PT | Language::PT_BR => "Limite de pacotes excedido",
         Language::EL => "Το όριο των πακέτων ξεπεράστηκε",
         // Language::FA => "آستانه بسته فراتر رفت",
         Language::SV => "Paketgräns överskriden",
@@ -2133,6 +2154,7 @@ pub fn favorite_transmitted_translation(language: Language) -> &'static str {
         Language::TR => "Favorilerden yeni veri aktarıldı",
         Language::RU => "Новый обмен данными в избранных соедиениях",
         Language::PT => "Novos dados trocados dos favoritos",
+        Language::PT_BR => "Novos dados trocados com os favoritos",
         Language::EL => "Νέα δεδομένα έχουν ανταλλαγεί στα αγαπημένα",
         // Language::FA => "مبادله داده جدید از پسندیده ها",
         Language::SV => "Ny data utbytt av favoriter",
@@ -2222,6 +2244,11 @@ pub fn no_notifications_set_translation<'a>(language: Language) -> Text<'a, Styl
             "Ainda não ativou as notificações!\n\n\
                                 Depois de ativá-las, esta página irá mostrar um registo das suas notificações\n\n\
                                 Pode ativar as notificações nas definições:"
+        }
+        Language::PT_BR => {
+            "Você não ativou as notificações ainda!\n\n\
+                                Depois de ativá-las, esta página irá mostrar um registro das suas notificações\n\n\
+                                Você pode ativar as notificações nas configurações:"
         }
         Language::EL => {
             "Δεν έχετε ενεργοποιήσει τις ειδοποιήσεις ακόμη!\n\n\
@@ -2327,10 +2354,11 @@ pub fn no_notifications_received_translation<'a>(language: Language) -> Text<'a,
             "Нечего показывать в текущий момент...\n\n\
                                 Когда придут уведомления, они будут показаны тут"
         }
-        Language::PT => {
+        Language::PT | Language::PT_BR => {
             "Nada para ver neste momento...\n\n\
                                 Quando receber uma notificação, ela será mostrada aqui"
         }
+
         Language::EL => {
             "Δεν υπάρχουν ειδοποιήσεις αυτή τη στιγμή...\n\n\
                                  Όταν λάβετε μια ειδοποίηση, θα εμφανιστεί εδώ"
@@ -2386,7 +2414,7 @@ pub fn only_last_30_translation(language: Language) -> &'static str {
         Language::KO => "최근 30개의 알림만 표시됩니다",
         Language::TR => "Sadece son 30 bildirim gösterilmektedir",
         Language::RU => "Показываются только последние 30 уведомлений",
-        Language::PT => "São mostradas apenas as últimas 30 notificações",
+        Language::PT | Language::PT_BR => "São mostradas apenas as últimas 30 notificações",
         Language::EL => "Μόνο οι τελευταίες 30 ειδοποιήσεις απεικονίζονται",
         // Language::FA => "تنها ۳۰ اعلان آخر نمایش داده شده اند",
         Language::SV => "Endast de senaste 30 notifikationerna visas",

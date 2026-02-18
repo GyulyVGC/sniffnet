@@ -6,8 +6,8 @@ use serde::{Deserialize, Serialize};
 
 use crate::StyleType;
 use crate::countries::flags_pictures::{
-    CN, CZ, DE, ES, FI, FLAGS_WIDTH_BIG, FR, GB, GR, ID, IT, JP, KR, NL, PL, PT, RO, RU, SE, TR,
-    TW, UA, UZ, VN,
+    BR, CN, CZ, DE, ES, FI, FLAGS_WIDTH_BIG, FR, GB, GR, ID, IT, JP, KR, NL, PL, PT, RO, RU, SE,
+    TR, TW, UA, UZ, VN,
 };
 
 /// This enum defines the available languages.
@@ -39,6 +39,9 @@ pub enum Language {
     KO,
     /// Portuguese
     PT,
+    /// Brazilian Portuguese
+    #[allow(non_camel_case_types)]
+    PT_BR,
     /// Turkish
     TR,
     /// Russian
@@ -66,7 +69,7 @@ pub enum Language {
 }
 
 impl Language {
-    pub const ALL: [Language; 23] = [
+    pub const ALL: [Language; 24] = [
         Language::EN,
         Language::CS,
         Language::DE,
@@ -81,6 +84,7 @@ impl Language {
         Language::NL,
         Language::PL,
         Language::PT,
+        Language::PT_BR,
         Language::RO,
         Language::RU,
         Language::SV,
@@ -104,6 +108,7 @@ impl Language {
             Language::KO => KR,
             Language::PL => PL,
             Language::PT => PT,
+            Language::PT_BR => BR,
             Language::RO => RO,
             Language::RU => RU,
             Language::TR => TR,
@@ -140,6 +145,7 @@ impl Language {
                 | Language::ES
                 | Language::CS
                 | Language::VI
+                | Language::PT_BR
         )
     }
 }
@@ -161,6 +167,7 @@ impl fmt::Display for Language {
             Language::TR => "Türkçe",
             Language::RU => "Русский",
             Language::PT => "Português",
+            Language::PT_BR => "Português (Brasil)",
             Language::EL => "Ελληνικά",
             // Language::FA => "فارسی",
             Language::SV => "Svenska",
