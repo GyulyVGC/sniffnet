@@ -518,6 +518,22 @@ pub fn get_address_to_lookup(key: &AddressPortPair, traffic_direction: TrafficDi
     }
 }
 
+pub fn get_local_port(
+    key: &AddressPortPair,
+    traffic_direction: TrafficDirection,
+) -> Option<(u16, listeners::Protocol)> {
+    let port = match traffic_direction {
+        TrafficDirection::Outgoing => key.sport,
+        TrafficDirection::Incoming => key.dport,
+    };
+    let protocol = match key.protocol {
+        Protocol::TCP => Some(listeners::Protocol::TCP),
+        Protocol::UDP => Some(listeners::Protocol::UDP),
+        _ => None,
+    };
+    port.zip(protocol)
+}
+
 #[cfg(test)]
 mod tests {
     use pcap::Address;
