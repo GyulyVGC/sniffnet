@@ -331,6 +331,7 @@ pub fn modify_or_insert_in_map(
                 HashMap::new()
             },
             is_blacklisted,
+            program: None,
         });
 
     (new_info.traffic_direction, new_info.service)

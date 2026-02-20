@@ -1,9 +1,6 @@
 //! Module defining the `InfoAddressPortPair` struct, useful to format the output report file and
 //! to keep track of statistics about the sniffed traffic.
 
-use std::cmp::Ordering;
-use std::collections::HashMap;
-
 use crate::Service;
 use crate::networking::types::arp_type::ArpType;
 use crate::networking::types::data_info::DataInfo;
@@ -12,6 +9,9 @@ use crate::networking::types::icmp_type::IcmpType;
 use crate::networking::types::traffic_direction::TrafficDirection;
 use crate::report::types::sort_type::SortType;
 use crate::utils::types::timestamp::Timestamp;
+use listeners::Process;
+use std::cmp::Ordering;
+use std::collections::HashMap;
 
 /// Struct useful to format the output report file and to keep track of statistics about the sniffed traffic.
 ///
@@ -40,10 +40,13 @@ pub struct InfoAddressPortPair {
     pub arp_types: HashMap<ArpType, usize>,
     /// Whether the remote address is blacklisted
     pub is_blacklisted: bool,
+    /// The program associated to this pair
+    pub program: Option<Process>,
 }
 
 impl InfoAddressPortPair {
     pub fn refresh(&mut self, other: &Self) {
+        // self.program MUST NOT be refreshed here (other.program is always None)
         self.transmitted_bytes += other.transmitted_bytes;
         self.transmitted_packets += other.transmitted_packets;
         self.final_timestamp = other.final_timestamp;

@@ -1,22 +1,5 @@
 //! Module defining the application structure: messages, updates, subscriptions.
 
-use crate::gui::pages::waiting_page::waiting_page;
-use async_channel::Receiver;
-use iced::Event::{Keyboard, Window};
-use iced::keyboard::key::Named;
-use iced::keyboard::{Event, Key, Modifiers};
-use iced::mouse::Event::ButtonPressed;
-use iced::widget::{Column, center};
-use iced::window::{Id, Level};
-use iced::{Element, Point, Size, Subscription, Task, window};
-use rfd::FileHandle;
-use std::collections::{HashMap, HashSet};
-use std::net::IpAddr;
-use std::path::PathBuf;
-use std::sync::Arc;
-use std::thread;
-use std::time::Duration;
-
 use crate::chart::types::preview_chart::PreviewChart;
 use crate::gui::components::footer::footer;
 use crate::gui::components::header::header;
@@ -33,6 +16,7 @@ use crate::gui::pages::settings_style_page::settings_style_page;
 use crate::gui::pages::thumbnail_page::thumbnail_page;
 use crate::gui::pages::types::running_page::RunningPage;
 use crate::gui::pages::types::settings_page::SettingsPage;
+use crate::gui::pages::waiting_page::waiting_page;
 use crate::gui::pages::welcome_page::welcome_page;
 use crate::gui::styles::types::custom_palette::CustomPalette;
 use crate::gui::styles::types::gradient_type::GradientType;
@@ -56,6 +40,7 @@ use crate::networking::types::host_data_states::HostDataStates;
 use crate::networking::types::info_traffic::InfoTraffic;
 use crate::networking::types::ip_blacklist::IpBlacklist;
 use crate::networking::types::my_device::MyDevice;
+use crate::networking::types::program_lookup::{ProgramLookup, lookup_program};
 use crate::notifications::notify_and_log::notify_and_log;
 use crate::notifications::types::logged_notification::LoggedNotifications;
 use crate::notifications::types::notifications::{DataNotification, Notification};
@@ -70,6 +55,22 @@ use crate::utils::types::file_info::FileInfo;
 use crate::utils::types::icon::Icon;
 use crate::utils::types::web_page::WebPage;
 use crate::{StyleType, TrafficChart, location};
+use async_channel::Receiver;
+use iced::Event::{Keyboard, Window};
+use iced::keyboard::key::Named;
+use iced::keyboard::{Event, Key, Modifiers};
+use iced::mouse::Event::ButtonPressed;
+use iced::widget::{Column, center};
+use iced::window::{Id, Level};
+use iced::{Element, Point, Size, Subscription, Task, window};
+use listeners::Process;
+use rfd::FileHandle;
+use std::collections::{HashMap, HashSet};
+use std::net::IpAddr;
+use std::path::PathBuf;
+use std::sync::Arc;
+use std::thread;
+use std::time::Duration;
 
 pub const FONT_FAMILY_NAME: &str = "Sarasa Mono SC for Sniffnet";
 pub const ICON_FONT_FAMILY_NAME: &str = "Icons for Sniffnet";
@@ -139,6 +140,8 @@ pub struct Sniffer {
     pub frozen: bool,
     /// Sender to freeze the packet capture
     pub freeze_tx: Option<tokio::sync::broadcast::Sender<()>>,
+    /// State of the port to program lookups
+    program_lookup: Option<ProgramLookup>,
 }
 
 impl Sniffer {
@@ -189,6 +192,7 @@ impl Sniffer {
             host_data_states: HostDataStates::default(),
             frozen: false,
             freeze_tx: None,
+            program_lookup: None,
         }
     }
 
@@ -357,6 +361,7 @@ impl Sniffer {
             Message::RemoteNotificationsUrl(url) => self.remote_notifications_url(&url),
             Message::Freeze => self.freeze(),
             Message::TrafficPreview(msg) => self.traffic_preview(msg),
+            Message::ProgramLookupResult(lookup_res) => self.program_lookup_result(lookup_res),
         }
         Task::none()
     }
@@ -860,6 +865,13 @@ impl Sniffer {
             .sort_by(|(_, c1), (_, c2)| c2.tot_packets.total_cmp(&c1.tot_packets));
     }
 
+    fn program_lookup_result(&mut self, lookup_res: (u16, listeners::Protocol, Option<Process>)) {
+        if let Some(program_lookup) = &mut self.program_lookup {
+            program_lookup.update(lookup_res);
+            // TODO: associate past unassigned connections on port with the program
+        }
+    }
+
     /// Updates threshold if it hasn't been edited for a while
     fn update_threshold(&mut self) {
         // Ignore if just edited
@@ -880,7 +892,8 @@ impl Sniffer {
     }
 
     fn refresh_data(&mut self, mut msg: InfoTraffic, no_more_packets: bool) {
-        self.info_traffic.refresh(&mut msg);
+        self.info_traffic
+            .refresh(&mut msg, &mut self.program_lookup);
         if self.info_traffic.tot_data_info.tot_data(DataRepr::Packets) == 0 {
             return;
         }
@@ -979,7 +992,24 @@ impl Sniffer {
                     .log_err(location!());
                 self.current_capture_rx.1 = Some(rx.clone());
                 self.freeze_tx = Some(freeze_tx);
-                return Task::run(rx, |backend_msg| match backend_msg {
+
+                let mut program_rx_task = Task::none();
+                if matches!(self.capture_source, CaptureSource::Device(_)) {
+                    let (port_tx, port_rx) = async_channel::unbounded();
+                    let (program_tx, program_rx) = async_channel::unbounded();
+                    let _ = thread::Builder::new()
+                        .name("thread_lookup_program".to_string())
+                        .spawn(move || {
+                            lookup_program(port_rx, program_tx);
+                        })
+                        .log_err(location!());
+                    self.program_lookup = Some(ProgramLookup::new(port_tx));
+                    program_rx_task = Task::run(program_rx, |lookup_res| {
+                        Message::ProgramLookupResult(lookup_res)
+                    });
+                }
+
+                let backend_task = Task::run(rx, |backend_msg| match backend_msg {
                     BackendTrafficMessage::TickRun(cap_id, msg, host_msg, no_more_packets) => {
                         Message::TickRun(cap_id, msg, host_msg, no_more_packets)
                     }
@@ -990,6 +1020,8 @@ impl Sniffer {
                         Message::OfflineGap(cap_id, gap)
                     }
                 });
+
+                return Task::batch([backend_task, program_rx_task]);
             }
         }
         Task::none()
