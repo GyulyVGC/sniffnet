@@ -6,6 +6,7 @@ use crate::networking::types::data_info_host::DataInfoHost;
 use crate::networking::types::data_representation::DataRepr;
 use crate::networking::types::host::Host;
 use crate::networking::types::info_address_port_pair::InfoAddressPortPair;
+use crate::networking::types::program::Program;
 use crate::networking::types::program_lookup::ProgramLookup;
 use crate::utils::types::timestamp::Timestamp;
 use std::collections::HashMap;
@@ -47,10 +48,10 @@ impl InfoTraffic {
                 Entry::Occupied(mut o) => {
                     if let Some(program_lookup) = program_lookup_opt
                         && let Some(local_port) = local_port
-                        && o.get().program.is_none()
+                        && !o.get().program.is_known()
                     {
-                        let program = program_lookup.lookup(local_port, false);
-                        o.get_mut().program = program;
+                        let proc = program_lookup.lookup(local_port, false);
+                        o.get_mut().program = Program::from_proc(proc);
                     }
 
                     o.get_mut().refresh(value);
@@ -61,8 +62,8 @@ impl InfoTraffic {
                     if let Some(program_lookup) = program_lookup_opt
                         && let Some(local_port) = local_port
                     {
-                        let program = program_lookup.lookup(local_port, true);
-                        new_value.program = program;
+                        let proc = program_lookup.lookup(local_port, true);
+                        new_value.program = Program::from_proc(proc);
                     }
 
                     v.insert(new_value);

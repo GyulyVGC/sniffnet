@@ -15,6 +15,7 @@ use crate::networking::types::icmp_type::{IcmpType, IcmpTypeV4, IcmpTypeV6};
 use crate::networking::types::info_address_port_pair::InfoAddressPortPair;
 use crate::networking::types::info_traffic::InfoTraffic;
 use crate::networking::types::ip_blacklist::IpBlacklist;
+use crate::networking::types::program::Program;
 use crate::networking::types::service::Service;
 use crate::networking::types::service_query::ServiceQuery;
 use crate::networking::types::traffic_direction::TrafficDirection;
@@ -331,7 +332,7 @@ pub fn modify_or_insert_in_map(
                 HashMap::new()
             },
             is_blacklisted,
-            program: None,
+            program: Program::NotApplicable,
         });
 
     (new_info.traffic_direction, new_info.service)

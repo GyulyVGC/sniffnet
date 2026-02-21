@@ -199,10 +199,7 @@ impl FilterInputType {
                 .asn
                 .name
                 .clone(),
-            FilterInputType::Program => value
-                .program
-                .as_ref()
-                .map_or(String::new(), |p| p.name.clone()),
+            FilterInputType::Program => value.program.to_string(),
         }
     }
 
@@ -294,7 +291,7 @@ impl FilterInputType {
                 ..search_params.clone()
             },
             FilterInputType::Program => SearchParameters {
-                program: new_value,
+                program: new_value.trim().to_string(),
                 ..search_params.clone()
             },
         }

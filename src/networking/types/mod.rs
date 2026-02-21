@@ -16,6 +16,7 @@ pub mod ip_blacklist;
 pub mod ip_collection;
 pub mod my_device;
 pub mod my_link_type;
+pub mod program;
 pub mod program_lookup;
 pub mod protocol;
 pub mod service;

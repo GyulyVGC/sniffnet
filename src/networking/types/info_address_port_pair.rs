@@ -6,10 +6,10 @@ use crate::networking::types::arp_type::ArpType;
 use crate::networking::types::data_info::DataInfo;
 use crate::networking::types::data_representation::DataRepr;
 use crate::networking::types::icmp_type::IcmpType;
+use crate::networking::types::program::Program;
 use crate::networking::types::traffic_direction::TrafficDirection;
 use crate::report::types::sort_type::SortType;
 use crate::utils::types::timestamp::Timestamp;
-use listeners::Process;
 use std::cmp::Ordering;
 use std::collections::HashMap;
 
@@ -41,7 +41,7 @@ pub struct InfoAddressPortPair {
     /// Whether the remote address is blacklisted
     pub is_blacklisted: bool,
     /// The program associated to this pair
-    pub program: Option<Process>,
+    pub program: Program,
 }
 
 impl InfoAddressPortPair {
