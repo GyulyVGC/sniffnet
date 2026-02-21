@@ -889,7 +889,7 @@ impl Sniffer {
                                 == Some((lookup_res.0, lookup_res.1))
                     })
                     .for_each(|(_, v)| {
-                        v.program = Program::from_proc(lookup_res.2.clone());
+                        v.program = Program::from_proc(lookup_res.2.as_ref());
                     });
             }
 

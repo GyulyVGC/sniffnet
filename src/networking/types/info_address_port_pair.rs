@@ -97,6 +97,7 @@ impl InfoAddressPortPair {
             self.transmitted_packets,
             self.transmitted_bytes,
             self.traffic_direction,
+            self.final_instant,
         );
         data_info
     }

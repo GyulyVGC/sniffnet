@@ -51,7 +51,7 @@ impl InfoTraffic {
                         && !o.get().program.is_known()
                     {
                         let proc = program_lookup.lookup(local_port, false);
-                        o.get_mut().program = Program::from_proc(proc);
+                        o.get_mut().program = Program::from_proc(proc.as_ref());
                     }
 
                     o.get_mut().refresh(value);
@@ -63,7 +63,7 @@ impl InfoTraffic {
                         && let Some(local_port) = local_port
                     {
                         let proc = program_lookup.lookup(local_port, true);
-                        new_value.program = Program::from_proc(proc);
+                        new_value.program = Program::from_proc(proc.as_ref());
                     }
 
                     v.insert(new_value);

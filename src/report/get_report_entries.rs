@@ -38,11 +38,7 @@ pub fn get_searched_entries(
                 .match_entry(key, value, r_dns_host, is_favorite)
         })
         .map(|(key, val)| {
-            agglomerate.add_packets(
-                val.transmitted_packets,
-                val.transmitted_bytes,
-                val.traffic_direction,
-            );
+            agglomerate.refresh(val.data_info());
             (key, val)
         })
         .collect();

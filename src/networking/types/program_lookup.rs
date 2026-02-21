@@ -7,20 +7,20 @@ const RETRY_TIMEOUT: u128 = 1500; // milliseconds
 pub const VALID_PROGRAM_TIMEOUT: u128 = 60_000; // milliseconds
 
 pub struct ProgramLookup {
-    map: HashMap<(u16, Protocol), LookedUpProgram>,
+    state: HashMap<(u16, Protocol), LookedUpProgram>,
     port_tx: Sender<(u16, Protocol)>,
 }
 
 impl ProgramLookup {
     pub fn new(port_tx: Sender<(u16, Protocol)>) -> Self {
         Self {
-            map: HashMap::new(),
+            state: HashMap::new(),
             port_tx,
         }
     }
 
     pub fn lookup(&mut self, key: (u16, Protocol), is_new_connection: bool) -> Option<Process> {
-        if let Some(looked_up_program) = self.map.get_mut(&key) {
+        if let Some(looked_up_program) = self.state.get_mut(&key) {
             let program = &looked_up_program.program;
             let was_recently_tried =
                 looked_up_program.instant.elapsed().as_millis() < RETRY_TIMEOUT;
@@ -59,7 +59,7 @@ impl ProgramLookup {
                 instant: Instant::now(),
                 retried: false,
             };
-            self.map.insert(key, looked_up_program);
+            self.state.insert(key, looked_up_program);
             // send this to the listeners routine
             let _ = self.port_tx.send_blocking(key);
             None
@@ -69,7 +69,7 @@ impl ProgramLookup {
     pub fn update(&mut self, lookup_res: (u16, Protocol, Option<Process>)) {
         let key = (lookup_res.0, lookup_res.1);
         let program = lookup_res.2;
-        self.map.entry(key).and_modify(|looked_up_program| {
+        self.state.entry(key).and_modify(|looked_up_program| {
             looked_up_program.program = program;
             looked_up_program.instant = Instant::now();
         });

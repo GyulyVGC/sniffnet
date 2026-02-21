@@ -54,7 +54,13 @@ impl DataInfo {
         self.final_instant = Instant::now();
     }
 
-    pub fn add_packets(&mut self, packets: u128, bytes: u128, traffic_direction: TrafficDirection) {
+    pub fn add_packets(
+        &mut self,
+        packets: u128,
+        bytes: u128,
+        traffic_direction: TrafficDirection,
+        final_instant: Instant,
+    ) {
         if traffic_direction.eq(&TrafficDirection::Outgoing) {
             self.outgoing_packets += packets;
             self.outgoing_bytes += bytes;
@@ -62,6 +68,7 @@ impl DataInfo {
             self.incoming_packets += packets;
             self.incoming_bytes += bytes;
         }
+        self.final_instant = final_instant;
     }
 
     pub fn new_with_first_packet(bytes: u128, traffic_direction: TrafficDirection) -> Self {
@@ -143,9 +150,9 @@ mod tests {
         // 2, 0, 223, 0
         data_info_1.add_packet(200, TrafficDirection::Outgoing);
         // 2, 1, 223, 200
-        data_info_1.add_packets(11, 1200, TrafficDirection::Outgoing);
+        data_info_1.add_packets(11, 1200, TrafficDirection::Outgoing, Instant::now());
         // 2, 12, 223, 1400
-        data_info_1.add_packets(5, 500, TrafficDirection::Incoming);
+        data_info_1.add_packets(5, 500, TrafficDirection::Incoming, Instant::now());
         // 7, 12, 723, 1400
 
         assert_eq!(data_info_1.incoming_packets, 7);
@@ -169,7 +176,7 @@ mod tests {
         std::thread::sleep(std::time::Duration::from_millis(10));
         let mut data_info_2 = DataInfo::new_with_first_packet(100, TrafficDirection::Outgoing);
         // 0, 1, 0, 100
-        data_info_2.add_packets(19, 300, TrafficDirection::Outgoing);
+        data_info_2.add_packets(19, 300, TrafficDirection::Outgoing, Instant::now());
         // 0, 20, 0, 400
 
         assert_eq!(data_info_2.incoming_packets, 0);

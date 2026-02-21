@@ -28,8 +28,8 @@ impl Program {
         matches!(self, Program::Unknown)
     }
 
-    pub fn from_proc(proc: Option<Process>) -> Self {
-        proc.map_or(Program::Unknown, |proc| Program::Name(proc.name))
+    pub fn from_proc(proc: Option<&Process>) -> Self {
+        proc.map_or(Program::Unknown, |proc| Program::Name(proc.name.clone()))
     }
 }
 
