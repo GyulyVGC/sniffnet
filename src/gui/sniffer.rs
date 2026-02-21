@@ -1087,6 +1087,7 @@ impl Sniffer {
         self.combobox_data_states = ComboboxDataStates::default();
         self.frozen = false;
         self.freeze_tx = None;
+        self.program_lookup = None;
         self.start_traffic_previews()
     }
 
