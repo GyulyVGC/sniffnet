@@ -104,7 +104,12 @@ pub fn get_program_entries(
     data_repr: DataRepr,
     sort_type: SortType,
 ) -> Vec<(Program, DataInfo)> {
-    let mut sorted_vec: Vec<(&Program, &DataInfo)> = program_lookup.programs().iter().collect();
+    let mut sorted_vec: Vec<(&Program, &DataInfo)> = program_lookup
+        .programs()
+        .iter()
+        // Unknown may be inserted, and then all of its data could be reassigned to known programs
+        .filter(|(_, d)| d.tot_data(DataRepr::Packets) > 0)
+        .collect();
 
     sorted_vec.sort_by(|&(_, a), &(_, b)| a.compare(b, sort_type, data_repr));
 
