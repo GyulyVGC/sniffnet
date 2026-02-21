@@ -25,6 +25,8 @@ pub struct SearchParameters {
     pub domain: String,
     /// Autonomous System name
     pub as_name: String,
+    /// Program name
+    pub program: String,
     /// Whether to display only favorites
     pub only_favorites: bool,
     /// Whether to display only blacklisted
@@ -103,10 +105,11 @@ pub enum FilterInputType {
     Country,
     Domain,
     AsName,
+    Program,
 }
 
 impl FilterInputType {
-    pub const ALL: [FilterInputType; 9] = [
+    pub const ALL: [FilterInputType; 10] = [
         Self::AddressSrc,
         Self::PortSrc,
         Self::AddressDst,
@@ -116,6 +119,7 @@ impl FilterInputType {
         Self::Country,
         Self::Domain,
         Self::AsName,
+        Self::Program,
     ];
 
     pub fn matches_entry(
@@ -151,6 +155,7 @@ impl FilterInputType {
             FilterInputType::Country => &search_params.country,
             FilterInputType::Domain => &search_params.domain,
             FilterInputType::AsName => &search_params.as_name,
+            FilterInputType::Program => &search_params.program,
         }
     }
 
@@ -194,6 +199,10 @@ impl FilterInputType {
                 .asn
                 .name
                 .clone(),
+            FilterInputType::Program => value
+                .program
+                .as_ref()
+                .map_or(String::new(), |p| p.name.clone()),
         }
     }
 
@@ -233,6 +242,10 @@ impl FilterInputType {
             },
             FilterInputType::AsName => SearchParameters {
                 as_name: String::new(),
+                ..search_params.clone()
+            },
+            FilterInputType::Program => SearchParameters {
+                program: String::new(),
                 ..search_params.clone()
             },
         }
@@ -278,6 +291,10 @@ impl FilterInputType {
             },
             FilterInputType::AsName => SearchParameters {
                 as_name: new_value,
+                ..search_params.clone()
+            },
+            FilterInputType::Program => SearchParameters {
+                program: new_value,
                 ..search_params.clone()
             },
         }

@@ -34,9 +34,9 @@ use crate::networking::traffic_preview::{TrafficPreview, traffic_preview};
 use crate::networking::types::capture_context::{
     CaptureContext, CaptureSource, CaptureSourcePicklist, MyPcapImport,
 };
+use crate::networking::types::combobox_data_states::ComboboxDataStates;
 use crate::networking::types::data_representation::DataRepr;
 use crate::networking::types::host::{Host, HostMessage};
-use crate::networking::types::host_data_states::HostDataStates;
 use crate::networking::types::info_traffic::InfoTraffic;
 use crate::networking::types::ip_blacklist::IpBlacklist;
 use crate::networking::types::my_device::MyDevice;
@@ -134,14 +134,14 @@ pub struct Sniffer {
     pub thumbnail: bool,
     /// Window id
     pub id: Option<Id>,
-    /// Host data for filter dropdowns (comboboxes)
-    pub host_data_states: HostDataStates,
+    /// Combobox data for filter dropdowns
+    pub combobox_data_states: ComboboxDataStates,
     /// Flag reporting whether the packet capture is frozen
     pub frozen: bool,
     /// Sender to freeze the packet capture
     pub freeze_tx: Option<tokio::sync::broadcast::Sender<()>>,
     /// State of the port to program lookups
-    program_lookup: Option<ProgramLookup>,
+    pub program_lookup: Option<ProgramLookup>,
 }
 
 impl Sniffer {
@@ -189,7 +189,7 @@ impl Sniffer {
             timing_events: TimingEvents::default(),
             thumbnail: false,
             id: None,
-            host_data_states: HostDataStates::default(),
+            combobox_data_states: ComboboxDataStates::default(),
             frozen: false,
             freeze_tx: None,
             program_lookup: None,
@@ -580,11 +580,12 @@ impl Sniffer {
 
     fn search(&mut self, parameters: SearchParameters) {
         // update comboboxes
-        let host_data = &mut self.host_data_states.data;
-        host_data.countries.1 = self.search.country != parameters.country;
-        host_data.asns.1 = self.search.as_name != parameters.as_name;
-        host_data.domains.1 = self.search.domain != parameters.domain;
-        self.host_data_states.update_states(&parameters);
+        let combobox_data = &mut self.combobox_data_states.data;
+        combobox_data.countries.1 = self.search.country != parameters.country;
+        combobox_data.asns.1 = self.search.as_name != parameters.as_name;
+        combobox_data.domains.1 = self.search.domain != parameters.domain;
+        combobox_data.programs.1 = self.search.program != parameters.program;
+        self.combobox_data_states.update_states(&parameters);
 
         self.page_number = 1;
         self.running_page = Some(RunningPage::Inspect);
@@ -867,6 +868,11 @@ impl Sniffer {
 
     fn program_lookup_result(&mut self, lookup_res: (u16, listeners::Protocol, Option<Process>)) {
         if let Some(program_lookup) = &mut self.program_lookup {
+            // update programs combobox state including the new program
+            self.combobox_data_states
+                .data
+                .update_program(lookup_res.2.as_ref());
+            // update program lookup state with the new lookup result
             program_lookup.update(lookup_res);
             // TODO: associate past unassigned connections on port with the program
         }
@@ -914,8 +920,8 @@ impl Sniffer {
         }
         self.traffic_chart.update_charts_data(&msg, no_more_packets);
 
-        // update host dropdowns
-        self.host_data_states.update_states(&self.search);
+        // update combobox dropdowns
+        self.combobox_data_states.update_states(&self.search);
     }
 
     fn open_web_page(web_page: &WebPage) {
@@ -1000,7 +1006,7 @@ impl Sniffer {
                     let _ = thread::Builder::new()
                         .name("thread_lookup_program".to_string())
                         .spawn(move || {
-                            lookup_program(port_rx, program_tx);
+                            lookup_program(&port_rx, &program_tx);
                         })
                         .log_err(location!());
                     self.program_lookup = Some(ProgramLookup::new(port_tx));
@@ -1050,7 +1056,7 @@ impl Sniffer {
         self.search = SearchParameters::default();
         self.page_number = 1;
         self.thumbnail = false;
-        self.host_data_states = HostDataStates::default();
+        self.combobox_data_states = ComboboxDataStates::default();
         self.frozen = false;
         self.freeze_tx = None;
         self.start_traffic_previews()
@@ -1351,8 +1357,8 @@ impl Sniffer {
         self.addresses_resolved
             .insert(address_to_lookup, (rdns, host.clone()));
 
-        // update host data states including the new host
-        self.host_data_states.data.update(&host);
+        // update hosts combobox states including the new host
+        self.combobox_data_states.data.update_host(&host);
     }
 
     fn register_sigint_handler() -> Task<Message> {

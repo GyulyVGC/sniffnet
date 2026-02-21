@@ -83,8 +83,8 @@ struct LookedUpProgram {
 }
 
 pub fn lookup_program(
-    port_rx: Receiver<(u16, Protocol)>,
-    program_tx: Sender<(u16, Protocol, Option<Process>)>,
+    port_rx: &Receiver<(u16, Protocol)>,
+    program_tx: &Sender<(u16, Protocol, Option<Process>)>,
 ) {
     while let Ok((port, protocol)) = port_rx.recv_blocking() {
         let program = listeners::get_process_by_port(port, protocol).ok();

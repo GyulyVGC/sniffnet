@@ -41,20 +41,19 @@ impl InfoTraffic {
         self.last_packet_timestamp = msg.last_packet_timestamp;
 
         for (key, value) in &msg.map {
-            let local_port = get_local_port(&key, value.traffic_direction);
+            let local_port = get_local_port(key, value.traffic_direction);
             let entry = self.map.entry(*key);
             match entry {
                 Entry::Occupied(mut o) => {
                     if let Some(program_lookup) = program_lookup_opt
                         && let Some(local_port) = local_port
+                        && o.get().program.is_none()
                     {
                         let program = program_lookup.lookup(local_port, false);
-                        if o.get().program.is_none() {
-                            o.get_mut().program = program;
-                        }
+                        o.get_mut().program = program;
                     }
 
-                    o.get_mut().refresh(&value);
+                    o.get_mut().refresh(value);
                 }
                 Entry::Vacant(v) => {
                     let mut new_value = value.clone();

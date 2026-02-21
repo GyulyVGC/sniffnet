@@ -21,9 +21,9 @@ use crate::gui::styles::text_input::TextInputType;
 use crate::gui::types::message::Message;
 use crate::gui::types::settings::Settings;
 use crate::networking::types::address_port_pair::AddressPortPair;
+use crate::networking::types::combobox_data_states::ComboboxStates;
 use crate::networking::types::data_info::DataInfo;
 use crate::networking::types::data_representation::DataRepr;
-use crate::networking::types::host_data_states::HostStates;
 use crate::networking::types::info_address_port_pair::InfoAddressPortPair;
 use crate::networking::types::traffic_direction::TrafficDirection;
 use crate::report::get_report_entries::get_searched_entries;
@@ -31,10 +31,10 @@ use crate::report::types::report_col::ReportCol;
 use crate::report::types::search_parameters::{FilterInputType, SearchParameters};
 use crate::report::types::sort_type::SortType;
 use crate::translations::translations_2::{
-    country_translation, domain_name_translation, no_search_results_translation,
+    country_translation, domain_translation, no_search_results_translation,
     only_show_favorites_translation, showing_results_translation,
 };
-use crate::translations::translations_5::only_show_blacklisted_translation;
+use crate::translations::translations_5::{only_show_blacklisted_translation, program_translation};
 use crate::utils::types::icon::Icon;
 use crate::{Language, RunningPage, Sniffer, StyleType};
 
@@ -73,7 +73,7 @@ pub fn inspect_page(sniffer: &Sniffer) -> Container<'_, Message, StyleType> {
     body = body
         .push(additional_filters_row(
             &sniffer.search,
-            &sniffer.host_data_states.states,
+            &sniffer.combobox_data_states.states,
             language,
         ))
         .push(
@@ -284,7 +284,7 @@ fn row_report_entry<'a>(
 
 fn additional_filters_row<'a>(
     search_params: &'a SearchParameters,
-    host_states: &'a HostStates,
+    combobox_states: &'a ComboboxStates,
     language: Language,
 ) -> Row<'a, Message, StyleType> {
     let clear_all_filters: Element<'a, Message, StyleType> =
@@ -309,24 +309,31 @@ fn additional_filters_row<'a>(
 
     let combobox_country = filter_combobox(
         FilterInputType::Country,
-        &host_states.countries,
+        &combobox_states.countries,
         search_params.clone(),
     )
-    .width(95);
+    .width(70);
 
     let combobox_domain = filter_combobox(
         FilterInputType::Domain,
-        &host_states.domains,
+        &combobox_states.domains,
         search_params.clone(),
     )
-    .width(190);
+    .width(160);
 
     let combobox_as_name = filter_combobox(
         FilterInputType::AsName,
-        &host_states.asns,
+        &combobox_states.asns,
         search_params.clone(),
     )
-    .width(190);
+    .width(160);
+
+    let combobox_program = filter_combobox(
+        FilterInputType::Program,
+        &combobox_states.programs,
+        search_params.clone(),
+    )
+    .width(160);
 
     let container_country = Row::new()
         .spacing(5)
@@ -337,7 +344,7 @@ fn additional_filters_row<'a>(
     let container_domain = Row::new()
         .spacing(5)
         .align_y(Alignment::Center)
-        .push(Text::new(format!("{}:", domain_name_translation(language))))
+        .push(Text::new(format!("{}:", domain_translation(language))))
         .push(combobox_domain);
 
     let container_as_name = Row::new()
@@ -345,6 +352,12 @@ fn additional_filters_row<'a>(
         .align_y(Alignment::Center)
         .push(Text::new("ASN:"))
         .push(combobox_as_name);
+
+    let container_program = Row::new()
+        .spacing(5)
+        .align_y(Alignment::Center)
+        .push(Text::new(format!("{}:", program_translation(language))))
+        .push(combobox_program);
 
     let favorites_only = toggler_filter(
         search_params.only_favorites,
@@ -373,12 +386,13 @@ fn additional_filters_row<'a>(
     let container = Container::new(
         Row::new()
             .align_y(Alignment::Center)
-            .spacing(30)
+            .spacing(25)
             .push(blacklisted_only)
             .push(favorites_only)
             .push(container_country)
             .push(container_domain)
             .push(container_as_name)
+            .push(container_program)
             .wrap()
             .vertical_spacing(5),
     )
