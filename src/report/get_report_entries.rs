@@ -7,6 +7,8 @@ use crate::networking::types::data_info_host::DataInfoHost;
 use crate::networking::types::data_representation::DataRepr;
 use crate::networking::types::host::Host;
 use crate::networking::types::info_address_port_pair::InfoAddressPortPair;
+use crate::networking::types::program::Program;
+use crate::networking::types::program_lookup::ProgramLookup;
 use crate::report::types::sort_type::SortType;
 use crate::{InfoTraffic, Service, Sniffer};
 
@@ -38,11 +40,7 @@ pub fn get_searched_entries(
                 .match_entry(key, value, r_dns_host, is_favorite)
         })
         .map(|(key, val)| {
-            agglomerate.add_packets(
-                val.transmitted_packets,
-                val.transmitted_bytes,
-                val.traffic_direction,
-            );
+            agglomerate.refresh(val.data_info());
             (key, val)
         })
         .collect();
@@ -98,5 +96,26 @@ pub fn get_service_entries(
     sorted_vec[0..n_entry]
         .iter()
         .map(|&(service, data_info)| (*service, *data_info))
+        .collect()
+}
+
+pub fn get_program_entries(
+    program_lookup: &ProgramLookup,
+    data_repr: DataRepr,
+    sort_type: SortType,
+) -> Vec<(Program, DataInfo)> {
+    let mut sorted_vec: Vec<(&Program, &DataInfo)> = program_lookup
+        .programs()
+        .iter()
+        // Unknown may be inserted, and then all of its data could be reassigned to known programs
+        .filter(|(_, d)| d.tot_data(DataRepr::Packets) > 0)
+        .collect();
+
+    sorted_vec.sort_by(|&(_, a), &(_, b)| a.compare(b, sort_type, data_repr));
+
+    let n_entry = min(sorted_vec.len(), 30);
+    sorted_vec[0..n_entry]
+        .iter()
+        .map(|&(program, data_info)| (program.clone(), *data_info))
         .collect()
 }

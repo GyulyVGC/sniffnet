@@ -53,3 +53,11 @@ pub fn only_show_blacklisted_translation(language: Language) -> &'static str {
         _ => "Only show blacklisted",
     }
 }
+
+pub fn program_translation(language: Language) -> &'static str {
+    match language {
+        Language::EN => "Program",
+        Language::IT => "Programma",
+        _ => "Program",
+    }
+}

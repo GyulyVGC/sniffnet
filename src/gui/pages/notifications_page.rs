@@ -3,7 +3,7 @@ use crate::countries::flags_pictures::FLAGS_HEIGHT_BIG;
 use crate::gui::components::header::get_button_settings;
 use crate::gui::components::tab::get_pages_tabs;
 use crate::gui::components::types::my_modal::MyModal;
-use crate::gui::pages::overview_page::{get_bars, get_bars_length, host_bar, service_bar};
+use crate::gui::pages::overview_page::{get_bars, get_bars_length, host_bar, simple_bar};
 use crate::gui::pages::types::settings_page::SettingsPage;
 use crate::gui::styles::container::ContainerType;
 use crate::gui::styles::rule::RuleType;
@@ -480,8 +480,8 @@ fn data_notification_extra<'a>(
         .unwrap_or(&(Service::default(), DataInfo::default()))
         .1;
     for (service, data_info) in &logged_notification.services {
-        let service_bar = service_bar(
-            service,
+        let service_bar = simple_bar(
+            service.to_string(),
             data_info,
             logged_notification.data_repr,
             first_data_info_service,
