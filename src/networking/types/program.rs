@@ -24,6 +24,10 @@ impl Program {
         matches!(self, Program::Name(_))
     }
 
+    pub fn is_unknown(&self) -> bool {
+        matches!(self, Program::Unknown)
+    }
+
     pub fn from_proc(proc: Option<Process>) -> Self {
         proc.map_or(Program::Unknown, |proc| Program::Name(proc.name))
     }

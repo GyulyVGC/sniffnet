@@ -21,6 +21,7 @@ use crate::networking::types::service_query::ServiceQuery;
 use crate::networking::types::traffic_direction::TrafficDirection;
 use crate::networking::types::traffic_type::TrafficType;
 use std::fmt::Write;
+use std::time::Instant;
 
 include!(concat!(env!("OUT_DIR"), "/services.rs"));
 
@@ -299,6 +300,7 @@ pub fn modify_or_insert_in_map(
             info.transmitted_bytes += exchanged_bytes;
             info.transmitted_packets += 1;
             info.final_timestamp = timestamp;
+            info.final_instant = Instant::now();
             if key.protocol.eq(&Protocol::ICMP) {
                 info.icmp_types
                     .entry(icmp_type)
@@ -319,6 +321,7 @@ pub fn modify_or_insert_in_map(
             transmitted_packets: 1,
             initial_timestamp: timestamp,
             final_timestamp: timestamp,
+            final_instant: Instant::now(),
             service,
             traffic_direction,
             icmp_types: if key.protocol.eq(&Protocol::ICMP) {

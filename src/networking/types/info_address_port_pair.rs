@@ -12,11 +12,12 @@ use crate::report::types::sort_type::SortType;
 use crate::utils::types::timestamp::Timestamp;
 use std::cmp::Ordering;
 use std::collections::HashMap;
+use std::time::Instant;
 
 /// Struct useful to format the output report file and to keep track of statistics about the sniffed traffic.
 ///
 /// Each `InfoAddressPortPair` struct is associated to a single address:port pair.
-#[derive(Clone, Default, Debug)]
+#[derive(Clone, Debug)]
 pub struct InfoAddressPortPair {
     /// Source MAC address
     pub mac_address1: Option<String>,
@@ -30,6 +31,8 @@ pub struct InfoAddressPortPair {
     pub initial_timestamp: Timestamp,
     /// Last occurrence of information exchange featuring the associate address:port pair as a source or destination.
     pub final_timestamp: Timestamp,
+    /// Final instance of information exchange featuring the associate address:port pair as a source or destination (used for Program).
+    pub final_instant: Instant,
     /// Upper layer service carried by the associated address:port pair.
     pub service: Service,
     /// Determines if the connection is incoming or outgoing
@@ -50,6 +53,7 @@ impl InfoAddressPortPair {
         self.transmitted_bytes += other.transmitted_bytes;
         self.transmitted_packets += other.transmitted_packets;
         self.final_timestamp = other.final_timestamp;
+        self.final_instant = other.final_instant;
         self.service = other.service;
         self.is_blacklisted = other.is_blacklisted;
         self.traffic_direction = other.traffic_direction;
@@ -95,6 +99,26 @@ impl InfoAddressPortPair {
             self.traffic_direction,
         );
         data_info
+    }
+}
+
+impl Default for InfoAddressPortPair {
+    fn default() -> Self {
+        Self {
+            mac_address1: None,
+            mac_address2: None,
+            transmitted_bytes: 0,
+            transmitted_packets: 0,
+            initial_timestamp: Timestamp::default(),
+            final_timestamp: Timestamp::default(),
+            final_instant: Instant::now(),
+            service: Service::default(),
+            traffic_direction: TrafficDirection::default(),
+            icmp_types: HashMap::new(),
+            arp_types: HashMap::new(),
+            is_blacklisted: false,
+            program: Program::default(),
+        }
     }
 }
 

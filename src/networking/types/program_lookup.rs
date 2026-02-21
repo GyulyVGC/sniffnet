@@ -4,7 +4,7 @@ use std::collections::HashMap;
 use std::time::Instant;
 
 const RETRY_TIMEOUT: u128 = 1500; // milliseconds
-const VALID_PROGRAM_TIMEOUT: u128 = 60_000; // milliseconds
+pub const VALID_PROGRAM_TIMEOUT: u128 = 60_000; // milliseconds
 
 pub struct ProgramLookup {
     map: HashMap<(u16, Protocol), LookedUpProgram>,
