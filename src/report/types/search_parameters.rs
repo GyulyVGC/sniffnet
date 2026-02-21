@@ -2,6 +2,7 @@ use crate::countries::types::country::Country;
 use crate::networking::types::address_port_pair::AddressPortPair;
 use crate::networking::types::host::Host;
 use crate::networking::types::info_address_port_pair::InfoAddressPortPair;
+use crate::networking::types::program::Program;
 use crate::networking::types::service::Service;
 
 /// Used to express the search filters applied to GUI inspect page
@@ -89,6 +90,13 @@ impl SearchParameters {
     pub fn new_service_search(service: &Service) -> Self {
         Self {
             service: service.to_string_with_equal_prefix(),
+            ..SearchParameters::default()
+        }
+    }
+
+    pub fn new_program_search(program: &Program) -> Self {
+        Self {
+            program: program.to_string_with_equal_prefix(),
             ..SearchParameters::default()
         }
     }

@@ -6,7 +6,6 @@ use crate::networking::types::data_info_host::DataInfoHost;
 use crate::networking::types::data_representation::DataRepr;
 use crate::networking::types::host::Host;
 use crate::networking::types::info_address_port_pair::InfoAddressPortPair;
-use crate::networking::types::program::Program;
 use crate::networking::types::program_lookup::ProgramLookup;
 use crate::utils::types::timestamp::Timestamp;
 use std::collections::HashMap;
@@ -48,10 +47,21 @@ impl InfoTraffic {
                 Entry::Occupied(mut o) => {
                     if let Some(program_lookup) = program_lookup_opt
                         && let Some(local_port) = local_port
-                        && !o.get().program.is_known()
                     {
-                        let proc = program_lookup.lookup(local_port, false);
-                        o.get_mut().program = Program::from_proc(proc.as_ref());
+                        if o.get().program.is_known() {
+                            program_lookup.lookup_and_add_data(
+                                local_port,
+                                false,
+                                value.data_info(),
+                            );
+                        } else {
+                            let program = program_lookup.lookup_and_replace_data(
+                                local_port,
+                                o.get().data_info(),
+                                value.data_info(),
+                            );
+                            o.get_mut().program = program;
+                        }
                     }
 
                     o.get_mut().refresh(value);
@@ -62,8 +72,9 @@ impl InfoTraffic {
                     if let Some(program_lookup) = program_lookup_opt
                         && let Some(local_port) = local_port
                     {
-                        let proc = program_lookup.lookup(local_port, true);
-                        new_value.program = Program::from_proc(proc.as_ref());
+                        let program =
+                            program_lookup.lookup_and_add_data(local_port, true, value.data_info());
+                        new_value.program = program;
                     }
 
                     v.insert(new_value);

@@ -43,6 +43,8 @@ pub enum Message {
     HostSortSelection(SortType),
     /// Select service sort type to be displayed (overview page)
     ServiceSortSelection(SortType),
+    /// Select program sort type to be displayed (overview page)
+    ProgramSortSelection(SortType),
     /// Adds or removes the given host into/from the favorites
     AddOrRemoveFavorite(Host, bool),
     /// Open the supplied web page

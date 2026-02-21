@@ -96,7 +96,16 @@ impl DataInfo {
         self.outgoing_packets += rhs.outgoing_packets;
         self.incoming_bytes += rhs.incoming_bytes;
         self.outgoing_bytes += rhs.outgoing_bytes;
-        self.final_instant = rhs.final_instant;
+        if rhs.final_instant > self.final_instant {
+            self.final_instant = rhs.final_instant;
+        }
+    }
+
+    pub fn subtract(&mut self, rhs: Self) {
+        self.incoming_packets = self.incoming_packets.saturating_sub(rhs.incoming_packets);
+        self.outgoing_packets = self.outgoing_packets.saturating_sub(rhs.outgoing_packets);
+        self.incoming_bytes = self.incoming_bytes.saturating_sub(rhs.incoming_bytes);
+        self.outgoing_bytes = self.outgoing_bytes.saturating_sub(rhs.outgoing_bytes);
     }
 
     pub fn compare(&self, other: &Self, sort_type: SortType, data_repr: DataRepr) -> Ordering {

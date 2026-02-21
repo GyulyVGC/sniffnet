@@ -36,6 +36,7 @@ use crate::networking::types::capture_context::{
     CaptureContext, CaptureSource, CaptureSourcePicklist, MyPcapImport,
 };
 use crate::networking::types::combobox_data_states::ComboboxDataStates;
+use crate::networking::types::data_info::DataInfo;
 use crate::networking::types::data_representation::DataRepr;
 use crate::networking::types::host::{Host, HostMessage};
 use crate::networking::types::info_traffic::InfoTraffic;
@@ -345,6 +346,7 @@ impl Sniffer {
             }
             Message::HostSortSelection(sort_type) => self.host_sort_selection(sort_type),
             Message::ServiceSortSelection(sort_type) => self.service_sort_selection(sort_type),
+            Message::ProgramSortSelection(sort_type) => self.program_sort_selection(sort_type),
             Message::ToggleExportPcap => self.toggle_export_pcap(),
             Message::OutputPcapDir(path) => self.output_pcap_dir(path),
             Message::OutputPcapFile(name) => self.output_pcap_file(&name),
@@ -696,6 +698,10 @@ impl Sniffer {
         self.conf.service_sort_type = sort_type;
     }
 
+    fn program_sort_selection(&mut self, sort_type: SortType) {
+        self.conf.program_sort_type = sort_type;
+    }
+
     fn toggle_export_pcap(&mut self) {
         self.conf.export_pcap.toggle();
     }
@@ -878,6 +884,7 @@ impl Sniffer {
                 .update_program(lookup_res.2.as_ref());
 
             // associate unassigned recent connections on port with the program
+            let mut reassigned_data = DataInfo::default();
             if lookup_res.2.is_some() {
                 self.info_traffic
                     .map
@@ -890,11 +897,12 @@ impl Sniffer {
                     })
                     .for_each(|(_, v)| {
                         v.program = Program::from_proc(lookup_res.2.as_ref());
+                        reassigned_data.refresh(v.data_info());
                     });
             }
 
             // update program lookup state with the new lookup result
-            program_lookup.update(lookup_res);
+            program_lookup.update(lookup_res, reassigned_data);
         }
     }
 
