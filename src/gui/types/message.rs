@@ -15,7 +15,6 @@ use crate::utils::types::file_info::FileInfo;
 use crate::utils::types::web_page::WebPage;
 use crate::{Language, StyleType};
 use iced::window;
-use listeners::Process;
 use std::net::IpAddr;
 
 #[derive(Debug, Clone)]
@@ -155,6 +154,4 @@ pub enum Message {
     Freeze,
     /// Traffic preview
     TrafficPreview(TrafficPreview),
-    /// Program lookup result received from the listeners routine
-    ProgramLookupResult((u16, listeners::Protocol, Option<Process>)),
 }

@@ -10,16 +10,21 @@ const RETRY_TIMEOUT: u128 = 1500; // milliseconds
 pub const VALID_PROGRAM_TIMEOUT: u128 = 60_000; // milliseconds
 
 pub struct ProgramLookup {
-    state: HashMap<(u16, Protocol), LookedUpProgram>,
     port_tx: Sender<(u16, Protocol)>,
+    program_rx: Receiver<(u16, Protocol, Option<Process>)>,
+    state: HashMap<(u16, Protocol), LookedUpProgram>,
     programs: HashMap<Program, DataInfo>,
 }
 
 impl ProgramLookup {
-    pub fn new(port_tx: Sender<(u16, Protocol)>) -> Self {
+    pub fn new(
+        port_tx: Sender<(u16, Protocol)>,
+        program_rx: Receiver<(u16, Protocol, Option<Process>)>,
+    ) -> Self {
         Self {
-            state: HashMap::new(),
             port_tx,
+            program_rx,
+            state: HashMap::new(),
             programs: HashMap::new(),
         }
     }
@@ -72,6 +77,14 @@ impl ProgramLookup {
                 .or_insert(total);
         }
 
+        res
+    }
+
+    pub fn pending_results(&mut self) -> Vec<(u16, Protocol, Option<Process>)> {
+        let mut res = Vec::new();
+        while let Ok(lookup_res) = self.program_rx.try_recv() {
+            res.push(lookup_res);
+        }
         res
     }
 

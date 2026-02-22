@@ -367,7 +367,6 @@ impl Sniffer {
             Message::RemoteNotificationsUrl(url) => self.remote_notifications_url(&url),
             Message::Freeze => self.freeze(),
             Message::TrafficPreview(msg) => self.traffic_preview(msg),
-            Message::ProgramLookupResult(lookup_res) => self.program_lookup_result(lookup_res),
         }
         Task::none()
     }
@@ -492,6 +491,11 @@ impl Sniffer {
         if cap_id == self.current_capture_rx.0 {
             for host_msg in host_msgs {
                 self.handle_new_host(host_msg);
+            }
+            if let Some(program_lookup) = &mut self.program_lookup {
+                for program_res in program_lookup.pending_results() {
+                    self.handle_program_lookup_result(program_res);
+                }
             }
             self.refresh_data(msg, no_more_packets);
         }
@@ -876,36 +880,6 @@ impl Sniffer {
             .sort_by(|(_, c1), (_, c2)| c2.tot_packets.total_cmp(&c1.tot_packets));
     }
 
-    fn program_lookup_result(&mut self, lookup_res: (u16, listeners::Protocol, Option<Process>)) {
-        if let Some(program_lookup) = &mut self.program_lookup {
-            // update programs combobox state including the new program
-            self.combobox_data_states
-                .data
-                .update_program(lookup_res.2.as_ref());
-
-            // associate unassigned recent connections on port with the program
-            let mut reassigned_data = DataInfo::default();
-            if lookup_res.2.is_some() {
-                self.info_traffic
-                    .map
-                    .iter_mut()
-                    .filter(|(k, v)| {
-                        v.program.is_unknown()
-                            && v.final_instant.elapsed().as_millis() < VALID_PROGRAM_TIMEOUT
-                            && get_local_port(k, v.traffic_direction)
-                                == Some((lookup_res.0, lookup_res.1))
-                    })
-                    .for_each(|(_, v)| {
-                        v.program = Program::from_proc(lookup_res.2.as_ref());
-                        reassigned_data.refresh(v.data_info());
-                    });
-            }
-
-            // update program lookup state with the new lookup result
-            program_lookup.update(lookup_res, reassigned_data);
-        }
-    }
-
     /// Updates threshold if it hasn't been edited for a while
     fn update_threshold(&mut self) {
         // Ignore if just edited
@@ -1027,7 +1001,6 @@ impl Sniffer {
                 self.current_capture_rx.1 = Some(rx.clone());
                 self.freeze_tx = Some(freeze_tx);
 
-                let mut program_rx_task = Task::none();
                 if matches!(self.capture_source, CaptureSource::Device(_)) {
                     let (port_tx, port_rx) = async_channel::unbounded();
                     let (program_tx, program_rx) = async_channel::unbounded();
@@ -1037,13 +1010,10 @@ impl Sniffer {
                             lookup_program(&port_rx, &program_tx);
                         })
                         .log_err(location!());
-                    self.program_lookup = Some(ProgramLookup::new(port_tx));
-                    program_rx_task = Task::run(program_rx, |lookup_res| {
-                        Message::ProgramLookupResult(lookup_res)
-                    });
+                    self.program_lookup = Some(ProgramLookup::new(port_tx, program_rx));
                 }
 
-                let backend_task = Task::run(rx, |backend_msg| match backend_msg {
+                return Task::run(rx, |backend_msg| match backend_msg {
                     BackendTrafficMessage::TickRun(cap_id, msg, host_msg, no_more_packets) => {
                         Message::TickRun(cap_id, msg, host_msg, no_more_packets)
                     }
@@ -1054,8 +1024,6 @@ impl Sniffer {
                         Message::OfflineGap(cap_id, gap)
                     }
                 });
-
-                return Task::batch([backend_task, program_rx_task]);
             }
         }
         Task::none()
@@ -1388,6 +1356,39 @@ impl Sniffer {
 
         // update hosts combobox states including the new host
         self.combobox_data_states.data.update_host(&host);
+    }
+
+    fn handle_program_lookup_result(
+        &mut self,
+        lookup_res: (u16, listeners::Protocol, Option<Process>),
+    ) {
+        if let Some(program_lookup) = &mut self.program_lookup {
+            // update programs combobox state including the new program
+            self.combobox_data_states
+                .data
+                .update_program(lookup_res.2.as_ref());
+
+            // associate unassigned recent connections on port with the program
+            let mut reassigned_data = DataInfo::default();
+            if lookup_res.2.is_some() {
+                self.info_traffic
+                    .map
+                    .iter_mut()
+                    .filter(|(k, v)| {
+                        v.program.is_unknown()
+                            && v.final_instant.elapsed().as_millis() < VALID_PROGRAM_TIMEOUT
+                            && get_local_port(k, v.traffic_direction)
+                                == Some((lookup_res.0, lookup_res.1))
+                    })
+                    .for_each(|(_, v)| {
+                        v.program = Program::from_proc(lookup_res.2.as_ref());
+                        reassigned_data.refresh(v.data_info());
+                    });
+            }
+
+            // update program lookup state with the new lookup result
+            program_lookup.update(lookup_res, reassigned_data);
+        }
     }
 
     fn register_sigint_handler() -> Task<Message> {
@@ -2294,6 +2295,7 @@ mod tests {
                 report_sort_type: SortType::Ascending,
                 host_sort_type: SortType::Descending,
                 service_sort_type: SortType::Descending,
+                program_sort_type: SortType::Neutral,
                 last_opened_setting: SettingsPage::Appearance,
                 last_opened_page: RunningPage::Notifications,
                 export_pcap: ExportPcap {
