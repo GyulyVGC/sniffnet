@@ -6,6 +6,7 @@
 use crate::chart::types::donut_chart::donut_chart;
 use crate::countries::country_utils::get_flag_tooltip;
 use crate::countries::flags_pictures::{FLAGS_HEIGHT_BIG, FLAGS_WIDTH_BIG};
+use crate::gui::components::ellipsized_text::EllipsizedText;
 use crate::gui::components::tab::get_pages_tabs;
 use crate::gui::pages::initial_page::get_addresses_row;
 use crate::gui::sniffer::Sniffer;
@@ -45,7 +46,7 @@ use crate::{Language, RunningPage, StyleType};
 use iced::Length::Fill;
 use iced::alignment::{Horizontal, Vertical};
 use iced::widget::scrollable::Direction;
-use iced::widget::text::LineHeight;
+use iced::widget::text::{LineHeight, Wrapping};
 use iced::widget::tooltip::Position;
 use iced::widget::{Button, Column, Container, Row, Scrollable, Space, Text, Tooltip, button};
 use iced::{Alignment, Element, Length, Padding};
@@ -347,8 +348,11 @@ pub fn host_bar<'a>(
                 .spacing(1)
                 .push(
                     Row::new()
-                        .push(Text::new(host.to_entry_string()))
-                        .push(Space::new().width(Length::Fill))
+                        .push(
+                            EllipsizedText::new(host.to_entry_string())
+                                .wrapping(Wrapping::Glyph)
+                                .width(Length::Fill),
+                        )
                         .push(Text::new(data_repr.formatted_string(
                             data_info_host.data_info.tot_data(data_repr),
                         ))),
@@ -375,8 +379,11 @@ pub fn simple_bar<'a>(
                 .spacing(1)
                 .push(
                     Row::new()
-                        .push(Text::new(item))
-                        .push(Space::new().width(Length::Fill))
+                        .push(
+                            EllipsizedText::new(item)
+                                .wrapping(Wrapping::Glyph)
+                                .width(Length::Fill),
+                        )
                         .push(Text::new(
                             data_repr.formatted_string(data_info.tot_data(data_repr)),
                         )),
