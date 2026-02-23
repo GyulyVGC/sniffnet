@@ -8,7 +8,7 @@ use std::time::Instant;
 
 /// Amount of exchanged data (packets and bytes) incoming and outgoing, with the timestamp of the latest occurrence
 // data fields are private to make them only editable via the provided methods: needed to correctly refresh timestamps
-#[derive(Clone, Copy, Debug, Eq, PartialEq, Hash)]
+#[derive(Clone, Copy, Debug, Eq, PartialEq, Hash, Default)]
 pub struct DataInfo {
     /// Incoming packets
     incoming_packets: u128,
@@ -18,8 +18,8 @@ pub struct DataInfo {
     incoming_bytes: u128,
     /// Outgoing bytes
     outgoing_bytes: u128,
-    /// Latest instant of occurrence
-    final_instant: Instant,
+    /// Latest instant of occurrence. Initialized to None by Default.
+    final_instant: Option<Instant>,
 }
 
 impl DataInfo {
@@ -51,7 +51,7 @@ impl DataInfo {
             self.incoming_packets += 1;
             self.incoming_bytes += bytes;
         }
-        self.final_instant = Instant::now();
+        self.final_instant = Some(Instant::now());
     }
 
     pub fn add_packets(
@@ -68,7 +68,7 @@ impl DataInfo {
             self.incoming_packets += packets;
             self.incoming_bytes += bytes;
         }
-        self.final_instant = final_instant;
+        self.final_instant = Some(final_instant);
     }
 
     pub fn new_with_first_packet(bytes: u128, traffic_direction: TrafficDirection) -> Self {
@@ -78,7 +78,7 @@ impl DataInfo {
                 outgoing_packets: 1,
                 incoming_bytes: 0,
                 outgoing_bytes: bytes,
-                final_instant: Instant::now(),
+                final_instant: Some(Instant::now()),
             }
         } else {
             Self {
@@ -86,7 +86,7 @@ impl DataInfo {
                 outgoing_packets: 0,
                 incoming_bytes: bytes,
                 outgoing_bytes: 0,
-                final_instant: Instant::now(),
+                final_instant: Some(Instant::now()),
             }
         }
     }
@@ -99,13 +99,6 @@ impl DataInfo {
         if rhs.final_instant > self.final_instant {
             self.final_instant = rhs.final_instant;
         }
-    }
-
-    pub fn subtract(&mut self, rhs: Self) {
-        self.incoming_packets = self.incoming_packets.saturating_sub(rhs.incoming_packets);
-        self.outgoing_packets = self.outgoing_packets.saturating_sub(rhs.outgoing_packets);
-        self.incoming_bytes = self.incoming_bytes.saturating_sub(rhs.incoming_bytes);
-        self.outgoing_bytes = self.outgoing_bytes.saturating_sub(rhs.outgoing_bytes);
     }
 
     pub fn compare(&self, other: &Self, sort_type: SortType, data_repr: DataRepr) -> Ordering {
@@ -128,19 +121,7 @@ impl DataInfo {
             outgoing_packets,
             incoming_bytes,
             outgoing_bytes,
-            final_instant: Instant::now(),
-        }
-    }
-}
-
-impl Default for DataInfo {
-    fn default() -> Self {
-        Self {
-            incoming_packets: 0,
-            outgoing_packets: 0,
-            incoming_bytes: 0,
-            outgoing_bytes: 0,
-            final_instant: Instant::now(),
+            final_instant: Some(Instant::now()),
         }
     }
 }

@@ -17,10 +17,6 @@ impl Program {
         format!("={self}")
     }
 
-    pub fn is_known(&self) -> bool {
-        matches!(self, Program::Name(_))
-    }
-
     pub fn is_unknown(&self) -> bool {
         matches!(self, Program::Unknown)
     }

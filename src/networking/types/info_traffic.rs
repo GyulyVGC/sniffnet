@@ -48,20 +48,7 @@ impl InfoTraffic {
                     if let Some(program_lookup) = program_lookup_opt
                         && let Some(local_port) = local_port
                     {
-                        if o.get().program.is_known() {
-                            program_lookup.lookup_and_add_data(
-                                local_port,
-                                false,
-                                value.data_info(),
-                            );
-                        } else {
-                            let program = program_lookup.lookup_and_replace_data(
-                                local_port,
-                                o.get().data_info(),
-                                value.data_info(),
-                            );
-                            o.get_mut().program = program;
-                        }
+                        program_lookup.lookup_and_add_data(local_port, false, value.data_info());
                     }
 
                     o.get_mut().refresh(value);

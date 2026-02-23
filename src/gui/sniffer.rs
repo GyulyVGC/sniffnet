@@ -28,7 +28,6 @@ use crate::gui::types::timing_events::TimingEvents;
 use crate::mmdb::asn::ASN_MMDB;
 use crate::mmdb::country::COUNTRY_MMDB;
 use crate::mmdb::types::mmdb_reader::{MmdbReader, MmdbReaders};
-use crate::networking::manage_packets::get_local_port;
 use crate::networking::parse_packets::BackendTrafficMessage;
 use crate::networking::parse_packets::parse_packets;
 use crate::networking::traffic_preview::{TrafficPreview, traffic_preview};
@@ -36,16 +35,12 @@ use crate::networking::types::capture_context::{
     CaptureContext, CaptureSource, CaptureSourcePicklist, MyPcapImport,
 };
 use crate::networking::types::combobox_data_states::ComboboxDataStates;
-use crate::networking::types::data_info::DataInfo;
 use crate::networking::types::data_representation::DataRepr;
 use crate::networking::types::host::{Host, HostMessage};
 use crate::networking::types::info_traffic::InfoTraffic;
 use crate::networking::types::ip_blacklist::IpBlacklist;
 use crate::networking::types::my_device::MyDevice;
-use crate::networking::types::program::Program;
-use crate::networking::types::program_lookup::{
-    ProgramLookup, VALID_PROGRAM_TIMEOUT, lookup_program,
-};
+use crate::networking::types::program_lookup::{ProgramLookup, lookup_program};
 use crate::notifications::notify_and_log::notify_and_log;
 use crate::notifications::types::logged_notification::LoggedNotifications;
 use crate::notifications::types::notifications::{DataNotification, Notification};
@@ -1368,26 +1363,8 @@ impl Sniffer {
                 .data
                 .update_program(lookup_res.2.as_ref());
 
-            // associate unassigned recent connections on port with the program
-            let mut reassigned_data = DataInfo::default();
-            if lookup_res.2.is_some() {
-                self.info_traffic
-                    .map
-                    .iter_mut()
-                    .filter(|(k, v)| {
-                        v.program.is_unknown()
-                            && v.final_instant.elapsed().as_millis() < VALID_PROGRAM_TIMEOUT
-                            && get_local_port(k, v.traffic_direction)
-                                == Some((lookup_res.0, lookup_res.1))
-                    })
-                    .for_each(|(_, v)| {
-                        v.program = Program::from_proc(lookup_res.2.as_ref());
-                        reassigned_data.refresh(v.data_info());
-                    });
-            }
-
             // update program lookup state with the new lookup result
-            program_lookup.update(lookup_res, reassigned_data);
+            program_lookup.update(lookup_res, &mut self.info_traffic.map);
         }
     }
 
