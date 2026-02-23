@@ -30,7 +30,6 @@ use etherparse::{EtherType, LaxPacketHeaders};
 use pcap::{Address, Packet, PacketHeader};
 use std::collections::HashMap;
 use std::net::IpAddr;
-use std::sync::{Arc, Mutex};
 use std::thread;
 use std::time::{Duration, Instant};
 use tokio::sync::broadcast::Receiver;
@@ -40,7 +39,7 @@ use tokio::sync::broadcast::Receiver;
 pub fn parse_packets(
     cap_id: usize,
     mut cs: CaptureSource,
-    mmdb_readers: &MmdbReaders,
+    mmdb_readers: MmdbReaders,
     ip_blacklist: &IpBlacklist,
     capture_context: CaptureContext,
     filters: Filters,
@@ -59,9 +58,16 @@ pub fn parse_packets(
     };
 
     let mut info_traffic_msg = InfoTraffic::default();
-    let resolutions_state = Arc::new(Mutex::new(AddressesResolutionState::default()));
-    // list of newly resolved hosts to be sent (batched to avoid UI updates too often)
-    let new_hosts_to_send = Arc::new(Mutex::new(Vec::new()));
+
+    let (lookup_request_tx, lookup_request_rx) = std::sync::mpsc::channel();
+    let (lookup_result_tx, lookup_result_rx) = std::sync::mpsc::channel();
+    let mut resolutions_state = AddressesResolutionState::new(lookup_request_tx, lookup_result_rx);
+    let _ = thread::Builder::new()
+        .name("thread_reverse_dns_lookups".to_string())
+        .spawn(move || {
+            reverse_dns_lookups(&lookup_request_rx, &lookup_result_tx, &mmdb_readers);
+        })
+        .log_err(location!());
 
     // instant of the first parsed packet plus multiples of 1 second (only used in live captures)
     let mut first_packet_ticks = None;
@@ -93,10 +99,10 @@ pub fn parse_packets(
             maybe_send_tick_run_live(
                 cap_id,
                 &mut info_traffic_msg,
-                &new_hosts_to_send,
                 &mut cs,
                 &mut first_packet_ticks,
                 tx,
+                &mut resolutions_state,
             );
         }
 
@@ -107,18 +113,18 @@ pub fn parse_packets(
                     let _ = tx.send_blocking(BackendTrafficMessage::TickRun(
                         cap_id,
                         info_traffic_msg,
-                        new_hosts_to_send.lock().unwrap().drain(..).collect(),
+                        resolutions_state.new_hosts_to_send(),
                         true,
                     ));
-                    // wait until there is still some thread doing rdns
-                    while tx.sender_count() > 1 {
+                    // wait until there is still some IP address waiting for resolution
+                    let mut pending_hosts = Vec::new();
+                    while !resolutions_state.addresses_waiting_resolution.is_empty() {
+                        pending_hosts.extend(resolutions_state.new_hosts_to_send());
                         thread::sleep(Duration::from_millis(1000));
                     }
                     // send one last message including all pending hosts
-                    let _ = tx.send_blocking(BackendTrafficMessage::PendingHosts(
-                        cap_id,
-                        new_hosts_to_send.lock().unwrap().drain(..).collect(),
-                    ));
+                    let _ = tx
+                        .send_blocking(BackendTrafficMessage::PendingHosts(cap_id, pending_hosts));
                     return;
                 }
             }
@@ -134,9 +140,9 @@ pub fn parse_packets(
                         maybe_send_tick_run_offline(
                             cap_id,
                             &mut info_traffic_msg,
-                            &new_hosts_to_send,
                             next_packet_timestamp,
                             tx,
+                            &mut resolutions_state,
                         );
                     } else if first_packet_ticks.is_none() {
                         first_packet_ticks = Some(Instant::now());
@@ -187,12 +193,11 @@ pub fn parse_packets(
                     // check the rDNS status of this address and act accordingly
                     let address_to_lookup = get_address_to_lookup(&key, traffic_direction);
                     let mut r_dns_waiting_resolution = false;
-                    let mut resolutions_lock = resolutions_state.lock().unwrap();
-                    let r_dns_already_resolved = resolutions_lock
+                    let r_dns_already_resolved = resolutions_state
                         .addresses_resolved
                         .contains_key(&address_to_lookup);
                     if !r_dns_already_resolved {
-                        r_dns_waiting_resolution = resolutions_lock
+                        r_dns_waiting_resolution = resolutions_state
                             .addresses_waiting_resolution
                             .contains_key(&address_to_lookup);
                     }
@@ -203,54 +208,36 @@ pub fn parse_packets(
 
                             // Add this address to the map of addresses waiting for a resolution
                             // Useful to NOT perform again a rDNS lookup for this entry
-                            resolutions_lock.addresses_waiting_resolution.insert(
+                            resolutions_state.addresses_waiting_resolution.insert(
                                 address_to_lookup,
                                 DataInfo::new_with_first_packet(exchanged_bytes, traffic_direction),
                             );
-                            drop(resolutions_lock);
 
-                            // launch new thread to resolve host name
-                            let key2 = key;
-                            let resolutions_state2 = resolutions_state.clone();
-                            let new_hosts_to_send2 = new_hosts_to_send.clone();
-                            let interface_addresses = cs.get_addresses().clone();
-                            let mmdb_readers_2 = mmdb_readers.clone();
-                            let tx2 = tx.clone();
-                            let _ = thread::Builder::new()
-                                .name("thread_reverse_dns_lookup".to_string())
-                                .spawn(move || {
-                                    reverse_dns_lookup(
-                                        &resolutions_state2,
-                                        &new_hosts_to_send2,
-                                        &key2,
-                                        traffic_direction,
-                                        &interface_addresses,
-                                        &mmdb_readers_2,
-                                        &tx2,
-                                    );
-                                })
-                                .log_err(location!());
+                            // send the rDNS lookup request to the corresponding thread
+                            let _ = resolutions_state.lookup_request_tx.send((
+                                key,
+                                traffic_direction,
+                                cs.get_addresses().clone(),
+                            ));
                         }
                         (true, false) => {
                             // waiting for a previously requested rDNS resolution
                             // update the corresponding waiting address data
-                            resolutions_lock
+                            resolutions_state
                                 .addresses_waiting_resolution
                                 .entry(address_to_lookup)
                                 .and_modify(|data_info| {
                                     data_info.add_packet(exchanged_bytes, traffic_direction);
                                 });
-                            drop(resolutions_lock);
                         }
                         (_, true) => {
                             // rDNS already resolved
                             // update the corresponding host's data info
-                            let host = resolutions_lock
+                            let host = resolutions_state
                                 .addresses_resolved
                                 .get(&address_to_lookup)
                                 .unwrap_or(&Host::default())
                                 .clone();
-                            drop(resolutions_lock);
                             info_traffic_msg
                                 .hosts
                                 .entry(host)
@@ -373,81 +360,110 @@ fn from_linux_sll(packet: &[u8], is_v1: bool) -> Option<LaxPacketHeaders<'_>> {
     ))
 }
 
-fn reverse_dns_lookup(
-    resolutions_state: &Arc<Mutex<AddressesResolutionState>>,
-    new_hosts_to_send: &Arc<Mutex<Vec<HostMessage>>>,
-    key: &AddressPortPair,
-    traffic_direction: TrafficDirection,
-    interface_addresses: &Vec<Address>,
+fn reverse_dns_lookups(
+    lookup_request_rx: &std::sync::mpsc::Receiver<(
+        AddressPortPair,
+        TrafficDirection,
+        Vec<Address>,
+    )>,
+    lookup_result_tx: &std::sync::mpsc::Sender<HostMessage>,
     mmdb_readers: &MmdbReaders,
-    // needed to know that this thread is still running!
-    _tx: &Sender<BackendTrafficMessage>,
 ) {
-    let address_to_lookup = get_address_to_lookup(key, traffic_direction);
+    while let Ok((key, traffic_direction, interface_addresses)) = lookup_request_rx.recv() {
+        let address_to_lookup = get_address_to_lookup(&key, traffic_direction);
 
-    // perform rDNS lookup
-    let lookup_result = lookup_addr(&address_to_lookup);
+        // perform rDNS lookup
+        let lookup_result = lookup_addr(&address_to_lookup);
 
-    // get new host info and build the new host
-    let traffic_type = get_traffic_type(&address_to_lookup, interface_addresses, traffic_direction);
-    let is_loopback = address_to_lookup.is_loopback();
-    let is_local = is_local_connection(&address_to_lookup, interface_addresses);
-    let is_bogon = is_bogon(&address_to_lookup);
-    let country = get_country(&address_to_lookup, &mmdb_readers.country);
-    let asn = get_asn(&address_to_lookup, &mmdb_readers.asn);
-    let rdns = if let Ok(result) = lookup_result {
-        if result.is_empty() {
-            address_to_lookup.to_string()
+        // get new host info and build the new host
+        let traffic_type =
+            get_traffic_type(&address_to_lookup, &interface_addresses, traffic_direction);
+        let is_loopback = address_to_lookup.is_loopback();
+        let is_local = is_local_connection(&address_to_lookup, &interface_addresses);
+        let is_bogon = is_bogon(&address_to_lookup);
+        let country = get_country(&address_to_lookup, &mmdb_readers.country);
+        let asn = get_asn(&address_to_lookup, &mmdb_readers.asn);
+        let rdns = if let Ok(result) = lookup_result {
+            if result.is_empty() {
+                address_to_lookup.to_string()
+            } else {
+                result
+            }
         } else {
-            result
-        }
-    } else {
-        address_to_lookup.to_string()
-    };
-    let new_host = Host {
-        domain: get_domain_from_r_dns(rdns.clone()),
-        asn,
-        country,
-    };
+            address_to_lookup.to_string()
+        };
+        let new_host = Host {
+            domain: get_domain_from_r_dns(rdns.clone()),
+            asn,
+            country,
+        };
 
-    // collect the data exchanged from the same address so far and remove the address from the collection of addresses waiting a rDNS
-    let mut resolutions_lock = resolutions_state.lock().unwrap();
-    let other_data = resolutions_lock
-        .addresses_waiting_resolution
-        .remove(&address_to_lookup)
-        .unwrap_or_default();
-    // insert the newly resolved host in the collections, with the data it exchanged so far
-    resolutions_lock
-        .addresses_resolved
-        .insert(address_to_lookup, new_host.clone());
-    drop(resolutions_lock);
+        let data_info_host = DataInfoHost {
+            data_info: DataInfo::default(),
+            is_favorite: false,
+            is_local,
+            is_bogon,
+            is_loopback,
+            traffic_type,
+        };
 
-    let data_info_host = DataInfoHost {
-        data_info: other_data,
-        is_favorite: false,
-        is_local,
-        is_bogon,
-        is_loopback,
-        traffic_type,
-    };
+        let msg_data = HostMessage {
+            host: new_host,
+            data_info_host,
+            address_to_lookup,
+            rdns,
+        };
 
-    let msg_data = HostMessage {
-        host: new_host,
-        data_info_host,
-        address_to_lookup,
-        rdns,
-    };
-
-    // add the new host to the list of hosts to be sent
-    new_hosts_to_send.lock().unwrap().push(msg_data);
+        // add the new host to the list of hosts to be sent
+        let _ = lookup_result_tx.send(msg_data);
+    }
 }
 
-#[derive(Default)]
 pub struct AddressesResolutionState {
+    lookup_request_tx: std::sync::mpsc::Sender<(AddressPortPair, TrafficDirection, Vec<Address>)>,
+    lookup_result_rx: std::sync::mpsc::Receiver<HostMessage>,
     /// Map of the addresses waiting for a rDNS resolution; used to NOT send multiple rDNS for the same address
     addresses_waiting_resolution: HashMap<IpAddr, DataInfo>,
     /// Map of the resolved addresses with the corresponding host
-    pub addresses_resolved: HashMap<IpAddr, Host>,
+    addresses_resolved: HashMap<IpAddr, Host>,
+}
+
+impl AddressesResolutionState {
+    fn new(
+        lookup_request_tx: std::sync::mpsc::Sender<(
+            AddressPortPair,
+            TrafficDirection,
+            Vec<Address>,
+        )>,
+        lookup_result_rx: std::sync::mpsc::Receiver<HostMessage>,
+    ) -> Self {
+        Self {
+            lookup_request_tx,
+            lookup_result_rx,
+            addresses_waiting_resolution: HashMap::new(),
+            addresses_resolved: HashMap::new(),
+        }
+    }
+
+    fn new_hosts_to_send(&mut self) -> Vec<HostMessage> {
+        let mut new_hosts = Vec::new();
+        while let Ok(mut host_msg) = self.lookup_result_rx.try_recv() {
+            let address_to_lookup = host_msg.address_to_lookup;
+            // collect the data exchanged from the same address so far and remove the address from the collection of addresses waiting a rDNS
+            let other_data = self
+                .addresses_waiting_resolution
+                .remove(&address_to_lookup)
+                .unwrap_or_default();
+            // overwrite the host message with the collected data
+            host_msg.data_info_host.data_info = other_data;
+            // insert the newly resolved host in the collection of resolved addresses
+            self.addresses_resolved
+                .insert(address_to_lookup, host_msg.host.clone());
+
+            new_hosts.push(host_msg);
+        }
+        new_hosts
+    }
 }
 
 #[allow(clippy::large_enum_variant)]
@@ -460,10 +476,10 @@ pub enum BackendTrafficMessage {
 fn maybe_send_tick_run_live(
     cap_id: usize,
     info_traffic_msg: &mut InfoTraffic,
-    new_hosts_to_send: &Arc<Mutex<Vec<HostMessage>>>,
     cs: &mut CaptureSource,
     first_packet_ticks: &mut Option<Instant>,
     tx: &Sender<BackendTrafficMessage>,
+    resolutions_state: &mut AddressesResolutionState,
 ) {
     if first_packet_ticks.is_some_and(|i| i.elapsed() >= Duration::from_millis(1000)) {
         *first_packet_ticks =
@@ -471,7 +487,7 @@ fn maybe_send_tick_run_live(
         let _ = tx.send_blocking(BackendTrafficMessage::TickRun(
             cap_id,
             info_traffic_msg.take_but_leave_something(),
-            new_hosts_to_send.lock().unwrap().drain(..).collect(),
+            resolutions_state.new_hosts_to_send(),
             false,
         ));
         cs.set_addresses();
@@ -481,9 +497,9 @@ fn maybe_send_tick_run_live(
 fn maybe_send_tick_run_offline(
     cap_id: usize,
     info_traffic_msg: &mut InfoTraffic,
-    new_hosts_to_send: &Arc<Mutex<Vec<HostMessage>>>,
     next_packet_timestamp: Timestamp,
     tx: &Sender<BackendTrafficMessage>,
+    resolutions_state: &mut AddressesResolutionState,
 ) {
     if info_traffic_msg.last_packet_timestamp == Timestamp::default() {
         info_traffic_msg.last_packet_timestamp = next_packet_timestamp;
@@ -494,7 +510,7 @@ fn maybe_send_tick_run_offline(
         let _ = tx.send_blocking(BackendTrafficMessage::TickRun(
             cap_id,
             info_traffic_msg.take_but_leave_something(),
-            new_hosts_to_send.lock().unwrap().drain(..).collect(),
+            resolutions_state.new_hosts_to_send(),
             false,
         ));
         if diff_secs > 1 {

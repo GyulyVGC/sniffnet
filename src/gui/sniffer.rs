@@ -989,7 +989,7 @@ impl Sniffer {
                         parse_packets(
                             curr_cap_id,
                             capture_source,
-                            &mmdb_readers,
+                            mmdb_readers,
                             &ip_blacklist,
                             capture_context,
                             filters,
