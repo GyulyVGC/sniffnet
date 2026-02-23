@@ -1002,8 +1002,8 @@ impl Sniffer {
                 self.freeze_tx = Some(freeze_tx);
 
                 if matches!(self.capture_source, CaptureSource::Device(_)) {
-                    let (port_tx, port_rx) = async_channel::unbounded();
-                    let (program_tx, program_rx) = async_channel::unbounded();
+                    let (port_tx, port_rx) = std::sync::mpsc::channel();
+                    let (program_tx, program_rx) = std::sync::mpsc::channel();
                     let _ = thread::Builder::new()
                         .name("thread_lookup_program".to_string())
                         .spawn(move || {

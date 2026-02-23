@@ -14,10 +14,7 @@ pub enum Program {
 
 impl Program {
     pub fn to_string_with_equal_prefix(&self) -> String {
-        match self {
-            Program::Name(_) | Program::NotApplicable => ["=", &self.to_string()].concat(),
-            Program::Unknown => self.to_string(),
-        }
+        format!("={self}")
     }
 
     pub fn is_known(&self) -> bool {
@@ -80,7 +77,6 @@ mod tests {
             "=Google Chrome Helper"
         );
         assert_eq!(Program::NotApplicable.to_string_with_equal_prefix(), "=-");
-        // unknown should not have the prefix
-        assert_eq!(Program::Unknown.to_string_with_equal_prefix(), "?");
+        assert_eq!(Program::Unknown.to_string_with_equal_prefix(), "=?");
     }
 }

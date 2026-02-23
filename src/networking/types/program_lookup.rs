@@ -1,9 +1,9 @@
 use crate::networking::types::data_info::DataInfo;
 use crate::networking::types::data_representation::DataRepr;
 use crate::networking::types::program::Program;
-use async_channel::{Receiver, Sender};
 use listeners::{Process, Protocol};
 use std::collections::HashMap;
+use std::sync::mpsc::{Receiver, Sender};
 use std::time::Instant;
 
 const RETRY_TIMEOUT: u128 = 1500; // milliseconds
@@ -101,7 +101,7 @@ impl ProgramLookup {
                 looked_up_program.retried = false;
                 looked_up_program.instant = Instant::now();
                 // send this to the listeners routine
-                let _ = self.port_tx.send_blocking(key);
+                let _ = self.port_tx.send(key);
                 return None;
             }
 
@@ -109,7 +109,7 @@ impl ProgramLookup {
                 looked_up_program.retried = program_still_valid;
                 looked_up_program.instant = Instant::now();
                 // send this to the listeners routine
-                let _ = self.port_tx.send_blocking(key);
+                let _ = self.port_tx.send(key);
                 return None;
             }
 
@@ -117,7 +117,7 @@ impl ProgramLookup {
                 looked_up_program.retried = true;
                 looked_up_program.instant = Instant::now();
                 // send this to the listeners routine
-                let _ = self.port_tx.send_blocking(key);
+                let _ = self.port_tx.send(key);
                 return None;
             }
 
@@ -130,7 +130,7 @@ impl ProgramLookup {
             };
             self.state.insert(key, looked_up_program);
             // send this to the listeners routine
-            let _ = self.port_tx.send_blocking(key);
+            let _ = self.port_tx.send(key);
             None
         }
     }
@@ -177,8 +177,8 @@ pub fn lookup_program(
     port_rx: &Receiver<(u16, Protocol)>,
     program_tx: &Sender<(u16, Protocol, Option<Process>)>,
 ) {
-    while let Ok((port, protocol)) = port_rx.recv_blocking() {
+    while let Ok((port, protocol)) = port_rx.recv() {
         let program = listeners::get_process_by_port(port, protocol).ok();
-        let _ = program_tx.send_blocking((port, protocol, program));
+        let _ = program_tx.send((port, protocol, program));
     }
 }

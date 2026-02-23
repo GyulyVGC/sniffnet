@@ -282,6 +282,7 @@ fn row_report_entry<'a>(
     ret_val
 }
 
+#[allow(clippy::too_many_lines)]
 fn additional_filters_row<'a>(
     search_params: &'a SearchParameters,
     combobox_states: &'a ComboboxStates,
