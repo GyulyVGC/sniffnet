@@ -867,6 +867,15 @@
       "contributions": [
         "ideas"
       ]
+    },
+    {
+      "login": "edwloef",
+      "name": "edwloef",
+      "avatar_url": "https://avatars.githubusercontent.com/u/75493688?v=4",
+      "profile": "https://github.com/edwloef",
+      "contributions": [
+        "bug"
+      ]
     }
   ],
   "contributorsPerLine": 7,
