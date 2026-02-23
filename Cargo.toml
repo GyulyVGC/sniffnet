@@ -53,7 +53,7 @@ plotters = { version = "0.3.7", default-features = false, features = ["area_seri
 plotters-iced2 = "0.14.0"
 reqwest = { version = "0.13.2", features = ["json"] }
 rfd = "0.17.2"
-rodio = { version = "0.21.1", default-features = false, features = ["mp3", "playback"] }
+rodio = { version = "0.22.1", default-features = false, features = ["mp3", "playback"] }
 semver = "1.0.27"
 serde = { version = "1.0.228", features = ["derive"] }
 serde_json = { version = "1.0.149", features = ["preserve_order"] }
