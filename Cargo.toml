@@ -38,7 +38,7 @@ strip = true
 
 [dependencies]
 async-channel = "2.5.0"
-chrono = "0.4.43"
+chrono = "0.4.44"
 clap = { version = "4.5.59", features = ["derive"] }
 confy = "2.0.0"
 ctrlc = { version = "3.5.2", features = ["termination"] }
