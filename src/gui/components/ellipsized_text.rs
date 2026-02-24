@@ -130,7 +130,7 @@ where
 
             if changed {
                 state.ellipsis.update(text::Text {
-                    content: "…",
+                    content: "… ",
                     bounds: Size::INFINITE,
                     size,
                     line_height: format.line_height,
@@ -162,8 +162,9 @@ where
 
                         state.ellipsized.update(text::Text {
                             content: &format!(
-                                "{}…",
-                                &self.fragment[..offset].trim().trim_end_matches([',', '.'])
+                                "{}… ",
+                                &self.fragment[..offset]
+                                    .trim_end_matches(|s: char| !s.is_alphanumeric())
                             ),
                             bounds,
                             size,

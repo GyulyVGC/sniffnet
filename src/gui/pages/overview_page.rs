@@ -6,6 +6,7 @@
 use crate::chart::types::donut_chart::donut_chart;
 use crate::countries::country_utils::get_flag_tooltip;
 use crate::countries::flags_pictures::{FLAGS_HEIGHT_BIG, FLAGS_WIDTH_BIG};
+use crate::countries::types::country::Country;
 use crate::gui::components::ellipsized_text::EllipsizedText;
 use crate::gui::components::tab::get_pages_tabs;
 use crate::gui::pages::initial_page::get_addresses_row;
@@ -141,7 +142,8 @@ fn col_host<'a>(sniffer: &Sniffer) -> Column<'a, Message, StyleType> {
         let star_button = get_star_button(data_info_host.is_favorite, host.clone());
 
         let host_bar = host_bar(
-            host,
+            host.to_entry_string(),
+            host.country,
             data_info_host,
             data_repr,
             first_entry_data_info,
@@ -324,7 +326,8 @@ fn col_program<'a>(conf: &Conf, program_lookup: &ProgramLookup) -> Column<'a, Me
 }
 
 pub fn host_bar<'a>(
-    host: &Host,
+    item: String,
+    country: Country,
     data_info_host: &DataInfoHost,
     data_repr: DataRepr,
     first_entry_data_info: DataInfo,
@@ -337,19 +340,14 @@ pub fn host_bar<'a>(
         .height(FLAGS_HEIGHT_BIG)
         .align_y(Alignment::Center)
         .spacing(5)
-        .push(get_flag_tooltip(
-            host.country,
-            data_info_host,
-            language,
-            false,
-        ))
+        .push(get_flag_tooltip(country, data_info_host, language, false))
         .push(
             Column::new()
                 .spacing(1)
                 .push(
                     Row::new()
                         .push(
-                            EllipsizedText::new(host.to_entry_string())
+                            EllipsizedText::new(item)
                                 .wrapping(Wrapping::Glyph)
                                 .width(Length::Fill),
                         )
