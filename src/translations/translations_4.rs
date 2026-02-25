@@ -21,6 +21,7 @@ pub fn reserved_address_translation(language: Language, info: &str) -> String {
         Language::ID => format!("Alamat disimpan ({info})"),
         Language::EL => format!("Δεσμευμένη διεύθυνση ({info})"),
         Language::VI => format!("Địa chỉ dự trữ ({info})"),
+        Language::TR => format!("Rezerve edilmiş adres ({info})"),
         _ => format!("Reserved address ({info})"),
     }
 }
@@ -42,6 +43,7 @@ pub fn share_feedback_translation(language: Language) -> &'static str {
         Language::ID => "Berikan masukanmu",
         Language::EL => "Μοιραστείτε τα σχόλιά σας",
         Language::VI => "Chia sẻ phản hồi của bạn",
+        Language::TR => "Geri bildirimlerinizi paylaşın",
         _ => "Share your feedback",
     }
 }
@@ -64,6 +66,7 @@ pub fn share_feedback_translation(language: Language) -> &'static str {
 //         Language::ID => "Kecuali",
 //         Language::ES => "Excluidos",
 //         Language::VI => "Loại trừ",
+//         Language::TR => "Hariç tutulan",
 //         _ => "Excluded",
 //     }
 // }
@@ -85,6 +88,7 @@ pub fn capture_file_translation(language: Language) -> &'static str {
         Language::ID => "File tangkapan",
         Language::ES => "Archivo de captura",
         Language::VI => "Bắt tệp tin",
+        Language::TR => "Yakalama dosyası",
         _ => "Capture file",
     }
 }
@@ -106,6 +110,7 @@ pub fn select_file_translation(language: Language) -> &'static str {
         Language::ZH_TW => "選擇文件",
         Language::EL => "Επιλογή αρχείου",
         Language::VI => "Chọn tệp",
+        Language::TR => "Dosya seç",
         _ => "Select file",
     }
 }
@@ -172,6 +177,10 @@ pub fn reading_from_pcap_translation(language: Language) -> &'static str {
             "Đang đọc gói tin từ tệp...\n\n\
                                  Bạn có chắc tệp tin đã chọn không bị trống?"
         }
+        Language::TR => {
+            "Paketler dosyadan okunuyor...\n\n\
+                                 Seçilen dosyanın boş olmadığından emin misiniz?"
+        }
         _ => {
             "Reading packets from file...\n\n\
                                 Are you sure the file you selected isn't empty?"
@@ -195,6 +204,7 @@ pub fn data_exceeded_translation(language: Language) -> &'static str {
         Language::ID => "Ambang batas data terlampaui",
         Language::EL => "Υπέρβαση ορίου δεδομένων",
         Language::VI => "Đã vượt ngưỡng dữ liệu",
+        Language::TR => "Veri limiti aşıldı",
         _ => "Data threshold exceeded",
     }
 }
@@ -216,6 +226,7 @@ pub fn bits_exceeded_translation(language: Language) -> &'static str {
         Language::ZH_TW => "超出數據界限",
         Language::EL => "Υπέρβαση ορίου δυφίων",
         Language::VI => "Đã vượt ngưỡng bit",
+        Language::TR => "Bit limiti aşıldı",
         _ => "Bits threshold exceeded",
     }
 }
@@ -236,7 +247,7 @@ pub fn bits_translation(language: Language) -> &'static str {
         Language::EL => "Δυφία",
         Language::RO => "biți",
         Language::ZH_TW => "位元",
-        Language::VI => "bit",
+        Language::VI | Language::TR => "bit",
         _ => "bits",
     }
 }
@@ -256,6 +267,7 @@ pub fn pause_translation(language: Language) -> &'static str {
         Language::ZH_TW => "暫停",
         Language::EL => "Παύση",
         Language::VI => "Tạm dừng",
+        Language::TR => "Duraklat",
         _ => "Pause",
     }
 }
@@ -278,6 +290,7 @@ pub fn resume_translation(language: Language) -> &'static str {
         Language::ZH_TW => "繼續",
         Language::EL => "Συνέχεια",
         Language::VI => "Tiếp tục",
+        Language::TR => "Devam et",
         _ => "Resume",
     }
 }
