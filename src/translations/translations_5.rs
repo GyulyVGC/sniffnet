@@ -7,6 +7,7 @@ pub fn filter_traffic_translation(language: Language) -> String {
         Language::EN => "Filter traffic",
         Language::CS => "Filtr provozu",
         Language::IT => "Filtra il traffico",
+        Language::RO => "Filtrează traficul",
         _ => "Filter traffic",
     }
     .to_string()
@@ -18,6 +19,7 @@ pub fn traffic_source_translation(language: Language) -> &'static str {
         Language::EN => "Traffic source",
         Language::CS => "Zdroj provozu",
         Language::IT => "Fonte del traffico",
+        Language::RO => "Sursa traficului",
         _ => "Traffic source",
     }
 }
