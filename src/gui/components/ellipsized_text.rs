@@ -155,7 +155,7 @@ where
                             .original
                             .raw()
                             .hit_test(Point {
-                                x: min_bounds.width - state.ellipsis.min_width() * 1.25,
+                                x: min_bounds.width - state.ellipsis.min_width(),
                                 y: min_bounds.height - y_offset,
                             })
                             .unwrap_or(Hit::CharOffset(offset));

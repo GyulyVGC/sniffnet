@@ -95,7 +95,7 @@ fn row_report<'a>(sniffer: &Sniffer) -> Row<'a, Message, StyleType> {
     let col_service = col_service(sniffer);
     let container_program = sniffer.program_lookup.as_ref().map(|program_lookup| {
         Container::new(col_program(&sniffer.conf, program_lookup))
-            .width(Length::FillPortion(3))
+            .width(Length::FillPortion(1))
             .height(Length::Fill)
             .padding(Padding::new(10.0).top(0).bottom(5))
             .class(ContainerType::BorderedRound)
@@ -105,14 +105,14 @@ fn row_report<'a>(sniffer: &Sniffer) -> Row<'a, Message, StyleType> {
         .spacing(10)
         .push(
             Container::new(col_host)
-                .width(Length::FillPortion(5))
+                .width(Length::FillPortion(2))
                 .height(Length::Fill)
                 .padding(Padding::new(10.0).top(0).bottom(5))
                 .class(ContainerType::BorderedRound),
         )
         .push(
             Container::new(col_service)
-                .width(Length::FillPortion(2))
+                .width(Length::FillPortion(1))
                 .height(Length::Fill)
                 .padding(Padding::new(10.0).top(0).bottom(5))
                 .class(ContainerType::BorderedRound),
