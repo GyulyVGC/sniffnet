@@ -281,7 +281,7 @@ fn col_program<'a>(conf: &Conf, program_lookup: &ProgramLookup) -> Column<'a, Me
 
     for (program, data_info) in &entries {
         let content = simple_bar(
-            image(&program_lookup.icon_handle).height(FLAGS_HEIGHT_BIG),
+            image(&program_lookup.icon_handle).height(Length::Fill),
             program.to_string(),
             data_info,
             data_repr,
@@ -341,13 +341,13 @@ pub fn host_bar<'a>(
         get_bars_length(data_repr, &first_entry_data_info, &data_info_host.data_info);
 
     Row::new()
-        .height(FLAGS_HEIGHT_BIG)
+        .height(32)
         .align_y(Alignment::Center)
         .spacing(5)
         .push(get_flag_tooltip(country, data_info_host, language, false))
         .push(
             Column::new()
-                .spacing(1)
+                .spacing(2)
                 .push(
                     Row::new()
                         .push(
@@ -374,13 +374,13 @@ pub fn simple_bar<'a>(
         get_bars_length(data_repr, &first_entry_data_info, data_info);
 
     Row::new()
-        .height(FLAGS_HEIGHT_BIG)
+        .height(32)
         .align_y(Alignment::Center)
         .spacing(5)
         .push(icon)
         .push(
             Column::new()
-                .spacing(1)
+                .spacing(2)
                 .push(
                     Row::new()
                         .push(
