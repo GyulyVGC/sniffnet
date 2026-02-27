@@ -145,8 +145,16 @@ impl FilterInputType {
 
         let entry_value = self.entry_value(key, value, r_dns_host).to_lowercase();
 
-        if let Some(stripped_filter) = filter_value.strip_prefix('=') {
-            return entry_value.eq(stripped_filter);
+        if let Some(equal_filter) = filter_value.strip_prefix('=') {
+            return entry_value.eq(equal_filter);
+        }
+
+        if let Some(not_equal_filter) = filter_value.strip_prefix("!=") {
+            return !entry_value.eq(not_equal_filter);
+        }
+
+        if let Some(not_contains_filter) = filter_value.strip_prefix('!') {
+            return !entry_value.contains(not_contains_filter);
         }
 
         entry_value.contains(&filter_value)
