@@ -143,7 +143,7 @@ jobs:
       - name: Install packaging tools
         run: cargo install cargo-deb
 
-      - uses: actions/download-artifact@v7
+      - uses: actions/download-artifact@v8
         with:
           name: build-ubuntu-${{ matrix.target }}
           path: target/
@@ -189,7 +189,7 @@ jobs:
         run: apt-get update -y && apt-get install -y git build-essential graphicsmagick-imagemagick-compat wget file desktop-file-utils libfuse2
 
       - name: Download Debian package
-        uses: actions/download-artifact@v7
+        uses: actions/download-artifact@v8
         with:
           name: deb-${{ matrix.arch }}
           path: /target/
@@ -248,7 +248,7 @@ jobs:
       - name: Install packaging tools
         run: cargo install cargo-generate-rpm
 
-      - uses: actions/download-artifact@v7
+      - uses: actions/download-artifact@v8
         with:
           name: build-ubuntu-${{ matrix.target }}
           path: target/
@@ -292,7 +292,7 @@ jobs:
           cargo install toml-cli
           brew install create-dmg
 
-      - uses: actions/download-artifact@v7
+      - uses: actions/download-artifact@v8
         with:
           name: build-macos-${{ matrix.target }}
           path: target/
@@ -369,7 +369,7 @@ jobs:
       - name: Install packaging tools
         run: cargo install cargo-wix
 
-      - uses: actions/download-artifact@v7
+      - uses: actions/download-artifact@v8
         with:
           name: build-windows-${{ matrix.target }}
           path: target/
