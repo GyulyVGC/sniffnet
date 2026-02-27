@@ -1,9 +1,12 @@
+use crate::countries::flags_pictures::FLAGS_HEIGHT_BIG;
 use crate::networking::manage_packets::get_local_port;
 use crate::networking::types::address_port_pair::AddressPortPair;
 use crate::networking::types::data_info::DataInfo;
 use crate::networking::types::data_representation::DataRepr;
 use crate::networking::types::info_address_port_pair::InfoAddressPortPair;
 use crate::networking::types::program::Program;
+use iced::widget::image::Handle;
+use iced::widget::{Image, image};
 use listeners::{Process, Protocol};
 use std::collections::HashMap;
 use std::sync::mpsc::{Receiver, Sender};
@@ -17,6 +20,7 @@ pub struct ProgramLookup {
     program_rx: Receiver<(u16, Protocol, Option<Process>)>,
     state: HashMap<(u16, Protocol), LookedUpProgram>,
     programs: HashMap<Program, DataInfo>,
+    pub icon_handle: Handle,
 }
 
 impl ProgramLookup {
@@ -29,6 +33,9 @@ impl ProgramLookup {
             program_rx,
             state: HashMap::new(),
             programs: HashMap::new(),
+            icon_handle: Handle::from_bytes(
+                picon::get_icon_by_path("/Applications/Telegram.app").bytes,
+            ),
         }
     }
 
@@ -175,4 +182,12 @@ pub fn lookup_program(
         let program = listeners::get_process_by_port(port, protocol).ok();
         let _ = program_tx.send((port, protocol, program));
     }
+}
+
+pub fn get_picon(program_lookup: &ProgramLookup) -> Image {
+    // let icon_bytes = picon::get_icon_by_path(ppath);
+    image(image::Handle::from_path(
+        "/Applications/Sniffnet.app/Contents/Resources/sniffnet.icns",
+    ))
+    .height(FLAGS_HEIGHT_BIG)
 }

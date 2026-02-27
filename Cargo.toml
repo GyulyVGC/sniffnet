@@ -50,6 +50,7 @@ maxminddb = "0.27.3"
 pcap = "2.4.0"
 phf = "0.13.1"
 phf_shared = "0.13.1"
+picon = { path = "../picon" }
 plotters = { version = "0.3.7", default-features = false, features = ["area_series", "line_series"] }
 plotters-iced2 = "0.14.0"
 reqwest = { version = "0.13.2", features = ["json"] }

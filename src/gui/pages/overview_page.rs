@@ -26,7 +26,7 @@ use crate::networking::types::data_info::DataInfo;
 use crate::networking::types::data_info_host::DataInfoHost;
 use crate::networking::types::data_representation::DataRepr;
 use crate::networking::types::host::Host;
-use crate::networking::types::program_lookup::ProgramLookup;
+use crate::networking::types::program_lookup::{ProgramLookup, get_picon};
 use crate::report::get_report_entries::{
     get_host_entries, get_program_entries, get_service_entries,
 };
@@ -49,7 +49,9 @@ use iced::alignment::{Horizontal, Vertical};
 use iced::widget::scrollable::Direction;
 use iced::widget::text::{LineHeight, Wrapping};
 use iced::widget::tooltip::Position;
-use iced::widget::{Button, Column, Container, Row, Scrollable, Space, Text, Tooltip, button};
+use iced::widget::{
+    Button, Column, Container, Row, Scrollable, Space, Text, Tooltip, button, image,
+};
 use iced::{Alignment, Element, Length, Padding};
 
 /// Computes the body of gui overview page
@@ -215,6 +217,7 @@ fn col_service<'a>(sniffer: &Sniffer) -> Column<'a, Message, StyleType> {
 
     for (service, data_info) in &entries {
         let content = simple_bar(
+            None::<Element<Message, StyleType>>,
             service.to_string(),
             data_info,
             data_repr,
@@ -278,6 +281,7 @@ fn col_program<'a>(conf: &Conf, program_lookup: &ProgramLookup) -> Column<'a, Me
 
     for (program, data_info) in &entries {
         let content = simple_bar(
+            image(&program_lookup.icon_handle).height(FLAGS_HEIGHT_BIG),
             program.to_string(),
             data_info,
             data_repr,
@@ -360,6 +364,7 @@ pub fn host_bar<'a>(
 }
 
 pub fn simple_bar<'a>(
+    icon: impl Into<Element<'a, Message, StyleType>>,
     item: String,
     data_info: &DataInfo,
     data_repr: DataRepr,
@@ -372,6 +377,7 @@ pub fn simple_bar<'a>(
         .height(FLAGS_HEIGHT_BIG)
         .align_y(Alignment::Center)
         .spacing(5)
+        .push(icon)
         .push(
             Column::new()
                 .spacing(1)

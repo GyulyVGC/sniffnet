@@ -36,7 +36,7 @@ use iced::widget::text::LineHeight;
 use iced::widget::tooltip::Position;
 use iced::widget::{Column, Container, Row, Scrollable, Text, Tooltip};
 use iced::widget::{Space, button};
-use iced::{Alignment, Length, Padding};
+use iced::{Alignment, Element, Length, Padding};
 use std::cmp::max;
 
 /// Computes the body of gui notifications page
@@ -450,6 +450,7 @@ fn data_notification_extra<'a>(
         .1;
     for (service, data_info) in &logged_notification.services {
         let service_bar = simple_bar(
+            None::<Element<Message, StyleType>>,
             service.to_string(),
             data_info,
             logged_notification.data_repr,
