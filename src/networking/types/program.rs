@@ -4,7 +4,7 @@ use listeners::Process;
 #[derive(Debug, Clone, PartialEq, Eq, Hash, Default)]
 pub enum Program {
     /// A known program.
-    Name(String),
+    NamePath((String, String)),
     /// Not identified
     Unknown,
     /// Not applicable (ARP and ICMP)
@@ -21,15 +21,24 @@ impl Program {
         matches!(self, Program::Unknown)
     }
 
+    pub fn path(&self) -> Option<String> {
+        match self {
+            Program::NamePath((_, path)) => Some(path.clone()),
+            _ => None,
+        }
+    }
+
     pub fn from_proc(proc: Option<&Process>) -> Self {
-        proc.map_or(Program::Unknown, |proc| Program::Name(proc.name.clone()))
+        proc.map_or(Program::Unknown, |proc| {
+            Program::NamePath((proc.name.clone(), proc.path.clone()))
+        })
     }
 }
 
 impl std::fmt::Display for Program {
     fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
         match self {
-            Program::Name(name) => write!(f, "{name}"),
+            Program::NamePath((name, _)) => write!(f, "{name}"),
             Program::Unknown => write!(f, "?"),
             Program::NotApplicable => write!(f, "-"),
         }
@@ -53,11 +62,12 @@ mod tests {
     #[test]
     fn test_program_display_known() {
         assert_eq!(
-            Program::Name("Telegram".to_string()).to_string(),
+            Program::NamePath(("Telegram".to_string(), String::new())).to_string(),
             "Telegram"
         );
         assert_eq!(
-            Program::Name("Google Chrome Helper".to_string()).to_string(),
+            Program::NamePath(("Google Chrome Helper".to_string(), "/Gg.exe".to_string()))
+                .to_string(),
             "Google Chrome Helper"
         );
     }
@@ -65,11 +75,13 @@ mod tests {
     #[test]
     fn test_program_to_string_with_equal_prefix() {
         assert_eq!(
-            Program::Name("Telegram".to_string()).to_string_with_equal_prefix(),
+            Program::NamePath(("Telegram".to_string(), String::new()))
+                .to_string_with_equal_prefix(),
             "=Telegram"
         );
         assert_eq!(
-            Program::Name("Google Chrome Helper".to_string()).to_string_with_equal_prefix(),
+            Program::NamePath(("Google Chrome Helper".to_string(), "/Gg.exe".to_string()))
+                .to_string_with_equal_prefix(),
             "=Google Chrome Helper"
         );
         assert_eq!(Program::NotApplicable.to_string_with_equal_prefix(), "=-");

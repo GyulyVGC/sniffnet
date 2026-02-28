@@ -40,7 +40,7 @@ use crate::networking::types::host::{Host, HostMessage};
 use crate::networking::types::info_traffic::InfoTraffic;
 use crate::networking::types::ip_blacklist::IpBlacklist;
 use crate::networking::types::my_device::MyDevice;
-use crate::networking::types::program_lookup::{ProgramLookup, lookup_program};
+use crate::networking::types::program_lookup::{ProgramLookup, get_picon, lookup_program};
 use crate::notifications::notify_and_log::notify_and_log;
 use crate::notifications::types::logged_notification::LoggedNotifications;
 use crate::notifications::types::notifications::{DataNotification, Notification};
@@ -488,6 +488,7 @@ impl Sniffer {
                 self.handle_new_host(host_msg);
             }
             if let Some(program_lookup) = &mut self.program_lookup {
+                program_lookup.handle_pending_icons();
                 for program_res in program_lookup.pending_results() {
                     self.handle_program_lookup_result(program_res);
                 }
@@ -1005,7 +1006,16 @@ impl Sniffer {
                             lookup_program(&port_rx, &program_tx);
                         })
                         .log_err(location!());
-                    self.program_lookup = Some(ProgramLookup::new(port_tx, program_rx));
+                    let (path_tx, path_rx) = std::sync::mpsc::channel();
+                    let (picon_tx, picon_rx) = std::sync::mpsc::channel();
+                    let _ = thread::Builder::new()
+                        .name("thread_get_picon".to_string())
+                        .spawn(move || {
+                            get_picon(&path_rx, &picon_tx);
+                        })
+                        .log_err(location!());
+                    self.program_lookup =
+                        Some(ProgramLookup::new(port_tx, program_rx, path_tx, picon_rx));
                 }
 
                 return Task::run(rx, |backend_msg| match backend_msg {

@@ -1,12 +1,17 @@
-use crate::countries::flags_pictures::FLAGS_HEIGHT_BIG;
+use crate::gui::styles::container::ContainerType;
+use crate::gui::styles::style_constants::TOOLTIP_DELAY;
+use crate::gui::styles::types::style_type::StyleType;
+use crate::gui::types::message::Message;
 use crate::networking::manage_packets::get_local_port;
 use crate::networking::types::address_port_pair::AddressPortPair;
 use crate::networking::types::data_info::DataInfo;
 use crate::networking::types::data_representation::DataRepr;
 use crate::networking::types::info_address_port_pair::InfoAddressPortPair;
 use crate::networking::types::program::Program;
+use iced::Length;
 use iced::widget::image::Handle;
-use iced::widget::{Image, image};
+use iced::widget::tooltip::Position;
+use iced::widget::{Text, Tooltip, image};
 use listeners::{Process, Protocol};
 use std::collections::HashMap;
 use std::sync::mpsc::{Receiver, Sender};
@@ -18,24 +23,28 @@ const VALID_PROGRAM_TIMEOUT: u128 = 60_000; // milliseconds
 pub struct ProgramLookup {
     port_tx: Sender<(u16, Protocol)>,
     program_rx: Receiver<(u16, Protocol, Option<Process>)>,
+    path_tx: Sender<String>,
+    picon_rx: Receiver<(String, Handle)>,
     state: HashMap<(u16, Protocol), LookedUpProgram>,
     programs: HashMap<Program, DataInfo>,
-    pub icon_handle: Handle,
+    picons: HashMap<String, Handle>,
 }
 
 impl ProgramLookup {
     pub fn new(
         port_tx: Sender<(u16, Protocol)>,
         program_rx: Receiver<(u16, Protocol, Option<Process>)>,
+        path_tx: Sender<String>,
+        picon_rx: Receiver<(String, Handle)>,
     ) -> Self {
         Self {
             port_tx,
             program_rx,
+            path_tx,
+            picon_rx,
             state: HashMap::new(),
             programs: HashMap::new(),
-            icon_handle: Handle::from_bytes(
-                picon::get_icon_by_path("/Applications/Telegram.app").bytes,
-            ),
+            picons: HashMap::new(),
         }
     }
 
@@ -157,14 +166,45 @@ impl ProgramLookup {
             }
         }
 
+        // icon retrieval
+        if let Some(proc) = proc.as_ref() {
+            let path = &proc.path;
+            if !self.picons.contains_key(path) {
+                self.picons.insert(path.clone(), DEFAULT_PICON.clone());
+                let _ = self.path_tx.send(path.clone());
+            }
+        }
+
         self.state.entry(key).and_modify(|looked_up_program| {
             looked_up_program.program = proc;
             looked_up_program.instant = Instant::now();
         });
     }
 
+    pub fn handle_pending_icons(&mut self) {
+        while let Ok((path, picon)) = self.picon_rx.try_recv() {
+            self.picons.insert(path, picon);
+        }
+    }
+
     pub fn programs(&self) -> &HashMap<Program, DataInfo> {
         &self.programs
+    }
+
+    pub fn picon_tooltip<'a>(&self, program_path: String) -> Tooltip<'a, Message, StyleType> {
+        let tooltip_class = if program_path.is_empty() {
+            ContainerType::Standard
+        } else {
+            ContainerType::Tooltip
+        };
+
+        let handle = self.picons.get(&program_path).unwrap_or(&DEFAULT_PICON);
+        let content = image(handle).height(Length::Fill);
+
+        Tooltip::new(content, Text::new(program_path), Position::FollowCursor)
+            .snap_within_viewport(true)
+            .class(tooltip_class)
+            .delay(TOOLTIP_DELAY)
     }
 }
 
@@ -184,10 +224,17 @@ pub fn lookup_program(
     }
 }
 
-pub fn get_picon(program_lookup: &ProgramLookup) -> Image {
-    // let icon_bytes = picon::get_icon_by_path(ppath);
-    image(image::Handle::from_path(
-        "/Applications/Sniffnet.app/Contents/Resources/sniffnet.icns",
-    ))
-    .height(FLAGS_HEIGHT_BIG)
+pub fn get_picon(path_rx: &Receiver<String>, picon_tx: &Sender<(String, Handle)>) {
+    while let Ok(path) = path_rx.recv() {
+        if let Some(picon) = picon::get_icon_by_path(&path) {
+            let handle = Handle::from_bytes(picon.bytes);
+            let _ = picon_tx.send((path, handle));
+        }
+    }
 }
+
+const DEFAULT_PICON_BYTES: &[u8] =
+    include_bytes!("../../../resources/countries_flags/default_picon.png");
+
+static DEFAULT_PICON: std::sync::LazyLock<Handle> =
+    std::sync::LazyLock::new(|| Handle::from_bytes(DEFAULT_PICON_BYTES));
