@@ -226,8 +226,7 @@ pub fn lookup_program(
 
 pub fn get_picon(path_rx: &Receiver<String>, picon_tx: &Sender<(String, Handle)>) {
     while let Ok(path) = path_rx.recv() {
-        if let Some(picon) = picon::get_icon_by_path(&path) {
-            let handle = Handle::from_bytes(picon.bytes);
+        if let Some(handle) = picon::get_icon_by_path(&path) {
             let _ = picon_tx.send((path, handle));
         }
     }
