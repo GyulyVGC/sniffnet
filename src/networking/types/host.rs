@@ -27,26 +27,26 @@ impl Host {
     }
 
     /// Used in the blacklist notifications
-    pub fn to_blacklist_string(&self) -> String {
+    pub fn to_blacklist_string(&self, ip: IpAddr) -> String {
         let domain = &self.domain;
         let asn = &self.asn.name;
-        let mut ret_val = String::new();
+        let mut info = String::new();
 
         if !domain.trim().is_empty() && domain.parse::<IpAddr>().is_err() {
-            ret_val.push_str(domain);
+            info.push_str(domain);
         }
 
         if !asn.is_empty() {
-            if !ret_val.is_empty() {
-                ret_val.push_str(" - ");
+            if !info.is_empty() {
+                info.push_str(" - ");
             }
-            ret_val.push_str(asn);
+            info.push_str(asn);
         }
 
-        if ret_val.is_empty() {
-            String::new()
+        if info.is_empty() {
+            ip.to_string()
         } else {
-            format!("({ret_val})")
+            format!("{ip} ({info})")
         }
     }
 }
@@ -93,6 +93,7 @@ pub struct HostMessage {
 mod tests {
     use crate::networking::types::asn::Asn;
     use crate::networking::types::host::{Host, ThumbnailHost};
+    use std::net::IpAddr;
 
     fn host_for_tests(domain: &str, asn: &str) -> Host {
         Host {
@@ -143,38 +144,40 @@ mod tests {
 
     #[test]
     fn test_host_to_blacklist_string() {
+        let ip = IpAddr::from([8, 8, 8, 8]);
+
         let host = host_for_tests("iphone-di-doofenshmirtz.local", "AS1234");
         assert_eq!(
-            host.to_blacklist_string(),
-            "(iphone-di-doofenshmirtz.local - AS1234)"
+            host.to_blacklist_string(ip),
+            "8.8.8.8 (iphone-di-doofenshmirtz.local - AS1234)"
         );
 
         let host = host_for_tests("", "");
-        assert_eq!(host.to_blacklist_string(), "");
+        assert_eq!(host.to_blacklist_string(ip), "8.8.8.8");
 
         let host = host_for_tests("192.168.1.113", "AS1234");
-        assert_eq!(host.to_blacklist_string(), "(AS1234)");
+        assert_eq!(host.to_blacklist_string(ip), "8.8.8.8 (AS1234)");
 
         let host = host_for_tests("192.168.1.113", "");
-        assert_eq!(host.to_blacklist_string(), "");
+        assert_eq!(host.to_blacklist_string(ip), "8.8.8.8");
 
         let host = host_for_tests("", "FASTLY");
-        assert_eq!(host.to_blacklist_string(), "(FASTLY)");
+        assert_eq!(host.to_blacklist_string(ip), "8.8.8.8 (FASTLY)");
 
         let host = host_for_tests("::", "GOOGLE");
-        assert_eq!(host.to_blacklist_string(), "(GOOGLE)");
+        assert_eq!(host.to_blacklist_string(ip), "8.8.8.8 (GOOGLE)");
 
         let host = host_for_tests("::f", "AKAMAI-TECHNOLOGIES-INCORPORATED");
         assert_eq!(
-            host.to_blacklist_string(),
-            "(AKAMAI-TECHNOLOGIES-INCORPORATED)"
+            host.to_blacklist_string(ip),
+            "8.8.8.8 (AKAMAI-TECHNOLOGIES-INCORPORATED)"
         );
 
         let host = host_for_tests("::g", "GOOGLE");
-        assert_eq!(host.to_blacklist_string(), "(::g - GOOGLE)");
+        assert_eq!(host.to_blacklist_string(ip), "8.8.8.8 (::g - GOOGLE)");
 
         let host = host_for_tests(" ", "GOOGLE");
-        assert_eq!(host.to_blacklist_string(), "(GOOGLE)");
+        assert_eq!(host.to_blacklist_string(ip), "8.8.8.8 (GOOGLE)");
     }
 
     #[test]

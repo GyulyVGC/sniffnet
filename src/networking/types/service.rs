@@ -12,10 +12,7 @@ pub enum Service {
 
 impl Service {
     pub fn to_string_with_equal_prefix(self) -> String {
-        match self {
-            Service::Name(_) | Service::NotApplicable => ["=", &self.to_string()].concat(),
-            Service::Unknown => self.to_string(),
-        }
+        format!("={self}")
     }
 }
 
@@ -54,7 +51,6 @@ mod tests {
         assert_eq!(Service::Name("mdns").to_string_with_equal_prefix(), "=mdns");
         assert_eq!(Service::Name("upnp").to_string_with_equal_prefix(), "=upnp");
         assert_eq!(Service::NotApplicable.to_string_with_equal_prefix(), "=-");
-        // unknown should not have the prefix
-        assert_eq!(Service::Unknown.to_string_with_equal_prefix(), "?");
+        assert_eq!(Service::Unknown.to_string_with_equal_prefix(), "=?");
     }
 }

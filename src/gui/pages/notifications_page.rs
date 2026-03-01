@@ -1,9 +1,9 @@
-use crate::countries::country_utils::{get_computer_tooltip, get_flag_tooltip};
+use crate::countries::country_utils::get_computer_tooltip;
 use crate::countries::flags_pictures::FLAGS_HEIGHT_BIG;
 use crate::gui::components::header::get_button_settings;
 use crate::gui::components::tab::get_pages_tabs;
 use crate::gui::components::types::my_modal::MyModal;
-use crate::gui::pages::overview_page::{get_bars, get_bars_length, host_bar, service_bar};
+use crate::gui::pages::overview_page::{get_bars, get_bars_length, host_bar, simple_bar};
 use crate::gui::pages::types::settings_page::SettingsPage;
 use crate::gui::styles::container::ContainerType;
 use crate::gui::styles::rule::RuleType;
@@ -36,7 +36,7 @@ use iced::widget::text::LineHeight;
 use iced::widget::tooltip::Position;
 use iced::widget::{Column, Container, Row, Scrollable, Text, Tooltip};
 use iced::widget::{Space, button};
-use iced::{Alignment, Length, Padding};
+use iced::{Alignment, Element, Length, Padding};
 use std::cmp::max;
 
 /// Computes the body of gui notifications page
@@ -199,7 +199,8 @@ fn favorite_notification_log<'a>(
     language: Language,
 ) -> Container<'a, Message, StyleType> {
     let host_bar = host_bar(
-        &logged_notification.host,
+        logged_notification.host.to_entry_string(),
+        logged_notification.host.country,
         &logged_notification.data_info_host,
         data_repr,
         first_entry_data_info,
@@ -241,8 +242,12 @@ fn blacklisted_notification_log<'a>(
     data_repr: DataRepr,
     language: Language,
 ) -> Container<'a, Message, StyleType> {
-    let blacklisted_bar = blacklisted_bar(
-        logged_notification,
+    let blacklisted_bar = host_bar(
+        logged_notification
+            .host
+            .to_blacklist_string(logged_notification.ip),
+        logged_notification.host.country,
+        &logged_notification.data_info_host,
         data_repr,
         first_entry_data_info,
         language,
@@ -378,43 +383,6 @@ fn threshold_bar<'a>(
         )
 }
 
-fn blacklisted_bar<'a>(
-    logged_notification: &BlacklistedTransmitted,
-    data_repr: DataRepr,
-    first_entry_data_info: DataInfo,
-    language: Language,
-) -> Row<'a, Message, StyleType> {
-    let data_info_host = &logged_notification.data_info_host;
-    let host = &logged_notification.host;
-    let (incoming_bar_len, outgoing_bar_len) =
-        get_bars_length(data_repr, &first_entry_data_info, &data_info_host.data_info);
-
-    let flag = get_flag_tooltip(host.country, data_info_host, language, false);
-    let ip_str = logged_notification.ip.to_string();
-    let info_str = host.to_blacklist_string();
-
-    Row::new()
-        .align_y(Alignment::Center)
-        .spacing(5)
-        .push(flag)
-        .push(
-            Column::new()
-                .spacing(1)
-                .push(
-                    Row::new()
-                        .align_y(Alignment::End)
-                        .push(Text::new(ip_str))
-                        .push(Space::new().width(8))
-                        .push(Text::new(info_str).size(FONT_SIZE_FOOTER))
-                        .push(Space::new().width(Length::Fill))
-                        .push(Text::new(data_repr.formatted_string(
-                            data_info_host.data_info.tot_data(data_repr),
-                        ))),
-                )
-                .push(get_bars(incoming_bar_len, outgoing_bar_len)),
-        )
-}
-
 fn button_expand<'a>(
     notification_id: usize,
     is_expanded: bool,
@@ -456,7 +424,7 @@ fn data_notification_extra<'a>(
     let height = (FLAGS_HEIGHT_BIG + spacing) * max_entries as f32;
 
     let mut hosts_col = Column::new().spacing(spacing).width(Length::FillPortion(5));
-    let first_data_info_host = logged_notification
+    let first_data_info = logged_notification
         .hosts
         .first()
         .unwrap_or(&(Host::default(), DataInfoHost::default()))
@@ -464,10 +432,11 @@ fn data_notification_extra<'a>(
         .data_info;
     for (host, data_info_host) in &logged_notification.hosts {
         let host_bar = host_bar(
-            host,
+            host.to_entry_string(),
+            host.country,
             data_info_host,
             logged_notification.data_repr,
-            first_data_info_host,
+            first_data_info,
             language,
         );
         hosts_col = hosts_col.push(host_bar);
@@ -480,8 +449,9 @@ fn data_notification_extra<'a>(
         .unwrap_or(&(Service::default(), DataInfo::default()))
         .1;
     for (service, data_info) in &logged_notification.services {
-        let service_bar = service_bar(
-            service,
+        let service_bar = simple_bar(
+            None::<Element<Message, StyleType>>,
+            service.to_string(),
             data_info,
             logged_notification.data_repr,
             first_data_info_service,

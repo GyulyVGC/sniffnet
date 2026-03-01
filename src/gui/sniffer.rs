@@ -1,22 +1,5 @@
 //! Module defining the application structure: messages, updates, subscriptions.
 
-use crate::gui::pages::waiting_page::waiting_page;
-use async_channel::Receiver;
-use iced::Event::{Keyboard, Window};
-use iced::keyboard::key::Named;
-use iced::keyboard::{Event, Key, Modifiers};
-use iced::mouse::Event::ButtonPressed;
-use iced::widget::{Column, center};
-use iced::window::{Id, Level};
-use iced::{Element, Point, Size, Subscription, Task, window};
-use rfd::FileHandle;
-use std::collections::{HashMap, HashSet};
-use std::net::IpAddr;
-use std::path::PathBuf;
-use std::sync::Arc;
-use std::thread;
-use std::time::Duration;
-
 use crate::chart::types::preview_chart::PreviewChart;
 use crate::gui::components::footer::footer;
 use crate::gui::components::header::header;
@@ -33,6 +16,7 @@ use crate::gui::pages::settings_style_page::settings_style_page;
 use crate::gui::pages::thumbnail_page::thumbnail_page;
 use crate::gui::pages::types::running_page::RunningPage;
 use crate::gui::pages::types::settings_page::SettingsPage;
+use crate::gui::pages::waiting_page::waiting_page;
 use crate::gui::pages::welcome_page::welcome_page;
 use crate::gui::styles::types::custom_palette::CustomPalette;
 use crate::gui::styles::types::gradient_type::GradientType;
@@ -50,12 +34,13 @@ use crate::networking::traffic_preview::{TrafficPreview, traffic_preview};
 use crate::networking::types::capture_context::{
     CaptureContext, CaptureSource, CaptureSourcePicklist, MyPcapImport,
 };
+use crate::networking::types::combobox_data_states::ComboboxDataStates;
 use crate::networking::types::data_representation::DataRepr;
 use crate::networking::types::host::{Host, HostMessage};
-use crate::networking::types::host_data_states::HostDataStates;
 use crate::networking::types::info_traffic::InfoTraffic;
 use crate::networking::types::ip_blacklist::IpBlacklist;
 use crate::networking::types::my_device::MyDevice;
+use crate::networking::types::program_lookup::{ProgramLookup, get_picon, lookup_program};
 use crate::notifications::notify_and_log::notify_and_log;
 use crate::notifications::types::logged_notification::LoggedNotifications;
 use crate::notifications::types::notifications::{DataNotification, Notification};
@@ -70,6 +55,22 @@ use crate::utils::types::file_info::FileInfo;
 use crate::utils::types::icon::Icon;
 use crate::utils::types::web_page::WebPage;
 use crate::{StyleType, TrafficChart, location};
+use async_channel::Receiver;
+use iced::Event::{Keyboard, Window};
+use iced::keyboard::key::Named;
+use iced::keyboard::{Event, Key, Modifiers};
+use iced::mouse::Event::ButtonPressed;
+use iced::widget::{Column, center};
+use iced::window::{Id, Level};
+use iced::{Element, Point, Size, Subscription, Task, window};
+use listeners::Process;
+use rfd::FileHandle;
+use std::collections::{HashMap, HashSet};
+use std::net::IpAddr;
+use std::path::PathBuf;
+use std::sync::Arc;
+use std::thread;
+use std::time::Duration;
 
 pub const FONT_FAMILY_NAME: &str = "Sarasa Mono SC for Sniffnet";
 pub const ICON_FONT_FAMILY_NAME: &str = "Icons for Sniffnet";
@@ -133,12 +134,14 @@ pub struct Sniffer {
     pub thumbnail: bool,
     /// Window id
     pub id: Option<Id>,
-    /// Host data for filter dropdowns (comboboxes)
-    pub host_data_states: HostDataStates,
+    /// Combobox data for filter dropdowns
+    pub combobox_data_states: ComboboxDataStates,
     /// Flag reporting whether the packet capture is frozen
     pub frozen: bool,
     /// Sender to freeze the packet capture
     pub freeze_tx: Option<tokio::sync::broadcast::Sender<()>>,
+    /// State of the port to program lookups
+    pub program_lookup: Option<ProgramLookup>,
 }
 
 impl Sniffer {
@@ -186,9 +189,10 @@ impl Sniffer {
             timing_events: TimingEvents::default(),
             thumbnail: false,
             id: None,
-            host_data_states: HostDataStates::default(),
+            combobox_data_states: ComboboxDataStates::default(),
             frozen: false,
             freeze_tx: None,
+            program_lookup: None,
         }
     }
 
@@ -337,6 +341,7 @@ impl Sniffer {
             }
             Message::HostSortSelection(sort_type) => self.host_sort_selection(sort_type),
             Message::ServiceSortSelection(sort_type) => self.service_sort_selection(sort_type),
+            Message::ProgramSortSelection(sort_type) => self.program_sort_selection(sort_type),
             Message::ToggleExportPcap => self.toggle_export_pcap(),
             Message::OutputPcapDir(path) => self.output_pcap_dir(path),
             Message::OutputPcapFile(name) => self.output_pcap_file(&name),
@@ -482,6 +487,12 @@ impl Sniffer {
             for host_msg in host_msgs {
                 self.handle_new_host(host_msg);
             }
+            if let Some(program_lookup) = &mut self.program_lookup {
+                program_lookup.handle_pending_icons();
+                for program_res in program_lookup.pending_results() {
+                    self.handle_program_lookup_result(program_res);
+                }
+            }
             self.refresh_data(msg, no_more_packets);
         }
     }
@@ -575,11 +586,12 @@ impl Sniffer {
 
     fn search(&mut self, parameters: SearchParameters) {
         // update comboboxes
-        let host_data = &mut self.host_data_states.data;
-        host_data.countries.1 = self.search.country != parameters.country;
-        host_data.asns.1 = self.search.as_name != parameters.as_name;
-        host_data.domains.1 = self.search.domain != parameters.domain;
-        self.host_data_states.update_states(&parameters);
+        let combobox_data = &mut self.combobox_data_states.data;
+        combobox_data.countries.1 = self.search.country != parameters.country;
+        combobox_data.asns.1 = self.search.as_name != parameters.as_name;
+        combobox_data.domains.1 = self.search.domain != parameters.domain;
+        combobox_data.programs.1 = self.search.program != parameters.program;
+        self.combobox_data_states.update_states(&parameters);
 
         self.page_number = 1;
         self.running_page = Some(RunningPage::Inspect);
@@ -684,6 +696,10 @@ impl Sniffer {
 
     fn service_sort_selection(&mut self, sort_type: SortType) {
         self.conf.service_sort_type = sort_type;
+    }
+
+    fn program_sort_selection(&mut self, sort_type: SortType) {
+        self.conf.program_sort_type = sort_type;
     }
 
     fn toggle_export_pcap(&mut self) {
@@ -880,7 +896,8 @@ impl Sniffer {
     }
 
     fn refresh_data(&mut self, mut msg: InfoTraffic, no_more_packets: bool) {
-        self.info_traffic.refresh(&mut msg);
+        self.info_traffic
+            .refresh(&mut msg, &mut self.program_lookup);
         if self.info_traffic.tot_data_info.tot_data(DataRepr::Packets) == 0 {
             return;
         }
@@ -901,8 +918,8 @@ impl Sniffer {
         }
         self.traffic_chart.update_charts_data(&msg, no_more_packets);
 
-        // update host dropdowns
-        self.host_data_states.update_states(&self.search);
+        // update combobox dropdowns
+        self.combobox_data_states.update_states(&self.search);
     }
 
     fn open_web_page(web_page: &WebPage) {
@@ -968,7 +985,7 @@ impl Sniffer {
                         parse_packets(
                             curr_cap_id,
                             capture_source,
-                            &mmdb_readers,
+                            mmdb_readers,
                             &ip_blacklist,
                             capture_context,
                             filters,
@@ -979,6 +996,28 @@ impl Sniffer {
                     .log_err(location!());
                 self.current_capture_rx.1 = Some(rx.clone());
                 self.freeze_tx = Some(freeze_tx);
+
+                if matches!(self.capture_source, CaptureSource::Device(_)) {
+                    let (port_tx, port_rx) = std::sync::mpsc::channel();
+                    let (program_tx, program_rx) = std::sync::mpsc::channel();
+                    let _ = thread::Builder::new()
+                        .name("thread_lookup_program".to_string())
+                        .spawn(move || {
+                            lookup_program(&port_rx, &program_tx);
+                        })
+                        .log_err(location!());
+                    let (path_tx, path_rx) = std::sync::mpsc::channel();
+                    let (picon_tx, picon_rx) = std::sync::mpsc::channel();
+                    let _ = thread::Builder::new()
+                        .name("thread_get_picon".to_string())
+                        .spawn(move || {
+                            get_picon(&path_rx, &picon_tx);
+                        })
+                        .log_err(location!());
+                    self.program_lookup =
+                        Some(ProgramLookup::new(port_tx, program_rx, path_tx, picon_rx));
+                }
+
                 return Task::run(rx, |backend_msg| match backend_msg {
                     BackendTrafficMessage::TickRun(cap_id, msg, host_msg, no_more_packets) => {
                         Message::TickRun(cap_id, msg, host_msg, no_more_packets)
@@ -1018,9 +1057,10 @@ impl Sniffer {
         self.search = SearchParameters::default();
         self.page_number = 1;
         self.thumbnail = false;
-        self.host_data_states = HostDataStates::default();
+        self.combobox_data_states = ComboboxDataStates::default();
         self.frozen = false;
         self.freeze_tx = None;
+        self.program_lookup = None;
         self.start_traffic_previews()
     }
 
@@ -1319,8 +1359,23 @@ impl Sniffer {
         self.addresses_resolved
             .insert(address_to_lookup, (rdns, host.clone()));
 
-        // update host data states including the new host
-        self.host_data_states.data.update(&host);
+        // update hosts combobox states including the new host
+        self.combobox_data_states.data.update_host(&host);
+    }
+
+    fn handle_program_lookup_result(
+        &mut self,
+        lookup_res: (u16, listeners::Protocol, Option<Process>),
+    ) {
+        if let Some(program_lookup) = &mut self.program_lookup {
+            // update programs combobox state including the new program
+            self.combobox_data_states
+                .data
+                .update_program(lookup_res.2.as_ref());
+
+            // update program lookup state with the new lookup result
+            program_lookup.update(lookup_res, &mut self.info_traffic.map);
+        }
     }
 
     fn register_sigint_handler() -> Task<Message> {
@@ -2227,6 +2282,7 @@ mod tests {
                 report_sort_type: SortType::Ascending,
                 host_sort_type: SortType::Descending,
                 service_sort_type: SortType::Descending,
+                program_sort_type: SortType::Neutral,
                 last_opened_setting: SettingsPage::Appearance,
                 last_opened_page: RunningPage::Notifications,
                 export_pcap: ExportPcap {

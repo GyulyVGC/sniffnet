@@ -539,32 +539,30 @@ pub fn country_translation(language: Language) -> &'static str {
     }
 }
 
-pub fn domain_name_translation(language: Language) -> &'static str {
+// refers to the domain name of the host, e.g., "example.com"
+pub fn domain_translation(language: Language) -> &'static str {
     match language {
-        Language::EN => "Domain name",
-        Language::CS => "Doménové jméno",
-        Language::IT => "Nome di dominio",
-        Language::RU => "Доменное имя",
+        Language::EN | Language::DE | Language::ID => "Domain",
+        Language::CS => "Doménové",
+        Language::IT | Language::ES => "Dominio",
+        Language::RU => "Доменное",
         Language::SV => "Domännamn",
         Language::FI => "Verkkotunnus",
-        Language::DE => "Domain Name",
-        Language::TR => "Alan adı",
-        // Language::FA => "نام دامنه",
-        Language::ES => "Nombre de dominio",
-        Language::KO => "도메인 네임",
+        Language::TR => "Alan",
+        // Language::FA => "دامنه",
+        Language::KO => "도메인",
         Language::ZH => "域名",
         Language::ZH_TW => "網域名稱",
-        Language::UK => "Доменне ім'я",
-        Language::RO => "Nume domeniu",
-        Language::PL => "Nazwa domeny",
-        Language::FR => "Nom de domaine",
+        Language::UK => "Доменне",
+        Language::RO => "Domeniu",
+        Language::PL => "Domeny",
+        Language::FR => "Domaine",
         Language::JA => "ドメイン名",
-        Language::UZ => "Domen nomi",
-        Language::PT => "Nome do domínio",
-        Language::VI => "Tên miền",
-        Language::ID => "Nama Domain",
+        Language::UZ => "Domen",
+        Language::PT => "Domínio",
+        Language::VI => "Miền",
         Language::NL => "Domeinnaam",
-        Language::EL => "Όνομα τομέα",
+        Language::EL => "Τομέα",
     }
 }
 

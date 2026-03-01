@@ -146,6 +146,7 @@ mod tests {
             report_sort_type: SortType::Ascending,
             host_sort_type: SortType::Descending,
             service_sort_type: SortType::Neutral,
+            program_sort_type: SortType::Neutral,
             filters: Filters {
                 bpf: "tcp".to_string(),
                 expanded: true,

@@ -45,10 +45,12 @@ ctrlc = { version = "3.5.2", features = ["termination"] }
 dns-lookup = "3.0.1"
 etherparse = "0.19.0"
 iced = { version = "0.14.0", features = ["tokio", "svg", "advanced", "lazy", "image"] }
+listeners = { git = "https://github.com/GyulyVGC/listeners" }
 maxminddb = "0.27.3"
 pcap = "2.4.0"
 phf = "0.13.1"
 phf_shared = "0.13.1"
+picon = { git = "https://github.com/GyulyVGC/picon" }
 plotters = { version = "0.3.7", default-features = false, features = ["area_series", "line_series"] }
 plotters-iced2 = "0.14.0"
 reqwest = { version = "0.13.2", features = ["json"] }
