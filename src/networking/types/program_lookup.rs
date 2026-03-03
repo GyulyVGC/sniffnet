@@ -8,9 +8,9 @@ use crate::networking::types::data_info::DataInfo;
 use crate::networking::types::data_representation::DataRepr;
 use crate::networking::types::info_address_port_pair::InfoAddressPortPair;
 use crate::networking::types::program::Program;
+use iced::Element;
 use iced::widget::tooltip::Position;
 use iced::widget::{Image, Svg, Text, Tooltip, image};
-use iced::{Element, Length};
 use listeners::{Process, Protocol};
 use picon::IconHandle;
 use std::collections::HashMap;
@@ -135,7 +135,9 @@ impl ProgramLookup {
         if !self.picons.contains_key(icon_key) {
             self.picons
                 .insert(icon_key.to_string(), DEFAULT_PICON.clone());
-            let _ = self.icon_key_tx.send(icon_key.to_string());
+            if !icon_key.is_empty() {
+                let _ = self.icon_key_tx.send(icon_key.to_string());
+            }
         }
 
         // associate unassigned recent connections on port with the program
@@ -232,9 +234,9 @@ pub fn lookup_program(
 }
 
 pub fn get_picon(icon_key_rx: &Receiver<String>, picon_tx: &Sender<(String, IconHandle)>) {
-    while let Ok(path) = icon_key_rx.recv() {
-        if let Some(handle) = picon::get_icon(&path) {
-            let _ = picon_tx.send((path, handle));
+    while let Ok(icon_key) = icon_key_rx.recv() {
+        if let Some(handle) = picon::get_icon(&icon_key) {
+            let _ = picon_tx.send((icon_key, handle));
         }
     }
 }

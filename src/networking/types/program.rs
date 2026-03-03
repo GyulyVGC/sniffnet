@@ -33,9 +33,9 @@ impl Program {
             #[allow(unused_variables)]
             Program::NamePath((name, path)) => {
                 #[cfg(target_os = "linux")]
-                return name;
+                return name.trim();
                 #[cfg(not(target_os = "linux"))]
-                return path;
+                return path.trim();
             }
             _ => "",
         }
