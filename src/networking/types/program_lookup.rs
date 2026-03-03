@@ -204,8 +204,8 @@ impl ProgramLookup {
 
         let handle = self.picons.get(icon_key).unwrap_or(&DEFAULT_PICON);
         let content: Element<Message, StyleType> = match handle {
-            IconHandle::Image(image_handle) => Image::new(image_handle).height(Length::Fill).into(),
-            IconHandle::Svg(svg_handle) => Svg::new(svg_handle.clone()).height(Length::Fill).into(),
+            IconHandle::Image(image_handle) => Image::new(image_handle).width(32).height(32).into(),
+            IconHandle::Svg(svg_handle) => Svg::new(svg_handle.clone()).width(32).height(32).into(),
         };
 
         Tooltip::new(content, Text::new(program_path), Position::FollowCursor)
