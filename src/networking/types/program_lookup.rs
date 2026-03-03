@@ -23,7 +23,7 @@ const VALID_PROGRAM_TIMEOUT: u128 = 60_000; // milliseconds
 pub struct ProgramLookup {
     port_tx: Sender<(u16, Protocol)>,
     program_rx: Receiver<(u16, Protocol, Option<Process>)>,
-    path_tx: Sender<String>,
+    icon_key_tx: Sender<String>,
     picon_rx: Receiver<(String, IconHandle)>,
     state: HashMap<(u16, Protocol), LookedUpProgram>,
     programs: HashMap<Program, DataInfo>,
@@ -34,13 +34,13 @@ impl ProgramLookup {
     pub fn new(
         port_tx: Sender<(u16, Protocol)>,
         program_rx: Receiver<(u16, Protocol, Option<Process>)>,
-        path_tx: Sender<String>,
+        icon_key_tx: Sender<String>,
         picon_rx: Receiver<(String, IconHandle)>,
     ) -> Self {
         Self {
             port_tx,
             program_rx,
-            path_tx,
+            icon_key_tx,
             picon_rx,
             state: HashMap::new(),
             programs: HashMap::new(),
@@ -128,6 +128,16 @@ impl ProgramLookup {
         let key = (lookup_res.0, lookup_res.1);
         let proc = lookup_res.2;
 
+        let program = Program::from_proc(proc.as_ref());
+
+        // icon retrieval
+        let icon_key = program.icon_key();
+        if !self.picons.contains_key(icon_key) {
+            self.picons
+                .insert(icon_key.to_string(), DEFAULT_PICON.clone());
+            let _ = self.icon_key_tx.send(icon_key.to_string());
+        }
+
         // associate unassigned recent connections on port with the program
         if proc.is_some() {
             let mut reassigned_data = DataInfo::default();
@@ -139,13 +149,12 @@ impl ProgramLookup {
                         && get_local_port(k, v.traffic_direction) == Some(key)
                 })
                 .for_each(|(_, v)| {
-                    v.program = Program::from_proc(proc.as_ref());
+                    v.program = program.clone();
                     reassigned_data.refresh(v.data_info());
                 });
 
             if reassigned_data.tot_data(DataRepr::Packets) > 0 {
                 // assign to known
-                let program = Program::from_proc(proc.as_ref());
                 self.programs
                     .entry(program)
                     .and_modify(|d| d.refresh(reassigned_data))
@@ -166,15 +175,6 @@ impl ProgramLookup {
             }
         }
 
-        // icon retrieval
-        if let Some(proc) = proc.as_ref() {
-            let path = &proc.path;
-            if !self.picons.contains_key(path) {
-                self.picons.insert(path.clone(), DEFAULT_PICON.clone());
-                let _ = self.path_tx.send(path.clone());
-            }
-        }
-
         self.state.entry(key).and_modify(|looked_up_program| {
             looked_up_program.program = proc;
             looked_up_program.instant = Instant::now();
@@ -182,8 +182,8 @@ impl ProgramLookup {
     }
 
     pub fn handle_pending_icons(&mut self) {
-        while let Ok((path, picon)) = self.picon_rx.try_recv() {
-            self.picons.insert(path, picon);
+        while let Ok((icon_key, picon)) = self.picon_rx.try_recv() {
+            self.picons.insert(icon_key, picon);
         }
     }
 
@@ -191,14 +191,18 @@ impl ProgramLookup {
         &self.programs
     }
 
-    pub fn picon_tooltip<'a>(&self, program_path: String) -> Tooltip<'a, Message, StyleType> {
+    pub fn picon_tooltip<'a>(
+        &self,
+        icon_key: &str,
+        program_path: String,
+    ) -> Tooltip<'a, Message, StyleType> {
         let tooltip_class = if program_path.is_empty() {
             ContainerType::Standard
         } else {
             ContainerType::Tooltip
         };
 
-        let handle = self.picons.get(&program_path).unwrap_or(&DEFAULT_PICON);
+        let handle = self.picons.get(icon_key).unwrap_or(&DEFAULT_PICON);
         let content: Element<Message, StyleType> = match handle {
             IconHandle::Image(image_handle) => Image::new(image_handle).height(Length::Fill).into(),
             IconHandle::Svg(svg_handle) => Svg::new(svg_handle.clone()).height(Length::Fill).into(),
@@ -227,8 +231,8 @@ pub fn lookup_program(
     }
 }
 
-pub fn get_picon(path_rx: &Receiver<String>, picon_tx: &Sender<(String, IconHandle)>) {
-    while let Ok(path) = path_rx.recv() {
+pub fn get_picon(icon_key_rx: &Receiver<String>, picon_tx: &Sender<(String, IconHandle)>) {
+    while let Ok(path) = icon_key_rx.recv() {
         if let Some(handle) = picon::get_icon_by_path(&path) {
             let _ = picon_tx.send((path, handle));
         }

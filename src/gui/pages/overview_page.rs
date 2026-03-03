@@ -279,7 +279,7 @@ fn col_program<'a>(conf: &Conf, program_lookup: &ProgramLookup) -> Column<'a, Me
 
     for (program, data_info) in &entries {
         let content = simple_bar(
-            program_lookup.picon_tooltip(program.path().unwrap_or_default()),
+            program_lookup.picon_tooltip(program.icon_key(), program.path()),
             program.to_string(),
             data_info,
             data_repr,

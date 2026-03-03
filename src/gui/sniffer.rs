@@ -1006,16 +1006,20 @@ impl Sniffer {
                             lookup_program(&port_rx, &program_tx);
                         })
                         .log_err(location!());
-                    let (path_tx, path_rx) = std::sync::mpsc::channel();
+                    let (icon_key_tx, icon_key_rx) = std::sync::mpsc::channel();
                     let (picon_tx, picon_rx) = std::sync::mpsc::channel();
                     let _ = thread::Builder::new()
                         .name("thread_get_picon".to_string())
                         .spawn(move || {
-                            get_picon(&path_rx, &picon_tx);
+                            get_picon(&icon_key_rx, &picon_tx);
                         })
                         .log_err(location!());
-                    self.program_lookup =
-                        Some(ProgramLookup::new(port_tx, program_rx, path_tx, picon_rx));
+                    self.program_lookup = Some(ProgramLookup::new(
+                        port_tx,
+                        program_rx,
+                        icon_key_tx,
+                        picon_rx,
+                    ));
                 }
 
                 return Task::run(rx, |backend_msg| match backend_msg {

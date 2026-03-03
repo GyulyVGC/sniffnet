@@ -21,10 +21,23 @@ impl Program {
         matches!(self, Program::Unknown)
     }
 
-    pub fn path(&self) -> Option<String> {
+    pub fn path(&self) -> String {
         match self {
-            Program::NamePath((_, path)) => Some(path.clone()),
-            _ => None,
+            Program::NamePath((_, path)) => path.clone(),
+            _ => String::new(),
+        }
+    }
+
+    pub fn icon_key(&self) -> &str {
+        match self {
+            #[allow(unused_variables)]
+            Program::NamePath((name, path)) => {
+                #[cfg(target_os = "linux")]
+                return name;
+                #[cfg(not(target_os = "linux"))]
+                return path;
+            }
+            _ => "",
         }
     }
 
