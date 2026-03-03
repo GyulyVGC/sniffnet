@@ -3640,7 +3640,7 @@ checksum = "5be167a7af36ee22fe3115051bc51f6e6c7054c9348e28deb4f49bd6f705a315"
 [[package]]
 name = "picon"
 version = "0.0.0"
-source = "git+https://github.com/GyulyVGC/picon#2b794163c47d50f1d1810bf8cc97841e03acbfc6"
+source = "git+https://github.com/GyulyVGC/picon#4739af32773e9d1f441eb7848c0743d07a6132a1"
 dependencies = [
  "iced",
  "icon",

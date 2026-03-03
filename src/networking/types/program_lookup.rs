@@ -233,7 +233,7 @@ pub fn lookup_program(
 
 pub fn get_picon(icon_key_rx: &Receiver<String>, picon_tx: &Sender<(String, IconHandle)>) {
     while let Ok(path) = icon_key_rx.recv() {
-        if let Some(handle) = picon::get_icon_by_path(&path) {
+        if let Some(handle) = picon::get_icon(&path) {
             let _ = picon_tx.send((path, handle));
         }
     }
