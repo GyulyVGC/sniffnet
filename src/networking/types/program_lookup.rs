@@ -8,11 +8,11 @@ use crate::networking::types::data_info::DataInfo;
 use crate::networking::types::data_representation::DataRepr;
 use crate::networking::types::info_address_port_pair::InfoAddressPortPair;
 use crate::networking::types::program::Program;
-use iced::Length;
-use iced::widget::image::Handle;
 use iced::widget::tooltip::Position;
-use iced::widget::{Text, Tooltip, image};
+use iced::widget::{Image, Svg, Text, Tooltip, image};
+use iced::{Element, Length};
 use listeners::{Process, Protocol};
+use picon::IconHandle;
 use std::collections::HashMap;
 use std::sync::mpsc::{Receiver, Sender};
 use std::time::Instant;
@@ -24,10 +24,10 @@ pub struct ProgramLookup {
     port_tx: Sender<(u16, Protocol)>,
     program_rx: Receiver<(u16, Protocol, Option<Process>)>,
     path_tx: Sender<String>,
-    picon_rx: Receiver<(String, Handle)>,
+    picon_rx: Receiver<(String, IconHandle)>,
     state: HashMap<(u16, Protocol), LookedUpProgram>,
     programs: HashMap<Program, DataInfo>,
-    picons: HashMap<String, Handle>,
+    picons: HashMap<String, IconHandle>,
 }
 
 impl ProgramLookup {
@@ -35,7 +35,7 @@ impl ProgramLookup {
         port_tx: Sender<(u16, Protocol)>,
         program_rx: Receiver<(u16, Protocol, Option<Process>)>,
         path_tx: Sender<String>,
-        picon_rx: Receiver<(String, Handle)>,
+        picon_rx: Receiver<(String, IconHandle)>,
     ) -> Self {
         Self {
             port_tx,
@@ -199,7 +199,10 @@ impl ProgramLookup {
         };
 
         let handle = self.picons.get(&program_path).unwrap_or(&DEFAULT_PICON);
-        let content = image(handle).height(Length::Fill);
+        let content: Element<Message, StyleType> = match handle {
+            IconHandle::Image(image_handle) => Image::new(image_handle).height(Length::Fill).into(),
+            IconHandle::Svg(svg_handle) => Svg::new(svg_handle.clone()).height(Length::Fill).into(),
+        };
 
         Tooltip::new(content, Text::new(program_path), Position::FollowCursor)
             .snap_within_viewport(true)
@@ -224,7 +227,7 @@ pub fn lookup_program(
     }
 }
 
-pub fn get_picon(path_rx: &Receiver<String>, picon_tx: &Sender<(String, Handle)>) {
+pub fn get_picon(path_rx: &Receiver<String>, picon_tx: &Sender<(String, IconHandle)>) {
     while let Ok(path) = path_rx.recv() {
         if let Some(handle) = picon::get_icon_by_path(&path) {
             let _ = picon_tx.send((path, handle));
@@ -235,5 +238,5 @@ pub fn get_picon(path_rx: &Receiver<String>, picon_tx: &Sender<(String, Handle)>
 const DEFAULT_PICON_BYTES: &[u8] =
     include_bytes!("../../../resources/countries_flags/default_picon.png");
 
-static DEFAULT_PICON: std::sync::LazyLock<Handle> =
-    std::sync::LazyLock::new(|| Handle::from_bytes(DEFAULT_PICON_BYTES));
+static DEFAULT_PICON: std::sync::LazyLock<IconHandle> =
+    std::sync::LazyLock::new(|| IconHandle::Image(image::Handle::from_bytes(DEFAULT_PICON_BYTES)));
