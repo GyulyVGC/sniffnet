@@ -109,6 +109,19 @@ impl DataInfo {
         }
     }
 
+    pub fn is_within_same_second(&self, other: &Self) -> bool {
+        if let (Some(self_instant), Some(other_instant)) = (self.final_instant, other.final_instant)
+        {
+            if self_instant < other_instant {
+                other_instant.duration_since(self_instant).as_secs() == 0
+            } else {
+                self_instant.duration_since(other_instant).as_secs() == 0
+            }
+        } else {
+            false
+        }
+    }
+
     #[cfg(test)]
     pub fn new_for_tests(
         incoming_packets: u128,

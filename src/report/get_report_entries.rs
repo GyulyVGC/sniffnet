@@ -111,7 +111,19 @@ pub fn get_program_entries(
         .filter(|(_, d)| d.tot_data(DataRepr::Packets) > 0)
         .collect();
 
-    sorted_vec.sort_by(|&(_, a), &(_, b)| a.compare(b, sort_type, data_repr));
+    sorted_vec.sort_by(|&(p1, a), &(p2, b)| {
+        if sort_type == SortType::Neutral {
+            let is_same_second = a.is_within_same_second(b);
+            if is_same_second {
+                if p1.is_unknown() {
+                    return std::cmp::Ordering::Greater;
+                } else if p2.is_unknown() {
+                    return std::cmp::Ordering::Less;
+                }
+            }
+        }
+        a.compare(b, sort_type, data_repr)
+    });
 
     let n_entry = min(sorted_vec.len(), 30);
     sorted_vec[0..n_entry]
