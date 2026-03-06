@@ -12,6 +12,10 @@ pub enum Protocol {
     ICMP,
     /// Address Resolution Protocol
     ARP,
+    /// Internet Group Management Protocol
+    IGMP,
+    /// Stream Control Transmission Protocol
+    SCTP,
 }
 
 impl std::fmt::Display for Protocol {

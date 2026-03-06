@@ -168,6 +168,7 @@ fn col_info<'a>(
 ) -> Column<'a, Message, StyleType> {
     let is_icmp = key.protocol.eq(&Protocol::ICMP);
     let is_arp = key.protocol.eq(&Protocol::ARP);
+    let is_igmp = key.protocol.eq(&Protocol::IGMP);
 
     let mut ret_val = Column::new()
         .spacing(10)
@@ -190,7 +191,7 @@ fn col_info<'a>(
             &key.protocol.to_string(),
         ));
 
-    if !is_icmp && !is_arp {
+    if !is_icmp && !is_arp && !is_igmp {
         ret_val = ret_val.push(TextType::highlighted_subtitle_with_desc(
             service_translation(language),
             &val.service.to_string(),

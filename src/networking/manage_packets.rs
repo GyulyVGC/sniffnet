@@ -2,7 +2,8 @@ use std::collections::HashMap;
 use std::net::{IpAddr, Ipv4Addr, Ipv6Addr};
 
 use etherparse::{
-    ArpHardwareId, EtherType, LaxPacketHeaders, LinkHeader, NetHeaders, TransportHeader,
+    ArpHardwareId, EtherType, IpNumber, LaxPacketHeaders, LaxPayloadSlice, LinkHeader, NetHeaders,
+    TransportHeader,
 };
 use pcap::Address;
 
@@ -56,6 +57,7 @@ pub fn analyze_headers(
     if !is_arp
         && !analyze_transport_header(
             headers.transport,
+            &headers.payload,
             &mut retval.sport,
             &mut retval.dport,
             &mut retval.protocol,
@@ -166,6 +168,7 @@ fn analyze_network_header(
 /// Returns false if packet has to be skipped.
 fn analyze_transport_header(
     transport_header: Option<TransportHeader>,
+    payload: &LaxPayloadSlice<'_>,
     port1: &mut Option<u16>,
     port2: &mut Option<u16>,
     protocol: &mut Protocol,
@@ -198,7 +201,32 @@ fn analyze_transport_header(
             *icmp_type = IcmpTypeV6::from_etherparse(&icmpv6_header.icmp_type);
             true
         }
-        None => false,
+        None => {
+            if let LaxPayloadSlice::Ip(ip_payload) = payload {
+                if ip_payload.ip_number == IpNumber::IGMP {
+                    *port1 = None;
+                    *port2 = None;
+                    *protocol = Protocol::IGMP;
+                    return true;
+                }
+                if ip_payload.ip_number == IpNumber::SCTP {
+                    // SCTP common header: src_port (2 bytes) + dst_port (2 bytes) + ...
+                    if ip_payload.payload.len() >= 4 {
+                        *port1 = Some(u16::from_be_bytes([
+                            ip_payload.payload[0],
+                            ip_payload.payload[1],
+                        ]));
+                        *port2 = Some(u16::from_be_bytes([
+                            ip_payload.payload[2],
+                            ip_payload.payload[3],
+                        ]));
+                    }
+                    *protocol = Protocol::SCTP;
+                    return true;
+                }
+            }
+            false
+        }
     }
 }
 
@@ -207,7 +235,10 @@ pub fn get_service(
     traffic_direction: TrafficDirection,
     my_interface_addresses: &[Address],
 ) -> Service {
-    if key.protocol == Protocol::ICMP || key.protocol == Protocol::ARP {
+    if matches!(
+        key.protocol,
+        Protocol::ICMP | Protocol::ARP | Protocol::IGMP | Protocol::SCTP
+    ) {
         return Service::NotApplicable;
     }
 
