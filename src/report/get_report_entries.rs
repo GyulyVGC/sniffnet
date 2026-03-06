@@ -112,14 +112,11 @@ pub fn get_program_entries(
         .collect();
 
     sorted_vec.sort_by(|&(p1, a), &(p2, b)| {
-        if sort_type == SortType::Neutral {
-            let is_same_second = a.is_within_same_second(b);
-            if is_same_second {
-                if p1.is_unknown() {
-                    return std::cmp::Ordering::Greater;
-                } else if p2.is_unknown() {
-                    return std::cmp::Ordering::Less;
-                }
+        if sort_type == SortType::Neutral && a.is_within_same_second(b) {
+            if p1.is_unknown() {
+                return std::cmp::Ordering::Greater;
+            } else if p2.is_unknown() {
+                return std::cmp::Ordering::Less;
             }
         }
         a.compare(b, sort_type, data_repr)
@@ -128,6 +125,6 @@ pub fn get_program_entries(
     let n_entry = min(sorted_vec.len(), 30);
     sorted_vec[0..n_entry]
         .iter()
-        .map(|&(program, data_info)| (program.clone(), *data_info))
+        .map(|&(program, data_info)| (program.to_owned(), *data_info))
         .collect()
 }
