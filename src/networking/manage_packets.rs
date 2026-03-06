@@ -559,7 +559,7 @@ mod tests {
     use crate::Protocol;
     use crate::Service;
     use crate::networking::manage_packets::{
-        get_service, get_traffic_direction, get_traffic_type, is_local_connection,
+        analyze_headers, get_service, get_traffic_direction, get_traffic_type, is_local_connection,
         mac_from_dec_to_hex,
     };
     use crate::networking::types::address_port_pair::AddressPortPair;
@@ -1940,5 +1940,86 @@ mod tests {
             SERVICES.get(&ServiceQuery(64738, Protocol::UDP)).unwrap(),
             &Service::Name("murmur")
         );
+    }
+
+    #[test]
+    fn analyze_headers_igmp_test() {
+        // Raw IPv4 packet with protocol=2 (IGMP).
+        // IPv4 header (20 bytes): src=192.168.1.1, dst=224.0.0.1, proto=2, checksum=0 (lax ok)
+        // IGMP membership query payload (8 bytes)
+        #[rustfmt::skip]
+        let raw_packet: &[u8] = &[
+            // IPv4 header
+            0x45, 0x00, 0x00, 0x1c,
+            0x00, 0x01, 0x00, 0x00,
+            0x01, 0x02, 0x00, 0x00,
+            192, 168, 1, 1,
+            224, 0, 0, 1,
+            // IGMP membership query
+            0x11, 0x64, 0x00, 0x00,
+            0x00, 0x00, 0x00, 0x00,
+        ];
+
+        let headers = etherparse::LaxPacketHeaders::from_ip(raw_packet).unwrap();
+        let mut mac_addresses = (None, None);
+        let mut exchanged_bytes = 0u128;
+        let mut icmp_type = crate::networking::types::icmp_type::IcmpType::default();
+        let mut arp_type = crate::networking::types::arp_type::ArpType::default();
+
+        let key = analyze_headers(
+            headers,
+            &mut mac_addresses,
+            &mut exchanged_bytes,
+            &mut icmp_type,
+            &mut arp_type,
+        )
+        .unwrap();
+
+        assert_eq!(key.protocol, Protocol::IGMP);
+        assert_eq!(key.sport, None);
+        assert_eq!(key.dport, None);
+        assert_eq!(key.source, IpAddr::V4(Ipv4Addr::new(192, 168, 1, 1)));
+        assert_eq!(key.dest, IpAddr::V4(Ipv4Addr::new(224, 0, 0, 1)));
+    }
+
+    #[test]
+    fn analyze_headers_sctp_test() {
+        // Raw IPv4 packet with protocol=132 (SCTP).
+        // IPv4 header (20 bytes): src=10.0.0.1, dst=10.0.0.2, proto=132, checksum=0 (lax ok)
+        // SCTP common header (12 bytes): src_port=80, dst_port=443
+        #[rustfmt::skip]
+        let raw_packet: &[u8] = &[
+            // IPv4 header
+            0x45, 0x00, 0x00, 0x20,
+            0x00, 0x01, 0x00, 0x00,
+            0x40, 0x84, 0x00, 0x00,
+            10, 0, 0, 1,
+            10, 0, 0, 2,
+            // SCTP common header: src_port=80 (0x0050), dst_port=443 (0x01bb)
+            0x00, 0x50, 0x01, 0xbb,
+            0x00, 0x00, 0x00, 0x00,
+            0x00, 0x00, 0x00, 0x00,
+        ];
+
+        let headers = etherparse::LaxPacketHeaders::from_ip(raw_packet).unwrap();
+        let mut mac_addresses = (None, None);
+        let mut exchanged_bytes = 0u128;
+        let mut icmp_type = crate::networking::types::icmp_type::IcmpType::default();
+        let mut arp_type = crate::networking::types::arp_type::ArpType::default();
+
+        let key = analyze_headers(
+            headers,
+            &mut mac_addresses,
+            &mut exchanged_bytes,
+            &mut icmp_type,
+            &mut arp_type,
+        )
+        .unwrap();
+
+        assert_eq!(key.protocol, Protocol::SCTP);
+        assert_eq!(key.sport, Some(80));
+        assert_eq!(key.dport, Some(443));
+        assert_eq!(key.source, IpAddr::V4(Ipv4Addr::new(10, 0, 0, 1)));
+        assert_eq!(key.dest, IpAddr::V4(Ipv4Addr::new(10, 0, 0, 2)));
     }
 }
