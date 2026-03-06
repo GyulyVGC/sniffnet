@@ -96,6 +96,7 @@ impl DataInfo {
         self.outgoing_packets += rhs.outgoing_packets;
         self.incoming_bytes += rhs.incoming_bytes;
         self.outgoing_bytes += rhs.outgoing_bytes;
+        // None < Some(_) by Option's Ord, so a Some will always win over a default None
         if rhs.final_instant > self.final_instant {
             self.final_instant = rhs.final_instant;
         }

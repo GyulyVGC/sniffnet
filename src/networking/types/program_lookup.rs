@@ -171,12 +171,14 @@ impl ProgramLookup {
                     .for_each(|(_, v)| {
                         unknown_data.refresh(v.data_info());
                     });
+                // or_insert not needed: Unknown is already in the map since reassigned data came from it
                 self.programs
                     .entry(Program::Unknown)
                     .and_modify(|d| *d = unknown_data);
             }
         }
 
+        // or_insert not needed: key is always inserted in lookup() before being sent to the thread
         self.state.entry(key).and_modify(|looked_up_program| {
             looked_up_program.program = proc;
             looked_up_program.instant = Instant::now();
