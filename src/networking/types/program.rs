@@ -32,9 +32,9 @@ impl Program {
         match self {
             #[allow(unused_variables)]
             Program::NamePath((name, path)) => {
-                #[cfg(target_os = "linux")]
+                #[cfg(not(any(target_os = "windows", target_os = "macos")))]
                 return name.trim();
-                #[cfg(not(target_os = "linux"))]
+                #[cfg(any(target_os = "windows", target_os = "macos"))]
                 return path.trim();
             }
             _ => "",
