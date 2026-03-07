@@ -61,6 +61,9 @@ pub struct Conf {
     /// Service sort type (overview page)
     #[serde(deserialize_with = "deserialize_or_default")]
     pub service_sort_type: SortType,
+    /// Program sort type (overview page)
+    #[serde(deserialize_with = "deserialize_or_default")]
+    pub program_sort_type: SortType,
     /// Report sort type (inspect page)
     #[serde(deserialize_with = "deserialize_or_default")]
     pub report_sort_type: SortType,

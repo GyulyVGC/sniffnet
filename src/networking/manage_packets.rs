@@ -15,11 +15,13 @@ use crate::networking::types::icmp_type::{IcmpType, IcmpTypeV4, IcmpTypeV6};
 use crate::networking::types::info_address_port_pair::InfoAddressPortPair;
 use crate::networking::types::info_traffic::InfoTraffic;
 use crate::networking::types::ip_blacklist::IpBlacklist;
+use crate::networking::types::program::Program;
 use crate::networking::types::service::Service;
 use crate::networking::types::service_query::ServiceQuery;
 use crate::networking::types::traffic_direction::TrafficDirection;
 use crate::networking::types::traffic_type::TrafficType;
 use std::fmt::Write;
+use std::time::Instant;
 
 include!(concat!(env!("OUT_DIR"), "/services.rs"));
 
@@ -298,6 +300,7 @@ pub fn modify_or_insert_in_map(
             info.transmitted_bytes += exchanged_bytes;
             info.transmitted_packets += 1;
             info.final_timestamp = timestamp;
+            info.final_instant = Instant::now();
             if key.protocol.eq(&Protocol::ICMP) {
                 info.icmp_types
                     .entry(icmp_type)
@@ -318,6 +321,7 @@ pub fn modify_or_insert_in_map(
             transmitted_packets: 1,
             initial_timestamp: timestamp,
             final_timestamp: timestamp,
+            final_instant: Instant::now(),
             service,
             traffic_direction,
             icmp_types: if key.protocol.eq(&Protocol::ICMP) {
@@ -331,6 +335,7 @@ pub fn modify_or_insert_in_map(
                 HashMap::new()
             },
             is_blacklisted,
+            program: Program::NotApplicable,
         });
 
     (new_info.traffic_direction, new_info.service)
@@ -516,6 +521,22 @@ pub fn get_address_to_lookup(key: &AddressPortPair, traffic_direction: TrafficDi
         TrafficDirection::Outgoing => key.dest,
         TrafficDirection::Incoming => key.source,
     }
+}
+
+pub fn get_local_port(
+    key: &AddressPortPair,
+    traffic_direction: TrafficDirection,
+) -> Option<(u16, listeners::Protocol)> {
+    let port = match traffic_direction {
+        TrafficDirection::Outgoing => key.sport,
+        TrafficDirection::Incoming => key.dport,
+    };
+    let protocol = match key.protocol {
+        Protocol::TCP => Some(listeners::Protocol::TCP),
+        Protocol::UDP => Some(listeners::Protocol::UDP),
+        _ => None,
+    };
+    port.zip(protocol)
 }
 
 #[cfg(test)]

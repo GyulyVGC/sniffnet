@@ -55,7 +55,6 @@ A special shout-out to these awesome organizations and folks who are sponsoring 
 <a href="https://ads.fund" title="ADS Fund"><img src="https://avatars.githubusercontent.com/ADS-Fund?v=4" width="60px" alt="ADS Fund"/></a>&nbsp;&nbsp;
 <a href="https://ipinfo.io" title="IPinfo"><img src="https://avatars.githubusercontent.com/ipinfo?v=4" width="60px" alt="IPinfo"/></a>&nbsp;&nbsp;
 <a href="https://github.com/Cthulu201" title="Cthulu201"><img src="https://avatars.githubusercontent.com/Cthulu201?v=4" width="60px" alt="Cthulu201"/></a>&nbsp;&nbsp;
-<a href="https://github.com/0x0177b11f" title="Tiansheng Li"><img src="https://avatars.githubusercontent.com/0x0177b11f?v=4" width="60px" alt="Tiansheng Li"/></a>&nbsp;&nbsp;
 <a href="https://github.com/ZEROF" title="ZEROF"><img src="https://avatars.githubusercontent.com/ZEROF?v=4" width="60px" alt="ZEROF"/></a>&nbsp;&nbsp;
 <a href="https://www.janwalter.org/" title="Jan Walter"><img src="https://avatars.githubusercontent.com/wahn?v=4" width="60px" alt="Jan Walter"/></a>
 </p>

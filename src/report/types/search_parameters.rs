@@ -2,6 +2,7 @@ use crate::countries::types::country::Country;
 use crate::networking::types::address_port_pair::AddressPortPair;
 use crate::networking::types::host::Host;
 use crate::networking::types::info_address_port_pair::InfoAddressPortPair;
+use crate::networking::types::program::Program;
 use crate::networking::types::service::Service;
 
 /// Used to express the search filters applied to GUI inspect page
@@ -25,6 +26,8 @@ pub struct SearchParameters {
     pub domain: String,
     /// Autonomous System name
     pub as_name: String,
+    /// Program name
+    pub program: String,
     /// Whether to display only favorites
     pub only_favorites: bool,
     /// Whether to display only blacklisted
@@ -90,6 +93,13 @@ impl SearchParameters {
             ..SearchParameters::default()
         }
     }
+
+    pub fn new_program_search(program: &Program) -> Self {
+        Self {
+            program: program.to_string_with_equal_prefix(),
+            ..SearchParameters::default()
+        }
+    }
 }
 
 #[derive(Copy, Clone)]
@@ -103,10 +113,11 @@ pub enum FilterInputType {
     Country,
     Domain,
     AsName,
+    Program,
 }
 
 impl FilterInputType {
-    pub const ALL: [FilterInputType; 9] = [
+    pub const ALL: [FilterInputType; 10] = [
         Self::AddressSrc,
         Self::PortSrc,
         Self::AddressDst,
@@ -116,6 +127,7 @@ impl FilterInputType {
         Self::Country,
         Self::Domain,
         Self::AsName,
+        Self::Program,
     ];
 
     pub fn matches_entry(
@@ -133,8 +145,16 @@ impl FilterInputType {
 
         let entry_value = self.entry_value(key, value, r_dns_host).to_lowercase();
 
-        if let Some(stripped_filter) = filter_value.strip_prefix('=') {
-            return entry_value.eq(stripped_filter);
+        if let Some(equal_filter) = filter_value.strip_prefix('=') {
+            return entry_value.eq(equal_filter);
+        }
+
+        if let Some(not_equal_filter) = filter_value.strip_prefix("!=") {
+            return !entry_value.eq(not_equal_filter);
+        }
+
+        if let Some(not_contains_filter) = filter_value.strip_prefix('!') {
+            return !entry_value.contains(not_contains_filter);
         }
 
         entry_value.contains(&filter_value)
@@ -151,6 +171,7 @@ impl FilterInputType {
             FilterInputType::Country => &search_params.country,
             FilterInputType::Domain => &search_params.domain,
             FilterInputType::AsName => &search_params.as_name,
+            FilterInputType::Program => &search_params.program,
         }
     }
 
@@ -194,6 +215,7 @@ impl FilterInputType {
                 .asn
                 .name
                 .clone(),
+            FilterInputType::Program => value.program.to_string(),
         }
     }
 
@@ -233,6 +255,10 @@ impl FilterInputType {
             },
             FilterInputType::AsName => SearchParameters {
                 as_name: String::new(),
+                ..search_params.clone()
+            },
+            FilterInputType::Program => SearchParameters {
+                program: String::new(),
                 ..search_params.clone()
             },
         }
@@ -278,6 +304,10 @@ impl FilterInputType {
             },
             FilterInputType::AsName => SearchParameters {
                 as_name: new_value,
+                ..search_params.clone()
+            },
+            FilterInputType::Program => SearchParameters {
+                program: new_value.trim().to_string(),
                 ..search_params.clone()
             },
         }
