@@ -909,13 +909,23 @@ impl Sniffer {
         let url = web_page.get_url();
 
         #[cfg(target_os = "windows")]
-        let cmd = "explorer";
-        #[cfg(target_os = "macos")]
-        let cmd = "open";
+        let mut cmd = std::process::Command::new("explorer");
         #[cfg(all(not(target_os = "windows"), not(target_os = "macos")))]
-        let cmd = "xdg-open";
+        let mut cmd = std::process::Command::new("xdg-open");
+        #[cfg(target_os = "macos")]
+        let mut cmd = {
+            if Self::is_macos_process_root()
+                && let Some(console_user) = Self::get_macos_console_user()
+            {
+                let mut cmd = std::process::Command::new("sudo");
+                cmd.arg("-H").arg("-u").arg(console_user).arg("open");
+                cmd
+            } else {
+                std::process::Command::new("open")
+            }
+        };
 
-        let Ok(mut child) = std::process::Command::new(cmd)
+        let Ok(mut child) = cmd
             .arg(url)
             .spawn()
             .log_err(location!())
@@ -924,6 +934,36 @@ impl Sniffer {
         };
 
         child.wait().unwrap_or_default();
+    }
+
+    #[cfg(target_os = "macos")]
+    fn is_macos_process_root() -> bool {
+        let Ok(output) = std::process::Command::new("id").arg("-u").output() else {
+            return false;
+        };
+
+        output.status.success() && String::from_utf8_lossy(&output.stdout).trim() == "0"
+    }
+
+    #[cfg(target_os = "macos")]
+    fn get_macos_console_user() -> Option<String> {
+        let Ok(output) = std::process::Command::new("stat")
+            .args(["-f", "%Su", "/dev/console"])
+            .output()
+        else {
+            return None;
+        };
+
+        if !output.status.success() {
+            return None;
+        }
+
+        let user = String::from_utf8_lossy(&output.stdout).trim().to_string();
+        if user.is_empty() || user == "root" {
+            None
+        } else {
+            Some(user)
+        }
     }
 
     fn start(&mut self) -> Task<Message> {
