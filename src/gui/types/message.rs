@@ -1,6 +1,3 @@
-use iced::window;
-use std::net::IpAddr;
-
 use crate::gui::components::types::my_modal::MyModal;
 use crate::gui::pages::types::running_page::RunningPage;
 use crate::gui::pages::types::settings_page::SettingsPage;
@@ -17,6 +14,8 @@ use crate::report::types::sort_type::SortType;
 use crate::utils::types::file_info::FileInfo;
 use crate::utils::types::web_page::WebPage;
 use crate::{Language, StyleType};
+use iced::window;
+use std::net::IpAddr;
 
 #[derive(Debug, Clone)]
 /// Messages types that permit reacting to application interactions/subscriptions
@@ -43,6 +42,8 @@ pub enum Message {
     HostSortSelection(SortType),
     /// Select service sort type to be displayed (overview page)
     ServiceSortSelection(SortType),
+    /// Select program sort type to be displayed (overview page)
+    ProgramSortSelection(SortType),
     /// Adds or removes the given host into/from the favorites
     AddOrRemoveFavorite(Host, bool),
     /// Open the supplied web page
