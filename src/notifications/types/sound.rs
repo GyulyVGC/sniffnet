@@ -2,7 +2,7 @@ use std::fmt;
 use std::thread;
 
 use iced::widget::Text;
-use rodio::{Decoder, OutputStreamBuilder, Sink};
+use rodio::{Decoder, DeviceSinkBuilder, Player};
 use serde::{Deserialize, Serialize};
 
 use crate::gui::styles::style_constants::FONT_SIZE_FOOTER;
@@ -63,13 +63,12 @@ pub fn play(sound: Sound, volume: u8) {
         .name("thread_play_sound".to_string())
         .spawn(move || {
             // Get an output stream handle to the default physical sound device
-            let Ok(mut stream_handle) =
-                OutputStreamBuilder::open_default_stream().log_err(location!())
+            let Ok(mut stream_handle) = DeviceSinkBuilder::open_default_sink().log_err(location!())
             else {
                 return;
             };
             stream_handle.log_on_drop(false);
-            let sink = Sink::connect_new(stream_handle.mixer());
+            let player = Player::connect_new(stream_handle.mixer());
             //load data
             let data = std::io::Cursor::new(mp3_sound);
             // Decode that sound file into a source
@@ -77,11 +76,11 @@ pub fn play(sound: Sound, volume: u8) {
                 return;
             };
             // Play the sound directly on the device
-            sink.set_volume(f32::from(volume) / 200.0); // set the desired volume
-            sink.append(source);
+            player.set_volume(f32::from(volume) / 200.0); // set the desired volume
+            player.append(source);
             // The sound plays in a separate thread. This call will block the current thread until the sink
             // has finished playing all its queued sounds.
-            sink.sleep_until_end();
+            player.sleep_until_end();
         })
         .log_err(location!());
 }
