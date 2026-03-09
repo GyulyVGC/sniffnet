@@ -368,7 +368,7 @@ fn additional_filters_row<'a>(
                 ..search_params.clone()
             })
         },
-        Icon::Star.codepoint(),
+        Icon::StarEmpty.codepoint(),
         only_show_favorites_translation(language),
     );
 

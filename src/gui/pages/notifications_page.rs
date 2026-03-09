@@ -211,7 +211,7 @@ fn favorite_notification_log<'a>(
         .spacing(30)
         .align_y(Alignment::Center)
         .push(
-            Icon::Star
+            Icon::StarEmpty
                 .to_text()
                 .size(80)
                 .line_height(LineHeight::Relative(1.0)),

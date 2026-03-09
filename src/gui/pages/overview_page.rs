@@ -5,7 +5,6 @@
 
 use crate::chart::types::donut_chart::donut_chart;
 use crate::countries::country_utils::get_flag_tooltip;
-use crate::countries::flags_pictures::{FLAGS_HEIGHT_BIG, FLAGS_WIDTH_BIG};
 use crate::countries::types::country::Country;
 use crate::gui::components::ellipsized_text::EllipsizedText;
 use crate::gui::components::tab::get_pages_tabs;
@@ -158,7 +157,7 @@ fn col_host<'a>(sniffer: &Sniffer) -> Column<'a, Message, StyleType> {
 
         scroll_host = scroll_host.push(
             button(content)
-                .padding(Padding::new(5.0).right(15).left(10))
+                .padding(Padding::new(5.0).right(10))
                 .on_press(Message::Search(SearchParameters::new_host_search(host)))
                 .class(ButtonType::Neutral),
         );
@@ -688,21 +687,22 @@ pub fn get_bars<'a>(in_len: u16, out_len: u16) -> Row<'a, Message, StyleType> {
 }
 
 fn get_star_button<'a>(is_favorite: bool, host: Host) -> Button<'a, Message, StyleType> {
+    let (icon, class) = if is_favorite {
+        (Icon::StarFull, ButtonType::Starred)
+    } else {
+        (Icon::StarEmpty, ButtonType::NotStarred)
+    };
+
     button(
-        Icon::Star
-            .to_text()
-            .size(20)
+        icon.to_text()
+            .size(16)
             .align_x(Alignment::Center)
             .align_y(Alignment::Center),
     )
     .padding(0)
-    .height(FLAGS_HEIGHT_BIG)
-    .width(FLAGS_WIDTH_BIG)
-    .class(if is_favorite {
-        ButtonType::Starred
-    } else {
-        ButtonType::NotStarred
-    })
+    .height(25)
+    .width(25)
+    .class(class)
     .on_press(Message::AddOrRemoveFavorite(host, !is_favorite))
 }
 
@@ -739,7 +739,7 @@ fn sort_arrows<'a>(
         .class(active_sort_type.button_type())
         .on_press(message(active_sort_type.next_sort())),
     )
-    .width(60.0)
+    .width(50.0)
     .align_x(Alignment::Center)
 }
 
