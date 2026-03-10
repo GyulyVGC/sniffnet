@@ -3,7 +3,7 @@ use crate::countries::flags_pictures::FLAGS_HEIGHT_BIG;
 use crate::gui::components::header::get_button_settings;
 use crate::gui::components::tab::get_pages_tabs;
 use crate::gui::components::types::my_modal::MyModal;
-use crate::gui::pages::overview_page::{get_bars, get_bars_length, host_bar, simple_bar};
+use crate::gui::pages::overview_page::{get_bars, host_bar, simple_bar};
 use crate::gui::pages::types::settings_page::SettingsPage;
 use crate::gui::styles::container::ContainerType;
 use crate::gui::styles::rule::RuleType;
@@ -356,8 +356,6 @@ fn threshold_bar<'a>(
 ) -> Row<'a, Message, StyleType> {
     let data_repr = logged_notification.data_repr;
     let data_info = logged_notification.data_info;
-    let (incoming_bar_len, outgoing_bar_len) =
-        get_bars_length(data_repr, &first_entry_data_info, &data_info);
 
     Row::new()
         .align_y(Alignment::Center)
@@ -379,7 +377,7 @@ fn threshold_bar<'a>(
                             data_repr.formatted_string(data_info.tot_data(data_repr)),
                         )),
                 )
-                .push(get_bars(incoming_bar_len, outgoing_bar_len)),
+                .push(get_bars(data_repr, &first_entry_data_info, &data_info)),
         )
 }
 

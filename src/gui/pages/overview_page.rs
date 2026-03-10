@@ -334,9 +334,6 @@ pub fn host_bar<'a>(
     first_entry_data_info: DataInfo,
     language: Language,
 ) -> Row<'a, Message, StyleType> {
-    let (incoming_bar_len, outgoing_bar_len) =
-        get_bars_length(data_repr, &first_entry_data_info, &data_info_host.data_info);
-
     Row::new()
         .height(32)
         .align_y(Alignment::Center)
@@ -356,7 +353,11 @@ pub fn host_bar<'a>(
                             data_info_host.data_info.tot_data(data_repr),
                         ))),
                 )
-                .push(get_bars(incoming_bar_len, outgoing_bar_len)),
+                .push(get_bars(
+                    data_repr,
+                    &first_entry_data_info,
+                    &data_info_host.data_info,
+                )),
         )
 }
 
@@ -367,9 +368,6 @@ pub fn simple_bar<'a>(
     data_repr: DataRepr,
     first_entry_data_info: DataInfo,
 ) -> Row<'a, Message, StyleType> {
-    let (incoming_bar_len, outgoing_bar_len) =
-        get_bars_length(data_repr, &first_entry_data_info, data_info);
-
     Row::new()
         .height(32)
         .align_y(Alignment::Center)
@@ -389,7 +387,7 @@ pub fn simple_bar<'a>(
                             data_repr.formatted_string(data_info.tot_data(data_repr)),
                         )),
                 )
-                .push(get_bars(incoming_bar_len, outgoing_bar_len)),
+                .push(get_bars(data_repr, &first_entry_data_info, data_info)),
         )
 }
 
@@ -548,13 +546,13 @@ fn donut_row(language: Language, sniffer: &Sniffer) -> Container<'_, Message, St
         .push(donut_legend_entry(
             in_data,
             data_repr,
-            RuleType::Incoming,
+            RuleType::Incoming(true),
             language,
         ))
         .push(donut_legend_entry(
             out_data,
             data_repr,
-            RuleType::Outgoing,
+            RuleType::Outgoing(true),
             language,
         ))
         .push(donut_legend_entry(
@@ -592,8 +590,8 @@ fn donut_legend_entry<'a>(
     let value_text = data_repr.formatted_string(value);
 
     let label = match rule_type {
-        RuleType::Incoming => incoming_translation(language),
-        RuleType::Outgoing => outgoing_translation(language),
+        RuleType::Incoming(_) => incoming_translation(language),
+        RuleType::Outgoing(_) => outgoing_translation(language),
         RuleType::Dropped => dropped_translation(language),
         _ => "",
     };
@@ -607,7 +605,7 @@ fn donut_legend_entry<'a>(
 
 const MIN_BARS_LENGTH: f32 = 4.0;
 
-pub fn get_bars_length(
+fn get_bars_length(
     data_repr: DataRepr,
     first_entry: &DataInfo,
     data_info: &DataInfo,
@@ -663,19 +661,28 @@ pub fn get_bars_length(
     (in_len.round() as u16, out_len.round() as u16)
 }
 
-pub fn get_bars<'a>(in_len: u16, out_len: u16) -> Row<'a, Message, StyleType> {
+pub fn get_bars<'a>(
+    data_repr: DataRepr,
+    first_entry: &DataInfo,
+    data_info: &DataInfo,
+) -> Row<'a, Message, StyleType> {
+    let (in_len, out_len) = get_bars_length(data_repr, first_entry, data_info);
+
+    let in_all_round = out_len == 0;
+    let out_all_round = in_len == 0;
+
     Row::new()
         .push(if in_len > 0 {
             Row::new()
                 .width(Length::FillPortion(in_len))
-                .push(RuleType::Incoming.horizontal(5))
+                .push(RuleType::Incoming(in_all_round).horizontal(5))
         } else {
             Row::new()
         })
         .push(if out_len > 0 {
             Row::new()
                 .width(Length::FillPortion(out_len))
-                .push(RuleType::Outgoing.horizontal(5))
+                .push(RuleType::Outgoing(out_all_round).horizontal(5))
         } else {
             Row::new()
         })

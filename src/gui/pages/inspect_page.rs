@@ -10,7 +10,7 @@ use iced::{Alignment, Element, Length, Padding, Pixels, alignment};
 
 use crate::gui::components::tab::get_pages_tabs;
 use crate::gui::components::types::my_modal::MyModal;
-use crate::gui::pages::overview_page::{get_bars, get_bars_length};
+use crate::gui::pages::overview_page::get_bars;
 use crate::gui::styles::button::ButtonType;
 use crate::gui::styles::container::ContainerType;
 use crate::gui::styles::rule::RuleType;
@@ -561,8 +561,7 @@ fn get_button_change_page<'a>(increment: bool) -> Button<'a, Message, StyleType>
 }
 
 fn get_agglomerates_row<'a>(tot: DataInfo, data_repr: DataRepr) -> Row<'a, Message, StyleType> {
-    let (in_length, out_length) = get_bars_length(data_repr, &tot, &tot);
-    let bars = get_bars(in_length, out_length).width(ReportCol::FILTER_COLUMNS_WIDTH);
+    let bars = get_bars(data_repr, &tot, &tot).width(ReportCol::FILTER_COLUMNS_WIDTH);
 
     let data_col = Column::new()
         .align_x(Alignment::Center)

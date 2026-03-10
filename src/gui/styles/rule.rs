@@ -4,6 +4,7 @@
 
 use crate::StyleType;
 use crate::gui::types::message::Message;
+use iced::border::Radius;
 use iced::widget::rule::{Catalog, FillMode, Style};
 use iced::widget::{Container, rule};
 use iced::{Alignment, Color, Length};
@@ -13,8 +14,8 @@ pub enum RuleType {
     #[default]
     Standard,
     PaletteColor(Color),
-    Incoming,
-    Outgoing,
+    Incoming(bool),
+    Outgoing(bool),
     Dropped,
 }
 
@@ -24,8 +25,8 @@ impl RuleType {
         let ext = style.get_extension();
         Style {
             color: match self {
-                RuleType::Incoming => colors.secondary,
-                RuleType::Outgoing => colors.outgoing,
+                RuleType::Incoming(_) => colors.secondary,
+                RuleType::Outgoing(_) => colors.outgoing,
                 RuleType::PaletteColor(color) => *color,
                 RuleType::Dropped => ext.buttons_color,
                 RuleType::Standard => Color {
@@ -33,7 +34,12 @@ impl RuleType {
                     ..ext.buttons_color
                 },
             },
-            radius: 0.0.into(),
+            radius: match self {
+                RuleType::Incoming(all_round) if !all_round => Radius::new(100.0).right(0.0),
+                RuleType::Outgoing(all_round) if !all_round => Radius::new(100.0).left(0.0),
+                RuleType::PaletteColor(_) => 0.0.into(),
+                _ => 100.0.into(),
+            },
             fill_mode: FillMode::Full,
             snap: true,
         }
@@ -43,7 +49,7 @@ impl RuleType {
         match self {
             RuleType::Standard => 3,
             RuleType::PaletteColor(_) => 25,
-            RuleType::Dropped | RuleType::Incoming | RuleType::Outgoing => 5,
+            RuleType::Dropped | RuleType::Incoming(_) | RuleType::Outgoing(_) => 5,
         }
     }
 
