@@ -268,7 +268,7 @@ impl Sniffer {
                 sub.map(|_| Message::Quit)
             }
         } else {
-            Subscription::none()
+            iced::time::every(Duration::from_millis(1000)).map(|_| Message::Periodic)
         }
     }
 
@@ -356,6 +356,7 @@ impl Sniffer {
             Message::SetPcapImport(path) => self.set_pcap_import(path),
             Message::PendingHosts(cap_id, host_msgs) => self.pending_hosts(cap_id, host_msgs),
             Message::OfflineGap(cap_id, gap) => self.offline_gap(cap_id, gap),
+            Message::Periodic => self.periodic(),
             Message::ExpandNotification(id, expand) => self.expand_notification(id, expand),
             Message::ToggleRemoteNotifications => self.toggle_remote_notifications(),
             Message::RemoteNotificationsUrl(url) => self.remote_notifications_url(&url),
@@ -483,25 +484,15 @@ impl Sniffer {
         no_more_packets: bool,
     ) {
         if cap_id == self.current_capture_rx.0 {
-            // periodic stuff
-            self.update_waiting_dots();
-            self.capture_source.set_addresses();
-            self.update_threshold();
-
-            // update hosts
             for host_msg in host_msgs {
                 self.handle_new_host(host_msg);
             }
-
-            // update programs
             if let Some(program_lookup) = &mut self.program_lookup {
                 program_lookup.handle_pending_icons();
                 for program_res in program_lookup.pending_results() {
                     self.handle_program_lookup_result(program_res);
                 }
             }
-
-            // update traffic info
             self.refresh_data(msg, no_more_packets);
         }
     }
@@ -821,6 +812,12 @@ impl Sniffer {
         }
     }
 
+    fn periodic(&mut self) {
+        self.update_waiting_dots();
+        self.capture_source.set_addresses();
+        self.update_threshold();
+    }
+
     fn expand_notification(&mut self, id: usize, expand: bool) {
         if let Some(n) = self
             .logged_notifications
@@ -856,10 +853,6 @@ impl Sniffer {
     }
 
     fn traffic_preview(&mut self, msg: TrafficPreview) {
-        // periodic stuff
-        self.update_waiting_dots();
-
-        // update charts data
         self.preview_charts.retain(|(my_dev, _)| {
             msg.data
                 .iter()
@@ -1100,10 +1093,12 @@ impl Sniffer {
     }
 
     fn update_waiting_dots(&mut self) {
-        if self.dots_pulse.0.len() > 2 {
-            self.dots_pulse.0 = String::new();
+        if !self.frozen {
+            if self.dots_pulse.0.len() > 2 {
+                self.dots_pulse.0 = String::new();
+            }
+            self.dots_pulse.0 = ".".repeat(self.dots_pulse.0.len() + 1);
         }
-        self.dots_pulse.0 = ".".repeat(self.dots_pulse.0.len() + 1);
     }
 
     fn add_or_remove_favorite(&mut self, host: &Host, add: bool) {
@@ -1437,13 +1432,11 @@ mod tests {
     use crate::gui::types::message::Message;
     use crate::gui::types::settings::Settings;
     use crate::gui::types::timing_events::TimingEvents;
-    use crate::networking::traffic_preview::TrafficPreview;
     use crate::networking::types::capture_context::CaptureSourcePicklist;
     use crate::networking::types::config_device::ConfigDevice;
     use crate::networking::types::data_info::DataInfo;
     use crate::networking::types::data_representation::DataRepr;
     use crate::networking::types::host::Host;
-    use crate::networking::types::info_traffic::InfoTraffic;
     use crate::networking::types::traffic_direction::TrafficDirection;
     use crate::notifications::types::logged_notification::{
         DataThresholdExceeded, LoggedNotification,
@@ -1574,13 +1567,12 @@ mod tests {
     #[test]
     #[parallel] // needed to not collide with other tests generating configs files
     fn test_dots_pulse_update() {
-        // every kind of message will update the integer,
-        // but only TickRun and TrafficPreview will update the string
+        // every kind of message will update the integer, but only Periodic will update the string
         let mut sniffer = Sniffer::new(Conf::default());
 
         assert_eq!(sniffer.dots_pulse, (".".to_string(), 0));
 
-        sniffer.update(Message::TrafficPreview(TrafficPreview::default()));
+        sniffer.update(Message::Periodic);
         assert_eq!(sniffer.dots_pulse, ("..".to_string(), 1));
 
         sniffer.update(Message::HideModal);
@@ -1589,36 +1581,28 @@ mod tests {
         sniffer.update(Message::CtrlDPressed);
         assert_eq!(sniffer.dots_pulse, ("..".to_string(), 0));
 
-        sniffer.update(Message::TickRun(
-            0,
-            InfoTraffic::default(),
-            Vec::new(),
-            false,
-        ));
+        sniffer.update(Message::Periodic);
         assert_eq!(sniffer.dots_pulse, ("...".to_string(), 1));
 
         sniffer.update(Message::OpenLastSettings);
         assert_eq!(sniffer.dots_pulse, ("...".to_string(), 2));
 
-        sniffer.update(Message::TickRun(
-            0,
-            InfoTraffic::default(),
-            Vec::new(),
-            true,
-        ));
+        sniffer.update(Message::Periodic);
         assert_eq!(sniffer.dots_pulse, (".".to_string(), 0));
 
-        // if from another capture id, string won't update
-        sniffer.update(Message::TickRun(
-            18,
-            InfoTraffic::default(),
-            Vec::new(),
-            false,
-        ));
+        // if frozen, string won't update
+        sniffer.frozen = true;
+
+        sniffer.update(Message::Periodic);
         assert_eq!(sniffer.dots_pulse, (".".to_string(), 1));
 
         sniffer.update(Message::BpfFilter(String::new()));
         assert_eq!(sniffer.dots_pulse, (".".to_string(), 2));
+
+        sniffer.frozen = false;
+
+        sniffer.update(Message::Periodic);
+        assert_eq!(sniffer.dots_pulse, ("..".to_string(), 0));
     }
 
     #[test]
@@ -1930,12 +1914,7 @@ mod tests {
                 .add_packet(0, TrafficDirection::Outgoing);
 
             // Simulate an update to apply the settings
-            sniffer.update(Message::TickRun(
-                0,
-                InfoTraffic::default(),
-                Vec::new(),
-                false,
-            ));
+            sniffer.update(Message::Periodic);
         }
         let mut sniffer = Sniffer::new(Conf::default());
 

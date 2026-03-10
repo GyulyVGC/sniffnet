@@ -142,6 +142,8 @@ pub enum Message {
     PendingHosts(usize, Vec<HostMessage>),
     /// Sent by offline captures: ticks without packets
     OfflineGap(usize, u32),
+    /// Emitted every second to repeat certain tasks (such as fetching the network devices)
+    Periodic,
     /// Expand or collapse the given logged notification
     ExpandNotification(usize, bool),
     /// Toggle remote notifications
