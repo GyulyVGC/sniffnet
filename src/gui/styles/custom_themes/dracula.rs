@@ -13,7 +13,7 @@ pub static DRACULA_DARK_PALETTE: std::sync::LazyLock<Palette> =
         primary: color!(0x282a36),   // Background
         secondary: color!(0xff79c6), // Pink
         outgoing: color!(0x8be9fd),  // Cyan
-        starred: color!(0xf1fa8c, 0.7),
+        starred: color!(0xf1fa8c),
         text_headers: color!(0x282a36), // Background
         text_body: color!(0xf8f8f2),    // Foreground
     });
