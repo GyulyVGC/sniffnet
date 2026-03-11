@@ -4,8 +4,6 @@
 //! and overall statistics about the traffic.
 
 use crate::chart::types::donut_chart::donut_chart;
-use crate::countries::country_utils::get_flag_tooltip;
-use crate::countries::types::country::Country;
 use crate::gui::components::ellipsized_text::EllipsizedText;
 use crate::gui::components::tab::get_pages_tabs;
 use crate::gui::pages::initial_page::get_addresses_row;
@@ -16,32 +14,21 @@ use crate::gui::styles::rule::RuleType;
 use crate::gui::styles::scrollbar::ScrollbarType;
 use crate::gui::styles::style_constants::{FONT_SIZE_FOOTER, FONT_SIZE_TITLE, TOOLTIP_DELAY};
 use crate::gui::styles::text::TextType;
-use crate::gui::types::conf::Conf;
+use crate::gui::types::favorite::Favorite;
 use crate::gui::types::filters::Filters;
 use crate::gui::types::message::Message;
 use crate::gui::types::settings::Settings;
 use crate::networking::types::capture_context::CaptureSource;
 use crate::networking::types::data_info::DataInfo;
-use crate::networking::types::data_info_host::DataInfoHost;
 use crate::networking::types::data_representation::DataRepr;
-use crate::networking::types::host::Host;
-use crate::networking::types::program_lookup::ProgramLookup;
-use crate::report::get_report_entries::{
-    get_host_entries, get_program_entries, get_service_entries,
-};
-use crate::report::types::search_parameters::SearchParameters;
 use crate::report::types::sort_type::SortType;
 use crate::translations::translations::{
     active_filters_translation, incoming_translation, none_translation, outgoing_translation,
     traffic_rate_translation,
 };
 use crate::translations::translations_2::{
-    data_representation_translation, dropped_translation, host_translation,
-    only_top_30_items_translation,
+    data_representation_translation, dropped_translation, only_top_30_items_translation,
 };
-use crate::translations::translations_3::service_translation;
-use crate::translations::translations_5::program_translation;
-use crate::utils::types::icon::Icon;
 use crate::{Language, RunningPage, StyleType};
 use iced::Length::Fill;
 use iced::alignment::{Horizontal, Vertical};
@@ -89,64 +76,55 @@ pub fn overview_page(sniffer: &Sniffer) -> Container<'_, Message, StyleType> {
     Container::new(Column::new().push(tab_and_body.push(body))).height(Length::Fill)
 }
 
-fn row_report<'a>(sniffer: &Sniffer) -> Row<'a, Message, StyleType> {
-    let col_host = col_host(sniffer);
-    let col_service = col_service(sniffer);
-    let container_program = sniffer.program_lookup.as_ref().map(|program_lookup| {
-        Container::new(col_program(&sniffer.conf, program_lookup))
-            .width(Length::FillPortion(1))
-            .height(Length::Fill)
-            .padding(Padding::new(10.0).top(0).bottom(5))
-            .class(ContainerType::BorderedRound)
-    });
+fn row_report(sniffer: &Sniffer) -> Row<Message, StyleType> {
+    let col_host = col_favorite_item(sniffer, Favorite::Host);
+    let col_service = col_favorite_item(sniffer, Favorite::Service);
+    let col_program = col_favorite_item(sniffer, Favorite::Program);
 
     Row::new()
         .spacing(10)
-        .push(
-            Container::new(col_host)
-                .width(Length::FillPortion(2))
-                .height(Length::Fill)
-                .padding(Padding::new(10.0).top(0).bottom(5))
-                .class(ContainerType::BorderedRound),
-        )
-        .push(
-            Container::new(col_service)
-                .width(Length::FillPortion(1))
-                .height(Length::Fill)
-                .padding(Padding::new(10.0).top(0).bottom(5))
-                .class(ContainerType::BorderedRound),
-        )
-        .push(container_program)
+        .push(col_host)
+        .push(col_service)
+        .push(col_program)
 }
 
-fn col_host<'a>(sniffer: &Sniffer) -> Column<'a, Message, StyleType> {
+fn col_favorite_item(
+    sniffer: &Sniffer,
+    favorite: Favorite,
+) -> impl Into<Element<Message, StyleType>> {
     let Settings { language, .. } = sniffer.conf.settings;
     let data_repr = sniffer.conf.data_repr;
+    let program_lookup = sniffer.program_lookup.as_ref();
 
-    let mut scroll_host = Column::new()
+    if program_lookup.is_none() && favorite == Favorite::Program {
+        return None::<Element<Message, StyleType>>;
+    }
+
+    let mut scroll_item = Column::new()
         .padding(Padding::ZERO.right(11.0))
         .align_x(Alignment::Center);
-    let entries = get_host_entries(
+    let entries = favorite.get_entries(
         &sniffer.info_traffic,
+        program_lookup,
         data_repr,
         sniffer.conf.host_sort_type,
     );
     let first_entry_data_info = entries
         .iter()
-        .map(|(_, d)| d.data_info)
+        .map(|fi| fi.data_info())
         .max_by(|d1, d2| d1.compare(d2, SortType::Ascending, data_repr))
         .unwrap_or_default();
 
-    for (host, data_info_host) in &entries {
-        let star_button = get_star_button(data_info_host.is_favorite, host.clone());
+    for fi in &entries {
+        let star_button = fi.star_button();
 
-        let host_bar = host_bar(
-            host.to_entry_string(),
-            host.country,
-            data_info_host,
+        let icon = fi.icon(language, false, program_lookup);
+        let host_bar = item_bar(
+            icon,
+            fi.to_entry_string(),
+            &fi.data_info(),
             data_repr,
             first_entry_data_info,
-            language,
         );
 
         let content = Row::new()
@@ -155,213 +133,184 @@ fn col_host<'a>(sniffer: &Sniffer) -> Column<'a, Message, StyleType> {
             .push(star_button)
             .push(host_bar);
 
-        scroll_host = scroll_host.push(
+        scroll_item = scroll_item.push(
             button(content)
                 .padding(Padding::new(5.0).right(10))
-                .on_press(Message::Search(SearchParameters::new_host_search(host)))
+                .on_press(Message::Search(fi.new_entry_search()))
                 .class(ButtonType::Neutral),
         );
     }
 
     if entries.len() >= 30 {
-        scroll_host = scroll_host
+        scroll_item = scroll_item
             .push(Space::new().height(25))
             .push(Text::new(only_top_30_items_translation(language)).align_x(Alignment::Center));
     }
 
-    Column::new()
+    let col = Column::new()
         .push(
             Row::new()
                 .height(45)
                 .align_y(Alignment::Center)
                 .push(
-                    Text::new(host_translation(language))
+                    Text::new(favorite.title(language))
                         .class(TextType::Title)
                         .size(FONT_SIZE_TITLE),
                 )
                 .push(Space::new().width(Length::Fill))
-                .push(sort_arrows(
-                    sniffer.conf.host_sort_type,
-                    Message::HostSortSelection,
-                )),
+                .push(favorite.sort_arrows(&sniffer.conf)),
         )
         .push(
             Scrollable::with_direction(
-                scroll_host,
+                scroll_item,
                 Direction::Vertical(ScrollbarType::properties()),
             )
             .width(Length::Fill),
-        )
-}
-
-fn col_service<'a>(sniffer: &Sniffer) -> Column<'a, Message, StyleType> {
-    let Settings { language, .. } = sniffer.conf.settings;
-    let data_repr = sniffer.conf.data_repr;
-
-    let mut scroll_service = Column::new()
-        .padding(Padding::ZERO.right(11.0))
-        .align_x(Alignment::Center);
-    let entries = get_service_entries(
-        &sniffer.info_traffic,
-        data_repr,
-        sniffer.conf.service_sort_type,
-    );
-    let first_entry_data_info = entries
-        .iter()
-        .map(|&(_, d)| d)
-        .max_by(|d1, d2| d1.compare(d2, SortType::Ascending, data_repr))
-        .unwrap_or_default();
-
-    for (service, data_info) in &entries {
-        let content = simple_bar(
-            None::<Element<Message, StyleType>>,
-            service.to_string(),
-            data_info,
-            data_repr,
-            first_entry_data_info,
         );
 
-        scroll_service = scroll_service.push(
-            button(content)
-                .padding(Padding::new(5.0).right(15).left(10))
-                .on_press(Message::Search(SearchParameters::new_service_search(
-                    service,
-                )))
-                .class(ButtonType::Neutral),
-        );
-    }
-
-    if entries.len() >= 30 {
-        scroll_service = scroll_service
-            .push(Space::new().height(25))
-            .push(Text::new(only_top_30_items_translation(language)).align_x(Alignment::Center));
-    }
-
-    Column::new()
-        .push(
-            Row::new()
-                .height(45)
-                .align_y(Alignment::Center)
-                .push(
-                    Text::new(service_translation(language))
-                        .class(TextType::Title)
-                        .size(FONT_SIZE_TITLE),
-                )
-                .push(Space::new().width(Length::Fill))
-                .push(sort_arrows(
-                    sniffer.conf.service_sort_type,
-                    Message::ServiceSortSelection,
-                )),
-        )
-        .push(
-            Scrollable::with_direction(
-                scroll_service,
-                Direction::Vertical(ScrollbarType::properties()),
-            )
-            .width(Length::Fill),
-        )
+    Some(
+        Container::new(col)
+            .width(favorite.fill_portion())
+            .height(Length::Fill)
+            .padding(Padding::new(10.0).top(0).bottom(5))
+            .class(ContainerType::BorderedRound)
+            .into(),
+    )
 }
 
-fn col_program<'a>(conf: &Conf, program_lookup: &ProgramLookup) -> Column<'a, Message, StyleType> {
-    let Settings { language, .. } = conf.settings;
-    let data_repr = conf.data_repr;
+// fn col_service<'a>(sniffer: &Sniffer) -> Column<'a, Message, StyleType> {
+//     let Settings { language, .. } = sniffer.conf.settings;
+//     let data_repr = sniffer.conf.data_repr;
+//
+//     let mut scroll_service = Column::new()
+//         .padding(Padding::ZERO.right(11.0))
+//         .align_x(Alignment::Center);
+//     let entries = get_service_entries(
+//         &sniffer.info_traffic,
+//         data_repr,
+//         sniffer.conf.service_sort_type,
+//     );
+//     let first_entry_data_info = entries
+//         .iter()
+//         .map(|&(_, d)| d)
+//         .max_by(|d1, d2| d1.compare(d2, SortType::Ascending, data_repr))
+//         .unwrap_or_default();
+//
+//     for (service, data_info) in &entries {
+//         let content = item_bar(
+//             None::<Element<Message, StyleType>>,
+//             service.to_string(),
+//             data_info,
+//             data_repr,
+//             first_entry_data_info,
+//         );
+//
+//         scroll_service = scroll_service.push(
+//             button(content)
+//                 .padding(Padding::new(5.0).right(15).left(10))
+//                 .on_press(Message::Search(SearchParameters::new_service_search(
+//                     service,
+//                 )))
+//                 .class(ButtonType::Neutral),
+//         );
+//     }
+//
+//     if entries.len() >= 30 {
+//         scroll_service = scroll_service
+//             .push(Space::new().height(25))
+//             .push(Text::new(only_top_30_items_translation(language)).align_x(Alignment::Center));
+//     }
+//
+//     Column::new()
+//         .push(
+//             Row::new()
+//                 .height(45)
+//                 .align_y(Alignment::Center)
+//                 .push(
+//                     Text::new(service_translation(language))
+//                         .class(TextType::Title)
+//                         .size(FONT_SIZE_TITLE),
+//                 )
+//                 .push(Space::new().width(Length::Fill))
+//                 .push(sort_arrows(
+//                     sniffer.conf.service_sort_type,
+//                     Message::ServiceSortSelection,
+//                 )),
+//         )
+//         .push(
+//             Scrollable::with_direction(
+//                 scroll_service,
+//                 Direction::Vertical(ScrollbarType::properties()),
+//             )
+//             .width(Length::Fill),
+//         )
+// }
 
-    let mut scroll_program = Column::new()
-        .padding(Padding::ZERO.right(11.0))
-        .align_x(Alignment::Center);
-    let entries = get_program_entries(program_lookup, data_repr, conf.program_sort_type);
-    let first_entry_data_info = entries
-        .iter()
-        .map(|&(_, d)| d)
-        .max_by(|d1, d2| d1.compare(d2, SortType::Ascending, data_repr))
-        .unwrap_or_default();
+// fn col_program<'a>(conf: &Conf, program_lookup: &ProgramLookup) -> Column<'a, Message, StyleType> {
+//     let Settings { language, .. } = conf.settings;
+//     let data_repr = conf.data_repr;
+//
+//     let mut scroll_program = Column::new()
+//         .padding(Padding::ZERO.right(11.0))
+//         .align_x(Alignment::Center);
+//     let entries = get_program_entries(program_lookup, data_repr, conf.program_sort_type);
+//     let first_entry_data_info = entries
+//         .iter()
+//         .map(|&(_, d)| d)
+//         .max_by(|d1, d2| d1.compare(d2, SortType::Ascending, data_repr))
+//         .unwrap_or_default();
+//
+//     for (program, data_info) in &entries {
+//         let content = item_bar(
+//             program_lookup.picon_tooltip(program.icon_key(), program.path()),
+//             program.to_string(),
+//             data_info,
+//             data_repr,
+//             first_entry_data_info,
+//         );
+//
+//         scroll_program = scroll_program.push(
+//             button(content)
+//                 .padding(Padding::new(5.0).right(15).left(10))
+//                 .on_press(Message::Search(SearchParameters::new_program_search(
+//                     program,
+//                 )))
+//                 .class(ButtonType::Neutral),
+//         );
+//     }
+//
+//     if entries.len() >= 30 {
+//         scroll_program = scroll_program
+//             .push(Space::new().height(25))
+//             .push(Text::new(only_top_30_items_translation(language)).align_x(Alignment::Center));
+//     }
+//
+//     Column::new()
+//         .push(
+//             Row::new()
+//                 .height(45)
+//                 .align_y(Alignment::Center)
+//                 .push(
+//                     Text::new(program_translation(language))
+//                         .class(TextType::Title)
+//                         .size(FONT_SIZE_TITLE),
+//                 )
+//                 .push(Space::new().width(Length::Fill))
+//                 .push(sort_arrows(
+//                     conf.program_sort_type,
+//                     Message::ProgramSortSelection,
+//                 )),
+//         )
+//         .push(
+//             Scrollable::with_direction(
+//                 scroll_program,
+//                 Direction::Vertical(ScrollbarType::properties()),
+//             )
+//             .width(Length::Fill),
+//         )
+// }
 
-    for (program, data_info) in &entries {
-        let content = simple_bar(
-            program_lookup.picon_tooltip(program.icon_key(), program.path()),
-            program.to_string(),
-            data_info,
-            data_repr,
-            first_entry_data_info,
-        );
-
-        scroll_program = scroll_program.push(
-            button(content)
-                .padding(Padding::new(5.0).right(15).left(10))
-                .on_press(Message::Search(SearchParameters::new_program_search(
-                    program,
-                )))
-                .class(ButtonType::Neutral),
-        );
-    }
-
-    if entries.len() >= 30 {
-        scroll_program = scroll_program
-            .push(Space::new().height(25))
-            .push(Text::new(only_top_30_items_translation(language)).align_x(Alignment::Center));
-    }
-
-    Column::new()
-        .push(
-            Row::new()
-                .height(45)
-                .align_y(Alignment::Center)
-                .push(
-                    Text::new(program_translation(language))
-                        .class(TextType::Title)
-                        .size(FONT_SIZE_TITLE),
-                )
-                .push(Space::new().width(Length::Fill))
-                .push(sort_arrows(
-                    conf.program_sort_type,
-                    Message::ProgramSortSelection,
-                )),
-        )
-        .push(
-            Scrollable::with_direction(
-                scroll_program,
-                Direction::Vertical(ScrollbarType::properties()),
-            )
-            .width(Length::Fill),
-        )
-}
-
-pub fn host_bar<'a>(
-    item: String,
-    country: Country,
-    data_info_host: &DataInfoHost,
-    data_repr: DataRepr,
-    first_entry_data_info: DataInfo,
-    language: Language,
-) -> Row<'a, Message, StyleType> {
-    Row::new()
-        .height(32)
-        .align_y(Alignment::Center)
-        .spacing(5)
-        .push(get_flag_tooltip(country, data_info_host, language, false))
-        .push(
-            Column::new()
-                .spacing(2)
-                .push(
-                    Row::new()
-                        .push(
-                            EllipsizedText::new(item)
-                                .wrapping(Wrapping::Glyph)
-                                .width(Length::Fill),
-                        )
-                        .push(Text::new(data_repr.formatted_string(
-                            data_info_host.data_info.tot_data(data_repr),
-                        ))),
-                )
-                .push(get_bars(
-                    data_repr,
-                    &first_entry_data_info,
-                    &data_info_host.data_info,
-                )),
-        )
-}
-
-pub fn simple_bar<'a>(
+pub fn item_bar<'a>(
     icon: impl Into<Element<'a, Message, StyleType>>,
     item: String,
     data_info: &DataInfo,
@@ -387,7 +336,7 @@ pub fn simple_bar<'a>(
                             data_repr.formatted_string(data_info.tot_data(data_repr)),
                         )),
                 )
-                .push(get_bars(data_repr, &first_entry_data_info, data_info)),
+                .push(get_bars(data_repr, &first_entry_data_info, &data_info)),
         )
 }
 
@@ -693,26 +642,6 @@ pub fn get_bars<'a>(
         })
 }
 
-fn get_star_button<'a>(is_favorite: bool, host: Host) -> Button<'a, Message, StyleType> {
-    let (icon, class) = if is_favorite {
-        (Icon::StarFull, ButtonType::Starred)
-    } else {
-        (Icon::StarEmpty, ButtonType::NotStarred)
-    };
-
-    button(
-        icon.to_text()
-            .size(16)
-            .align_x(Alignment::Center)
-            .align_y(Alignment::Center),
-    )
-    .padding(0)
-    .height(25)
-    .width(25)
-    .class(class)
-    .on_press(Message::AddOrRemoveFavorite(host, !is_favorite))
-}
-
 fn get_info_tooltip(tooltip_content: Element<Message, StyleType>) -> Tooltip<Message, StyleType> {
     Tooltip::new(
         Container::new(
@@ -730,24 +659,6 @@ fn get_info_tooltip(tooltip_content: Element<Message, StyleType>) -> Tooltip<Mes
     )
     .class(ContainerType::Tooltip)
     .delay(TOOLTIP_DELAY)
-}
-
-fn sort_arrows<'a>(
-    active_sort_type: SortType,
-    message: fn(SortType) -> Message,
-) -> Container<'a, Message, StyleType> {
-    Container::new(
-        button(
-            active_sort_type
-                .icon()
-                .align_x(Alignment::Center)
-                .align_y(Alignment::Center),
-        )
-        .class(active_sort_type.button_type())
-        .on_press(message(active_sort_type.next_sort())),
-    )
-    .width(50.0)
-    .align_x(Alignment::Center)
 }
 
 #[cfg(test)]

@@ -2,10 +2,11 @@ use crate::gui::components::types::my_modal::MyModal;
 use crate::gui::pages::types::running_page::RunningPage;
 use crate::gui::pages::types::settings_page::SettingsPage;
 use crate::gui::styles::types::gradient_type::GradientType;
+use crate::gui::types::favorite::FavoriteKey;
 use crate::networking::traffic_preview::TrafficPreview;
 use crate::networking::types::capture_context::CaptureSourcePicklist;
 use crate::networking::types::data_representation::DataRepr;
-use crate::networking::types::host::{Host, HostMessage};
+use crate::networking::types::host::HostMessage;
 use crate::networking::types::info_traffic::InfoTraffic;
 use crate::networking::types::ip_blacklist::IpBlacklist;
 use crate::notifications::types::notifications::Notification;
@@ -44,8 +45,8 @@ pub enum Message {
     ServiceSortSelection(SortType),
     /// Select program sort type to be displayed (overview page)
     ProgramSortSelection(SortType),
-    /// Adds or removes the given host into/from the favorites
-    AddOrRemoveFavorite(Host, bool),
+    /// Adds or removes the given item into/from the favorites
+    AddOrRemoveFavorite(FavoriteKey, bool),
     /// Open the supplied web page
     OpenWebPage(WebPage),
     /// Start sniffing packets

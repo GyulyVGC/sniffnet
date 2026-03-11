@@ -2,6 +2,7 @@ use crate::Service;
 use crate::networking::manage_packets::get_local_port;
 use crate::networking::types::address_port_pair::AddressPortPair;
 use crate::networking::types::data_info::DataInfo;
+use crate::networking::types::data_info_fav::DataInfoFav;
 use crate::networking::types::data_info_host::DataInfoHost;
 use crate::networking::types::data_representation::DataRepr;
 use crate::networking::types::host::Host;
@@ -23,7 +24,7 @@ pub struct InfoTraffic {
     /// Map of the traffic
     pub map: HashMap<AddressPortPair, InfoAddressPortPair>,
     /// Map of the upper layer services with their data info
-    pub services: HashMap<Service, DataInfo>,
+    pub services: HashMap<Service, DataInfoFav>,
     /// Map of the hosts with their data info
     pub hosts: HashMap<Host, DataInfoHost>,
 }
@@ -72,7 +73,7 @@ impl InfoTraffic {
         for (key, value) in &msg.services {
             self.services
                 .entry(*key)
-                .and_modify(|x| x.refresh(*value))
+                .and_modify(|x| x.data_info.refresh(value.data_info))
                 .or_insert(*value);
         }
 

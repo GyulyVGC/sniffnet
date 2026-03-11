@@ -14,6 +14,7 @@ use crate::networking::types::arp_type::ArpType;
 use crate::networking::types::bogon::is_bogon;
 use crate::networking::types::capture_context::{CaptureContext, CaptureSource, CaptureType};
 use crate::networking::types::data_info::DataInfo;
+use crate::networking::types::data_info_fav::DataInfoFav;
 use crate::networking::types::data_info_host::DataInfoHost;
 use crate::networking::types::host::{Host, HostMessage};
 use crate::networking::types::icmp_type::IcmpType;
@@ -243,6 +244,7 @@ pub fn parse_packets(
                                 .entry(host)
                                 .and_modify(|data_info_host| {
                                     data_info_host
+                                        .data_info_fav
                                         .data_info
                                         .add_packet(exchanged_bytes, traffic_direction);
                                 })
@@ -260,11 +262,11 @@ pub fn parse_packets(
                                     );
                                     let is_bogon = is_bogon(&address_to_lookup);
                                     DataInfoHost {
-                                        data_info: DataInfo::new_with_first_packet(
+                                        data_info_fav: DataInfo::new_with_first_packet(
                                             exchanged_bytes,
                                             traffic_direction,
-                                        ),
-                                        is_favorite: false,
+                                        )
+                                        .into(),
                                         is_loopback,
                                         is_local,
                                         is_bogon,
@@ -278,11 +280,14 @@ pub fn parse_packets(
                     info_traffic_msg
                         .services
                         .entry(service)
-                        .and_modify(|data_info| {
-                            data_info.add_packet(exchanged_bytes, traffic_direction);
+                        .and_modify(|data_info_fav| {
+                            data_info_fav
+                                .data_info
+                                .add_packet(exchanged_bytes, traffic_direction);
                         })
                         .or_insert_with(|| {
                             DataInfo::new_with_first_packet(exchanged_bytes, traffic_direction)
+                                .into()
                         });
 
                     // update dropped packets number
@@ -399,8 +404,7 @@ fn reverse_dns_lookups(
         };
 
         let data_info_host = DataInfoHost {
-            data_info: DataInfo::default(),
-            is_favorite: false,
+            data_info_fav: DataInfoFav::default(),
             is_local,
             is_bogon,
             is_loopback,
@@ -455,7 +459,7 @@ impl AddressesResolutionState {
                 .remove(&address_to_lookup)
                 .unwrap_or_default();
             // overwrite the host message with the collected data
-            host_msg.data_info_host.data_info = other_data;
+            host_msg.data_info_host.data_info_fav.data_info = other_data;
             // insert the newly resolved host in the collection of resolved addresses
             self.addresses_resolved
                 .insert(address_to_lookup, host_msg.host.clone());

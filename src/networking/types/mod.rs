@@ -6,6 +6,7 @@ pub mod capture_context;
 pub mod combobox_data_states;
 pub mod config_device;
 pub mod data_info;
+pub mod data_info_fav;
 pub mod data_info_host;
 pub mod data_representation;
 pub mod host;

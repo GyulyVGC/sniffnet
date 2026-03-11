@@ -80,8 +80,10 @@ impl LoggedNotification {
     pub fn data_info(&self) -> DataInfo {
         match self {
             LoggedNotification::DataThresholdExceeded(d) => d.data_info,
-            LoggedNotification::FavoriteTransmitted(f) => f.data_info_host.data_info,
-            LoggedNotification::BlacklistedTransmitted(b) => b.data_info_host.data_info,
+            LoggedNotification::FavoriteTransmitted(f) => f.data_info_host.data_info_fav.data_info,
+            LoggedNotification::BlacklistedTransmitted(b) => {
+                b.data_info_host.data_info_fav.data_info
+            }
         }
     }
 
@@ -144,7 +146,7 @@ impl FavoriteTransmitted {
                 "domain": self.host.domain,
                 "asn": self.host.asn.name,
             },
-            "data": DataRepr::Bytes.formatted_string(self.data_info_host.data_info.tot_data(DataRepr::Bytes)),
+            "data": DataRepr::Bytes.formatted_string(self.data_info_host.data_info_fav.data_info.tot_data(DataRepr::Bytes)),
         })
         .to_string()
     }
@@ -170,7 +172,7 @@ impl BlacklistedTransmitted {
                 "domain": self.host.domain,
                 "asn": self.host.asn.name,
             },
-            "data": DataRepr::Bytes.formatted_string(self.data_info_host.data_info.tot_data(DataRepr::Bytes)),
+            "data": DataRepr::Bytes.formatted_string(self.data_info_host.data_info_fav.data_info.tot_data(DataRepr::Bytes)),
         })
         .to_string()
     }

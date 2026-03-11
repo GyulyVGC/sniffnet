@@ -22,6 +22,7 @@ use crate::gui::styles::types::custom_palette::CustomPalette;
 use crate::gui::styles::types::gradient_type::GradientType;
 use crate::gui::styles::types::palette::Palette;
 use crate::gui::types::conf::Conf;
+use crate::gui::types::favorite::FavoriteKey;
 use crate::gui::types::message::Message;
 use crate::gui::types::settings::Settings;
 use crate::gui::types::timing_events::TimingEvents;
@@ -96,8 +97,8 @@ pub struct Sniffer {
     pub info_traffic: InfoTraffic,
     /// Map of the resolved addresses with their full rDNS value and the corresponding host
     pub addresses_resolved: HashMap<IpAddr, (String, Host)>,
-    /// Collection of the favorite hosts
-    pub favorite_hosts: HashSet<Host>,
+    /// Collection of the favorite hosts, services and programs
+    pub favorites: HashSet<FavoriteKey>,
     /// Log of the displayed notifications, with the total number of notifications for this capture
     pub logged_notifications: LoggedNotifications,
     /// Reports if a newer release of the software is available on GitHub
@@ -167,7 +168,7 @@ impl Sniffer {
             preview_captures_rx: None,
             info_traffic: InfoTraffic::default(),
             addresses_resolved: HashMap::new(),
-            favorite_hosts: HashSet::new(),
+            favorites: HashSet::new(),
             logged_notifications: LoggedNotifications::default(),
             newer_release_available: None,
             capture_source,
@@ -302,7 +303,7 @@ impl Sniffer {
             Message::Reset => return self.reset(),
             Message::Style(style) => self.style(style),
             Message::LoadStyle(path) => self.load_style(path),
-            Message::AddOrRemoveFavorite(host, add) => self.add_or_remove_favorite(&host, add),
+            Message::AddOrRemoveFavorite(fav, add) => self.add_or_remove_favorite(&fav, add),
             Message::ShowModal(modal) => self.show_modal(modal),
             Message::HideModal => self.hide_modal(),
             Message::OpenSettings(settings_page) => self.open_settings(settings_page),
@@ -905,7 +906,7 @@ impl Sniffer {
             &mut self.logged_notifications,
             &self.conf.settings.notifications,
             &msg,
-            &self.favorite_hosts,
+            &self.favorites,
             &self.capture_source,
             &self.addresses_resolved,
         );
@@ -1050,7 +1051,7 @@ impl Sniffer {
         self.current_capture_rx = (self.current_capture_rx.0 + 1, None);
         self.info_traffic = InfoTraffic::default();
         self.addresses_resolved = HashMap::new();
-        self.favorite_hosts = HashSet::new();
+        self.favorites = HashSet::new();
         self.logged_notifications = LoggedNotifications::default();
         self.pcap_error = None;
         self.traffic_chart = TrafficChart::new(style, language, self.conf.data_repr);
@@ -1101,16 +1102,31 @@ impl Sniffer {
         }
     }
 
-    fn add_or_remove_favorite(&mut self, host: &Host, add: bool) {
-        let info_traffic = &mut self.info_traffic;
+    fn add_or_remove_favorite(&mut self, fav: &FavoriteKey, add: bool) {
         if add {
-            self.favorite_hosts.insert(host.clone());
+            self.favorites.insert(fav.clone());
         } else {
-            self.favorite_hosts.remove(host);
+            self.favorites.remove(fav);
         }
-        if let Some(host_info) = info_traffic.hosts.get_mut(host) {
-            host_info.is_favorite = add;
-        }
+
+        match fav {
+            FavoriteKey::Host(host) => {
+                if let Some(host_info) = self.info_traffic.hosts.get_mut(host) {
+                    host_info.data_info_fav.is_favorite = add;
+                }
+            }
+            FavoriteKey::Service(service) => {
+                if let Some(service_info) = self.info_traffic.services.get_mut(service) {
+                    service_info.is_favorite = add;
+                }
+            }
+            FavoriteKey::Program(program) => {
+                let Some(program_lookup) = &mut self.program_lookup else {
+                    return;
+                };
+                program_lookup.edit_fav(program, add);
+            }
+        };
     }
 
     fn close_settings(&mut self) {
@@ -1618,7 +1634,7 @@ mod tests {
             },
             false,
         ));
-        assert_eq!(sniffer.favorite_hosts, HashSet::new());
+        assert_eq!(sniffer.favorites, HashSet::new());
         // remove 2
         sniffer.update(Message::AddOrRemoveFavorite(
             Host {
@@ -1628,7 +1644,7 @@ mod tests {
             },
             false,
         ));
-        assert_eq!(sniffer.favorite_hosts, HashSet::new());
+        assert_eq!(sniffer.favorites, HashSet::new());
         // add 2
         sniffer.update(Message::AddOrRemoveFavorite(
             Host {
@@ -1639,7 +1655,7 @@ mod tests {
             true,
         ));
         assert_eq!(
-            sniffer.favorite_hosts,
+            sniffer.favorites,
             HashSet::from([Host {
                 domain: "2.2".to_string(),
                 asn: Default::default(),
@@ -1656,7 +1672,7 @@ mod tests {
             false,
         ));
         assert_eq!(
-            sniffer.favorite_hosts,
+            sniffer.favorites,
             HashSet::from([Host {
                 domain: "2.2".to_string(),
                 asn: Default::default(),
@@ -1673,7 +1689,7 @@ mod tests {
             true,
         ));
         assert_eq!(
-            sniffer.favorite_hosts,
+            sniffer.favorites,
             HashSet::from([Host {
                 domain: "2.2".to_string(),
                 asn: Default::default(),
@@ -1690,7 +1706,7 @@ mod tests {
             true,
         ));
         assert_eq!(
-            sniffer.favorite_hosts,
+            sniffer.favorites,
             HashSet::from([
                 Host {
                     domain: "1.1".to_string(),
@@ -1714,7 +1730,7 @@ mod tests {
             true,
         ));
         assert_eq!(
-            sniffer.favorite_hosts,
+            sniffer.favorites,
             HashSet::from([
                 Host {
                     domain: "1.1".to_string(),
@@ -1743,7 +1759,7 @@ mod tests {
             false,
         ));
         assert_eq!(
-            sniffer.favorite_hosts,
+            sniffer.favorites,
             HashSet::from([
                 Host {
                     domain: "1.1".to_string(),
@@ -1767,7 +1783,7 @@ mod tests {
             false,
         ));
         assert_eq!(
-            sniffer.favorite_hosts,
+            sniffer.favorites,
             HashSet::from([Host {
                 domain: "1.1".to_string(),
                 asn: Default::default(),
@@ -1783,7 +1799,7 @@ mod tests {
             },
             false,
         ));
-        assert_eq!(sniffer.favorite_hosts, HashSet::new());
+        assert_eq!(sniffer.favorites, HashSet::new());
     }
 
     #[test]

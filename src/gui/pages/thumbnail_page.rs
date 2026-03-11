@@ -9,11 +9,11 @@ use crate::gui::sniffer::Sniffer;
 use crate::gui::styles::rule::RuleType;
 use crate::gui::styles::style_constants::FONT_SIZE_FOOTER;
 use crate::gui::styles::types::style_type::StyleType;
+use crate::gui::types::favorite::{Favorite, FavoriteItem};
 use crate::gui::types::message::Message;
 use crate::networking::types::data_representation::DataRepr;
 use crate::networking::types::host::ThumbnailHost;
 use crate::networking::types::info_traffic::InfoTraffic;
-use crate::report::get_report_entries::{get_host_entries, get_service_entries};
 use crate::report::types::sort_type::SortType;
 use crate::translations::types::language::Language;
 use crate::utils::formatted_strings::clip_text;
@@ -92,10 +92,14 @@ fn host_col<'a>(
         .padding([0, 5])
         .spacing(3)
         .width(Length::FillPortion(2));
-    let hosts = get_host_entries(info_traffic, data_repr, sort_type);
+    let hosts = Favorite::Host.get_entries(info_traffic, None, data_repr, sort_type);
     let mut thumbnail_hosts = Vec::new();
 
-    for (host, data_info_host) in &hosts {
+    for fi in &hosts {
+        let FavoriteItem::Host((host, data_info_host)) = fi else {
+            continue;
+        };
+
         let thumbnail_host = ThumbnailHost::from_host(host, MAX_CHARS_HOST);
         let country = thumbnail_host.country;
         let text = thumbnail_host.text.clone();
@@ -128,9 +132,13 @@ fn service_col<'a>(
     sort_type: SortType,
 ) -> Column<'a, Message, StyleType> {
     let mut service_col = Column::new().padding([0, 5]).spacing(3).width(Length::Fill);
-    let services = get_service_entries(info_traffic, data_repr, sort_type);
+    let services = Favorite::Service.get_entries(info_traffic, None, data_repr, sort_type);
     let n_entry = min(services.len(), MAX_ENTRIES);
-    for (service, _) in services.get(..n_entry).unwrap_or_default() {
+    for fi in services.get(..n_entry).unwrap_or_default() {
+        let FavoriteItem::Service((service, _)) = fi else {
+            continue;
+        };
+
         service_col = service_col.push(
             Text::new(clip_text(&service.to_string(), MAX_CHARS_SERVICE)).size(FONT_SIZE_FOOTER),
         );

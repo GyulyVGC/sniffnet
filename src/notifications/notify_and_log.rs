@@ -1,3 +1,4 @@
+use crate::gui::types::favorite::FavoriteKey;
 use crate::networking::manage_packets::get_address_to_lookup;
 use crate::networking::types::capture_context::CaptureSource;
 use crate::networking::types::data_info::DataInfo;
@@ -27,7 +28,7 @@ pub fn notify_and_log(
     logged_notifications: &mut LoggedNotifications,
     notifications: &Notifications,
     info_traffic_msg: &InfoTraffic,
-    favorites: &HashSet<Host>,
+    favorites: &HashSet<FavoriteKey>,
     cs: &CaptureSource,
     addresses_resolved: &HashMap<IpAddr, (String, Host)>,
 ) -> usize {
@@ -114,13 +115,14 @@ pub fn notify_and_log(
                 .get(&host)
                 .copied()
                 .unwrap_or_default();
-            data_info_host.data_info = v.data_info();
+            data_info_host.data_info_fav.data_info = v.data_info();
             blacklisted_last_interval
                 .entry(*address_to_lookup)
                 .and_modify(|(_, existing_data_info_host)| {
                     existing_data_info_host
+                        .data_info_fav
                         .data_info
-                        .refresh(data_info_host.data_info);
+                        .refresh(data_info_host.data_info_fav.data_info);
                 })
                 .or_insert((host, data_info_host));
         }
@@ -164,8 +166,11 @@ fn hosts_list(info_traffic_msg: &InfoTraffic, data_repr: DataRepr) -> Vec<(Host,
         .map(|(h, data)| (h.clone(), *data))
         .collect();
     hosts.sort_by(|(_, a), (_, b)| {
-        a.data_info
-            .compare(&b.data_info, SortType::Descending, data_repr)
+        a.data_info_fav.data_info.compare(
+            &b.data_info_fav.data_info,
+            SortType::Descending,
+            data_repr,
+        )
     });
     let n_entry = min(hosts.len(), 4);
     hosts
@@ -181,9 +186,9 @@ fn services_list(info_traffic_msg: &InfoTraffic, data_repr: DataRepr) -> Vec<(Se
         .services
         .iter()
         .filter(|(service, _)| service != &&Service::NotApplicable)
-        .map(|(s, data)| (*s, *data))
+        .map(|(s, data_info_fav)| (*s, data_info_fav.data_info))
         .collect();
-    services.sort_by(|(_, a), (_, b)| a.compare(b, SortType::Descending, data_repr));
+    services.sort_by(|(_, a), (_, b)| a.compare(&b, SortType::Descending, data_repr));
     let n_entry = min(services.len(), 4);
     services
         .get(..n_entry)

@@ -1,9 +1,9 @@
-use crate::countries::country_utils::get_computer_tooltip;
+use crate::countries::country_utils::{get_computer_tooltip, get_flag_tooltip};
 use crate::countries::flags_pictures::FLAGS_HEIGHT_BIG;
 use crate::gui::components::header::get_button_settings;
 use crate::gui::components::tab::get_pages_tabs;
 use crate::gui::components::types::my_modal::MyModal;
-use crate::gui::pages::overview_page::{get_bars, host_bar, simple_bar};
+use crate::gui::pages::overview_page::{get_bars, item_bar};
 use crate::gui::pages::types::settings_page::SettingsPage;
 use crate::gui::styles::container::ContainerType;
 use crate::gui::styles::rule::RuleType;
@@ -198,13 +198,15 @@ fn favorite_notification_log<'a>(
     data_repr: DataRepr,
     language: Language,
 ) -> Container<'a, Message, StyleType> {
-    let host_bar = host_bar(
-        logged_notification.host.to_entry_string(),
-        logged_notification.host.country,
-        &logged_notification.data_info_host,
+    let host = &logged_notification.host;
+    let data_info_host = logged_notification.data_info_host;
+    let icon = get_flag_tooltip(host.country, &data_info_host, language, false);
+    let host_bar = item_bar(
+        icon,
+        host.to_entry_string(),
+        &data_info_host.data_info_fav.data_info,
         data_repr,
         first_entry_data_info,
-        language,
     );
 
     let content = Row::new()
@@ -242,15 +244,15 @@ fn blacklisted_notification_log<'a>(
     data_repr: DataRepr,
     language: Language,
 ) -> Container<'a, Message, StyleType> {
-    let blacklisted_bar = host_bar(
-        logged_notification
-            .host
-            .to_blacklist_string(logged_notification.ip),
-        logged_notification.host.country,
-        &logged_notification.data_info_host,
+    let host = &logged_notification.host;
+    let data_info_host = logged_notification.data_info_host;
+    let icon = get_flag_tooltip(host.country, &data_info_host, language, false);
+    let blacklisted_bar = item_bar(
+        icon,
+        host.to_blacklist_string(logged_notification.ip),
+        &data_info_host.data_info_fav.data_info,
         data_repr,
         first_entry_data_info,
-        language,
     );
 
     let content = Row::new()
@@ -427,15 +429,16 @@ fn data_notification_extra<'a>(
         .first()
         .unwrap_or(&(Host::default(), DataInfoHost::default()))
         .1
+        .data_info_fav
         .data_info;
     for (host, data_info_host) in &logged_notification.hosts {
-        let host_bar = host_bar(
+        let icon = get_flag_tooltip(host.country, &data_info_host, language, false);
+        let host_bar = item_bar(
+            icon,
             host.to_entry_string(),
-            host.country,
-            data_info_host,
+            &data_info_host.data_info_fav.data_info,
             logged_notification.data_repr,
             first_data_info,
-            language,
         );
         hosts_col = hosts_col.push(host_bar);
     }
@@ -447,7 +450,7 @@ fn data_notification_extra<'a>(
         .unwrap_or(&(Service::default(), DataInfo::default()))
         .1;
     for (service, data_info) in &logged_notification.services {
-        let service_bar = simple_bar(
+        let service_bar = item_bar(
             None::<Element<Message, StyleType>>,
             service.to_string(),
             data_info,

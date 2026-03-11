@@ -1,16 +1,11 @@
 use std::cmp::min;
 
+use crate::Sniffer;
 use crate::networking::manage_packets::get_address_to_lookup;
 use crate::networking::types::address_port_pair::AddressPortPair;
 use crate::networking::types::data_info::DataInfo;
 use crate::networking::types::data_info_host::DataInfoHost;
-use crate::networking::types::data_representation::DataRepr;
-use crate::networking::types::host::Host;
 use crate::networking::types::info_address_port_pair::InfoAddressPortPair;
-use crate::networking::types::program::Program;
-use crate::networking::types::program_lookup::ProgramLookup;
-use crate::report::types::sort_type::SortType;
-use crate::{InfoTraffic, Service, Sniffer};
 
 /// Return the elements that satisfy the search constraints and belong to the given page,
 /// and the total number of elements which satisfy the search constraints,
@@ -31,6 +26,7 @@ pub fn get_searched_entries(
                     .hosts
                     .get(&e.1)
                     .unwrap_or(&DataInfoHost::default())
+                    .data_info_fav
                     .is_favorite
             } else {
                 false
@@ -61,70 +57,4 @@ pub fn get_searched_entries(
         all_results.len(),
         agglomerate,
     )
-}
-
-pub fn get_host_entries(
-    info_traffic: &InfoTraffic,
-    data_repr: DataRepr,
-    sort_type: SortType,
-) -> Vec<(Host, DataInfoHost)> {
-    let mut sorted_vec: Vec<(&Host, &DataInfoHost)> = info_traffic.hosts.iter().collect();
-
-    sorted_vec.sort_by(|&(_, a), &(_, b)| a.data_info.compare(&b.data_info, sort_type, data_repr));
-
-    let n_entry = min(sorted_vec.len(), 30);
-    sorted_vec[0..n_entry]
-        .iter()
-        .map(|&(host, data_info_host)| (host.to_owned(), data_info_host.to_owned()))
-        .collect()
-}
-
-pub fn get_service_entries(
-    info_traffic: &InfoTraffic,
-    data_repr: DataRepr,
-    sort_type: SortType,
-) -> Vec<(Service, DataInfo)> {
-    let mut sorted_vec: Vec<(&Service, &DataInfo)> = info_traffic
-        .services
-        .iter()
-        .filter(|(service, _)| service != &&Service::NotApplicable)
-        .collect();
-
-    sorted_vec.sort_by(|&(_, a), &(_, b)| a.compare(b, sort_type, data_repr));
-
-    let n_entry = min(sorted_vec.len(), 30);
-    sorted_vec[0..n_entry]
-        .iter()
-        .map(|&(service, data_info)| (*service, *data_info))
-        .collect()
-}
-
-pub fn get_program_entries(
-    program_lookup: &ProgramLookup,
-    data_repr: DataRepr,
-    sort_type: SortType,
-) -> Vec<(Program, DataInfo)> {
-    let mut sorted_vec: Vec<(&Program, &DataInfo)> = program_lookup
-        .programs()
-        .iter()
-        // Unknown may be inserted, and then all of its data could be reassigned to known programs
-        .filter(|(_, d)| d.tot_data(DataRepr::Packets) > 0)
-        .collect();
-
-    sorted_vec.sort_by(|&(p1, a), &(p2, b)| {
-        if sort_type == SortType::Neutral && a.is_within_same_second(b) {
-            if p1.is_unknown() {
-                return std::cmp::Ordering::Greater;
-            } else if p2.is_unknown() {
-                return std::cmp::Ordering::Less;
-            }
-        }
-        a.compare(b, sort_type, data_repr)
-    });
-
-    let n_entry = min(sorted_vec.len(), 30);
-    sorted_vec[0..n_entry]
-        .iter()
-        .map(|&(program, data_info)| (program.to_owned(), *data_info))
-        .collect()
 }
