@@ -1126,7 +1126,7 @@ impl Sniffer {
                 };
                 program_lookup.edit_fav(program, add);
             }
-        };
+        }
     }
 
     fn close_settings(&mut self) {

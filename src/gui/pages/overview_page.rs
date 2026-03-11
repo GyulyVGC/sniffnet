@@ -14,7 +14,7 @@ use crate::gui::styles::rule::RuleType;
 use crate::gui::styles::scrollbar::ScrollbarType;
 use crate::gui::styles::style_constants::{FONT_SIZE_FOOTER, FONT_SIZE_TITLE, TOOLTIP_DELAY};
 use crate::gui::styles::text::TextType;
-use crate::gui::types::favorite::Favorite;
+use crate::gui::types::favorite::{Favorite, FavoriteItem};
 use crate::gui::types::filters::Filters;
 use crate::gui::types::message::Message;
 use crate::gui::types::settings::Settings;
@@ -76,7 +76,7 @@ pub fn overview_page(sniffer: &Sniffer) -> Container<'_, Message, StyleType> {
     Container::new(Column::new().push(tab_and_body.push(body))).height(Length::Fill)
 }
 
-fn row_report(sniffer: &Sniffer) -> Row<Message, StyleType> {
+fn row_report(sniffer: &Sniffer) -> Row<'_, Message, StyleType> {
     let col_host = col_favorite_item(sniffer, Favorite::Host);
     let col_service = col_favorite_item(sniffer, Favorite::Service);
     let col_program = col_favorite_item(sniffer, Favorite::Program);
@@ -91,7 +91,7 @@ fn row_report(sniffer: &Sniffer) -> Row<Message, StyleType> {
 fn col_favorite_item(
     sniffer: &Sniffer,
     favorite: Favorite,
-) -> impl Into<Element<Message, StyleType>> {
+) -> impl Into<Element<'_, Message, StyleType>> {
     let Settings { language, .. } = sniffer.conf.settings;
     let data_repr = sniffer.conf.data_repr;
     let program_lookup = sniffer.program_lookup.as_ref();
@@ -103,15 +103,10 @@ fn col_favorite_item(
     let mut scroll_item = Column::new()
         .padding(Padding::ZERO.right(11.0))
         .align_x(Alignment::Center);
-    let entries = favorite.get_entries(
-        &sniffer.info_traffic,
-        program_lookup,
-        data_repr,
-        sniffer.conf.host_sort_type,
-    );
+    let entries = favorite.get_entries(&sniffer);
     let first_entry_data_info = entries
         .iter()
-        .map(|fi| fi.data_info())
+        .map(FavoriteItem::data_info)
         .max_by(|d1, d2| d1.compare(d2, SortType::Ascending, data_repr))
         .unwrap_or_default();
 
@@ -119,7 +114,7 @@ fn col_favorite_item(
         let star_button = fi.star_button();
 
         let icon = fi.icon(language, false, program_lookup);
-        let host_bar = item_bar(
+        let item_bar = item_bar(
             icon,
             fi.to_entry_string(),
             &fi.data_info(),
@@ -131,7 +126,7 @@ fn col_favorite_item(
             .align_y(Alignment::Center)
             .spacing(5)
             .push(star_button)
-            .push(host_bar);
+            .push(item_bar);
 
         scroll_item = scroll_item.push(
             button(content)
@@ -152,12 +147,14 @@ fn col_favorite_item(
             Row::new()
                 .height(45)
                 .align_y(Alignment::Center)
+                .padding(Padding::ZERO.left(5))
                 .push(
                     Text::new(favorite.title(language))
                         .class(TextType::Title)
-                        .size(FONT_SIZE_TITLE),
+                        .size(FONT_SIZE_TITLE)
+                        .width(Length::Fill)
+                        .align_x(Alignment::Start),
                 )
-                .push(Space::new().width(Length::Fill))
                 .push(favorite.sort_arrows(&sniffer.conf)),
         )
         .push(
@@ -177,138 +174,6 @@ fn col_favorite_item(
             .into(),
     )
 }
-
-// fn col_service<'a>(sniffer: &Sniffer) -> Column<'a, Message, StyleType> {
-//     let Settings { language, .. } = sniffer.conf.settings;
-//     let data_repr = sniffer.conf.data_repr;
-//
-//     let mut scroll_service = Column::new()
-//         .padding(Padding::ZERO.right(11.0))
-//         .align_x(Alignment::Center);
-//     let entries = get_service_entries(
-//         &sniffer.info_traffic,
-//         data_repr,
-//         sniffer.conf.service_sort_type,
-//     );
-//     let first_entry_data_info = entries
-//         .iter()
-//         .map(|&(_, d)| d)
-//         .max_by(|d1, d2| d1.compare(d2, SortType::Ascending, data_repr))
-//         .unwrap_or_default();
-//
-//     for (service, data_info) in &entries {
-//         let content = item_bar(
-//             None::<Element<Message, StyleType>>,
-//             service.to_string(),
-//             data_info,
-//             data_repr,
-//             first_entry_data_info,
-//         );
-//
-//         scroll_service = scroll_service.push(
-//             button(content)
-//                 .padding(Padding::new(5.0).right(15).left(10))
-//                 .on_press(Message::Search(SearchParameters::new_service_search(
-//                     service,
-//                 )))
-//                 .class(ButtonType::Neutral),
-//         );
-//     }
-//
-//     if entries.len() >= 30 {
-//         scroll_service = scroll_service
-//             .push(Space::new().height(25))
-//             .push(Text::new(only_top_30_items_translation(language)).align_x(Alignment::Center));
-//     }
-//
-//     Column::new()
-//         .push(
-//             Row::new()
-//                 .height(45)
-//                 .align_y(Alignment::Center)
-//                 .push(
-//                     Text::new(service_translation(language))
-//                         .class(TextType::Title)
-//                         .size(FONT_SIZE_TITLE),
-//                 )
-//                 .push(Space::new().width(Length::Fill))
-//                 .push(sort_arrows(
-//                     sniffer.conf.service_sort_type,
-//                     Message::ServiceSortSelection,
-//                 )),
-//         )
-//         .push(
-//             Scrollable::with_direction(
-//                 scroll_service,
-//                 Direction::Vertical(ScrollbarType::properties()),
-//             )
-//             .width(Length::Fill),
-//         )
-// }
-
-// fn col_program<'a>(conf: &Conf, program_lookup: &ProgramLookup) -> Column<'a, Message, StyleType> {
-//     let Settings { language, .. } = conf.settings;
-//     let data_repr = conf.data_repr;
-//
-//     let mut scroll_program = Column::new()
-//         .padding(Padding::ZERO.right(11.0))
-//         .align_x(Alignment::Center);
-//     let entries = get_program_entries(program_lookup, data_repr, conf.program_sort_type);
-//     let first_entry_data_info = entries
-//         .iter()
-//         .map(|&(_, d)| d)
-//         .max_by(|d1, d2| d1.compare(d2, SortType::Ascending, data_repr))
-//         .unwrap_or_default();
-//
-//     for (program, data_info) in &entries {
-//         let content = item_bar(
-//             program_lookup.picon_tooltip(program.icon_key(), program.path()),
-//             program.to_string(),
-//             data_info,
-//             data_repr,
-//             first_entry_data_info,
-//         );
-//
-//         scroll_program = scroll_program.push(
-//             button(content)
-//                 .padding(Padding::new(5.0).right(15).left(10))
-//                 .on_press(Message::Search(SearchParameters::new_program_search(
-//                     program,
-//                 )))
-//                 .class(ButtonType::Neutral),
-//         );
-//     }
-//
-//     if entries.len() >= 30 {
-//         scroll_program = scroll_program
-//             .push(Space::new().height(25))
-//             .push(Text::new(only_top_30_items_translation(language)).align_x(Alignment::Center));
-//     }
-//
-//     Column::new()
-//         .push(
-//             Row::new()
-//                 .height(45)
-//                 .align_y(Alignment::Center)
-//                 .push(
-//                     Text::new(program_translation(language))
-//                         .class(TextType::Title)
-//                         .size(FONT_SIZE_TITLE),
-//                 )
-//                 .push(Space::new().width(Length::Fill))
-//                 .push(sort_arrows(
-//                     conf.program_sort_type,
-//                     Message::ProgramSortSelection,
-//                 )),
-//         )
-//         .push(
-//             Scrollable::with_direction(
-//                 scroll_program,
-//                 Direction::Vertical(ScrollbarType::properties()),
-//             )
-//             .width(Length::Fill),
-//         )
-// }
 
 pub fn item_bar<'a>(
     icon: impl Into<Element<'a, Message, StyleType>>,
@@ -336,7 +201,7 @@ pub fn item_bar<'a>(
                             data_repr.formatted_string(data_info.tot_data(data_repr)),
                         )),
                 )
-                .push(get_bars(data_repr, &first_entry_data_info, &data_info)),
+                .push(get_bars(data_repr, &first_entry_data_info, data_info)),
         )
 }
 

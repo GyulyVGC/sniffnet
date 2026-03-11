@@ -1,3 +1,4 @@
+use crate::gui::types::favorite::FavoriteItem;
 use crate::networking::types::data_info::DataInfo;
 use crate::networking::types::data_info_host::DataInfoHost;
 use crate::networking::types::data_representation::DataRepr;
@@ -80,7 +81,7 @@ impl LoggedNotification {
     pub fn data_info(&self) -> DataInfo {
         match self {
             LoggedNotification::DataThresholdExceeded(d) => d.data_info,
-            LoggedNotification::FavoriteTransmitted(f) => f.data_info_host.data_info_fav.data_info,
+            LoggedNotification::FavoriteTransmitted(f) => f.favorite.data_info(),
             LoggedNotification::BlacklistedTransmitted(b) => {
                 b.data_info_host.data_info_fav.data_info
             }
@@ -131,8 +132,7 @@ impl DataThresholdExceeded {
 #[derive(Clone)]
 pub struct FavoriteTransmitted {
     pub(crate) id: usize,
-    pub(crate) host: Host,
-    pub(crate) data_info_host: DataInfoHost,
+    pub(crate) favorite: FavoriteItem,
     pub(crate) timestamp: String,
 }
 
@@ -141,12 +141,13 @@ impl FavoriteTransmitted {
         json!({
             "info": favorite_transmitted_translation(Language::EN),
             "timestamp": self.timestamp,
-            "favorite": {
-                "country": self.host.country.to_string(),
-                "domain": self.host.domain,
-                "asn": self.host.asn.name,
-            },
-            "data": DataRepr::Bytes.formatted_string(self.data_info_host.data_info_fav.data_info.tot_data(DataRepr::Bytes)),
+            // TODO: support remote notifications for all favorite kinds
+            // "favorite": {
+            //     "country": self.host.country.to_string(),
+            //     "domain": self.host.domain,
+            //     "asn": self.host.asn.name,
+            // },
+            "data": DataRepr::Bytes.formatted_string(self.favorite.data_info().tot_data(DataRepr::Bytes)),
         })
         .to_string()
     }

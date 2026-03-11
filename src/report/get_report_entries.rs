@@ -21,6 +21,7 @@ pub fn get_searched_entries(
         .filter(|(key, value)| {
             let address_to_lookup = &get_address_to_lookup(key, value.traffic_direction);
             let r_dns_host = sniffer.addresses_resolved.get(address_to_lookup);
+            // TODO: correctly match all kinds of favorite
             let is_favorite = if let Some(e) = r_dns_host {
                 info_traffic
                     .hosts

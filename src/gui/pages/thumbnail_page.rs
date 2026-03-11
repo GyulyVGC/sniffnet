@@ -13,8 +13,6 @@ use crate::gui::types::favorite::{Favorite, FavoriteItem};
 use crate::gui::types::message::Message;
 use crate::networking::types::data_representation::DataRepr;
 use crate::networking::types::host::ThumbnailHost;
-use crate::networking::types::info_traffic::InfoTraffic;
-use crate::report::types::sort_type::SortType;
 use crate::translations::types::language::Language;
 use crate::utils::formatted_strings::clip_text;
 
@@ -66,33 +64,21 @@ pub fn thumbnail_page(sniffer: &Sniffer) -> Container<'_, Message, StyleType> {
         .padding([5, 0])
         .height(Length::Fill)
         .align_y(Alignment::Start)
-        .push(host_col(
-            info_traffic,
-            data_repr,
-            sniffer.conf.host_sort_type,
-        ))
+        .push(host_col(sniffer))
         .push(RuleType::Standard.vertical(10))
-        .push(service_col(
-            info_traffic,
-            data_repr,
-            sniffer.conf.service_sort_type,
-        ));
+        .push(service_col(sniffer));
 
     let content = Column::new().push(charts).push(report);
 
     Container::new(content)
 }
 
-fn host_col<'a>(
-    info_traffic: &InfoTraffic,
-    data_repr: DataRepr,
-    sort_type: SortType,
-) -> Column<'a, Message, StyleType> {
+fn host_col<'a>(sniffer: &Sniffer) -> Column<'a, Message, StyleType> {
     let mut host_col = Column::new()
         .padding([0, 5])
         .spacing(3)
         .width(Length::FillPortion(2));
-    let hosts = Favorite::Host.get_entries(info_traffic, None, data_repr, sort_type);
+    let hosts = Favorite::Host.get_entries(sniffer);
     let mut thumbnail_hosts = Vec::new();
 
     for fi in &hosts {
@@ -126,13 +112,9 @@ fn host_col<'a>(
     host_col
 }
 
-fn service_col<'a>(
-    info_traffic: &InfoTraffic,
-    data_repr: DataRepr,
-    sort_type: SortType,
-) -> Column<'a, Message, StyleType> {
+fn service_col<'a>(sniffer: &Sniffer) -> Column<'a, Message, StyleType> {
     let mut service_col = Column::new().padding([0, 5]).spacing(3).width(Length::Fill);
-    let services = Favorite::Service.get_entries(info_traffic, None, data_repr, sort_type);
+    let services = Favorite::Service.get_entries(sniffer);
     let n_entry = min(services.len(), MAX_ENTRIES);
     for fi in services.get(..n_entry).unwrap_or_default() {
         let FavoriteItem::Service((service, _)) = fi else {

@@ -1,4 +1,4 @@
-use crate::gui::types::favorite::FavoriteKey;
+use crate::gui::types::favorite::{FavoriteItem, FavoriteKey};
 use crate::networking::manage_packets::get_address_to_lookup;
 use crate::networking::types::capture_context::CaptureSource;
 use crate::networking::types::data_info::DataInfo;
@@ -67,18 +67,23 @@ pub fn notify_and_log(
 
     // from favorites
     if notifications.favorite_notification.is_active {
-        let favorites_last_interval: HashSet<(Host, DataInfoHost)> = info_traffic_msg
-            .hosts
+        // TODO: detect all kinds of favorites in latest interval
+        let favorites_last_interval: Vec<FavoriteItem> = favorites
             .iter()
-            .filter(|(h, _)| favorites.contains(h))
-            .map(|(h, data)| (h.clone(), *data))
+            .filter_map(|fav| match fav {
+                FavoriteKey::Host(h) => info_traffic_msg
+                    .hosts
+                    .get(h)
+                    .map(|d| FavoriteItem::Host((h.clone(), *d))),
+                _ => None,
+            })
             .collect();
+
         if !favorites_last_interval.is_empty() {
-            for (host, data_info_host) in favorites_last_interval {
+            for favorite in favorites_last_interval {
                 let notification = LoggedNotification::FavoriteTransmitted(FavoriteTransmitted {
                     id: logged_notifications.tot(),
-                    host,
-                    data_info_host,
+                    favorite,
                     timestamp: get_formatted_timestamp(timestamp),
                 });
 
@@ -188,7 +193,7 @@ fn services_list(info_traffic_msg: &InfoTraffic, data_repr: DataRepr) -> Vec<(Se
         .filter(|(service, _)| service != &&Service::NotApplicable)
         .map(|(s, data_info_fav)| (*s, data_info_fav.data_info))
         .collect();
-    services.sort_by(|(_, a), (_, b)| a.compare(&b, SortType::Descending, data_repr));
+    services.sort_by(|(_, a), (_, b)| a.compare(b, SortType::Descending, data_repr));
     let n_entry = min(services.len(), 4);
     services
         .get(..n_entry)

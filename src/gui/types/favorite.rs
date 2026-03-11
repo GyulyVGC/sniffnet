@@ -1,4 +1,5 @@
 use crate::countries::country_utils::get_flag_tooltip;
+use crate::gui::sniffer::Sniffer;
 use crate::gui::styles::button::ButtonType;
 use crate::gui::styles::types::style_type::StyleType;
 use crate::gui::types::conf::Conf;
@@ -31,17 +32,20 @@ pub enum Favorite {
 }
 
 impl Favorite {
-    pub fn get_entries(
-        self,
-        info_traffic: &InfoTraffic,
-        program_lookup: Option<&ProgramLookup>,
-        data_repr: DataRepr,
-        sort_type: SortType,
-    ) -> Vec<FavoriteItem> {
+    pub fn get_entries(self, sniffer: &Sniffer) -> Vec<FavoriteItem> {
+        let info_traffic = &sniffer.info_traffic;
+        let conf = &sniffer.conf;
+        let data_repr = conf.data_repr;
+        let program_lookup = sniffer.program_lookup.as_ref();
+
         match self {
-            Favorite::Host => get_host_entries(info_traffic, data_repr, sort_type),
-            Favorite::Service => get_service_entries(info_traffic, data_repr, sort_type),
-            Favorite::Program => get_program_entries(program_lookup, data_repr, sort_type),
+            Favorite::Host => get_host_entries(info_traffic, data_repr, conf.host_sort_type),
+            Favorite::Service => {
+                get_service_entries(info_traffic, data_repr, conf.service_sort_type)
+            }
+            Favorite::Program => {
+                get_program_entries(program_lookup, data_repr, conf.program_sort_type)
+            }
         }
     }
 
@@ -99,16 +103,16 @@ impl FavoriteItem {
     pub fn data_info(&self) -> DataInfo {
         match self {
             FavoriteItem::Host((_, data_info_host)) => data_info_host.data_info_fav.data_info,
-            FavoriteItem::Service((_, data_info_fav)) => data_info_fav.data_info,
-            FavoriteItem::Program((_, data_info_fav)) => data_info_fav.data_info,
+            FavoriteItem::Service((_, data_info_fav))
+            | FavoriteItem::Program((_, data_info_fav)) => data_info_fav.data_info,
         }
     }
 
     fn is_favorite(&self) -> bool {
         match self {
             FavoriteItem::Host((_, data_info_host)) => data_info_host.data_info_fav.is_favorite,
-            FavoriteItem::Service((_, data_info_fav)) => data_info_fav.is_favorite,
-            FavoriteItem::Program((_, data_info_fav)) => data_info_fav.is_favorite,
+            FavoriteItem::Service((_, data_info_fav))
+            | FavoriteItem::Program((_, data_info_fav)) => data_info_fav.is_favorite,
         }
     }
 
@@ -152,9 +156,7 @@ impl FavoriteItem {
             )),
             FavoriteItem::Service(_) => None::<Tooltip<Message, StyleType>>,
             FavoriteItem::Program((program, _)) => {
-                let Some(program_lookup) = program_lookup else {
-                    return None::<Tooltip<Message, StyleType>>;
-                };
+                let program_lookup = program_lookup?;
                 Some(program_lookup.picon_tooltip(program.icon_key(), program.path()))
             }
         }

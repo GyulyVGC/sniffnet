@@ -16,6 +16,7 @@ use crate::networking::types::data_info::DataInfo;
 use crate::networking::types::data_info_host::DataInfoHost;
 use crate::networking::types::data_representation::DataRepr;
 use crate::networking::types::host::Host;
+use crate::networking::types::program_lookup::ProgramLookup;
 use crate::networking::types::service::Service;
 use crate::networking::types::traffic_type::TrafficType;
 use crate::notifications::types::logged_notification::{
@@ -193,18 +194,18 @@ fn data_notification_log<'a>(
 }
 
 fn favorite_notification_log<'a>(
-    logged_notification: &FavoriteTransmitted,
+    logged_notification: &'a FavoriteTransmitted,
     first_entry_data_info: DataInfo,
     data_repr: DataRepr,
     language: Language,
+    program_lookup: Option<&'a ProgramLookup>,
 ) -> Container<'a, Message, StyleType> {
-    let host = &logged_notification.host;
-    let data_info_host = logged_notification.data_info_host;
-    let icon = get_flag_tooltip(host.country, &data_info_host, language, false);
-    let host_bar = item_bar(
+    let favorite = &logged_notification.favorite;
+    let icon = favorite.icon(language, false, program_lookup);
+    let item_bar = item_bar(
         icon,
-        host.to_entry_string(),
-        &data_info_host.data_info_fav.data_info,
+        favorite.to_entry_string(),
+        &favorite.data_info(),
         data_repr,
         first_entry_data_info,
     );
@@ -230,7 +231,7 @@ fn favorite_notification_log<'a>(
                 )
                 .push(Text::new(favorite_transmitted_translation(language)).class(TextType::Title)),
         )
-        .push(host_bar);
+        .push(item_bar);
 
     Container::new(content)
         .width(Length::Fill)
@@ -309,7 +310,7 @@ fn get_button_clear_all<'a>(language: Language) -> Tooltip<'a, Message, StyleTyp
     .delay(TOOLTIP_DELAY)
 }
 
-fn logged_notifications<'a>(sniffer: &Sniffer) -> Column<'a, Message, StyleType> {
+fn logged_notifications(sniffer: &Sniffer) -> Column<'_, Message, StyleType> {
     let Settings { language, .. } = sniffer.conf.settings;
     let data_repr = sniffer.conf.data_repr;
     let mut ret_val = Column::new()
@@ -336,6 +337,7 @@ fn logged_notifications<'a>(sniffer: &Sniffer) -> Column<'a, Message, StyleType>
                     first_entry_data_info,
                     data_repr,
                     language,
+                    sniffer.program_lookup.as_ref(),
                 )
             }
             LoggedNotification::BlacklistedTransmitted(blacklisted_transmitted) => {
@@ -432,7 +434,7 @@ fn data_notification_extra<'a>(
         .data_info_fav
         .data_info;
     for (host, data_info_host) in &logged_notification.hosts {
-        let icon = get_flag_tooltip(host.country, &data_info_host, language, false);
+        let icon = get_flag_tooltip(host.country, data_info_host, language, false);
         let host_bar = item_bar(
             icon,
             host.to_entry_string(),
