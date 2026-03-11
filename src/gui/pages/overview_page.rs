@@ -103,7 +103,7 @@ fn col_favorite_item(
     let mut scroll_item = Column::new()
         .padding(Padding::ZERO.right(11.0))
         .align_x(Alignment::Center);
-    let entries = favorite.get_entries(&sniffer);
+    let entries = favorite.get_entries(sniffer);
     let first_entry_data_info = entries
         .iter()
         .map(FavoriteItem::data_info)
