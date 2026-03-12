@@ -35,7 +35,7 @@ use iced::alignment::{Horizontal, Vertical};
 use iced::widget::scrollable::Direction;
 use iced::widget::text::{LineHeight, Wrapping};
 use iced::widget::tooltip::Position;
-use iced::widget::{Button, Column, Container, Row, Scrollable, Space, Text, Tooltip, button};
+use iced::widget::{Button, Column, Container, Row, Scrollable, Text, Tooltip, button};
 use iced::{Alignment, Element, Length, Padding};
 
 /// Computes the body of gui overview page
@@ -137,9 +137,12 @@ fn col_favorite_item(
     }
 
     if entries.len() >= 30 {
-        scroll_item = scroll_item
-            .push(Space::new().height(25))
-            .push(Text::new(only_top_30_items_translation(language)).align_x(Alignment::Center));
+        scroll_item = scroll_item.push(
+            Text::new(only_top_30_items_translation(language))
+                .height(50)
+                .align_y(Alignment::Center)
+                .align_x(Alignment::Center),
+        );
     }
 
     let col = Column::new()
@@ -169,7 +172,7 @@ fn col_favorite_item(
         Container::new(col)
             .width(favorite.fill_portion())
             .height(Length::Fill)
-            .padding(Padding::new(10.0).top(0).bottom(5))
+            .padding(Padding::new(7.0).top(0))
             .class(ContainerType::BorderedRound)
             .into(),
     )
