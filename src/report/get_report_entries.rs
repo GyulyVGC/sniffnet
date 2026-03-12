@@ -4,6 +4,7 @@ use crate::Sniffer;
 use crate::networking::manage_packets::get_address_to_lookup;
 use crate::networking::types::address_port_pair::AddressPortPair;
 use crate::networking::types::data_info::DataInfo;
+use crate::networking::types::data_info_fav::DataInfoFav;
 use crate::networking::types::data_info_host::DataInfoHost;
 use crate::networking::types::info_address_port_pair::InfoAddressPortPair;
 
@@ -21,8 +22,8 @@ pub fn get_searched_entries(
         .filter(|(key, value)| {
             let address_to_lookup = &get_address_to_lookup(key, value.traffic_direction);
             let r_dns_host = sniffer.addresses_resolved.get(address_to_lookup);
-            // TODO: correctly match all kinds of favorite
-            let is_favorite = if let Some(e) = r_dns_host {
+            // is this a favorite host?
+            let is_favorite_host = if let Some(e) = r_dns_host {
                 info_traffic
                     .hosts
                     .get(&e.1)
@@ -32,6 +33,22 @@ pub fn get_searched_entries(
             } else {
                 false
             };
+            // is this a favorite service?
+            let is_favorite_service = info_traffic
+                .services
+                .get(&value.service)
+                .unwrap_or(&DataInfoFav::default())
+                .is_favorite;
+            // is this a favorite program?
+            let is_favorite_program = if let Some(pl) = sniffer.program_lookup.as_ref() {
+                pl.programs()
+                    .get(&value.program)
+                    .unwrap_or(&DataInfoFav::default())
+                    .is_favorite
+            } else {
+                false
+            };
+            let is_favorite = is_favorite_host || is_favorite_service || is_favorite_program;
             sniffer
                 .search
                 .match_entry(key, value, r_dns_host, is_favorite)
