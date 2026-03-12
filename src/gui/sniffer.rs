@@ -1444,6 +1444,7 @@ mod tests {
     use crate::gui::types::conf::Conf;
     use crate::gui::types::config_window::ConfigWindow;
     use crate::gui::types::export_pcap::ExportPcap;
+    use crate::gui::types::favorite::FavoriteKey;
     use crate::gui::types::filters::Filters;
     use crate::gui::types::message::Message;
     use crate::gui::types::settings::Settings;
@@ -1453,6 +1454,8 @@ mod tests {
     use crate::networking::types::data_info::DataInfo;
     use crate::networking::types::data_representation::DataRepr;
     use crate::networking::types::host::Host;
+    use crate::networking::types::program::Program;
+    use crate::networking::types::service::Service;
     use crate::networking::types::traffic_direction::TrafficDirection;
     use crate::notifications::types::logged_notification::{
         DataThresholdExceeded, LoggedNotification,
@@ -1623,182 +1626,58 @@ mod tests {
 
     #[test]
     #[parallel] // needed to not collide with other tests generating configs files
-    fn test_modify_favorite_connections() {
+    fn test_add_or_remove_favorite() {
         let mut sniffer = Sniffer::new(Conf::default());
-        // remove 1
-        sniffer.update(Message::AddOrRemoveFavorite(
-            Host {
-                domain: "1.1".to_string(),
-                asn: Default::default(),
-                country: Country::US,
-            },
-            false,
-        ));
+
+        let fav_host = FavoriteKey::Host(Host {
+            domain: "1.1".to_string(),
+            asn: Default::default(),
+            country: Country::US,
+        });
+        let fav_service = FavoriteKey::Service(Service::Name("https"));
+        let fav_program = FavoriteKey::Program(Program::NamePath((
+            "Chrome".to_string(),
+            "/usr/bin/chrome".to_string(),
+        )));
+
+        // remove host
+        sniffer.update(Message::AddOrRemoveFavorite(fav_host.clone(), false));
         assert_eq!(sniffer.favorites, HashSet::new());
-        // remove 2
-        sniffer.update(Message::AddOrRemoveFavorite(
-            Host {
-                domain: "2.2".to_string(),
-                asn: Default::default(),
-                country: Country::US,
-            },
-            false,
-        ));
+        // remove service
+        sniffer.update(Message::AddOrRemoveFavorite(fav_service.clone(), false));
         assert_eq!(sniffer.favorites, HashSet::new());
-        // add 2
-        sniffer.update(Message::AddOrRemoveFavorite(
-            Host {
-                domain: "2.2".to_string(),
-                asn: Default::default(),
-                country: Country::US,
-            },
-            true,
-        ));
+        // add service
+        sniffer.update(Message::AddOrRemoveFavorite(fav_service.clone(), true));
+        assert_eq!(sniffer.favorites, HashSet::from([fav_service.clone()]));
+        // remove host
+        sniffer.update(Message::AddOrRemoveFavorite(fav_host.clone(), false));
+        assert_eq!(sniffer.favorites, HashSet::from([fav_service.clone()]));
+        // add service
+        sniffer.update(Message::AddOrRemoveFavorite(fav_service.clone(), true));
+        assert_eq!(sniffer.favorites, HashSet::from([fav_service.clone()]));
+        // add host
+        sniffer.update(Message::AddOrRemoveFavorite(fav_host.clone(), true));
         assert_eq!(
             sniffer.favorites,
-            HashSet::from([Host {
-                domain: "2.2".to_string(),
-                asn: Default::default(),
-                country: Country::US,
-            }])
+            HashSet::from([fav_host.clone(), fav_service.clone()])
         );
-        // remove 1
-        sniffer.update(Message::AddOrRemoveFavorite(
-            Host {
-                domain: "1.1".to_string(),
-                asn: Default::default(),
-                country: Country::US,
-            },
-            false,
-        ));
+        // add program
+        sniffer.update(Message::AddOrRemoveFavorite(fav_program.clone(), true));
         assert_eq!(
             sniffer.favorites,
-            HashSet::from([Host {
-                domain: "2.2".to_string(),
-                asn: Default::default(),
-                country: Country::US,
-            }])
+            HashSet::from([fav_host.clone(), fav_service.clone(), fav_program.clone()])
         );
-        // add 2
-        sniffer.update(Message::AddOrRemoveFavorite(
-            Host {
-                domain: "2.2".to_string(),
-                asn: Default::default(),
-                country: Country::US,
-            },
-            true,
-        ));
+        // remove service
+        sniffer.update(Message::AddOrRemoveFavorite(fav_service.clone(), false));
         assert_eq!(
             sniffer.favorites,
-            HashSet::from([Host {
-                domain: "2.2".to_string(),
-                asn: Default::default(),
-                country: Country::US,
-            }])
+            HashSet::from([fav_host.clone(), fav_program.clone()])
         );
-        // add 1
-        sniffer.update(Message::AddOrRemoveFavorite(
-            Host {
-                domain: "1.1".to_string(),
-                asn: Default::default(),
-                country: Country::US,
-            },
-            true,
-        ));
-        assert_eq!(
-            sniffer.favorites,
-            HashSet::from([
-                Host {
-                    domain: "1.1".to_string(),
-                    asn: Default::default(),
-                    country: Country::US,
-                },
-                Host {
-                    domain: "2.2".to_string(),
-                    asn: Default::default(),
-                    country: Country::US,
-                }
-            ])
-        );
-        // add 3
-        sniffer.update(Message::AddOrRemoveFavorite(
-            Host {
-                domain: "3.3".to_string(),
-                asn: Default::default(),
-                country: Country::US,
-            },
-            true,
-        ));
-        assert_eq!(
-            sniffer.favorites,
-            HashSet::from([
-                Host {
-                    domain: "1.1".to_string(),
-                    asn: Default::default(),
-                    country: Country::US,
-                },
-                Host {
-                    domain: "2.2".to_string(),
-                    asn: Default::default(),
-                    country: Country::US,
-                },
-                Host {
-                    domain: "3.3".to_string(),
-                    asn: Default::default(),
-                    country: Country::US,
-                }
-            ])
-        );
-        // remove 2
-        sniffer.update(Message::AddOrRemoveFavorite(
-            Host {
-                domain: "2.2".to_string(),
-                asn: Default::default(),
-                country: Country::US,
-            },
-            false,
-        ));
-        assert_eq!(
-            sniffer.favorites,
-            HashSet::from([
-                Host {
-                    domain: "1.1".to_string(),
-                    asn: Default::default(),
-                    country: Country::US,
-                },
-                Host {
-                    domain: "3.3".to_string(),
-                    asn: Default::default(),
-                    country: Country::US,
-                }
-            ])
-        );
-        // remove 3
-        sniffer.update(Message::AddOrRemoveFavorite(
-            Host {
-                domain: "3.3".to_string(),
-                asn: Default::default(),
-                country: Country::US,
-            },
-            false,
-        ));
-        assert_eq!(
-            sniffer.favorites,
-            HashSet::from([Host {
-                domain: "1.1".to_string(),
-                asn: Default::default(),
-                country: Country::US,
-            }])
-        );
-        // remove 1
-        sniffer.update(Message::AddOrRemoveFavorite(
-            Host {
-                domain: "1.1".to_string(),
-                asn: Default::default(),
-                country: Country::US,
-            },
-            false,
-        ));
+        // remove program
+        sniffer.update(Message::AddOrRemoveFavorite(fav_program.clone(), false));
+        assert_eq!(sniffer.favorites, HashSet::from([fav_host.clone()]));
+        // remove host
+        sniffer.update(Message::AddOrRemoveFavorite(fav_host.clone(), false));
         assert_eq!(sniffer.favorites, HashSet::new());
     }
 
