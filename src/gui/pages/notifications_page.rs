@@ -1,9 +1,9 @@
-use crate::countries::country_utils::{get_computer_tooltip, get_flag_tooltip};
+use crate::countries::country_utils::get_flag_tooltip;
 use crate::countries::flags_pictures::ICONS_SIZE_BIG;
 use crate::gui::components::header::get_button_settings;
 use crate::gui::components::tab::get_pages_tabs;
 use crate::gui::components::types::my_modal::MyModal;
-use crate::gui::pages::overview_page::{get_bars, item_bar};
+use crate::gui::pages::overview_page::item_bar;
 use crate::gui::pages::types::settings_page::SettingsPage;
 use crate::gui::styles::container::ContainerType;
 use crate::gui::styles::rule::RuleType;
@@ -18,7 +18,6 @@ use crate::networking::types::data_representation::DataRepr;
 use crate::networking::types::host::Host;
 use crate::networking::types::program_lookup::ProgramLookup;
 use crate::networking::types::service::Service;
-use crate::networking::types::traffic_type::TrafficType;
 use crate::notifications::types::logged_notification::{
     BlacklistedTransmitted, DataThresholdExceeded, FavoriteTransmitted, LoggedNotification,
 };
@@ -135,7 +134,16 @@ fn data_notification_log<'a>(
     first_entry_data_info: DataInfo,
     language: Language,
 ) -> Container<'a, Message, StyleType> {
+    let data_info = logged_notification.data_info;
     let data_repr = logged_notification.data_repr;
+    let threshold_bar = item_bar(
+        Space::new().width(ICONS_SIZE_BIG),
+        String::new(),
+        &data_info,
+        data_repr,
+        first_entry_data_info,
+    );
+
     let data_string = data_repr.formatted_string(logged_notification.threshold.into());
     let icon = if data_repr == DataRepr::Packets {
         Icon::PacketsThreshold
@@ -174,11 +182,7 @@ fn data_notification_log<'a>(
                         .size(FONT_SIZE_FOOTER),
                 ),
         )
-        .push(threshold_bar(
-            logged_notification,
-            first_entry_data_info,
-            language,
-        ));
+        .push(threshold_bar);
     let content_and_extra = Column::new()
         .spacing(10)
         .push(content)
@@ -201,7 +205,7 @@ fn favorite_notification_log<'a>(
     program_lookup: Option<&'a ProgramLookup>,
 ) -> Container<'a, Message, StyleType> {
     let favorite = &logged_notification.favorite;
-    let icon = favorite.icon(language, false, program_lookup);
+    let icon = favorite.icon(language, program_lookup, true);
     let item_bar = item_bar(
         icon,
         favorite.to_entry_string(),
@@ -353,38 +357,6 @@ fn logged_notifications(sniffer: &Sniffer) -> Column<'_, Message, StyleType> {
     ret_val
 }
 
-fn threshold_bar<'a>(
-    logged_notification: &DataThresholdExceeded,
-    first_entry_data_info: DataInfo,
-    language: Language,
-) -> Row<'a, Message, StyleType> {
-    let data_repr = logged_notification.data_repr;
-    let data_info = logged_notification.data_info;
-
-    Row::new()
-        .align_y(Alignment::Center)
-        .spacing(5)
-        .push(get_computer_tooltip(
-            true,
-            true,
-            None,
-            TrafficType::Unicast,
-            language,
-        ))
-        .push(
-            Column::new()
-                .spacing(1)
-                .push(
-                    Row::new()
-                        .push(Space::new().width(Length::Fill))
-                        .push(Text::new(
-                            data_repr.formatted_string(data_info.tot_data(data_repr)),
-                        )),
-                )
-                .push(get_bars(data_repr, &first_entry_data_info, &data_info)),
-        )
-}
-
 fn button_expand<'a>(
     notification_id: usize,
     is_expanded: bool,
@@ -406,7 +378,7 @@ fn button_expand<'a>(
     .on_press(Message::ExpandNotification(notification_id, !is_expanded));
 
     Container::new(button)
-        .padding(Padding::ZERO.left(395))
+        .padding(Padding::ZERO.left(427))
         .align_y(Alignment::Center)
 }
 

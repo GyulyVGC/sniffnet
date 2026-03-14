@@ -1,4 +1,5 @@
 use crate::countries::country_utils::get_flag_tooltip;
+use crate::countries::flags_pictures::ICONS_SIZE_BIG;
 use crate::gui::sniffer::Sniffer;
 use crate::gui::styles::button::ButtonType;
 use crate::gui::styles::types::style_type::StyleType;
@@ -20,7 +21,7 @@ use crate::translations::translations_3::service_translation;
 use crate::translations::translations_5::program_translation;
 use crate::translations::types::language::Language;
 use crate::utils::types::icon::Icon;
-use iced::widget::{Button, Container, Tooltip, button};
+use iced::widget::{Button, Container, Space, button};
 use iced::{Alignment, Element};
 use std::cmp::min;
 
@@ -144,20 +145,27 @@ impl FavoriteItem {
     pub fn icon<'a>(
         &self,
         language: Language,
-        thumbnail: bool,
         program_lookup: Option<&'a ProgramLookup>,
+        fill_empty: bool,
     ) -> impl Into<Element<'a, Message, StyleType>> {
         match self {
-            FavoriteItem::Host((host, data_info_host)) => Some(get_flag_tooltip(
-                host.country,
-                data_info_host,
-                language,
-                thumbnail,
-            )),
-            FavoriteItem::Service(_) => None::<Tooltip<Message, StyleType>>,
+            FavoriteItem::Host((host, data_info_host)) => {
+                Some(get_flag_tooltip(host.country, data_info_host, language, false).into())
+            }
+            FavoriteItem::Service(_) => {
+                if fill_empty {
+                    Some(Space::new().width(ICONS_SIZE_BIG).into())
+                } else {
+                    None::<Element<Message, StyleType>>
+                }
+            }
             FavoriteItem::Program((program, _)) => {
                 let program_lookup = program_lookup?;
-                Some(program_lookup.picon_tooltip(program.icon_key(), program.path()))
+                Some(
+                    program_lookup
+                        .picon_tooltip(program.icon_key(), program.path())
+                        .into(),
+                )
             }
         }
     }

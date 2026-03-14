@@ -114,7 +114,7 @@ fn col_favorite_item(
     for fi in &entries {
         let star_button = fi.star_button();
 
-        let icon = fi.icon(language, false, program_lookup);
+        let icon = fi.icon(language, program_lookup, false);
         let item_bar = item_bar(
             icon,
             fi.to_entry_string(),

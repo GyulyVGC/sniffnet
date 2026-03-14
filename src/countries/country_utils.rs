@@ -317,7 +317,7 @@ pub fn get_flag_tooltip<'a>(
     language: Language,
     thumbnail: bool,
 ) -> Tooltip<'a, Message, StyleType> {
-    let width = if thumbnail {
+    let size = if thumbnail {
         ICONS_SIZE_SMALL
     } else {
         ICONS_SIZE_BIG
@@ -328,7 +328,7 @@ pub fn get_flag_tooltip<'a>(
     let traffic_type = host_info.traffic_type;
     let (content, tooltip) = get_flag_from_country(
         country,
-        width,
+        size,
         is_local,
         is_loopback,
         is_bogon,
