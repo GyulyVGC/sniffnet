@@ -2,6 +2,7 @@ use crate::gui::types::favorite::{FavoriteItem, FavoriteKey};
 use crate::networking::manage_packets::get_address_to_lookup;
 use crate::networking::types::capture_context::CaptureSource;
 use crate::networking::types::data_info::DataInfo;
+use crate::networking::types::data_info_fav::DataInfoFav;
 use crate::networking::types::data_info_host::DataInfoHost;
 use crate::networking::types::data_representation::DataRepr;
 use crate::networking::types::host::Host;
@@ -48,8 +49,8 @@ pub fn notify_and_log(
                 data_info,
                 timestamp: get_formatted_timestamp(timestamp),
                 is_expanded: false,
-                hosts: hosts_list(info_traffic_msg, data_repr),
-                services: services_list(info_traffic_msg, data_repr),
+                hosts: threshold_hosts(info_traffic_msg, data_repr),
+                services: threshold_services(info_traffic_msg, data_repr),
             });
 
             //log this notification
@@ -67,17 +68,7 @@ pub fn notify_and_log(
 
     // from favorites
     if notifications.favorite_notification.is_active {
-        // TODO: detect all kinds of favorites in latest interval
-        let favorites_last_interval: Vec<FavoriteItem> = favorites
-            .iter()
-            .filter_map(|fav| match fav {
-                FavoriteKey::Host(h) => info_traffic_msg
-                    .hosts
-                    .get(h)
-                    .map(|d| FavoriteItem::Host((h.clone(), *d))),
-                _ => None,
-            })
-            .collect();
+        let favorites_last_interval = favorites_last_interval(info_traffic_msg, favorites);
 
         if !favorites_last_interval.is_empty() {
             for favorite in favorites_last_interval {
@@ -164,7 +155,10 @@ pub fn notify_and_log(
     logged_notifications.tot() - emitted_notifications_prev
 }
 
-fn hosts_list(info_traffic_msg: &InfoTraffic, data_repr: DataRepr) -> Vec<(Host, DataInfoHost)> {
+fn threshold_hosts(
+    info_traffic_msg: &InfoTraffic,
+    data_repr: DataRepr,
+) -> Vec<(Host, DataInfoHost)> {
     let mut hosts: Vec<(Host, DataInfoHost)> = info_traffic_msg
         .hosts
         .iter()
@@ -186,7 +180,10 @@ fn hosts_list(info_traffic_msg: &InfoTraffic, data_repr: DataRepr) -> Vec<(Host,
         .collect()
 }
 
-fn services_list(info_traffic_msg: &InfoTraffic, data_repr: DataRepr) -> Vec<(Service, DataInfo)> {
+fn threshold_services(
+    info_traffic_msg: &InfoTraffic,
+    data_repr: DataRepr,
+) -> Vec<(Service, DataInfo)> {
     let mut services: Vec<(Service, DataInfo)> = info_traffic_msg
         .services
         .iter()
@@ -200,6 +197,44 @@ fn services_list(info_traffic_msg: &InfoTraffic, data_repr: DataRepr) -> Vec<(Se
         .unwrap_or_default()
         .to_owned()
         .into_iter()
+        .collect()
+}
+
+fn favorites_last_interval(
+    info_traffic_msg: &InfoTraffic,
+    favorites: &HashSet<FavoriteKey>,
+) -> Vec<FavoriteItem> {
+    favorites
+        .iter()
+        .filter_map(|fav| match fav {
+            FavoriteKey::Host(h) => info_traffic_msg
+                .hosts
+                .get(h)
+                .map(|d| FavoriteItem::Host((h.clone(), *d))),
+            FavoriteKey::Service(s) => info_traffic_msg
+                .services
+                .get(s)
+                .map(|d| FavoriteItem::Service((*s, *d))),
+            FavoriteKey::Program(p) => {
+                let mut data_info = DataInfo::default();
+                info_traffic_msg
+                    .map
+                    .values()
+                    .filter(|v| v.program.eq(p))
+                    .for_each(|v| data_info.refresh(v.data_info()));
+                if data_info.tot_data(DataRepr::Packets) > 0 {
+                    Some(FavoriteItem::Program((
+                        p.clone(),
+                        DataInfoFav {
+                            data_info,
+                            is_favorite: true,
+                        },
+                    )))
+                } else {
+                    None
+                }
+            }
+        })
         .collect()
 }
 

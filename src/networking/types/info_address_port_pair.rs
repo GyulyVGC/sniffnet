@@ -49,7 +49,7 @@ pub struct InfoAddressPortPair {
 
 impl InfoAddressPortPair {
     pub fn refresh(&mut self, other: &Self) {
-        // self.program MUST NOT be refreshed here (other.program is always NotApplicable)
+        // self.program MUST NOT be refreshed here
         self.transmitted_bytes += other.transmitted_bytes;
         self.transmitted_packets += other.transmitted_packets;
         self.final_timestamp = other.final_timestamp;
