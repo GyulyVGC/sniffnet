@@ -1,3 +1,4 @@
+use crate::countries::flags_pictures::ICONS_SIZE_BIG;
 use crate::gui::styles::container::ContainerType;
 use crate::gui::styles::style_constants::TOOLTIP_DELAY;
 use crate::gui::styles::types::style_type::StyleType;
@@ -215,8 +216,14 @@ impl ProgramLookup {
 
         let handle = self.picons.get(icon_key).unwrap_or(&DEFAULT_PICON);
         let content: Element<Message, StyleType> = match handle {
-            IconHandle::Image(image_handle) => Image::new(image_handle).width(32).height(32).into(),
-            IconHandle::Svg(svg_handle) => Svg::new(svg_handle.clone()).width(32).height(32).into(),
+            IconHandle::Image(image_handle) => Image::new(image_handle)
+                .width(ICONS_SIZE_BIG)
+                .height(ICONS_SIZE_BIG)
+                .into(),
+            IconHandle::Svg(svg_handle) => Svg::new(svg_handle.clone())
+                .width(ICONS_SIZE_BIG)
+                .height(ICONS_SIZE_BIG)
+                .into(),
         };
 
         Tooltip::new(content, Text::new(program_path), Position::FollowCursor)

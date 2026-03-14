@@ -1,7 +1,5 @@
-pub const FLAGS_WIDTH_SMALL: f32 = 20.0;
-pub const FLAGS_WIDTH_BIG: f32 = 37.5;
-
-pub const FLAGS_HEIGHT_BIG: f32 = FLAGS_WIDTH_BIG * 3.0 / 4.0;
+pub const ICONS_SIZE_SMALL: f32 = 20.0;
+pub const ICONS_SIZE_BIG: f32 = 32.0;
 
 pub const AD: &[u8] = include_bytes!("../../resources/embedded_icons/countries/ad.svg");
 pub const AE: &[u8] = include_bytes!("../../resources/embedded_icons/countries/ae.svg");
@@ -36,7 +34,7 @@ pub const BO: &[u8] = include_bytes!("../../resources/embedded_icons/countries/b
 pub const BR: &[u8] = include_bytes!("../../resources/embedded_icons/countries/br.svg");
 pub const BS: &[u8] = include_bytes!("../../resources/embedded_icons/countries/bs.svg");
 pub const BT: &[u8] = include_bytes!("../../resources/embedded_icons/countries/bt.svg");
-pub const BV: &[u8] = include_bytes!("../../resources/embedded_icons/countries/bv.svg");
+// pub const BV: &[u8] = include_bytes!("../../resources/embedded_icons/countries/bv.svg");
 pub const BW: &[u8] = include_bytes!("../../resources/embedded_icons/countries/bw.svg");
 pub const BY: &[u8] = include_bytes!("../../resources/embedded_icons/countries/by.svg");
 pub const BZ: &[u8] = include_bytes!("../../resources/embedded_icons/countries/bz.svg");
@@ -235,7 +233,7 @@ pub const TZ: &[u8] = include_bytes!("../../resources/embedded_icons/countries/t
 pub const UA: &[u8] = include_bytes!("../../resources/embedded_icons/countries/ua.svg");
 pub const UG: &[u8] = include_bytes!("../../resources/embedded_icons/countries/ug.svg");
 // pub const UM: &[u8] = include_bytes!("../../resources/embedded_icons/countries/um.svg");
-pub const US: &[u8] = include_bytes!("../../resources/embedded_icons/countries/usa.svg");
+pub const US: &[u8] = include_bytes!("../../resources/embedded_icons/countries/us.svg");
 pub const UY: &[u8] = include_bytes!("../../resources/embedded_icons/countries/uy.svg");
 pub const UZ: &[u8] = include_bytes!("../../resources/embedded_icons/countries/uz.svg");
 pub const VA: &[u8] = include_bytes!("../../resources/embedded_icons/countries/va.svg");

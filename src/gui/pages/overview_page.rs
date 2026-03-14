@@ -4,6 +4,7 @@
 //! and overall statistics about the traffic.
 
 use crate::chart::types::donut_chart::donut_chart;
+use crate::countries::flags_pictures::ICONS_SIZE_BIG;
 use crate::gui::components::ellipsized_text::EllipsizedText;
 use crate::gui::components::tab::get_pages_tabs;
 use crate::gui::pages::initial_page::get_addresses_row;
@@ -186,7 +187,7 @@ pub fn item_bar<'a>(
     first_entry_data_info: DataInfo,
 ) -> Row<'a, Message, StyleType> {
     Row::new()
-        .height(32)
+        .height(ICONS_SIZE_BIG)
         .align_y(Alignment::Center)
         .spacing(5)
         .push(icon)

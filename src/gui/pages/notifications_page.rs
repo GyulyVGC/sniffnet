@@ -1,5 +1,5 @@
 use crate::countries::country_utils::{get_computer_tooltip, get_flag_tooltip};
-use crate::countries::flags_pictures::FLAGS_HEIGHT_BIG;
+use crate::countries::flags_pictures::ICONS_SIZE_BIG;
 use crate::gui::components::header::get_button_settings;
 use crate::gui::components::tab::get_pages_tabs;
 use crate::gui::components::types::my_modal::MyModal;
@@ -423,7 +423,7 @@ fn data_notification_extra<'a>(
     }
     let spacing = 10.0;
     #[allow(clippy::cast_precision_loss)]
-    let height = (FLAGS_HEIGHT_BIG + spacing) * max_entries as f32;
+    let height = (ICONS_SIZE_BIG + spacing) * max_entries as f32;
 
     let mut hosts_col = Column::new().spacing(spacing).width(Length::FillPortion(5));
     let first_data_info = logged_notification
