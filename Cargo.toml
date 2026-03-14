@@ -17,7 +17,7 @@ include = [
     "/LICENSE-APACHE",
     "/README.md",
     "/CHANGELOG.md",
-    "/resources/countries_flags/**/*.svg",
+    "/resources/embedded_icons/**/*.svg",
     "/resources/DB/*.mmdb",
     "/resources/fonts/subset/*.ttf",
     "/resources/logos/raw/icon.png",

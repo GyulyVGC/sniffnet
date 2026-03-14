@@ -42,7 +42,7 @@ fn get_flag_from_country<'a>(
     #![allow(clippy::too_many_lines)]
     let mut tooltip = country.to_string();
     let mut svg_style = SvgType::Standard;
-    let svg = Svg::new(Handle::from_memory(Vec::from(match country {
+    let svg = Svg::new(Handle::from_memory(match country {
         Country::AD => AD,
         Country::AE => AE,
         Country::AF => AF,
@@ -310,7 +310,7 @@ fn get_flag_from_country<'a>(
             tooltip = new_tooltip;
             flag
         }
-    })))
+    }))
     .class(svg_style)
     .width(width)
     .height(width * 0.75);

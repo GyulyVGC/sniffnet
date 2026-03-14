@@ -11,7 +11,7 @@ use crate::networking::types::info_address_port_pair::InfoAddressPortPair;
 use crate::networking::types::program::Program;
 use iced::Element;
 use iced::widget::tooltip::Position;
-use iced::widget::{Image, Svg, Text, Tooltip, image};
+use iced::widget::{Image, Svg, Text, Tooltip, svg};
 use listeners::{Process, Protocol};
 use picon::IconHandle;
 use std::collections::HashMap;
@@ -251,7 +251,7 @@ pub fn get_picon(icon_key_rx: &Receiver<String>, picon_tx: &Sender<(String, Icon
 }
 
 const DEFAULT_PICON_BYTES: &[u8] =
-    include_bytes!("../../../resources/countries_flags/default_picon.png");
+    include_bytes!("../../../resources/embedded_icons/default_picon.svg");
 
 static DEFAULT_PICON: std::sync::LazyLock<IconHandle> =
-    std::sync::LazyLock::new(|| IconHandle::Image(image::Handle::from_bytes(DEFAULT_PICON_BYTES)));
+    std::sync::LazyLock::new(|| IconHandle::Svg(svg::Handle::from_memory(DEFAULT_PICON_BYTES)));
