@@ -43,9 +43,9 @@ use std::cmp::max;
 pub fn notifications_page(sniffer: &Sniffer) -> Container<'_, Message, StyleType> {
     let Settings {
         language,
-        notifications,
+        ref notifications,
         ..
-    } = sniffer.conf.settings.clone();
+    } = sniffer.conf.settings;
 
     let mut tab_and_body = Column::new()
         .align_x(Alignment::Center)

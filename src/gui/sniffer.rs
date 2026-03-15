@@ -147,13 +147,10 @@ pub struct Sniffer {
 
 impl Sniffer {
     pub fn new(conf: Conf) -> Self {
-        let Settings {
-            style,
-            language,
-            mmdb_country,
-            mmdb_asn,
-            ..
-        } = conf.settings.clone();
+        let style = conf.settings.style;
+        let language = conf.settings.language;
+        let mmdb_country = conf.settings.mmdb_country.clone();
+        let mmdb_asn = conf.settings.mmdb_asn.clone();
         let data_repr = conf.data_repr;
         let capture_source = CaptureSource::from_conf(&conf);
         let preview_charts = pcap::Device::list()
