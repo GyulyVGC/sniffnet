@@ -61,11 +61,8 @@ fn page_content<'a>(sniffer: &Sniffer, key: &AddressPortPair) -> Container<'a, M
     let data_repr = sniffer.conf.data_repr;
 
     let info_traffic = &sniffer.info_traffic;
-    let val = info_traffic
-        .map
-        .get(key)
-        .unwrap_or(&InfoAddressPortPair::default())
-        .clone();
+    let default_val = InfoAddressPortPair::default();
+    let val = info_traffic.map.get(key).unwrap_or(&default_val);
     let address_to_lookup = get_address_to_lookup(key, val.traffic_direction);
     let host_option = sniffer.addresses_resolved.get(&address_to_lookup);
     let default_host = Host::default();
@@ -126,7 +123,7 @@ fn page_content<'a>(sniffer: &Sniffer, key: &AddressPortPair) -> Container<'a, M
         dest_col = dest_col.push(host_info_col);
     }
 
-    let col_info = col_info(key, &val, data_repr, language);
+    let col_info = col_info(key, val, data_repr, language);
 
     let content = assemble_widgets(col_info, source_col, dest_col);
 

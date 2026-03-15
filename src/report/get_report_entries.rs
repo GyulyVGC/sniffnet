@@ -13,7 +13,11 @@ use crate::networking::types::info_address_port_pair::InfoAddressPortPair;
 /// with their packets, in-bytes, and out-bytes count
 pub fn get_searched_entries(
     sniffer: &Sniffer,
-) -> (Vec<(AddressPortPair, InfoAddressPortPair)>, usize, DataInfo) {
+) -> (
+    Vec<(&AddressPortPair, &InfoAddressPortPair)>,
+    usize,
+    DataInfo,
+) {
     let mut agglomerate = DataInfo::default();
     let info_traffic = &sniffer.info_traffic;
     let mut all_results: Vec<(&AddressPortPair, &InfoAddressPortPair)> = info_traffic
@@ -69,9 +73,7 @@ pub fn get_searched_entries(
         all_results
             .get((sniffer.page_number.saturating_sub(1)) * 30..upper_bound)
             .unwrap_or_default()
-            .iter()
-            .map(|&(key, val)| (key.to_owned(), val.to_owned()))
-            .collect(),
+            .to_vec(),
         all_results.len(),
         agglomerate,
     )

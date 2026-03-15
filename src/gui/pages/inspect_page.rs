@@ -102,18 +102,12 @@ fn report<'a>(sniffer: &Sniffer) -> Column<'a, Message, StyleType> {
     let mut scroll_report = Column::new().align_x(Alignment::Start);
     let start_entry_num = (sniffer.page_number.saturating_sub(1)) * 30 + 1;
     let end_entry_num = start_entry_num + search_results.len() - 1;
-    for report_entry in search_results {
+    for (key, val) in search_results {
         scroll_report = scroll_report.push(
-            button(row_report_entry(
-                &report_entry.0,
-                &report_entry.1,
-                data_repr,
-            ))
-            .padding(2)
-            .on_press(Message::ShowModal(MyModal::ConnectionDetails(
-                report_entry.0,
-            )))
-            .class(ButtonType::Neutral),
+            button(row_report_entry(key, val, data_repr))
+                .padding(2)
+                .on_press(Message::ShowModal(MyModal::ConnectionDetails(*key)))
+                .class(ButtonType::Neutral),
         );
     }
     if results_number > 0 {

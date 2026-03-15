@@ -18,7 +18,6 @@ use crate::utils::error_logger::{ErrorLogger, Location};
 use crate::utils::formatted_strings::APP_VERSION;
 use crate::utils::formatted_strings::get_formatted_timestamp;
 use crate::{InfoTraffic, SNIFFNET_LOWERCASE, location};
-use std::cmp::min;
 use std::collections::{HashMap, HashSet};
 use std::net::IpAddr;
 
@@ -171,13 +170,8 @@ fn threshold_hosts(
             data_repr,
         )
     });
-    let n_entry = min(hosts.len(), 4);
+    hosts.truncate(4);
     hosts
-        .get(..n_entry)
-        .unwrap_or_default()
-        .to_owned()
-        .into_iter()
-        .collect()
 }
 
 fn threshold_services(
@@ -191,13 +185,8 @@ fn threshold_services(
         .map(|(s, data_info_fav)| (*s, data_info_fav.data_info))
         .collect();
     services.sort_by(|(_, a), (_, b)| a.compare(b, SortType::Descending, data_repr));
-    let n_entry = min(services.len(), 4);
+    services.truncate(4);
     services
-        .get(..n_entry)
-        .unwrap_or_default()
-        .to_owned()
-        .into_iter()
-        .collect()
 }
 
 fn favorites_last_interval(
