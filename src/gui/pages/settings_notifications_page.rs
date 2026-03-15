@@ -244,7 +244,7 @@ fn get_remote_notifications<'a>(
             .spacing(5)
             .align_y(Alignment::Center)
             .padding(Padding::ZERO.left(26))
-            .push(Text::new("URL:".to_string()))
+            .push(Text::new("URL:"))
             .push(
                 TextInput::new("https://example.com/notify", remote_notifications.url())
                     .on_input(Message::RemoteNotificationsUrl)

@@ -125,7 +125,7 @@ fn body_no_notifications_received(
         .width(Length::Fill)
         .push(Space::new().height(Length::Fill))
         .push(no_notifications_received_translation(language).align_x(Alignment::Center))
-        .push(Text::new(dots.to_owned()).size(50))
+        .push(Text::new(dots).size(50))
         .push(Space::new().height(FillPortion(2)))
 }
 

@@ -102,9 +102,8 @@ pub fn notify_and_log(
             let address_to_lookup = &get_address_to_lookup(k, v.traffic_direction);
             let host = addresses_resolved
                 .get(address_to_lookup)
-                .cloned()
-                .unwrap_or_default()
-                .1;
+                .map(|(_, h)| h.clone())
+                .unwrap_or_default();
             let mut data_info_host = info_traffic_msg
                 .hosts
                 .get(&host)

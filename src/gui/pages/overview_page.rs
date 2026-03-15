@@ -312,11 +312,7 @@ pub(crate) fn col_device<'a>(
                     Text::new(format!("{}:", active_filters_translation(language)))
                         .class(TextType::Subtitle),
                 )
-                .push(
-                    Row::new()
-                        .push(Text::new("   ".to_string()))
-                        .push(filters_desc),
-                ),
+                .push(Row::new().push(Text::new("   ")).push(filters_desc)),
         )
 }
 
