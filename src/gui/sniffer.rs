@@ -407,7 +407,7 @@ impl Sniffer {
         let content: Element<Message, StyleType> =
             Column::new().push(header).push(body).push(footer).into();
 
-        let ret_val: Element<'_, Message, StyleType> = match self.modal.clone() {
+        let ret_val: Element<'_, Message, StyleType> = match &self.modal {
             None => {
                 if let Some(settings_page) = self.settings_page {
                     let overlay: Element<Message, StyleType> = match settings_page {
@@ -427,7 +427,7 @@ impl Sniffer {
                     MyModal::Reset => get_exit_overlay(Message::Reset, color_gradient, language),
                     MyModal::Quit => get_exit_overlay(Message::Quit, color_gradient, language),
                     MyModal::ClearAll => get_clear_all_overlay(color_gradient, language),
-                    MyModal::ConnectionDetails(key) => connection_details_page(self, key),
+                    MyModal::ConnectionDetails(key) => connection_details_page(self, *key),
                 }
                 .into();
 
@@ -1291,7 +1291,7 @@ impl Sniffer {
             self.welcome = Some((false, 13));
         } else if let Some((false, x)) = self.welcome {
             if x <= 2 {
-                let _ = self.conf.clone().store();
+                let _ = self.conf.store();
                 return window::close(self.id.unwrap_or_else(Id::unique));
             }
             self.welcome = Some((false, x.saturating_sub(1)));

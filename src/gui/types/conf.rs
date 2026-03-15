@@ -118,7 +118,7 @@ impl Conf {
     }
 
     #[cfg(not(test))]
-    pub fn store(self) -> Result<(), ConfyError> {
+    pub fn store(&self) -> Result<(), ConfyError> {
         confy::store(SNIFFNET_LOWERCASE, Self::FILE_NAME, self).log_err(location!())
     }
 }
@@ -145,7 +145,7 @@ mod tests {
             confy::load_path::<Conf>(Conf::test_path()).unwrap_or_else(|_| Conf::default())
         }
 
-        pub fn store(self) -> Result<(), confy::ConfyError> {
+        pub fn store(&self) -> Result<(), confy::ConfyError> {
             confy::store_path(Conf::test_path(), self)
         }
     }

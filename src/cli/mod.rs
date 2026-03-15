@@ -164,7 +164,7 @@ mod tests {
         // we want to be sure that modified config is different from defaults
         assert_ne!(Conf::default(), modified_conf);
         //store modified configs
-        modified_conf.clone().store().unwrap();
+        modified_conf.store().unwrap();
         // assert they've been stored
         assert_eq!(Conf::load(), modified_conf);
         // restore defaults

@@ -67,10 +67,11 @@ fn page_content<'a>(sniffer: &Sniffer, key: &AddressPortPair) -> Container<'a, M
         .unwrap_or(&InfoAddressPortPair::default())
         .clone();
     let address_to_lookup = get_address_to_lookup(key, val.traffic_direction);
-    let host_option = sniffer.addresses_resolved.get(&address_to_lookup).cloned();
+    let host_option = sniffer.addresses_resolved.get(&address_to_lookup);
+    let default_host = Host::default();
     let host_info_option = info_traffic
         .hosts
-        .get(&host_option.clone().unwrap_or_default().1)
+        .get(host_option.map_or(&default_host, |(_, h)| h))
         .copied();
 
     let header_and_content = Column::new()
@@ -89,7 +90,7 @@ fn page_content<'a>(sniffer: &Sniffer, key: &AddressPortPair) -> Container<'a, M
     );
     let mut host_info_col = Column::new();
     if let Some((r_dns, host)) = host_option {
-        host_info_col = get_host_info_col(&r_dns, &host, language);
+        host_info_col = get_host_info_col(r_dns, host, language);
         let host_info = host_info_option.unwrap_or_default();
         let flag = get_flag_tooltip(host.country, &host_info, language, false);
         let computer = get_local_tooltip(sniffer, &address_to_lookup, key);
