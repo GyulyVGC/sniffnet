@@ -1,12 +1,10 @@
-use std::cmp::min;
-
 use crate::Sniffer;
+use crate::gui::types::favorite::FavoriteKey;
 use crate::networking::manage_packets::get_address_to_lookup;
 use crate::networking::types::address_port_pair::AddressPortPair;
 use crate::networking::types::data_info::DataInfo;
-use crate::networking::types::data_info_fav::DataInfoFav;
-use crate::networking::types::data_info_host::DataInfoHost;
 use crate::networking::types::info_address_port_pair::InfoAddressPortPair;
+use std::cmp::min;
 
 /// Return the elements that satisfy the search constraints and belong to the given page,
 /// and the total number of elements which satisfy the search constraints,
@@ -20,6 +18,7 @@ pub fn get_searched_entries(
 ) {
     let mut agglomerate = DataInfo::default();
     let info_traffic = &sniffer.info_traffic;
+    let favorites = &sniffer.conf.settings.favorites;
     let mut all_results: Vec<(&AddressPortPair, &InfoAddressPortPair)> = info_traffic
         .map
         .iter()
@@ -28,27 +27,15 @@ pub fn get_searched_entries(
             let r_dns_host = sniffer.addresses_resolved.get(address_to_lookup);
             // is this a favorite host?
             let is_favorite_host = if let Some(e) = r_dns_host {
-                info_traffic
-                    .hosts
-                    .get(&e.1)
-                    .unwrap_or(&DataInfoHost::default())
-                    .data_info_fav
-                    .is_favorite
+                favorites.contains(&FavoriteKey::Host(e.1.clone()))
             } else {
                 false
             };
             // is this a favorite service?
-            let is_favorite_service = info_traffic
-                .services
-                .get(&value.service)
-                .unwrap_or(&DataInfoFav::default())
-                .is_favorite;
+            let is_favorite_service = favorites.contains(&FavoriteKey::Service(value.service));
             // is this a favorite program?
-            let is_favorite_program = if let Some(pl) = sniffer.program_lookup.as_ref() {
-                pl.programs()
-                    .get(&value.program)
-                    .unwrap_or(&DataInfoFav::default())
-                    .is_favorite
+            let is_favorite_program = if sniffer.program_lookup.is_some() {
+                favorites.contains(&FavoriteKey::Program(value.program.clone()))
             } else {
                 false
             };

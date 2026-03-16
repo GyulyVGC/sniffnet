@@ -66,7 +66,7 @@ use iced::window::{Id, Level};
 use iced::{Element, Point, Size, Subscription, Task, window};
 use listeners::Process;
 use rfd::FileHandle;
-use std::collections::{HashMap, HashSet};
+use std::collections::HashMap;
 use std::net::IpAddr;
 use std::path::PathBuf;
 use std::sync::Arc;
@@ -97,8 +97,6 @@ pub struct Sniffer {
     pub info_traffic: InfoTraffic,
     /// Map of the resolved addresses with their full rDNS value and the corresponding host
     pub addresses_resolved: HashMap<IpAddr, (String, Host)>,
-    /// Collection of the favorite hosts, services and programs
-    pub favorites: HashSet<FavoriteKey>,
     /// Log of the displayed notifications, with the total number of notifications for this capture
     pub logged_notifications: LoggedNotifications,
     /// Reports if a newer release of the software is available on GitHub
@@ -165,7 +163,6 @@ impl Sniffer {
             preview_captures_rx: None,
             info_traffic: InfoTraffic::default(),
             addresses_resolved: HashMap::new(),
-            favorites: HashSet::new(),
             logged_notifications: LoggedNotifications::default(),
             newer_release_available: None,
             capture_source,
@@ -903,7 +900,7 @@ impl Sniffer {
             &mut self.logged_notifications,
             &self.conf.settings.notifications,
             &msg,
-            &self.favorites,
+            &self.conf.settings.favorites,
             &self.capture_source,
             &self.addresses_resolved,
         );
@@ -1048,7 +1045,6 @@ impl Sniffer {
         self.current_capture_rx = (self.current_capture_rx.0 + 1, None);
         self.info_traffic = InfoTraffic::default();
         self.addresses_resolved = HashMap::new();
-        self.favorites = HashSet::new();
         self.logged_notifications = LoggedNotifications::default();
         self.pcap_error = None;
         self.traffic_chart = TrafficChart::new(style, language, self.conf.data_repr);
@@ -1101,28 +1097,9 @@ impl Sniffer {
 
     fn add_or_remove_favorite(&mut self, fav: &FavoriteKey, add: bool) {
         if add {
-            self.favorites.insert(fav.clone());
+            self.conf.settings.favorites.insert(fav.clone());
         } else {
-            self.favorites.remove(fav);
-        }
-
-        match fav {
-            FavoriteKey::Host(host) => {
-                if let Some(host_info) = self.info_traffic.hosts.get_mut(host) {
-                    host_info.data_info_fav.is_favorite = add;
-                }
-            }
-            FavoriteKey::Service(service) => {
-                if let Some(service_info) = self.info_traffic.services.get_mut(service) {
-                    service_info.is_favorite = add;
-                }
-            }
-            FavoriteKey::Program(program) => {
-                let Some(program_lookup) = &mut self.program_lookup else {
-                    return;
-                };
-                program_lookup.edit_fav(program, add);
-            }
+            self.conf.settings.favorites.remove(fav);
         }
     }
 
@@ -1639,43 +1616,55 @@ mod tests {
 
         // remove host
         sniffer.update(Message::AddOrRemoveFavorite(fav_host.clone(), false));
-        assert_eq!(sniffer.favorites, HashSet::new());
+        assert_eq!(sniffer.conf.settings.favorites, HashSet::new());
         // remove service
         sniffer.update(Message::AddOrRemoveFavorite(fav_service.clone(), false));
-        assert_eq!(sniffer.favorites, HashSet::new());
+        assert_eq!(sniffer.conf.settings.favorites, HashSet::new());
         // add service
         sniffer.update(Message::AddOrRemoveFavorite(fav_service.clone(), true));
-        assert_eq!(sniffer.favorites, HashSet::from([fav_service.clone()]));
+        assert_eq!(
+            sniffer.conf.settings.favorites,
+            HashSet::from([fav_service.clone()])
+        );
         // remove host
         sniffer.update(Message::AddOrRemoveFavorite(fav_host.clone(), false));
-        assert_eq!(sniffer.favorites, HashSet::from([fav_service.clone()]));
+        assert_eq!(
+            sniffer.conf.settings.favorites,
+            HashSet::from([fav_service.clone()])
+        );
         // add service
         sniffer.update(Message::AddOrRemoveFavorite(fav_service.clone(), true));
-        assert_eq!(sniffer.favorites, HashSet::from([fav_service.clone()]));
+        assert_eq!(
+            sniffer.conf.settings.favorites,
+            HashSet::from([fav_service.clone()])
+        );
         // add host
         sniffer.update(Message::AddOrRemoveFavorite(fav_host.clone(), true));
         assert_eq!(
-            sniffer.favorites,
+            sniffer.conf.settings.favorites,
             HashSet::from([fav_host.clone(), fav_service.clone()])
         );
         // add program
         sniffer.update(Message::AddOrRemoveFavorite(fav_program.clone(), true));
         assert_eq!(
-            sniffer.favorites,
+            sniffer.conf.settings.favorites,
             HashSet::from([fav_host.clone(), fav_service.clone(), fav_program.clone()])
         );
         // remove service
         sniffer.update(Message::AddOrRemoveFavorite(fav_service.clone(), false));
         assert_eq!(
-            sniffer.favorites,
+            sniffer.conf.settings.favorites,
             HashSet::from([fav_host.clone(), fav_program.clone()])
         );
         // remove program
         sniffer.update(Message::AddOrRemoveFavorite(fav_program.clone(), false));
-        assert_eq!(sniffer.favorites, HashSet::from([fav_host.clone()]));
+        assert_eq!(
+            sniffer.conf.settings.favorites,
+            HashSet::from([fav_host.clone()])
+        );
         // remove host
         sniffer.update(Message::AddOrRemoveFavorite(fav_host.clone(), false));
-        assert_eq!(sniffer.favorites, HashSet::new());
+        assert_eq!(sniffer.conf.settings.favorites, HashSet::new());
     }
 
     #[test]
@@ -2139,6 +2128,10 @@ mod tests {
         sniffer.update(Message::ChangeRunningPage(RunningPage::Notifications));
         sniffer.update(Message::DataReprSelection(DataRepr::Bits));
         sniffer.update(Message::LoadIpBlacklist("blacklist_file.csv".to_string()));
+        sniffer.update(Message::AddOrRemoveFavorite(
+            FavoriteKey::Service(Service::Name("https")),
+            true,
+        ));
 
         // force saving configs by quitting the app
         sniffer.welcome = Some((false, 0));
@@ -2167,6 +2160,7 @@ mod tests {
                     },
                     style: StyleType::DraculaDark,
                     ip_blacklist: "blacklist_file.csv".to_string(),
+                    favorites: HashSet::from([FavoriteKey::Service(Service::Name("https"))]),
                 },
                 window: ConfigWindow::new((1000.0, 999.0), (-5.0, 277.5), (20.0, 20.0)),
                 device: ConfigDevice::default(),

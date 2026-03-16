@@ -1,13 +1,13 @@
 //! Module defining the `DataInfoHost` struct related to hosts.
 
-use crate::networking::types::data_info_fav::DataInfoFav;
+use crate::networking::types::data_info::DataInfo;
 use crate::networking::types::traffic_type::TrafficType;
 
 /// Host-related information.
 #[derive(Clone, Copy, Default, Debug, Eq, PartialEq, Hash)]
 pub struct DataInfoHost {
     /// Incoming and outgoing packets and bytes
-    pub data_info_fav: DataInfoFav,
+    pub data_info: DataInfo,
     /// Determine if the connection is loopback (the "remote" is loopback)
     pub is_loopback: bool,
     /// Determine if the connection with this host is local
@@ -20,9 +20,7 @@ pub struct DataInfoHost {
 
 impl DataInfoHost {
     pub fn refresh(&mut self, other: &Self) {
-        self.data_info_fav
-            .data_info
-            .refresh(other.data_info_fav.data_info);
+        self.data_info.refresh(other.data_info);
         self.is_loopback = other.is_loopback;
         self.is_local = other.is_local;
         self.is_bogon = other.is_bogon;

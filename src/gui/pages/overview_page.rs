@@ -112,7 +112,7 @@ fn col_favorite_item(
         .unwrap_or_default();
 
     for fi in &entries {
-        let star_button = fi.star_button();
+        let star_button = fi.star_button(&sniffer.conf.settings.favorites);
 
         let icon = fi.icon(language, program_lookup, false);
         let item_bar = item_bar(

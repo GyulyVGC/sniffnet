@@ -96,6 +96,7 @@ impl Args {
 #[cfg(test)]
 mod tests {
     use serial_test::serial;
+    use std::collections::HashSet;
 
     use crate::gui::pages::types::running_page::RunningPage;
     use crate::gui::pages::types::settings_page::SettingsPage;
@@ -103,11 +104,13 @@ mod tests {
     use crate::gui::types::conf::Conf;
     use crate::gui::types::config_window::ConfigWindow;
     use crate::gui::types::export_pcap::ExportPcap;
+    use crate::gui::types::favorite::FavoriteKey;
     use crate::gui::types::filters::Filters;
     use crate::gui::types::settings::Settings;
     use crate::networking::types::capture_context::CaptureSourcePicklist;
     use crate::networking::types::config_device::ConfigDevice;
     use crate::networking::types::data_representation::DataRepr;
+    use crate::networking::types::service::Service;
     use crate::notifications::types::notifications::Notifications;
     use crate::report::types::sort_type::SortType;
     use crate::{Language, Sniffer, StyleType};
@@ -137,6 +140,7 @@ mod tests {
                 },
                 style: StyleType::DraculaDark,
                 ip_blacklist: "some-path".to_string(),
+                favorites: HashSet::from([FavoriteKey::Service(Service::Name("https"))]),
             },
             device: ConfigDevice {
                 device_name: "hey-hey".to_string(),

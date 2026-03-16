@@ -2,7 +2,6 @@ use crate::gui::types::favorite::{FavoriteItem, FavoriteKey};
 use crate::networking::manage_packets::get_address_to_lookup;
 use crate::networking::types::capture_context::CaptureSource;
 use crate::networking::types::data_info::DataInfo;
-use crate::networking::types::data_info_fav::DataInfoFav;
 use crate::networking::types::data_info_host::DataInfoHost;
 use crate::networking::types::data_representation::DataRepr;
 use crate::networking::types::host::Host;
@@ -109,14 +108,13 @@ pub fn notify_and_log(
                 .get(&host)
                 .copied()
                 .unwrap_or_default();
-            data_info_host.data_info_fav.data_info = v.data_info();
+            data_info_host.data_info = v.data_info();
             blacklisted_last_interval
                 .entry(*address_to_lookup)
                 .and_modify(|(_, existing_data_info_host)| {
                     existing_data_info_host
-                        .data_info_fav
                         .data_info
-                        .refresh(data_info_host.data_info_fav.data_info);
+                        .refresh(data_info_host.data_info);
                 })
                 .or_insert((host, data_info_host));
         }
@@ -163,11 +161,8 @@ fn threshold_hosts(
         .map(|(h, data)| (h.clone(), *data))
         .collect();
     hosts.sort_by(|(_, a), (_, b)| {
-        a.data_info_fav.data_info.compare(
-            &b.data_info_fav.data_info,
-            SortType::Descending,
-            data_repr,
-        )
+        a.data_info
+            .compare(&b.data_info, SortType::Descending, data_repr)
     });
     hosts.truncate(4);
     hosts
@@ -181,7 +176,7 @@ fn threshold_services(
         .services
         .iter()
         .filter(|(service, _)| service != &&Service::NotApplicable)
-        .map(|(s, data_info_fav)| (*s, data_info_fav.data_info))
+        .map(|(s, data_info)| (*s, *data_info))
         .collect();
     services.sort_by(|(_, a), (_, b)| a.compare(b, SortType::Descending, data_repr));
     services.truncate(4);
@@ -211,13 +206,7 @@ fn favorites_last_interval(
                     .filter(|v| v.program.eq(p))
                     .for_each(|v| data_info.refresh(v.data_info()));
                 if data_info.tot_data(DataRepr::Packets) > 0 {
-                    Some(FavoriteItem::Program((
-                        p.clone(),
-                        DataInfoFav {
-                            data_info,
-                            is_favorite: true,
-                        },
-                    )))
+                    Some(FavoriteItem::Program((p.clone(), data_info)))
                 } else {
                     None
                 }

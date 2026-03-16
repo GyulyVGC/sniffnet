@@ -1,7 +1,8 @@
 use listeners::Process;
+use serde::{Deserialize, Serialize};
 
 /// Program / App.
-#[derive(Debug, Clone, PartialEq, Eq, Hash, Default)]
+#[derive(Debug, Clone, PartialEq, Eq, Hash, Default, Serialize, Deserialize)]
 pub enum Program {
     /// A known program.
     NamePath((String, String)),

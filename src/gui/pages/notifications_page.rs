@@ -255,7 +255,7 @@ fn blacklisted_notification_log<'a>(
     let blacklisted_bar = item_bar(
         icon,
         host.to_blacklist_string(logged_notification.ip),
-        &data_info_host.data_info_fav.data_info,
+        &data_info_host.data_info,
         data_repr,
         first_entry_data_info,
     );
@@ -403,14 +403,13 @@ fn data_notification_extra<'a>(
         .first()
         .unwrap_or(&(Host::default(), DataInfoHost::default()))
         .1
-        .data_info_fav
         .data_info;
     for (host, data_info_host) in &logged_notification.hosts {
         let icon = get_flag_tooltip(host.country, data_info_host, language, false);
         let host_bar = item_bar(
             icon,
             host.to_entry_string(),
-            &data_info_host.data_info_fav.data_info,
+            &data_info_host.data_info,
             logged_notification.data_repr,
             first_data_info,
         );

@@ -6,7 +6,6 @@ use crate::gui::styles::types::style_type::StyleType;
 use crate::gui::types::conf::Conf;
 use crate::gui::types::message::Message;
 use crate::networking::types::data_info::DataInfo;
-use crate::networking::types::data_info_fav::DataInfoFav;
 use crate::networking::types::data_info_host::DataInfoHost;
 use crate::networking::types::data_representation::DataRepr;
 use crate::networking::types::host::Host;
@@ -23,7 +22,9 @@ use crate::translations::types::language::Language;
 use crate::utils::types::icon::Icon;
 use iced::widget::{Button, Container, Space, button};
 use iced::{Alignment, Element};
+use serde::{Deserialize, Serialize};
 use std::cmp::min;
+use std::collections::HashSet;
 
 #[derive(Debug, Clone, Copy, Eq, PartialEq)]
 pub enum Favorite {
@@ -96,29 +97,25 @@ impl Favorite {
 #[derive(Clone)]
 pub enum FavoriteItem {
     Host((Host, DataInfoHost)),
-    Service((Service, DataInfoFav)),
-    Program((Program, DataInfoFav)),
+    Service((Service, DataInfo)),
+    Program((Program, DataInfo)),
 }
 
 impl FavoriteItem {
     pub fn data_info(&self) -> DataInfo {
         match self {
-            FavoriteItem::Host((_, data_info_host)) => data_info_host.data_info_fav.data_info,
-            FavoriteItem::Service((_, data_info_fav))
-            | FavoriteItem::Program((_, data_info_fav)) => data_info_fav.data_info,
+            FavoriteItem::Host((_, data_info_host)) => data_info_host.data_info,
+            FavoriteItem::Service((_, data_info)) | FavoriteItem::Program((_, data_info)) => {
+                *data_info
+            }
         }
     }
 
-    fn is_favorite(&self) -> bool {
-        match self {
-            FavoriteItem::Host((_, data_info_host)) => data_info_host.data_info_fav.is_favorite,
-            FavoriteItem::Service((_, data_info_fav))
-            | FavoriteItem::Program((_, data_info_fav)) => data_info_fav.is_favorite,
-        }
-    }
-
-    pub fn star_button<'a>(&self) -> Button<'a, Message, StyleType> {
-        let is_favorite = self.is_favorite();
+    pub fn star_button<'a>(
+        &self,
+        favorites: &HashSet<FavoriteKey>,
+    ) -> Button<'a, Message, StyleType> {
+        let is_favorite = favorites.contains(&FavoriteKey::from(self.clone()));
 
         let (icon, class) = if is_favorite {
             (Icon::StarFull, ButtonType::Starred)
@@ -187,7 +184,7 @@ impl FavoriteItem {
     }
 }
 
-#[derive(Clone, Hash, Eq, PartialEq, Debug)]
+#[derive(Clone, Hash, Eq, PartialEq, Debug, Serialize, Deserialize)]
 pub enum FavoriteKey {
     Host(Host),
     Service(Service),
@@ -213,11 +210,7 @@ fn get_host_entries(
 ) -> Vec<FavoriteItem> {
     let mut sorted_vec: Vec<(&Host, &DataInfoHost)> = info_traffic.hosts.iter().collect();
 
-    sorted_vec.sort_by(|&(_, a), &(_, b)| {
-        a.data_info_fav
-            .data_info
-            .compare(&b.data_info_fav.data_info, sort_type, data_repr)
-    });
+    sorted_vec.sort_by(|&(_, a), &(_, b)| a.data_info.compare(&b.data_info, sort_type, data_repr));
 
     let n_entry = min(sorted_vec.len(), 30);
     sorted_vec[0..n_entry]
@@ -233,13 +226,13 @@ fn get_service_entries(
     data_repr: DataRepr,
     sort_type: SortType,
 ) -> Vec<FavoriteItem> {
-    let mut sorted_vec: Vec<(&Service, &DataInfoFav)> = info_traffic
+    let mut sorted_vec: Vec<(&Service, &DataInfo)> = info_traffic
         .services
         .iter()
         .filter(|(service, _)| service != &&Service::NotApplicable)
         .collect();
 
-    sorted_vec.sort_by(|&(_, a), &(_, b)| a.data_info.compare(&b.data_info, sort_type, data_repr));
+    sorted_vec.sort_by(|&(_, a), &(_, b)| a.compare(b, sort_type, data_repr));
 
     let n_entry = min(sorted_vec.len(), 30);
     sorted_vec[0..n_entry]
@@ -257,22 +250,22 @@ fn get_program_entries(
         return Vec::new();
     };
 
-    let mut sorted_vec: Vec<(&Program, &DataInfoFav)> = program_lookup
+    let mut sorted_vec: Vec<(&Program, &DataInfo)> = program_lookup
         .programs()
         .iter()
         // Unknown may be inserted, and then all of its data could be reassigned to known programs
-        .filter(|(_, d)| d.data_info.tot_data(DataRepr::Packets) > 0)
+        .filter(|(_, d)| d.tot_data(DataRepr::Packets) > 0)
         .collect();
 
     sorted_vec.sort_by(|&(p1, a), &(p2, b)| {
-        if sort_type == SortType::Neutral && a.data_info.is_within_same_second(&b.data_info) {
+        if sort_type == SortType::Neutral && a.is_within_same_second(b) {
             if p1.is_unknown() {
                 return std::cmp::Ordering::Greater;
             } else if p2.is_unknown() {
                 return std::cmp::Ordering::Less;
             }
         }
-        a.data_info.compare(&b.data_info, sort_type, data_repr)
+        a.compare(b, sort_type, data_repr)
     });
 
     let n_entry = min(sorted_vec.len(), 30);

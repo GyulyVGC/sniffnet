@@ -82,9 +82,7 @@ impl LoggedNotification {
         match self {
             LoggedNotification::DataThresholdExceeded(d) => d.data_info,
             LoggedNotification::FavoriteTransmitted(f) => f.favorite.data_info(),
-            LoggedNotification::BlacklistedTransmitted(b) => {
-                b.data_info_host.data_info_fav.data_info
-            }
+            LoggedNotification::BlacklistedTransmitted(b) => b.data_info_host.data_info,
         }
     }
 
@@ -180,7 +178,7 @@ impl BlacklistedTransmitted {
                 "domain": self.host.domain,
                 "asn": self.host.asn.name,
             },
-            "data": DataRepr::Bytes.formatted_string(self.data_info_host.data_info_fav.data_info.tot_data(DataRepr::Bytes)),
+            "data": DataRepr::Bytes.formatted_string(self.data_info_host.data_info.tot_data(DataRepr::Bytes)),
         })
         .to_string()
     }
@@ -191,7 +189,6 @@ mod tests {
     use super::*;
     use crate::countries::types::country::Country;
     use crate::networking::types::asn::Asn;
-    use crate::networking::types::data_info_fav::DataInfoFav;
     use crate::networking::types::program::Program;
     use crate::networking::types::traffic_direction::TrafficDirection;
     use crate::networking::types::traffic_type::TrafficType;
@@ -228,14 +225,7 @@ mod tests {
             },
         };
         let data_info_host = DataInfoHost {
-            data_info_fav: DataInfoFav {
-                data_info: {
-                    let mut di = DataInfo::default();
-                    di.add_packets(5, 500, TrafficDirection::Outgoing, Instant::now());
-                    di
-                },
-                is_favorite: true,
-            },
+            data_info: DataInfo::new_for_tests(0, 5, 0, 500),
             is_loopback: false,
             is_local: false,
             is_bogon: None,
@@ -258,13 +248,7 @@ mod tests {
         let service = Service::Name("https");
         let mut data_info = DataInfo::default();
         data_info.add_packets(12, 1500, TrafficDirection::Incoming, Instant::now());
-        let favorite_item = FavoriteItem::Service((
-            service,
-            DataInfoFav {
-                data_info,
-                is_favorite: true,
-            },
-        ));
+        let favorite_item = FavoriteItem::Service((service, data_info));
         let notification = FavoriteTransmitted {
             id: 3,
             favorite: favorite_item,
@@ -284,13 +268,7 @@ mod tests {
         ));
         let mut data_info = DataInfo::default();
         data_info.add_packets(20, 2_500_000, TrafficDirection::Outgoing, Instant::now());
-        let favorite_item = FavoriteItem::Program((
-            program,
-            DataInfoFav {
-                data_info,
-                is_favorite: true,
-            },
-        ));
+        let favorite_item = FavoriteItem::Program((program, data_info));
         let notification = FavoriteTransmitted {
             id: 4,
             favorite: favorite_item,
@@ -313,14 +291,7 @@ mod tests {
             },
         };
         let data_info_host = DataInfoHost {
-            data_info_fav: DataInfoFav {
-                data_info: {
-                    let mut di = DataInfo::default();
-                    di.add_packets(50, 10_000, TrafficDirection::Incoming, Instant::now());
-                    di
-                },
-                is_favorite: false,
-            },
+            data_info: DataInfo::new_for_tests(50, 0, 10_000, 0),
             is_loopback: false,
             is_local: false,
             is_bogon: None,

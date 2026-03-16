@@ -6,7 +6,6 @@ use crate::gui::types::message::Message;
 use crate::networking::manage_packets::get_local_port;
 use crate::networking::types::address_port_pair::AddressPortPair;
 use crate::networking::types::data_info::DataInfo;
-use crate::networking::types::data_info_fav::DataInfoFav;
 use crate::networking::types::data_representation::DataRepr;
 use crate::networking::types::info_address_port_pair::InfoAddressPortPair;
 use crate::networking::types::program::Program;
@@ -28,7 +27,7 @@ pub struct ProgramLookup {
     icon_key_tx: Sender<String>,
     picon_rx: Receiver<(String, IconHandle)>,
     state: HashMap<(u16, Protocol), LookedUpProgram>,
-    programs: HashMap<Program, DataInfoFav>,
+    programs: HashMap<Program, DataInfo>,
     picons: HashMap<String, IconHandle>,
 }
 
@@ -61,8 +60,8 @@ impl ProgramLookup {
         let res = Program::from_proc(proc.as_ref());
         self.programs
             .entry(res.clone())
-            .and_modify(|d| d.data_info.refresh(new_data))
-            .or_insert(new_data.into());
+            .and_modify(|d| d.refresh(new_data))
+            .or_insert(new_data);
 
         res
     }
@@ -161,8 +160,8 @@ impl ProgramLookup {
                 // assign to known
                 self.programs
                     .entry(program)
-                    .and_modify(|d| d.data_info.refresh(reassigned_data))
-                    .or_insert(reassigned_data.into());
+                    .and_modify(|d| d.refresh(reassigned_data))
+                    .or_insert(reassigned_data);
                 // remove from Unknown
                 // NOTE: subtracting reassigned_data from Unknown wouldn't correctly reassign final_instant,
                 // so let's just reiterate through all the Unknown connections
@@ -176,7 +175,7 @@ impl ProgramLookup {
                 // or_insert not needed: Unknown is already in the map since reassigned data came from it
                 self.programs
                     .entry(Program::Unknown)
-                    .and_modify(|d| d.data_info = unknown_data);
+                    .and_modify(|d| *d = unknown_data);
             }
         }
 
@@ -193,14 +192,8 @@ impl ProgramLookup {
         }
     }
 
-    pub fn programs(&self) -> &HashMap<Program, DataInfoFav> {
+    pub fn programs(&self) -> &HashMap<Program, DataInfo> {
         &self.programs
-    }
-
-    pub fn edit_fav(&mut self, program: &Program, add: bool) {
-        if let Some(info) = self.programs.get_mut(program) {
-            info.is_favorite = add;
-        }
     }
 
     pub fn picon_tooltip<'a>(
