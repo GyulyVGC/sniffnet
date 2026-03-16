@@ -1,4 +1,4 @@
-use crate::gui::types::favorite::{FavoriteItem, FavoriteKey};
+use crate::gui::types::favorite::{FavoriteItem, Favorites};
 use crate::networking::manage_packets::get_address_to_lookup;
 use crate::networking::types::capture_context::CaptureSource;
 use crate::networking::types::data_info::DataInfo;
@@ -17,7 +17,7 @@ use crate::utils::error_logger::{ErrorLogger, Location};
 use crate::utils::formatted_strings::APP_VERSION;
 use crate::utils::formatted_strings::get_formatted_timestamp;
 use crate::{InfoTraffic, SNIFFNET_LOWERCASE, location};
-use std::collections::{HashMap, HashSet};
+use std::collections::HashMap;
 use std::net::IpAddr;
 
 /// Checks if one or more notifications have to be emitted and logs them.
@@ -27,7 +27,7 @@ pub fn notify_and_log(
     logged_notifications: &mut LoggedNotifications,
     notifications: &Notifications,
     info_traffic_msg: &InfoTraffic,
-    favorites: &HashSet<FavoriteKey>,
+    favorites: &Favorites,
     cs: &CaptureSource,
     addresses_resolved: &HashMap<IpAddr, (String, Host)>,
 ) -> usize {
@@ -185,34 +185,37 @@ fn threshold_services(
 
 fn favorites_last_interval(
     info_traffic_msg: &InfoTraffic,
-    favorites: &HashSet<FavoriteKey>,
+    favorites: &Favorites,
 ) -> Vec<FavoriteItem> {
-    favorites
-        .iter()
-        .filter_map(|fav| match fav {
-            FavoriteKey::Host(h) => info_traffic_msg
-                .hosts
-                .get(h)
-                .map(|d| FavoriteItem::Host((h.clone(), *d))),
-            FavoriteKey::Service(s) => info_traffic_msg
-                .services
-                .get(s)
-                .map(|d| FavoriteItem::Service((*s, *d))),
-            FavoriteKey::Program(p) => {
-                let mut data_info = DataInfo::default();
-                info_traffic_msg
-                    .map
-                    .values()
-                    .filter(|v| v.program.eq(p))
-                    .for_each(|v| data_info.refresh(v.data_info()));
-                if data_info.tot_data(DataRepr::Packets) > 0 {
-                    Some(FavoriteItem::Program((p.clone(), data_info)))
-                } else {
-                    None
-                }
-            }
-        })
-        .collect()
+    let hosts = favorites.hosts().iter().filter_map(|h| {
+        info_traffic_msg
+            .hosts
+            .get(h)
+            .map(|d| FavoriteItem::Host((h.clone(), *d)))
+    });
+
+    let services = favorites.services().iter().filter_map(|s| {
+        info_traffic_msg
+            .services
+            .get(s)
+            .map(|d| FavoriteItem::Service((*s, *d)))
+    });
+
+    let programs = favorites.programs().iter().filter_map(|p| {
+        let mut data_info = DataInfo::default();
+        info_traffic_msg
+            .map
+            .values()
+            .filter(|v| v.program.eq(p))
+            .for_each(|v| data_info.refresh(v.data_info()));
+        if data_info.tot_data(DataRepr::Packets) > 0 {
+            Some(FavoriteItem::Program((p.clone(), data_info)))
+        } else {
+            None
+        }
+    });
+
+    hosts.chain(services).chain(programs).collect()
 }
 
 fn send_remote_notification(

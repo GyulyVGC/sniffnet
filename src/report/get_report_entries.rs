@@ -1,5 +1,4 @@
 use crate::Sniffer;
-use crate::gui::types::favorite::FavoriteKey;
 use crate::networking::manage_packets::get_address_to_lookup;
 use crate::networking::types::address_port_pair::AddressPortPair;
 use crate::networking::types::data_info::DataInfo;
@@ -27,15 +26,15 @@ pub fn get_searched_entries(
             let r_dns_host = sniffer.addresses_resolved.get(address_to_lookup);
             // is this a favorite host?
             let is_favorite_host = if let Some(e) = r_dns_host {
-                favorites.contains(&FavoriteKey::Host(e.1.clone()))
+                favorites.contains_host(&e.1)
             } else {
                 false
             };
             // is this a favorite service?
-            let is_favorite_service = favorites.contains(&FavoriteKey::Service(value.service));
+            let is_favorite_service = favorites.contains_service(&value.service);
             // is this a favorite program?
             let is_favorite_program = if sniffer.program_lookup.is_some() {
-                favorites.contains(&FavoriteKey::Program(value.program.clone()))
+                favorites.contains_program(&value.program)
             } else {
                 false
             };

@@ -1,9 +1,8 @@
 use serde::{Deserialize, Serialize};
-use std::collections::HashSet;
 
 use crate::gui::styles::types::gradient_type::GradientType;
 use crate::gui::types::conf::deserialize_or_default;
-use crate::gui::types::favorite::FavoriteKey;
+use crate::gui::types::favorite::Favorites;
 use crate::notifications::types::notifications::Notifications;
 use crate::{Language, StyleType};
 
@@ -30,7 +29,7 @@ pub struct Settings {
     #[serde(deserialize_with = "deserialize_or_default")]
     pub style: StyleType,
     #[serde(deserialize_with = "deserialize_or_default")]
-    pub favorites: HashSet<FavoriteKey>,
+    pub favorites: Favorites,
 }
 
 impl Default for Settings {
@@ -45,7 +44,7 @@ impl Default for Settings {
             style_path: String::new(),
             notifications: Notifications::default(),
             style: StyleType::default(),
-            favorites: HashSet::new(),
+            favorites: Favorites::default(),
         }
     }
 }

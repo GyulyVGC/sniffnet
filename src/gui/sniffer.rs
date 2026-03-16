@@ -1097,7 +1097,7 @@ impl Sniffer {
 
     fn add_or_remove_favorite(&mut self, fav: &FavoriteKey, add: bool) {
         if add {
-            self.conf.settings.favorites.insert(fav.clone());
+            self.conf.settings.favorites.insert(fav);
         } else {
             self.conf.settings.favorites.remove(fav);
         }
@@ -1406,7 +1406,7 @@ mod tests {
 
     use iced::{Point, Size};
     use serial_test::{parallel, serial};
-    use std::collections::{HashSet, VecDeque};
+    use std::collections::VecDeque;
     use std::fs::remove_file;
     use std::path::Path;
     use std::time::Duration;
@@ -1418,7 +1418,7 @@ mod tests {
     use crate::gui::types::conf::Conf;
     use crate::gui::types::config_window::ConfigWindow;
     use crate::gui::types::export_pcap::ExportPcap;
-    use crate::gui::types::favorite::FavoriteKey;
+    use crate::gui::types::favorite::{FavoriteKey, Favorites};
     use crate::gui::types::filters::Filters;
     use crate::gui::types::message::Message;
     use crate::gui::types::settings::Settings;
@@ -1616,55 +1616,55 @@ mod tests {
 
         // remove host
         sniffer.update(Message::AddOrRemoveFavorite(fav_host.clone(), false));
-        assert_eq!(sniffer.conf.settings.favorites, HashSet::new());
+        assert_eq!(sniffer.conf.settings.favorites, Favorites::default());
         // remove service
         sniffer.update(Message::AddOrRemoveFavorite(fav_service.clone(), false));
-        assert_eq!(sniffer.conf.settings.favorites, HashSet::new());
+        assert_eq!(sniffer.conf.settings.favorites, Favorites::default());
         // add service
         sniffer.update(Message::AddOrRemoveFavorite(fav_service.clone(), true));
         assert_eq!(
             sniffer.conf.settings.favorites,
-            HashSet::from([fav_service.clone()])
+            Favorites::from([fav_service.clone()])
         );
         // remove host
         sniffer.update(Message::AddOrRemoveFavorite(fav_host.clone(), false));
         assert_eq!(
             sniffer.conf.settings.favorites,
-            HashSet::from([fav_service.clone()])
+            Favorites::from([fav_service.clone()])
         );
         // add service
         sniffer.update(Message::AddOrRemoveFavorite(fav_service.clone(), true));
         assert_eq!(
             sniffer.conf.settings.favorites,
-            HashSet::from([fav_service.clone()])
+            Favorites::from([fav_service.clone()])
         );
         // add host
         sniffer.update(Message::AddOrRemoveFavorite(fav_host.clone(), true));
         assert_eq!(
             sniffer.conf.settings.favorites,
-            HashSet::from([fav_host.clone(), fav_service.clone()])
+            Favorites::from([fav_host.clone(), fav_service.clone()])
         );
         // add program
         sniffer.update(Message::AddOrRemoveFavorite(fav_program.clone(), true));
         assert_eq!(
             sniffer.conf.settings.favorites,
-            HashSet::from([fav_host.clone(), fav_service.clone(), fav_program.clone()])
+            Favorites::from([fav_host.clone(), fav_service.clone(), fav_program.clone()])
         );
         // remove service
         sniffer.update(Message::AddOrRemoveFavorite(fav_service.clone(), false));
         assert_eq!(
             sniffer.conf.settings.favorites,
-            HashSet::from([fav_host.clone(), fav_program.clone()])
+            Favorites::from([fav_host.clone(), fav_program.clone()])
         );
         // remove program
         sniffer.update(Message::AddOrRemoveFavorite(fav_program.clone(), false));
         assert_eq!(
             sniffer.conf.settings.favorites,
-            HashSet::from([fav_host.clone()])
+            Favorites::from([fav_host.clone()])
         );
         // remove host
         sniffer.update(Message::AddOrRemoveFavorite(fav_host.clone(), false));
-        assert_eq!(sniffer.conf.settings.favorites, HashSet::new());
+        assert_eq!(sniffer.conf.settings.favorites, Favorites::default());
     }
 
     #[test]
@@ -2160,7 +2160,7 @@ mod tests {
                     },
                     style: StyleType::DraculaDark,
                     ip_blacklist: "blacklist_file.csv".to_string(),
-                    favorites: HashSet::from([FavoriteKey::Service(Service::Name("https"))]),
+                    favorites: Favorites::from([FavoriteKey::Service(Service::Name("https"))]),
                 },
                 window: ConfigWindow::new((1000.0, 999.0), (-5.0, 277.5), (20.0, 20.0)),
                 device: ConfigDevice::default(),

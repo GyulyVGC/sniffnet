@@ -26,6 +26,78 @@ use serde::{Deserialize, Serialize};
 use std::cmp::min;
 use std::collections::HashSet;
 
+#[derive(Clone, Default, PartialEq, Debug, Serialize, Deserialize)]
+pub struct Favorites {
+    hosts: HashSet<Host>,
+    services: HashSet<Service>,
+    programs: HashSet<Program>,
+}
+
+impl Favorites {
+    pub fn contains_host(&self, host: &Host) -> bool {
+        self.hosts.contains(host)
+    }
+
+    pub fn contains_service(&self, service: &Service) -> bool {
+        self.services.contains(service)
+    }
+
+    pub fn contains_program(&self, program: &Program) -> bool {
+        self.programs.contains(program)
+    }
+
+    pub fn insert(&mut self, key: &FavoriteKey) {
+        match key {
+            FavoriteKey::Host(h) => {
+                self.hosts.insert(h.clone());
+            }
+            FavoriteKey::Service(s) => {
+                self.services.insert(*s);
+            }
+            FavoriteKey::Program(p) => {
+                self.programs.insert(p.clone());
+            }
+        }
+    }
+
+    pub fn remove(&mut self, key: &FavoriteKey) {
+        match key {
+            FavoriteKey::Host(h) => {
+                self.hosts.remove(h);
+            }
+            FavoriteKey::Service(s) => {
+                self.services.remove(s);
+            }
+            FavoriteKey::Program(p) => {
+                self.programs.remove(p);
+            }
+        }
+    }
+
+    pub fn hosts(&self) -> &HashSet<Host> {
+        &self.hosts
+    }
+
+    pub fn services(&self) -> &HashSet<Service> {
+        &self.services
+    }
+
+    pub fn programs(&self) -> &HashSet<Program> {
+        &self.programs
+    }
+}
+
+#[cfg(test)]
+impl<const N: usize> From<[FavoriteKey; N]> for Favorites {
+    fn from(keys: [FavoriteKey; N]) -> Self {
+        let mut favorites = Favorites::default();
+        for key in keys {
+            favorites.insert(&key);
+        }
+        favorites
+    }
+}
+
 #[derive(Debug, Clone, Copy, Eq, PartialEq)]
 pub enum Favorite {
     Host,
@@ -111,11 +183,12 @@ impl FavoriteItem {
         }
     }
 
-    pub fn star_button<'a>(
-        &self,
-        favorites: &HashSet<FavoriteKey>,
-    ) -> Button<'a, Message, StyleType> {
-        let is_favorite = favorites.contains(&FavoriteKey::from(self.clone()));
+    pub fn star_button<'a>(&self, favorites: &Favorites) -> Button<'a, Message, StyleType> {
+        let is_favorite = match self {
+            FavoriteItem::Host((h, _)) => favorites.contains_host(h),
+            FavoriteItem::Service((s, _)) => favorites.contains_service(s),
+            FavoriteItem::Program((p, _)) => favorites.contains_program(p),
+        };
 
         let (icon, class) = if is_favorite {
             (Icon::StarFull, ButtonType::Starred)
