@@ -61,3 +61,11 @@ pub fn program_translation(language: Language) -> &'static str {
         _ => "Program",
     }
 }
+
+pub fn favorites_translation(language: Language) -> &'static str {
+    match language {
+        Language::EN => "Favorites",
+        Language::IT => "Preferiti",
+        _ => "Favorites",
+    }
+}

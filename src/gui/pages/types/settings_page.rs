@@ -1,6 +1,7 @@
 use crate::gui::types::message::Message;
 use crate::translations::translations::{notifications_translation, style_translation};
 use crate::translations::translations_3::general_translation;
+use crate::translations::translations_5::favorites_translation;
 use crate::utils::types::icon::Icon;
 use crate::{Language, StyleType};
 use serde::{Deserialize, Serialize};
@@ -13,14 +14,17 @@ pub enum SettingsPage {
     Notifications,
     /// Settings Appearance page.
     Appearance,
+    /// Settings Favorites page.
+    Favorites,
     /// General settings.
     General,
 }
 
 impl SettingsPage {
-    pub const ALL: [SettingsPage; 3] = [
+    pub const ALL: [SettingsPage; 4] = [
         SettingsPage::Notifications,
         SettingsPage::Appearance,
+        SettingsPage::Favorites,
         SettingsPage::General,
     ];
 
@@ -28,6 +32,7 @@ impl SettingsPage {
         match self {
             SettingsPage::Notifications => notifications_translation(language),
             SettingsPage::Appearance => style_translation(language),
+            SettingsPage::Favorites => favorites_translation(language),
             SettingsPage::General => general_translation(language),
         }
     }
@@ -35,7 +40,8 @@ impl SettingsPage {
     pub fn next(self) -> Self {
         match self {
             SettingsPage::Notifications => SettingsPage::Appearance,
-            SettingsPage::Appearance => SettingsPage::General,
+            SettingsPage::Appearance => SettingsPage::Favorites,
+            SettingsPage::Favorites => SettingsPage::General,
             SettingsPage::General => SettingsPage::Notifications,
         }
     }
@@ -44,7 +50,8 @@ impl SettingsPage {
         match self {
             SettingsPage::Notifications => SettingsPage::General,
             SettingsPage::Appearance => SettingsPage::Notifications,
-            SettingsPage::General => SettingsPage::Appearance,
+            SettingsPage::Favorites => SettingsPage::Appearance,
+            SettingsPage::General => SettingsPage::Favorites,
         }
     }
 
@@ -52,6 +59,7 @@ impl SettingsPage {
         match self {
             SettingsPage::Notifications => Icon::Notification,
             SettingsPage::Appearance => Icon::HalfSun,
+            SettingsPage::Favorites => Icon::StarEmpty,
             SettingsPage::General => Icon::Generals,
         }
         .to_text()
@@ -76,13 +84,15 @@ mod tests {
             SettingsPage::Appearance.previous(),
             SettingsPage::Notifications
         );
-        assert_eq!(SettingsPage::General.previous(), SettingsPage::Appearance);
+        assert_eq!(SettingsPage::Favorites.previous(), SettingsPage::Appearance);
+        assert_eq!(SettingsPage::General.previous(), SettingsPage::Favorites);
     }
 
     #[test]
     fn test_next_settings_page() {
         assert_eq!(SettingsPage::Notifications.next(), SettingsPage::Appearance);
-        assert_eq!(SettingsPage::Appearance.next(), SettingsPage::General);
+        assert_eq!(SettingsPage::Appearance.next(), SettingsPage::Favorites);
+        assert_eq!(SettingsPage::Favorites.next(), SettingsPage::General);
         assert_eq!(SettingsPage::General.next(), SettingsPage::Notifications);
     }
 }

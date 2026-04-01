@@ -10,6 +10,7 @@ use crate::gui::pages::initial_page::initial_page;
 use crate::gui::pages::inspect_page::inspect_page;
 use crate::gui::pages::notifications_page::notifications_page;
 use crate::gui::pages::overview_page::overview_page;
+use crate::gui::pages::settings_favorites_page::settings_favorites_page;
 use crate::gui::pages::settings_general_page::settings_general_page;
 use crate::gui::pages::settings_notifications_page::settings_notifications_page;
 use crate::gui::pages::settings_style_page::settings_style_page;
@@ -410,6 +411,7 @@ impl Sniffer {
                     let overlay: Element<Message, StyleType> = match settings_page {
                         SettingsPage::Notifications => settings_notifications_page(self),
                         SettingsPage::Appearance => settings_style_page(self),
+                        SettingsPage::Favorites => settings_favorites_page(self),
                         SettingsPage::General => settings_general_page(self),
                     }
                     .into();
