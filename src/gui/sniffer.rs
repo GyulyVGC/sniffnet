@@ -10,7 +10,6 @@ use crate::gui::pages::initial_page::initial_page;
 use crate::gui::pages::inspect_page::inspect_page;
 use crate::gui::pages::notifications_page::notifications_page;
 use crate::gui::pages::overview_page::overview_page;
-use crate::gui::pages::settings_favorites_page::settings_favorites_page;
 use crate::gui::pages::settings_general_page::settings_general_page;
 use crate::gui::pages::settings_notifications_page::settings_notifications_page;
 use crate::gui::pages::settings_style_page::settings_style_page;
@@ -338,6 +337,9 @@ impl Sniffer {
             Message::HostSortSelection(sort_type) => self.host_sort_selection(sort_type),
             Message::ServiceSortSelection(sort_type) => self.service_sort_selection(sort_type),
             Message::ProgramSortSelection(sort_type) => self.program_sort_selection(sort_type),
+            Message::HostFavoritesFilterToggle => self.host_favorites_filter_toggle(),
+            Message::ServiceFavoritesFilterToggle => self.service_favorites_filter_toggle(),
+            Message::ProgramFavoritesFilterToggle => self.program_favorites_filter_toggle(),
             Message::ToggleExportPcap => self.toggle_export_pcap(),
             Message::OutputPcapDir(path) => self.output_pcap_dir(path),
             Message::OutputPcapFile(name) => self.output_pcap_file(&name),
@@ -411,7 +413,6 @@ impl Sniffer {
                     let overlay: Element<Message, StyleType> = match settings_page {
                         SettingsPage::Notifications => settings_notifications_page(self),
                         SettingsPage::Appearance => settings_style_page(self),
-                        SettingsPage::Favorites => settings_favorites_page(self),
                         SettingsPage::General => settings_general_page(self),
                     }
                     .into();
@@ -699,6 +700,18 @@ impl Sniffer {
         self.conf.program_sort_type = sort_type;
     }
 
+    fn host_favorites_filter_toggle(&mut self) {
+        self.conf.host_favorites_filter = !self.conf.host_favorites_filter;
+    }
+
+    fn service_favorites_filter_toggle(&mut self) {
+        self.conf.service_favorites_filter = !self.conf.service_favorites_filter;
+    }
+
+    fn program_favorites_filter_toggle(&mut self) {
+        self.conf.program_favorites_filter = !self.conf.program_favorites_filter;
+    }
+
     fn toggle_export_pcap(&mut self) {
         self.conf.export_pcap.toggle();
     }
@@ -902,7 +915,7 @@ impl Sniffer {
             &mut self.logged_notifications,
             &self.conf.settings.notifications,
             &msg,
-            &self.conf.settings.favorites,
+            &self.conf.favorites,
             &self.capture_source,
             &self.addresses_resolved,
         );
@@ -1099,9 +1112,9 @@ impl Sniffer {
 
     fn add_or_remove_favorite(&mut self, fav: &FavoriteKey, add: bool) {
         if add {
-            self.conf.settings.favorites.insert(fav);
+            self.conf.favorites.insert(fav);
         } else {
-            self.conf.settings.favorites.remove(fav);
+            self.conf.favorites.remove(fav);
         }
     }
 
@@ -1618,55 +1631,52 @@ mod tests {
 
         // remove host
         sniffer.update(Message::AddOrRemoveFavorite(fav_host.clone(), false));
-        assert_eq!(sniffer.conf.settings.favorites, Favorites::default());
+        assert_eq!(sniffer.conf.favorites, Favorites::default());
         // remove service
         sniffer.update(Message::AddOrRemoveFavorite(fav_service.clone(), false));
-        assert_eq!(sniffer.conf.settings.favorites, Favorites::default());
+        assert_eq!(sniffer.conf.favorites, Favorites::default());
         // add service
         sniffer.update(Message::AddOrRemoveFavorite(fav_service.clone(), true));
         assert_eq!(
-            sniffer.conf.settings.favorites,
+            sniffer.conf.favorites,
             Favorites::from([fav_service.clone()])
         );
         // remove host
         sniffer.update(Message::AddOrRemoveFavorite(fav_host.clone(), false));
         assert_eq!(
-            sniffer.conf.settings.favorites,
+            sniffer.conf.favorites,
             Favorites::from([fav_service.clone()])
         );
         // add service
         sniffer.update(Message::AddOrRemoveFavorite(fav_service.clone(), true));
         assert_eq!(
-            sniffer.conf.settings.favorites,
+            sniffer.conf.favorites,
             Favorites::from([fav_service.clone()])
         );
         // add host
         sniffer.update(Message::AddOrRemoveFavorite(fav_host.clone(), true));
         assert_eq!(
-            sniffer.conf.settings.favorites,
+            sniffer.conf.favorites,
             Favorites::from([fav_host.clone(), fav_service.clone()])
         );
         // add program
         sniffer.update(Message::AddOrRemoveFavorite(fav_program.clone(), true));
         assert_eq!(
-            sniffer.conf.settings.favorites,
+            sniffer.conf.favorites,
             Favorites::from([fav_host.clone(), fav_service.clone(), fav_program.clone()])
         );
         // remove service
         sniffer.update(Message::AddOrRemoveFavorite(fav_service.clone(), false));
         assert_eq!(
-            sniffer.conf.settings.favorites,
+            sniffer.conf.favorites,
             Favorites::from([fav_host.clone(), fav_program.clone()])
         );
         // remove program
         sniffer.update(Message::AddOrRemoveFavorite(fav_program.clone(), false));
-        assert_eq!(
-            sniffer.conf.settings.favorites,
-            Favorites::from([fav_host.clone()])
-        );
+        assert_eq!(sniffer.conf.favorites, Favorites::from([fav_host.clone()]));
         // remove host
         sniffer.update(Message::AddOrRemoveFavorite(fav_host.clone(), false));
-        assert_eq!(sniffer.conf.settings.favorites, Favorites::default());
+        assert_eq!(sniffer.conf.favorites, Favorites::default());
     }
 
     #[test]
@@ -2122,6 +2132,8 @@ mod tests {
         sniffer.update(Message::ReportSortSelection(SortType::Ascending));
         sniffer.update(Message::HostSortSelection(SortType::Descending));
         sniffer.update(Message::ServiceSortSelection(SortType::Descending));
+        sniffer.update(Message::HostFavoritesFilterToggle);
+        sniffer.update(Message::ProgramFavoritesFilterToggle);
         sniffer.update(Message::OpenSettings(SettingsPage::Appearance));
         sniffer.update(Message::ToggleExportPcap);
         sniffer.update(Message::OutputPcapFile("test.cap".to_string()));
@@ -2162,8 +2174,11 @@ mod tests {
                     },
                     style: StyleType::DraculaDark,
                     ip_blacklist: "blacklist_file.csv".to_string(),
-                    favorites: Favorites::from([FavoriteKey::Service(Service::Name("https"))]),
                 },
+                favorites: Favorites::from([FavoriteKey::Service(Service::Name("https"))]),
+                host_favorites_filter: true,
+                service_favorites_filter: false,
+                program_favorites_filter: true,
                 window: ConfigWindow::new((1000.0, 999.0), (-5.0, 277.5), (20.0, 20.0)),
                 device: ConfigDevice::default(),
                 capture_source_picklist: CaptureSourcePicklist::File,

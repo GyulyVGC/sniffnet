@@ -98,7 +98,7 @@ fn new_page_tab<'a>(
     button(content)
         .height(if active { 35 } else { 30 })
         .padding(0)
-        .width(Length::FillPortion(if active { 2 } else { 1 }))
+        .width(Length::FillPortion(if active { 3 } else { 2 }))
         .class(if active {
             ButtonType::TabActive
         } else {
@@ -143,7 +143,7 @@ fn new_settings_tab<'a>(
     button(content)
         .height(if active { 35 } else { 30 })
         .padding(0)
-        .width(Length::FillPortion(if active { 2 } else { 1 }))
+        .width(Length::FillPortion(if active { 3 } else { 2 }))
         .class(if active {
             ButtonType::TabActive
         } else {

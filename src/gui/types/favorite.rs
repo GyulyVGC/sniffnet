@@ -113,13 +113,27 @@ impl Favorite {
         let program_lookup = sniffer.program_lookup.as_ref();
 
         match self {
-            Favorite::Host => get_host_entries(info_traffic, data_repr, conf.host_sort_type),
-            Favorite::Service => {
-                get_service_entries(info_traffic, data_repr, conf.service_sort_type)
-            }
-            Favorite::Program => {
-                get_program_entries(program_lookup, data_repr, conf.program_sort_type)
-            }
+            Favorite::Host => get_host_entries(
+                info_traffic,
+                data_repr,
+                conf.host_sort_type,
+                conf.host_favorites_filter,
+                &conf.favorites.hosts,
+            ),
+            Favorite::Service => get_service_entries(
+                info_traffic,
+                data_repr,
+                conf.service_sort_type,
+                conf.service_favorites_filter,
+                &conf.favorites.services,
+            ),
+            Favorite::Program => get_program_entries(
+                program_lookup,
+                data_repr,
+                conf.program_sort_type,
+                conf.program_favorites_filter,
+                &conf.favorites.programs,
+            ),
         }
     }
 
@@ -163,6 +177,38 @@ impl Favorite {
         )
         .width(50.0)
         .align_x(Alignment::Center)
+    }
+
+    pub fn star_filter_button<'a>(self, conf: &Conf) -> Button<'a, Message, StyleType> {
+        let message = match self {
+            Favorite::Host => Message::HostFavoritesFilterToggle,
+            Favorite::Service => Message::ServiceFavoritesFilterToggle,
+            Favorite::Program => Message::ProgramFavoritesFilterToggle,
+        };
+
+        let is_active = match self {
+            Favorite::Host => conf.host_favorites_filter,
+            Favorite::Service => conf.service_favorites_filter,
+            Favorite::Program => conf.program_favorites_filter,
+        };
+
+        let (icon, class) = if is_active {
+            (Icon::StarFull, ButtonType::SortArrowActive)
+        } else {
+            (Icon::Funnel, ButtonType::SortArrows)
+        };
+
+        button(
+            icon.to_text()
+                .size(16)
+                .align_x(Alignment::Center)
+                .align_y(Alignment::Center),
+        )
+        .padding(0)
+        .height(25)
+        .width(25)
+        .class(class)
+        .on_press(message)
     }
 }
 
@@ -280,8 +326,24 @@ fn get_host_entries(
     info_traffic: &InfoTraffic,
     data_repr: DataRepr,
     sort_type: SortType,
+    favorites_filter: bool,
+    favorites: &HashSet<Host>,
 ) -> Vec<FavoriteItem> {
-    let mut sorted_vec: Vec<(&Host, &DataInfoHost)> = info_traffic.hosts.iter().collect();
+    let default_data_info_host = DataInfoHost::default();
+    let mut sorted_vec: Vec<(&Host, &DataInfoHost)> = if favorites_filter {
+        favorites
+            .iter()
+            .map(|host| {
+                let data_info_host = info_traffic
+                    .hosts
+                    .get(host)
+                    .unwrap_or(&default_data_info_host);
+                (host, data_info_host)
+            })
+            .collect()
+    } else {
+        info_traffic.hosts.iter().collect()
+    };
 
     sorted_vec.sort_by(|&(_, a), &(_, b)| a.data_info.compare(&b.data_info, sort_type, data_repr));
 
@@ -298,12 +360,26 @@ fn get_service_entries(
     info_traffic: &InfoTraffic,
     data_repr: DataRepr,
     sort_type: SortType,
+    favorites_filter: bool,
+    favorites: &HashSet<Service>,
 ) -> Vec<FavoriteItem> {
-    let mut sorted_vec: Vec<(&Service, &DataInfo)> = info_traffic
-        .services
-        .iter()
-        .filter(|(service, _)| service != &&Service::NotApplicable)
-        .collect();
+    let default_data_info = DataInfo::default();
+    let mut sorted_vec: Vec<(&Service, &DataInfo)> = if favorites_filter {
+        favorites
+            .iter()
+            .map(|service| {
+                let data_info_host = info_traffic
+                    .services
+                    .get(service)
+                    .unwrap_or(&default_data_info);
+                (service, data_info_host)
+            })
+            .collect()
+    } else {
+        info_traffic.services.iter().collect()
+    };
+
+    sorted_vec.retain(|(service, _)| service != &&Service::NotApplicable);
 
     sorted_vec.sort_by(|&(_, a), &(_, b)| a.compare(b, sort_type, data_repr));
 
@@ -318,17 +394,33 @@ fn get_program_entries(
     program_lookup: Option<&ProgramLookup>,
     data_repr: DataRepr,
     sort_type: SortType,
+    favorites_filter: bool,
+    favorites: &HashSet<Program>,
 ) -> Vec<FavoriteItem> {
     let Some(program_lookup) = program_lookup else {
         return Vec::new();
     };
 
-    let mut sorted_vec: Vec<(&Program, &DataInfo)> = program_lookup
-        .programs()
-        .iter()
-        // Unknown may be inserted, and then all of its data could be reassigned to known programs
-        .filter(|(_, d)| d.tot_data(DataRepr::Packets) > 0)
-        .collect();
+    let default_data_info = DataInfo::default();
+    let mut sorted_vec: Vec<(&Program, &DataInfo)> = if favorites_filter {
+        favorites
+            .iter()
+            .map(|program| {
+                let data_info_host = program_lookup
+                    .programs()
+                    .get(program)
+                    .unwrap_or(&default_data_info);
+                (program, data_info_host)
+            })
+            .collect()
+    } else {
+        program_lookup
+            .programs()
+            .iter()
+            // Unknown may be inserted, and then all of its data could be reassigned to known programs
+            .filter(|(_, d)| d.tot_data(DataRepr::Packets) > 0)
+            .collect()
+    };
 
     sorted_vec.sort_by(|&(p1, a), &(p2, b)| {
         if sort_type == SortType::Neutral && a.is_within_same_second(b) {

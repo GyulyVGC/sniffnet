@@ -45,6 +45,12 @@ pub enum Message {
     ServiceSortSelection(SortType),
     /// Select program sort type to be displayed (overview page)
     ProgramSortSelection(SortType),
+    /// Toggle host favorites filter
+    HostFavoritesFilterToggle,
+    /// Toggle service favorites filter
+    ServiceFavoritesFilterToggle,
+    /// Toggle program favorites filter
+    ProgramFavoritesFilterToggle,
     /// Adds or removes the given item into/from the favorites
     AddOrRemoveFavorite(FavoriteKey, bool),
     /// Open the supplied web page

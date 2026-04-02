@@ -112,7 +112,7 @@ fn col_favorite_item(
         .unwrap_or_default();
 
     for fi in &entries {
-        let star_button = fi.star_button(&sniffer.conf.settings.favorites);
+        let star_button = fi.star_button(&sniffer.conf.favorites);
 
         let icon = fi.icon(language, program_lookup, false);
         let item_bar = item_bar(
@@ -152,12 +152,13 @@ fn col_favorite_item(
                 .height(45)
                 .align_y(Alignment::Center)
                 .padding(Padding::ZERO.left(5))
+                .push(favorite.star_filter_button(&sniffer.conf))
                 .push(
                     Text::new(favorite.title(language))
                         .class(TextType::Title)
                         .size(FONT_SIZE_TITLE)
                         .width(Length::Fill)
-                        .align_x(Alignment::Start),
+                        .align_x(Alignment::Center),
                 )
                 .push(favorite.sort_arrows(&sniffer.conf)),
         )

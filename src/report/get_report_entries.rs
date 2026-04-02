@@ -17,7 +17,7 @@ pub fn get_searched_entries(
 ) {
     let mut agglomerate = DataInfo::default();
     let info_traffic = &sniffer.info_traffic;
-    let favorites = &sniffer.conf.settings.favorites;
+    let favorites = &sniffer.conf.favorites;
     let mut all_results: Vec<(&AddressPortPair, &InfoAddressPortPair)> = info_traffic
         .map
         .iter()
