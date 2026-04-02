@@ -4,6 +4,7 @@ use crate::gui::sniffer::Sniffer;
 use crate::gui::styles::button::ButtonType;
 use crate::gui::styles::types::style_type::StyleType;
 use crate::gui::types::conf::Conf;
+use crate::gui::types::conf::deserialize_or_default;
 use crate::gui::types::message::Message;
 use crate::networking::types::data_info::DataInfo;
 use crate::networking::types::data_info_host::DataInfoHost;
@@ -27,9 +28,13 @@ use std::cmp::min;
 use std::collections::HashSet;
 
 #[derive(Clone, Default, PartialEq, Debug, Serialize, Deserialize)]
+#[serde(default)]
 pub struct Favorites {
+    #[serde(deserialize_with = "deserialize_or_default")]
     hosts: HashSet<Host>,
+    #[serde(deserialize_with = "deserialize_or_default")]
     services: HashSet<Service>,
+    #[serde(deserialize_with = "deserialize_or_default")]
     programs: HashSet<Program>,
 }
 
@@ -376,10 +381,12 @@ fn get_service_entries(
             })
             .collect()
     } else {
-        info_traffic.services.iter().collect()
+        info_traffic
+            .services
+            .iter()
+            .filter(|(service, _)| service != &&Service::NotApplicable)
+            .collect()
     };
-
-    sorted_vec.retain(|(service, _)| service != &&Service::NotApplicable);
 
     sorted_vec.sort_by(|&(_, a), &(_, b)| a.compare(b, sort_type, data_repr));
 

@@ -41,6 +41,7 @@ use crate::networking::types::host::{Host, HostMessage};
 use crate::networking::types::info_traffic::InfoTraffic;
 use crate::networking::types::ip_blacklist::IpBlacklist;
 use crate::networking::types::my_device::MyDevice;
+use crate::networking::types::program::Program;
 use crate::networking::types::program_lookup::{ProgramLookup, get_picon, lookup_program};
 use crate::notifications::notify_and_log::notify_and_log;
 use crate::notifications::types::logged_notification::LoggedNotifications;
@@ -1018,10 +1019,12 @@ impl Sniffer {
                         .log_err(location!());
                     let (icon_key_tx, icon_key_rx) = std::sync::mpsc::channel();
                     let (picon_tx, picon_rx) = std::sync::mpsc::channel();
+                    let favorite_programs: Vec<Program> =
+                        self.conf.favorites.programs().iter().cloned().collect();
                     let _ = thread::Builder::new()
                         .name("thread_get_picon".to_string())
                         .spawn(move || {
-                            get_picon(&icon_key_rx, &picon_tx);
+                            get_picon(&icon_key_rx, &picon_tx, favorite_programs);
                         })
                         .log_err(location!());
                     self.program_lookup = Some(ProgramLookup::new(

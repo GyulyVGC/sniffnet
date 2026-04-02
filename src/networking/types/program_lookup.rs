@@ -14,7 +14,7 @@ use iced::widget::tooltip::Position;
 use iced::widget::{Image, Svg, Text, Tooltip, svg};
 use listeners::{Process, Protocol};
 use picon::IconHandle;
-use std::collections::HashMap;
+use std::collections::{HashMap, HashSet};
 use std::sync::mpsc::{Receiver, Sender};
 use std::time::Instant;
 
@@ -136,9 +136,7 @@ impl ProgramLookup {
         if !self.picons.contains_key(icon_key) {
             self.picons
                 .insert(icon_key.to_string(), DEFAULT_PICON.clone());
-            if !icon_key.is_empty() {
-                let _ = self.icon_key_tx.send(icon_key.to_string());
-            }
+            let _ = self.icon_key_tx.send(icon_key.to_string());
         }
 
         // associate unassigned recent connections on port with the program
@@ -242,11 +240,30 @@ pub fn lookup_program(
     }
 }
 
-pub fn get_picon(icon_key_rx: &Receiver<String>, picon_tx: &Sender<(String, IconHandle)>) {
-    while let Ok(icon_key) = icon_key_rx.recv() {
-        if let Some(handle) = picon::get_icon(&icon_key) {
+pub fn get_picon(
+    icon_key_rx: &Receiver<String>,
+    picon_tx: &Sender<(String, IconHandle)>,
+    favorite_programs: Vec<Program>,
+) {
+    let mut unique_icon_keys = HashSet::new();
+
+    let mut get_and_send_picon = |icon_key: String| {
+        if !icon_key.is_empty()
+            && unique_icon_keys.insert(icon_key.clone())
+            && let Some(handle) = picon::get_icon(&icon_key)
+        {
             let _ = picon_tx.send((icon_key, handle));
         }
+    };
+
+    // first get picons for saved favorite programs
+    for program in favorite_programs {
+        let icon_key = program.icon_key().to_string();
+        get_and_send_picon(icon_key);
+    }
+
+    while let Ok(icon_key) = icon_key_rx.recv() {
+        get_and_send_picon(icon_key);
     }
 }
 
