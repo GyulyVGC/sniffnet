@@ -198,22 +198,20 @@ impl Favorite {
         };
 
         let (icon, class) = if is_active {
-            (Icon::StarFull, ButtonType::SortArrowActive)
+            (
+                Icon::FunnelStar.to_text().size(20),
+                ButtonType::SortArrowActive,
+            )
         } else {
-            (Icon::Funnel, ButtonType::SortArrows)
+            (Icon::Funnel.to_text().size(17), ButtonType::SortArrows)
         };
 
-        button(
-            icon.to_text()
-                .size(16)
-                .align_x(Alignment::Center)
-                .align_y(Alignment::Center),
-        )
-        .padding(0)
-        .height(25)
-        .width(25)
-        .class(class)
-        .on_press(message)
+        button(icon.align_x(Alignment::Center).align_y(Alignment::Center))
+            .padding(0)
+            .height(25)
+            .width(25)
+            .class(class)
+            .on_press(message)
     }
 }
 

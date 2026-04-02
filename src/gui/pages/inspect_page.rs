@@ -138,7 +138,7 @@ fn report<'a>(sniffer: &Sniffer) -> Column<'a, Message, StyleType> {
                 .padding(20)
                 .align_x(Alignment::Center)
                 .push(Space::new().height(Length::Fill))
-                .push(Icon::Funnel.to_text().size(60))
+                .push(Icon::FunnelX.to_text().size(60))
                 .push(Space::new().height(15))
                 .push(Text::new(no_search_results_translation(language)))
                 .push(Space::new().height(Length::FillPortion(2))),
