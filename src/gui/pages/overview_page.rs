@@ -30,13 +30,14 @@ use crate::translations::translations::{
 use crate::translations::translations_2::{
     data_representation_translation, dropped_translation, only_top_30_items_translation,
 };
+use crate::utils::types::icon::Icon;
 use crate::{Language, RunningPage, StyleType};
 use iced::Length::Fill;
 use iced::alignment::{Horizontal, Vertical};
 use iced::widget::scrollable::Direction;
 use iced::widget::text::{LineHeight, Wrapping};
 use iced::widget::tooltip::Position;
-use iced::widget::{Button, Column, Container, Row, Scrollable, Text, Tooltip, button};
+use iced::widget::{Button, Column, Container, Row, Scrollable, Space, Text, Tooltip, button};
 use iced::{Alignment, Element, Length, Padding};
 
 /// Computes the body of gui overview page
@@ -146,29 +147,49 @@ fn col_favorite_item(
         );
     }
 
-    let col = Column::new()
-        .push(
-            Row::new()
-                .height(45)
-                .align_y(Alignment::Center)
-                .padding(Padding::ZERO.left(5))
-                .push(favorite.star_filter_button(&sniffer.conf))
-                .push(
-                    Text::new(favorite.title(language))
-                        .class(TextType::Title)
-                        .size(FONT_SIZE_TITLE)
-                        .width(Length::Fill)
-                        .align_x(Alignment::Center),
-                )
-                .push(favorite.sort_arrows(&sniffer.conf)),
-        )
-        .push(
+    let is_favorite_filter_active = favorite.is_filter_active(&sniffer.conf);
+
+    let mut col = Column::new().push(
+        Row::new()
+            .height(45)
+            .align_y(Alignment::Center)
+            .padding(Padding::ZERO.left(5))
+            .push(favorite.star_filter_button(is_favorite_filter_active))
+            .push(
+                Text::new(favorite.title(language))
+                    .class(TextType::Title)
+                    .size(FONT_SIZE_TITLE)
+                    .width(Length::Fill)
+                    .align_x(Alignment::Center),
+            )
+            .push(favorite.sort_arrows(&sniffer.conf)),
+    );
+
+    if entries.is_empty() {
+        let empty_text = if is_favorite_filter_active {
+            Icon::FunnelX.to_text().size(60)
+        } else {
+            Text::new(&sniffer.dots_pulse.0).size(50)
+        };
+
+        col = col.push(
+            Column::new()
+                .width(Length::Fill)
+                .height(Length::Fill)
+                .align_x(Alignment::Center)
+                .push(Space::new().height(Length::Fill))
+                .push(empty_text)
+                .push(Space::new().height(Length::FillPortion(2))),
+        );
+    } else {
+        col = col.push(
             Scrollable::with_direction(
                 scroll_item,
                 Direction::Vertical(ScrollbarType::properties()),
             )
             .width(Length::Fill),
         );
+    }
 
     Some(
         Container::new(col)

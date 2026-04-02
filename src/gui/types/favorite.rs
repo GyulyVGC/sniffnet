@@ -117,26 +117,27 @@ impl Favorite {
         let data_repr = conf.data_repr;
         let program_lookup = sniffer.program_lookup.as_ref();
 
+        let favorites_filter = self.is_filter_active(conf);
         match self {
             Favorite::Host => get_host_entries(
                 info_traffic,
                 data_repr,
                 conf.host_sort_type,
-                conf.host_favorites_filter,
+                favorites_filter,
                 &conf.favorites.hosts,
             ),
             Favorite::Service => get_service_entries(
                 info_traffic,
                 data_repr,
                 conf.service_sort_type,
-                conf.service_favorites_filter,
+                favorites_filter,
                 &conf.favorites.services,
             ),
             Favorite::Program => get_program_entries(
                 program_lookup,
                 data_repr,
                 conf.program_sort_type,
-                conf.program_favorites_filter,
+                favorites_filter,
                 &conf.favorites.programs,
             ),
         }
@@ -184,17 +185,19 @@ impl Favorite {
         .align_x(Alignment::Center)
     }
 
-    pub fn star_filter_button<'a>(self, conf: &Conf) -> Button<'a, Message, StyleType> {
+    pub fn is_filter_active(self, conf: &Conf) -> bool {
+        match self {
+            Favorite::Host => conf.host_favorites_filter,
+            Favorite::Service => conf.service_favorites_filter,
+            Favorite::Program => conf.program_favorites_filter,
+        }
+    }
+
+    pub fn star_filter_button<'a>(self, is_active: bool) -> Button<'a, Message, StyleType> {
         let message = match self {
             Favorite::Host => Message::HostFavoritesFilterToggle,
             Favorite::Service => Message::ServiceFavoritesFilterToggle,
             Favorite::Program => Message::ProgramFavoritesFilterToggle,
-        };
-
-        let is_active = match self {
-            Favorite::Host => conf.host_favorites_filter,
-            Favorite::Service => conf.service_favorites_filter,
-            Favorite::Program => conf.program_favorites_filter,
         };
 
         let (icon, class) = if is_active {
