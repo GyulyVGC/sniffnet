@@ -1,4 +1,4 @@
-pub const ICONS_SIZE_SMALL: f32 = 20.0;
+pub const ICONS_SIZE_SMALL: f32 = 18.0;
 pub const ICONS_SIZE_BIG: f32 = 32.0;
 
 pub const AD: &[u8] = include_bytes!("../../resources/embedded_icons/countries/ad.svg");
