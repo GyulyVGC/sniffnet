@@ -453,5 +453,3 @@ fn get_program_entries(
         .map(|&(program, data_info)| FavoriteItem::Program((program.to_owned(), *data_info)))
         .collect()
 }
-
-// TODO: fix DataInfoHost stuff?
