@@ -90,12 +90,12 @@ pub struct Conf {
     /// Information about PCAP file export
     #[serde(deserialize_with = "deserialize_or_default")]
     pub export_pcap: ExportPcap,
-    /// Favorite hosts, services, and programs
-    #[serde(deserialize_with = "deserialize_or_default")]
-    pub favorites: Favorites,
     /// Parameters from settings pages
     #[serde(deserialize_with = "deserialize_or_default")]
     pub settings: Settings,
+    /// Favorite hosts, services, and programs
+    #[serde(deserialize_with = "deserialize_or_default")]
+    pub favorites: Favorites,
 }
 
 impl Conf {
