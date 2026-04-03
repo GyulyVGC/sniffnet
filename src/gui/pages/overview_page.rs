@@ -30,6 +30,7 @@ use crate::translations::translations::{
 use crate::translations::translations_2::{
     data_representation_translation, dropped_translation, only_top_30_items_translation,
 };
+use crate::translations::translations_5::no_favorites_saved_translation;
 use crate::utils::types::icon::Icon;
 use crate::{Language, RunningPage, StyleType};
 use iced::Length::Fill;
@@ -90,11 +91,14 @@ fn row_report(sniffer: &Sniffer) -> Row<'_, Message, StyleType> {
         .push(col_program)
 }
 
+#[allow(clippy::too_many_lines)]
 fn col_favorite_item(
     sniffer: &Sniffer,
     favorite: Favorite,
 ) -> impl Into<Element<'_, Message, StyleType>> {
-    let Settings { language, .. } = sniffer.conf.settings;
+    let Settings {
+        language, style, ..
+    } = sniffer.conf.settings;
     let data_repr = sniffer.conf.data_repr;
     let program_lookup = sniffer.program_lookup.as_ref();
 
@@ -114,12 +118,18 @@ fn col_favorite_item(
 
     for fi in &entries {
         let star_button = fi.star_button(&sniffer.conf.favorites);
+        let data_info = fi.data_info();
 
-        let icon = fi.icon(language, program_lookup, false);
+        let icon_opacity = if data_info.tot_data(DataRepr::Packets) == 0 {
+            style.get_extension().alpha_chart_badge
+        } else {
+            1.0
+        };
+        let icon = fi.icon(language, program_lookup, false, icon_opacity);
         let item_bar = item_bar(
             icon,
             fi.to_entry_string(),
-            &fi.data_info(),
+            &data_info,
             data_repr,
             first_entry_data_info,
         );
@@ -166,16 +176,22 @@ fn col_favorite_item(
     );
 
     if entries.is_empty() {
-        let empty_text = if is_favorite_filter_active {
-            Icon::FunnelX.to_text().size(60)
+        let empty_text: Element<'_, Message, StyleType> = if is_favorite_filter_active {
+            Column::new()
+                .spacing(15)
+                .align_x(Alignment::Center)
+                .push(Icon::FunnelX.to_text().size(60))
+                .push(no_favorites_saved_translation(language))
+                .into()
         } else {
-            Text::new(&sniffer.dots_pulse.0).size(50)
+            Text::new(&sniffer.dots_pulse.0).size(50).into()
         };
 
         col = col.push(
             Column::new()
                 .width(Length::Fill)
                 .height(Length::Fill)
+                .padding(20)
                 .align_x(Alignment::Center)
                 .push(Space::new().height(Length::Fill))
                 .push(empty_text)
@@ -207,28 +223,35 @@ pub fn item_bar<'a>(
     data_info: &DataInfo,
     data_repr: DataRepr,
     first_entry_data_info: DataInfo,
-) -> Row<'a, Message, StyleType> {
-    Row::new()
-        .height(ICONS_SIZE_BIG)
-        .align_y(Alignment::Center)
-        .spacing(5)
-        .push(icon)
-        .push(
-            Column::new()
-                .spacing(2)
-                .push(
-                    Row::new()
-                        .push(
-                            EllipsizedText::new(item)
-                                .wrapping(Wrapping::Glyph)
-                                .width(Length::Fill),
-                        )
-                        .push(Text::new(
-                            data_repr.formatted_string(data_info.tot_data(data_repr)),
-                        )),
-                )
-                .push(get_bars(data_repr, &first_entry_data_info, data_info)),
-        )
+) -> Container<'a, Message, StyleType> {
+    Container::new(
+        Row::new()
+            .height(ICONS_SIZE_BIG)
+            .align_y(Alignment::Center)
+            .spacing(5)
+            .push(icon)
+            .push(
+                Column::new()
+                    .spacing(2)
+                    .push(
+                        Row::new()
+                            .push(
+                                EllipsizedText::new(item)
+                                    .wrapping(Wrapping::Glyph)
+                                    .width(Length::Fill),
+                            )
+                            .push(Text::new(
+                                data_repr.formatted_string(data_info.tot_data(data_repr)),
+                            )),
+                    )
+                    .push(get_bars(data_repr, &first_entry_data_info, data_info)),
+            ),
+    )
+    .class(if data_info.tot_data(DataRepr::Packets) == 0 {
+        ContainerType::DimmedText
+    } else {
+        ContainerType::Standard
+    })
 }
 
 fn col_info(sniffer: &Sniffer) -> Container<'_, Message, StyleType> {

@@ -198,6 +198,7 @@ impl ProgramLookup {
         &self,
         icon_key: &str,
         program_path: String,
+        opacity: f32,
     ) -> Tooltip<'a, Message, StyleType> {
         let tooltip_class = if program_path.is_empty() {
             ContainerType::Standard
@@ -208,10 +209,12 @@ impl ProgramLookup {
         let handle = self.picons.get(icon_key).unwrap_or(&DEFAULT_PICON);
         let content: Element<Message, StyleType> = match handle {
             IconHandle::Image(image_handle) => Image::new(image_handle)
+                .opacity(opacity)
                 .width(ICONS_SIZE_BIG)
                 .height(ICONS_SIZE_BIG)
                 .into(),
             IconHandle::Svg(svg_handle) => Svg::new(svg_handle.clone())
+                .opacity(opacity)
                 .width(ICONS_SIZE_BIG)
                 .height(ICONS_SIZE_BIG)
                 .into(),

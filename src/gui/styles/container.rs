@@ -25,6 +25,7 @@ pub enum ContainerType {
     HighlightedOnHeader,
     ModalBackground,
     AdapterAddress,
+    DimmedText,
 }
 
 impl ContainerType {
@@ -34,6 +35,10 @@ impl ContainerType {
         Style {
             text_color: Some(match self {
                 ContainerType::Gradient(_) | ContainerType::Highlighted => colors.text_headers,
+                ContainerType::DimmedText => Color {
+                    a: ext.alpha_chart_badge,
+                    ..colors.text_body
+                },
                 _ => colors.text_body,
             }),
             background: Some(match self {
@@ -55,7 +60,7 @@ impl ContainerType {
                 ContainerType::Modal | ContainerType::HighlightedOnHeader => {
                     Background::Color(colors.primary)
                 }
-                ContainerType::Standard | ContainerType::Palette => {
+                ContainerType::Standard | ContainerType::Palette | ContainerType::DimmedText => {
                     Background::Color(Color::TRANSPARENT)
                 }
                 ContainerType::ModalBackground => Background::Color(Color {
@@ -81,6 +86,7 @@ impl ContainerType {
                 },
                 width: match self {
                     ContainerType::Standard
+                    | ContainerType::DimmedText
                     | ContainerType::ModalBackground
                     | ContainerType::Gradient(_)
                     | ContainerType::HighlightedOnHeader

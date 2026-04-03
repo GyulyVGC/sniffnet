@@ -22,7 +22,7 @@ use crate::translations::translations_5::program_translation;
 use crate::translations::types::language::Language;
 use crate::utils::types::icon::Icon;
 use iced::widget::{Button, Container, Space, button};
-use iced::{Alignment, Element};
+use iced::{Alignment, Element, Padding};
 use serde::{Deserialize, Serialize};
 use std::cmp::min;
 use std::collections::HashSet;
@@ -200,17 +200,22 @@ impl Favorite {
             Favorite::Program => Message::ProgramFavoritesFilterToggle,
         };
 
-        let (icon, class) = if is_active {
+        let (icon, class, padding) = if is_active {
             (
                 Icon::FunnelStar.to_text().size(20),
                 ButtonType::SortArrowActive,
+                Padding::ZERO.left(3),
             )
         } else {
-            (Icon::Funnel.to_text().size(17), ButtonType::SortArrows)
+            (
+                Icon::Funnel.to_text().size(17),
+                ButtonType::SortArrows,
+                Padding::ZERO,
+            )
         };
 
         button(icon.align_x(Alignment::Center).align_y(Alignment::Center))
-            .padding(0)
+            .padding(padding)
             .height(25)
             .width(25)
             .class(class)
@@ -269,11 +274,12 @@ impl FavoriteItem {
         language: Language,
         program_lookup: Option<&'a ProgramLookup>,
         fill_empty: bool,
+        opacity: f32,
     ) -> impl Into<Element<'a, Message, StyleType>> {
         match self {
-            FavoriteItem::Host((host, data_info_host)) => {
-                Some(get_flag_tooltip(host.country, data_info_host, language, false).into())
-            }
+            FavoriteItem::Host((host, data_info_host)) => Some(
+                get_flag_tooltip(host.country, data_info_host, language, false, opacity).into(),
+            ),
             FavoriteItem::Service(_) => {
                 if fill_empty {
                     Some(Space::new().width(ICONS_SIZE_BIG).into())
@@ -285,7 +291,7 @@ impl FavoriteItem {
                 let program_lookup = program_lookup?;
                 Some(
                     program_lookup
-                        .picon_tooltip(program.icon_key(), program.path())
+                        .picon_tooltip(program.icon_key(), program.path(), opacity)
                         .into(),
                 )
             }
@@ -447,3 +453,5 @@ fn get_program_entries(
         .map(|&(program, data_info)| FavoriteItem::Program((program.to_owned(), *data_info)))
         .collect()
 }
+
+// TODO: fix DataInfoHost stuff?

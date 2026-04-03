@@ -96,7 +96,7 @@ fn host_col<'a>(sniffer: &Sniffer) -> Column<'a, Message, StyleType> {
 
         thumbnail_hosts.push(thumbnail_host);
 
-        let flag = get_flag_tooltip(country, data_info_host, Language::default(), true);
+        let flag = get_flag_tooltip(country, data_info_host, Language::default(), true, 1.0);
         let host_row = Row::new()
             .align_y(Alignment::Center)
             .spacing(5)

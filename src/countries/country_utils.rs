@@ -28,6 +28,7 @@ use crate::translations::translations_2::{
 use crate::translations::translations_4::reserved_address_translation;
 use crate::{Language, StyleType};
 
+#[allow(clippy::too_many_lines, clippy::too_many_arguments)]
 fn get_flag_from_country<'a>(
     country: Country,
     size: f32,
@@ -36,8 +37,8 @@ fn get_flag_from_country<'a>(
     is_bogon: Option<&str>,
     traffic_type: TrafficType,
     language: Language,
+    opacity: f32,
 ) -> (Svg<'a, StyleType>, String) {
-    #![allow(clippy::too_many_lines)]
     let mut tooltip = country.to_string();
     let svg = Svg::new(Handle::from_memory(match country {
         Country::AD => AD,
@@ -305,6 +306,7 @@ fn get_flag_from_country<'a>(
             flag
         }
     }))
+    .opacity(opacity)
     .width(size)
     .height(size);
 
@@ -316,6 +318,7 @@ pub fn get_flag_tooltip<'a>(
     host_info: &DataInfoHost,
     language: Language,
     thumbnail: bool,
+    opacity: f32,
 ) -> Tooltip<'a, Message, StyleType> {
     let size = if thumbnail {
         ICONS_SIZE_SMALL
@@ -334,6 +337,7 @@ pub fn get_flag_tooltip<'a>(
         is_bogon,
         traffic_type,
         language,
+        opacity,
     );
 
     let actual_tooltip = if thumbnail { String::new() } else { tooltip };

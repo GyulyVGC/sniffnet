@@ -205,7 +205,7 @@ fn favorite_notification_log<'a>(
     program_lookup: Option<&'a ProgramLookup>,
 ) -> Container<'a, Message, StyleType> {
     let favorite = &logged_notification.favorite;
-    let icon = favorite.icon(language, program_lookup, true);
+    let icon = favorite.icon(language, program_lookup, true, 1.0);
     let item_bar = item_bar(
         icon,
         favorite.to_entry_string(),
@@ -251,7 +251,7 @@ fn blacklisted_notification_log<'a>(
 ) -> Container<'a, Message, StyleType> {
     let host = &logged_notification.host;
     let data_info_host = logged_notification.data_info_host;
-    let icon = get_flag_tooltip(host.country, &data_info_host, language, false);
+    let icon = get_flag_tooltip(host.country, &data_info_host, language, false, 1.0);
     let blacklisted_bar = item_bar(
         icon,
         host.to_blacklist_string(logged_notification.ip),
@@ -405,7 +405,7 @@ fn data_notification_extra<'a>(
         .1
         .data_info;
     for (host, data_info_host) in &logged_notification.hosts {
-        let icon = get_flag_tooltip(host.country, data_info_host, language, false);
+        let icon = get_flag_tooltip(host.country, data_info_host, language, false, 1.0);
         let host_bar = item_bar(
             icon,
             host.to_entry_string(),

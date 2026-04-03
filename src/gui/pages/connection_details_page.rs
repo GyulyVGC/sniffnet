@@ -89,7 +89,7 @@ fn page_content<'a>(sniffer: &Sniffer, key: &AddressPortPair) -> Container<'a, M
     if let Some((r_dns, host)) = host_option {
         host_info_col = get_host_info_col(r_dns, host, language);
         let host_info = host_info_option.unwrap_or_default();
-        let flag = get_flag_tooltip(host.country, &host_info, language, false);
+        let flag = get_flag_tooltip(host.country, &host_info, language, false, 1.0);
         let computer = get_local_tooltip(sniffer, &address_to_lookup, key);
         if address_to_lookup.eq(&key.source) {
             source_caption = source_caption.push(flag);
