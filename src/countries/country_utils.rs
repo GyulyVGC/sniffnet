@@ -346,16 +346,11 @@ pub fn get_flag_tooltip<'a>(
     } else {
         ContainerType::Tooltip
     };
-    let mut tooltip = Tooltip::new(content, Text::new(actual_tooltip), Position::FollowCursor)
+
+    Tooltip::new(content, Text::new(actual_tooltip), Position::FollowCursor)
         .snap_within_viewport(true)
         .class(tooltip_style)
-        .delay(TOOLTIP_DELAY);
-
-    if thumbnail {
-        tooltip = tooltip.padding(3);
-    }
-
-    tooltip
+        .delay(TOOLTIP_DELAY)
 }
 
 pub fn get_computer_tooltip<'a>(
