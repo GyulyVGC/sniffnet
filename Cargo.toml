@@ -40,7 +40,7 @@ codegen-units = 1
 [dependencies]
 async-channel = "2.5.0"
 chrono = "0.4.44"
-clap = { version = "4.5.60", features = ["derive"] }
+clap = { version = "4.6.0", features = ["derive"] }
 confy = "2.0.0"
 ctrlc = { version = "3.5.2", features = ["termination"] }
 dns-lookup = "3.0.1"
@@ -57,12 +57,12 @@ plotters-iced2 = "0.14.0"
 reqwest = { version = "0.13.2", features = ["json"] }
 rfd = "0.17.2"
 rodio = { version = "0.22.2", default-features = false, features = ["mp3", "playback"] }
-semver = "1.0.27"
+semver = "1.0.28"
 serde = { version = "1.0.228", features = ["derive"] }
 serde_json = { version = "1.0.149", features = ["preserve_order"] }
 splines = "5.0.0"
-tokio = { version = "1.50.0", features = ["macros", "fs"] }
-toml = "1.0.6"
+tokio = { version = "1.51.0", features = ["macros", "fs"] }
+toml = "1.1.2"
 
 [target.'cfg(windows)'.dependencies]
 gag = "1.0.0"
