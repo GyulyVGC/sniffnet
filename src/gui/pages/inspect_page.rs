@@ -10,7 +10,7 @@ use iced::{Alignment, Element, Length, Padding, Pixels, alignment};
 
 use crate::gui::components::tab::get_pages_tabs;
 use crate::gui::components::types::my_modal::MyModal;
-use crate::gui::pages::overview_page::{get_bars, get_bars_length};
+use crate::gui::pages::overview_page::get_bars;
 use crate::gui::styles::button::ButtonType;
 use crate::gui::styles::container::ContainerType;
 use crate::gui::styles::rule::RuleType;
@@ -102,18 +102,12 @@ fn report<'a>(sniffer: &Sniffer) -> Column<'a, Message, StyleType> {
     let mut scroll_report = Column::new().align_x(Alignment::Start);
     let start_entry_num = (sniffer.page_number.saturating_sub(1)) * 30 + 1;
     let end_entry_num = start_entry_num + search_results.len() - 1;
-    for report_entry in search_results {
+    for (key, val) in search_results {
         scroll_report = scroll_report.push(
-            button(row_report_entry(
-                &report_entry.0,
-                &report_entry.1,
-                data_repr,
-            ))
-            .padding(2)
-            .on_press(Message::ShowModal(MyModal::ConnectionDetails(
-                report_entry.0,
-            )))
-            .class(ButtonType::Neutral),
+            button(row_report_entry(key, val, data_repr))
+                .padding(2)
+                .on_press(Message::ShowModal(MyModal::ConnectionDetails(*key)))
+                .class(ButtonType::Neutral),
         );
     }
     if results_number > 0 {
@@ -144,7 +138,7 @@ fn report<'a>(sniffer: &Sniffer) -> Column<'a, Message, StyleType> {
                 .padding(20)
                 .align_x(Alignment::Center)
                 .push(Space::new().height(Length::Fill))
-                .push(Icon::Funnel.to_text().size(60))
+                .push(Icon::FunnelX.to_text().size(60))
                 .push(Space::new().height(15))
                 .push(Text::new(no_search_results_translation(language)))
                 .push(Space::new().height(Length::FillPortion(2))),
@@ -368,7 +362,7 @@ fn additional_filters_row<'a>(
                 ..search_params.clone()
             })
         },
-        Icon::Star.codepoint(),
+        Icon::StarEmpty.codepoint(),
         only_show_favorites_translation(language),
     );
 
@@ -561,8 +555,7 @@ fn get_button_change_page<'a>(increment: bool) -> Button<'a, Message, StyleType>
 }
 
 fn get_agglomerates_row<'a>(tot: DataInfo, data_repr: DataRepr) -> Row<'a, Message, StyleType> {
-    let (in_length, out_length) = get_bars_length(data_repr, &tot, &tot);
-    let bars = get_bars(in_length, out_length).width(ReportCol::FILTER_COLUMNS_WIDTH);
+    let bars = get_bars(data_repr, &tot, &tot).width(ReportCol::FILTER_COLUMNS_WIDTH);
 
     let data_col = Column::new()
         .align_x(Alignment::Center)

@@ -54,11 +54,11 @@ fn column_all_general_setting(sniffer: &Sniffer) -> Column<'_, Message, StyleTyp
     let Settings {
         language,
         scale_factor,
-        mmdb_country,
-        mmdb_asn,
-        ip_blacklist: ip_blacklist_str,
+        ref mmdb_country,
+        ref mmdb_asn,
+        ip_blacklist: ref ip_blacklist_str,
         ..
-    } = sniffer.conf.settings.clone();
+    } = sniffer.conf.settings;
     let ip_blacklist = &sniffer.ip_blacklist;
 
     let is_editable = sniffer.running_page.is_none();
@@ -86,14 +86,14 @@ fn column_all_general_setting(sniffer: &Sniffer) -> Column<'_, Message, StyleTyp
         .push(mmdb_settings(
             is_editable,
             language,
-            &mmdb_country,
-            &mmdb_asn,
+            mmdb_country,
+            mmdb_asn,
             &sniffer.mmdb_readers,
         ))
         .push(RuleType::Standard.vertical(25))
         .push(blacklist_selection(
             is_editable,
-            &ip_blacklist_str,
+            ip_blacklist_str,
             ip_blacklist,
             language,
         ));

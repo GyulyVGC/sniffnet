@@ -103,11 +103,13 @@ mod tests {
     use crate::gui::types::conf::Conf;
     use crate::gui::types::config_window::ConfigWindow;
     use crate::gui::types::export_pcap::ExportPcap;
+    use crate::gui::types::favorite::{FavoriteKey, Favorites};
     use crate::gui::types::filters::Filters;
     use crate::gui::types::settings::Settings;
     use crate::networking::types::capture_context::CaptureSourcePicklist;
     use crate::networking::types::config_device::ConfigDevice;
     use crate::networking::types::data_representation::DataRepr;
+    use crate::networking::types::service::Service;
     use crate::notifications::types::notifications::Notifications;
     use crate::report::types::sort_type::SortType;
     use crate::{Language, Sniffer, StyleType};
@@ -138,12 +140,16 @@ mod tests {
                 style: StyleType::DraculaDark,
                 ip_blacklist: "some-path".to_string(),
             },
+            favorites: Favorites::from([FavoriteKey::Service(Service::Name("https"))]),
             device: ConfigDevice {
                 device_name: "hey-hey".to_string(),
             },
             window: ConfigWindow::new((452.0, 870.0), (440.0, 99.0), (20.0, 20.0)),
             capture_source_picklist: CaptureSourcePicklist::File,
             report_sort_type: SortType::Ascending,
+            host_favorites_filter: false,
+            service_favorites_filter: true,
+            program_favorites_filter: false,
             host_sort_type: SortType::Descending,
             service_sort_type: SortType::Neutral,
             program_sort_type: SortType::Neutral,
@@ -164,7 +170,7 @@ mod tests {
         // we want to be sure that modified config is different from defaults
         assert_ne!(Conf::default(), modified_conf);
         //store modified configs
-        modified_conf.clone().store().unwrap();
+        modified_conf.store().unwrap();
         // assert they've been stored
         assert_eq!(Conf::load(), modified_conf);
         // restore defaults

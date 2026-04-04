@@ -9,12 +9,10 @@ use crate::gui::sniffer::Sniffer;
 use crate::gui::styles::rule::RuleType;
 use crate::gui::styles::style_constants::FONT_SIZE_FOOTER;
 use crate::gui::styles::types::style_type::StyleType;
+use crate::gui::types::favorite::{Favorite, FavoriteItem};
 use crate::gui::types::message::Message;
 use crate::networking::types::data_representation::DataRepr;
 use crate::networking::types::host::ThumbnailHost;
-use crate::networking::types::info_traffic::InfoTraffic;
-use crate::report::get_report_entries::{get_host_entries, get_service_entries};
-use crate::report::types::sort_type::SortType;
 use crate::translations::types::language::Language;
 use crate::utils::formatted_strings::clip_text;
 
@@ -66,36 +64,28 @@ pub fn thumbnail_page(sniffer: &Sniffer) -> Container<'_, Message, StyleType> {
         .padding([5, 0])
         .height(Length::Fill)
         .align_y(Alignment::Start)
-        .push(host_col(
-            info_traffic,
-            data_repr,
-            sniffer.conf.host_sort_type,
-        ))
+        .push(host_col(sniffer))
         .push(RuleType::Standard.vertical(10))
-        .push(service_col(
-            info_traffic,
-            data_repr,
-            sniffer.conf.service_sort_type,
-        ));
+        .push(service_col(sniffer));
 
     let content = Column::new().push(charts).push(report);
 
     Container::new(content)
 }
 
-fn host_col<'a>(
-    info_traffic: &InfoTraffic,
-    data_repr: DataRepr,
-    sort_type: SortType,
-) -> Column<'a, Message, StyleType> {
+fn host_col<'a>(sniffer: &Sniffer) -> Column<'a, Message, StyleType> {
     let mut host_col = Column::new()
         .padding([0, 5])
         .spacing(3)
         .width(Length::FillPortion(2));
-    let hosts = get_host_entries(info_traffic, data_repr, sort_type);
+    let hosts = Favorite::Host.get_entries(sniffer);
     let mut thumbnail_hosts = Vec::new();
 
-    for (host, data_info_host) in &hosts {
+    for fi in &hosts {
+        let FavoriteItem::Host((host, data_info_host)) = fi else {
+            continue;
+        };
+
         let thumbnail_host = ThumbnailHost::from_host(host, MAX_CHARS_HOST);
         let country = thumbnail_host.country;
         let text = thumbnail_host.text.clone();
@@ -106,7 +96,7 @@ fn host_col<'a>(
 
         thumbnail_hosts.push(thumbnail_host);
 
-        let flag = get_flag_tooltip(country, data_info_host, Language::default(), true);
+        let flag = get_flag_tooltip(country, data_info_host, Language::default(), true, 1.0);
         let host_row = Row::new()
             .align_y(Alignment::Center)
             .spacing(5)
@@ -122,15 +112,15 @@ fn host_col<'a>(
     host_col
 }
 
-fn service_col<'a>(
-    info_traffic: &InfoTraffic,
-    data_repr: DataRepr,
-    sort_type: SortType,
-) -> Column<'a, Message, StyleType> {
+fn service_col<'a>(sniffer: &Sniffer) -> Column<'a, Message, StyleType> {
     let mut service_col = Column::new().padding([0, 5]).spacing(3).width(Length::Fill);
-    let services = get_service_entries(info_traffic, data_repr, sort_type);
+    let services = Favorite::Service.get_entries(sniffer);
     let n_entry = min(services.len(), MAX_ENTRIES);
-    for (service, _) in services.get(..n_entry).unwrap_or_default() {
+    for fi in services.get(..n_entry).unwrap_or_default() {
+        let FavoriteItem::Service((service, _)) = fi else {
+            continue;
+        };
+
         service_col = service_col.push(
             Text::new(clip_text(&service.to_string(), MAX_CHARS_SERVICE)).size(FONT_SIZE_FOOTER),
         );

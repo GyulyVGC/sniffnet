@@ -264,7 +264,6 @@ pub fn parse_packets(
                                             exchanged_bytes,
                                             traffic_direction,
                                         ),
-                                        is_favorite: false,
                                         is_loopback,
                                         is_local,
                                         is_bogon,
@@ -400,7 +399,6 @@ fn reverse_dns_lookups(
 
         let data_info_host = DataInfoHost {
             data_info: DataInfo::default(),
-            is_favorite: false,
             is_local,
             is_bogon,
             is_loopback,

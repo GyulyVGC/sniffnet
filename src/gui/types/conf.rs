@@ -2,6 +2,7 @@ use crate::gui::pages::types::running_page::RunningPage;
 use crate::gui::pages::types::settings_page::SettingsPage;
 use crate::gui::types::config_window::ConfigWindow;
 use crate::gui::types::export_pcap::ExportPcap;
+use crate::gui::types::favorite::Favorites;
 use crate::gui::types::filters::Filters;
 use crate::gui::types::settings::Settings;
 use crate::networking::types::capture_context::CaptureSourcePicklist;
@@ -67,6 +68,15 @@ pub struct Conf {
     /// Report sort type (inspect page)
     #[serde(deserialize_with = "deserialize_or_default")]
     pub report_sort_type: SortType,
+    /// Host favorites filter (overview page)
+    #[serde(deserialize_with = "deserialize_or_default")]
+    pub host_favorites_filter: bool,
+    /// Service favorites filter (overview page)
+    #[serde(deserialize_with = "deserialize_or_default")]
+    pub service_favorites_filter: bool,
+    /// Program favorites filter (overview page)
+    #[serde(deserialize_with = "deserialize_or_default")]
+    pub program_favorites_filter: bool,
     // ---------------------------------------------------------------------------------------------
     /// Window configuration, such as size and position
     #[serde(deserialize_with = "deserialize_or_default")]
@@ -83,6 +93,9 @@ pub struct Conf {
     /// Parameters from settings pages
     #[serde(deserialize_with = "deserialize_or_default")]
     pub settings: Settings,
+    /// Favorite hosts, services, and programs
+    #[serde(deserialize_with = "deserialize_or_default")]
+    pub favorites: Favorites,
 }
 
 impl Conf {
@@ -118,7 +131,7 @@ impl Conf {
     }
 
     #[cfg(not(test))]
-    pub fn store(self) -> Result<(), ConfyError> {
+    pub fn store(&self) -> Result<(), ConfyError> {
         confy::store(SNIFFNET_LOWERCASE, Self::FILE_NAME, self).log_err(location!())
     }
 }
@@ -145,7 +158,7 @@ mod tests {
             confy::load_path::<Conf>(Conf::test_path()).unwrap_or_else(|_| Conf::default())
         }
 
-        pub fn store(self) -> Result<(), confy::ConfyError> {
+        pub fn store(&self) -> Result<(), confy::ConfyError> {
             confy::store_path(Conf::test_path(), self)
         }
     }

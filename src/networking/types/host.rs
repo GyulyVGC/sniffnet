@@ -2,10 +2,11 @@ use crate::countries::types::country::Country;
 use crate::networking::types::asn::Asn;
 use crate::networking::types::data_info_host::DataInfoHost;
 use crate::utils::formatted_strings::clip_text;
+use serde::{Deserialize, Serialize};
 use std::net::IpAddr;
 
 /// Struct to represent a network host
-#[derive(Default, PartialEq, Eq, Hash, Clone, Debug)]
+#[derive(Default, PartialEq, Eq, Hash, Clone, Debug, Serialize, Deserialize)]
 pub struct Host {
     /// Hostname (domain). Obtained from the reverse DNS.
     pub domain: String,

@@ -1,3 +1,4 @@
+use crate::countries::flags_pictures::ICONS_SIZE_BIG;
 use crate::gui::styles::container::ContainerType;
 use crate::gui::styles::style_constants::TOOLTIP_DELAY;
 use crate::gui::styles::types::style_type::StyleType;
@@ -10,10 +11,10 @@ use crate::networking::types::info_address_port_pair::InfoAddressPortPair;
 use crate::networking::types::program::Program;
 use iced::Element;
 use iced::widget::tooltip::Position;
-use iced::widget::{Image, Svg, Text, Tooltip, image};
+use iced::widget::{Image, Svg, Text, Tooltip, svg};
 use listeners::{Process, Protocol};
 use picon::IconHandle;
-use std::collections::HashMap;
+use std::collections::{HashMap, HashSet};
 use std::sync::mpsc::{Receiver, Sender};
 use std::time::Instant;
 
@@ -135,9 +136,7 @@ impl ProgramLookup {
         if !self.picons.contains_key(icon_key) {
             self.picons
                 .insert(icon_key.to_string(), DEFAULT_PICON.clone());
-            if !icon_key.is_empty() {
-                let _ = self.icon_key_tx.send(icon_key.to_string());
-            }
+            let _ = self.icon_key_tx.send(icon_key.to_string());
         }
 
         // associate unassigned recent connections on port with the program
@@ -199,6 +198,7 @@ impl ProgramLookup {
         &self,
         icon_key: &str,
         program_path: String,
+        opacity: f32,
     ) -> Tooltip<'a, Message, StyleType> {
         let tooltip_class = if program_path.is_empty() {
             ContainerType::Standard
@@ -208,8 +208,16 @@ impl ProgramLookup {
 
         let handle = self.picons.get(icon_key).unwrap_or(&DEFAULT_PICON);
         let content: Element<Message, StyleType> = match handle {
-            IconHandle::Image(image_handle) => Image::new(image_handle).width(32).height(32).into(),
-            IconHandle::Svg(svg_handle) => Svg::new(svg_handle.clone()).width(32).height(32).into(),
+            IconHandle::Image(image_handle) => Image::new(image_handle)
+                .opacity(opacity)
+                .width(ICONS_SIZE_BIG)
+                .height(ICONS_SIZE_BIG)
+                .into(),
+            IconHandle::Svg(svg_handle) => Svg::new(svg_handle.clone())
+                .opacity(opacity)
+                .width(ICONS_SIZE_BIG)
+                .height(ICONS_SIZE_BIG)
+                .into(),
         };
 
         Tooltip::new(content, Text::new(program_path), Position::FollowCursor)
@@ -235,16 +243,35 @@ pub fn lookup_program(
     }
 }
 
-pub fn get_picon(icon_key_rx: &Receiver<String>, picon_tx: &Sender<(String, IconHandle)>) {
-    while let Ok(icon_key) = icon_key_rx.recv() {
-        if let Some(handle) = picon::get_icon(&icon_key) {
+pub fn get_picon(
+    icon_key_rx: &Receiver<String>,
+    picon_tx: &Sender<(String, IconHandle)>,
+    favorite_programs: Vec<Program>,
+) {
+    let mut unique_icon_keys = HashSet::new();
+
+    let mut get_and_send_picon = |icon_key: String| {
+        if !icon_key.is_empty()
+            && unique_icon_keys.insert(icon_key.clone())
+            && let Some(handle) = picon::get_icon(&icon_key)
+        {
             let _ = picon_tx.send((icon_key, handle));
         }
+    };
+
+    // first get picons for saved favorite programs
+    for program in favorite_programs {
+        let icon_key = program.icon_key().to_string();
+        get_and_send_picon(icon_key);
+    }
+
+    while let Ok(icon_key) = icon_key_rx.recv() {
+        get_and_send_picon(icon_key);
     }
 }
 
 const DEFAULT_PICON_BYTES: &[u8] =
-    include_bytes!("../../../resources/countries_flags/default_picon.png");
+    include_bytes!("../../../resources/embedded_icons/default_picon.svg");
 
 static DEFAULT_PICON: std::sync::LazyLock<IconHandle> =
-    std::sync::LazyLock::new(|| IconHandle::Image(image::Handle::from_bytes(DEFAULT_PICON_BYTES)));
+    std::sync::LazyLock::new(|| IconHandle::Svg(svg::Handle::from_memory(DEFAULT_PICON_BYTES)));

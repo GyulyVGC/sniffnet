@@ -11,7 +11,7 @@ pub static YETI_DARK_PALETTE: std::sync::LazyLock<Palette> = std::sync::LazyLock
     primary: color!(0x282828),
     secondary: color!(0xb35900),
     outgoing: color!(0x0059b3),
-    starred: color!(0xf5c127, 0.5),
+    starred: color!(0xf5c127),
     text_headers: color!(0x000000),
     text_body: color!(0xffffff),
 });
@@ -24,7 +24,7 @@ pub static YETI_LIGHT_PALETTE: std::sync::LazyLock<Palette> =
         primary: color!(0xffffff),
         secondary: color!(0x0059b3),
         outgoing: color!(0xb35900),
-        starred: color!(0xd7a313, 0.9),
+        starred: color!(0xd7a313),
         text_headers: color!(0xffffff),
         text_body: color!(0x000000),
     });

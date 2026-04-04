@@ -22,6 +22,7 @@ use crate::gui::styles::types::custom_palette::CustomPalette;
 use crate::gui::styles::types::gradient_type::GradientType;
 use crate::gui::styles::types::palette::Palette;
 use crate::gui::types::conf::Conf;
+use crate::gui::types::favorite::FavoriteKey;
 use crate::gui::types::message::Message;
 use crate::gui::types::settings::Settings;
 use crate::gui::types::timing_events::TimingEvents;
@@ -40,6 +41,7 @@ use crate::networking::types::host::{Host, HostMessage};
 use crate::networking::types::info_traffic::InfoTraffic;
 use crate::networking::types::ip_blacklist::IpBlacklist;
 use crate::networking::types::my_device::MyDevice;
+use crate::networking::types::program::Program;
 use crate::networking::types::program_lookup::{ProgramLookup, get_picon, lookup_program};
 use crate::notifications::notify_and_log::notify_and_log;
 use crate::notifications::types::logged_notification::LoggedNotifications;
@@ -65,7 +67,7 @@ use iced::window::{Id, Level};
 use iced::{Element, Point, Size, Subscription, Task, window};
 use listeners::Process;
 use rfd::FileHandle;
-use std::collections::{HashMap, HashSet};
+use std::collections::HashMap;
 use std::net::IpAddr;
 use std::path::PathBuf;
 use std::sync::Arc;
@@ -96,8 +98,6 @@ pub struct Sniffer {
     pub info_traffic: InfoTraffic,
     /// Map of the resolved addresses with their full rDNS value and the corresponding host
     pub addresses_resolved: HashMap<IpAddr, (String, Host)>,
-    /// Collection of the favorite hosts
-    pub favorite_hosts: HashSet<Host>,
     /// Log of the displayed notifications, with the total number of notifications for this capture
     pub logged_notifications: LoggedNotifications,
     /// Reports if a newer release of the software is available on GitHub
@@ -146,13 +146,10 @@ pub struct Sniffer {
 
 impl Sniffer {
     pub fn new(conf: Conf) -> Self {
-        let Settings {
-            style,
-            language,
-            mmdb_country,
-            mmdb_asn,
-            ..
-        } = conf.settings.clone();
+        let style = conf.settings.style;
+        let language = conf.settings.language;
+        let mmdb_country = conf.settings.mmdb_country.clone();
+        let mmdb_asn = conf.settings.mmdb_asn.clone();
         let data_repr = conf.data_repr;
         let capture_source = CaptureSource::from_conf(&conf);
         let preview_charts = pcap::Device::list()
@@ -167,7 +164,6 @@ impl Sniffer {
             preview_captures_rx: None,
             info_traffic: InfoTraffic::default(),
             addresses_resolved: HashMap::new(),
-            favorite_hosts: HashSet::new(),
             logged_notifications: LoggedNotifications::default(),
             newer_release_available: None,
             capture_source,
@@ -302,7 +298,7 @@ impl Sniffer {
             Message::Reset => return self.reset(),
             Message::Style(style) => self.style(style),
             Message::LoadStyle(path) => self.load_style(path),
-            Message::AddOrRemoveFavorite(host, add) => self.add_or_remove_favorite(&host, add),
+            Message::AddOrRemoveFavorite(fav, add) => self.add_or_remove_favorite(&fav, add),
             Message::ShowModal(modal) => self.show_modal(modal),
             Message::HideModal => self.hide_modal(),
             Message::OpenSettings(settings_page) => self.open_settings(settings_page),
@@ -342,6 +338,9 @@ impl Sniffer {
             Message::HostSortSelection(sort_type) => self.host_sort_selection(sort_type),
             Message::ServiceSortSelection(sort_type) => self.service_sort_selection(sort_type),
             Message::ProgramSortSelection(sort_type) => self.program_sort_selection(sort_type),
+            Message::HostFavoritesFilterToggle => self.host_favorites_filter_toggle(),
+            Message::ServiceFavoritesFilterToggle => self.service_favorites_filter_toggle(),
+            Message::ProgramFavoritesFilterToggle => self.program_favorites_filter_toggle(),
             Message::ToggleExportPcap => self.toggle_export_pcap(),
             Message::OutputPcapDir(path) => self.output_pcap_dir(path),
             Message::OutputPcapFile(name) => self.output_pcap_file(&name),
@@ -409,7 +408,7 @@ impl Sniffer {
         let content: Element<Message, StyleType> =
             Column::new().push(header).push(body).push(footer).into();
 
-        let ret_val: Element<'_, Message, StyleType> = match self.modal.clone() {
+        let ret_val: Element<'_, Message, StyleType> = match &self.modal {
             None => {
                 if let Some(settings_page) = self.settings_page {
                     let overlay: Element<Message, StyleType> = match settings_page {
@@ -429,7 +428,7 @@ impl Sniffer {
                     MyModal::Reset => get_exit_overlay(Message::Reset, color_gradient, language),
                     MyModal::Quit => get_exit_overlay(Message::Quit, color_gradient, language),
                     MyModal::ClearAll => get_clear_all_overlay(color_gradient, language),
-                    MyModal::ConnectionDetails(key) => connection_details_page(self, key),
+                    MyModal::ConnectionDetails(key) => connection_details_page(self, *key),
                 }
                 .into();
 
@@ -702,6 +701,18 @@ impl Sniffer {
         self.conf.program_sort_type = sort_type;
     }
 
+    fn host_favorites_filter_toggle(&mut self) {
+        self.conf.host_favorites_filter = !self.conf.host_favorites_filter;
+    }
+
+    fn service_favorites_filter_toggle(&mut self) {
+        self.conf.service_favorites_filter = !self.conf.service_favorites_filter;
+    }
+
+    fn program_favorites_filter_toggle(&mut self) {
+        self.conf.program_favorites_filter = !self.conf.program_favorites_filter;
+    }
+
     fn toggle_export_pcap(&mut self) {
         self.conf.export_pcap.toggle();
     }
@@ -905,7 +916,7 @@ impl Sniffer {
             &mut self.logged_notifications,
             &self.conf.settings.notifications,
             &msg,
-            &self.favorite_hosts,
+            &self.conf.favorites,
             &self.capture_source,
             &self.addresses_resolved,
         );
@@ -1008,10 +1019,12 @@ impl Sniffer {
                         .log_err(location!());
                     let (icon_key_tx, icon_key_rx) = std::sync::mpsc::channel();
                     let (picon_tx, picon_rx) = std::sync::mpsc::channel();
+                    let favorite_programs: Vec<Program> =
+                        self.conf.favorites.programs().iter().cloned().collect();
                     let _ = thread::Builder::new()
                         .name("thread_get_picon".to_string())
                         .spawn(move || {
-                            get_picon(&icon_key_rx, &picon_tx);
+                            get_picon(&icon_key_rx, &picon_tx, favorite_programs);
                         })
                         .log_err(location!());
                     self.program_lookup = Some(ProgramLookup::new(
@@ -1050,7 +1063,6 @@ impl Sniffer {
         self.current_capture_rx = (self.current_capture_rx.0 + 1, None);
         self.info_traffic = InfoTraffic::default();
         self.addresses_resolved = HashMap::new();
-        self.favorite_hosts = HashSet::new();
         self.logged_notifications = LoggedNotifications::default();
         self.pcap_error = None;
         self.traffic_chart = TrafficChart::new(style, language, self.conf.data_repr);
@@ -1101,15 +1113,11 @@ impl Sniffer {
         }
     }
 
-    fn add_or_remove_favorite(&mut self, host: &Host, add: bool) {
-        let info_traffic = &mut self.info_traffic;
+    fn add_or_remove_favorite(&mut self, fav: &FavoriteKey, add: bool) {
         if add {
-            self.favorite_hosts.insert(host.clone());
+            self.conf.favorites.insert(fav);
         } else {
-            self.favorite_hosts.remove(host);
-        }
-        if let Some(host_info) = info_traffic.hosts.get_mut(host) {
-            host_info.is_favorite = add;
+            self.conf.favorites.remove(fav);
         }
     }
 
@@ -1278,7 +1286,7 @@ impl Sniffer {
             self.welcome = Some((false, 13));
         } else if let Some((false, x)) = self.welcome {
             if x <= 2 {
-                let _ = self.conf.clone().store();
+                let _ = self.conf.store();
                 return window::close(self.id.unwrap_or_else(Id::unique));
             }
             self.welcome = Some((false, x.saturating_sub(1)));
@@ -1416,7 +1424,7 @@ mod tests {
 
     use iced::{Point, Size};
     use serial_test::{parallel, serial};
-    use std::collections::{HashSet, VecDeque};
+    use std::collections::VecDeque;
     use std::fs::remove_file;
     use std::path::Path;
     use std::time::Duration;
@@ -1428,6 +1436,7 @@ mod tests {
     use crate::gui::types::conf::Conf;
     use crate::gui::types::config_window::ConfigWindow;
     use crate::gui::types::export_pcap::ExportPcap;
+    use crate::gui::types::favorite::{FavoriteKey, Favorites};
     use crate::gui::types::filters::Filters;
     use crate::gui::types::message::Message;
     use crate::gui::types::settings::Settings;
@@ -1437,6 +1446,8 @@ mod tests {
     use crate::networking::types::data_info::DataInfo;
     use crate::networking::types::data_representation::DataRepr;
     use crate::networking::types::host::Host;
+    use crate::networking::types::program::Program;
+    use crate::networking::types::service::Service;
     use crate::networking::types::traffic_direction::TrafficDirection;
     use crate::notifications::types::logged_notification::{
         DataThresholdExceeded, LoggedNotification,
@@ -1607,183 +1618,68 @@ mod tests {
 
     #[test]
     #[parallel] // needed to not collide with other tests generating configs files
-    fn test_modify_favorite_connections() {
+    fn test_add_or_remove_favorite() {
         let mut sniffer = Sniffer::new(Conf::default());
-        // remove 1
-        sniffer.update(Message::AddOrRemoveFavorite(
-            Host {
-                domain: "1.1".to_string(),
-                asn: Default::default(),
-                country: Country::US,
-            },
-            false,
-        ));
-        assert_eq!(sniffer.favorite_hosts, HashSet::new());
-        // remove 2
-        sniffer.update(Message::AddOrRemoveFavorite(
-            Host {
-                domain: "2.2".to_string(),
-                asn: Default::default(),
-                country: Country::US,
-            },
-            false,
-        ));
-        assert_eq!(sniffer.favorite_hosts, HashSet::new());
-        // add 2
-        sniffer.update(Message::AddOrRemoveFavorite(
-            Host {
-                domain: "2.2".to_string(),
-                asn: Default::default(),
-                country: Country::US,
-            },
-            true,
-        ));
+
+        let fav_host = FavoriteKey::Host(Host {
+            domain: "1.1".to_string(),
+            asn: Default::default(),
+            country: Country::US,
+        });
+        let fav_service = FavoriteKey::Service(Service::Name("https"));
+        let fav_program = FavoriteKey::Program(Program::NamePath((
+            "Chrome".to_string(),
+            "/usr/bin/chrome".to_string(),
+        )));
+
+        // remove host
+        sniffer.update(Message::AddOrRemoveFavorite(fav_host.clone(), false));
+        assert_eq!(sniffer.conf.favorites, Favorites::default());
+        // remove service
+        sniffer.update(Message::AddOrRemoveFavorite(fav_service.clone(), false));
+        assert_eq!(sniffer.conf.favorites, Favorites::default());
+        // add service
+        sniffer.update(Message::AddOrRemoveFavorite(fav_service.clone(), true));
         assert_eq!(
-            sniffer.favorite_hosts,
-            HashSet::from([Host {
-                domain: "2.2".to_string(),
-                asn: Default::default(),
-                country: Country::US,
-            }])
+            sniffer.conf.favorites,
+            Favorites::from([fav_service.clone()])
         );
-        // remove 1
-        sniffer.update(Message::AddOrRemoveFavorite(
-            Host {
-                domain: "1.1".to_string(),
-                asn: Default::default(),
-                country: Country::US,
-            },
-            false,
-        ));
+        // remove host
+        sniffer.update(Message::AddOrRemoveFavorite(fav_host.clone(), false));
         assert_eq!(
-            sniffer.favorite_hosts,
-            HashSet::from([Host {
-                domain: "2.2".to_string(),
-                asn: Default::default(),
-                country: Country::US,
-            }])
+            sniffer.conf.favorites,
+            Favorites::from([fav_service.clone()])
         );
-        // add 2
-        sniffer.update(Message::AddOrRemoveFavorite(
-            Host {
-                domain: "2.2".to_string(),
-                asn: Default::default(),
-                country: Country::US,
-            },
-            true,
-        ));
+        // add service
+        sniffer.update(Message::AddOrRemoveFavorite(fav_service.clone(), true));
         assert_eq!(
-            sniffer.favorite_hosts,
-            HashSet::from([Host {
-                domain: "2.2".to_string(),
-                asn: Default::default(),
-                country: Country::US,
-            }])
+            sniffer.conf.favorites,
+            Favorites::from([fav_service.clone()])
         );
-        // add 1
-        sniffer.update(Message::AddOrRemoveFavorite(
-            Host {
-                domain: "1.1".to_string(),
-                asn: Default::default(),
-                country: Country::US,
-            },
-            true,
-        ));
+        // add host
+        sniffer.update(Message::AddOrRemoveFavorite(fav_host.clone(), true));
         assert_eq!(
-            sniffer.favorite_hosts,
-            HashSet::from([
-                Host {
-                    domain: "1.1".to_string(),
-                    asn: Default::default(),
-                    country: Country::US,
-                },
-                Host {
-                    domain: "2.2".to_string(),
-                    asn: Default::default(),
-                    country: Country::US,
-                }
-            ])
+            sniffer.conf.favorites,
+            Favorites::from([fav_host.clone(), fav_service.clone()])
         );
-        // add 3
-        sniffer.update(Message::AddOrRemoveFavorite(
-            Host {
-                domain: "3.3".to_string(),
-                asn: Default::default(),
-                country: Country::US,
-            },
-            true,
-        ));
+        // add program
+        sniffer.update(Message::AddOrRemoveFavorite(fav_program.clone(), true));
         assert_eq!(
-            sniffer.favorite_hosts,
-            HashSet::from([
-                Host {
-                    domain: "1.1".to_string(),
-                    asn: Default::default(),
-                    country: Country::US,
-                },
-                Host {
-                    domain: "2.2".to_string(),
-                    asn: Default::default(),
-                    country: Country::US,
-                },
-                Host {
-                    domain: "3.3".to_string(),
-                    asn: Default::default(),
-                    country: Country::US,
-                }
-            ])
+            sniffer.conf.favorites,
+            Favorites::from([fav_host.clone(), fav_service.clone(), fav_program.clone()])
         );
-        // remove 2
-        sniffer.update(Message::AddOrRemoveFavorite(
-            Host {
-                domain: "2.2".to_string(),
-                asn: Default::default(),
-                country: Country::US,
-            },
-            false,
-        ));
+        // remove service
+        sniffer.update(Message::AddOrRemoveFavorite(fav_service.clone(), false));
         assert_eq!(
-            sniffer.favorite_hosts,
-            HashSet::from([
-                Host {
-                    domain: "1.1".to_string(),
-                    asn: Default::default(),
-                    country: Country::US,
-                },
-                Host {
-                    domain: "3.3".to_string(),
-                    asn: Default::default(),
-                    country: Country::US,
-                }
-            ])
+            sniffer.conf.favorites,
+            Favorites::from([fav_host.clone(), fav_program.clone()])
         );
-        // remove 3
-        sniffer.update(Message::AddOrRemoveFavorite(
-            Host {
-                domain: "3.3".to_string(),
-                asn: Default::default(),
-                country: Country::US,
-            },
-            false,
-        ));
-        assert_eq!(
-            sniffer.favorite_hosts,
-            HashSet::from([Host {
-                domain: "1.1".to_string(),
-                asn: Default::default(),
-                country: Country::US,
-            }])
-        );
-        // remove 1
-        sniffer.update(Message::AddOrRemoveFavorite(
-            Host {
-                domain: "1.1".to_string(),
-                asn: Default::default(),
-                country: Country::US,
-            },
-            false,
-        ));
-        assert_eq!(sniffer.favorite_hosts, HashSet::new());
+        // remove program
+        sniffer.update(Message::AddOrRemoveFavorite(fav_program.clone(), false));
+        assert_eq!(sniffer.conf.favorites, Favorites::from([fav_host.clone()]));
+        // remove host
+        sniffer.update(Message::AddOrRemoveFavorite(fav_host.clone(), false));
+        assert_eq!(sniffer.conf.favorites, Favorites::default());
     }
 
     #[test]
@@ -2239,6 +2135,8 @@ mod tests {
         sniffer.update(Message::ReportSortSelection(SortType::Ascending));
         sniffer.update(Message::HostSortSelection(SortType::Descending));
         sniffer.update(Message::ServiceSortSelection(SortType::Descending));
+        sniffer.update(Message::HostFavoritesFilterToggle);
+        sniffer.update(Message::ProgramFavoritesFilterToggle);
         sniffer.update(Message::OpenSettings(SettingsPage::Appearance));
         sniffer.update(Message::ToggleExportPcap);
         sniffer.update(Message::OutputPcapFile("test.cap".to_string()));
@@ -2247,6 +2145,10 @@ mod tests {
         sniffer.update(Message::ChangeRunningPage(RunningPage::Notifications));
         sniffer.update(Message::DataReprSelection(DataRepr::Bits));
         sniffer.update(Message::LoadIpBlacklist("blacklist_file.csv".to_string()));
+        sniffer.update(Message::AddOrRemoveFavorite(
+            FavoriteKey::Service(Service::Name("https")),
+            true,
+        ));
 
         // force saving configs by quitting the app
         sniffer.welcome = Some((false, 0));
@@ -2276,6 +2178,10 @@ mod tests {
                     style: StyleType::DraculaDark,
                     ip_blacklist: "blacklist_file.csv".to_string(),
                 },
+                favorites: Favorites::from([FavoriteKey::Service(Service::Name("https"))]),
+                host_favorites_filter: true,
+                service_favorites_filter: false,
+                program_favorites_filter: true,
                 window: ConfigWindow::new((1000.0, 999.0), (-5.0, 277.5), (20.0, 20.0)),
                 device: ConfigDevice::default(),
                 capture_source_picklist: CaptureSourcePicklist::File,

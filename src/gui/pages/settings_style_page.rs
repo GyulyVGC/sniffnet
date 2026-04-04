@@ -31,9 +31,9 @@ pub fn settings_style_page(sniffer: &Sniffer) -> Container<'_, Message, StyleTyp
         style,
         language,
         color_gradient,
-        style_path,
+        ref style_path,
         ..
-    } = sniffer.conf.settings.clone();
+    } = sniffer.conf.settings;
 
     let mut content = Column::new()
         .align_x(Alignment::Center)
@@ -56,7 +56,7 @@ pub fn settings_style_page(sniffer: &Sniffer) -> Container<'_, Message, StyleTyp
     }
     styles_col = styles_col
         .push(lazy((language, style_path.clone(), style), move |_| {
-            lazy_custom_style_input(language, &style_path, style)
+            lazy_custom_style_input(language, style_path, style)
         }))
         .push(Space::new().height(10));
 

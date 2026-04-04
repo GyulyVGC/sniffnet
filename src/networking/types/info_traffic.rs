@@ -40,7 +40,7 @@ impl InfoTraffic {
         }
         self.last_packet_timestamp = msg.last_packet_timestamp;
 
-        for (key, value) in &msg.map {
+        for (key, value) in &mut msg.map {
             let local_port = get_local_port(key, value.traffic_direction);
             let entry = self.map.entry(*key);
             match entry {
@@ -48,23 +48,28 @@ impl InfoTraffic {
                     if let Some(program_lookup) = program_lookup_opt
                         && let Some(local_port) = local_port
                     {
-                        program_lookup.lookup_and_add_data(local_port, false, value.data_info());
+                        let program = program_lookup.lookup_and_add_data(
+                            local_port,
+                            false,
+                            value.data_info(),
+                        );
+                        // set program in msg (used for favorite notifications)
+                        value.program = program;
                     }
 
                     o.get_mut().refresh(value);
                 }
                 Entry::Vacant(v) => {
-                    let mut new_value = value.clone();
-
                     if let Some(program_lookup) = program_lookup_opt
                         && let Some(local_port) = local_port
                     {
                         let program =
                             program_lookup.lookup_and_add_data(local_port, true, value.data_info());
-                        new_value.program = program;
+                        // set program in msg (used for favorite notifications)
+                        value.program = program;
                     }
 
-                    v.insert(new_value);
+                    v.insert(value.clone());
                 }
             }
         }

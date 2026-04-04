@@ -14,7 +14,6 @@ use crate::gui::styles::style_constants::{FONT_SIZE_FOOTER, FONT_SIZE_SUBTITLE, 
 use crate::gui::styles::text::TextType;
 use crate::gui::styles::types::gradient_type::GradientType;
 use crate::gui::types::message::Message;
-use crate::gui::types::settings::Settings;
 use crate::networking::types::data_representation::DataRepr;
 use crate::notifications::types::notifications::{
     DataNotification, Notification, RemoteNotifications, SimpleNotification,
@@ -35,12 +34,9 @@ use crate::{Language, Sniffer, StyleType};
 const CONTAINERS_WIDTH: f32 = 715.0;
 
 pub fn settings_notifications_page<'a>(sniffer: &Sniffer) -> Container<'a, Message, StyleType> {
-    let Settings {
-        language,
-        color_gradient,
-        mut notifications,
-        ..
-    } = sniffer.conf.settings.clone();
+    let language = sniffer.conf.settings.language;
+    let color_gradient = sniffer.conf.settings.color_gradient;
+    let mut notifications = sniffer.conf.settings.notifications.clone();
 
     // Use threshold that has not yet been applied, if available
     if let Some(temp_data_notification) = sniffer.timing_events.temp_threshold() {
@@ -248,7 +244,7 @@ fn get_remote_notifications<'a>(
             .spacing(5)
             .align_y(Alignment::Center)
             .padding(Padding::ZERO.left(26))
-            .push(Text::new("URL:".to_string()))
+            .push(Text::new("URL:"))
             .push(
                 TextInput::new("https://example.com/notify", remote_notifications.url())
                     .on_input(Message::RemoteNotificationsUrl)
@@ -274,7 +270,7 @@ fn input_group_bytes<'a>(
     let mut curr_threshold_str = (bytes_notification.threshold.unwrap_or_default()
         / bytes_notification.byte_multiple.multiplier())
     .to_string();
-    curr_threshold_str.push_str(&bytes_notification.byte_multiple.get_char());
+    curr_threshold_str.push_str(bytes_notification.byte_multiple.get_char());
     let input_row = Row::new()
         .spacing(5)
         .align_y(Alignment::Center)

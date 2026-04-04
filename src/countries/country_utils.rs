@@ -5,22 +5,20 @@ use iced::widget::{Svg, Text};
 
 use crate::countries::flags_pictures::{
     AD, AE, AF, AG, AI, AL, AM, AO, AQ, AR, AS, AT, AU, AW, AX, AZ, BA, BB, BD, BE, BF, BG, BH, BI,
-    BJ, BM, BN, BO, BOGON, BR, BROADCAST, BS, BT, BV, BW, BY, BZ, CA, CC, CD, CF, CG, CH, CI, CK,
-    CL, CM, CN, CO, COMPUTER, CR, CU, CV, CW, CX, CY, CZ, DE, DJ, DK, DM, DO, DZ, EC, EE, EG, EH,
-    ER, ES, ET, FI, FJ, FK, FLAGS_HEIGHT_BIG, FLAGS_WIDTH_BIG, FLAGS_WIDTH_SMALL, FM, FO, FR, GA,
-    GB, GD, GE, GG, GH, GI, GL, GM, GN, GQ, GR, GS, GT, GU, GW, GY, HK, HN, HOME, HR, HT, HU, ID,
-    IE, IL, IM, IN, IO, IQ, IR, IS, IT, JE, JM, JO, JP, KE, KG, KH, KI, KM, KN, KP, KR, KW, KY, KZ,
-    LA, LB, LC, LI, LK, LR, LS, LT, LU, LV, LY, MA, MC, MD, ME, MG, MH, MK, ML, MM, MN, MO, MP, MR,
-    MS, MT, MU, MULTICAST, MV, MW, MX, MY, MZ, NA, NC, NE, NF, NG, NI, NL, NO, NP, NR, NU, NZ, OM,
-    PA, PE, PF, PG, PH, PK, PL, PN, PR, PS, PT, PW, PY, QA, RO, RS, RU, RW, SA, SB, SC, SD, SE, SG,
-    SH, SI, SK, SL, SM, SN, SO, SR, SS, ST, SV, SX, SY, SZ, TC, TD, TF, TG, TH, TJ, TK, TL, TM, TN,
-    TO, TR, TT, TV, TW, TZ, UA, UG, UNKNOWN, US, UY, UZ, VA, VC, VE, VG, VI, VN, VU, WS, YE, ZA,
-    ZM, ZW,
+    BJ, BM, BN, BO, BOGON, BR, BROADCAST, BS, BT, BW, BY, BZ, CA, CC, CD, CF, CG, CH, CI, CK, CL,
+    CM, CN, CO, COMPUTER, CR, CU, CV, CW, CX, CY, CZ, DE, DJ, DK, DM, DO, DZ, EC, EE, EG, EH, ER,
+    ES, ET, FI, FJ, FK, FM, FO, FR, GA, GB, GD, GE, GG, GH, GI, GL, GM, GN, GQ, GR, GS, GT, GU, GW,
+    GY, HK, HN, HOME, HR, HT, HU, ICONS_SIZE_BIG, ICONS_SIZE_SMALL, ID, IE, IL, IM, IN, IO, IQ, IR,
+    IS, IT, JE, JM, JO, JP, KE, KG, KH, KI, KM, KN, KP, KR, KW, KY, KZ, LA, LB, LC, LI, LK, LR, LS,
+    LT, LU, LV, LY, MA, MC, MD, ME, MG, MH, MK, ML, MM, MN, MO, MP, MR, MS, MT, MU, MULTICAST, MV,
+    MW, MX, MY, MZ, NA, NC, NE, NF, NG, NI, NL, NO, NP, NR, NU, NZ, OM, PA, PE, PF, PG, PH, PK, PL,
+    PN, PR, PS, PT, PW, PY, QA, RO, RS, RU, RW, SA, SB, SC, SD, SE, SG, SH, SI, SK, SL, SM, SN, SO,
+    SR, SS, ST, SV, SX, SY, SZ, TC, TD, TF, TG, TH, TJ, TK, TL, TM, TN, TO, TR, TT, TV, TW, TZ, UA,
+    UG, UNKNOWN, US, UY, UZ, VA, VC, VE, VG, VI, VN, VU, WS, YE, ZA, ZM, ZW,
 };
 use crate::countries::types::country::Country;
 use crate::gui::styles::container::ContainerType;
 use crate::gui::styles::style_constants::TOOLTIP_DELAY;
-use crate::gui::styles::svg::SvgType;
 use crate::gui::types::message::Message;
 use crate::networking::types::data_info_host::DataInfoHost;
 use crate::networking::types::traffic_type::TrafficType;
@@ -30,19 +28,19 @@ use crate::translations::translations_2::{
 use crate::translations::translations_4::reserved_address_translation;
 use crate::{Language, StyleType};
 
+#[allow(clippy::too_many_lines, clippy::too_many_arguments)]
 fn get_flag_from_country<'a>(
     country: Country,
-    width: f32,
+    size: f32,
     is_local: bool,
     is_loopback: bool,
     is_bogon: Option<&str>,
     traffic_type: TrafficType,
     language: Language,
+    opacity: f32,
 ) -> (Svg<'a, StyleType>, String) {
-    #![allow(clippy::too_many_lines)]
     let mut tooltip = country.to_string();
-    let mut svg_style = SvgType::Standard;
-    let svg = Svg::new(Handle::from_memory(Vec::from(match country {
+    let svg = Svg::new(Handle::from_memory(match country {
         Country::AD => AD,
         Country::AE => AE,
         Country::AF => AF,
@@ -74,7 +72,6 @@ fn get_flag_from_country<'a>(
         Country::BR => BR,
         Country::BS => BS,
         Country::BT => BT,
-        Country::BV => BV,
         Country::BW => BW,
         Country::BY => BY,
         Country::BZ => BZ,
@@ -211,7 +208,7 @@ fn get_flag_from_country<'a>(
         Country::NG => NG,
         Country::NI => NI,
         Country::NL | Country::BQ => NL,
-        Country::NO | Country::SJ => NO,
+        Country::NO | Country::BV | Country::SJ => NO,
         Country::NP => NP,
         Country::NR => NR,
         Country::NU => NU,
@@ -305,15 +302,13 @@ fn get_flag_from_country<'a>(
             } else {
                 (UNKNOWN, unknown_translation(language).to_string())
             };
-
-            svg_style = SvgType::AdaptColor;
             tooltip = new_tooltip;
             flag
         }
-    })))
-    .class(svg_style)
-    .width(width)
-    .height(width * 0.75);
+    }))
+    .opacity(opacity)
+    .width(size)
+    .height(size);
 
     (svg, tooltip)
 }
@@ -323,11 +318,12 @@ pub fn get_flag_tooltip<'a>(
     host_info: &DataInfoHost,
     language: Language,
     thumbnail: bool,
+    opacity: f32,
 ) -> Tooltip<'a, Message, StyleType> {
-    let width = if thumbnail {
-        FLAGS_WIDTH_SMALL
+    let size = if thumbnail {
+        ICONS_SIZE_SMALL
     } else {
-        FLAGS_WIDTH_BIG
+        ICONS_SIZE_BIG
     };
     let is_local = host_info.is_local;
     let is_loopback = host_info.is_loopback;
@@ -335,12 +331,13 @@ pub fn get_flag_tooltip<'a>(
     let traffic_type = host_info.traffic_type;
     let (content, tooltip) = get_flag_from_country(
         country,
-        width,
+        size,
         is_local,
         is_loopback,
         is_bogon,
         traffic_type,
         language,
+        opacity,
     );
 
     let actual_tooltip = if thumbnail { String::new() } else { tooltip };
@@ -349,16 +346,11 @@ pub fn get_flag_tooltip<'a>(
     } else {
         ContainerType::Tooltip
     };
-    let mut tooltip = Tooltip::new(content, Text::new(actual_tooltip), Position::FollowCursor)
+
+    Tooltip::new(content, Text::new(actual_tooltip), Position::FollowCursor)
         .snap_within_viewport(true)
         .class(tooltip_style)
-        .delay(TOOLTIP_DELAY);
-
-    if width == FLAGS_WIDTH_SMALL {
-        tooltip = tooltip.padding(3);
-    }
-
-    tooltip
+        .delay(TOOLTIP_DELAY)
 }
 
 pub fn get_computer_tooltip<'a>(
@@ -378,9 +370,8 @@ pub fn get_computer_tooltip<'a>(
             (false, false, None, TrafficType::Unicast) => UNKNOWN,
         },
     )))
-    .class(SvgType::AdaptColor)
-    .width(FLAGS_WIDTH_BIG)
-    .height(FLAGS_HEIGHT_BIG);
+    .width(ICONS_SIZE_BIG)
+    .height(ICONS_SIZE_BIG);
 
     let tooltip = match (is_my_address, is_local, is_bogon, traffic_type) {
         (true, _, _, _) => your_network_adapter_translation(language).to_string(),

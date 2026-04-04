@@ -1,9 +1,9 @@
-use crate::countries::country_utils::get_computer_tooltip;
-use crate::countries::flags_pictures::FLAGS_HEIGHT_BIG;
+use crate::countries::country_utils::get_flag_tooltip;
+use crate::countries::flags_pictures::ICONS_SIZE_BIG;
 use crate::gui::components::header::get_button_settings;
 use crate::gui::components::tab::get_pages_tabs;
 use crate::gui::components::types::my_modal::MyModal;
-use crate::gui::pages::overview_page::{get_bars, get_bars_length, host_bar, simple_bar};
+use crate::gui::pages::overview_page::item_bar;
 use crate::gui::pages::types::settings_page::SettingsPage;
 use crate::gui::styles::container::ContainerType;
 use crate::gui::styles::rule::RuleType;
@@ -16,8 +16,8 @@ use crate::networking::types::data_info::DataInfo;
 use crate::networking::types::data_info_host::DataInfoHost;
 use crate::networking::types::data_representation::DataRepr;
 use crate::networking::types::host::Host;
+use crate::networking::types::program_lookup::ProgramLookup;
 use crate::networking::types::service::Service;
-use crate::networking::types::traffic_type::TrafficType;
 use crate::notifications::types::logged_notification::{
     BlacklistedTransmitted, DataThresholdExceeded, FavoriteTransmitted, LoggedNotification,
 };
@@ -43,9 +43,9 @@ use std::cmp::max;
 pub fn notifications_page(sniffer: &Sniffer) -> Container<'_, Message, StyleType> {
     let Settings {
         language,
-        notifications,
+        ref notifications,
         ..
-    } = sniffer.conf.settings.clone();
+    } = sniffer.conf.settings;
 
     let mut tab_and_body = Column::new()
         .align_x(Alignment::Center)
@@ -125,7 +125,7 @@ fn body_no_notifications_received(
         .width(Length::Fill)
         .push(Space::new().height(Length::Fill))
         .push(no_notifications_received_translation(language).align_x(Alignment::Center))
-        .push(Text::new(dots.to_owned()).size(50))
+        .push(Text::new(dots).size(50))
         .push(Space::new().height(FillPortion(2)))
 }
 
@@ -134,7 +134,16 @@ fn data_notification_log<'a>(
     first_entry_data_info: DataInfo,
     language: Language,
 ) -> Container<'a, Message, StyleType> {
+    let data_info = logged_notification.data_info;
     let data_repr = logged_notification.data_repr;
+    let threshold_bar = item_bar(
+        Space::new().width(ICONS_SIZE_BIG),
+        String::new(),
+        &data_info,
+        data_repr,
+        first_entry_data_info,
+    );
+
     let data_string = data_repr.formatted_string(logged_notification.threshold.into());
     let icon = if data_repr == DataRepr::Packets {
         Icon::PacketsThreshold
@@ -173,11 +182,7 @@ fn data_notification_log<'a>(
                         .size(FONT_SIZE_FOOTER),
                 ),
         )
-        .push(threshold_bar(
-            logged_notification,
-            first_entry_data_info,
-            language,
-        ));
+        .push(threshold_bar);
     let content_and_extra = Column::new()
         .spacing(10)
         .push(content)
@@ -193,25 +198,27 @@ fn data_notification_log<'a>(
 }
 
 fn favorite_notification_log<'a>(
-    logged_notification: &FavoriteTransmitted,
+    logged_notification: &'a FavoriteTransmitted,
     first_entry_data_info: DataInfo,
     data_repr: DataRepr,
     language: Language,
+    program_lookup: Option<&'a ProgramLookup>,
 ) -> Container<'a, Message, StyleType> {
-    let host_bar = host_bar(
-        logged_notification.host.to_entry_string(),
-        logged_notification.host.country,
-        &logged_notification.data_info_host,
+    let favorite = &logged_notification.favorite;
+    let icon = favorite.icon(language, program_lookup, true, 1.0);
+    let item_bar = item_bar(
+        icon,
+        favorite.to_entry_string(),
+        &favorite.data_info(),
         data_repr,
         first_entry_data_info,
-        language,
     );
 
     let content = Row::new()
         .spacing(30)
         .align_y(Alignment::Center)
         .push(
-            Icon::Star
+            Icon::StarEmpty
                 .to_text()
                 .size(80)
                 .line_height(LineHeight::Relative(1.0)),
@@ -228,7 +235,7 @@ fn favorite_notification_log<'a>(
                 )
                 .push(Text::new(favorite_transmitted_translation(language)).class(TextType::Title)),
         )
-        .push(host_bar);
+        .push(item_bar);
 
     Container::new(content)
         .width(Length::Fill)
@@ -242,15 +249,15 @@ fn blacklisted_notification_log<'a>(
     data_repr: DataRepr,
     language: Language,
 ) -> Container<'a, Message, StyleType> {
-    let blacklisted_bar = host_bar(
-        logged_notification
-            .host
-            .to_blacklist_string(logged_notification.ip),
-        logged_notification.host.country,
-        &logged_notification.data_info_host,
+    let host = &logged_notification.host;
+    let data_info_host = logged_notification.data_info_host;
+    let icon = get_flag_tooltip(host.country, &data_info_host, language, false, 1.0);
+    let blacklisted_bar = item_bar(
+        icon,
+        host.to_blacklist_string(logged_notification.ip),
+        &data_info_host.data_info,
         data_repr,
         first_entry_data_info,
-        language,
     );
 
     let content = Row::new()
@@ -307,7 +314,7 @@ fn get_button_clear_all<'a>(language: Language) -> Tooltip<'a, Message, StyleTyp
     .delay(TOOLTIP_DELAY)
 }
 
-fn logged_notifications<'a>(sniffer: &Sniffer) -> Column<'a, Message, StyleType> {
+fn logged_notifications(sniffer: &Sniffer) -> Column<'_, Message, StyleType> {
     let Settings { language, .. } = sniffer.conf.settings;
     let data_repr = sniffer.conf.data_repr;
     let mut ret_val = Column::new()
@@ -334,6 +341,7 @@ fn logged_notifications<'a>(sniffer: &Sniffer) -> Column<'a, Message, StyleType>
                     first_entry_data_info,
                     data_repr,
                     language,
+                    sniffer.program_lookup.as_ref(),
                 )
             }
             LoggedNotification::BlacklistedTransmitted(blacklisted_transmitted) => {
@@ -347,40 +355,6 @@ fn logged_notifications<'a>(sniffer: &Sniffer) -> Column<'a, Message, StyleType>
         });
     }
     ret_val
-}
-
-fn threshold_bar<'a>(
-    logged_notification: &DataThresholdExceeded,
-    first_entry_data_info: DataInfo,
-    language: Language,
-) -> Row<'a, Message, StyleType> {
-    let data_repr = logged_notification.data_repr;
-    let data_info = logged_notification.data_info;
-    let (incoming_bar_len, outgoing_bar_len) =
-        get_bars_length(data_repr, &first_entry_data_info, &data_info);
-
-    Row::new()
-        .align_y(Alignment::Center)
-        .spacing(5)
-        .push(get_computer_tooltip(
-            true,
-            true,
-            None,
-            TrafficType::Unicast,
-            language,
-        ))
-        .push(
-            Column::new()
-                .spacing(1)
-                .push(
-                    Row::new()
-                        .push(Space::new().width(Length::Fill))
-                        .push(Text::new(
-                            data_repr.formatted_string(data_info.tot_data(data_repr)),
-                        )),
-                )
-                .push(get_bars(incoming_bar_len, outgoing_bar_len)),
-        )
 }
 
 fn button_expand<'a>(
@@ -404,7 +378,7 @@ fn button_expand<'a>(
     .on_press(Message::ExpandNotification(notification_id, !is_expanded));
 
     Container::new(button)
-        .padding(Padding::ZERO.left(395))
+        .padding(Padding::ZERO.left(427))
         .align_y(Alignment::Center)
 }
 
@@ -421,7 +395,7 @@ fn data_notification_extra<'a>(
     }
     let spacing = 10.0;
     #[allow(clippy::cast_precision_loss)]
-    let height = (FLAGS_HEIGHT_BIG + spacing) * max_entries as f32;
+    let height = (ICONS_SIZE_BIG + spacing) * max_entries as f32;
 
     let mut hosts_col = Column::new().spacing(spacing).width(Length::FillPortion(5));
     let first_data_info = logged_notification
@@ -431,13 +405,13 @@ fn data_notification_extra<'a>(
         .1
         .data_info;
     for (host, data_info_host) in &logged_notification.hosts {
-        let host_bar = host_bar(
+        let icon = get_flag_tooltip(host.country, data_info_host, language, false, 1.0);
+        let host_bar = item_bar(
+            icon,
             host.to_entry_string(),
-            host.country,
-            data_info_host,
+            &data_info_host.data_info,
             logged_notification.data_repr,
             first_data_info,
-            language,
         );
         hosts_col = hosts_col.push(host_bar);
     }
@@ -449,7 +423,7 @@ fn data_notification_extra<'a>(
         .unwrap_or(&(Service::default(), DataInfo::default()))
         .1;
     for (service, data_info) in &logged_notification.services {
-        let service_bar = simple_bar(
+        let service_bar = item_bar(
             None::<Element<Message, StyleType>>,
             service.to_string(),
             data_info,

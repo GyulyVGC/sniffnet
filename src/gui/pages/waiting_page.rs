@@ -64,7 +64,7 @@ pub fn waiting_page(sniffer: &Sniffer) -> Option<Container<'_, Message, StyleTyp
         .push(icon_text)
         .push(Space::new().height(25))
         .push(Text::new(nothing_to_see_text).align_x(Alignment::Center))
-        .push(Text::new(dots.to_owned()).size(50));
+        .push(Text::new(dots).size(50));
 
     Some(Container::new(
         Column::new()

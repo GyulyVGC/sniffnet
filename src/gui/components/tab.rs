@@ -73,18 +73,17 @@ fn new_page_tab<'a>(
                 .align_x(alignment::Alignment::Center)
                 .align_y(alignment::Alignment::Center),
         )
-        .push(Space::new().width(10))
-        .push(
-            Text::new(page.get_tab_label(language).to_string())
-                .size(FONT_SIZE_SUBTITLE)
-                .class(if active {
-                    TextType::Title
-                } else {
-                    TextType::Standard
-                })
-                .align_x(alignment::Alignment::Center)
-                .align_y(alignment::Alignment::Center),
-        );
+        .push(if active {
+            Some(
+                Text::new(format!(" {}", page.get_tab_label(language)))
+                    .size(FONT_SIZE_SUBTITLE)
+                    .class(TextType::Title)
+                    .align_x(alignment::Alignment::Center)
+                    .align_y(alignment::Alignment::Center),
+            )
+        } else {
+            None
+        });
 
     if let Some(num) = unread
         && num > 0
@@ -99,7 +98,7 @@ fn new_page_tab<'a>(
     button(content)
         .height(if active { 35 } else { 30 })
         .padding(0)
-        .width(Length::Fill)
+        .width(Length::FillPortion(if active { 3 } else { 2 }))
         .class(if active {
             ButtonType::TabActive
         } else {
@@ -128,24 +127,23 @@ fn new_settings_tab<'a>(
                 .align_x(alignment::Alignment::Center)
                 .align_y(alignment::Alignment::Center),
         )
-        .push(Space::new().width(10))
-        .push(
-            Text::new(page.get_tab_label(language).to_string())
-                .size(FONT_SIZE_SUBTITLE)
-                .class(if active {
-                    TextType::Title
-                } else {
-                    TextType::Standard
-                })
-                .align_x(alignment::Alignment::Center)
-                .align_y(alignment::Alignment::Center),
-        )
+        .push(if active {
+            Some(
+                Text::new(format!(" {}", page.get_tab_label(language)))
+                    .size(FONT_SIZE_SUBTITLE)
+                    .class(TextType::Title)
+                    .align_x(alignment::Alignment::Center)
+                    .align_y(alignment::Alignment::Center),
+            )
+        } else {
+            None
+        })
         .push(Space::new().width(Length::Fill));
 
     button(content)
         .height(if active { 35 } else { 30 })
         .padding(0)
-        .width(Length::Fill)
+        .width(Length::FillPortion(if active { 3 } else { 2 }))
         .class(if active {
             ButtonType::TabActive
         } else {
