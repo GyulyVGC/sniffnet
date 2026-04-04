@@ -315,7 +315,7 @@ impl FavoriteItem {
     }
 }
 
-#[derive(Clone, Hash, Eq, PartialEq, Debug, Serialize, Deserialize)]
+#[derive(Clone, Debug)]
 pub enum FavoriteKey {
     Host(Host),
     Service(Service),
@@ -380,11 +380,11 @@ fn get_service_entries(
         favorites
             .iter()
             .map(|service| {
-                let data_info_host = info_traffic
+                let data_info = info_traffic
                     .services
                     .get(service)
                     .unwrap_or(&default_data_info);
-                (service, data_info_host)
+                (service, data_info)
             })
             .collect()
     } else {
@@ -400,7 +400,7 @@ fn get_service_entries(
     let n_entry = min(sorted_vec.len(), 30);
     sorted_vec[0..n_entry]
         .iter()
-        .map(|&(service, data_info_fav)| FavoriteItem::Service((*service, *data_info_fav)))
+        .map(|&(service, data_info)| FavoriteItem::Service((*service, *data_info)))
         .collect()
 }
 
@@ -420,11 +420,11 @@ fn get_program_entries(
         favorites
             .iter()
             .map(|program| {
-                let data_info_host = program_lookup
+                let data_info = program_lookup
                     .programs()
                     .get(program)
                     .unwrap_or(&default_data_info);
-                (program, data_info_host)
+                (program, data_info)
             })
             .collect()
     } else {
