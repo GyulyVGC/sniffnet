@@ -37,7 +37,7 @@ mod tests {
             // known IP
             let res = get_asn(&IpAddr::from([8, 8, 8, 8]), &reader);
             assert_eq!(res.code, "15169");
-            assert_eq!(res.name, "GOOGLE");
+            assert_eq!(res.name, "Google LLC");
 
             // another known IP
             let res = get_asn(&IpAddr::from([78, 35, 248, 93]), &reader);
