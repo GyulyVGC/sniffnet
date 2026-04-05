@@ -64,7 +64,7 @@ pub fn program_translation(language: Language) -> &'static str {
     match language {
         Language::EN => "Program",
         Language::IT => "Programma",
-        language::RO => "Program",
+        Language::RO => "Program",
         _ => "Program",
     }
 }
