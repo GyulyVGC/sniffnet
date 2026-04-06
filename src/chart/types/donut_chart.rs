@@ -1,11 +1,12 @@
 use crate::gui::styles::donut::Catalog;
-use crate::gui::styles::style_constants::{FONT_SIZE_FOOTER, FONT_SIZE_SUBTITLE};
+use crate::gui::styles::style_constants::{FONT_SIZE_FOOTER, FONT_SIZE_SUBTITLE, SARASA_MONO};
 use crate::networking::types::data_representation::DataRepr;
-use iced::alignment::{Horizontal, Vertical};
+use iced::alignment::Vertical;
 use iced::widget::canvas::path::Arc;
-use iced::widget::canvas::{Frame, Text};
+use iced::widget::canvas::{Frame, Stroke, Text};
+use iced::widget::text::Alignment;
 use iced::widget::{Canvas, canvas};
-use iced::{Font, Length, Radians, Renderer, mouse};
+use iced::{Length, Radians, Renderer, mouse};
 use std::f32::consts;
 
 pub struct DonutChart {
@@ -13,7 +14,6 @@ pub struct DonutChart {
     incoming: u128,
     outgoing: u128,
     dropped: u128,
-    font: Font,
     thumbnail: bool,
 }
 
@@ -23,7 +23,6 @@ impl DonutChart {
         incoming: u128,
         outgoing: u128,
         dropped: u128,
-        font: Font,
         thumbnail: bool,
     ) -> Self {
         Self {
@@ -31,7 +30,6 @@ impl DonutChart {
             incoming,
             outgoing,
             dropped,
-            font,
             thumbnail,
         }
     }
@@ -93,33 +91,37 @@ impl<Message, Theme: Catalog> canvas::Program<Message, Theme> for DonutChart {
     ) -> Vec<canvas::Geometry> {
         let mut frame = Frame::new(renderer, bounds.size());
         let center = frame.center();
-        let radius = (frame.width().min(frame.height()) / 2.0) * 0.9;
+
+        let thickness = 6.0;
+        let radius = (frame.width().min(frame.height()) / 2.0) * 0.9 - thickness / 2.0;
 
         let style = <Theme as Catalog>::style(theme, &<Theme as Catalog>::default());
         let colors = [style.incoming, style.outgoing, style.dropped];
 
         for ((start_angle, end_angle), color) in self.angles().into_iter().zip(colors) {
             let path = canvas::Path::new(|builder| {
+                // build path using just an arc with thickness, because iced's paths are limited:
+                // - no single close path can be constructed as the one we want (drawing an arc starts a new sub-path)
+                // - counter-clockwise arcs are not supported
                 builder.arc(Arc {
                     center,
                     radius,
                     start_angle,
                     end_angle,
                 });
-                builder.line_to(center);
-                builder.close();
             });
 
-            frame.fill(&path, color);
+            let stroke = Stroke {
+                style: canvas::stroke::Style::Solid(color),
+                width: thickness,
+                ..Default::default()
+            };
+            frame.stroke(&path, stroke);
         }
 
-        let inner_circle = canvas::Path::circle(center, radius - 6.0);
-        frame.fill(&inner_circle, style.background);
         frame.fill_text(Text {
             content: self.title().clone(),
             position: center,
-            vertical_alignment: Vertical::Center,
-            horizontal_alignment: Horizontal::Center,
             color: style.text_color,
             size: if self.thumbnail {
                 FONT_SIZE_FOOTER
@@ -127,7 +129,9 @@ impl<Message, Theme: Catalog> canvas::Program<Message, Theme> for DonutChart {
                 FONT_SIZE_SUBTITLE
             }
             .into(),
-            font: self.font,
+            font: SARASA_MONO,
+            align_x: Alignment::Center,
+            align_y: Vertical::Center,
             ..Default::default()
         });
 
@@ -140,7 +144,6 @@ pub fn donut_chart<Message, Theme: Catalog>(
     incoming: u128,
     outgoing: u128,
     dropped: u128,
-    font: Font,
     thumbnail: bool,
 ) -> Canvas<DonutChart, Message, Theme, Renderer> {
     let size = if thumbnail {
@@ -149,7 +152,7 @@ pub fn donut_chart<Message, Theme: Catalog>(
         Length::Fixed(110.0)
     };
     iced::widget::canvas(DonutChart::new(
-        data_repr, incoming, outgoing, dropped, font, thumbnail,
+        data_repr, incoming, outgoing, dropped, thumbnail,
     ))
     .width(size)
     .height(size)

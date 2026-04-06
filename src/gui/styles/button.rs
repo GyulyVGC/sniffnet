@@ -41,13 +41,13 @@ impl ButtonType {
                 ButtonType::TabActive | ButtonType::BorderedRoundSelected => {
                     Background::Color(mix_colors(colors.primary, ext.buttons_color))
                 }
-                ButtonType::Starred => Background::Color(colors.starred),
                 ButtonType::BorderedRound => Background::Color(Color {
                     a: ext.alpha_round_containers,
                     ..ext.buttons_color
                 }),
                 ButtonType::Neutral
                 | ButtonType::Thumbnail
+                | ButtonType::Starred
                 | ButtonType::NotStarred
                 | ButtonType::SortArrows
                 | ButtonType::SortArrowActive => Background::Color(Color::TRANSPARENT),
@@ -92,9 +92,9 @@ impl ButtonType {
                 },
             },
             text_color: match self {
-                ButtonType::Starred => Color::BLACK,
+                ButtonType::Starred => colors.starred,
                 ButtonType::SortArrows => Color {
-                    a: if ext.is_nightly { 0.2 } else { 0.7 },
+                    a: ext.alpha_chart_badge,
                     ..colors.text_body
                 },
                 ButtonType::SortArrowActive => colors.secondary,
@@ -110,6 +110,7 @@ impl ButtonType {
                 },
                 _ => Shadow::default(),
             },
+            snap: true,
         }
     }
 
@@ -135,7 +136,6 @@ impl ButtonType {
                 },
             },
             background: Some(match self {
-                ButtonType::Starred => Background::Color(colors.starred),
                 ButtonType::SortArrows | ButtonType::SortArrowActive | ButtonType::Thumbnail => {
                     Background::Color(Color::TRANSPARENT)
                 }
@@ -164,6 +164,7 @@ impl ButtonType {
                 },
                 width: match self {
                     ButtonType::Starred
+                    | ButtonType::NotStarred
                     | ButtonType::TabActive
                     | ButtonType::SortArrows
                     | ButtonType::SortArrowActive
@@ -174,7 +175,7 @@ impl ButtonType {
                 },
                 color: match self {
                     ButtonType::Alert => ext.red_alert_color,
-                    ButtonType::BorderedRound | ButtonType::NotStarred => Color {
+                    ButtonType::BorderedRound => Color {
                         a: ext.alpha_round_borders,
                         ..ext.buttons_color
                     },
@@ -183,11 +184,12 @@ impl ButtonType {
                 },
             },
             text_color: match self {
-                ButtonType::Starred => Color::BLACK,
+                ButtonType::Starred => colors.starred,
                 ButtonType::Gradient(_) | ButtonType::Thumbnail => colors.text_headers,
                 ButtonType::SortArrowActive | ButtonType::SortArrows => colors.secondary,
                 _ => colors.text_body,
             },
+            snap: true,
         }
     }
 
@@ -224,6 +226,7 @@ impl ButtonType {
                     ..colors.text_headers
                 },
                 shadow: Shadow::default(),
+                snap: true,
             },
             ButtonType::Standard => Style {
                 background: Some(Background::Color(Color {
@@ -243,6 +246,7 @@ impl ButtonType {
                     ..colors.text_body
                 },
                 shadow: Shadow::default(),
+                snap: true,
             },
             _ => self.active(style),
         }

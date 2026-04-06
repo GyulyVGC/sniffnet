@@ -822,6 +822,60 @@
       "contributions": [
         "translation"
       ]
+    },
+    {
+      "login": "tonywhelan",
+      "name": "Tony",
+      "avatar_url": "https://avatars.githubusercontent.com/u/5572784?v=4",
+      "profile": "https://github.com/tonywhelan",
+      "contributions": [
+        "financial"
+      ]
+    },
+    {
+      "login": "lxl66566",
+      "name": "Absolutex",
+      "avatar_url": "https://avatars.githubusercontent.com/u/88281489?v=4",
+      "profile": "http://absx.pages.dev",
+      "contributions": [
+        "bug"
+      ]
+    },
+    {
+      "login": "antoncxx",
+      "name": "Anton Liashkevich",
+      "avatar_url": "https://avatars.githubusercontent.com/u/36372201?v=4",
+      "profile": "https://github.com/antoncxx",
+      "contributions": [
+        "code"
+      ]
+    },
+    {
+      "login": "recallai",
+      "name": "Recall.ai",
+      "avatar_url": "https://avatars.githubusercontent.com/u/88795516?v=4",
+      "profile": "https://www.recall.ai/",
+      "contributions": [
+        "financial"
+      ]
+    },
+    {
+      "login": "farsheed",
+      "name": "Farsheed Atef",
+      "avatar_url": "https://avatars.githubusercontent.com/u/1152100?v=4",
+      "profile": "https://github.com/Farsheed",
+      "contributions": [
+        "ideas"
+      ]
+    },
+    {
+      "login": "edwloef",
+      "name": "edwloef",
+      "avatar_url": "https://avatars.githubusercontent.com/u/75493688?v=4",
+      "profile": "https://github.com/edwloef",
+      "contributions": [
+        "bug"
+      ]
     }
   ],
   "contributorsPerLine": 7,

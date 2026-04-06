@@ -17,7 +17,7 @@ include = [
     "/LICENSE-APACHE",
     "/README.md",
     "/CHANGELOG.md",
-    "/resources/countries_flags/**/*.svg",
+    "/resources/embedded_icons/**/*.svg",
     "/resources/DB/*.mmdb",
     "/resources/fonts/subset/*.ttf",
     "/resources/logos/raw/icon.png",
@@ -33,55 +33,53 @@ include = [
 opt-level = 3
 lto = true
 strip = true
+codegen-units = 1
 
 #═══════════════════════════════════════════════════════════════════════════════════════════════════════════════════════
 
 [dependencies]
-pcap = "2.4.0"
-etherparse = "0.19.0"
-chrono = { version = "0.4.42", default-features = false, features = ["clock"] }
-plotters = { version = "0.3.7", default-features = false, features = ["area_series", "line_series"] }
-iced = { version = "0.13.1", features = ["tokio", "svg", "advanced", "lazy", "image"] }
-plotters-iced = "0.11.0"
-maxminddb = "0.27.0"
+async-channel = "2.5.0"
+chrono = "0.4.44"
+clap = { version = "4.6.0", features = ["derive"] }
 confy = "2.0.0"
-serde = { version = "1.0.228", default-features = false, features = ["derive"] }
-serde_json = { version = "1.0.145", features = ["preserve_order"] }
-rodio = { version = "0.21.1", default-features = false, features = ["mp3", "playback"] }
+ctrlc = { version = "3.5.2", features = ["termination"] }
 dns-lookup = "3.0.1"
-toml = "0.9.8"
-ctrlc = { version = "3.5.1", features = ["termination"] }
-rfd = "0.16.0"
+etherparse = "0.19.0"
+iced = { version = "0.14.0", features = ["tokio", "svg", "advanced", "lazy", "image"] }
+listeners = "0.5.1"
+maxminddb = "0.27.3"
+pcap = "2.4.0"
 phf = "0.13.1"
 phf_shared = "0.13.1"
+picon = "0.1.0"
+plotters = { version = "0.3.7", default-features = false, features = ["area_series", "line_series"] }
+plotters-iced2 = "0.14.0"
+reqwest = { version = "0.13.2", features = ["json"] }
+rfd = "0.17.2"
+rodio = { version = "0.22.2", default-features = false, features = ["mp3", "playback"] }
+semver = "1.0.28"
+serde = { version = "1.0.228", features = ["derive"] }
+serde_json = { version = "1.0.149", features = ["preserve_order"] }
 splines = "5.0.0"
-clap = { version = "4.5.53", features = ["derive"] }
-tokio = { version = "1.48.0", features = ["macros"] }
-async-channel = "2.5.0"
-semver = "1.0.27"
+tokio = { version = "1.51.0", features = ["macros", "fs"] }
+toml = "1.1.2"
 
 [target.'cfg(windows)'.dependencies]
 gag = "1.0.0"
 
-[target.'cfg(not(target_arch = "powerpc64"))'.dependencies]
-reqwest = { version = "0.12.24", default-features = false, features = ["json", "rustls-tls"] }
-
-[target.'cfg(target_arch = "powerpc64")'.dependencies]
-reqwest = { version = "0.12.24", features = ["json"] }
-
 #───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
 
 [dev-dependencies]
-serde_test = "1.0.177"
 rstest = "0.26.1"
-serial_test = { version = "3.2.0", default-features = false }
+serde_test = "1.0.177"
+serial_test = { version = "3.4.0", default-features = false }
 
 #───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
 
 [build-dependencies]
 phf_codegen = "0.13.1"
 phf_shared = "0.13.1"
-rustrict = { version = "0.7.37", default-features = false, features = ["censor"] }
+rustrict = { version = "0.7.38", default-features = false, features = ["censor"] }
 
 [target."cfg(windows)".build-dependencies]
 winres = "0.1.12"

@@ -5,7 +5,7 @@ use crate::networking::types::my_link_type::MyLinkType;
 /// Represents the current inspected device.
 /// Used to keep in sync the device addresses in case of changes
 /// (e.g., device not connected to the internet acquires new IP address)
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct MyDevice {
     name: String,
     desc: Option<String>,

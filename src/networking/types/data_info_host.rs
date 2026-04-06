@@ -8,8 +8,6 @@ use crate::networking::types::traffic_type::TrafficType;
 pub struct DataInfoHost {
     /// Incoming and outgoing packets and bytes
     pub data_info: DataInfo,
-    /// Determine if this host is one of the favorites
-    pub is_favorite: bool,
     /// Determine if the connection is loopback (the "remote" is loopback)
     pub is_loopback: bool,
     /// Determine if the connection with this host is local

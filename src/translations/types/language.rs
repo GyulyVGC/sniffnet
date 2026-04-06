@@ -6,8 +6,8 @@ use serde::{Deserialize, Serialize};
 
 use crate::StyleType;
 use crate::countries::flags_pictures::{
-    CN, CZ, DE, ES, FI, FLAGS_WIDTH_BIG, FR, GB, GR, ID, IT, JP, KR, NL, PL, PT, RO, RU, SE, TR,
-    TW, UA, UZ, VN,
+    CN, CZ, DE, ES, FI, FR, GB, GR, ICONS_SIZE_BIG, ID, IT, JP, KR, NL, PL, PT, RO, RU, SE, TR, TW,
+    UA, UZ, VN,
 };
 
 /// This enum defines the available languages.
@@ -119,7 +119,7 @@ impl Language {
             Language::NL => NL,
             Language::CS => CZ,
         })))
-        .width(FLAGS_WIDTH_BIG)
+        .width(ICONS_SIZE_BIG)
     }
 
     pub fn is_up_to_date(self) -> bool {

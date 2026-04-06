@@ -13,10 +13,13 @@ use iced::{Task, window};
     version = APP_VERSION,
     about = "Application to comfortably monitor your network traffic"
 )]
-struct Args {
+pub(crate) struct Args {
     /// Start sniffing packets from the supplied network adapter
     #[arg(short, long, value_name = "NAME", default_missing_value = CONF.device.device_name.as_str(), num_args = 0..=1)]
     adapter: Option<String>,
+    /// Print the path to the configuration file
+    #[arg(short, long, exclusive = true)]
+    config_path: bool,
     #[cfg(all(windows, not(debug_assertions)))]
     /// Show the logs (stdout and stderr) of the most recent application run
     #[arg(short, long, exclusive = true)]
@@ -26,50 +29,68 @@ struct Args {
     restore_default: bool,
 }
 
-pub fn handle_cli_args() -> Task<Message> {
-    let args = Args::parse();
+impl Args {
+    /// Handle and return CLI arguments
+    pub fn handle() -> Self {
+        let args = Args::parse();
 
-    #[cfg(all(windows, not(debug_assertions)))]
-    if let Some(logs_file) = crate::utils::formatted_strings::get_logs_file_path() {
-        if args.logs {
-            std::process::Command::new("explorer")
-                .arg(logs_file)
-                .spawn()
-                .unwrap()
-                .wait()
-                .unwrap_or_default();
-            std::process::exit(0);
-        } else {
-            // truncate logs file
-            let _ = std::fs::OpenOptions::new()
-                .write(true)
-                .truncate(true)
-                .open(logs_file);
+        #[cfg(all(windows, not(debug_assertions)))]
+        if let Some(logs_file) = crate::utils::formatted_strings::get_logs_file_path() {
+            if args.logs {
+                std::process::Command::new("explorer")
+                    .arg(logs_file)
+                    .spawn()
+                    .unwrap()
+                    .wait()
+                    .unwrap_or_default();
+                std::process::exit(0);
+            } else {
+                // truncate logs file
+                let _ = std::fs::OpenOptions::new()
+                    .write(true)
+                    .truncate(true)
+                    .open(logs_file);
+            }
         }
-    }
 
-    if args.restore_default {
-        if Conf::default().store().is_ok() {
-            println!("Restored default settings");
+        if args.restore_default {
+            if Conf::default().store().is_ok() {
+                println!("Restored default settings");
+                std::process::exit(0);
+            } else {
+                eprintln!("Could not restore default settings");
+                std::process::exit(1);
+            }
         }
-        std::process::exit(0);
+
+        if args.config_path {
+            if let Ok(config_path) =
+                confy::get_configuration_file_path(SNIFFNET_LOWERCASE, Conf::FILE_NAME)
+            {
+                println!("{}", config_path.display());
+                std::process::exit(0);
+            } else {
+                eprintln!("Could not retrieve configuration file path");
+                std::process::exit(1);
+            }
+        }
+
+        args
     }
 
-    let mut boot_task_chain = window::get_latest()
-        .map(Message::StartApp)
-        .chain(Task::done(Message::Periodic));
-    if let Some(adapter) = args.adapter {
-        // TODO: check if this works once #653 is fixed
-        // currently the link type and device name aren't displayed properly when starting from CLI
-        boot_task_chain = boot_task_chain
-            .chain(Task::done(Message::SetCaptureSource(
-                CaptureSourcePicklist::Device,
-            )))
-            .chain(Task::done(Message::DeviceSelection(adapter)))
-            .chain(Task::done(Message::Start));
-    }
+    pub fn get_boot_task_chain(&self) -> Task<Message> {
+        let mut boot_task_chain = window::latest().map(Message::StartApp);
+        if let Some(adapter) = self.adapter.clone() {
+            boot_task_chain = boot_task_chain
+                .chain(Task::done(Message::SetCaptureSource(
+                    CaptureSourcePicklist::Device,
+                )))
+                .chain(Task::done(Message::DeviceSelection(adapter)))
+                .chain(Task::done(Message::Start));
+        }
 
-    boot_task_chain
+        boot_task_chain
+    }
 }
 
 #[cfg(test)]
@@ -78,19 +99,20 @@ mod tests {
 
     use crate::gui::pages::types::running_page::RunningPage;
     use crate::gui::pages::types::settings_page::SettingsPage;
-    use crate::gui::styles::types::custom_palette::ExtraStyles;
     use crate::gui::styles::types::gradient_type::GradientType;
     use crate::gui::types::conf::Conf;
-    use crate::gui::types::config_window::{PositionTuple, SizeTuple};
+    use crate::gui::types::config_window::ConfigWindow;
     use crate::gui::types::export_pcap::ExportPcap;
+    use crate::gui::types::favorite::{FavoriteKey, Favorites};
     use crate::gui::types::filters::Filters;
     use crate::gui::types::settings::Settings;
     use crate::networking::types::capture_context::CaptureSourcePicklist;
     use crate::networking::types::config_device::ConfigDevice;
     use crate::networking::types::data_representation::DataRepr;
+    use crate::networking::types::service::Service;
     use crate::notifications::types::notifications::Notifications;
     use crate::report::types::sort_type::SortType;
-    use crate::{ConfigWindow, Language, Sniffer, StyleType};
+    use crate::{Language, Sniffer, StyleType};
 
     #[test]
     #[serial]
@@ -113,21 +135,24 @@ mod tests {
                     data_notification: Default::default(),
                     favorite_notification: Default::default(),
                     remote_notifications: Default::default(),
+                    ip_blacklist_notification: Default::default(),
                 },
-                style: StyleType::Custom(ExtraStyles::DraculaDark),
+                style: StyleType::DraculaDark,
+                ip_blacklist: "some-path".to_string(),
             },
+            favorites: Favorites::from([FavoriteKey::Service(Service::Name("https"))]),
             device: ConfigDevice {
                 device_name: "hey-hey".to_string(),
             },
-            window: ConfigWindow {
-                position: PositionTuple(440.0, 99.0),
-                size: SizeTuple(452.0, 870.0),
-                thumbnail_position: PositionTuple(20.0, 20.0),
-            },
+            window: ConfigWindow::new((452.0, 870.0), (440.0, 99.0), (20.0, 20.0)),
             capture_source_picklist: CaptureSourcePicklist::File,
             report_sort_type: SortType::Ascending,
+            host_favorites_filter: false,
+            service_favorites_filter: true,
+            program_favorites_filter: false,
             host_sort_type: SortType::Descending,
             service_sort_type: SortType::Neutral,
+            program_sort_type: SortType::Neutral,
             filters: Filters {
                 bpf: "tcp".to_string(),
                 expanded: true,
@@ -145,7 +170,7 @@ mod tests {
         // we want to be sure that modified config is different from defaults
         assert_ne!(Conf::default(), modified_conf);
         //store modified configs
-        modified_conf.clone().store().unwrap();
+        modified_conf.store().unwrap();
         // assert they've been stored
         assert_eq!(Conf::load(), modified_conf);
         // restore defaults

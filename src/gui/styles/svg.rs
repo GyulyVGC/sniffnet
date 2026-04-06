@@ -8,16 +8,14 @@ use crate::StyleType;
 
 #[derive(Default)]
 pub enum SvgType {
-    AdaptColor,
     #[default]
     Standard,
 }
 
 impl SvgType {
-    fn appearance(&self, style: &StyleType) -> Style {
+    fn appearance(&self, _style: &StyleType) -> Style {
         Style {
             color: match self {
-                SvgType::AdaptColor => Some(style.get_palette().text_body),
                 SvgType::Standard => None,
             },
         }
