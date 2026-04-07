@@ -294,6 +294,57 @@ impl TrafficChart {
         AreaSeries::new(data, 0.0, color.mix(alpha.into()))
             .border_style(ShapeStyle::from(&color).stroke_width(CHARTS_LINE_BORDER))
     }
+
+    // pub fn sample_for_screenshot(style: StyleType) -> Self {
+    //     use crate::translations::types::language::Language;
+    //     use splines::{Interpolation, Key};
+    //     use std::io::Read;
+    //
+    //     let get_rand = |delta: f32| {
+    //         let mut f = std::fs::File::open("/dev/urandom").unwrap();
+    //         let mut buf = [0u8; 1];
+    //         f.read_exact(&mut buf).unwrap();
+    //         let x = buf[0];
+    //         x as f32 / 255.0 * 2.0 * delta - delta
+    //     };
+    //
+    //     let mut chart = TrafficChart::new(style, Language::default(), DataRepr::default());
+    //
+    //     chart.ticks = 5 * 60 - 2;
+    //     let x_range = chart.ticks - 30..chart.ticks;
+    //
+    //     let in_base = 35_000.0;
+    //     let in_delta = 9_000.0;
+    //     let out_base = -15_000.0;
+    //     let out_delta = 5_000.0;
+    //
+    //     chart.in_bytes.spline = Spline::from_vec(
+    //         x_range
+    //             .clone()
+    //             .map(|x| {
+    //                 Key::new(
+    //                     x as f32,
+    //                     in_base + get_rand(in_delta),
+    //                     Interpolation::Cosine,
+    //                 )
+    //             })
+    //             .collect(),
+    //     );
+    //     chart.out_bytes.spline = Spline::from_vec(
+    //         x_range
+    //             .map(|x| {
+    //                 Key::new(
+    //                     x as f32,
+    //                     out_base + get_rand(out_delta),
+    //                     Interpolation::Cosine,
+    //                 )
+    //             })
+    //             .collect(),
+    //     );
+    //     chart.min_bytes = chart.out_bytes.get_min();
+    //     chart.max_bytes = chart.in_bytes.get_max();
+    //     chart
+    // }
 }
 
 impl Chart<Message> for TrafficChart {
