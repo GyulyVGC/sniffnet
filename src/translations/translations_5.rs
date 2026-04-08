@@ -74,11 +74,9 @@ pub fn only_show_blacklisted_translation(language: Language) -> &'static str {
 
 pub fn program_translation(language: Language) -> &'static str {
     match language {
-        Language::EN => "Program",
+        Language::EN | Language::TR | Language::RO => "Program",
         Language::IT => "Programma",
-        Language::TR => "Program",
         Language::JA => "プログラム",
-        Language::RO => "Program",
         _ => "Program",
     }
 }
