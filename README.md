@@ -104,7 +104,7 @@ Not what you're looking for? Check out [alternative installation methods](https:
 
 - 💻 choose a **network adapter** of your PC to inspect
 - 🏷️ select a set of **filters** to apply to the observed traffic
-- 📁 **import** and **export** comprehensive capture reports as **PCAP files**
+- 📁 **import** and **export** comprehensive capture reports as **PCAP** files
 - 📊 view overall **statistics** about your Internet traffic
 - 📈 view **real-time charts** about traffic intensity
 - 🏠 identify connections in your **local network**
@@ -116,7 +116,7 @@ Not what you're looking for? Check out [alternative installation methods](https:
 - 📌 keep an eye on your network even when the application is **minimized**
 - ️🔎 search and **inspect** each of your network connections in real time
 - 🔉 set custom **notifications** to inform you when defined network events occur
-- 🚫 import custom **blacklists** to highlight potentially dangerous connections
+- 🚫 import custom **IP blacklists** to highlight potentially dangerous connections
 - 🎨 choose the **style** that fits you the most, including custom themes support
 - ...and more!
 
