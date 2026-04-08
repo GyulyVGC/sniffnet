@@ -1571,7 +1571,7 @@ mod tests {
 
     #[test]
     fn test_all_services_map_key_and_values_are_valid() {
-        assert_eq!(SERVICES.len(), 12084);
+        assert_eq!(SERVICES.len(), 12093);
         let mut distinct_services = HashSet::new();
         for (sq, s) in &SERVICES {
             // only tcp or udp
@@ -1592,7 +1592,7 @@ mod tests {
             // just to count and verify number of distinct services
             distinct_services.insert(name.to_string());
         }
-        assert_eq!(distinct_services.len(), 6456);
+        assert_eq!(distinct_services.len(), 6465);
     }
 
     #[test]
