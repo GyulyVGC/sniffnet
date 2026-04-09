@@ -16,6 +16,8 @@ All Sniffnet releases with the relative changes are documented in this file.
   - Romanian ([#942](https://github.com/GyulyVGC/sniffnet/pull/942))
   - Japanese ([#1020](https://github.com/GyulyVGC/sniffnet/pull/1020))
   - Turkish ([#1074](https://github.com/GyulyVGC/sniffnet/pull/1074))
+  - Simplified Chinese ([#1021](https://github.com/GyulyVGC/sniffnet/pull/1021))
+  - Traditional Chinese (Taiwan) ([#1021](https://github.com/GyulyVGC/sniffnet/pull/1021))
 - Fix app configurations backward-compatibility when an existing field is updated or invalid
 - Return a PCAP error when trying to start a capture from an unknown adapter name
 
