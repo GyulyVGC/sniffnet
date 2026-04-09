@@ -1,5 +1,7 @@
+use serde::{Deserialize, Serialize};
+
 /// Struct to represent an Autonomous System
-#[derive(Default, Clone, PartialEq, Eq, Hash, Debug)]
+#[derive(Default, Clone, PartialEq, Eq, Hash, Debug, Serialize, Deserialize)]
 pub struct Asn {
     /// Autonomous System number
     pub code: String,

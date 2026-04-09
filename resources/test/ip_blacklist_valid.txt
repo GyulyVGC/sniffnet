@@ -1,0 +1,10 @@
+# this only has 4 valid IPs, but it's still valid!
+  8.8.8.8
+
+ehi
+ciao
+
+fe80::99
+1.2.3.255
+::123
+...

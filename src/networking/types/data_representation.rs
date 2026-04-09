@@ -45,8 +45,6 @@ impl DataRepr {
         }
         let precision = usize::from(byte_multiple != ByteMultiple::B && n <= 9.95);
         format!("{n:.precision$} {}", byte_multiple.pretty_print(self))
-            .trim()
-            .to_string()
     }
 
     pub fn data_exceeded_translation(&self, language: Language) -> &str {
@@ -59,9 +57,10 @@ impl DataRepr {
 }
 
 /// Represents a Byte or bit multiple for displaying values in a human-readable format.
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize, Default)]
 pub enum ByteMultiple {
     /// A Byte
+    #[default]
     B,
     /// 10^3 Bytes
     KB,
@@ -120,14 +119,14 @@ impl ByteMultiple {
         }
     }
 
-    pub fn get_char(self) -> String {
+    pub fn get_char(self) -> &'static str {
         match self {
-            Self::B => String::new(),
-            Self::KB => "K".to_string(),
-            Self::MB => "M".to_string(),
-            Self::GB => "G".to_string(),
-            Self::TB => "T".to_string(),
-            Self::PB => "P".to_string(),
+            Self::B => "",
+            Self::KB => "K",
+            Self::MB => "M",
+            Self::GB => "G",
+            Self::TB => "T",
+            Self::PB => "P",
         }
     }
 

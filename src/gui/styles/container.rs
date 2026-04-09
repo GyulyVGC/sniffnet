@@ -24,6 +24,8 @@ pub enum ContainerType {
     Highlighted,
     HighlightedOnHeader,
     ModalBackground,
+    AdapterAddress,
+    DimmedText,
 }
 
 impl ContainerType {
@@ -33,6 +35,10 @@ impl ContainerType {
         Style {
             text_color: Some(match self {
                 ContainerType::Gradient(_) | ContainerType::Highlighted => colors.text_headers,
+                ContainerType::DimmedText => Color {
+                    a: ext.alpha_chart_badge,
+                    ..colors.text_body
+                },
                 _ => colors.text_body,
             }),
             background: Some(match self {
@@ -54,12 +60,16 @@ impl ContainerType {
                 ContainerType::Modal | ContainerType::HighlightedOnHeader => {
                     Background::Color(colors.primary)
                 }
-                ContainerType::Standard | ContainerType::Palette => {
+                ContainerType::Standard | ContainerType::Palette | ContainerType::DimmedText => {
                     Background::Color(Color::TRANSPARENT)
                 }
                 ContainerType::ModalBackground => Background::Color(Color {
-                    a: 0.9,
+                    a: 0.75,
                     ..Color::BLACK
+                }),
+                ContainerType::AdapterAddress => Background::Color(Color {
+                    a: if ext.is_nightly { 0.4 } else { 0.7 },
+                    ..ext.buttons_color
                 }),
             }),
             border: Border {
@@ -68,6 +78,7 @@ impl ContainerType {
                     ContainerType::Modal => Radius::new(0).bottom(BORDER_ROUNDED_RADIUS),
                     ContainerType::Tooltip => 7.0.into(),
                     ContainerType::Badge
+                    | ContainerType::AdapterAddress
                     | ContainerType::BadgeInfo
                     | ContainerType::Highlighted
                     | ContainerType::HighlightedOnHeader => 100.0.into(),
@@ -75,6 +86,7 @@ impl ContainerType {
                 },
                 width: match self {
                     ContainerType::Standard
+                    | ContainerType::DimmedText
                     | ContainerType::ModalBackground
                     | ContainerType::Gradient(_)
                     | ContainerType::HighlightedOnHeader
@@ -84,6 +96,7 @@ impl ContainerType {
                     _ => BORDER_WIDTH,
                 },
                 color: match self {
+                    ContainerType::AdapterAddress => colors.primary,
                     ContainerType::Palette => Color::BLACK,
                     ContainerType::BadgeInfo => colors.secondary,
                     ContainerType::Modal => ext.buttons_color,
@@ -94,6 +107,7 @@ impl ContainerType {
                 },
             },
             shadow: Shadow::default(),
+            snap: true,
         }
     }
 }

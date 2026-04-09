@@ -125,7 +125,7 @@ pub fn data_representation_translation(language: Language) -> &'static str {
         Language::FI => "Tietojen esitys",
         Language::DE => "Daten Darstellung",
         Language::TR => "Veri gösterimi",
-        // Language::FA => "بازنمایی داده ها", // TODO: or نمایندگی داده ها depending on context
+        // Language::FA => "بازنمایی داده ها",
         Language::ES => "Representación de los datos",
         Language::KO => "데이터 단위",
         Language::ZH => "图表数据",
@@ -455,34 +455,34 @@ pub fn fqdn_translation(language: Language) -> &'static str {
     }
 }
 
-pub fn administrative_entity_translation(language: Language) -> &'static str {
-    match language {
-        Language::EN => "Autonomous System name",
-        Language::CS => "Jméno autonomního systému",
-        Language::IT => "Nome del sistema autonomo",
-        Language::RU => "Имя автономной системы",
-        Language::SV => "Administrativ enhet",
-        Language::FI => "Autonomisen järjestelmän nimi",
-        Language::DE => "Name des autonomen Systems",
-        Language::TR => "Yönetim varlığı",
-        // Language::FA => "واحد اجرایی", // TODO: or واحد اداری depending on context
-        Language::ES => "Nombre del sistema autónomo",
-        Language::KO => "관리 엔티티",
-        Language::ZH => "ASN 信息",
-        Language::ZH_TW => "ASN 資訊",
-        Language::UK => "Адміністративна одиниця",
-        Language::RO => "Numele sistemului autonom",
-        Language::PL => "Nazwa autonomicznego systemu",
-        Language::FR => "Nom du système autonome",
-        Language::JA => "AS 名",
-        Language::UZ => "Avtonom tizim nomi",
-        Language::PT => "Entidade administrativa",
-        Language::VI => "Tên Autonomous System",
-        Language::ID => "Nama System Otomatis",
-        Language::NL => "Naam van het autonome systeem",
-        Language::EL => "Όνομα αυτόνομου συστήματος",
-    }
-}
+// pub fn administrative_entity_translation(language: Language) -> &'static str {
+//     match language {
+//         Language::EN => "Autonomous System name",
+//         Language::CS => "Jméno autonomního systému",
+//         Language::IT => "Nome del sistema autonomo",
+//         Language::RU => "Имя автономной системы",
+//         Language::SV => "Administrativ enhet",
+//         Language::FI => "Autonomisen järjestelmän nimi",
+//         Language::DE => "Name des autonomen Systems",
+//         Language::TR => "Yönetim varlığı",
+//         // Language::FA => "واحد اداری",
+//         Language::ES => "Nombre del sistema autónomo",
+//         Language::KO => "관리 엔티티",
+//         Language::ZH => "ASN 信息",
+//         Language::ZH_TW => "ASN 資訊",
+//         Language::UK => "Адміністративна одиниця",
+//         Language::RO => "Numele sistemului autonom",
+//         Language::PL => "Nazwa autonomicznego systemu",
+//         Language::FR => "Nom du système autonome",
+//         Language::JA => "AS 名",
+//         Language::UZ => "Avtonom tizim nomi",
+//         Language::PT => "Entidade administrativa",
+//         Language::VI => "Tên Autonomous System",
+//         Language::ID => "Nama System Otomatis",
+//         Language::NL => "Naam van het autonome systeem",
+//         Language::EL => "Όνομα αυτόνομου συστήματος",
+//     }
+// }
 
 pub fn transmitted_data_translation(language: Language) -> &'static str {
     match language {
@@ -539,32 +539,30 @@ pub fn country_translation(language: Language) -> &'static str {
     }
 }
 
-pub fn domain_name_translation(language: Language) -> &'static str {
+// refers to the domain name of the host, e.g., "example.com"
+pub fn domain_translation(language: Language) -> &'static str {
     match language {
-        Language::EN => "Domain name",
-        Language::CS => "Doménové jméno",
-        Language::IT => "Nome di dominio",
-        Language::RU => "Доменное имя",
+        Language::EN | Language::DE | Language::ID => "Domain",
+        Language::CS => "Doménové",
+        Language::IT | Language::ES => "Dominio",
+        Language::RU => "Доменное",
         Language::SV => "Domännamn",
         Language::FI => "Verkkotunnus",
-        Language::DE => "Domain Name",
-        Language::TR => "Alan adı",
-        // Language::FA => "نام دامنه",
-        Language::ES => "Nombre de dominio",
-        Language::KO => "도메인 네임",
+        Language::TR => "Alan",
+        // Language::FA => "دامنه",
+        Language::KO => "도메인",
         Language::ZH => "域名",
         Language::ZH_TW => "網域名稱",
-        Language::UK => "Доменне ім'я",
-        Language::RO => "Nume domeniu",
-        Language::PL => "Nazwa domeny",
-        Language::FR => "Nom de domaine",
+        Language::UK => "Доменне",
+        Language::RO => "Domeniu",
+        Language::PL => "Domeny",
+        Language::FR => "Domaine",
         Language::JA => "ドメイン名",
-        Language::UZ => "Domen nomi",
-        Language::PT => "Nome do domínio",
-        Language::VI => "Tên miền",
-        Language::ID => "Nama Domain",
+        Language::UZ => "Domen",
+        Language::PT => "Domínio",
+        Language::VI => "Miền",
         Language::NL => "Domeinnaam",
-        Language::EL => "Όνομα τομέα",
+        Language::EL => "Τομέα",
     }
 }
 

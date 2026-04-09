@@ -137,6 +137,24 @@ pub fn redirect_stdout_stderr_to_file()
     None
 }
 
+pub fn clip_text(text: &str, max_chars: usize) -> String {
+    let text = text.trim();
+    let chars = text.chars().collect::<Vec<char>>();
+    let tot_len = chars.len();
+    let slice_len = min(max_chars, tot_len);
+
+    let suspensions = if tot_len > max_chars { "…" } else { "" };
+    let slice = if tot_len > max_chars {
+        &chars[..slice_len - 2]
+    } else {
+        &chars[..slice_len]
+    }
+    .iter()
+    .collect::<String>();
+
+    [slice.trim(), suspensions].concat()
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -208,5 +226,35 @@ mod tests {
         assert_eq!(f(".."), "..");
         assert_eq!(f("..."), "..");
         assert_eq!(f("no_dots_in_this"), "no_dots_in_this");
+    }
+
+    #[test]
+    fn test_clip_text() {
+        assert_eq!(
+            clip_text("iphone-di-doofenshmirtz.local", 26),
+            "iphone-di-doofenshmirtz.…"
+        );
+        assert_eq!(clip_text("github.com", 26), "github.com");
+
+        assert_eq!(clip_text("https6789012", 13), "https6789012");
+        assert_eq!(clip_text("https67890123", 13), "https67890123");
+        assert_eq!(clip_text("https678901234", 13), "https678901…");
+        assert_eq!(clip_text("https6789012345", 13), "https678901…");
+
+        assert_eq!(clip_text("protocol with space", 13), "protocol wi…");
+        assert_eq!(clip_text("protocol90 23456", 13), "protocol90…");
+
+        assert_eq!(
+            clip_text("      \n\t    sniffnet.net       ", 26),
+            "sniffnet.net"
+        );
+        assert_eq!(
+            clip_text("        protocol90 23456    \n      ", 12),
+            "protocol90…"
+        );
+        assert_eq!(
+            clip_text("        protocol90 23456          ", 26),
+            "protocol90 23456"
+        );
     }
 }

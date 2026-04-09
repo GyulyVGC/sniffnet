@@ -1,9 +1,6 @@
 #![allow(clippy::match_same_arms)]
 
-use crate::gui::styles::types::style_type::StyleType;
-use crate::translations::translations_3::file_name_translation;
 use crate::translations::types::language::Language;
-use iced::widget::Text;
 
 pub fn reserved_address_translation(language: Language, info: &str) -> String {
     match language {
@@ -92,111 +89,94 @@ pub fn capture_file_translation(language: Language) -> &'static str {
     }
 }
 
-pub fn select_capture_translation(language: Language) -> &'static str {
+pub fn select_file_translation(language: Language) -> &'static str {
     match language {
-        Language::EN => "Select capture file",
-        Language::CS => "Výběr souboru se záznamem",
-        Language::IT => "Seleziona file di cattura",
-        Language::FR => "Sélectionner un fichier de capture",
-        Language::JA => "キャプチャファイルを選択",
-        Language::ZH => "选择捕获文件",
-        Language::NL => "Selecteer capture bestand",
-        Language::ES => "Seleccionar archivo de captura",
-        Language::RO => "Selectează fișierul de captură",
-        Language::DE => "Aufzeichnungsdatei auswählen",
-        Language::UZ => "Tahlil faylini tanlang",
-        Language::ID => "Pilih file tangkapan",
-        Language::ZH_TW => "選擇擷取文件",
-        Language::EL => "Επιλογή αρχείου καταγραφής",
-        Language::VI => "Chọn tệp tin được bắt",
-        _ => "Select capture file",
+        Language::EN => "Select file",
+        Language::CS => "Výběr souboru",
+        Language::IT => "Seleziona file",
+        Language::FR => "Sélectionner fichier",
+        Language::JA => "ファイルを選択",
+        Language::ZH => "选择文件",
+        Language::NL => "Selecteer bestand",
+        Language::ES => "Seleccionar archivo",
+        Language::RO => "Selectează fișierul",
+        Language::DE => "Datei auswählen",
+        Language::UZ => "Faylini tanlang",
+        Language::ID => "Pilih file",
+        Language::ZH_TW => "選擇文件",
+        Language::EL => "Επιλογή αρχείου",
+        Language::VI => "Chọn tệp",
+        _ => "Select file",
     }
 }
 
-pub fn reading_from_pcap_translation<'a>(language: Language, file: &str) -> Text<'a, StyleType> {
-    let file_name_translation = file_name_translation(language);
-    Text::new(match language {
-        Language::EN => format!(
+pub fn reading_from_pcap_translation(language: Language) -> &'static str {
+    match language {
+        Language::EN => {
             "Reading packets from file...\n\n\
-                                 {file_name_translation}: {file}\n\n\
                                  Are you sure the file you selected isn't empty?"
-        ),
-        Language::CS => format!(
+        }
+        Language::CS => {
             "Čtení paketů ze souuboru...\n\n\
-                                 {file_name_translation}: {file}\n\n\
                                  Jste si jistý že vybraný soubor není prázdný?"
-        ),
-        Language::IT => format!(
+        }
+        Language::IT => {
             "Lettura pacchetti da file...\n\n\
-                                {file_name_translation}: {file}\n\n\
                                 Sei sicuro che il file che hai selezionato non sia vuoto?"
-        ),
-        Language::FR => format!(
+        }
+        Language::FR => {
             "Lecture des paquets depuis le fichier...\n\n\
-                                 {file_name_translation}: {file}\n\n\
                                  Êtes-vous sûr que le fichier sélectionné n'est pas vide?"
-        ),
-        Language::JA => format!(
+        }
+        Language::JA => {
             "ファイルからパケットを読み込み中...\n\n\
-                                 {file_name_translation}: {file}\n\n\
                                  選択したファイルが空でないことを確認しましたか？"
-        ),
-        Language::ZH => format!(
+        }
+        Language::ZH => {
             "从文件中读取数据包...\n\n\
-                                {file_name_translation}: {file}\n\n\
                                 您确定选中的文件不是空的吗?"
-        ),
-        Language::NL => format!(
+        }
+        Language::NL => {
             "Pakketten lezen uit bestand...\n\n\
-                                 {file_name_translation}: {file}\n\n\
                                  Weet je zeker dat het geselecteerde bestand niet leeg is?"
-        ),
-        Language::ES => format!(
+        }
+        Language::ES => {
             "Leyendo paquetes desde el archivo...\n\n\
-                                {file_name_translation}: {file}\n\n\
                                 ¿Seguro que el archivo seleccionado no está vacío?"
-        ),
-        Language::RO => format!(
+        }
+        Language::RO => {
             "Citirea pachetelor din fișier...\n\n\
-                                 {file_name_translation}: {file}\n\n\
                                  Ești sigur că fișierul selectat nu este gol?"
-        ),
-        Language::DE => format!(
+        }
+        Language::DE => {
             "Pakete aus Datei laden... \n\n\
-                                {file_name_translation}: {file}\n\n\
                                 Bist du sicher, dass die gewählte Datei nicht leer ist?"
-        ),
-        Language::UZ => format!(
+        }
+        Language::UZ => {
             "Faylni o'qish...\n\n\
-                                {file_name_translation}: {file}\n\n\
                                 Fayl bo'sh emasligiga aminmisiz?"
-        ),
-        Language::ID => format!(
+        }
+        Language::ID => {
             "Membaca paket dari berkas...\n\n\
-                                {file_name_translation}: {file}\n\n\
                                 Apa kamu yakin berkasnya tidak kosong?"
-        ),
-        Language::ZH_TW => format!(
+        }
+        Language::ZH_TW => {
             "從檔案讀取資料包...\n\n\
-                                {file_name_translation}: {file}\n\n\
                                 您確定您選擇的檔案不是空的嗎？"
-        ),
-        Language::EL => format!(
+        }
+        Language::EL => {
             "Ανάγνωση πακέτων από αρχείο...\n\n\
-                                 {file_name_translation}: {file}\n\n\
                                  Είστε βέβαιοι ότι το επιλεγμένο αρχείο δεν είναι κενό;"
-        ),
-        Language::VI => format!(
+        }
+        Language::VI => {
             "Đang đọc gói tin từ tệp...\n\n\
-                                 {file_name_translation}: {file}\n\n\
                                  Bạn có chắc tệp tin đã chọn không bị trống?"
-        ),
-        _ => format!(
+        }
+        _ => {
             "Reading packets from file...\n\n\
-                                {file_name_translation}: {file}\n\n\
                                 Are you sure the file you selected isn't empty?"
-        ),
-    })
+        }
+    }
 }
 
 pub fn data_exceeded_translation(language: Language) -> &'static str {

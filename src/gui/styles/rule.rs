@@ -3,16 +3,19 @@
 #![allow(clippy::module_name_repetitions)]
 
 use crate::StyleType;
-use iced::Color;
+use crate::gui::types::message::Message;
+use iced::border::Radius;
 use iced::widget::rule::{Catalog, FillMode, Style};
+use iced::widget::{Container, rule};
+use iced::{Alignment, Color, Length};
 
 #[derive(Default)]
 pub enum RuleType {
     #[default]
     Standard,
-    PaletteColor(Color, u16),
-    Incoming,
-    Outgoing,
+    PaletteColor(Color),
+    Incoming(bool),
+    Outgoing(bool),
     Dropped,
 }
 
@@ -22,23 +25,44 @@ impl RuleType {
         let ext = style.get_extension();
         Style {
             color: match self {
-                RuleType::Incoming => colors.secondary,
-                RuleType::Outgoing => colors.outgoing,
-                RuleType::PaletteColor(color, _) => *color,
+                RuleType::Incoming(_) => colors.secondary,
+                RuleType::Outgoing(_) => colors.outgoing,
+                RuleType::PaletteColor(color) => *color,
                 RuleType::Dropped => ext.buttons_color,
                 RuleType::Standard => Color {
                     a: ext.alpha_round_borders,
                     ..ext.buttons_color
                 },
             },
-            width: match self {
-                RuleType::PaletteColor(_, width) => *width,
-                RuleType::Standard => 3,
-                _ => 5,
+            radius: match self {
+                RuleType::Incoming(all_round) if !all_round => Radius::new(100.0).right(0.0),
+                RuleType::Outgoing(all_round) if !all_round => Radius::new(100.0).left(0.0),
+                RuleType::PaletteColor(_) => 0.0.into(),
+                _ => 100.0.into(),
             },
-            radius: 0.0.into(),
             fill_mode: FillMode::Full,
+            snap: true,
         }
+    }
+
+    fn thickness(&self) -> u32 {
+        match self {
+            RuleType::Standard => 3,
+            RuleType::PaletteColor(_) => 25,
+            RuleType::Dropped | RuleType::Incoming(_) | RuleType::Outgoing(_) => 5,
+        }
+    }
+
+    pub fn horizontal<'a>(self, height: impl Into<Length>) -> Container<'a, Message, StyleType> {
+        let rule = rule::horizontal(self.thickness()).class(self);
+        Container::new(rule)
+            .height(height)
+            .align_y(Alignment::Center)
+    }
+
+    pub fn vertical<'a>(self, width: impl Into<Length>) -> Container<'a, Message, StyleType> {
+        let rule = rule::vertical(self.thickness()).class(self);
+        Container::new(rule).width(width).align_x(Alignment::Center)
     }
 }
 
