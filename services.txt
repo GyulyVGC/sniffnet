@@ -473,6 +473,7 @@ fxp	286/tcp
 fxp	286/udp
 k-block	287/tcp
 k-block	287/udp
+tacacss	300/tcp
 novastorbakcup	308/tcp
 novastorbakcup	308/udp
 entrusttime	309/tcp
@@ -8109,6 +8110,7 @@ awacs-ice	4488/udp
 sae-urn	4500/tcp
 nat-t-ike	4500/udp
 a25-fap-fgw	4502/tcp
+m-bus-oms	4503/tcp
 armagetronad	4534/tcp
 ehs	4535/tcp
 ehs	4535/udp
@@ -8328,6 +8330,7 @@ vxlan	4789/tcp
 vxlan-gpe	4790/tcp
 roce	4791/tcp
 unified-bus	4792/tcp
+uet	4793/tcp
 iims	4800/tcp
 iims	4800/udp
 iwec	4801/tcp
@@ -10177,6 +10180,7 @@ cucme-2	7649/udp
 cucme-3	7650/udp
 cucme-4	7651/udp
 rome	7663/tcp
+authoritygate	7668/tcp
 imqstomp	7672/tcp
 imqstomps	7673/tcp
 imqtunnels	7674/tcp
@@ -10980,6 +10984,7 @@ odnsp	9966/udp
 xybrid-rt	9978/tcp
 visweather	9979/tcp
 pumpkindb	9981/tcp
+kaostransport	9986/tcp
 dsm-scm-target	9987/tcp
 dsm-scm-target	9987/udp
 nsesrvr	9988/tcp
@@ -11163,6 +11168,7 @@ atm-uhas	11367/udp
 pksd	11371/tcp
 hkp	11371/udp
 lsdp	11430/tcp
+ollama	11434/tcp
 asgcypresstcps	11489/tcp
 tempest-port	11600/tcp
 tempest-port	11600/udp
@@ -11533,6 +11539,7 @@ memcachedb	21201/tcp
 trinket-agent	21212/tcp
 cohesity-agent	21213/tcp
 aigairserver	21221/tcp
+xahaud	21337/tcp
 rdm-tfs	21553/tcp
 dfserver	21554/tcp
 dfserver	21554/udp
@@ -11648,6 +11655,7 @@ tonidods	24465/udp
 binkp	24554/tcp
 binkp	24554/udp
 bilobit	24577/tcp
+udpstp	24601/tcp
 sdtvwcam	24666/tcp
 canditv	24676/tcp
 canditv	24676/udp
@@ -12020,6 +12028,7 @@ rs-status	45002/tcp
 synctest	45045/tcp
 invision-ag	45054/tcp
 invision-ag	45054/udp
+witsnet	45185/tcp
 cloudcheck	45514/tcp
 eba	45678/tcp
 eba	45678/udp
