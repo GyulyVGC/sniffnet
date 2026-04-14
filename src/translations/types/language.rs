@@ -127,19 +127,11 @@ impl Language {
             self,
             Language::EN
                 | Language::IT
-                | Language::NL
-                | Language::DE
-                | Language::UZ
-                | Language::ZH
                 | Language::JA
-                | Language::FR
-                | Language::EL
                 | Language::RO
+                | Language::TR
+                | Language::ZH
                 | Language::ZH_TW
-                | Language::ID
-                | Language::ES
-                | Language::CS
-                | Language::VI
         )
     }
 }
