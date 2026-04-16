@@ -68,7 +68,7 @@ pub fn mmdb_files_translation(language: Language) -> &'static str {
         Language::ES => "Archivos de la base de datos",
         Language::IT => "File di database",
         Language::FR => "Fichiers de la base de données",
-        Language::DE => "Datenbank Dateien",
+        Language::DE => "Datenbankdateien",
         Language::PL => "Pliki bazy danych",
         Language::RU => "Файлы базы данных",
         Language::RO => "Fișiere bază de date",
