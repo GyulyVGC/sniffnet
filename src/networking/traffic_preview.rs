@@ -35,9 +35,9 @@ pub fn traffic_preview(tx: &Sender<TrafficPreview>) {
             return;
         }
 
-        if ticks.elapsed() >= Duration::from_millis(1000) {
+        if ticks.elapsed() >= Duration::from_secs(1) {
             ticks = ticks
-                .checked_add(Duration::from_millis(1000))
+                .checked_add(Duration::from_secs(1))
                 .unwrap_or(Instant::now());
             handle_devices_and_previews(&mut data, tx, &pcap_tx);
         }
