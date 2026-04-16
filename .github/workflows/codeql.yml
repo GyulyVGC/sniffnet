@@ -23,7 +23,6 @@ jobs:
         include:
           - language: actions
             build-mode: none
-            queries: default
           - language: rust
             build-mode: none
             queries: security-extended
