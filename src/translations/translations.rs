@@ -256,7 +256,7 @@ pub fn traffic_rate_translation<'a>(language: Language) -> Text<'a, StyleType> {
         Language::FR => "Fréquence du traffic",
         Language::ES => "Tasa de tráfico",
         Language::PL => "Prędkość ruchu",
-        Language::DE => "Daten Frequenz",
+        Language::DE => "Datenrate",
         Language::UK => "Швидкість руху",
         Language::ZH => "网络速率图",
         Language::ZH_TW => "流量速率",
@@ -480,7 +480,6 @@ pub fn hide_translation(language: Language) -> &'static str {
         Language::FR => "Masquer",
         Language::ES => "Ocultar",
         Language::PL => "Ukryj",
-        Language::DE => "Verstecken",
         Language::UK => "Заховати",
         Language::ZH => "隐藏",
         Language::ZH_TW => "隱藏",
@@ -497,7 +496,7 @@ pub fn hide_translation(language: Language) -> &'static str {
         Language::UZ => "Yashirish",
         Language::VI => "Ẩn",
         Language::ID => "Sembunyikan",
-        Language::NL => "Verbergen",
+        Language::NL | Language::DE => "Verbergen",
     }
 }
 
@@ -558,7 +557,7 @@ pub fn no_addresses_translation(language: Language) -> &'static str {
         }
         Language::DE => {
             "Es kann kein Netzwerkverkehr beobachtet werden, weil der Adapter keine aktiven Adressen hat...\n\n\
-                                 Wenn du dir sicher bist, dass du mit dem Internet verbunden bist, probier einen anderen Adapter auszuwählen."
+                                 Wenn du dir sicher bist, dass du mit dem Internet verbunden bist, versuche einen anderen Adapter auszuwählen."
         }
         Language::UK => {
             "Не зафіксовано жодного мережевого руху, тому що вибраний адаптер не має активних адрес... \n\n\
@@ -1363,7 +1362,7 @@ pub fn notifications_title_translation<'a>(language: Language) -> Text<'a, Style
         Language::FR => "Personnalisez vos notifications",
         Language::ES => "Personaliza tus notificaciones",
         Language::PL => "Dostosuj powiadomienia",
-        Language::DE => "Stell deine Benachrichtigungen ein",
+        Language::DE => "Passe deine Benachrichtigungen an",
         Language::UK => "Налаштування повідомлень",
         Language::ZH => "自定义通知",
         Language::ZH_TW => "自訂通知",
@@ -1392,7 +1391,7 @@ pub fn appearance_title_translation<'a>(language: Language) -> Text<'a, StyleTyp
         Language::FR => "Sélectionnez votre thème préféré",
         Language::ES => "Elige tu tema favorito",
         Language::PL => "Wybierz swój ulubiony motyw",
-        Language::DE => "Wähl dein Lieblingsdesign",
+        Language::DE => "Wähle dein Lieblingsdesign",
         Language::UK => "Виберіть улюблену тему",
         Language::ZH_TW => "選擇您偏好的主題",
         Language::ZH => "选择您喜欢的主题",
