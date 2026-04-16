@@ -16,14 +16,17 @@ jobs:
       actions: read
       contents: read
 
+    # https://docs.github.com/en/code-security/reference/code-scanning/codeql/codeql-queries
     strategy:
       fail-fast: false
       matrix:
         include:
           - language: actions
             build-mode: none
+            queries: default
           - language: rust
             build-mode: none
+            queries: security-extended
 
     steps:
       - name: Checkout repository
@@ -34,7 +37,7 @@ jobs:
         with:
           languages: ${{ matrix.language }}
           build-mode: ${{ matrix.build-mode }}
-          queries: security-extended
+          queries: ${{ matrix.queries }}
 
       - name: Perform CodeQL Analysis
         uses: github/codeql-action/analyze@v4
