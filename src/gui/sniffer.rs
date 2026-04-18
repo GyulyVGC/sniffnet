@@ -264,7 +264,7 @@ impl Sniffer {
                 sub.map(|_| Message::Quit)
             }
         } else {
-            iced::time::every(Duration::from_millis(1000)).map(|_| Message::Periodic)
+            iced::time::every(Duration::from_secs(1)).map(|_| Message::Periodic)
         }
     }
 

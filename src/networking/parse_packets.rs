@@ -120,7 +120,7 @@ pub fn parse_packets(
                     let mut pending_hosts = Vec::new();
                     while !resolutions_state.addresses_waiting_resolution.is_empty() {
                         pending_hosts.extend(resolutions_state.new_hosts_to_send());
-                        thread::sleep(Duration::from_millis(1000));
+                        thread::sleep(Duration::from_secs(1));
                     }
                     // send one last message including all pending hosts
                     let _ = tx
@@ -479,9 +479,9 @@ fn maybe_send_tick_run_live(
     tx: &Sender<BackendTrafficMessage>,
     resolutions_state: &mut AddressesResolutionState,
 ) {
-    if first_packet_ticks.is_some_and(|i| i.elapsed() >= Duration::from_millis(1000)) {
+    if first_packet_ticks.is_some_and(|i| i.elapsed() >= Duration::from_secs(1)) {
         *first_packet_ticks =
-            first_packet_ticks.and_then(|i| i.checked_add(Duration::from_millis(1000)));
+            first_packet_ticks.and_then(|i| i.checked_add(Duration::from_secs(1)));
         let _ = tx.send_blocking(BackendTrafficMessage::TickRun(
             cap_id,
             info_traffic_msg.take_but_leave_something(),

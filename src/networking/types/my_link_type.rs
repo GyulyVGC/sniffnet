@@ -61,7 +61,7 @@ impl MyLinkType {
                 )
             }
             Self::NotYetAssigned => {
-                format!("{}: -", link_type_translation(language),)
+                format!("{}: -", link_type_translation(language))
             }
         }
     }
