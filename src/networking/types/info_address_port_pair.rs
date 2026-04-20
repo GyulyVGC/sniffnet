@@ -1,21 +1,23 @@
 //! Module defining the `InfoAddressPortPair` struct, useful to format the output report file and
 //! to keep track of statistics about the sniffed traffic.
 
-use std::cmp::Ordering;
-use std::collections::HashMap;
-
 use crate::Service;
 use crate::networking::types::arp_type::ArpType;
+use crate::networking::types::data_info::DataInfo;
 use crate::networking::types::data_representation::DataRepr;
 use crate::networking::types::icmp_type::IcmpType;
+use crate::networking::types::program::Program;
 use crate::networking::types::traffic_direction::TrafficDirection;
 use crate::report::types::sort_type::SortType;
 use crate::utils::types::timestamp::Timestamp;
+use std::cmp::Ordering;
+use std::collections::HashMap;
+use std::time::Instant;
 
 /// Struct useful to format the output report file and to keep track of statistics about the sniffed traffic.
 ///
 /// Each `InfoAddressPortPair` struct is associated to a single address:port pair.
-#[derive(Clone, Default, Debug)]
+#[derive(Clone, Debug)]
 pub struct InfoAddressPortPair {
     /// Source MAC address
     pub mac_address1: Option<String>,
@@ -29,6 +31,8 @@ pub struct InfoAddressPortPair {
     pub initial_timestamp: Timestamp,
     /// Last occurrence of information exchange featuring the associate address:port pair as a source or destination.
     pub final_timestamp: Timestamp,
+    /// Final instance of information exchange featuring the associate address:port pair as a source or destination (used for Program).
+    pub final_instant: Instant,
     /// Upper layer service carried by the associated address:port pair.
     pub service: Service,
     /// Determines if the connection is incoming or outgoing
@@ -37,14 +41,21 @@ pub struct InfoAddressPortPair {
     pub icmp_types: HashMap<IcmpType, usize>,
     /// Types of the ARP operations, with the relative count (this is empty if not ARP)
     pub arp_types: HashMap<ArpType, usize>,
+    /// Whether the remote address is blacklisted
+    pub is_blacklisted: bool,
+    /// The program associated to this pair
+    pub program: Program,
 }
 
 impl InfoAddressPortPair {
     pub fn refresh(&mut self, other: &Self) {
+        // self.program MUST NOT be refreshed here
         self.transmitted_bytes += other.transmitted_bytes;
         self.transmitted_packets += other.transmitted_packets;
         self.final_timestamp = other.final_timestamp;
+        self.final_instant = other.final_instant;
         self.service = other.service;
+        self.is_blacklisted = other.is_blacklisted;
         self.traffic_direction = other.traffic_direction;
         for (icmp_type, count) in &other.icmp_types {
             self.icmp_types
@@ -77,6 +88,37 @@ impl InfoAddressPortPair {
                 .transmitted_data(data_repr)
                 .cmp(&self.transmitted_data(data_repr)),
             SortType::Neutral => other.final_timestamp.cmp(&self.final_timestamp),
+        }
+    }
+
+    pub fn data_info(&self) -> DataInfo {
+        let mut data_info = DataInfo::default();
+        data_info.add_packets(
+            self.transmitted_packets,
+            self.transmitted_bytes,
+            self.traffic_direction,
+            self.final_instant,
+        );
+        data_info
+    }
+}
+
+impl Default for InfoAddressPortPair {
+    fn default() -> Self {
+        Self {
+            mac_address1: None,
+            mac_address2: None,
+            transmitted_bytes: 0,
+            transmitted_packets: 0,
+            initial_timestamp: Timestamp::default(),
+            final_timestamp: Timestamp::default(),
+            final_instant: Instant::now(),
+            service: Service::default(),
+            traffic_direction: TrafficDirection::default(),
+            icmp_types: HashMap::new(),
+            arp_types: HashMap::new(),
+            is_blacklisted: false,
+            program: Program::default(),
         }
     }
 }

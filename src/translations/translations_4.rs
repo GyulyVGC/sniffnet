@@ -1,9 +1,6 @@
 #![allow(clippy::match_same_arms)]
 
-use crate::gui::styles::types::style_type::StyleType;
-use crate::translations::translations_3::file_name_translation;
 use crate::translations::types::language::Language;
-use iced::widget::Text;
 
 pub fn reserved_address_translation(language: Language, info: &str) -> String {
     match language {
@@ -24,6 +21,7 @@ pub fn reserved_address_translation(language: Language, info: &str) -> String {
         Language::ID => format!("Alamat disimpan ({info})"),
         Language::EL => format!("Δεσμευμένη διεύθυνση ({info})"),
         Language::VI => format!("Địa chỉ dự trữ ({info})"),
+        Language::TR => format!("Rezerve edilmiş adres ({info})"),
         _ => format!("Reserved address ({info})"),
     }
 }
@@ -45,7 +43,7 @@ pub fn share_feedback_translation(language: Language) -> &'static str {
         Language::ID => "Berikan masukanmu",
         Language::EL => "Μοιραστείτε τα σχόλιά σας",
         Language::VI => "Chia sẻ phản hồi của bạn",
-        Language::UK => "Надіслати відгук",
+        Language::TR => "Geri bildirimlerinizi paylaşın",
         _ => "Share your feedback",
     }
 }
@@ -68,6 +66,7 @@ pub fn share_feedback_translation(language: Language) -> &'static str {
 //         Language::ID => "Kecuali",
 //         Language::ES => "Excluidos",
 //         Language::VI => "Loại trừ",
+//         Language::TR => "Hariç tutulan",
 //         _ => "Excluded",
 //     }
 // }
@@ -89,122 +88,104 @@ pub fn capture_file_translation(language: Language) -> &'static str {
         Language::ID => "File tangkapan",
         Language::ES => "Archivo de captura",
         Language::VI => "Bắt tệp tin",
-        Language::UK => "Захопити файл",
+        Language::TR => "Yakalama dosyası",
         _ => "Capture file",
     }
 }
 
-pub fn select_capture_translation(language: Language) -> &'static str {
+pub fn select_file_translation(language: Language) -> &'static str {
     match language {
-        Language::EN => "Select capture file",
-        Language::CS => "Výběr souboru se záznamem",
-        Language::IT => "Seleziona file di cattura",
-        Language::FR => "Sélectionner un fichier de capture",
-        Language::JA => "キャプチャファイルを選択",
-        Language::ZH => "选择捕获文件",
-        Language::NL => "Selecteer capture bestand",
-        Language::ES => "Seleccionar archivo de captura",
-        Language::RO => "Selectează fișierul de captură",
-        Language::DE => "Aufzeichnungsdatei auswählen",
-        Language::UZ => "Tahlil faylini tanlang",
-        Language::ID => "Pilih file tangkapan",
-        Language::ZH_TW => "選擇擷取文件",
-        Language::EL => "Επιλογή αρχείου καταγραφής",
-        Language::VI => "Chọn tệp tin được bắt",
-        Language::UK => "Вибрати файл захоплення",
-        _ => "Select capture file",
+        Language::EN => "Select file",
+        Language::CS => "Výběr souboru",
+        Language::IT => "Seleziona file",
+        Language::FR => "Sélectionner fichier",
+        Language::JA => "ファイルを選択",
+        Language::ZH => "选择文件",
+        Language::NL => "Selecteer bestand",
+        Language::ES => "Seleccionar archivo",
+        Language::RO => "Selectează fișierul",
+        Language::DE => "Datei auswählen",
+        Language::UZ => "Faylini tanlang",
+        Language::ID => "Pilih file",
+        Language::ZH_TW => "選擇文件",
+        Language::EL => "Επιλογή αρχείου",
+        Language::VI => "Chọn tệp",
+        Language::TR => "Dosya seç",
+        _ => "Select file",
     }
 }
 
-pub fn reading_from_pcap_translation<'a>(language: Language, file: &str) -> Text<'a, StyleType> {
-    let file_name_translation = file_name_translation(language);
-    Text::new(match language {
-        Language::EN => format!(
+pub fn reading_from_pcap_translation(language: Language) -> &'static str {
+    match language {
+        Language::EN => {
             "Reading packets from file...\n\n\
-                                 {file_name_translation}: {file}\n\n\
                                  Are you sure the file you selected isn't empty?"
-        ),
-        Language::CS => format!(
+        }
+        Language::CS => {
             "Čtení paketů ze souuboru...\n\n\
-                                 {file_name_translation}: {file}\n\n\
                                  Jste si jistý že vybraný soubor není prázdný?"
-        ),
-        Language::IT => format!(
+        }
+        Language::IT => {
             "Lettura pacchetti da file...\n\n\
-                                {file_name_translation}: {file}\n\n\
                                 Sei sicuro che il file che hai selezionato non sia vuoto?"
-        ),
-        Language::FR => format!(
+        }
+        Language::FR => {
             "Lecture des paquets depuis le fichier...\n\n\
-                                 {file_name_translation}: {file}\n\n\
                                  Êtes-vous sûr que le fichier sélectionné n'est pas vide?"
-        ),
-        Language::JA => format!(
+        }
+        Language::JA => {
             "ファイルからパケットを読み込み中...\n\n\
-                                 {file_name_translation}: {file}\n\n\
                                  選択したファイルが空でないことを確認しましたか？"
-        ),
-        Language::ZH => format!(
+        }
+        Language::ZH => {
             "从文件中读取数据包...\n\n\
-                                {file_name_translation}: {file}\n\n\
                                 您确定选中的文件不是空的吗?"
-        ),
-        Language::NL => format!(
+        }
+        Language::NL => {
             "Pakketten lezen uit bestand...\n\n\
-                                 {file_name_translation}: {file}\n\n\
                                  Weet je zeker dat het geselecteerde bestand niet leeg is?"
-        ),
-        Language::ES => format!(
+        }
+        Language::ES => {
             "Leyendo paquetes desde el archivo...\n\n\
-                                {file_name_translation}: {file}\n\n\
                                 ¿Seguro que el archivo seleccionado no está vacío?"
-        ),
-        Language::RO => format!(
+        }
+        Language::RO => {
             "Citirea pachetelor din fișier...\n\n\
-                                 {file_name_translation}: {file}\n\n\
                                  Ești sigur că fișierul selectat nu este gol?"
-        ),
-        Language::DE => format!(
+        }
+        Language::DE => {
             "Pakete aus Datei laden... \n\n\
-                                {file_name_translation}: {file}\n\n\
                                 Bist du sicher, dass die gewählte Datei nicht leer ist?"
-        ),
-        Language::UZ => format!(
+        }
+        Language::UZ => {
             "Faylni o'qish...\n\n\
-                                {file_name_translation}: {file}\n\n\
                                 Fayl bo'sh emasligiga aminmisiz?"
-        ),
-        Language::ID => format!(
+        }
+        Language::ID => {
             "Membaca paket dari berkas...\n\n\
-                                {file_name_translation}: {file}\n\n\
                                 Apa kamu yakin berkasnya tidak kosong?"
-        ),
-        Language::ZH_TW => format!(
+        }
+        Language::ZH_TW => {
             "從檔案讀取資料包...\n\n\
-                                {file_name_translation}: {file}\n\n\
                                 您確定您選擇的檔案不是空的嗎？"
-        ),
-        Language::EL => format!(
+        }
+        Language::EL => {
             "Ανάγνωση πακέτων από αρχείο...\n\n\
-                                 {file_name_translation}: {file}\n\n\
                                  Είστε βέβαιοι ότι το επιλεγμένο αρχείο δεν είναι κενό;"
-        ),
-        Language::VI => format!(
+        }
+        Language::VI => {
             "Đang đọc gói tin từ tệp...\n\n\
-                                 {file_name_translation}: {file}\n\n\
                                  Bạn có chắc tệp tin đã chọn không bị trống?"
-        ),
-        Language::UK => format!(
-            "Зчитування пакетів із файлу...\n\n\
-                                 {file_name_translation}: {file}\n\n\
-                                 Ви впевнені, що обраний файл не порожній?"
-        ),
-        _ => format!(
+        }
+        Language::TR => {
+            "Paketler dosyadan okunuyor...\n\n\
+                                 Seçilen dosyanın boş olmadığından emin misiniz?"
+        }
+        _ => {
             "Reading packets from file...\n\n\
-                                {file_name_translation}: {file}\n\n\
                                 Are you sure the file you selected isn't empty?"
-        ),
-    })
+        }
+    }
 }
 
 pub fn data_exceeded_translation(language: Language) -> &'static str {
@@ -223,7 +204,7 @@ pub fn data_exceeded_translation(language: Language) -> &'static str {
         Language::ID => "Ambang batas data terlampaui",
         Language::EL => "Υπέρβαση ορίου δεδομένων",
         Language::VI => "Đã vượt ngưỡng dữ liệu",
-        Language::UK => "Перевищено ліміт даних",
+        Language::TR => "Veri limiti aşıldı",
         _ => "Data threshold exceeded",
     }
 }
@@ -245,7 +226,7 @@ pub fn bits_exceeded_translation(language: Language) -> &'static str {
         Language::ZH_TW => "超出數據界限",
         Language::EL => "Υπέρβαση ορίου δυφίων",
         Language::VI => "Đã vượt ngưỡng bit",
-        Language::UK => "Перевищено ліміт бітів",
+        Language::TR => "Bit limiti aşıldı",
         _ => "Bits threshold exceeded",
     }
 }
@@ -266,8 +247,7 @@ pub fn bits_translation(language: Language) -> &'static str {
         Language::EL => "Δυφία",
         Language::RO => "biți",
         Language::ZH_TW => "位元",
-        Language::VI => "bit",
-        Language::UK => "біти",
+        Language::VI | Language::TR => "bit",
         _ => "bits",
     }
 }
@@ -287,7 +267,7 @@ pub fn pause_translation(language: Language) -> &'static str {
         Language::ZH_TW => "暫停",
         Language::EL => "Παύση",
         Language::VI => "Tạm dừng",
-        Language::UK => "Пауза",
+        Language::TR => "Duraklat",
         _ => "Pause",
     }
 }
@@ -310,7 +290,7 @@ pub fn resume_translation(language: Language) -> &'static str {
         Language::ZH_TW => "繼續",
         Language::EL => "Συνέχεια",
         Language::VI => "Tiếp tục",
-        Language::UK => "Продовжити",
+        Language::TR => "Devam et",
         _ => "Resume",
     }
 }

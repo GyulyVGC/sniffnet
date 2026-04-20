@@ -1,21 +1,20 @@
 use std::net::{IpAddr, Ipv4Addr};
-use std::ops::Sub;
-use std::time::Duration;
+use std::time::{Duration, Instant};
 
 use crate::notifications::types::notifications::DataNotification;
 
 pub struct TimingEvents {
     /// Instant of the last window focus
-    focus: std::time::Instant,
+    focus: Instant,
     /// Instant of the last press on Copy IP button, with the related IP address
-    copy_ip: (std::time::Instant, IpAddr),
+    copy_ip: (Instant, IpAddr),
     /// Instant of the last thumbnail mode enter
-    thumbnail_enter: std::time::Instant,
+    thumbnail_enter: Instant,
     /// Instant of the last click on the thumbnail window
-    thumbnail_click: std::time::Instant,
+    thumbnail_click: Instant,
     /// Instant of the last adjust of notifications settings threshold and storage of this
     /// threshold while editing
-    threshold_adjust: (std::time::Instant, Option<DataNotification>),
+    threshold_adjust: (Instant, Option<DataNotification>),
 }
 
 impl TimingEvents {
@@ -29,7 +28,7 @@ impl TimingEvents {
     pub const TIMEOUT_THRESHOLD_ADJUST: u64 = 100;
 
     pub fn focus_now(&mut self) {
-        self.focus = std::time::Instant::now();
+        self.focus = Instant::now();
     }
 
     pub fn was_just_focus(&self) -> bool {
@@ -37,7 +36,7 @@ impl TimingEvents {
     }
 
     pub fn copy_ip_now(&mut self, ip: IpAddr) {
-        self.copy_ip = (std::time::Instant::now(), ip);
+        self.copy_ip = (Instant::now(), ip);
     }
 
     pub fn was_just_copy_ip(&self, ip: &IpAddr) -> bool {
@@ -46,7 +45,7 @@ impl TimingEvents {
     }
 
     pub fn thumbnail_enter_now(&mut self) {
-        self.thumbnail_enter = std::time::Instant::now();
+        self.thumbnail_enter = Instant::now();
     }
 
     pub fn was_just_thumbnail_enter(&self) -> bool {
@@ -55,7 +54,7 @@ impl TimingEvents {
     }
 
     pub fn thumbnail_click_now(&mut self) {
-        self.thumbnail_click = std::time::Instant::now();
+        self.thumbnail_click = Instant::now();
     }
 
     pub fn was_just_thumbnail_click(&self) -> bool {
@@ -64,7 +63,7 @@ impl TimingEvents {
     }
 
     pub fn threshold_adjust_now(&mut self, temp_threshold: DataNotification) {
-        self.threshold_adjust.0 = std::time::Instant::now();
+        self.threshold_adjust.0 = Instant::now();
         self.threshold_adjust.1 = Some(temp_threshold);
     }
 
@@ -87,11 +86,13 @@ impl TimingEvents {
 impl Default for TimingEvents {
     fn default() -> Self {
         Self {
-            focus: std::time::Instant::now().sub(Duration::from_millis(400)),
-            copy_ip: (std::time::Instant::now(), IpAddr::V4(Ipv4Addr::UNSPECIFIED)),
-            thumbnail_enter: std::time::Instant::now(),
-            thumbnail_click: std::time::Instant::now(),
-            threshold_adjust: (std::time::Instant::now(), None),
+            focus: Instant::now()
+                .checked_sub(Duration::from_millis(400))
+                .unwrap_or(Instant::now()),
+            copy_ip: (Instant::now(), IpAddr::V4(Ipv4Addr::UNSPECIFIED)),
+            thumbnail_enter: Instant::now(),
+            thumbnail_click: Instant::now(),
+            threshold_adjust: (Instant::now(), None),
         }
     }
 }

@@ -2,10 +2,11 @@ use crate::countries::types::country::Country;
 use crate::networking::types::address_port_pair::AddressPortPair;
 use crate::networking::types::host::Host;
 use crate::networking::types::info_address_port_pair::InfoAddressPortPair;
+use crate::networking::types::program::Program;
 use crate::networking::types::service::Service;
 
 /// Used to express the search filters applied to GUI inspect page
-#[derive(Clone, Debug, Default, Hash)]
+#[derive(Clone, Debug, Default, Hash, Eq, PartialEq)]
 pub struct SearchParameters {
     /// IP address (source)
     pub address_src: String,
@@ -25,8 +26,12 @@ pub struct SearchParameters {
     pub domain: String,
     /// Autonomous System name
     pub as_name: String,
+    /// Program name
+    pub program: String,
     /// Whether to display only favorites
     pub only_favorites: bool,
+    /// Whether to display only blacklisted
+    pub only_blacklisted: bool,
 }
 
 impl SearchParameters {
@@ -53,25 +58,20 @@ impl SearchParameters {
             return false;
         }
 
+        // check blacklisted filter
+        if self.only_blacklisted && !value.is_blacklisted {
+            return false;
+        }
+
         // if arrived at this point all filters are satisfied
         true
     }
 
-    pub fn is_some_host_filter_active(&self) -> bool {
+    fn is_some_host_filter_active(&self) -> bool {
         self.only_favorites
             || !self.country.is_empty()
             || !self.as_name.is_empty()
             || !self.domain.is_empty()
-    }
-
-    pub fn reset_host_filters(&self) -> Self {
-        Self {
-            country: String::new(),
-            domain: String::new(),
-            as_name: String::new(),
-            only_favorites: false,
-            ..self.clone()
-        }
     }
 
     pub fn new_host_search(host: &Host) -> Self {
@@ -93,6 +93,13 @@ impl SearchParameters {
             ..SearchParameters::default()
         }
     }
+
+    pub fn new_program_search(program: &Program) -> Self {
+        Self {
+            program: program.to_string_with_equal_prefix(),
+            ..SearchParameters::default()
+        }
+    }
 }
 
 #[derive(Copy, Clone)]
@@ -106,10 +113,11 @@ pub enum FilterInputType {
     Country,
     Domain,
     AsName,
+    Program,
 }
 
 impl FilterInputType {
-    pub const ALL: [FilterInputType; 9] = [
+    pub const ALL: [FilterInputType; 10] = [
         Self::AddressSrc,
         Self::PortSrc,
         Self::AddressDst,
@@ -119,6 +127,7 @@ impl FilterInputType {
         Self::Country,
         Self::Domain,
         Self::AsName,
+        Self::Program,
     ];
 
     pub fn matches_entry(
@@ -136,8 +145,16 @@ impl FilterInputType {
 
         let entry_value = self.entry_value(key, value, r_dns_host).to_lowercase();
 
-        if let Some(stripped_filter) = filter_value.strip_prefix('=') {
-            return entry_value.eq(stripped_filter);
+        if let Some(equal_filter) = filter_value.strip_prefix('=') {
+            return entry_value.eq(equal_filter);
+        }
+
+        if let Some(not_equal_filter) = filter_value.strip_prefix("!=") {
+            return !entry_value.eq(not_equal_filter);
+        }
+
+        if let Some(not_contains_filter) = filter_value.strip_prefix('!') {
+            return !entry_value.contains(not_contains_filter);
         }
 
         entry_value.contains(&filter_value)
@@ -154,6 +171,7 @@ impl FilterInputType {
             FilterInputType::Country => &search_params.country,
             FilterInputType::Domain => &search_params.domain,
             FilterInputType::AsName => &search_params.as_name,
+            FilterInputType::Program => &search_params.program,
         }
     }
 
@@ -197,48 +215,25 @@ impl FilterInputType {
                 .asn
                 .name
                 .clone(),
+            FilterInputType::Program => value.program.to_string(),
         }
     }
 
     pub fn clear_search(self, search_params: &SearchParameters) -> SearchParameters {
+        let mut result = search_params.clone();
         match self {
-            FilterInputType::AddressSrc => SearchParameters {
-                address_src: String::new(),
-                ..search_params.clone()
-            },
-            FilterInputType::PortSrc => SearchParameters {
-                port_src: String::new(),
-                ..search_params.clone()
-            },
-            FilterInputType::AddressDst => SearchParameters {
-                address_dst: String::new(),
-                ..search_params.clone()
-            },
-            FilterInputType::PortDst => SearchParameters {
-                port_dst: String::new(),
-                ..search_params.clone()
-            },
-            FilterInputType::Proto => SearchParameters {
-                proto: String::new(),
-                ..search_params.clone()
-            },
-            FilterInputType::Service => SearchParameters {
-                service: String::new(),
-                ..search_params.clone()
-            },
-            FilterInputType::Domain => SearchParameters {
-                domain: String::new(),
-                ..search_params.clone()
-            },
-            FilterInputType::Country => SearchParameters {
-                country: String::new(),
-                ..search_params.clone()
-            },
-            FilterInputType::AsName => SearchParameters {
-                as_name: String::new(),
-                ..search_params.clone()
-            },
+            FilterInputType::AddressSrc => result.address_src = String::new(),
+            FilterInputType::PortSrc => result.port_src = String::new(),
+            FilterInputType::AddressDst => result.address_dst = String::new(),
+            FilterInputType::PortDst => result.port_dst = String::new(),
+            FilterInputType::Proto => result.proto = String::new(),
+            FilterInputType::Service => result.service = String::new(),
+            FilterInputType::Domain => result.domain = String::new(),
+            FilterInputType::Country => result.country = String::new(),
+            FilterInputType::AsName => result.as_name = String::new(),
+            FilterInputType::Program => result.program = String::new(),
         }
+        result
     }
 
     pub fn new_search(
@@ -246,43 +241,20 @@ impl FilterInputType {
         search_params: &SearchParameters,
         new_value: String,
     ) -> SearchParameters {
+        let mut result = search_params.clone();
+        let trimmed = new_value.trim().to_string();
         match self {
-            FilterInputType::AddressSrc => SearchParameters {
-                address_src: new_value.trim().to_string(),
-                ..search_params.clone()
-            },
-            FilterInputType::PortSrc => SearchParameters {
-                port_src: new_value.trim().to_string(),
-                ..search_params.clone()
-            },
-            FilterInputType::AddressDst => SearchParameters {
-                address_dst: new_value.trim().to_string(),
-                ..search_params.clone()
-            },
-            FilterInputType::PortDst => SearchParameters {
-                port_dst: new_value.trim().to_string(),
-                ..search_params.clone()
-            },
-            FilterInputType::Proto => SearchParameters {
-                proto: new_value.trim().to_string(),
-                ..search_params.clone()
-            },
-            FilterInputType::Service => SearchParameters {
-                service: new_value.trim().to_string(),
-                ..search_params.clone()
-            },
-            FilterInputType::Domain => SearchParameters {
-                domain: new_value.trim().to_string(),
-                ..search_params.clone()
-            },
-            FilterInputType::Country => SearchParameters {
-                country: new_value.trim().to_string(),
-                ..search_params.clone()
-            },
-            FilterInputType::AsName => SearchParameters {
-                as_name: new_value,
-                ..search_params.clone()
-            },
+            FilterInputType::AddressSrc => result.address_src = trimmed,
+            FilterInputType::PortSrc => result.port_src = trimmed,
+            FilterInputType::AddressDst => result.address_dst = trimmed,
+            FilterInputType::PortDst => result.port_dst = trimmed,
+            FilterInputType::Proto => result.proto = trimmed,
+            FilterInputType::Service => result.service = trimmed,
+            FilterInputType::Domain => result.domain = trimmed,
+            FilterInputType::Country => result.country = trimmed,
+            FilterInputType::AsName => result.as_name = new_value,
+            FilterInputType::Program => result.program = trimmed,
         }
+        result
     }
 }

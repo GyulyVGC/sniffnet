@@ -2,9 +2,23 @@
 
 All Sniffnet releases with the relative changes are documented in this file.
 
-## [UNRELEASED]
+## [1.5.0] - 2026-04-14
+- Show which apps and programs are generating network traffic ([#1056](https://github.com/GyulyVGC/sniffnet/pull/1056) — fixes [#170](https://github.com/GyulyVGC/sniffnet/issues/170))
 - Add charts to preview network adapters traffic in initial page ([#1026](https://github.com/GyulyVGC/sniffnet/pull/1026) — fixes [#556](https://github.com/GyulyVGC/sniffnet/issues/556))
+- Support custom IP blacklists ([#1055](https://github.com/GyulyVGC/sniffnet/pull/1055) — fixes [#729](https://github.com/GyulyVGC/sniffnet/issues/729))
+- Enhance favorites: support services, programs, and persistence ([#1109](https://github.com/GyulyVGC/sniffnet/pull/1109) — fixes [#839](https://github.com/GyulyVGC/sniffnet/issues/839))
+- New command line option `--config_path` to print the path of the app configuration file
+- Migrate to Iced 0.14 ([#1032](https://github.com/GyulyVGC/sniffnet/pull/1032) — fixes [#589](https://github.com/GyulyVGC/sniffnet/issues/589), [#639](https://github.com/GyulyVGC/sniffnet/issues/639), [#653](https://github.com/GyulyVGC/sniffnet/issues/653), [#656](https://github.com/GyulyVGC/sniffnet/issues/656), [#675](https://github.com/GyulyVGC/sniffnet/issues/675))
 - Add animated welcome screen ([#1002](https://github.com/GyulyVGC/sniffnet/pull/1002))
+- Support search prefixes `!` and `!=` in Inspect page filters to allow searching values that don't contain or aren't equal to a given string
+- Added various sanity checks when loading app configurations from file (window properties, scale factor, themes, notifications volume)
+- Updated some of the existing translations to v1.5:
+  - Romanian ([#942](https://github.com/GyulyVGC/sniffnet/pull/942))
+  - Japanese ([#1020](https://github.com/GyulyVGC/sniffnet/pull/1020))
+  - Turkish ([#1074](https://github.com/GyulyVGC/sniffnet/pull/1074))
+  - Simplified Chinese ([#1021](https://github.com/GyulyVGC/sniffnet/pull/1021))
+  - Traditional Chinese (Taiwan) ([#1021](https://github.com/GyulyVGC/sniffnet/pull/1021))
+- Fix app configurations backward-compatibility when an existing field is updated or invalid
 - Return a PCAP error when trying to start a capture from an unknown adapter name
 
 ## [1.4.2] - 2025-11-04

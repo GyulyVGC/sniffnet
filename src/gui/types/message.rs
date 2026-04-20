@@ -1,21 +1,22 @@
-use iced::window;
-use std::net::IpAddr;
-
 use crate::gui::components::types::my_modal::MyModal;
 use crate::gui::pages::types::running_page::RunningPage;
 use crate::gui::pages::types::settings_page::SettingsPage;
 use crate::gui::styles::types::gradient_type::GradientType;
+use crate::gui::types::favorite::FavoriteKey;
 use crate::networking::traffic_preview::TrafficPreview;
 use crate::networking::types::capture_context::CaptureSourcePicklist;
 use crate::networking::types::data_representation::DataRepr;
-use crate::networking::types::host::{Host, HostMessage};
+use crate::networking::types::host::HostMessage;
 use crate::networking::types::info_traffic::InfoTraffic;
+use crate::networking::types::ip_blacklist::IpBlacklist;
 use crate::notifications::types::notifications::Notification;
 use crate::report::types::search_parameters::SearchParameters;
 use crate::report::types::sort_type::SortType;
 use crate::utils::types::file_info::FileInfo;
 use crate::utils::types::web_page::WebPage;
 use crate::{Language, StyleType};
+use iced::window;
+use std::net::IpAddr;
 
 #[derive(Debug, Clone)]
 /// Messages types that permit reacting to application interactions/subscriptions
@@ -42,8 +43,16 @@ pub enum Message {
     HostSortSelection(SortType),
     /// Select service sort type to be displayed (overview page)
     ServiceSortSelection(SortType),
-    /// Adds or removes the given host into/from the favorites
-    AddOrRemoveFavorite(Host, bool),
+    /// Select program sort type to be displayed (overview page)
+    ProgramSortSelection(SortType),
+    /// Toggle host favorites filter
+    HostFavoritesFilterToggle,
+    /// Toggle service favorites filter
+    ServiceFavoritesFilterToggle,
+    /// Toggle program favorites filter
+    ProgramFavoritesFilterToggle,
+    /// Adds or removes the given item into/from the favorites
+    AddOrRemoveFavorite(FavoriteKey, bool),
     /// Open the supplied web page
     OpenWebPage(WebPage),
     /// Start sniffing packets
@@ -95,7 +104,7 @@ pub enum Message {
     /// Enable or disable gradients
     GradientsSelection(GradientType),
     /// Set UI scale factor
-    ChangeScaleFactor(f64),
+    ChangeScaleFactor(f32),
     /// The app window position has been changed
     WindowMoved(f32, f32),
     /// The app window size has been changed
@@ -104,6 +113,10 @@ pub enum Message {
     CustomCountryDb(String),
     /// The ASN MMDB custom path has been updated
     CustomAsnDb(String),
+    /// Load IP blacklist from file
+    LoadIpBlacklist(String),
+    /// Set new IP blacklist content
+    SetIpBlacklist(IpBlacklist),
     /// Wrapper around the Quit message
     QuitWrapper,
     /// Save the configurations of the app and quit

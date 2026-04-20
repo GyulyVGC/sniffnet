@@ -1,3 +1,4 @@
+use crate::gui::types::conf::deserialize_or_default;
 use crate::networking::types::my_device::MyDevice;
 use pcap::{Device, DeviceFlags};
 use serde::{Deserialize, Serialize};
@@ -5,6 +6,7 @@ use serde::{Deserialize, Serialize};
 #[derive(Serialize, Deserialize, Clone, PartialEq, Debug)]
 #[serde(default)]
 pub struct ConfigDevice {
+    #[serde(deserialize_with = "deserialize_or_default")]
     pub device_name: String,
 }
 

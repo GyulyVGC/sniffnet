@@ -13,7 +13,7 @@ pub static SOLARIZED_LIGHT_PALETTE: std::sync::LazyLock<Palette> =
         primary: color!(0xfdf6e3),      // base3
         secondary: color!(0x859900),    // green
         outgoing: color!(0x268bd2),     // blue
-        starred: color!(0xb58900, 0.9), // yellow
+        starred: color!(0xb58900),      // yellow
         text_headers: color!(0xfdf6e3), // base3
         text_body: color!(0x002b36),    // base03
     });

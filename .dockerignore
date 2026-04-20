@@ -8,7 +8,7 @@
 !Cargo.lock
 !Dockerfile
 !services.txt
-!resources/countries_flags/**/*.svg
+!resources/embedded_icons/**/*.svg
 !resources/DB/*.mmdb
 !resources/fonts/subset/*.ttf
 !resources/logos/raw/icon.png
