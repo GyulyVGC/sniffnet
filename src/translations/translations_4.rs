@@ -185,7 +185,7 @@ pub fn reading_from_pcap_translation(language: Language) -> &'static str {
                                  Seçilen dosyanın boş olmadığından emin misiniz?"
         }
         Language::UK => {
-                "Читання пакетів із файлу...\n\n\
+            "Читання пакетів із файлу...\n\n\
                                  Ви впевнені, що вибраний файл не порожній?"
         }
         _ => {
