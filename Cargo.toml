@@ -40,7 +40,7 @@ codegen-units = 1
 [dependencies]
 async-channel = "2.5.0"
 chrono = "0.4.44"
-clap = { version = "4.6.0", features = ["derive"] }
+clap = { version = "4.6.1", features = ["derive"] }
 confy = "2.0.0"
 ctrlc = { version = "3.5.2", features = ["termination"] }
 dns-lookup = "3.0.1"
