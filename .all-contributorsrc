@@ -894,6 +894,15 @@
       "contributions": [
         "ideas"
       ]
+    },
+    {
+      "login": "abiton-glenn",
+      "name": "Glenn Johansson",
+      "avatar_url": "https://avatars.githubusercontent.com/u/268374269?v=4",
+      "profile": "http://www.abitonventures.com",
+      "contributions": [
+        "financial"
+      ]
     }
   ],
   "contributorsPerLine": 7,
