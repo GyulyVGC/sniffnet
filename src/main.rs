@@ -70,6 +70,19 @@ pub fn main() -> iced::Result {
 
     print_cli_welcome_message();
 
+    // On Wayland with NVIDIA Optimus (Intel iGPU drives display, NVIDIA dGPU available),
+    // wgpu 27 defaults to the discrete NVIDIA adapter, which fails to configure a Wayland
+    // surface owned by the Intel-driven compositor → panic "Invalid surface".
+    // Force integrated GPU unless the user already set a preference via env vars.
+    #[cfg(target_os = "linux")]
+    if std::env::var("WAYLAND_DISPLAY").is_ok()
+        && std::env::var("WGPU_POWER_PREF").is_err()
+        && std::env::var("WGPU_BACKEND").is_err()
+        && std::path::Path::new("/proc/driver/nvidia").exists()
+    {
+        std::env::set_var("WGPU_POWER_PREF", "low");
+    }
+
     let size = conf.window.size();
     let position = Position::Specific(conf.window.position());
 
