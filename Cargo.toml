@@ -47,7 +47,7 @@ dns-lookup = "3.0.1"
 etherparse = "0.20.1"
 iced = { version = "0.14.0", features = ["tokio", "svg", "advanced", "lazy", "image"] }
 listeners = "0.5.1"
-maxminddb = "0.27.3"
+maxminddb = "0.28.1"
 pcap = "2.4.0"
 phf = "0.13.1"
 phf_shared = "0.13.1"
