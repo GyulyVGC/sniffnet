@@ -3,7 +3,7 @@ use std::net::IpAddr;
 
 use crate::countries::types::country::Country;
 use crate::networking::types::host::Host;
-use crate::report::types::search_parameters::SearchParameters;
+use crate::report::types::search_parameters::{SearchParameters, TrafficDirectionFilter};
 use crate::utils::types::case_insensitive_string::CaseInsensitiveString;
 use iced::widget::combo_box;
 use listeners::Process;
@@ -53,6 +53,14 @@ impl ComboboxDataStates {
             );
             data.programs.1 = false;
         }
+
+        if data.direction {
+            states.direction = combo_box::State::with_selection(
+                TrafficDirectionFilter::combobox_values(),
+                Some(&search.traffic_direction.to_string()),
+            );
+            data.direction = false;
+        }
     }
 }
 
@@ -62,6 +70,7 @@ pub struct ComboboxData {
     pub asns: (BTreeSet<CaseInsensitiveString>, bool),
     pub countries: (BTreeSet<CaseInsensitiveString>, bool),
     pub programs: (BTreeSet<CaseInsensitiveString>, bool),
+    pub direction: bool,
 }
 
 impl ComboboxData {
@@ -104,10 +113,22 @@ impl ComboboxData {
     }
 }
 
-#[derive(Default)]
 pub struct ComboboxStates {
     pub domains: combo_box::State<String>,
     pub asns: combo_box::State<String>,
     pub countries: combo_box::State<String>,
     pub programs: combo_box::State<String>,
+    pub direction: combo_box::State<String>,
+}
+
+impl Default for ComboboxStates {
+    fn default() -> Self {
+        Self {
+            domains: combo_box::State::default(),
+            asns: combo_box::State::default(),
+            countries: combo_box::State::default(),
+            programs: combo_box::State::default(),
+            direction: combo_box::State::new(TrafficDirectionFilter::combobox_values()),
+        }
+    }
 }

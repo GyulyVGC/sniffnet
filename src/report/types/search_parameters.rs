@@ -1,9 +1,63 @@
+use std::str::FromStr;
+
 use crate::countries::types::country::Country;
 use crate::networking::types::address_port_pair::AddressPortPair;
 use crate::networking::types::host::Host;
 use crate::networking::types::info_address_port_pair::InfoAddressPortPair;
 use crate::networking::types::program::Program;
 use crate::networking::types::service::Service;
+use crate::networking::types::traffic_direction::TrafficDirection;
+
+/// Values for filtering based on traffic direction
+#[derive(Clone, Debug, Default, Hash, Eq, PartialEq)]
+pub enum TrafficDirectionFilter {
+    #[default]
+    All,
+    Incoming,
+    Outgoing,
+}
+
+impl TrafficDirectionFilter {
+    pub fn combobox_values() -> Vec<String> {
+        vec![Self::Incoming.to_string(), Self::Outgoing.to_string()]
+    }
+
+    pub fn as_str(&self) -> &str {
+        match self {
+            Self::All => "",
+            Self::Incoming => "incoming",
+            Self::Outgoing => "outgoing",
+        }
+    }
+}
+
+impl From<TrafficDirection> for TrafficDirectionFilter {
+    fn from(direction: TrafficDirection) -> Self {
+        match direction {
+            TrafficDirection::Incoming => Self::Incoming,
+            TrafficDirection::Outgoing => Self::Outgoing,
+        }
+    }
+}
+
+impl std::fmt::Display for TrafficDirectionFilter {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{}", self.as_str())
+    }
+}
+
+impl FromStr for TrafficDirectionFilter {
+    type Err = ();
+
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        match s {
+            "" => Ok(Self::All),
+            "incoming" => Ok(Self::Incoming),
+            "outgoing" => Ok(Self::Outgoing),
+            _ => Err(()),
+        }
+    }
+}
 
 /// Used to express the search filters applied to GUI inspect page
 #[derive(Clone, Debug, Default, Hash, Eq, PartialEq)]
@@ -28,6 +82,8 @@ pub struct SearchParameters {
     pub as_name: String,
     /// Program name
     pub program: String,
+    /// Direction
+    pub traffic_direction: TrafficDirectionFilter,
     /// Whether to display only favorites
     pub only_favorites: bool,
     /// Whether to display only blacklisted
@@ -114,10 +170,11 @@ pub enum FilterInputType {
     Domain,
     AsName,
     Program,
+    TrafficDirection,
 }
 
 impl FilterInputType {
-    pub const ALL: [FilterInputType; 10] = [
+    pub const ALL: [FilterInputType; 11] = [
         Self::AddressSrc,
         Self::PortSrc,
         Self::AddressDst,
@@ -128,6 +185,7 @@ impl FilterInputType {
         Self::Domain,
         Self::AsName,
         Self::Program,
+        Self::TrafficDirection,
     ];
 
     pub fn matches_entry(
@@ -172,6 +230,7 @@ impl FilterInputType {
             FilterInputType::Domain => &search_params.domain,
             FilterInputType::AsName => &search_params.as_name,
             FilterInputType::Program => &search_params.program,
+            FilterInputType::TrafficDirection => search_params.traffic_direction.as_str(),
         }
     }
 
@@ -216,6 +275,9 @@ impl FilterInputType {
                 .name
                 .clone(),
             FilterInputType::Program => value.program.to_string(),
+            FilterInputType::TrafficDirection => {
+                TrafficDirectionFilter::from(value.traffic_direction).to_string()
+            }
         }
     }
 
@@ -232,6 +294,9 @@ impl FilterInputType {
             FilterInputType::Country => result.country = String::new(),
             FilterInputType::AsName => result.as_name = String::new(),
             FilterInputType::Program => result.program = String::new(),
+            FilterInputType::TrafficDirection => {
+                result.traffic_direction = TrafficDirectionFilter::default()
+            }
         }
         result
     }
@@ -254,6 +319,10 @@ impl FilterInputType {
             FilterInputType::Country => result.country = trimmed,
             FilterInputType::AsName => result.as_name = new_value,
             FilterInputType::Program => result.program = trimmed,
+            FilterInputType::TrafficDirection => {
+                result.traffic_direction =
+                    TrafficDirectionFilter::from_str(&trimmed).unwrap_or_default()
+            }
         }
         result
     }
