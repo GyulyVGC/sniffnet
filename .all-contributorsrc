@@ -912,6 +912,15 @@
       "contributions": [
         "translation"
       ]
+    },
+    {
+      "login": "HiProfession",
+      "name": "Christian",
+      "avatar_url": "https://avatars.githubusercontent.com/u/117604634?v=4",
+      "profile": "https://github.com/HiProfession",
+      "contributions": [
+        "translation"
+      ]
     }
   ],
   "contributorsPerLine": 7,
