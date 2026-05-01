@@ -16,7 +16,7 @@ where
     class: Theme::Class<'a>,
 }
 
-impl<Theme, Renderer> EllipsizedText<'_, Theme, Renderer>
+impl<'a, Theme, Renderer> EllipsizedText<'a, Theme, Renderer>
 where
     Theme: widget::text::Catalog,
     Renderer: text::Renderer,
@@ -77,6 +77,11 @@ where
 
     pub fn wrapping(mut self, wrapping: text::Wrapping) -> Self {
         self.format.wrapping = wrapping;
+        self
+    }
+
+    pub fn class(mut self, class: impl Into<Theme::Class<'a>>) -> Self {
+        self.class = class.into();
         self
     }
 }

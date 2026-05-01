@@ -8,6 +8,7 @@ use crate::countries::country_utils::get_flag_tooltip;
 use crate::gui::sniffer::Sniffer;
 use crate::gui::styles::rule::RuleType;
 use crate::gui::styles::style_constants::FONT_SIZE_FOOTER;
+use crate::gui::styles::text::TextType;
 use crate::gui::styles::types::style_type::StyleType;
 use crate::gui::types::favorite::{Favorite, FavoriteItem};
 use crate::gui::types::message::Message;
@@ -96,12 +97,28 @@ fn host_col<'a>(sniffer: &Sniffer) -> Column<'a, Message, StyleType> {
 
         thumbnail_hosts.push(thumbnail_host);
 
-        let flag = get_flag_tooltip(country, data_info_host, Language::default(), true, 1.0);
+        let is_dimmed = data_info_host.data_info.tot_data(DataRepr::Packets) == 0;
+        let opacity = if is_dimmed {
+            sniffer
+                .conf
+                .settings
+                .style
+                .get_extension()
+                .alpha_chart_badge
+        } else {
+            1.0
+        };
+
+        let flag = get_flag_tooltip(country, data_info_host, Language::default(), true, opacity);
         let host_row = Row::new()
             .align_y(Alignment::Center)
             .spacing(5)
             .push(flag)
-            .push(Text::new(text).size(FONT_SIZE_FOOTER));
+            .push(Text::new(text).size(FONT_SIZE_FOOTER).class(if is_dimmed {
+                TextType::Dimmed
+            } else {
+                TextType::Standard
+            }));
         host_col = host_col.push(host_row);
 
         if thumbnail_hosts.len() >= MAX_ENTRIES {
@@ -117,12 +134,20 @@ fn service_col<'a>(sniffer: &Sniffer) -> Column<'a, Message, StyleType> {
     let services = Favorite::Service.get_entries(sniffer);
     let n_entry = min(services.len(), MAX_ENTRIES);
     for fi in services.get(..n_entry).unwrap_or_default() {
-        let FavoriteItem::Service((service, _)) = fi else {
+        let FavoriteItem::Service((service, data_info)) = fi else {
             continue;
         };
 
+        let is_dimmed = data_info.tot_data(DataRepr::Packets) == 0;
+
         service_col = service_col.push(
-            Text::new(clip_text(&service.to_string(), MAX_CHARS_SERVICE)).size(FONT_SIZE_FOOTER),
+            Text::new(clip_text(&service.to_string(), MAX_CHARS_SERVICE))
+                .size(FONT_SIZE_FOOTER)
+                .class(if is_dimmed {
+                    TextType::Dimmed
+                } else {
+                    TextType::Standard
+                }),
         );
     }
     service_col

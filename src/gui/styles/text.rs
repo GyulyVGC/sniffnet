@@ -19,6 +19,7 @@ pub enum TextType {
     Danger,
     Sponsor,
     Welcome(f32),
+    Dimmed,
 }
 
 /// Returns a formatted caption followed by subtitle, new line, tab, and desc
@@ -77,6 +78,10 @@ pub fn highlight(style: &StyleType, element: TextType) -> Color {
         TextType::Outgoing => colors.outgoing,
         TextType::Danger | TextType::Sponsor => ext.red_alert_color,
         TextType::Standard => colors.text_body,
+        TextType::Dimmed => Color {
+            a: ext.alpha_chart_badge,
+            ..colors.text_body
+        },
     }
 }
 

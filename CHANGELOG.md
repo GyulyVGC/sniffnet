@@ -9,6 +9,7 @@ All Sniffnet releases with the relative changes are documented in this file.
   - French ([#1123](https://github.com/GyulyVGC/sniffnet/pull/1123))
   - Spanish ([#1140](https://github.com/GyulyVGC/sniffnet/pull/1140))
   - Indonesian ([#1145](https://github.com/GyulyVGC/sniffnet/pull/1145))
+- Fix unseen hosts and services not appearing dimmed in thumbnail mode (fixes [#1142](https://github.com/GyulyVGC/sniffnet/issues/1142))
 
 ## [1.5.0] - 2026-04-14
 - Show which apps and programs are generating network traffic ([#1056](https://github.com/GyulyVGC/sniffnet/pull/1056) — fixes [#170](https://github.com/GyulyVGC/sniffnet/issues/170))

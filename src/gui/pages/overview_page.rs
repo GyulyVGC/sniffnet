@@ -223,35 +223,39 @@ pub fn item_bar<'a>(
     data_info: &DataInfo,
     data_repr: DataRepr,
     first_entry_data_info: DataInfo,
-) -> Container<'a, Message, StyleType> {
-    Container::new(
-        Row::new()
-            .height(ICONS_SIZE_BIG)
-            .align_y(Alignment::Center)
-            .spacing(5)
-            .push(icon)
-            .push(
-                Column::new()
-                    .spacing(2)
-                    .push(
-                        Row::new()
-                            .push(
-                                EllipsizedText::new(item)
-                                    .wrapping(Wrapping::Glyph)
-                                    .width(Length::Fill),
-                            )
-                            .push(Text::new(
-                                data_repr.formatted_string(data_info.tot_data(data_repr)),
-                            )),
-                    )
-                    .push(get_bars(data_repr, &first_entry_data_info, data_info)),
-            ),
-    )
-    .class(if data_info.tot_data(DataRepr::Packets) == 0 {
-        ContainerType::DimmedText
-    } else {
-        ContainerType::Standard
-    })
+) -> Row<'a, Message, StyleType> {
+    let is_dimmed = data_info.tot_data(DataRepr::Packets) == 0;
+    Row::new()
+        .height(ICONS_SIZE_BIG)
+        .align_y(Alignment::Center)
+        .spacing(5)
+        .push(icon)
+        .push(
+            Column::new()
+                .spacing(2)
+                .push(
+                    Row::new()
+                        .push(
+                            EllipsizedText::new(item)
+                                .wrapping(Wrapping::Glyph)
+                                .width(Length::Fill)
+                                .class(if is_dimmed {
+                                    TextType::Dimmed
+                                } else {
+                                    TextType::Standard
+                                }),
+                        )
+                        .push(
+                            Text::new(data_repr.formatted_string(data_info.tot_data(data_repr)))
+                                .class(if is_dimmed {
+                                    TextType::Dimmed
+                                } else {
+                                    TextType::Standard
+                                }),
+                        ),
+                )
+                .push(get_bars(data_repr, &first_entry_data_info, data_info)),
+        )
 }
 
 fn col_info(sniffer: &Sniffer) -> Container<'_, Message, StyleType> {
