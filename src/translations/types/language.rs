@@ -132,6 +132,11 @@ impl Language {
                 | Language::TR
                 | Language::ZH
                 | Language::ZH_TW
+                | Language::DE
+                | Language::UK
+                | Language::FR
+                | Language::ID
+                | Language::ES
         )
     }
 }

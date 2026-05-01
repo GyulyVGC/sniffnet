@@ -2,6 +2,14 @@
 
 All Sniffnet releases with the relative changes are documented in this file.
 
+## [UNRELEASED]
+- Updated some of the existing translations to v1.5:
+  - Ukrainian ([#1039](https://github.com/GyulyVGC/sniffnet/pull/1039))
+  - German ([#1122](https://github.com/GyulyVGC/sniffnet/pull/1122))
+  - French ([#1123](https://github.com/GyulyVGC/sniffnet/pull/1123))
+  - Spanish ([#1140](https://github.com/GyulyVGC/sniffnet/pull/1140))
+  - Indonesian ([#1145](https://github.com/GyulyVGC/sniffnet/pull/1145))
+
 ## [1.5.0] - 2026-04-14
 - Show which apps and programs are generating network traffic ([#1056](https://github.com/GyulyVGC/sniffnet/pull/1056) — fixes [#170](https://github.com/GyulyVGC/sniffnet/issues/170))
 - Add charts to preview network adapters traffic in initial page ([#1026](https://github.com/GyulyVGC/sniffnet/pull/1026) — fixes [#556](https://github.com/GyulyVGC/sniffnet/issues/556))
