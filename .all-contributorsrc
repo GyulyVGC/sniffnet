@@ -903,6 +903,15 @@
       "contributions": [
         "financial"
       ]
+    },
+    {
+      "login": "DmytroGaiduk",
+      "name": "Dmytro Gaiduk",
+      "avatar_url": "https://avatars.githubusercontent.com/u/8593269?v=4",
+      "profile": "https://github.com/DmytroGaiduk",
+      "contributions": [
+        "translation"
+      ]
     }
   ],
   "contributorsPerLine": 7,
