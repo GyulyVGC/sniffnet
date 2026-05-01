@@ -574,7 +574,7 @@ pub fn only_show_favorites_translation(language: Language) -> &'static str {
         Language::RU => "Показывать только избранные",
         Language::SV => "Visa endast favoriter",
         Language::FI => "Näytä vain suosikit",
-        Language::DE => "Zeige nur die Favoriten",
+        Language::DE => "Zeige nur Favoriten",
         Language::TR => "Sadece favorileri göster",
         // Language::FA => "فقط پسندیده ها را نمایش بده",
         Language::ES => "Mostrar solo los favoritos",
