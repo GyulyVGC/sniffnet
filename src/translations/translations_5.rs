@@ -12,6 +12,7 @@ pub fn filter_traffic_translation(language: Language) -> String {
         Language::TR => "Trafiği filtrele",
         Language::JA => "トラフィックをフィルタリング",
         Language::RO => "Filtrează traficul",
+        Language::UK => "Фільтр трафіку",
         _ => "Filter traffic",
     }
     .to_string()
@@ -28,6 +29,7 @@ pub fn traffic_source_translation(language: Language) -> &'static str {
         Language::TR => "Trafik kaynağı",
         Language::JA => "トラフィック元",
         Language::RO => "Sursa traficului",
+        Language::UK => "Джерело трафіку",
         _ => "Traffic source",
     }
 }
@@ -41,6 +43,7 @@ pub fn remote_notifications_translation(language: Language) -> &'static str {
         Language::TR => "Uzak bildirimler",
         Language::JA => "リモート通知",
         Language::RO => "Notificări la distanță",
+        Language::UK => "Віддалені сповіщення",
         _ => "Remote notifications",
     }
 }
@@ -54,6 +57,7 @@ pub fn ip_blacklist_translation(language: Language) -> &'static str {
         Language::TR => "IP kara listesi",
         Language::JA => "IP ブラックリスト",
         Language::RO => "Blacklist IP-uri",
+        Language::UK => "Чорний список IP-адрес",
         _ => "IP blacklist",
     }
 }
@@ -67,6 +71,7 @@ pub fn blacklisted_transmitted_translation(language: Language) -> &'static str {
         Language::TR => "Kara listedeki bir IP ile veri alışverişi yapıldı",
         Language::JA => "ブラックリストに登録されたIPから新しいデータが交換されました",
         Language::RO => "Noi date schimbate de la un IP în blacklist",
+        Language::UK => "Отримано нові дані з IP-адреси з чорного списку",
         _ => "New data exchanged from a blacklisted IP",
     }
 }
@@ -80,6 +85,7 @@ pub fn only_show_blacklisted_translation(language: Language) -> &'static str {
         Language::TR => "Sadece kara listedekileri göster",
         Language::JA => "ブラックリストのみ表示",
         Language::RO => "Afișează doar blacklist",
+        Language::UK => "Показувати лише заблоковані",
         _ => "Only show blacklisted",
     }
 }
@@ -91,6 +97,7 @@ pub fn program_translation(language: Language) -> &'static str {
         Language::ZH => "程序",
         Language::ZH_TW => "程式",
         Language::JA => "プログラム",
+        Language::UK => "Програма",
         _ => "Program",
     }
 }
@@ -104,6 +111,7 @@ pub fn no_favorites_saved_translation(language: Language) -> &'static str {
         Language::TR => "Henüz kaydedilmiş favori yok",
         Language::JA => "お気に入りはまだ保存されていません",
         Language::RO => "Niciun favorit salvat încă",
+        Language::UK => "Ще немає збережених улюблених",
         _ => "No favorites saved yet",
     }
 }
