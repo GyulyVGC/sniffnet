@@ -590,6 +590,7 @@ impl Sniffer {
         combobox_data.asns.1 = self.search.as_name != parameters.as_name;
         combobox_data.domains.1 = self.search.domain != parameters.domain;
         combobox_data.programs.1 = self.search.program != parameters.program;
+        combobox_data.direction = self.search.traffic_direction != parameters.traffic_direction;
         self.combobox_data_states.update_states(&parameters);
 
         self.page_number = 1;

@@ -34,7 +34,9 @@ use crate::translations::translations_2::{
     country_translation, domain_translation, no_search_results_translation,
     only_show_favorites_translation, showing_results_translation,
 };
-use crate::translations::translations_5::{only_show_blacklisted_translation, program_translation};
+use crate::translations::translations_5::{
+    only_show_blacklisted_translation, program_translation, traffic_direction_translation,
+};
 use crate::utils::types::icon::Icon;
 use crate::{Language, RunningPage, Sniffer, StyleType};
 
@@ -330,6 +332,13 @@ fn additional_filters_row<'a>(
     )
     .width(160);
 
+    let combobox_direction = filter_combobox(
+        FilterInputType::TrafficDirection,
+        &combobox_states.direction,
+        search_params.clone(),
+    )
+    .width(100);
+
     let container_country = Row::new()
         .spacing(5)
         .align_y(Alignment::Center)
@@ -353,6 +362,15 @@ fn additional_filters_row<'a>(
         .align_y(Alignment::Center)
         .push(Text::new(format!("{}:", program_translation(language))))
         .push(combobox_program);
+
+    let container_direction = Row::new()
+        .spacing(5)
+        .align_y(Alignment::Center)
+        .push(Text::new(format!(
+            "{}: ",
+            traffic_direction_translation(language)
+        )))
+        .push(combobox_direction);
 
     let favorites_only = toggler_filter(
         search_params.only_favorites,
@@ -384,6 +402,7 @@ fn additional_filters_row<'a>(
             .spacing(25)
             .push(blacklisted_only)
             .push(favorites_only)
+            .push(container_direction)
             .push(container_country)
             .push(container_domain)
             .push(container_as_name)
