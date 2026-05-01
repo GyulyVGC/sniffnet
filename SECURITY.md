@@ -7,6 +7,9 @@ as demonstrated by [security audits](https://sniffnet.net/news/security-audit/) 
 
 But no matter how much effort we put into securing the app, there can still be **vulnerabilities** present.
 
+For how incidents are handled, see [`INCIDENT_RESPONSE.md`](https://github.com/GyulyVGC/sniffnet/blob/main/INCIDENT_RESPONSE.md).<br>
+For the project's threat model, see [`THREAT_MODEL.md`](https://github.com/GyulyVGC/sniffnet/blob/main/THREAT_MODEL.md).
+
 ***
 
 If you discover a vulnerability, we would like to know about it so we can take steps to address it as quickly as possible.

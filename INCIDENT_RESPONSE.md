@@ -1,7 +1,9 @@
 # Incident Response Plan
 
-This document describes how Sniffnet handles security incidents. <br>
-For how to *report* a vulnerability, see [`SECURITY.md`](https://github.com/GyulyVGC/sniffnet/blob/main/SECURITY.md).
+This document describes how Sniffnet handles security incidents.
+
+For how to report a vulnerability, see [`SECURITY.md`](https://github.com/GyulyVGC/sniffnet/blob/main/SECURITY.md).<br>
+For the project's threat model, see [`THREAT_MODEL.md`](https://github.com/GyulyVGC/sniffnet/blob/main/THREAT_MODEL.md).
 
 ## Scope
 
