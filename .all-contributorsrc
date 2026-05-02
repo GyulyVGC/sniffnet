@@ -930,6 +930,15 @@
       "contributions": [
         "translation"
       ]
+    },
+    {
+      "login": "Elyrial",
+      "name": "Elyrial",
+      "avatar_url": "https://avatars.githubusercontent.com/u/150860379?v=4",
+      "profile": "https://github.com/Elyrial",
+      "contributions": [
+        "translation"
+      ]
     }
   ],
   "contributorsPerLine": 7,
