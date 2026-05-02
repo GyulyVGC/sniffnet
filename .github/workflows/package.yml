@@ -210,8 +210,9 @@ jobs:
       - name: Repackage for AppImage
         shell: bash
         run: |
+          grep -m1 "^version" Cargo.toml | cut -d'"' -f2 > VERSION
           cd pkg2appimage
-          NO_GLIBC_VERSION=1 VERSION=$(grep -m1 "^version" ../Cargo.toml | cut -d'"' -f2) ARCH=${{ matrix.appimgarch }} FUNCTIONS_SH=$(pwd)/functions.sh ./pkg2appimage ../resources/packaging/linux/AppImage/sniffnet.yml
+          NO_GLIBC_VERSION=1 ARCH=${{ matrix.appimgarch }} FUNCTIONS_SH=$(pwd)/functions.sh ./pkg2appimage ../resources/packaging/linux/AppImage/sniffnet.yml
           mkdir /out
           mv out/*.AppImage /out/Sniffnet_LinuxAppImage_${{ matrix.arch }}.AppImage
 
