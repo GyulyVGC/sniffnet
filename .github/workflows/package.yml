@@ -206,7 +206,7 @@ jobs:
         run: |
           VERSION=$(grep -m1 "^version" Cargo.toml | cut -d'"' -f2)
           mv /target/Sniffnet_LinuxDEB_${{ matrix.arch }}.deb /target/sniffnet_${VERSION}_${{ matrix.arch }}.deb
-          sed -i -e 's/REPLACE_TAG/sniffnet_${VERSION}_${{ matrix.arch }}.deb/g' resources/packaging/linux/AppImage/sniffnet.yml
+          sed -i -e "s/REPLACE_TAG/sniffnet_${VERSION}_${{ matrix.arch }}.deb/g" resources/packaging/linux/AppImage/sniffnet.yml
           sed -i -e 's/binary-${arch}/binary-${{ matrix.arch }}/g' pkg2appimage/functions.sh
 
       - name: Repackage for AppImage
