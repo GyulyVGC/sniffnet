@@ -211,7 +211,7 @@ jobs:
         shell: bash
         run: |
           cd pkg2appimage
-          ARCH=${{ matrix.appimgarch }} FUNCTIONS_SH=$(pwd)/functions.sh ./pkg2appimage ../resources/packaging/linux/AppImage/sniffnet.yml
+          NO_GLIBC_VERSION=1 VERSION=$(grep -m1 "^version" ../Cargo.toml | cut -d'"' -f2) ARCH=${{ matrix.appimgarch }} FUNCTIONS_SH=$(pwd)/functions.sh ./pkg2appimage ../resources/packaging/linux/AppImage/sniffnet.yml
           mkdir /out
           mv out/*.AppImage /out/Sniffnet_LinuxAppImage_${{ matrix.arch }}.AppImage
 
