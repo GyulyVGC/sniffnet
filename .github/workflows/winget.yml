@@ -1,0 +1,26 @@
+name: Publish to winget
+
+permissions:
+  contents: read
+
+on:
+  release:
+    types: [released]
+  workflow_dispatch:
+    inputs:
+      version:
+        description: "Release tag to publish (e.g. v1.5.1). Leave empty to use the latest published release."
+        required: false
+        type: string
+
+jobs:
+  winget:
+    runs-on: windows-latest
+    steps:
+      - name: Submit manifest to winget-pkgs
+        uses: vedantmgoyal9/winget-releaser@main
+        with:
+          identifier: GyulyVGC.Sniffnet
+          installers-regex: 'Sniffnet_Windows_(x64|x86|arm64)\.msi$'
+          version: ${{ inputs.version }}
+          token: ${{ secrets.WINGET_TOKEN }}
