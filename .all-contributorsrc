@@ -957,6 +957,15 @@
       "contributions": [
         "financial"
       ]
+    },
+    {
+      "login": "TheMasterOfDisasters",
+      "name": "TheMasterOfDisasters",
+      "avatar_url": "https://avatars.githubusercontent.com/u/43640311?v=4",
+      "profile": "https://github.com/TheMasterOfDisasters",
+      "contributions": [
+        "code"
+      ]
     }
   ],
   "contributorsPerLine": 7,
