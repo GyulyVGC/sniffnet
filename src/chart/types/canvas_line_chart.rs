@@ -3,11 +3,13 @@
 use std::cmp::min;
 use std::ops::Range;
 
+use iced::advanced::graphics::geometry;
+use iced::advanced::widget::{Tree, tree};
+use iced::advanced::{Clipboard, Layout, Shell, Widget, layout, renderer};
 use iced::alignment::Vertical;
 use iced::widget::canvas::{self, Frame, Stroke, Text};
 use iced::widget::text::Alignment;
-use iced::widget::{Canvas, Column, Space};
-use iced::{Color, Element, Length, Point, Rectangle, Renderer, Size, mouse};
+use iced::{Color, Element, Event, Length, Point, Rectangle, Size, mouse, window};
 
 use crate::StyleType;
 use crate::chart::types::chart_series::sample_spline;
@@ -31,26 +33,38 @@ pub struct CanvasLineChartState {
 
 pub struct CanvasLineChart<'a> {
     chart: &'a TrafficChart,
+    width: Length,
+    height: Length,
 }
 
 impl<'a> CanvasLineChart<'a> {
     fn new(chart: &'a TrafficChart) -> Self {
-        Self { chart }
+        Self {
+            chart,
+            width: Length::Fill,
+            height: if chart.thumbnail {
+                Length::Fixed(45.0)
+            } else if chart.is_live_capture {
+                Length::Fixed(215.0)
+            } else {
+                Length::Fixed(238.0)
+            },
+        }
     }
 
     fn chart_area(&self, bounds: Rectangle) -> Rectangle {
         if self.chart.thumbnail {
             return Rectangle {
-                x: 0.0,
-                y: 5.0,
+                x: bounds.x,
+                y: bounds.y + 5.0,
                 width: bounds.width,
                 height: (bounds.height - 5.0).max(0.0),
             };
         }
 
         Rectangle {
-            x: LEFT_LABEL_AREA,
-            y: TOP_MARGIN,
+            x: bounds.x + LEFT_LABEL_AREA,
+            y: bounds.y + TOP_MARGIN,
             width: (bounds.width - LEFT_LABEL_AREA - RIGHT_MARGIN).max(0.0),
             height: (bounds.height - TOP_MARGIN - BOTTOM_LABEL_AREA).max(0.0),
         }
@@ -170,9 +184,9 @@ impl<'a> CanvasLineChart<'a> {
             .find(|bucket| (bucket.0 - hovered_tick).abs() < f32::EPSILON)
     }
 
-    fn draw_grid(
+    fn draw_grid<Renderer: geometry::Renderer>(
         &self,
-        frame: &mut Frame,
+        frame: &mut Frame<Renderer>,
         area: Rectangle,
         x_range: Range<f32>,
         y_range: Range<f32>,
@@ -265,9 +279,9 @@ impl<'a> CanvasLineChart<'a> {
         }
     }
 
-    fn draw_series(
+    fn draw_series<Renderer: geometry::Renderer>(
         &self,
-        frame: &mut Frame,
+        frame: &mut Frame<Renderer>,
         area: Rectangle,
         x_range: Range<f32>,
         y_range: Range<f32>,
@@ -317,9 +331,9 @@ impl<'a> CanvasLineChart<'a> {
         );
     }
 
-    fn draw_hover(
+    fn draw_hover<Renderer: geometry::Renderer>(
         &self,
-        frame: &mut Frame,
+        frame: &mut Frame<Renderer>,
         area: Rectangle,
         x_range: Range<f32>,
         y_range: Range<f32>,
@@ -413,7 +427,11 @@ impl<'a> CanvasLineChart<'a> {
         });
     }
 
-    fn draw_legend(&self, frame: &mut Frame, bounds: Rectangle) {
+    fn draw_legend<Renderer: geometry::Renderer>(
+        &self,
+        frame: &mut Frame<Renderer>,
+        bounds: Rectangle,
+    ) {
         if self.chart.thumbnail {
             return;
         }
@@ -429,8 +447,8 @@ impl<'a> CanvasLineChart<'a> {
                 style.get_palette().outgoing,
             ),
         ];
-        let x = bounds.width - 155.0;
-        let mut y = 15.0;
+        let x = bounds.x + bounds.width - 155.0;
+        let mut y = bounds.y + 15.0;
 
         for (label, color) in labels {
             let swatch = canvas::Path::rectangle(Point::new(x, y + 3.0), Size::new(25.0, 10.0));
@@ -450,60 +468,84 @@ impl<'a> CanvasLineChart<'a> {
     }
 }
 
-impl<Message> canvas::Program<Message, StyleType> for CanvasLineChart<'_> {
-    type State = CanvasLineChartState;
+impl<Message, Renderer> Widget<Message, StyleType, Renderer> for CanvasLineChart<'_>
+where
+    Renderer: renderer::Renderer + geometry::Renderer,
+{
+    fn tag(&self) -> tree::Tag {
+        tree::Tag::of::<CanvasLineChartState>()
+    }
+
+    fn state(&self) -> tree::State {
+        tree::State::new(CanvasLineChartState::default())
+    }
+
+    fn size(&self) -> Size<Length> {
+        Size {
+            width: self.width,
+            height: self.height,
+        }
+    }
+
+    fn layout(
+        &mut self,
+        _tree: &mut Tree,
+        _renderer: &Renderer,
+        limits: &layout::Limits,
+    ) -> layout::Node {
+        layout::atomic(limits, self.width, self.height)
+    }
 
     fn update(
-        &self,
-        state: &mut Self::State,
-        event: &canvas::Event,
-        bounds: Rectangle,
+        &mut self,
+        tree: &mut Tree,
+        event: &Event,
+        layout: Layout<'_>,
         cursor: mouse::Cursor,
-    ) -> Option<iced::widget::Action<Message>> {
+        _renderer: &Renderer,
+        _clipboard: &mut dyn Clipboard,
+        shell: &mut Shell<'_, Message>,
+        _viewport: &Rectangle,
+    ) {
+        let bounds = layout.bounds();
+        let state = tree.state.downcast_mut::<CanvasLineChartState>();
         match event {
-            canvas::Event::Mouse(mouse::Event::CursorMoved { .. })
-            | canvas::Event::Mouse(mouse::Event::CursorEntered)
-            | canvas::Event::Mouse(mouse::Event::CursorLeft) => {
-                let area = self.chart_area(Rectangle {
-                    x: 0.0,
-                    y: 0.0,
-                    width: bounds.width,
-                    height: bounds.height,
-                });
+            Event::Mouse(mouse::Event::CursorMoved { .. })
+            | Event::Mouse(mouse::Event::CursorEntered)
+            | Event::Mouse(mouse::Event::CursorLeft)
+            | Event::Window(window::Event::RedrawRequested(_)) => {
+                let area = self.chart_area(bounds);
                 let hovered_tick = cursor
-                    .position_in(bounds)
+                    .position_over(bounds)
                     .and_then(|position| self.tick_at_x(area, self.x_axis_range(), position.x));
                 if state.hovered_tick != hovered_tick {
                     state.hovered_tick = hovered_tick;
-                    Some(iced::widget::Action::request_redraw())
-                } else {
-                    None
+                    shell.request_redraw();
                 }
             }
-            _ => None,
+            _ => {}
         }
     }
 
     fn draw(
         &self,
-        state: &Self::State,
-        renderer: &Renderer,
+        tree: &Tree,
+        renderer: &mut Renderer,
         _theme: &StyleType,
-        bounds: Rectangle,
+        _style: &renderer::Style,
+        layout: Layout<'_>,
         _cursor: mouse::Cursor,
-    ) -> Vec<canvas::Geometry> {
-        let mut frame = Frame::new(renderer, bounds.size());
+        viewport: &Rectangle,
+    ) {
+        let state = tree.state.downcast_ref::<CanvasLineChartState>();
+        let bounds = layout.bounds();
+        let mut frame = Frame::with_bounds(renderer, *viewport);
         if self.chart.ticks < 1 {
-            return vec![frame.into_geometry()];
+            renderer.draw_geometry(frame.into_geometry());
+            return;
         }
 
-        let local_bounds = Rectangle {
-            x: 0.0,
-            y: 0.0,
-            width: bounds.width,
-            height: bounds.height,
-        };
-        let area = self.chart_area(local_bounds);
+        let area = self.chart_area(bounds);
         let x_range = self.x_axis_range();
         let y_range = self.y_axis_range();
 
@@ -525,17 +567,20 @@ impl<Message> canvas::Program<Message, StyleType> for CanvasLineChart<'_> {
         if let Some(hovered_tick) = state.hovered_tick {
             self.draw_hover(&mut frame, area, x_range, y_range, hovered_tick);
         }
-        self.draw_legend(&mut frame, local_bounds);
+        self.draw_legend(&mut frame, bounds);
 
-        vec![frame.into_geometry()]
+        renderer.draw_geometry(frame.into_geometry());
     }
 
     fn mouse_interaction(
         &self,
-        _state: &Self::State,
-        bounds: Rectangle,
+        _tree: &Tree,
+        layout: Layout<'_>,
         cursor: mouse::Cursor,
+        _viewport: &Rectangle,
+        _renderer: &Renderer,
     ) -> mouse::Interaction {
+        let bounds = layout.bounds();
         if cursor.position_in(bounds).is_some() {
             mouse::Interaction::Crosshair
         } else {
@@ -545,17 +590,15 @@ impl<Message> canvas::Program<Message, StyleType> for CanvasLineChart<'_> {
 }
 
 pub fn canvas_line_chart(chart: &TrafficChart) -> Element<'_, Message, StyleType> {
-    let canvas = Canvas::new(CanvasLineChart::new(chart))
-        .width(Length::Fill)
-        .height(Length::Fill);
+    CanvasLineChart::new(chart).into()
+}
 
-    Column::new()
-        .height(Length::Fill)
-        .push(canvas)
-        .push(if chart.is_live_capture || chart.thumbnail {
-            None
-        } else {
-            Some(Space::new().height(23))
-        })
-        .into()
+impl<'a, Message, Renderer> From<CanvasLineChart<'a>> for Element<'a, Message, StyleType, Renderer>
+where
+    Message: 'a,
+    Renderer: 'a + renderer::Renderer + geometry::Renderer,
+{
+    fn from(chart: CanvasLineChart<'a>) -> Self {
+        Element::new(chart)
+    }
 }
