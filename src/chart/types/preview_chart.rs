@@ -1,10 +1,10 @@
 use std::ops::Range;
 
 use iced::Element;
-use iced::widget::Column;
 use plotters::prelude::*;
-use plotters_iced2::{Chart, ChartBuilder, ChartWidget, DrawingBackend};
+use plotters_iced2::{Chart, ChartBuilder, DrawingBackend};
 
+use crate::chart::types::canvas_preview_chart::canvas_preview_chart;
 use crate::chart::types::chart_series::{ChartSeries, sample_spline};
 use crate::gui::styles::style_constants::CHARTS_LINE_BORDER;
 use crate::gui::styles::types::palette::to_rgb_color;
@@ -53,7 +53,7 @@ impl PreviewChart {
     }
 
     pub fn view(&self) -> Element<'_, Message, StyleType> {
-        Column::new().height(45).push(ChartWidget::new(self)).into()
+        canvas_preview_chart(self)
     }
 
     pub fn change_style(&mut self, style: StyleType) {
