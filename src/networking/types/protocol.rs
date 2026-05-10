@@ -5,13 +5,13 @@
 #[allow(clippy::upper_case_acronyms)]
 pub enum Protocol {
     /// Transmission Control Protocol
-    TCP,
+    TCP = 0,
     /// User Datagram Protocol
-    UDP,
+    UDP = 1,
     /// Internet Control Message Protocol
-    ICMP,
+    ICMP = 2,
     /// Address Resolution Protocol
-    ARP,
+    ARP = 3,
 }
 
 impl std::fmt::Display for Protocol {

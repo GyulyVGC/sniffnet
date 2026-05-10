@@ -14,8 +14,9 @@ const SERVICES_LIST_PATH: &str = "./services.txt";
 #[derive(Clone, Copy, Debug, Eq, Hash, PartialEq)]
 #[allow(clippy::upper_case_acronyms)]
 enum BuildProtocol {
-    TCP,
-    UDP,
+    // Keep these discriminants in sync with `networking::types::protocol::Protocol`.
+    TCP = 0,
+    UDP = 1,
 }
 
 impl std::fmt::Display for BuildProtocol {
