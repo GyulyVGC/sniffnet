@@ -309,21 +309,6 @@ fn format_packet_count(value: u128) -> String {
     }
 }
 
-#[cfg(test)]
-mod tests {
-    use super::format_packet_count;
-
-    #[test]
-    fn test_format_packet_count() {
-        assert_eq!(format_packet_count(0), "0");
-        assert_eq!(format_packet_count(999), "999");
-        assert_eq!(format_packet_count(1_500), "1.5K");
-        assert_eq!(format_packet_count(999_999), "999K");
-        assert_eq!(format_packet_count(1_200_000), "1.2M");
-        assert_eq!(format_packet_count(123_000_000_000), "123G");
-    }
-}
-
 pub(crate) fn get_addresses_row(
     link_type: MyLinkType,
     addresses: &Vec<Address>,
@@ -508,4 +493,19 @@ fn get_export_pcap_group_maybe<'a>(
             .width(Length::Fill)
             .class(ContainerType::BorderedRound),
     )
+}
+
+#[cfg(test)]
+mod tests {
+    use super::format_packet_count;
+
+    #[test]
+    fn test_format_packet_count() {
+        assert_eq!(format_packet_count(0), "0");
+        assert_eq!(format_packet_count(999), "999");
+        assert_eq!(format_packet_count(1_500), "1.5K");
+        assert_eq!(format_packet_count(999_999), "999K");
+        assert_eq!(format_packet_count(1_200_000), "1.2M");
+        assert_eq!(format_packet_count(123_000_000_000), "123G");
+    }
 }

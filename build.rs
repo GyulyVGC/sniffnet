@@ -12,6 +12,7 @@ const WINDOWS_ICON_PATH: &str = "./resources/packaging/windows/graphics/sniffnet
 const SERVICES_LIST_PATH: &str = "./services.txt";
 
 #[derive(Clone, Copy, Debug, Eq, Hash, PartialEq)]
+#[allow(clippy::upper_case_acronyms)]
 enum BuildProtocol {
     TCP,
     UDP,
