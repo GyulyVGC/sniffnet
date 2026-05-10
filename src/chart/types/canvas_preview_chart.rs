@@ -1,4 +1,4 @@
-//! Renderer-compatible Canvas-style preview chart for the initial page adapters.
+//! Renderer-compatible preview chart for the initial page adapters.
 
 use std::ops::Range;
 
@@ -14,7 +14,7 @@ use crate::chart::types::preview_chart::PreviewChart;
 use crate::gui::styles::style_constants::CHARTS_LINE_BORDER;
 use crate::gui::types::message::Message;
 
-pub struct CanvasPreviewChart<'a> {
+struct CanvasPreviewChart<'a> {
     chart: &'a PreviewChart,
 }
 
@@ -67,6 +67,7 @@ impl<'a> CanvasPreviewChart<'a> {
         frame: &mut Frame<Renderer>,
         bounds: Rectangle,
     ) {
+        // Keep tiny-skia damage tracking scoped to the whole chart widget.
         frame.fill_rectangle(
             bounds.position(),
             bounds.size(),

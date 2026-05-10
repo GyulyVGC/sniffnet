@@ -295,15 +295,8 @@ fn col_info(sniffer: &Sniffer) -> Container<'_, Message, StyleType> {
 }
 
 fn container_chart(sniffer: &Sniffer) -> Container<'_, Message, StyleType> {
-    const USE_CANVAS_LINE_CHART_PROTOTYPE: bool = true;
-
     let Settings { language, .. } = sniffer.conf.settings;
     let traffic_chart = &sniffer.traffic_chart;
-    let chart: Element<'_, Message, StyleType> = if USE_CANVAS_LINE_CHART_PROTOTYPE {
-        canvas_line_chart(traffic_chart)
-    } else {
-        traffic_chart.view()
-    };
 
     Container::new(
         Column::new()
@@ -315,7 +308,7 @@ fn container_chart(sniffer: &Sniffer) -> Container<'_, Message, StyleType> {
                         .size(FONT_SIZE_TITLE),
                 ),
             )
-            .push(chart),
+            .push(canvas_line_chart(traffic_chart)),
     )
     .width(Fill)
     .align_x(Alignment::Center)

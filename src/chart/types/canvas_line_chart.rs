@@ -1,4 +1,4 @@
-//! Experimental Iced Canvas replacement for the Overview traffic line chart.
+//! Renderer-compatible line chart for the Overview traffic chart.
 
 use std::cmp::min;
 use std::ops::Range;
@@ -27,11 +27,11 @@ const TOP_MARGIN: f32 = 6.0;
 const BOTTOM_LABEL_AREA: f32 = 40.0;
 
 #[derive(Default)]
-pub struct CanvasLineChartState {
+struct CanvasLineChartState {
     hovered_tick: Option<f32>,
 }
 
-pub struct CanvasLineChart<'a> {
+struct CanvasLineChart<'a> {
     chart: &'a TrafficChart,
     width: Length,
     height: Length,
@@ -466,6 +466,22 @@ impl<'a> CanvasLineChart<'a> {
             y += 20.0;
         }
     }
+
+    fn draw_damage_bounds<Renderer: geometry::Renderer>(
+        &self,
+        frame: &mut Frame<Renderer>,
+        bounds: Rectangle,
+    ) {
+        // Keep tiny-skia damage tracking scoped to the whole chart widget.
+        frame.fill_rectangle(
+            bounds.position(),
+            bounds.size(),
+            Color {
+                a: 0.0,
+                ..self.chart.style.get_palette().primary
+            },
+        );
+    }
 }
 
 impl<Message, Renderer> Widget<Message, StyleType, Renderer> for CanvasLineChart<'_>
@@ -540,6 +556,7 @@ where
         let state = tree.state.downcast_ref::<CanvasLineChartState>();
         let bounds = layout.bounds();
         let mut frame = Frame::with_bounds(renderer, *viewport);
+        self.draw_damage_bounds(&mut frame, bounds);
         if self.chart.ticks < 1 {
             renderer.draw_geometry(frame.into_geometry());
             return;
