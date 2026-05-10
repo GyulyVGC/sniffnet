@@ -9,7 +9,8 @@ use iced::advanced::{Clipboard, Layout, Shell, Widget, layout, renderer};
 use iced::alignment::Vertical;
 use iced::widget::canvas::{self, Frame, Stroke, Text};
 use iced::widget::text::Alignment;
-use iced::{Color, Element, Event, Length, Point, Rectangle, Size, mouse, window};
+use iced::widget::{Column, Row, Space, Text as WidgetText};
+use iced::{Color, Element, Event, Length, Padding, Point, Rectangle, Size, mouse, window};
 
 use crate::StyleType;
 use crate::chart::types::chart_series::sample_spline;
@@ -19,7 +20,7 @@ use crate::gui::types::message::Message;
 use crate::networking::types::data_representation::DataRepr;
 use crate::networking::types::traffic_direction::TrafficDirection;
 use crate::translations::translations::{incoming_translation, outgoing_translation};
-use crate::utils::formatted_strings::get_formatted_num_seconds;
+use crate::utils::formatted_strings::{get_formatted_num_seconds, get_formatted_timestamp};
 
 const LEFT_LABEL_AREA: f32 = 55.0;
 const RIGHT_MARGIN: f32 = 25.0;
@@ -607,7 +608,30 @@ where
 }
 
 pub fn canvas_line_chart(chart: &TrafficChart) -> Element<'_, Message, StyleType> {
-    CanvasLineChart::new(chart).into()
+    let x_labels = if chart.is_live_capture || chart.thumbnail {
+        None
+    } else {
+        let ts_1 = chart.first_packet_timestamp;
+        let mut ts_2 = ts_1;
+        ts_2.add_secs(i64::from(chart.ticks) - 1);
+        Some(
+            Row::new()
+                .padding(Padding::new(8.0).bottom(15).left(55).right(25))
+                .width(Length::Fill)
+                .push(if chart.no_more_packets {
+                    Some(WidgetText::new(get_formatted_timestamp(ts_1)).size(12.5))
+                } else {
+                    None
+                })
+                .push(Space::new().width(Length::Fill))
+                .push(WidgetText::new(get_formatted_timestamp(ts_2)).size(12.5)),
+        )
+    };
+
+    Column::new()
+        .push(CanvasLineChart::new(chart))
+        .push(x_labels)
+        .into()
 }
 
 impl<'a, Message, Renderer> From<CanvasLineChart<'a>> for Element<'a, Message, StyleType, Renderer>

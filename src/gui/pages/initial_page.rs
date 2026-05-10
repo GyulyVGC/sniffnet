@@ -257,9 +257,9 @@ fn traffic_summary<'a>(
                     .align_y(Alignment::Center)
                     .spacing(5)
                     .push(
-                        Text::new("↑")
+                        Text::new("OUT")
                             .class(TextType::Outgoing)
-                            .size(FONT_SIZE_SUBTITLE),
+                            .size(FONT_SIZE_FOOTER),
                     )
                     .push(
                         Text::new(outgoing_rate)
@@ -272,9 +272,9 @@ fn traffic_summary<'a>(
                     .align_y(Alignment::Center)
                     .spacing(5)
                     .push(
-                        Text::new("↓")
+                        Text::new("IN")
                             .class(TextType::Incoming)
-                            .size(FONT_SIZE_SUBTITLE),
+                            .size(FONT_SIZE_FOOTER),
                     )
                     .push(
                         Text::new(incoming_rate)
@@ -287,11 +287,40 @@ fn traffic_summary<'a>(
 }
 
 fn format_packet_count(value: u128) -> String {
-    match value {
-        0..=999 => value.to_string(),
-        1_000..=999_499 => format!("{:.1}k", value as f32 / 1_000.0),
-        999_500..=999_999_999 => format!("{}k", value / 1_000),
-        _ => format!("{:.1}M", value as f32 / 1_000_000.0),
+    const UNITS: [&str; 6] = ["", "K", "M", "G", "T", "P"];
+
+    let mut unit_idx = 0;
+    let mut divisor = 1_u128;
+    while value / divisor >= 1_000 && unit_idx < UNITS.len() - 1 {
+        unit_idx += 1;
+        divisor *= 1_000;
+    }
+
+    if unit_idx == 0 {
+        value.to_string()
+    } else {
+        let whole = value / divisor;
+        let decimal = (value % divisor) * 10 / divisor;
+        if whole >= 100 || decimal == 0 {
+            format!("{whole}{}", UNITS[unit_idx])
+        } else {
+            format!("{whole}.{decimal}{}", UNITS[unit_idx])
+        }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::format_packet_count;
+
+    #[test]
+    fn test_format_packet_count() {
+        assert_eq!(format_packet_count(0), "0");
+        assert_eq!(format_packet_count(999), "999");
+        assert_eq!(format_packet_count(1_500), "1.5K");
+        assert_eq!(format_packet_count(999_999), "999K");
+        assert_eq!(format_packet_count(1_200_000), "1.2M");
+        assert_eq!(format_packet_count(123_000_000_000), "123G");
     }
 }
 
