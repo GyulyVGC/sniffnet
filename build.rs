@@ -4,14 +4,42 @@ extern crate winres;
 use std::borrow::Cow;
 use std::env;
 use std::fs::File;
+use std::hash::Hash;
 use std::io::{BufRead, BufReader, BufWriter, Write};
 use std::path::Path;
 
-include!("./src/networking/types/service_query.rs");
-include!("./src/networking/types/protocol.rs");
-
 const WINDOWS_ICON_PATH: &str = "./resources/packaging/windows/graphics/sniffnet.ico";
 const SERVICES_LIST_PATH: &str = "./services.txt";
+
+#[derive(Clone, Copy, Debug, Eq, Hash, PartialEq)]
+enum BuildProtocol {
+    TCP,
+    UDP,
+}
+
+impl std::fmt::Display for BuildProtocol {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{self:?}")
+    }
+}
+
+#[derive(Eq, Hash, PartialEq)]
+struct BuildServiceQuery(u16, BuildProtocol);
+
+impl phf_shared::PhfHash for BuildServiceQuery {
+    fn phf_hash<H: core::hash::Hasher>(&self, state: &mut H) {
+        let BuildServiceQuery(port, protocol) = self;
+        port.hash(state);
+        protocol.hash(state);
+    }
+}
+
+impl phf_shared::FmtConst for BuildServiceQuery {
+    fn fmt_const(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        let BuildServiceQuery(port, protocol) = self;
+        write!(f, "ServiceQuery({port}, Protocol::{protocol})")
+    }
+}
 
 fn main() {
     println!("cargo:rerun-if-changed={WINDOWS_ICON_PATH}");
@@ -85,17 +113,17 @@ fn get_valid_service_fmt_const(s: &str) -> String {
     }
 }
 
-fn get_valid_service_query(s: &str) -> ServiceQuery {
+fn get_valid_service_query(s: &str) -> BuildServiceQuery {
     let mut parts = s.split('/');
     let port = parts.next().unwrap().parse::<u16>().unwrap();
     let protocol_str = parts.next().unwrap();
     let protocol = match protocol_str {
-        "tcp" => Protocol::TCP,
-        "udp" => Protocol::UDP,
+        "tcp" => BuildProtocol::TCP,
+        "udp" => BuildProtocol::UDP,
         invalid => panic!("Invalid protocol found: {invalid}"),
     };
     assert!(parts.next().is_none());
-    ServiceQuery(port, protocol)
+    BuildServiceQuery(port, protocol)
 }
 
 #[cfg(debug_assertions)]
