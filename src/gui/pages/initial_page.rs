@@ -27,6 +27,7 @@ use crate::utils::formatted_strings::get_path_termination_string;
 use crate::utils::types::file_info::FileInfo;
 use crate::utils::types::icon::Icon;
 use crate::{Language, StyleType};
+use iced::Element;
 use iced::Length::FillPortion;
 use iced::widget::scrollable::Direction;
 use iced::widget::{
@@ -165,54 +166,133 @@ fn get_col_adapter(sniffer: &Sniffer) -> Column<'_, Message, StyleType> {
                 Icon::get_hourglass(sniffer.dots_pulse.0.len()).size(60),
             ))
         } else {
+            let uses_tiny_skia = uses_tiny_skia_backend();
             Scrollable::with_direction(
                 sniffer.preview_charts.iter().fold(
                     Column::new()
                         .padding(Padding::ZERO.right(13).bottom(10))
                         .spacing(5),
                     |scroll_adapters, (my_dev, chart)| {
-                        let name = my_dev.get_name();
-                        let addresses_row =
-                            get_addresses_row(my_dev.get_link_type(), my_dev.get_addresses());
-                        let (title, subtitle) = get_adapter_title_subtitle(my_dev);
-                        scroll_adapters.push(
-                            Button::new(
-                                Column::new()
-                                    .spacing(5)
-                                    .push(
-                                        Text::new(title)
-                                            .class(TextType::Subtitle)
-                                            .size(FONT_SIZE_SUBTITLE),
-                                    )
-                                    .push(subtitle.map(Text::new))
-                                    .push(addresses_row)
-                                    .push(if chart.max_packets > 0.0 {
-                                        Some(chart.view())
-                                    } else {
-                                        None
-                                    }),
-                            )
-                            .padding(15)
-                            .width(Length::Fill)
-                            .class(
-                                if let CaptureSource::Device(device) = &sniffer.capture_source {
-                                    if name == device.get_name() {
-                                        ButtonType::BorderedRoundSelected
-                                    } else {
-                                        ButtonType::BorderedRound
-                                    }
-                                } else {
-                                    ButtonType::BorderedRound
-                                },
-                            )
-                            .on_press(Message::DeviceSelection(name.clone())),
-                        )
+                        scroll_adapters.push(adapter_button(sniffer, my_dev, chart, uses_tiny_skia))
                     },
                 ),
                 Direction::Vertical(ScrollbarType::properties()),
             )
             .into()
         })
+}
+
+fn adapter_button<'a>(
+    sniffer: &Sniffer,
+    my_dev: &'a MyDevice,
+    chart: &'a crate::chart::types::preview_chart::PreviewChart,
+    uses_tiny_skia: bool,
+) -> Button<'a, Message, StyleType> {
+    let name = my_dev.get_name();
+    let addresses_row = get_addresses_row(my_dev.get_link_type(), my_dev.get_addresses());
+    let (title, subtitle) = get_adapter_title_subtitle(my_dev);
+    let details = Column::new()
+        .spacing(5)
+        .width(Length::Fill)
+        .push(
+            Text::new(title)
+                .class(TextType::Subtitle)
+                .size(FONT_SIZE_SUBTITLE),
+        )
+        .push(subtitle.map(Text::new))
+        .push(addresses_row);
+
+    let content: Element<'a, Message, StyleType> = if uses_tiny_skia {
+        Row::new()
+            .align_y(Alignment::Center)
+            .spacing(10)
+            .push(details)
+            .push(traffic_summary(chart))
+            .into()
+    } else {
+        Column::new()
+            .spacing(5)
+            .push(details)
+            .push(if chart.max_packets > 0.0 {
+                Some(chart.view())
+            } else {
+                None
+            })
+            .into()
+    };
+
+    Button::new(content)
+        .padding(15)
+        .width(Length::Fill)
+        .class(
+            if let CaptureSource::Device(device) = &sniffer.capture_source {
+                if name == device.get_name() {
+                    ButtonType::BorderedRoundSelected
+                } else {
+                    ButtonType::BorderedRound
+                }
+            } else {
+                ButtonType::BorderedRound
+            },
+        )
+        .on_press(Message::DeviceSelection(name.clone()))
+}
+
+fn uses_tiny_skia_backend() -> bool {
+    std::env::var("ICED_BACKEND").is_ok_and(|backend| backend.eq_ignore_ascii_case("tiny-skia"))
+}
+
+fn traffic_summary<'a>(
+    chart: &crate::chart::types::preview_chart::PreviewChart,
+) -> Container<'a, Message, StyleType> {
+    let incoming_rate = format!("{}/s", format_packet_count(chart.latest_incoming_packets));
+    let outgoing_rate = format!("{}/s", format_packet_count(chart.latest_outgoing_packets));
+
+    Container::new(
+        Column::new()
+            .align_x(Alignment::End)
+            .spacing(2)
+            .push(
+                Row::new()
+                    .align_y(Alignment::Center)
+                    .spacing(5)
+                    .push(
+                        Text::new("↑")
+                            .class(TextType::Outgoing)
+                            .size(FONT_SIZE_SUBTITLE),
+                    )
+                    .push(
+                        Text::new(outgoing_rate)
+                            .class(TextType::Outgoing)
+                            .size(FONT_SIZE_FOOTER),
+                    ),
+            )
+            .push(
+                Row::new()
+                    .align_y(Alignment::Center)
+                    .spacing(5)
+                    .push(
+                        Text::new("↓")
+                            .class(TextType::Incoming)
+                            .size(FONT_SIZE_SUBTITLE),
+                    )
+                    .push(
+                        Text::new(incoming_rate)
+                            .class(TextType::Incoming)
+                            .size(FONT_SIZE_FOOTER),
+                    ),
+            ),
+    )
+    .width(Length::Fixed(85.0))
+}
+
+fn format_packet_count(value: u128) -> String {
+    match value {
+        0..=999 => value.to_string(),
+        1_000..=999_499 => format!("{:.1}k", value as f32 / 1_000.0),
+        999_500..=999_999_999 => format!("{}k", value / 1_000),
+        _ => format!("{:.1}M", value as f32 / 1_000_000.0),
+    }
 }
 
 pub(crate) fn get_addresses_row(

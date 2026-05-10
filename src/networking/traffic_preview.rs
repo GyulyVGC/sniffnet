@@ -1,9 +1,10 @@
 use crate::gui::types::filters::Filters;
 use crate::location;
-use crate::networking::manage_packets::analyze_headers;
+use crate::networking::manage_packets::{analyze_headers, get_traffic_direction};
 use crate::networking::parse_packets::get_sniffable_headers;
 use crate::networking::types::arp_type::ArpType;
 use crate::networking::types::capture_context::{CaptureContext, CaptureSource, CaptureType};
+use crate::networking::types::data_info::DataInfo;
 use crate::networking::types::icmp_type::IcmpType;
 use crate::networking::types::my_device::MyDevice;
 use crate::networking::types::my_link_type::MyLinkType;
@@ -16,7 +17,7 @@ use std::time::{Duration, Instant};
 
 #[derive(Default, Clone, Debug)]
 pub struct TrafficPreview {
-    pub data: Vec<(MyDevice, u128)>,
+    pub data: Vec<(MyDevice, DataInfo)>,
 }
 
 pub fn traffic_preview(tx: &Sender<TrafficPreview>) {
@@ -45,26 +46,33 @@ pub fn traffic_preview(tx: &Sender<TrafficPreview>) {
         if let Ok(packet) = packet_res {
             let dev_info = packet.dev_info;
             let my_link_type = dev_info.my_link_type;
+            let mut exchanged_bytes = 0;
             if let Some(headers) = get_sniffable_headers(&packet.data, my_link_type)
-                && analyze_headers(
+                && let Some(key) = analyze_headers(
                     headers,
                     &mut (None, None),
-                    &mut 0,
+                    &mut exchanged_bytes,
                     &mut IcmpType::default(),
                     &mut ArpType::default(),
                 )
-                .is_some()
             {
+                let traffic_direction = get_traffic_direction(
+                    &key.source,
+                    &key.dest,
+                    key.sport,
+                    key.dport,
+                    &dev_info.addresses,
+                );
                 data.entry(dev_info.name)
-                    .and_modify(|p| *p += 1)
-                    .or_insert(1);
+                    .or_default()
+                    .add_packet(exchanged_bytes, traffic_direction);
             }
         }
     }
 }
 
 fn handle_devices_and_previews(
-    data: &mut HashMap<String, u128>,
+    data: &mut HashMap<String, DataInfo>,
     tx: &Sender<TrafficPreview>,
     pcap_tx: &std::sync::mpsc::SyncSender<(Result<PacketOwned, pcap::Error>, Option<Stat>)>,
 ) {
@@ -72,12 +80,14 @@ fn handle_devices_and_previews(
     for dev in Device::list().unwrap_or_default() {
         let dev_name = dev.name.clone();
         let my_dev = MyDevice::from_pcap_device(dev);
-        if let Some(n) = data.get(&dev_name) {
-            traffic_preview.data.push((my_dev, *n));
+        if let Some(data_info) = data.get(&dev_name) {
+            traffic_preview.data.push((my_dev, *data_info));
             continue;
         }
-        data.insert(dev_name.clone(), 0);
-        traffic_preview.data.push((my_dev.clone(), 0));
+        data.insert(dev_name.clone(), DataInfo::default());
+        traffic_preview
+            .data
+            .push((my_dev.clone(), DataInfo::default()));
         let capture_source = CaptureSource::Device(my_dev);
         let capture_context = CaptureContext::new(&capture_source, None, &Filters::default());
         let my_link_type = capture_context.my_link_type();
@@ -89,6 +99,7 @@ fn handle_devices_and_previews(
         let dev_info = DevInfo {
             name: dev_name,
             my_link_type,
+            addresses: capture_source.get_addresses().to_vec(),
         };
         let (Some(cap), _) = capture_context.consume() else {
             continue;
@@ -101,8 +112,8 @@ fn handle_devices_and_previews(
             .log_err(location!());
     }
     let _ = tx.send_blocking(traffic_preview);
-    for v in data.values_mut() {
-        *v = 0;
+    for data_info in data.values_mut() {
+        *data_info = DataInfo::default();
     }
 }
 
@@ -127,6 +138,7 @@ fn packet_stream(
 struct DevInfo {
     name: String,
     my_link_type: MyLinkType,
+    addresses: Vec<pcap::Address>,
 }
 
 struct PacketOwned {

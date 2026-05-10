@@ -342,7 +342,7 @@ pub fn modify_or_insert_in_map(
 }
 
 /// Returns the traffic direction observed (incoming or outgoing)
-fn get_traffic_direction(
+pub(crate) fn get_traffic_direction(
     source_ip: &IpAddr,
     destination_ip: &IpAddr,
     source_port: Option<u16>,

@@ -1,14 +1,16 @@
 use std::ops::Range;
 
 use iced::Element;
+use iced::widget::Column;
 use plotters::prelude::*;
-use plotters_iced2::{Chart, ChartBuilder, DrawingBackend};
+use plotters_iced2::{Chart, ChartBuilder, ChartWidget, DrawingBackend};
 
-use crate::chart::types::canvas_preview_chart::canvas_preview_chart;
 use crate::chart::types::chart_series::{ChartSeries, sample_spline};
 use crate::gui::styles::style_constants::CHARTS_LINE_BORDER;
 use crate::gui::styles::types::palette::to_rgb_color;
 use crate::gui::types::message::Message;
+use crate::networking::types::data_info::DataInfo;
+use crate::networking::types::data_representation::DataRepr;
 use crate::utils::error_logger::{ErrorLogger, Location};
 use crate::{StyleType, location};
 
@@ -22,6 +24,10 @@ pub struct PreviewChart {
     pub max_packets: f32,
     /// Total number of packets (last 30 seconds)
     pub tot_packets: f32,
+    /// Incoming packets in the latest preview interval
+    pub latest_incoming_packets: u128,
+    /// Outgoing packets in the latest preview interval
+    pub latest_outgoing_packets: u128,
     /// Style of the chart
     pub style: StyleType,
 }
@@ -33,15 +39,20 @@ impl PreviewChart {
             packets: ChartSeries::default(),
             max_packets: 0.0,
             tot_packets: 0.0,
+            latest_incoming_packets: 0,
+            latest_outgoing_packets: 0,
             style,
         }
     }
 
-    pub fn update_charts_data(&mut self, packets: u128) {
+    pub fn update_charts_data(&mut self, data_info: DataInfo) {
         #[allow(clippy::cast_precision_loss)]
         let tot_seconds = self.ticks as f32;
         self.ticks += 1;
 
+        self.latest_incoming_packets = data_info.incoming_data(DataRepr::Packets);
+        self.latest_outgoing_packets = data_info.outgoing_data(DataRepr::Packets);
+        let packets = data_info.tot_data(DataRepr::Packets);
         #[allow(clippy::cast_precision_loss)]
         let packets_entry = packets as f32;
         let packets_point = (tot_seconds, packets_entry);
@@ -52,12 +63,12 @@ impl PreviewChart {
         self.tot_packets = self.packets.get_tot();
     }
 
-    pub fn view(&self) -> Element<'_, Message, StyleType> {
-        canvas_preview_chart(self)
-    }
-
     pub fn change_style(&mut self, style: StyleType) {
         self.style = style;
+    }
+
+    pub fn view(&self) -> Element<'_, Message, StyleType> {
+        Column::new().height(45).push(ChartWidget::new(self)).into()
     }
 
     fn x_axis_range(&self) -> Range<f32> {
