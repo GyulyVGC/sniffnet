@@ -966,6 +966,15 @@
       "contributions": [
         "code"
       ]
+    },
+    {
+      "login": "ahassany",
+      "name": "Ahmed Elhassany",
+      "avatar_url": "https://avatars.githubusercontent.com/u/691424?v=4",
+      "profile": "http://hassany.ps",
+      "contributions": [
+        "ideas"
+      ]
     }
   ],
   "contributorsPerLine": 7,
