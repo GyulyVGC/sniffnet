@@ -5021,6 +5021,7 @@ dependencies = [
  "ipnet",
  "listeners",
  "maxminddb",
+ "nom",
  "pcap",
  "phf",
  "phf_codegen",

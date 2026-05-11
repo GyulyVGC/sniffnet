@@ -15,6 +15,8 @@ pub enum MyLinkType {
     LinuxSll(Linktype),
     LinuxSll2(Linktype),
     Unsupported(Linktype),
+    /// IPFIX collector — flow records over UDP, no underlying link layer
+    Ipfix,
     #[default]
     NotYetAssigned,
 }
@@ -59,6 +61,9 @@ impl MyLinkType {
                         String::new()
                     }
                 )
+            }
+            Self::Ipfix => {
+                format!("{}: IPFIX", link_type_translation(language))
             }
             Self::NotYetAssigned => {
                 format!("{}: -", link_type_translation(language))

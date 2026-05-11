@@ -178,11 +178,12 @@ pub fn parse_packets(
                     let (traffic_direction, service) = modify_or_insert_in_map(
                         &mut info_traffic_msg,
                         &key,
-                        &cs,
+                        cs.get_addresses(),
                         mac_addresses,
                         icmp_type,
                         arp_type,
                         exchanged_bytes,
+                        1,
                         ip_blacklist,
                     );
 
@@ -308,6 +309,8 @@ pub(super) fn get_sniffable_headers(
         MyLinkType::LinuxSll(_) => from_linux_sll(packet, true),
         MyLinkType::LinuxSll2(_) => from_linux_sll(packet, false),
         MyLinkType::Null(_) | MyLinkType::Loop(_) => from_null(packet),
+        // IPFIX never flows through this pcap-based path.
+        MyLinkType::Ipfix => None,
     }
 }
 
@@ -359,7 +362,7 @@ fn from_linux_sll(packet: &[u8], is_v1: bool) -> Option<LaxPacketHeaders<'_>> {
     ))
 }
 
-fn reverse_dns_lookups(
+pub(crate) fn reverse_dns_lookups(
     lookup_request_rx: &std::sync::mpsc::Receiver<(
         AddressPortPair,
         TrafficDirection,
@@ -418,16 +421,17 @@ fn reverse_dns_lookups(
 }
 
 pub struct AddressesResolutionState {
-    lookup_request_tx: std::sync::mpsc::Sender<(AddressPortPair, TrafficDirection, Vec<Address>)>,
-    lookup_result_rx: std::sync::mpsc::Receiver<HostMessage>,
+    pub(crate) lookup_request_tx:
+        std::sync::mpsc::Sender<(AddressPortPair, TrafficDirection, Vec<Address>)>,
+    pub(crate) lookup_result_rx: std::sync::mpsc::Receiver<HostMessage>,
     /// Map of the addresses waiting for a rDNS resolution; used to NOT send multiple rDNS for the same address
-    addresses_waiting_resolution: HashMap<IpAddr, DataInfo>,
+    pub(crate) addresses_waiting_resolution: HashMap<IpAddr, DataInfo>,
     /// Map of the resolved addresses with the corresponding host
-    addresses_resolved: HashMap<IpAddr, Host>,
+    pub(crate) addresses_resolved: HashMap<IpAddr, Host>,
 }
 
 impl AddressesResolutionState {
-    fn new(
+    pub(crate) fn new(
         lookup_request_tx: std::sync::mpsc::Sender<(
             AddressPortPair,
             TrafficDirection,
@@ -443,7 +447,7 @@ impl AddressesResolutionState {
         }
     }
 
-    fn new_hosts_to_send(&mut self) -> Vec<HostMessage> {
+    pub(crate) fn new_hosts_to_send(&mut self) -> Vec<HostMessage> {
         let mut new_hosts = Vec::new();
         while let Ok(mut host_msg) = self.lookup_result_rx.try_recv() {
             let address_to_lookup = host_msg.address_to_lookup;

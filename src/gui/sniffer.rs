@@ -29,6 +29,8 @@ use crate::gui::types::timing_events::TimingEvents;
 use crate::mmdb::asn::ASN_MMDB;
 use crate::mmdb::country::COUNTRY_MMDB;
 use crate::mmdb::types::mmdb_reader::{MmdbReader, MmdbReaders};
+use crate::networking::ipfix::MyIpfixCollector;
+use crate::networking::ipfix::collect::collect_ipfix;
 use crate::networking::parse_packets::BackendTrafficMessage;
 use crate::networking::parse_packets::parse_packets;
 use crate::networking::traffic_preview::{TrafficPreview, traffic_preview};
@@ -353,6 +355,8 @@ impl Sniffer {
             Message::ScaleFactorShortcut(increase) => self.scale_factor_shortcut(increase),
             Message::SetNewerReleaseStatus(status) => self.set_newer_release_status(status),
             Message::SetPcapImport(path) => self.set_pcap_import(path),
+            Message::SetIpfixBindAddr(addr) => self.set_ipfix_bind_addr(addr),
+            Message::SetIpfixBindPort(port) => self.set_ipfix_bind_port(&port),
             Message::PendingHosts(cap_id, host_msgs) => self.pending_hosts(cap_id, host_msgs),
             Message::OfflineGap(cap_id, gap) => self.offline_gap(cap_id, gap),
             Message::Periodic => self.periodic(),
@@ -498,10 +502,17 @@ impl Sniffer {
 
     fn set_capture_source(&mut self, cs_pick: CaptureSourcePicklist) {
         self.conf.capture_source_picklist = cs_pick;
-        if cs_pick == CaptureSourcePicklist::File {
-            self.set_pcap_import(self.conf.import_pcap_path.clone());
-        } else {
-            self.device_selection(&self.conf.device.device_name.clone());
+        match cs_pick {
+            CaptureSourcePicklist::File => {
+                self.set_pcap_import(self.conf.import_pcap_path.clone());
+            }
+            CaptureSourcePicklist::Ipfix => {
+                self.capture_source =
+                    CaptureSource::Ipfix(MyIpfixCollector::from_conf(&self.conf.ipfix_collector));
+            }
+            CaptureSourcePicklist::Device => {
+                self.device_selection(&self.conf.device.device_name.clone());
+            }
         }
     }
 
@@ -809,6 +820,26 @@ impl Sniffer {
         }
     }
 
+    fn set_ipfix_bind_addr(&mut self, addr: String) {
+        self.conf.ipfix_collector.bind_addr = addr;
+        self.capture_source =
+            CaptureSource::Ipfix(MyIpfixCollector::from_conf(&self.conf.ipfix_collector));
+    }
+
+    fn set_ipfix_bind_port(&mut self, raw: &str) {
+        // Accept anything that parses as u16; ignore other input so the user can
+        // edit the field freely without losing focus.
+        if let Ok(port) = raw.parse::<u16>() {
+            self.conf.ipfix_collector.bind_port = port;
+            self.capture_source =
+                CaptureSource::Ipfix(MyIpfixCollector::from_conf(&self.conf.ipfix_collector));
+        } else if raw.is_empty() {
+            self.conf.ipfix_collector.bind_port = 0;
+            self.capture_source =
+                CaptureSource::Ipfix(MyIpfixCollector::from_conf(&self.conf.ipfix_collector));
+        }
+    }
+
     fn pending_hosts(&mut self, cap_id: usize, host_msgs: Vec<HostMessage>) {
         if cap_id == self.current_capture_rx.0 {
             for host_msg in host_msgs {
@@ -969,6 +1000,9 @@ impl Sniffer {
                 let current_device_name = &self.capture_source.get_name();
                 self.device_selection(current_device_name);
             }
+            if matches!(&self.capture_source, CaptureSource::Ipfix(_)) {
+                return self.start_ipfix();
+            }
             let pcap_path = self.conf.export_pcap.full_path();
             let capture_context =
                 CaptureContext::new(&self.capture_source, pcap_path.as_ref(), &self.conf.filters);
@@ -1049,6 +1083,47 @@ impl Sniffer {
             }
         }
         Task::none()
+    }
+
+    fn start_ipfix(&mut self) -> Task<Message> {
+        let CaptureSource::Ipfix(collector) = self.capture_source.clone() else {
+            return Task::none();
+        };
+        self.pcap_error = None;
+        self.running_page = Some(self.conf.last_opened_page);
+
+        let curr_cap_id = self.current_capture_rx.0;
+        let mmdb_readers = self.mmdb_readers.clone();
+        let ip_blacklist = self.ip_blacklist.clone();
+        self.traffic_chart.change_capture_source(true);
+        let (tx, rx) = async_channel::unbounded();
+        let (freeze_tx, freeze_rx) = tokio::sync::broadcast::channel(1_048_575);
+        let freeze_rx2 = freeze_tx.subscribe();
+        let _ = thread::Builder::new()
+            .name("thread_collect_ipfix".to_string())
+            .spawn(move || {
+                collect_ipfix(
+                    curr_cap_id,
+                    &collector,
+                    mmdb_readers,
+                    &ip_blacklist,
+                    &tx,
+                    (freeze_rx, freeze_rx2),
+                );
+            })
+            .log_err(location!());
+        self.current_capture_rx.1 = Some(rx.clone());
+        self.freeze_tx = Some(freeze_tx);
+
+        Task::run(rx, |backend_msg| match backend_msg {
+            BackendTrafficMessage::TickRun(cap_id, msg, host_msg, no_more_packets) => {
+                Message::TickRun(cap_id, msg, host_msg, no_more_packets)
+            }
+            BackendTrafficMessage::PendingHosts(cap_id, host_msg) => {
+                Message::PendingHosts(cap_id, host_msg)
+            }
+            BackendTrafficMessage::OfflineGap(cap_id, gap) => Message::OfflineGap(cap_id, gap),
+        })
     }
 
     fn reset(&mut self) -> Task<Message> {
@@ -1403,10 +1478,12 @@ impl Sniffer {
     }
 
     pub fn is_capture_source_consistent(&self) -> bool {
-        self.conf.capture_source_picklist == CaptureSourcePicklist::Device
-            && matches!(self.capture_source, CaptureSource::Device(_))
-            || self.conf.capture_source_picklist == CaptureSourcePicklist::File
-                && matches!(self.capture_source, CaptureSource::File(_))
+        match (self.conf.capture_source_picklist, &self.capture_source) {
+            (CaptureSourcePicklist::Device, CaptureSource::Device(_))
+            | (CaptureSourcePicklist::File, CaptureSource::File(_)) => true,
+            (CaptureSourcePicklist::Ipfix, CaptureSource::Ipfix(c)) => c.is_valid(),
+            _ => false,
+        }
     }
 
     fn change_charts_style(&mut self) {
@@ -2201,6 +2278,7 @@ mod tests {
                     directory: "/".to_string()
                 },
                 import_pcap_path: "/test.pcap".to_string(),
+                ipfix_collector: Default::default(),
                 data_repr: DataRepr::Bits,
             }
         );

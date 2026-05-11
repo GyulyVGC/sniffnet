@@ -158,6 +158,7 @@ mod tests {
                 expanded: true,
             },
             import_pcap_path: "whole_day.pcapng".to_string(),
+            ipfix_collector: Default::default(),
             export_pcap: ExportPcap {
                 enabled: true,
                 file_name: "sniffnet.pcap".to_string(),

@@ -1,10 +1,12 @@
 use crate::gui::types::conf::Conf;
 use crate::gui::types::filters::Filters;
 use crate::location;
+use crate::networking::ipfix::MyIpfixCollector;
 use crate::networking::types::my_device::MyDevice;
 use crate::networking::types::my_link_type::MyLinkType;
 use crate::translations::translations::network_adapter_translation;
 use crate::translations::translations_4::capture_file_translation;
+use crate::translations::translations_6::ipfix_collector_translation;
 use crate::translations::types::language::Language;
 use crate::utils::error_logger::{ErrorLogger, Location};
 use pcap::{Active, Address, Capture, Device, Error, Packet, Savefile, Stat};
@@ -143,6 +145,9 @@ impl CaptureType {
                 Ok(Self::Live(cap))
             }
             CaptureSource::File(file) => Ok(Self::Offline(Capture::from_file(&file.path)?)),
+            CaptureSource::Ipfix(_) => Err(Error::PcapError(String::from(
+                "IPFIX collector does not use a pcap capture",
+            ))),
         }
     }
 
@@ -174,6 +179,7 @@ impl CaptureType {
 pub enum CaptureSource {
     Device(MyDevice),
     File(MyPcapImport),
+    Ipfix(MyIpfixCollector),
 }
 
 impl CaptureSource {
@@ -187,6 +193,9 @@ impl CaptureSource {
                 let path = conf.import_pcap_path.clone();
                 Self::File(MyPcapImport::new(path))
             }
+            CaptureSourcePicklist::Ipfix => {
+                Self::Ipfix(MyIpfixCollector::from_conf(&conf.ipfix_collector))
+            }
         }
     }
 
@@ -194,13 +203,16 @@ impl CaptureSource {
         match self {
             Self::Device(_) => network_adapter_translation(language),
             Self::File(_) => capture_file_translation(language),
+            Self::Ipfix(_) => ipfix_collector_translation(language),
         }
     }
 
     pub fn get_addresses(&self) -> &Vec<Address> {
+        const EMPTY: &Vec<Address> = &Vec::new();
         match self {
             Self::Device(device) => device.get_addresses(),
             Self::File(file) => &file.addresses,
+            Self::Ipfix(_) => EMPTY,
         }
     }
 
@@ -226,6 +238,7 @@ impl CaptureSource {
         match self {
             Self::Device(device) => device.get_link_type(),
             Self::File(file) => file.link_type,
+            Self::Ipfix(_) => MyLinkType::Ipfix,
         }
     }
 
@@ -233,6 +246,7 @@ impl CaptureSource {
         match self {
             Self::Device(device) => device.set_link_type(link_type),
             Self::File(file) => file.link_type = link_type,
+            Self::Ipfix(_) => {}
         }
     }
 
@@ -240,6 +254,7 @@ impl CaptureSource {
         match self {
             Self::Device(device) => device.get_name().clone(),
             Self::File(file) => file.path.clone(),
+            Self::Ipfix(c) => c.display_name(),
         }
     }
 
@@ -247,7 +262,7 @@ impl CaptureSource {
     pub fn get_desc(&self) -> Option<String> {
         match self {
             Self::Device(device) => device.get_desc().cloned(),
-            Self::File(_) => None,
+            Self::File(_) | Self::Ipfix(_) => None,
         }
     }
 }
@@ -274,4 +289,5 @@ pub enum CaptureSourcePicklist {
     #[default]
     Device,
     File,
+    Ipfix,
 }

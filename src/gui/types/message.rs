@@ -145,6 +145,10 @@ pub enum Message {
     SetNewerReleaseStatus(Option<bool>),
     /// Set the pcap import path
     SetPcapImport(String),
+    /// Set the IPFIX collector bind address
+    SetIpfixBindAddr(String),
+    /// Set the IPFIX collector bind port
+    SetIpfixBindPort(String),
     /// Sent by the backend parsing packets at the end of an offline capture; includes all the pending hosts
     PendingHosts(usize, Vec<HostMessage>),
     /// Sent by offline captures: ticks without packets

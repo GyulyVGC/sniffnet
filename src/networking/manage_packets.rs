@@ -10,7 +10,6 @@ use crate::Protocol;
 use crate::networking::types::address_port_pair::AddressPortPair;
 use crate::networking::types::arp_type::ArpType;
 use crate::networking::types::bogon::is_bogon;
-use crate::networking::types::capture_context::CaptureSource;
 use crate::networking::types::icmp_type::{IcmpType, IcmpTypeV4, IcmpTypeV6};
 use crate::networking::types::info_address_port_pair::InfoAddressPortPair;
 use crate::networking::types::info_traffic::InfoTraffic;
@@ -260,11 +259,12 @@ pub fn get_service(
 pub fn modify_or_insert_in_map(
     info_traffic_msg: &mut InfoTraffic,
     key: &AddressPortPair,
-    cs: &CaptureSource,
+    my_interface_addresses: &[Address],
     mac_addresses: (Option<String>, Option<String>),
     icmp_type: IcmpType,
     arp_type: ArpType,
     exchanged_bytes: u128,
+    exchanged_packets: u128,
     ip_blacklist: &IpBlacklist,
 ) -> (TrafficDirection, Service) {
     let mut traffic_direction = TrafficDirection::default();
@@ -274,7 +274,6 @@ pub fn modify_or_insert_in_map(
     if !info_traffic_msg.map.contains_key(key) {
         // first occurrence of key (in this time interval)
 
-        let my_interface_addresses = cs.get_addresses();
         // determine traffic direction
         let source_ip = &key.source;
         let destination_ip = &key.dest;
@@ -298,7 +297,7 @@ pub fn modify_or_insert_in_map(
         .entry(*key)
         .and_modify(|info| {
             info.transmitted_bytes += exchanged_bytes;
-            info.transmitted_packets += 1;
+            info.transmitted_packets += exchanged_packets;
             info.final_timestamp = timestamp;
             info.final_instant = Instant::now();
             if key.protocol.eq(&Protocol::ICMP) {
@@ -318,7 +317,7 @@ pub fn modify_or_insert_in_map(
             mac_address1: mac_addresses.0,
             mac_address2: mac_addresses.1,
             transmitted_bytes: exchanged_bytes,
-            transmitted_packets: 1,
+            transmitted_packets: exchanged_packets,
             initial_timestamp: timestamp,
             final_timestamp: timestamp,
             final_instant: Instant::now(),
@@ -424,10 +423,7 @@ fn is_broadcast_address(address: &IpAddr, my_interface_addresses: &[Address]) ->
 }
 
 /// Determines if the connection is local
-pub fn is_local_connection(
-    address_to_lookup: &IpAddr,
-    my_interface_addresses: &Vec<Address>,
-) -> bool {
+pub fn is_local_connection(address_to_lookup: &IpAddr, my_interface_addresses: &[Address]) -> bool {
     let mut ret_val = false;
 
     for address in my_interface_addresses {
