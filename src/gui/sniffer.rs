@@ -34,7 +34,7 @@ use crate::networking::parse_packets::BackendTrafficMessage;
 use crate::networking::parse_packets::parse_packets;
 use crate::networking::traffic_preview::{TrafficPreview, traffic_preview};
 use crate::networking::types::capture_context::{
-    CaptureContext, CaptureSource, CaptureSourcePicklist, MyPcapImport,
+    CaptureContext, CaptureSource, CaptureSourcePicklist, Ipfix, MyPcapImport,
 };
 use crate::networking::types::combobox_data_states::ComboboxDataStates;
 use crate::networking::types::data_representation::DataRepr;
@@ -1011,14 +1011,13 @@ impl Sniffer {
                 let (freeze_tx, freeze_rx) = tokio::sync::broadcast::channel(1_048_575);
                 let freeze_rx2 = freeze_tx.subscribe();
                 let filters = self.conf.filters.clone();
-                if let CaptureSource::Ipfix(collector) = &self.capture_source {
-                    let collector = collector.clone();
+                if let CaptureContext::Ipfix(socket) = capture_context {
                     let _ = thread::Builder::new()
                         .name("thread_collect_ipfix".to_string())
                         .spawn(move || {
                             collect_ipfix(
                                 curr_cap_id,
-                                capture_context,
+                                socket,
                                 mmdb_readers,
                                 &ip_blacklist,
                                 &tx,

@@ -48,17 +48,13 @@ const RECV_TIMEOUT: Duration = Duration::from_millis(150);
 /// second with the accumulated `InfoTraffic`.
 pub fn collect_ipfix(
     cap_id: usize,
-    capture_context: CaptureContext,
+    socket: UdpSocket,
     mmdb_readers: MmdbReaders,
     ip_blacklist: &IpBlacklist,
     tx: &Sender<BackendTrafficMessage>,
     freeze_rxs: (Receiver<()>, Receiver<()>),
 ) {
     let (mut freeze_rx, _freeze_rx_2) = freeze_rxs;
-
-    let (Some(CaptureType::Ipfix(socket)), None) = capture_context.consume() else {
-        return;
-    };
 
     let mut info_traffic_msg = InfoTraffic::default();
     let mut templates = TemplateCache::new();
@@ -69,7 +65,7 @@ pub fn collect_ipfix(
     let (lookup_result_tx, lookup_result_rx) = std::sync::mpsc::channel();
     let mut resolutions_state = AddressesResolutionState::new(lookup_request_tx, lookup_result_rx);
     let _ = thread::Builder::new()
-        .name("thread_reverse_dns_lookups_ipfix".to_string())
+        .name("thread_reverse_dns_lookups".to_string())
         .spawn(move || {
             reverse_dns_lookups(&lookup_request_rx, &lookup_result_tx, &mmdb_readers);
         })

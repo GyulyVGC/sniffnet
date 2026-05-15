@@ -18,15 +18,26 @@ pub enum CaptureContext {
     Live(Live),
     LiveWithSavefile(LiveWithSavefile),
     Offline(Offline),
-    Ipfix(Ipfix),
+    Ipfix(UdpSocket),
     Error(String),
 }
 
 impl CaptureContext {
     pub fn new(source: &CaptureSource, pcap_out_path: Option<&String>, filters: &Filters) -> Self {
-        let mut cap_type = match CaptureType::from_source(source, pcap_out_path) {
-            Ok(c) => c,
-            Err(e) => return Self::Error(e),
+        let mut cap_type = match source {
+            CaptureSource::Device(device) => {
+                match CaptureType::from_device(device, pcap_out_path) {
+                    Ok(c) => c,
+                    Err(e) => return Self::Error(e),
+                }
+            }
+            CaptureSource::File(file) => match CaptureType::from_file(file) {
+                Ok(c) => c,
+                Err(e) => return Self::Error(e),
+            },
+            CaptureSource::Ipfix(ipfix) => {
+                return Self::new_ipfix(ipfix).unwrap_or_else(|e| Self::Error(e));
+            }
         };
 
         // only apply BPF filter if it is active, and return an error if it fails to apply
@@ -39,7 +50,6 @@ impl CaptureContext {
         let cap = match cap_type {
             CaptureType::Live(cap) => cap,
             CaptureType::Offline(cap) => return Self::new_offline(cap),
-            CaptureType::Ipfix(socket) => return Self::Ipfix(Ipfix { socket }),
         };
 
         if let Some(out_path) = pcap_out_path {
@@ -82,8 +92,7 @@ impl CaptureContext {
                 (Some(CaptureType::Live(onws.live.cap)), Some(onws.savefile))
             }
             Self::Offline(off) => (Some(CaptureType::Offline(off.cap)), None),
-            Self::Ipfix(ipfix) => (Some(CaptureType::Ipfix(ipfix.socket)), None),
-            Self::Error(_) => (None, None),
+            _ => (None, None),
         }
     }
 
@@ -94,9 +103,18 @@ impl CaptureContext {
                 MyLinkType::from_pcap_link_type(onws.live.cap.get_datalink())
             }
             Self::Offline(off) => MyLinkType::from_pcap_link_type(off.cap.get_datalink()),
-            Self::Ipfix(_) => MyLinkType::default(),
-            Self::Error(_) => MyLinkType::default(),
+            _ => MyLinkType::default(),
         }
+    }
+
+    fn new_ipfix(ipfix_socket: &MyIpfixSocket) -> Result<Self, String> {
+        let socket_addr = ipfix_socket.socket_addr().map_err(|e| e.to_string())?;
+
+        let socket = UdpSocket::bind(socket_addr).map_err(|e| e.to_string())?;
+
+        let _ = socket.set_read_timeout(Some(Duration::from_millis(150)));
+
+        Ok(Self::Ipfix(socket))
     }
 }
 
@@ -120,7 +138,6 @@ pub struct Ipfix {
 pub enum CaptureType {
     Live(Capture<Active>),
     Offline(Capture<pcap::Offline>),
-    Ipfix(UdpSocket),
 }
 
 impl CaptureType {
@@ -128,9 +145,6 @@ impl CaptureType {
         match self {
             Self::Live(on) => on.next_packet(),
             Self::Offline(off) => off.next_packet(),
-            Self::Ipfix(_) => Err(Error::PcapError(
-                "Cannot capture packets from IPFIX source".into(),
-            )),
         }
     }
 
@@ -138,52 +152,36 @@ impl CaptureType {
         match self {
             Self::Live(on) => on.stats(),
             Self::Offline(off) => off.stats(),
-            Self::Ipfix(_) => Err(Error::PcapError(
-                "Cannot get stats from IPFIX source".into(),
-            )),
         }
     }
 
-    fn from_source(source: &CaptureSource, pcap_out_path: Option<&String>) -> Result<Self, String> {
-        match source {
-            CaptureSource::Device(device) => {
-                let inactive =
-                    Capture::from_device(device.to_pcap_device()).map_err(|e| e.to_string())?;
-                let cap = inactive
-                    .promisc(false)
-                    .buffer_size(2_000_000) // 2MB buffer -> 10k packets of 200 bytes
-                    .snaplen(if pcap_out_path.is_some() {
-                        i32::from(u16::MAX)
-                    } else {
-                        200 // limit stored packets slice dimension (to keep more in the buffer)
-                    })
-                    .immediate_mode(false)
-                    .timeout(150) // ensure UI is updated even if no packets are captured
-                    .open()
-                    .map_err(|e| e.to_string())?;
-                Ok(Self::Live(cap))
-            }
-            CaptureSource::File(file) => Ok(Self::Offline(
-                Capture::from_file(&file.path).map_err(|e| e.to_string())?,
-            )),
-            CaptureSource::Ipfix(ipfix_socket) => {
-                let socket = UdpSocket::bind(ipfix_socket.socket_addr()?)
-                    .map_err(|e| format!("Failed to bind UDP socket: {e}"))?;
-                socket
-                    .set_read_timeout(Some(Duration::from_millis(150)))
-                    .map_err(|e| format!("Failed to set socket read timeout: {e}"))?;
-                Ok(Self::Ipfix(socket))
-            }
-        }
+    fn from_device(device: &MyDevice, pcap_out_path: Option<&String>) -> Result<Self, String> {
+        let inactive = Capture::from_device(device.to_pcap_device()).map_err(|e| e.to_string())?;
+        let cap = inactive
+            .promisc(false)
+            .buffer_size(2_000_000) // 2MB buffer -> 10k packets of 200 bytes
+            .snaplen(if pcap_out_path.is_some() {
+                i32::from(u16::MAX)
+            } else {
+                200 // limit stored packets slice dimension (to keep more in the buffer)
+            })
+            .immediate_mode(false)
+            .timeout(150) // ensure UI is updated even if no packets are captured
+            .open()
+            .map_err(|e| e.to_string())?;
+        Ok(Self::Live(cap))
+    }
+
+    fn from_file(file: &MyPcapImport) -> Result<Self, String> {
+        Ok(Self::Offline(
+            Capture::from_file(&file.path).map_err(|e| e.to_string())?,
+        ))
     }
 
     fn set_bpf(&mut self, bpf: &str) -> Result<(), Error> {
         match self {
             Self::Live(cap) => cap.filter(bpf, true),
             Self::Offline(cap) => cap.filter(bpf, true),
-            Self::Ipfix(_) => Err(Error::PcapError(
-                "Cannot set BPF filter on IPFIX source".into(),
-            )),
         }
     }
 
@@ -238,8 +236,7 @@ impl CaptureSource {
         const EMPTY: &Vec<Address> = &Vec::new();
         match self {
             Self::Device(device) => device.get_addresses(),
-            Self::File(file) => &file.addresses,
-            Self::Ipfix(_) => EMPTY,
+            _ => EMPTY,
         }
     }
 
@@ -298,7 +295,6 @@ impl CaptureSource {
 pub struct MyPcapImport {
     path: String,
     link_type: MyLinkType,
-    addresses: Vec<Address>, // this is always empty!
 }
 
 impl MyPcapImport {
@@ -306,7 +302,6 @@ impl MyPcapImport {
         Self {
             path,
             link_type: MyLinkType::default(),
-            addresses: vec![],
         }
     }
 }
