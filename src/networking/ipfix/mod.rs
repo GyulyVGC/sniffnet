@@ -9,8 +9,11 @@ pub mod collect;
 pub mod templates;
 pub mod wire;
 
+use crate::location;
+use crate::utils::error_logger::ErrorLogger;
 use serde::{Deserialize, Serialize};
-use std::net::{IpAddr, SocketAddr};
+use std::net::{IpAddr, Ipv4Addr, SocketAddr, UdpSocket};
+use std::time::Duration;
 
 /// IANA-registered default IPFIX collector port.
 pub const DEFAULT_IPFIX_PORT: u16 = 4739;
@@ -18,52 +21,50 @@ pub const DEFAULT_IPFIX_PORT: u16 = 4739;
 /// Persisted IPFIX collector configuration.
 #[derive(Serialize, Deserialize, Clone, PartialEq, Debug)]
 #[serde(default)]
-pub struct IpfixCollectorConf {
-    pub bind_addr: String,
-    pub bind_port: u16,
+pub struct MyIpfixSocket {
+    addr: String,
+    port: String,
 }
 
-impl Default for IpfixCollectorConf {
-    fn default() -> Self {
-        Self {
-            bind_addr: String::from("0.0.0.0"),
-            bind_port: DEFAULT_IPFIX_PORT,
-        }
-    }
-}
-
-/// Runtime handle for an IPFIX collector source, embedded in `CaptureSource::Ipfix`.
-#[derive(Clone, Debug)]
-pub struct MyIpfixCollector {
-    bind_addr: String,
-    bind_port: u16,
-}
-
-impl MyIpfixCollector {
-    pub fn new(bind_addr: String, bind_port: u16) -> Self {
-        Self {
-            bind_addr,
-            bind_port,
-        }
+impl MyIpfixSocket {
+    pub fn addr(&self) -> &str {
+        &self.addr
     }
 
-    pub fn from_conf(conf: &IpfixCollectorConf) -> Self {
-        Self::new(conf.bind_addr.clone(), conf.bind_port)
+    pub fn port(&self) -> &str {
+        &self.port
     }
 
-    /// Parse the configured bind address + port into a `SocketAddr`. Returns
-    /// `None` if `bind_addr` is not a valid IP literal.
-    pub fn socket_addr(&self) -> Option<SocketAddr> {
-        let ip: IpAddr = self.bind_addr.parse().ok()?;
-        Some(SocketAddr::new(ip, self.bind_port))
+    pub fn set_addr(&mut self, addr: String) {
+        self.addr = addr;
     }
 
-    /// Whether the current config can be used to start a capture.
-    pub fn is_valid(&self) -> bool {
-        self.socket_addr().is_some()
+    pub fn set_port(&mut self, port: String) {
+        self.port = port;
     }
 
     pub fn display_name(&self) -> String {
-        format!("{}:{}", self.bind_addr, self.bind_port)
+        format!("{}:{}", self.addr, self.port)
+    }
+
+    pub fn socket_addr(&self) -> Result<SocketAddr, String> {
+        let port = self
+            .port
+            .parse::<u16>()
+            .map_err(|_| format!("Invalid port number: {}", self.port))?;
+        let ip_addr = self
+            .addr
+            .parse::<IpAddr>()
+            .map_err(|_| format!("Invalid IP address: {}", self.addr))?;
+        Ok(SocketAddr::new(ip_addr, port))
+    }
+}
+
+impl Default for MyIpfixSocket {
+    fn default() -> Self {
+        Self {
+            addr: IpAddr::V4(Ipv4Addr::UNSPECIFIED).to_string(),
+            port: DEFAULT_IPFIX_PORT.to_string(),
+        }
     }
 }

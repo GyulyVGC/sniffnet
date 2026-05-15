@@ -1,7 +1,7 @@
 use crate::gui::types::conf::Conf;
 use crate::gui::types::filters::Filters;
 use crate::location;
-use crate::networking::ipfix::MyIpfixCollector;
+use crate::networking::ipfix::MyIpfixSocket;
 use crate::networking::types::my_device::MyDevice;
 use crate::networking::types::my_link_type::MyLinkType;
 use crate::translations::translations::network_adapter_translation;
@@ -11,11 +11,14 @@ use crate::translations::types::language::Language;
 use crate::utils::error_logger::{ErrorLogger, Location};
 use pcap::{Active, Address, Capture, Device, Error, Packet, Savefile, Stat};
 use serde::{Deserialize, Serialize};
+use std::net::UdpSocket;
+use std::time::Duration;
 
 pub enum CaptureContext {
     Live(Live),
     LiveWithSavefile(LiveWithSavefile),
     Offline(Offline),
+    Ipfix(Ipfix),
     Error(String),
 }
 
@@ -23,7 +26,7 @@ impl CaptureContext {
     pub fn new(source: &CaptureSource, pcap_out_path: Option<&String>, filters: &Filters) -> Self {
         let mut cap_type = match CaptureType::from_source(source, pcap_out_path) {
             Ok(c) => c,
-            Err(e) => return Self::Error(e.to_string()),
+            Err(e) => return Self::Error(e),
         };
 
         // only apply BPF filter if it is active, and return an error if it fails to apply
@@ -36,6 +39,7 @@ impl CaptureContext {
         let cap = match cap_type {
             CaptureType::Live(cap) => cap,
             CaptureType::Offline(cap) => return Self::new_offline(cap),
+            CaptureType::Ipfix(socket) => return Self::Ipfix(Ipfix { socket }),
         };
 
         if let Some(out_path) = pcap_out_path {
@@ -78,6 +82,7 @@ impl CaptureContext {
                 (Some(CaptureType::Live(onws.live.cap)), Some(onws.savefile))
             }
             Self::Offline(off) => (Some(CaptureType::Offline(off.cap)), None),
+            Self::Ipfix(ipfix) => (Some(CaptureType::Ipfix(ipfix.socket)), None),
             Self::Error(_) => (None, None),
         }
     }
@@ -89,6 +94,7 @@ impl CaptureContext {
                 MyLinkType::from_pcap_link_type(onws.live.cap.get_datalink())
             }
             Self::Offline(off) => MyLinkType::from_pcap_link_type(off.cap.get_datalink()),
+            Self::Ipfix(_) => MyLinkType::default(),
             Self::Error(_) => MyLinkType::default(),
         }
     }
@@ -107,9 +113,14 @@ pub struct Offline {
     cap: Capture<pcap::Offline>,
 }
 
+pub struct Ipfix {
+    socket: UdpSocket,
+}
+
 pub enum CaptureType {
     Live(Capture<Active>),
     Offline(Capture<pcap::Offline>),
+    Ipfix(UdpSocket),
 }
 
 impl CaptureType {
@@ -117,6 +128,9 @@ impl CaptureType {
         match self {
             Self::Live(on) => on.next_packet(),
             Self::Offline(off) => off.next_packet(),
+            Self::Ipfix(_) => Err(Error::PcapError(
+                "Cannot capture packets from IPFIX source".into(),
+            )),
         }
     }
 
@@ -124,13 +138,17 @@ impl CaptureType {
         match self {
             Self::Live(on) => on.stats(),
             Self::Offline(off) => off.stats(),
+            Self::Ipfix(_) => Err(Error::PcapError(
+                "Cannot get stats from IPFIX source".into(),
+            )),
         }
     }
 
-    fn from_source(source: &CaptureSource, pcap_out_path: Option<&String>) -> Result<Self, Error> {
+    fn from_source(source: &CaptureSource, pcap_out_path: Option<&String>) -> Result<Self, String> {
         match source {
             CaptureSource::Device(device) => {
-                let inactive = Capture::from_device(device.to_pcap_device())?;
+                let inactive =
+                    Capture::from_device(device.to_pcap_device()).map_err(|e| e.to_string())?;
                 let cap = inactive
                     .promisc(false)
                     .buffer_size(2_000_000) // 2MB buffer -> 10k packets of 200 bytes
@@ -141,13 +159,21 @@ impl CaptureType {
                     })
                     .immediate_mode(false)
                     .timeout(150) // ensure UI is updated even if no packets are captured
-                    .open()?;
+                    .open()
+                    .map_err(|e| e.to_string())?;
                 Ok(Self::Live(cap))
             }
-            CaptureSource::File(file) => Ok(Self::Offline(Capture::from_file(&file.path)?)),
-            CaptureSource::Ipfix(_) => Err(Error::PcapError(String::from(
-                "IPFIX collector does not use a pcap capture",
-            ))),
+            CaptureSource::File(file) => Ok(Self::Offline(
+                Capture::from_file(&file.path).map_err(|e| e.to_string())?,
+            )),
+            CaptureSource::Ipfix(ipfix_socket) => {
+                let socket = UdpSocket::bind(ipfix_socket.socket_addr()?)
+                    .map_err(|e| format!("Failed to bind UDP socket: {e}"))?;
+                socket
+                    .set_read_timeout(Some(Duration::from_millis(150)))
+                    .map_err(|e| format!("Failed to set socket read timeout: {e}"))?;
+                Ok(Self::Ipfix(socket))
+            }
         }
     }
 
@@ -155,6 +181,9 @@ impl CaptureType {
         match self {
             Self::Live(cap) => cap.filter(bpf, true),
             Self::Offline(cap) => cap.filter(bpf, true),
+            Self::Ipfix(_) => Err(Error::PcapError(
+                "Cannot set BPF filter on IPFIX source".into(),
+            )),
         }
     }
 
@@ -179,7 +208,7 @@ impl CaptureType {
 pub enum CaptureSource {
     Device(MyDevice),
     File(MyPcapImport),
-    Ipfix(MyIpfixCollector),
+    Ipfix(MyIpfixSocket),
 }
 
 impl CaptureSource {
@@ -193,9 +222,7 @@ impl CaptureSource {
                 let path = conf.import_pcap_path.clone();
                 Self::File(MyPcapImport::new(path))
             }
-            CaptureSourcePicklist::Ipfix => {
-                Self::Ipfix(MyIpfixCollector::from_conf(&conf.ipfix_collector))
-            }
+            CaptureSourcePicklist::Ipfix => Self::Ipfix(conf.ipfix_socket.clone()),
         }
     }
 
@@ -238,7 +265,7 @@ impl CaptureSource {
         match self {
             Self::Device(device) => device.get_link_type(),
             Self::File(file) => file.link_type,
-            Self::Ipfix(_) => MyLinkType::Ipfix,
+            Self::Ipfix(_) => MyLinkType::default(),
         }
     }
 

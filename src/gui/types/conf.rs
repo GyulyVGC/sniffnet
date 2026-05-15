@@ -5,7 +5,7 @@ use crate::gui::types::export_pcap::ExportPcap;
 use crate::gui::types::favorite::Favorites;
 use crate::gui::types::filters::Filters;
 use crate::gui::types::settings::Settings;
-use crate::networking::ipfix::IpfixCollectorConf;
+use crate::networking::ipfix::MyIpfixSocket;
 use crate::networking::types::capture_context::CaptureSourcePicklist;
 use crate::networking::types::config_device::ConfigDevice;
 use crate::networking::types::data_representation::DataRepr;
@@ -48,9 +48,6 @@ pub struct Conf {
     /// Import path for PCAP file
     #[serde(deserialize_with = "deserialize_or_default")]
     pub import_pcap_path: String,
-    /// IPFIX collector configuration (bind address and port)
-    #[serde(deserialize_with = "deserialize_or_default")]
-    pub ipfix_collector: IpfixCollectorConf,
     /// Remembers the last opened setting page
     #[serde(deserialize_with = "deserialize_or_default")]
     pub last_opened_setting: SettingsPage,
@@ -94,6 +91,9 @@ pub struct Conf {
     /// Information about PCAP file export
     #[serde(deserialize_with = "deserialize_or_default")]
     pub export_pcap: ExportPcap,
+    /// IPFIX collector configuration (bind address and port)
+    #[serde(deserialize_with = "deserialize_or_default")]
+    pub ipfix_socket: MyIpfixSocket,
     /// Parameters from settings pages
     #[serde(deserialize_with = "deserialize_or_default")]
     pub settings: Settings,

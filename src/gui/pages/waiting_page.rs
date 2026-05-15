@@ -37,6 +37,12 @@ pub fn waiting_page(sniffer: &Sniffer) -> Option<Container<'_, Message, StyleTyp
             Icon::Error.to_text().size(60),
             format!("{}\n\n{error}", error_translation(language)),
         )
+    } else if matches!(cs, CaptureSource::Ipfix(_)) {
+        // TODO!
+        (
+            Icon::File.to_text().size(60),
+            reading_from_pcap_translation(language).to_string(),
+        )
     } else if !link_type.is_supported() {
         (
             Icon::Forbidden.to_text().size(60),

@@ -309,8 +309,6 @@ pub(super) fn get_sniffable_headers(
         MyLinkType::LinuxSll(_) => from_linux_sll(packet, true),
         MyLinkType::LinuxSll2(_) => from_linux_sll(packet, false),
         MyLinkType::Null(_) | MyLinkType::Loop(_) => from_null(packet),
-        // IPFIX never flows through this pcap-based path.
-        MyLinkType::Ipfix => None,
     }
 }
 

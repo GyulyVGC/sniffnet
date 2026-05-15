@@ -11,7 +11,7 @@ use tokio::sync::broadcast::Receiver;
 
 use crate::location;
 use crate::mmdb::types::mmdb_reader::MmdbReaders;
-use crate::networking::ipfix::MyIpfixCollector;
+use crate::networking::ipfix::MyIpfixSocket;
 use crate::networking::ipfix::templates::TemplateCache;
 use crate::networking::ipfix::wire::{
     self, FlowRecord, IPFIX_VERSION, Set, decode_data_record, format_mac, parse_message,
@@ -25,6 +25,7 @@ use crate::networking::parse_packets::{
 use crate::networking::types::address_port_pair::AddressPortPair;
 use crate::networking::types::arp_type::ArpType;
 use crate::networking::types::bogon::is_bogon;
+use crate::networking::types::capture_context::{CaptureContext, CaptureType};
 use crate::networking::types::data_info::DataInfo;
 use crate::networking::types::data_info_host::DataInfoHost;
 use crate::networking::types::icmp_type::IcmpType;
@@ -47,7 +48,7 @@ const RECV_TIMEOUT: Duration = Duration::from_millis(150);
 /// second with the accumulated `InfoTraffic`.
 pub fn collect_ipfix(
     cap_id: usize,
-    collector: &MyIpfixCollector,
+    capture_context: CaptureContext,
     mmdb_readers: MmdbReaders,
     ip_blacklist: &IpBlacklist,
     tx: &Sender<BackendTrafficMessage>,
@@ -55,19 +56,9 @@ pub fn collect_ipfix(
 ) {
     let (mut freeze_rx, _freeze_rx_2) = freeze_rxs;
 
-    let Some(bind) = collector.socket_addr() else {
+    let (Some(CaptureType::Ipfix(socket)), None) = capture_context.consume() else {
         return;
     };
-    let Ok(socket) = UdpSocket::bind(bind).log_err(location!()) else {
-        return;
-    };
-    if socket
-        .set_read_timeout(Some(RECV_TIMEOUT))
-        .log_err(location!())
-        .is_err()
-    {
-        return;
-    }
 
     let mut info_traffic_msg = InfoTraffic::default();
     let mut templates = TemplateCache::new();
@@ -416,6 +407,10 @@ fn build_key(record: &FlowRecord) -> Option<AddressPortPair> {
 /// Build a `[Address]` slice carrying just the exporter's IP, so direction
 /// classification treats the exporter as the local anchor.
 fn exporter_as_addresses(peer: IpAddr) -> Vec<Address> {
+    if peer.is_loopback() || peer.is_unspecified() {
+        return vec![];
+    }
+
     vec![Address {
         addr: peer,
         netmask: None,

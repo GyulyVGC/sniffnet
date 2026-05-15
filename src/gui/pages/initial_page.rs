@@ -14,7 +14,7 @@ use crate::gui::types::export_pcap::ExportPcap;
 use crate::gui::types::filters::Filters;
 use crate::gui::types::message::Message;
 use crate::gui::types::settings::Settings;
-use crate::networking::ipfix::IpfixCollectorConf;
+use crate::networking::ipfix::MyIpfixSocket;
 use crate::networking::types::capture_context::{CaptureSource, CaptureSourcePicklist};
 use crate::networking::types::my_device::MyDevice;
 use crate::networking::types::my_link_type::MyLinkType;
@@ -163,7 +163,7 @@ fn get_col_data_source(sniffer: &Sniffer, language: Language) -> Column<'_, Mess
         CaptureSourcePicklist::Ipfix => {
             col = col.push(get_col_ipfix_collector(
                 language,
-                &sniffer.conf.ipfix_collector,
+                &sniffer.conf.ipfix_socket,
             ));
         }
     }
@@ -319,7 +319,7 @@ fn get_col_import_pcap<'a>(
 
 fn get_col_ipfix_collector<'a>(
     language: Language,
-    conf: &IpfixCollectorConf,
+    ipfix_socket: &MyIpfixSocket,
 ) -> Column<'a, Message, StyleType> {
     let addr_row = Row::new()
         .align_y(Alignment::Center)
@@ -329,8 +329,8 @@ fn get_col_ipfix_collector<'a>(
             bind_address_translation(language)
         )))
         .push(
-            TextInput::new("0.0.0.0", &conf.bind_addr)
-                .on_input(Message::SetIpfixBindAddr)
+            TextInput::new("0.0.0.0", &ipfix_socket.addr())
+                .on_input(Message::SetIpfixAddr)
                 .padding([2, 5]),
         );
     let port_row = Row::new()
@@ -338,8 +338,8 @@ fn get_col_ipfix_collector<'a>(
         .spacing(5)
         .push(Text::new(format!("{}:", port_translation(language))))
         .push(
-            TextInput::new("4739", &conf.bind_port.to_string())
-                .on_input(Message::SetIpfixBindPort)
+            TextInput::new("4739", &ipfix_socket.port())
+                .on_input(Message::SetIpfixPort)
                 .padding([2, 5]),
         );
     let content = Column::new()
