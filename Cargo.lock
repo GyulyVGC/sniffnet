@@ -209,6 +209,12 @@ dependencies = [
 ]
 
 [[package]]
+name = "array-const-fn-init"
+version = "0.1.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "8bcb85e548c05d407fa6faff46b750ba287714ef32afc0f5e15b4641ffd6affb"
+
+[[package]]
 name = "arrayref"
 version = "0.3.9"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -3925,10 +3931,11 @@ dependencies = [
 
 [[package]]
 name = "prefix-trie"
-version = "0.8.3"
+version = "0.9.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "90f561214012d3fc240a1f9c817cc4d57f5310910d066069c1b093f766bb5966"
+checksum = "fbeb97a96d43f215f842f6ab81e8c7b5f6e9b912495c3178127f54f9dce28e32"
 dependencies = [
+ "array-const-fn-init",
  "either",
  "ipnet",
  "num-traits",
