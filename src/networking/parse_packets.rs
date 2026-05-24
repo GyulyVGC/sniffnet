@@ -185,6 +185,7 @@ pub fn parse_packets(
                         exchanged_bytes,
                         1,
                         ip_blacklist,
+                        None,
                     );
 
                     info_traffic_msg

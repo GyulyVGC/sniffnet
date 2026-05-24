@@ -16,6 +16,8 @@ use nom::multi::many0;
 use nom::number::complete::{be_u8, be_u16, be_u32};
 use std::net::{IpAddr, Ipv4Addr, Ipv6Addr};
 
+use crate::networking::types::traffic_direction::TrafficDirection;
+
 pub const IPFIX_VERSION: u16 = 0x000A;
 pub const SET_ID_TEMPLATE: u16 = 2;
 pub const SET_ID_OPTIONS_TEMPLATE: u16 = 3;
@@ -39,6 +41,7 @@ pub mod ie {
     pub const SOURCE_IPV6_ADDRESS: u16 = 27;
     pub const DESTINATION_IPV6_ADDRESS: u16 = 28;
     pub const SOURCE_MAC_ADDRESS: u16 = 56;
+    pub const FLOW_DIRECTION: u16 = 61;
     pub const POST_DESTINATION_MAC_ADDRESS: u16 = 80;
     pub const POST_SOURCE_MAC_ADDRESS: u16 = 81;
     pub const OCTET_TOTAL_COUNT: u16 = 85;
@@ -103,6 +106,7 @@ pub struct FlowRecord {
     pub packets: u128,
     pub src_mac: Option<[u8; 6]>,
     pub dst_mac: Option<[u8; 6]>,
+    pub direction: Option<TrafficDirection>,
 }
 
 /// Parse a complete IPFIX message (header + sets).
@@ -302,6 +306,15 @@ fn apply_ie(ie_id: u16, raw: &[u8], record: &mut FlowRecord) {
             if let Some(v) = read_mac(raw) {
                 record.dst_mac = Some(v);
             }
+        }
+        ie::FLOW_DIRECTION => {
+            // IANA: 0x00 = ingress, 0x01 = egress, 0xFF = undefined.
+            // Unknown values are treated as undefined.
+            record.direction = match raw.first() {
+                Some(0x00) => Some(TrafficDirection::Incoming),
+                Some(0x01) => Some(TrafficDirection::Outgoing),
+                _ => None,
+            };
         }
         _ => {}
     }

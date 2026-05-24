@@ -266,6 +266,7 @@ pub fn modify_or_insert_in_map(
     exchanged_bytes: u128,
     exchanged_packets: u128,
     ip_blacklist: &IpBlacklist,
+    direction_hint: Option<TrafficDirection>,
 ) -> (TrafficDirection, Service) {
     let mut traffic_direction = TrafficDirection::default();
     let mut service = Service::Unknown;
@@ -274,16 +275,18 @@ pub fn modify_or_insert_in_map(
     if !info_traffic_msg.map.contains_key(key) {
         // first occurrence of key (in this time interval)
 
-        // determine traffic direction
+        // determine traffic direction — caller's hint wins when present
         let source_ip = &key.source;
         let destination_ip = &key.dest;
-        traffic_direction = get_traffic_direction(
-            source_ip,
-            destination_ip,
-            key.sport,
-            key.dport,
-            my_interface_addresses,
-        );
+        traffic_direction = direction_hint.unwrap_or_else(|| {
+            get_traffic_direction(
+                source_ip,
+                destination_ip,
+                key.sport,
+                key.dport,
+                my_interface_addresses,
+            )
+        });
         // determine upper layer service
         service = get_service(key, traffic_direction, my_interface_addresses);
         // check if the remote address is blacklisted

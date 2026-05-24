@@ -262,6 +262,7 @@ fn ingest_flow_record(
         exchanged_bytes,
         exchanged_packets,
         ip_blacklist,
+        record.direction,
     );
 
     info_traffic_msg.tot_data_info.add_packets(
