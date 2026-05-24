@@ -19,6 +19,7 @@ use crate::networking::types::service::Service;
 use crate::networking::types::service_query::ServiceQuery;
 use crate::networking::types::traffic_direction::TrafficDirection;
 use crate::networking::types::traffic_type::TrafficType;
+use crate::utils::types::timestamp::Timestamp;
 use std::fmt::Write;
 use std::time::Instant;
 
@@ -267,6 +268,7 @@ pub fn modify_or_insert_in_map(
     exchanged_packets: u128,
     ip_blacklist: &IpBlacklist,
     direction_hint: Option<TrafficDirection>,
+    timestamps_hint: Option<(Timestamp, Timestamp)>,
 ) -> (TrafficDirection, Service) {
     let mut traffic_direction = TrafficDirection::default();
     let mut service = Service::Unknown;
@@ -294,14 +296,20 @@ pub fn modify_or_insert_in_map(
         is_blacklisted = ip_blacklist.contains(&address_to_lookup);
     }
 
-    let timestamp = info_traffic_msg.last_packet_timestamp;
+    let receipt_ts = info_traffic_msg.last_packet_timestamp;
+    let (initial_ts, final_ts) = timestamps_hint.unwrap_or((receipt_ts, receipt_ts));
     let new_info = info_traffic_msg
         .map
         .entry(*key)
         .and_modify(|info| {
             info.transmitted_bytes += exchanged_bytes;
             info.transmitted_packets += exchanged_packets;
-            info.final_timestamp = timestamp;
+            if initial_ts < info.initial_timestamp {
+                info.initial_timestamp = initial_ts;
+            }
+            if final_ts > info.final_timestamp {
+                info.final_timestamp = final_ts;
+            }
             info.final_instant = Instant::now();
             if key.protocol.eq(&Protocol::ICMP) {
                 info.icmp_types
@@ -321,8 +329,8 @@ pub fn modify_or_insert_in_map(
             mac_address2: mac_addresses.1,
             transmitted_bytes: exchanged_bytes,
             transmitted_packets: exchanged_packets,
-            initial_timestamp: timestamp,
-            final_timestamp: timestamp,
+            initial_timestamp: initial_ts,
+            final_timestamp: final_ts,
             final_instant: Instant::now(),
             service,
             traffic_direction,

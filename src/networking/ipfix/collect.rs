@@ -252,6 +252,7 @@ fn ingest_flow_record(
         record.dst_mac.map(format_mac),
     );
 
+    let timestamps_hint = record.flow_start.zip(record.flow_end);
     let (traffic_direction, service) = modify_or_insert_in_map(
         info_traffic_msg,
         &key,
@@ -263,6 +264,7 @@ fn ingest_flow_record(
         exchanged_packets,
         ip_blacklist,
         record.direction,
+        timestamps_hint,
     );
 
     info_traffic_msg.tot_data_info.add_packets(

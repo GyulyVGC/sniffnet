@@ -17,6 +17,7 @@ use nom::number::complete::{be_u8, be_u16, be_u32};
 use std::net::{IpAddr, Ipv4Addr, Ipv6Addr};
 
 use crate::networking::types::traffic_direction::TrafficDirection;
+use crate::utils::types::timestamp::Timestamp;
 
 pub const IPFIX_VERSION: u16 = 0x000A;
 pub const SET_ID_TEMPLATE: u16 = 2;
@@ -107,6 +108,8 @@ pub struct FlowRecord {
     pub src_mac: Option<[u8; 6]>,
     pub dst_mac: Option<[u8; 6]>,
     pub direction: Option<TrafficDirection>,
+    pub flow_start: Option<Timestamp>,
+    pub flow_end: Option<Timestamp>,
 }
 
 /// Parse a complete IPFIX message (header + sets).
@@ -316,8 +319,26 @@ fn apply_ie(ie_id: u16, raw: &[u8], record: &mut FlowRecord) {
                 _ => None,
             };
         }
+        ie::FLOW_START_MILLISECONDS => {
+            record.flow_start = read_timestamp_ms(raw);
+        }
+        ie::FLOW_END_MILLISECONDS => {
+            record.flow_end = read_timestamp_ms(raw);
+        }
         _ => {}
     }
+}
+
+/// IPFIX `dateTimeMilliseconds` is 8 bytes big-endian, ms since UNIX epoch.
+/// Converted to Sniffnet's `Timestamp(secs, usecs)` representation.
+fn read_timestamp_ms(raw: &[u8]) -> Option<Timestamp> {
+    if raw.len() != 8 {
+        return None;
+    }
+    let ms = u64::from_be_bytes(raw.try_into().ok()?);
+    let secs = (ms / 1_000) as i64;
+    let usecs = ((ms % 1_000) * 1_000) as i64;
+    Some(Timestamp::new(secs, usecs))
 }
 
 /// Read a big-endian unsigned integer of 1..=8 bytes into a `u128`.
