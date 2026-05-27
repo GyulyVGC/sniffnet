@@ -5,7 +5,7 @@
 
 <a href="#download"><img alt="" title="Download" src="https://raw.githubusercontent.com/GyulyVGC/sniffnet/main/resources/repository/badges/download.svg"/></a>
 <a href="https://github.com/GyulyVGC/sniffnet/blob/main/ROADMAP.md"><img alt="" title="Roadmap" src="https://raw.githubusercontent.com/GyulyVGC/sniffnet/main/resources/repository/badges/roadmap.svg"/></a>
-<a href="https://sniffnet.net"><img alt="" title="Website" src="https://raw.githubusercontent.com/GyulyVGC/sniffnet/main/resources/repository/badges/website.svg"/></a>
+<a href="https://sniffnet.app"><img alt="" title="Website" src="https://raw.githubusercontent.com/GyulyVGC/sniffnet/main/resources/repository/badges/website.svg"/></a>
 <a href="https://github.com/GyulyVGC/sniffnet/wiki"><img alt="" title="Wiki" src="https://raw.githubusercontent.com/GyulyVGC/sniffnet/main/resources/repository/badges/wiki.svg"/></a>
 
 Application to comfortably monitor your Internet traffic.<br>
@@ -61,7 +61,7 @@ A special shout-out to these awesome organizations and folks who are sponsoring 
 
 ## Download
 
-<picture><img height="28px" alt="" title="Downloads count" src="https://raw.githubusercontent.com/GyulyVGC/GyulyVGC.github.io/master/assets/img/downloads_badge.svg"/></picture>
+<picture><img height="28px" alt="" title="Downloads count" src="https://raw.githubusercontent.com/sniffnet/sniffnet-website/master/assets/img/downloads_badge.svg"/></picture>
 <a href="https://github.com/GyulyVGC/sniffnet/releases/latest"><img height="28px" alt="" title="Latest version" src="https://img.shields.io/github/v/release/gyulyvgc/sniffnet?color=blue&label=version&logo=github&style=for-the-badge"/></a>
 
 <table>
@@ -174,12 +174,12 @@ ICED_BACKEND=tiny-skia
 ## Stay in the loop
 
 Wait... there's more!<br>Sniffnet is rapidly evolving, and new features are added on a regular basis.<br>
-Follow the <a href="https://sniffnet.net/news"><b>news</b></a> and Sniffnet socials to never miss an update.
+Follow the <a href="https://sniffnet.app/news"><b>news</b></a> and Sniffnet socials to never miss an update.
 
 <table align="center">
   <tr>
     <td>
-      <a href="https://bsky.app/profile/sniffnet.net"><img width="48" height="48" alt="Bluesky" title="Bluesky" src="https://raw.githubusercontent.com/GyulyVGC/sniffnet/main/resources/repository/badges/bluesky.svg"/></a>
+      <a href="https://bsky.app/profile/sniffnet.app"><img width="48" height="48" alt="Bluesky" title="Bluesky" src="https://raw.githubusercontent.com/GyulyVGC/sniffnet/main/resources/repository/badges/bluesky.svg"/></a>
     </td>
     <td>
       <a href="https://www.linkedin.com/company/sniffnet"><img width="48" height="48" alt="LinkedIn" title="LinkedIn" src="https://raw.githubusercontent.com/GyulyVGC/sniffnet/main/resources/repository/badges/linkedin.svg"/></a>

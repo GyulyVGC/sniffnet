@@ -13,7 +13,7 @@ or safety of Sniffnet or its users:
 - a vulnerability in Sniffnet or one of its dependencies
 - a tampered release artifact or compromised signing key
 - unauthorized commits, tags, or releases
-- a compromised maintainer account or the [sniffnet.net](https://sniffnet.net) website
+- a compromised maintainer account or the [sniffnet.app](https://sniffnet.app) website
 
 ## Roles
 
