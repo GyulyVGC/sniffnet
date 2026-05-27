@@ -21,6 +21,7 @@ use crate::networking::types::data_representation::DataRepr;
 use crate::networking::types::host::Host;
 use crate::networking::types::icmp_type::IcmpType;
 use crate::networking::types::info_address_port_pair::InfoAddressPortPair;
+use crate::networking::types::latency::LatencyStatus;
 use crate::networking::types::traffic_direction::TrafficDirection;
 use crate::translations::translations::{
     address_translation, incoming_translation, outgoing_translation, packets_translation,
@@ -34,7 +35,9 @@ use crate::translations::translations_2::{
 use crate::translations::translations_3::{
     copy_translation, messages_translation, service_translation,
 };
-use crate::translations::translations_5::program_translation;
+use crate::translations::translations_5::{
+    latency_translation, measure_latency_translation, program_translation,
+};
 use crate::utils::formatted_strings::{get_formatted_timestamp, get_socket_address};
 use crate::utils::types::icon::Icon;
 use crate::{Language, Protocol, Sniffer, StyleType};
@@ -123,7 +126,14 @@ fn page_content<'a>(sniffer: &Sniffer, key: &AddressPortPair) -> Container<'a, M
         dest_col = dest_col.push(host_info_col);
     }
 
-    let col_info = col_info(key, val, data_repr, language);
+    let col_info = col_info(
+        key,
+        val,
+        data_repr,
+        language,
+        address_to_lookup,
+        sniffer.latency_statuses.get(&address_to_lookup),
+    );
 
     let content = assemble_widgets(col_info, source_col, dest_col);
 
@@ -164,6 +174,8 @@ fn col_info<'a>(
     val: &InfoAddressPortPair,
     data_repr: DataRepr,
     language: Language,
+    latency_target: IpAddr,
+    latency_status: Option<&LatencyStatus>,
 ) -> Column<'a, Message, StyleType> {
     let is_icmp = key.protocol.eq(&Protocol::ICMP);
     let is_arp = key.protocol.eq(&Protocol::ARP);
@@ -220,6 +232,8 @@ fn col_info<'a>(
             .as_ref()),
     ));
 
+    ret_val = ret_val.push(latency_row(language, latency_target, latency_status));
+
     if is_icmp || is_arp {
         ret_val = ret_val.push(
             Column::new()
@@ -246,6 +260,49 @@ fn col_info<'a>(
     ret_val = ret_val.push(Space::new().height(Length::Fill));
 
     ret_val
+}
+
+fn latency_row<'a>(
+    language: Language,
+    latency_target: IpAddr,
+    latency_status: Option<&LatencyStatus>,
+) -> Row<'a, Message, StyleType> {
+    let status = latency_status.map_or_else(|| "-".to_string(), LatencyStatus::formatted);
+    let measuring = latency_status.is_some_and(|s| matches!(s, LatencyStatus::Measuring));
+    let icon = if measuring {
+        Icon::Hourglass1.to_text().size(12)
+    } else {
+        Icon::Lightning.to_text().size(12)
+    };
+
+    let button = button(icon.align_x(Alignment::Center).align_y(Alignment::Center))
+        .padding(0)
+        .height(25)
+        .width(25);
+
+    let button = if measuring {
+        button
+    } else {
+        button.on_press(Message::MeasureLatency(latency_target))
+    };
+
+    Row::new()
+        .spacing(8)
+        .align_y(Alignment::Center)
+        .push(TextType::highlighted_subtitle_with_desc(
+            latency_translation(language),
+            &status,
+        ))
+        .push(
+            Tooltip::new(
+                button,
+                Text::new(measure_latency_translation(language)),
+                Position::Right,
+            )
+            .gap(5)
+            .class(ContainerType::Tooltip)
+            .delay(TOOLTIP_DELAY),
+        )
 }
 
 fn get_host_info_col<'a>(

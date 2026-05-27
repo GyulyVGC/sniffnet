@@ -40,6 +40,7 @@ use crate::networking::types::data_representation::DataRepr;
 use crate::networking::types::host::{Host, HostMessage};
 use crate::networking::types::info_traffic::InfoTraffic;
 use crate::networking::types::ip_blacklist::IpBlacklist;
+use crate::networking::types::latency::{LatencyStatus, measure_latency};
 use crate::networking::types::my_device::MyDevice;
 use crate::networking::types::program::Program;
 use crate::networking::types::program_lookup::{ProgramLookup, get_picon, lookup_program};
@@ -128,6 +129,8 @@ pub struct Sniffer {
     pub mmdb_readers: MmdbReaders,
     /// IP blacklist
     pub ip_blacklist: IpBlacklist,
+    /// Latest latency measurements by remote address
+    pub latency_statuses: HashMap<IpAddr, LatencyStatus>,
     /// Time-related events
     pub timing_events: TimingEvents,
     /// Whether thumbnail mode is currently active
@@ -182,6 +185,7 @@ impl Sniffer {
                 asn: Arc::new(MmdbReader::from(&mmdb_asn, ASN_MMDB)),
             },
             ip_blacklist: IpBlacklist::default(), // load it later
+            latency_statuses: HashMap::new(),
             timing_events: TimingEvents::default(),
             thumbnail: false,
             id: None,
@@ -332,6 +336,8 @@ impl Sniffer {
             Message::Quit => return self.quit(),
             Message::Welcome => self.welcome(),
             Message::CopyIp(ip) => return self.copy_ip(ip),
+            Message::MeasureLatency(ip) => return self.measure_latency(ip),
+            Message::LatencyMeasured(ip, status) => self.latency_measured(ip, status),
             Message::OpenFile(old_file, file_info, consumer_message) => {
                 return self.open_file(old_file, file_info, consumer_message);
             }
@@ -675,6 +681,17 @@ impl Sniffer {
 
     fn set_ip_blacklist(&mut self, blacklist: IpBlacklist) {
         self.ip_blacklist = blacklist;
+    }
+
+    fn measure_latency(&mut self, ip: IpAddr) -> Task<Message> {
+        self.latency_statuses.insert(ip, LatencyStatus::Measuring);
+        Task::perform(measure_latency(ip), |(ip, status)| {
+            Message::LatencyMeasured(ip, status)
+        })
+    }
+
+    fn latency_measured(&mut self, ip: IpAddr, status: LatencyStatus) {
+        self.latency_statuses.insert(ip, status);
     }
 
     fn open_file(
