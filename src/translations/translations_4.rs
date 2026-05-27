@@ -6,6 +6,7 @@ pub fn reserved_address_translation(language: Language, info: &str) -> String {
     match language {
         Language::EN => format!("Reserved address ({info})"),
         Language::CS => format!("Rezervovaná adresa ({info})"),
+        // Language::FA => format!("آدرس رزرو شده ({info})"),
         Language::IT => format!("Indirizzo riservato ({info})"),
         Language::JA => format!("予約済みアドレス ({info})"),
         Language::PT => format!("Endereço reservado ({info})"),
@@ -31,6 +32,7 @@ pub fn share_feedback_translation(language: Language) -> &'static str {
     match language {
         Language::EN => "Share your feedback",
         Language::CS => "Sdílejte své hodnocení",
+        // Language::FA => "اشتراک‌گذاری بازخورد",
         Language::IT => "Condividi il tuo feedback",
         Language::JA => "フィードバックを共有",
         Language::ZH => "分享您的反馈",
@@ -56,6 +58,7 @@ pub fn share_feedback_translation(language: Language) -> &'static str {
 //     match language {
 //         Language::EN => "Excluded",
 //         Language::CS => "Vyloučeno",
+//         Language::FA => "حذف‌شده",
 //         Language::IT => "Esclusi",
 //         Language::JA => "除外",
 //         Language::ZH => "已被过滤",
@@ -78,6 +81,7 @@ pub fn capture_file_translation(language: Language) -> &'static str {
     match language {
         Language::EN => "Capture file",
         Language::CS => "Soubor zachycení",
+        // Language::FA => "فایل ضبط",
         Language::IT => "File di cattura",
         Language::FR => "Fichier de capture",
         Language::JA => "キャプチャファイル",
@@ -102,6 +106,7 @@ pub fn select_file_translation(language: Language) -> &'static str {
     match language {
         Language::EN => "Select file",
         Language::CS => "Výběr souboru",
+        // Language::FA => "انتخاب فایل",
         Language::IT => "Seleziona file",
         Language::FR => "Sélectionner fichier",
         Language::JA => "ファイルを選択",
@@ -132,6 +137,10 @@ pub fn reading_from_pcap_translation(language: Language) -> &'static str {
             "Čtení paketů ze souuboru...\n\n\
                                  Jste si jistý že vybraný soubor není prázdný?"
         }
+    //  Language::FA => {
+    //     "در حال خواندن بسته‌ها از فایل...\n\n\
+    //      مطمئن هستید فایلی که انتخاب کرده‌اید خالی نیست؟"
+    // }
         Language::IT => {
             "Lettura pacchetti da file...\n\n\
                                 Sei sicuro che il file che hai selezionato non sia vuoto?"
@@ -207,6 +216,7 @@ pub fn data_exceeded_translation(language: Language) -> &'static str {
     match language {
         Language::EN => "Data threshold exceeded",
         Language::CS => "Překročen limit dat",
+        // Language::FA => "محدودیت داده فراتر رفت",
         Language::IT => "Soglia di dati superata",
         Language::FR => "Seuil de données dépassé",
         Language::JA => "データの閾値を超えました",
@@ -230,6 +240,7 @@ pub fn bits_exceeded_translation(language: Language) -> &'static str {
     match language {
         Language::EN => "Bits threshold exceeded",
         Language::CS => "Překročen limit bitů",
+        // Language::FA => "محدودیت بیت فراتر رفت",
         Language::IT => "Soglia di bit superata",
         Language::FR => "Seuil de bits dépassé",
         Language::JA => "ビットの閾値を超えました",
@@ -261,6 +272,7 @@ pub fn bits_translation(language: Language) -> &'static str {
         | Language::ES
         | Language::SV => "bits",
         Language::CS => "bity",
+        // Language::FA => "بیت",
         Language::JA => "ビット",
         Language::ZH => "比特",
         Language::UZ => "bitlar",
@@ -278,6 +290,7 @@ pub fn pause_translation(language: Language) -> &'static str {
     match language {
         Language::EN | Language::DE | Language::FR => "Pause",
         Language::CS => "Pauza",
+        // Language::FA => "توقف",
         Language::IT | Language::ES | Language::SV => "Pausa",
         Language::JA => "一時停止",
         Language::ZH => "暂停",
@@ -299,6 +312,7 @@ pub fn resume_translation(language: Language) -> &'static str {
     match language {
         Language::EN => "Resume",
         Language::CS => "Obnovit",
+        // Language::FA => "ادامه",
         Language::IT => "Riprendi",
         Language::FR => "Reprendre",
         Language::JA => "再開",
