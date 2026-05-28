@@ -61,7 +61,7 @@ A special shout-out to these awesome organizations and folks who are sponsoring 
 
 ## Download
 
-<picture><img height="28px" alt="" title="Downloads count" src="https://raw.githubusercontent.com/sniffnet/sniffnet-website/master/assets/img/downloads_badge.svg"/></picture>
+<picture><img height="28px" alt="" title="Downloads count" src="https://raw.githubusercontent.com/sniffnet/sniffnet.github.io/main/assets/img/downloads_badge.svg"/></picture>
 <a href="https://github.com/GyulyVGC/sniffnet/releases/latest"><img height="28px" alt="" title="Latest version" src="https://img.shields.io/github/v/release/gyulyvgc/sniffnet?color=blue&label=version&logo=github&style=for-the-badge"/></a>
 
 <table>
