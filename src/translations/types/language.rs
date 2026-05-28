@@ -1,14 +1,14 @@
 use std::fmt;
 
-use iced::widget::Svg;
 use iced::widget::svg::Handle;
+use iced::widget::Svg;
 use serde::{Deserialize, Serialize};
 
-use crate::StyleType;
 use crate::countries::flags_pictures::{
-    CN, CZ, DE, ES, FI, FR, GB, GR, ICONS_SIZE_BIG, ID, IT, JP, KR, NL, PL, PT, RO, RU, SE, TR, TW,
-    UA, UZ, VN,
+    CN, CZ, DE, ES, FI, FR, GB, GR, HU, ICONS_SIZE_BIG, ID, IT, JP, KR, NL, PL, PT, RO, RU, SE, TR,
+    TW, UA, UZ, VN,
 };
+use crate::StyleType;
 
 /// This enum defines the available languages.
 #[derive(PartialEq, Eq, Clone, Copy, Debug, Serialize, Deserialize, Hash, Default)]
@@ -63,10 +63,12 @@ pub enum Language {
     NL,
     /// Czech
     CS,
+    /// Hungarian
+    HU,
 }
 
 impl Language {
-    pub const ALL: [Language; 23] = [
+    pub const ALL: [Language; 24] = [
         Language::EN,
         Language::CS,
         Language::DE,
@@ -74,6 +76,7 @@ impl Language {
         Language::ES,
         Language::FI,
         Language::FR,
+        Language::HU,
         Language::ID,
         Language::IT,
         Language::JA,
@@ -118,6 +121,7 @@ impl Language {
             Language::ID => ID,
             Language::NL => NL,
             Language::CS => CZ,
+            Language::HU => HU,
         })))
         .width(ICONS_SIZE_BIG)
     }
@@ -139,6 +143,7 @@ impl Language {
                 | Language::ES
                 | Language::SV
                 | Language::EL
+                | Language::HU
         )
     }
 }
@@ -170,6 +175,7 @@ impl fmt::Display for Language {
             Language::ID => "Bahasa Indonesia",
             Language::NL => "Nederlands",
             Language::CS => "Čeština",
+            Language::HU => "Magyar",
         };
         write!(f, "{self:?} - {lang_str}")
     }
