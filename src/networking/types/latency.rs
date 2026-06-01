@@ -1,6 +1,18 @@
 use std::net::IpAddr;
-use std::process::Command;
+use std::sync::atomic::{AtomicU16, Ordering};
+use std::sync::{Arc, LazyLock};
 use std::time::Duration;
+
+use surge_ping::{Client, Config, ICMP, PingIdentifier, PingSequence};
+
+const PING_TIMEOUT: Duration = Duration::from_secs(1);
+const PING_PAYLOAD: [u8; 8] = [0; 8];
+
+static IPV4_CLIENT: LazyLock<Result<Arc<Client>, String>> =
+    LazyLock::new(|| latency_client(ICMP::V4));
+static IPV6_CLIENT: LazyLock<Result<Arc<Client>, String>> =
+    LazyLock::new(|| latency_client(ICMP::V6));
+static PING_SEQUENCE: AtomicU16 = AtomicU16::new(0);
 
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub enum LatencyStatus {
@@ -20,139 +32,87 @@ impl LatencyStatus {
 }
 
 pub async fn measure_latency(ip: IpAddr) -> (IpAddr, LatencyStatus) {
-    (ip, measure_latency_inner(ip))
+    (ip, measure_latency_inner(ip).await)
 }
 
-fn measure_latency_inner(ip: IpAddr) -> LatencyStatus {
-    let ip = ip.to_string();
-    let output = ping_command(&ip).output();
+async fn measure_latency_inner(ip: IpAddr) -> LatencyStatus {
+    let client = match client_for(ip) {
+        Ok(client) => client,
+        Err(error) => return LatencyStatus::Failed(error),
+    };
 
-    match output {
-        Ok(output) if output.status.success() => {
-            let stdout = String::from_utf8_lossy(&output.stdout);
-            parse_ping_latency(&stdout).map_or_else(
-                || LatencyStatus::Failed("Latency unavailable".to_string()),
-                LatencyStatus::Measured,
-            )
-        }
-        Ok(output) => {
-            let stderr = String::from_utf8_lossy(&output.stderr).trim().to_string();
-            LatencyStatus::Failed(if stderr.is_empty() {
-                "Latency unavailable".to_string()
-            } else {
-                stderr
-            })
-        }
-        Err(_) => LatencyStatus::Failed("Unable to run ping".to_string()),
+    let mut pinger = client.pinger(ip, ping_identifier()).await;
+    pinger.timeout(PING_TIMEOUT);
+
+    match pinger.ping(next_sequence(), &PING_PAYLOAD).await {
+        Ok((_packet, latency)) => LatencyStatus::Measured(latency),
+        Err(error) => LatencyStatus::Failed(error.to_string()),
     }
 }
 
-fn ping_command(ip: &str) -> Command {
-    let mut command = Command::new("ping");
+fn client_for(ip: IpAddr) -> Result<Arc<Client>, String> {
+    let client = match ip {
+        IpAddr::V4(_) => &*IPV4_CLIENT,
+        IpAddr::V6(_) => &*IPV6_CLIENT,
+    };
 
-    #[cfg(target_os = "windows")]
-    {
-        command.args(["-n", "1", "-w", "1000", ip]);
-    }
-
-    #[cfg(target_os = "macos")]
-    {
-        command.args(["-c", "1", "-W", "1000", ip]);
-    }
-
-    #[cfg(all(unix, not(target_os = "macos")))]
-    {
-        command.args(["-c", "1", "-W", "1", ip]);
-    }
-
-    command
+    client.as_ref().map(Arc::clone).map_err(ToString::to_string)
 }
 
-fn parse_ping_latency(output: &str) -> Option<Duration> {
-    let time_pos = output.find("time")?;
-    let after_time = &output[time_pos + "time".len()..];
-    let value_start = after_time.find(['=', '<'])?;
-    let value = after_time[value_start + 1..].trim_start();
-    let value_end = value
-        .find(|c: char| !(c.is_ascii_digit() || c == '.'))
-        .unwrap_or(value.len());
-    let millis = value[..value_end].parse::<f64>().ok()?;
+fn latency_client(kind: ICMP) -> Result<Arc<Client>, String> {
+    let config = match kind {
+        ICMP::V4 => Config::default(),
+        ICMP::V6 => Config::builder().kind(ICMP::V6).build(),
+    };
 
-    Some(Duration::from_secs_f64(millis / 1000.0))
+    Client::new(&config)
+        .map(Arc::new)
+        .map_err(|error| error.to_string())
+}
+
+fn ping_identifier() -> PingIdentifier {
+    PingIdentifier(std::process::id() as u16)
+}
+
+fn next_sequence() -> PingSequence {
+    PingSequence(PING_SEQUENCE.fetch_add(1, Ordering::Relaxed))
 }
 
 #[cfg(test)]
 mod tests {
     use std::env;
-    use std::net::{IpAddr, Ipv4Addr};
-    use std::process::Command;
+    use std::net::{IpAddr, Ipv4Addr, Ipv6Addr};
 
-    use super::{LatencyStatus, measure_latency_inner, parse_ping_latency, ping_command};
+    use super::{LatencyStatus, measure_latency_inner, next_sequence, ping_identifier};
 
-    fn command_args(command: &Command) -> Vec<String> {
-        command
-            .get_args()
-            .map(|arg| arg.to_string_lossy().into_owned())
-            .collect()
-    }
-
-    #[cfg(target_os = "windows")]
-    fn expected_ping_args(ip: &str) -> Vec<String> {
-        ["-n", "1", "-w", "1000", ip]
-            .into_iter()
-            .map(String::from)
-            .collect()
-    }
-
-    #[cfg(target_os = "macos")]
-    fn expected_ping_args(ip: &str) -> Vec<String> {
-        ["-c", "1", "-W", "1000", ip]
-            .into_iter()
-            .map(String::from)
-            .collect()
-    }
-
-    #[cfg(all(unix, not(target_os = "macos")))]
-    fn expected_ping_args(ip: &str) -> Vec<String> {
-        ["-c", "1", "-W", "1", ip]
-            .into_iter()
-            .map(String::from)
-            .collect()
+    #[test]
+    fn uses_process_id_as_ping_identifier() {
+        assert_eq!(ping_identifier().0, std::process::id() as u16);
     }
 
     #[test]
-    fn parses_linux_ping_latency() {
-        let output = "64 bytes from 1.1.1.1: icmp_seq=1 ttl=58 time=14.2 ms";
+    fn increments_ping_sequence() {
+        let first = next_sequence().0;
+        let second = next_sequence().0;
 
-        assert_eq!(parse_ping_latency(output).unwrap().as_millis(), 14);
+        assert_eq!(second, first.wrapping_add(1));
     }
 
-    #[test]
-    fn parses_windows_ping_latency() {
-        let output = "Reply from 1.1.1.1: bytes=32 time=23ms TTL=55";
+    #[tokio::test]
+    async fn measures_ipv4_loopback_latency_end_to_end() {
+        let status = measure_latency_inner(IpAddr::V4(Ipv4Addr::LOCALHOST)).await;
 
-        assert_eq!(parse_ping_latency(output).unwrap().as_millis(), 23);
+        assert_measured_or_local_permission_error(status);
     }
 
-    #[test]
-    fn parses_sub_millisecond_latency() {
-        let output = "64 bytes from 127.0.0.1: icmp_seq=1 ttl=64 time<1 ms";
+    #[tokio::test]
+    async fn measures_ipv6_loopback_latency_end_to_end() {
+        let status = measure_latency_inner(IpAddr::V6(Ipv6Addr::LOCALHOST)).await;
 
-        assert_eq!(parse_ping_latency(output).unwrap().as_millis(), 1);
+        assert_measured_or_local_permission_error(status);
     }
 
-    #[test]
-    fn builds_ping_command_for_current_platform() {
-        let command = ping_command("1.1.1.1");
-
-        assert_eq!(command.get_program().to_string_lossy(), "ping");
-        assert_eq!(command_args(&command), expected_ping_args("1.1.1.1"));
-    }
-
-    #[test]
-    fn measures_loopback_latency_end_to_end() {
-        let status = measure_latency_inner(IpAddr::V4(Ipv4Addr::LOCALHOST));
-
+    fn assert_measured_or_local_permission_error(status: LatencyStatus) {
         match status {
             LatencyStatus::Measured(_) => {}
             LatencyStatus::Failed(error)
@@ -160,10 +120,10 @@ mod tests {
                     && (error.contains("Operation not permitted")
                         || error.contains("Permission denied")) => {}
             LatencyStatus::Failed(error) => {
-                panic!("expected loopback latency measurement, got error: {error}");
+                panic!("expected loopback latency, got error: {error}");
             }
             LatencyStatus::Measuring => {
-                panic!("expected completed loopback latency measurement");
+                panic!("expected completed loopback latency");
             }
         }
     }
