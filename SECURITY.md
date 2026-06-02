@@ -10,13 +10,15 @@ But no matter how much effort we put into securing the app, there can still be *
 For how incidents are handled, see [`INCIDENT_RESPONSE.md`](https://github.com/GyulyVGC/sniffnet/blob/main/INCIDENT_RESPONSE.md).<br>
 For the project's threat model, see [`THREAT_MODEL.md`](https://github.com/GyulyVGC/sniffnet/blob/main/THREAT_MODEL.md).
 
+For all security-related communications, please write to `security@sniffnet.app`.
+
 ***
 
 If you discover a vulnerability, we would like to know about it so we can take steps to address it as quickly as possible.
 
 Please do the following:
 
-- E-mail your findings to gyulyvgc99@gmail.com
+- E-mail your findings to `security@sniffnet.app`
 - Do not take advantage of the vulnerability or problem you have discovered
 - Do not reveal the problem to others until it has been resolved
 - Do provide sufficient information to reproduce the problem, so we will be able to resolve it as quickly as possible

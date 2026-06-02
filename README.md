@@ -41,6 +41,8 @@ Translated in:<br>
 
 If you appreciate Sniffnet, [sponsor the project](https://github.com/sponsors/GyulyVGC) to support its [growth](https://github.com/GyulyVGC/sniffnet/blob/main/ROADMAP.md).
 
+For sponsorship inquiries, feel free to reach out at `sponsor@sniffnet.app`.
+
 A special shout-out to these awesome organizations and folks who are sponsoring Sniffnet:</i>
 
 <table><tr><td>
@@ -195,3 +197,5 @@ Follow the <a href="https://sniffnet.app/news"><b>news</b></a> and Sniffnet soci
     </td>
   </tr>
 </table>
+
+You can also reach us by email at `info@sniffnet.app`.
