@@ -4165,8 +4165,8 @@ jediserver	2406/tcp
 jediserver	2406/udp
 orion	2407/tcp
 orion	2407/udp
-optimanet	2408/tcp
-optimanet	2408/udp
+cloudflare-warp	2408/tcp
+cloudflare-warp	2408/udp
 sns-protocol	2409/tcp
 sns-protocol	2409/udp
 vrts-registry	2410/tcp
