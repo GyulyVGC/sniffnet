@@ -984,6 +984,15 @@
       "contributions": [
         "financial"
       ]
+    },
+    {
+      "login": "pml68",
+      "name": "Polesznyák Márk László",
+      "avatar_url": "https://avatars.githubusercontent.com/u/116908301?v=4",
+      "profile": "http://pml68.dev",
+      "contributions": [
+        "translation"
+      ]
     }
   ],
   "contributorsPerLine": 7,
