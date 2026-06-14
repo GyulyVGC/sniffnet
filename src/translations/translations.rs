@@ -2,8 +2,8 @@
 
 use iced::widget::Text;
 
-use crate::translations::types::language::Language;
 use crate::StyleType;
+use crate::translations::types::language::Language;
 
 // pub fn choose_adapters_translation<'a>(language: Language) -> Text<'a, StyleType> {
 //     Text::new(match language {
@@ -646,7 +646,7 @@ pub fn no_addresses_translation(language: Language) -> &'static str {
         }
         Language::HU => {
             "Nem megfigyelhető a forgalom mivel a kiválasztott adapternek nincs aktív címe...\n\n\
-                                Ha biztos vagy benne, hogy csatlakozva vagy az internethet, próbálj meg egy másik adaptert használni."
+                                Ha biztos vagy benne, hogy csatlakozva vagy az internethez, próbálj meg egy másik adaptert használni."
         }
     }
 }
@@ -2449,7 +2449,7 @@ pub fn no_notifications_received_translation<'a>(language: Language) -> Text<'a,
         }
         Language::HU => {
             "Semmi látnivaló...\n\n\
-                                 Amint érkezik egy értesítés, azt itt fogod látni."
+                                 Amint érkezik egy értesítés, azt itt fogod látni"
         }
     })
 }

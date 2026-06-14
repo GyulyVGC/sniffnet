@@ -142,10 +142,10 @@ pub fn reading_from_pcap_translation(language: Language) -> &'static str {
             "Čtení paketů ze souuboru...\n\n\
                                  Jste si jistý že vybraný soubor není prázdný?"
         }
-    //  Language::FA => {
-    //     "در حال خواندن بسته‌ها از فایل...\n\n\
-    //      مطمئن هستید فایلی که انتخاب کرده‌اید خالی نیست؟"
-    // }
+        //  Language::FA => {
+        //     "در حال خواندن بسته‌ها از فایل...\n\n\
+        //      مطمئن هستید فایلی که انتخاب کرده‌اید خالی نیست؟"
+        // }
         Language::IT => {
             "Lettura pacchetti da file...\n\n\
                                 Sei sicuro che il file che hai selezionato non sia vuoto?"

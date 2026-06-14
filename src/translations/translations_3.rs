@@ -356,7 +356,9 @@ pub fn unsupported_link_type_translation(language: Language) -> &'static str {
         Language::EL => {
             "Ο τύπος σύνδεσης που σχετίζεται με αυτόν τον προσαρμογέα δεν υποστηρίζεται ακόμη από το Sniffnet..."
         }
-        Language::HU => "Az ezzel az adapterrel asszociált link típust még nem támogatja a Sniffnet...",
+        Language::HU => {
+            "Az ezzel az adapterrel asszociált link típust még nem támogatja a Sniffnet..."
+        }
         _ => "The link type associated with this adapter is not supported by Sniffnet yet...",
     }
 }

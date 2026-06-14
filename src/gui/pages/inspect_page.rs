@@ -4,9 +4,9 @@ use iced::widget::scrollable::Direction;
 use iced::widget::text::LineHeight;
 use iced::widget::text_input::Side;
 use iced::widget::tooltip::Position;
-use iced::widget::{button, combo_box, text_input, ComboBox, Space, Toggler, Tooltip};
 use iced::widget::{Button, Column, Container, Row, Scrollable, Text, TextInput};
-use iced::{alignment, Alignment, Element, Length, Padding, Pixels};
+use iced::widget::{ComboBox, Space, Toggler, Tooltip, button, combo_box, text_input};
+use iced::{Alignment, Element, Length, Padding, Pixels, alignment};
 
 use crate::gui::components::tab::get_pages_tabs;
 use crate::gui::components::types::my_modal::MyModal;

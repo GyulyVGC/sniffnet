@@ -5,6 +5,7 @@ All Sniffnet releases with the relative changes are documented in this file.
 ## [UNRELEASED]
 - Support CIDR ranges in imported IP blacklists ([#1181](https://github.com/GyulyVGC/sniffnet/pull/1181))
 - Show number of IP addresses and CIDR ranges in imported IP blacklists ([#1183](https://github.com/GyulyVGC/sniffnet/pull/1183))
+- Added Hungarian translation 🇭🇺 ([#1197](https://github.com/GyulyVGC/sniffnet/pull/1197))
 - Updated some of the existing translations to v1.5:
   - Ukrainian ([#1039](https://github.com/GyulyVGC/sniffnet/pull/1039))
   - German ([#1122](https://github.com/GyulyVGC/sniffnet/pull/1122))
@@ -13,6 +14,7 @@ All Sniffnet releases with the relative changes are documented in this file.
   - Indonesian ([#1145](https://github.com/GyulyVGC/sniffnet/pull/1145))
   - Swedish ([#1068](https://github.com/GyulyVGC/sniffnet/pull/1068))
   - Greek ([#1175](https://github.com/GyulyVGC/sniffnet/pull/1175))
+  - Persian ([#1196](https://github.com/GyulyVGC/sniffnet/pull/1196))
 - Fix unseen hosts and services not appearing dimmed in thumbnail mode (fixes [#1142](https://github.com/GyulyVGC/sniffnet/issues/1142))
 - Fix `X-AppImage-Version` field in Linux AppImage metadata to correctly reflect the app version ([#1174](https://github.com/GyulyVGC/sniffnet/pull/1174) — fixes [#1003](https://github.com/GyulyVGC/sniffnet/issues/1003))
 

@@ -98,7 +98,7 @@ pub fn blacklisted_transmitted_translation(language: Language) -> &'static str {
     match language {
         Language::EN => "New data exchanged from a blacklisted IP",
         Language::IT => "Nuovi dati scambiati da un IP in blacklist",
-        // Language::FA => "داده‌های جدیدی از یک IP موجود در لیست سیاه مبادله شد.",
+        // Language::FA => "داده‌های جدیدی از یک IP موجود در لیست سیاه مبادله شد",
         Language::DE => "Neue Daten von einer IP auf der Blacklist ausgetauscht",
         Language::ZH => "与黑名单 IP 交换的新数据",
         Language::ZH_TW => "與黑名單 IP 交換的新資料",
