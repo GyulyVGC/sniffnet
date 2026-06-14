@@ -966,6 +966,24 @@
       "contributions": [
         "code"
       ]
+    },
+    {
+      "login": "ahassany",
+      "name": "Ahmed Elhassany",
+      "avatar_url": "https://avatars.githubusercontent.com/u/691424?v=4",
+      "profile": "http://hassany.ps",
+      "contributions": [
+        "ideas"
+      ]
+    },
+    {
+      "login": "golanbenoni",
+      "name": "golanbenoni",
+      "avatar_url": "https://avatars.githubusercontent.com/u/108551998?v=4",
+      "profile": "https://github.com/golanbenoni",
+      "contributions": [
+        "financial"
+      ]
     }
   ],
   "contributorsPerLine": 7,

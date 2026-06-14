@@ -5,6 +5,8 @@ This document describes how Sniffnet handles security incidents.
 For how to report a vulnerability, see [`SECURITY.md`](https://github.com/GyulyVGC/sniffnet/blob/main/SECURITY.md).<br>
 For the project's threat model, see [`THREAT_MODEL.md`](https://github.com/GyulyVGC/sniffnet/blob/main/THREAT_MODEL.md).
 
+For all security-related communications, please write to `security@sniffnet.app`.
+
 ## Scope
 
 An incident is anything that compromises, or could compromise, the integrity
@@ -13,7 +15,7 @@ or safety of Sniffnet or its users:
 - a vulnerability in Sniffnet or one of its dependencies
 - a tampered release artifact or compromised signing key
 - unauthorized commits, tags, or releases
-- a compromised maintainer account or the [sniffnet.net](https://sniffnet.net) website
+- a compromised maintainer account or the [sniffnet.app](https://sniffnet.app) website
 
 ## Roles
 

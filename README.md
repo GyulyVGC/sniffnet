@@ -5,7 +5,7 @@
 
 <a href="#download"><img alt="" title="Download" src="https://raw.githubusercontent.com/GyulyVGC/sniffnet/main/resources/repository/badges/download.svg"/></a>
 <a href="https://github.com/GyulyVGC/sniffnet/blob/main/ROADMAP.md"><img alt="" title="Roadmap" src="https://raw.githubusercontent.com/GyulyVGC/sniffnet/main/resources/repository/badges/roadmap.svg"/></a>
-<a href="https://sniffnet.net"><img alt="" title="Website" src="https://raw.githubusercontent.com/GyulyVGC/sniffnet/main/resources/repository/badges/website.svg"/></a>
+<a href="https://sniffnet.app"><img alt="" title="Website" src="https://raw.githubusercontent.com/GyulyVGC/sniffnet/main/resources/repository/badges/website.svg"/></a>
 <a href="https://github.com/GyulyVGC/sniffnet/wiki"><img alt="" title="Wiki" src="https://raw.githubusercontent.com/GyulyVGC/sniffnet/main/resources/repository/badges/wiki.svg"/></a>
 
 Application to comfortably monitor your Internet traffic.<br>
@@ -41,6 +41,8 @@ Translated in:<br>
 
 If you appreciate Sniffnet, [sponsor the project](https://github.com/sponsors/GyulyVGC) to support its [growth](https://github.com/GyulyVGC/sniffnet/blob/main/ROADMAP.md).
 
+For sponsorship inquiries, feel free to reach out at `sponsor@sniffnet.app`.
+
 A special shout-out to these awesome organizations and folks who are sponsoring Sniffnet:</i>
 
 <table><tr><td>
@@ -57,12 +59,13 @@ A special shout-out to these awesome organizations and folks who are sponsoring 
 <a href="https://github.com/Cthulu201" title="Cthulu201"><img src="https://avatars.githubusercontent.com/Cthulu201?v=4" width="60px" alt="Cthulu201"/></a>&nbsp;&nbsp;
 <a href="https://github.com/ZEROF" title="ZEROF"><img src="https://avatars.githubusercontent.com/ZEROF?v=4" width="60px" alt="ZEROF"/></a>&nbsp;&nbsp;
 <a href="https://www.janwalter.org/" title="Jan Walter"><img src="https://avatars.githubusercontent.com/wahn?v=4" width="60px" alt="Jan Walter"/></a>
+<a href="https://linktr.ee/golanbenoni" title="Golan Ben-Oni"><img src="https://ugc.production.linktr.ee/eed0c0ea-b302-4286-b940-1e4740d4f54d_84D5JxCc-400x400.jpeg?io=true&size=avatar-v3_0" width="60px" alt="Golan Ben-Oni"/></a>
 </p>
 
 ## Download
 
-<picture><img height="28px" alt="" title="Downloads count" src="https://raw.githubusercontent.com/GyulyVGC/GyulyVGC.github.io/master/assets/img/downloads_badge.svg"/></picture>
-<a href="https://github.com/GyulyVGC/sniffnet/releases/latest"><img height="28px" alt="" title="Latest version" src="https://img.shields.io/github/v/release/gyulyvgc/sniffnet?color=blue&label=version&logo=github&style=for-the-badge"/></a>
+<picture><img height="28px" alt="" title="Downloads count" src="https://raw.githubusercontent.com/sniffnet/sniffnet.github.io/main/assets/img/badges/downloads_badge.svg"/></picture>
+<a href="https://github.com/GyulyVGC/sniffnet/releases/latest"><img height="28px" alt="" title="Latest version" src="https://raw.githubusercontent.com/sniffnet/sniffnet.github.io/main/assets/img/badges/version_badge.svg"/></a>
 
 <table>
   <tr>
@@ -174,12 +177,12 @@ ICED_BACKEND=tiny-skia
 ## Stay in the loop
 
 Wait... there's more!<br>Sniffnet is rapidly evolving, and new features are added on a regular basis.<br>
-Follow the <a href="https://sniffnet.net/news"><b>news</b></a> and Sniffnet socials to never miss an update.
+Follow the <a href="https://sniffnet.app/news"><b>news</b></a> and Sniffnet socials to never miss an update.
 
 <table align="center">
   <tr>
     <td>
-      <a href="https://bsky.app/profile/sniffnet.net"><img width="48" height="48" alt="Bluesky" title="Bluesky" src="https://raw.githubusercontent.com/GyulyVGC/sniffnet/main/resources/repository/badges/bluesky.svg"/></a>
+      <a href="https://bsky.app/profile/sniffnet.app"><img width="48" height="48" alt="Bluesky" title="Bluesky" src="https://raw.githubusercontent.com/GyulyVGC/sniffnet/main/resources/repository/badges/bluesky.svg"/></a>
     </td>
     <td>
       <a href="https://www.linkedin.com/company/sniffnet"><img width="48" height="48" alt="LinkedIn" title="LinkedIn" src="https://raw.githubusercontent.com/GyulyVGC/sniffnet/main/resources/repository/badges/linkedin.svg"/></a>
@@ -195,3 +198,5 @@ Follow the <a href="https://sniffnet.net/news"><b>news</b></a> and Sniffnet soci
     </td>
   </tr>
 </table>
+
+You can also reach us by email at `info@sniffnet.app`.
