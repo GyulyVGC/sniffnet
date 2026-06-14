@@ -27,6 +27,7 @@ pub fn general_translation(language: Language) -> &'static str {
         Language::ID => "Umum",
         Language::NL => "Algemeen",
         Language::EL => "Γενικά",
+        Language::HU => "Általános",
         _ => "General",
     }
 }
@@ -56,6 +57,7 @@ pub fn zoom_translation(language: Language) -> &'static str {
         Language::UK => "Масштабування",
         Language::ID => "Perbesar",
         Language::EL => "Εστίαση",
+        Language::HU => "Közelítés",
         _ => "Zoom",
     }
 }
@@ -85,6 +87,7 @@ pub fn mmdb_files_translation(language: Language) -> &'static str {
         Language::ID => "Berkas database",
         Language::NL => "Database bestanden",
         Language::EL => "Αρχεία βάσης δεδομένων",
+        Language::HU => "Adatbázis fájlok",
         _ => "Database files",
     }
 }
@@ -116,6 +119,7 @@ pub fn params_not_editable_translation(language: Language) -> &'static str {
         Language::EL => {
             "Οι ακόλουθες παράμετροι δεν μπορούν να τροποποιηθούν κατά τη διάρκεια της ανάλυσης"
         }
+        Language::HU => "A következő paramétereken nem lehet elemzés közben változtatni",
         _ => "The following parameters can't be modified during the analysis",
     }
 }
@@ -144,6 +148,7 @@ pub fn custom_style_translation(language: Language) -> &'static str {
         Language::ID => "Ubah Model",
         Language::NL => "Aangepaste stijl",
         Language::EL => "Προσαρμοσμένο στυλ",
+        Language::HU => "Egyedi stílus",
         _ => "Custom style",
     }
 }
@@ -171,6 +176,7 @@ pub fn copy_translation(language: Language) -> &'static str {
         Language::ID => "Salin",
         Language::NL => "Kopiëren",
         Language::EL => "Αντιγραφή",
+        Language::HU => "Másolás",
         _ => "Copy",
     }
 }
@@ -185,7 +191,9 @@ pub fn port_translation(language: Language) -> &'static str {
         | Language::RO
         | Language::UZ
         | Language::SV
-        | Language::TR => "Port",
+        | Language::TR
+        | Language::ID
+        | Language::HU => "Port",
         // Language::FA => "درگاه",
         Language::ES => "Puerto",
         Language::IT | Language::PT => "Porta",
@@ -196,7 +204,6 @@ pub fn port_translation(language: Language) -> &'static str {
         Language::ZH_TW => "連接埠",
         Language::KO => "포트",
         Language::UK => "Порт",
-        Language::ID => "Port",
         Language::NL => "Poort",
         Language::EL => "Θύρα",
         _ => "Port",
@@ -227,6 +234,7 @@ pub fn port_translation(language: Language) -> &'static str {
 //         Language::ID => "Filter salah",
 //         Language::NL => "Ongeldige filters",
 //         Language::EL => "Μη έγκυρα φίλτρα",
+//         Language::HU => "Érvénytelen szűrők",
 //         _ => "Invalid filters",
 //     }
 // }
@@ -255,6 +263,7 @@ pub fn messages_translation(language: Language) -> &'static str {
         Language::ID => "Pesan",
         Language::NL => "Berichten",
         Language::EL => "Μηνύματα",
+        Language::HU => "Üzenetek",
         _ => "Messages",
     }
 }
@@ -283,6 +292,7 @@ pub fn link_type_translation(language: Language) -> &'static str {
         Language::UK => "Різновид зʼєднання",
         Language::ID => "Tipe koneksi",
         Language::EL => "Τύπος σύνδεσης",
+        Language::HU => "Link típus",
         _ => "Link type",
     }
 }
@@ -346,6 +356,7 @@ pub fn unsupported_link_type_translation(language: Language) -> &'static str {
         Language::EL => {
             "Ο τύπος σύνδεσης που σχετίζεται με αυτόν τον προσαρμογέα δεν υποστηρίζεται ακόμη από το Sniffnet..."
         }
+        Language::HU => "Az ezzel az adapterrel asszociált link típust még nem támogatja a Sniffnet...",
         _ => "The link type associated with this adapter is not supported by Sniffnet yet...",
     }
 }
@@ -375,6 +386,7 @@ pub fn unsupported_link_type_translation(language: Language) -> &'static str {
 //         Language::ID => "Pilih model / gaya dari berkas",
 //         Language::NL => "Selecteer stijl vanuit een bestand",
 //         Language::EL => "Επιλογή στυλ από αρχείο",
+//         Language::HU => "Stílus kiválasztása fájlból",
 //         _ => "Select style from a file",
 //     }
 // }
@@ -404,6 +416,7 @@ pub fn unsupported_link_type_translation(language: Language) -> &'static str {
 //         Language::ID => "Pilih berkas database",
 //         Language::NL => "Selecteer database bestand",
 //         Language::EL => "Επιλογή αρχείου βάσης δεδομένων",
+//         Language::HU => "Adatbázis fájl kiválasztása",
 //         _ => "Select database file",
 //     }
 // }
@@ -433,6 +446,7 @@ pub fn unsupported_link_type_translation(language: Language) -> &'static str {
 //         Language::ID => "Filter berdasarkan jaringan asal",
 //         Language::NL => "Filteren op netwerk host",
 //         Language::EL => "Φίλτρο ανά διακομιστή δικτύου",
+//         Language::HU => "Szűrés hálózati gazda szerint",
 //         _ => "Filter by network host",
 //     }
 // }
@@ -459,6 +473,7 @@ pub fn service_translation(language: Language) -> &'static str {
         Language::ID => "Layanan",
         Language::NL => "Dienst",
         Language::EL => "Υπηρεσία",
+        Language::HU => "Szolgáltatás",
         _ => "Service",
     }
 }
@@ -488,6 +503,7 @@ pub fn export_capture_translation(language: Language) -> &'static str {
         Language::ES => "Exportar archivo de captura",
         Language::NL => "Exporteer capture bestand",
         Language::EL => "Εξαγωγή αρχείου καταγραφής",
+        Language::HU => "Gyűjtött forgalom exportálása fájlba",
         _ => "Export capture file",
     }
 }
@@ -516,6 +532,7 @@ pub fn directory_translation(language: Language) -> &'static str {
         Language::ES => "Directorio",
         Language::NL => "Map",
         Language::EL => "Κατάλογος",
+        Language::HU => "Mappa",
         _ => "Directory",
     }
 }
@@ -545,6 +562,7 @@ pub fn select_dest_directory_translation(language: Language) -> &'static str {
         Language::ES => "Selecciona el directorio de destino",
         Language::NL => "Selecteer doelmap",
         Language::EL => "Επιλογή καταλόγου προορισμού",
+        Language::HU => "Cél mappa kiválasztása",
         _ => "Select destination directory",
     }
 }
@@ -574,6 +592,7 @@ pub fn file_name_translation(language: Language) -> &'static str {
         Language::ES => "Nombre del archivo",
         Language::NL => "Bestandsnaam",
         Language::EL => "Όνομα αρχείου",
+        Language::HU => "Fájlnév",
         _ => "File name",
     }
 }
@@ -602,6 +621,7 @@ pub fn thumbnail_mode_translation(language: Language) -> &'static str {
         Language::ID => "Mode gambar kecil",
         Language::NL => "Miniatuur modus",
         Language::EL => "Λειτουργία μικρογραφιών",
+        Language::HU => "Miniatűr nézet",
         _ => "Thumbnail mode",
     }
 }
@@ -630,6 +650,7 @@ pub fn thumbnail_mode_translation(language: Language) -> &'static str {
 //         Language::ID => "Apakah kamu mau belajar lebih lanjut?",
 //         Language::ES => "¿Quieres aprender más?",
 //         Language::NL => "Wil je meer leren?",
+//         Language::HU => "Szeretnél többet megtudni?"
 //         _ => "Do you want to learn more?",
 //     }
 // }
