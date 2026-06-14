@@ -61,3 +61,4 @@ node_modules
 package.json
 yarn.lock
 *.bkp
+.vscode
