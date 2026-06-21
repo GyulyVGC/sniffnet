@@ -98,6 +98,138 @@ fn latency_ms(query: Timestamp, response: Timestamp) -> Option<f64> {
     Some((r - q) as f64 / 1000.0)
 }
 
+/// Active filters on the DNS page. `All` variants disable the corresponding
+/// filter.
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq)]
+pub struct DnsFilter {
+    pub record_type: DnsTypeFilter,
+    pub rcode: DnsRCodeFilter,
+}
+
+impl DnsFilter {
+    /// Whether the given log entry passes the active filters.
+    pub fn matches(&self, entry: &DnsEntry) -> bool {
+        self.record_type.matches(entry.qtype) && self.rcode.matches(entry.rcode)
+    }
+
+    /// Whether any filter is active.
+    pub fn is_active(&self) -> bool {
+        self.record_type != DnsTypeFilter::All || self.rcode != DnsRCodeFilter::All
+    }
+}
+
+/// Record-type filter selectable on the DNS page.
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq)]
+pub enum DnsTypeFilter {
+    #[default]
+    All,
+    A,
+    Aaaa,
+    Cname,
+    Mx,
+    Txt,
+    Ns,
+    Ptr,
+    Soa,
+}
+
+impl DnsTypeFilter {
+    pub const ALL: [DnsTypeFilter; 9] = [
+        DnsTypeFilter::All,
+        DnsTypeFilter::A,
+        DnsTypeFilter::Aaaa,
+        DnsTypeFilter::Cname,
+        DnsTypeFilter::Mx,
+        DnsTypeFilter::Txt,
+        DnsTypeFilter::Ns,
+        DnsTypeFilter::Ptr,
+        DnsTypeFilter::Soa,
+    ];
+
+    fn matches(self, qtype: Option<DnsRecordType>) -> bool {
+        let expected = match self {
+            DnsTypeFilter::All => return true,
+            DnsTypeFilter::A => DnsRecordType::A,
+            DnsTypeFilter::Aaaa => DnsRecordType::Aaaa,
+            DnsTypeFilter::Cname => DnsRecordType::Cname,
+            DnsTypeFilter::Mx => DnsRecordType::Mx,
+            DnsTypeFilter::Txt => DnsRecordType::Txt,
+            DnsTypeFilter::Ns => DnsRecordType::Ns,
+            DnsTypeFilter::Ptr => DnsRecordType::Ptr,
+            DnsTypeFilter::Soa => DnsRecordType::Soa,
+        };
+        qtype == Some(expected)
+    }
+}
+
+impl std::fmt::Display for DnsTypeFilter {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            DnsTypeFilter::All => write!(f, "Type: all"),
+            DnsTypeFilter::A => write!(f, "A"),
+            DnsTypeFilter::Aaaa => write!(f, "AAAA"),
+            DnsTypeFilter::Cname => write!(f, "CNAME"),
+            DnsTypeFilter::Mx => write!(f, "MX"),
+            DnsTypeFilter::Txt => write!(f, "TXT"),
+            DnsTypeFilter::Ns => write!(f, "NS"),
+            DnsTypeFilter::Ptr => write!(f, "PTR"),
+            DnsTypeFilter::Soa => write!(f, "SOA"),
+        }
+    }
+}
+
+/// Response-code filter selectable on the DNS page.
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq)]
+pub enum DnsRCodeFilter {
+    #[default]
+    All,
+    NoError,
+    NxDomain,
+    ServFail,
+    Refused,
+    FormErr,
+    NotImpl,
+}
+
+impl DnsRCodeFilter {
+    pub const ALL: [DnsRCodeFilter; 7] = [
+        DnsRCodeFilter::All,
+        DnsRCodeFilter::NoError,
+        DnsRCodeFilter::NxDomain,
+        DnsRCodeFilter::ServFail,
+        DnsRCodeFilter::Refused,
+        DnsRCodeFilter::FormErr,
+        DnsRCodeFilter::NotImpl,
+    ];
+
+    fn matches(self, rcode: DnsRCode) -> bool {
+        let expected = match self {
+            DnsRCodeFilter::All => return true,
+            DnsRCodeFilter::NoError => DnsRCode::NoError,
+            DnsRCodeFilter::NxDomain => DnsRCode::NxDomain,
+            DnsRCodeFilter::ServFail => DnsRCode::ServFail,
+            DnsRCodeFilter::Refused => DnsRCode::Refused,
+            DnsRCodeFilter::FormErr => DnsRCode::FormErr,
+            DnsRCodeFilter::NotImpl => DnsRCode::NotImpl,
+        };
+        rcode == expected
+    }
+}
+
+impl std::fmt::Display for DnsRCodeFilter {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            DnsRCodeFilter::All => write!(f, "RCODE: all"),
+            DnsRCodeFilter::NoError => write!(f, "NOERROR"),
+            DnsRCodeFilter::NxDomain => write!(f, "NXDOMAIN"),
+            DnsRCodeFilter::ServFail => write!(f, "SERVFAIL"),
+            DnsRCodeFilter::Refused => write!(f, "REFUSED"),
+            DnsRCodeFilter::FormErr => write!(f, "FORMERR"),
+            DnsRCodeFilter::NotImpl => write!(f, "NOTIMP"),
+        }
+    }
+}
+
 /// A single, display-ready row of the DNS log.
 #[derive(Debug, Clone, PartialEq)]
 pub struct DnsEntry {
@@ -201,6 +333,40 @@ mod tests {
         let mut state = DnsState::default();
         state.ingest(vec![response(0x9999, "orphan.com", 5, 0)]);
         assert_eq!(state.log.back().unwrap().latency_ms, None);
+    }
+
+    #[test]
+    fn filter_matches_by_type_and_rcode() {
+        let mut state = DnsState::default();
+        state.ingest(vec![
+            query(1, "a.com", 1),
+            response(2, "b.com", 2, 0),
+        ]);
+        let a_query = state.log.front().unwrap();
+
+        // Default filter accepts everything.
+        assert!(DnsFilter::default().matches(a_query));
+        assert!(!DnsFilter::default().is_active());
+
+        // Type filter: A matches the A query, AAAA does not.
+        let f_a = DnsFilter {
+            record_type: DnsTypeFilter::A,
+            rcode: DnsRCodeFilter::All,
+        };
+        assert!(f_a.matches(a_query));
+        assert!(f_a.is_active());
+        let f_aaaa = DnsFilter {
+            record_type: DnsTypeFilter::Aaaa,
+            rcode: DnsRCodeFilter::All,
+        };
+        assert!(!f_aaaa.matches(a_query));
+
+        // RCODE filter: NXDOMAIN should not match a NOERROR entry.
+        let f_nx = DnsFilter {
+            record_type: DnsTypeFilter::All,
+            rcode: DnsRCodeFilter::NxDomain,
+        };
+        assert!(!f_nx.matches(a_query));
     }
 
     #[test]

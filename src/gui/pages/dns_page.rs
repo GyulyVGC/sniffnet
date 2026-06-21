@@ -2,7 +2,7 @@
 //! traffic (see [`crate::networking::dns`]).
 
 use iced::widget::scrollable::Direction;
-use iced::widget::{Column, Container, Row, Scrollable, Space, Text};
+use iced::widget::{Column, Container, PickList, Row, Scrollable, Space, Text};
 use iced::{Alignment, Length, Padding};
 
 use crate::gui::components::tab::get_pages_tabs;
@@ -11,7 +11,7 @@ use crate::gui::styles::rule::RuleType;
 use crate::gui::styles::scrollbar::ScrollbarType;
 use crate::gui::styles::style_constants::FONT_SIZE_FOOTER;
 use crate::gui::styles::text::TextType;
-use crate::gui::types::dns_state::DnsEntry;
+use crate::gui::types::dns_state::{DnsEntry, DnsRCodeFilter, DnsTypeFilter};
 use crate::gui::types::message::Message;
 use crate::gui::types::settings::Settings;
 use crate::utils::formatted_strings::{clip_text, get_formatted_timestamp};
@@ -61,25 +61,39 @@ pub fn dns_page(sniffer: &Sniffer) -> Container<'_, Message, StyleType> {
 /// The DNS log: a header row plus a scrollable list of entries (newest first),
 /// or an empty-state placeholder when no DNS traffic has been seen yet.
 fn dns_log<'a>(sniffer: &Sniffer) -> Column<'a, Message, StyleType> {
-    let count = sniffer.dns_state.len();
+    let filter = sniffer.dns_filter;
+    // Newest first, with the active filters applied.
+    let matching: Vec<&DnsEntry> = sniffer
+        .dns_state
+        .log
+        .iter()
+        .rev()
+        .filter(|e| filter.matches(e))
+        .collect();
 
     let col = Column::new()
         .width(Length::Fill)
         .height(Length::Fill)
         .align_x(Alignment::Start)
-        .push(summary_row(count))
+        .push(summary_row(sniffer.dns_state.len(), matching.len(), filter.is_active()))
         .push(ranking_row(sniffer))
+        .push(Space::new().height(4))
+        .push(filter_row(sniffer))
         .push(Space::new().height(4))
         .push(header_row())
         .push(RuleType::Standard.horizontal(5));
 
-    if sniffer.dns_state.is_empty() {
-        return col.push(empty_state());
+    if matching.is_empty() {
+        let message = if sniffer.dns_state.is_empty() {
+            "No DNS traffic captured yet"
+        } else {
+            "No DNS messages match the current filter"
+        };
+        return col.push(empty_state(message));
     }
 
     let mut scroll = Column::new().align_x(Alignment::Start);
-    // Newest entries first.
-    for entry in sniffer.dns_state.log.iter().rev() {
+    for entry in matching {
         scroll = scroll.push(log_row(entry));
     }
 
@@ -90,11 +104,41 @@ fn dns_log<'a>(sniffer: &Sniffer) -> Column<'a, Message, StyleType> {
     )
 }
 
-fn summary_row<'a>(count: usize) -> Row<'a, Message, StyleType> {
+/// Record-type and response-code filter dropdowns.
+fn filter_row<'a>(sniffer: &Sniffer) -> Row<'a, Message, StyleType> {
+    let type_pick = PickList::new(
+        &DnsTypeFilter::ALL[..],
+        Some(sniffer.dns_filter.record_type),
+        Message::DnsTypeFilterSelection,
+    )
+    .padding([2, 7]);
+
+    let rcode_pick = PickList::new(
+        &DnsRCodeFilter::ALL[..],
+        Some(sniffer.dns_filter.rcode),
+        Message::DnsRCodeFilterSelection,
+    )
+    .padding([2, 7]);
+
+    Row::new()
+        .padding([0, 2])
+        .spacing(10)
+        .align_y(Alignment::Center)
+        .push(Text::new("Filter:").size(FONT_SIZE_FOOTER).class(TextType::Subtitle))
+        .push(type_pick)
+        .push(rcode_pick)
+}
+
+fn summary_row<'a>(total: usize, shown: usize, filter_active: bool) -> Row<'a, Message, StyleType> {
+    let label = if filter_active {
+        format!("DNS messages captured: {total} (showing {shown})")
+    } else {
+        format!("DNS messages captured: {total}")
+    };
     Row::new()
         .padding([0, 2])
         .align_y(Alignment::Center)
-        .push(Text::new(format!("DNS messages captured: {count}")).class(TextType::Title))
+        .push(Text::new(label).class(TextType::Title))
 }
 
 /// A compact "most queried domains" ranking line.
@@ -183,7 +227,7 @@ fn log_row<'a>(entry: &DnsEntry) -> Row<'a, Message, StyleType> {
     row
 }
 
-fn empty_state<'a>() -> Column<'a, Message, StyleType> {
+fn empty_state<'a>(message: &'a str) -> Column<'a, Message, StyleType> {
     Column::new()
         .width(Length::Fill)
         .height(Length::Fill)
@@ -192,6 +236,6 @@ fn empty_state<'a>() -> Column<'a, Message, StyleType> {
         .push(Space::new().height(Length::Fill))
         .push(Icon::Globe.to_text().size(60))
         .push(Space::new().height(15))
-        .push(Text::new("No DNS traffic captured yet"))
+        .push(Text::new(message))
         .push(Space::new().height(Length::FillPortion(2)))
 }

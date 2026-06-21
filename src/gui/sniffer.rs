@@ -23,7 +23,7 @@ use crate::gui::styles::types::custom_palette::CustomPalette;
 use crate::gui::styles::types::gradient_type::GradientType;
 use crate::gui::styles::types::palette::Palette;
 use crate::gui::types::conf::Conf;
-use crate::gui::types::dns_state::DnsState;
+use crate::gui::types::dns_state::{DnsFilter, DnsState};
 use crate::gui::types::favorite::FavoriteKey;
 use crate::gui::types::message::Message;
 use crate::gui::types::settings::Settings;
@@ -146,6 +146,8 @@ pub struct Sniffer {
     pub program_lookup: Option<ProgramLookup>,
     /// State backing the DNS analyzer page
     pub dns_state: DnsState,
+    /// Active filters on the DNS analyzer page
+    pub dns_filter: DnsFilter,
 }
 
 impl Sniffer {
@@ -194,6 +196,7 @@ impl Sniffer {
             freeze_tx: None,
             program_lookup: None,
             dns_state: DnsState::default(),
+            dns_filter: DnsFilter::default(),
         }
     }
 
@@ -322,6 +325,8 @@ impl Sniffer {
             Message::ResetButtonPressed => return self.reset_button_pressed(),
             Message::CtrlDPressed => self.ctrl_d_pressed(),
             Message::Search(parameters) => self.search(parameters),
+            Message::DnsTypeFilterSelection(filter) => self.dns_filter.record_type = filter,
+            Message::DnsRCodeFilterSelection(filter) => self.dns_filter.rcode = filter,
             Message::UpdatePageNumber(increment) => self.update_page_number(increment),
             Message::ArrowPressed(increment) => self.arrow_pressed(increment),
             Message::WindowFocused => self.window_focused(),
