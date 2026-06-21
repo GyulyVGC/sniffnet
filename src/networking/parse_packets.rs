@@ -5,6 +5,8 @@ use crate::location;
 use crate::mmdb::asn::get_asn;
 use crate::mmdb::country::get_country;
 use crate::mmdb::types::mmdb_reader::MmdbReaders;
+use crate::networking::dns::parser::parse_dns;
+use crate::networking::dns::types::DnsEvent;
 use crate::networking::manage_packets::{
     analyze_headers, get_address_to_lookup, get_traffic_type, is_local_connection,
     modify_or_insert_in_map,
@@ -20,13 +22,14 @@ use crate::networking::types::icmp_type::IcmpType;
 use crate::networking::types::info_traffic::InfoTraffic;
 use crate::networking::types::ip_blacklist::IpBlacklist;
 use crate::networking::types::my_link_type::MyLinkType;
+use crate::networking::types::protocol::Protocol;
 use crate::networking::types::traffic_direction::TrafficDirection;
 use crate::utils::error_logger::{ErrorLogger, Location};
 use crate::utils::formatted_strings::get_domain_from_r_dns;
 use crate::utils::types::timestamp::Timestamp;
 use async_channel::Sender;
 use dns_lookup::lookup_addr;
-use etherparse::{EtherType, LaxPacketHeaders};
+use etherparse::{EtherType, LaxPacketHeaders, LaxPayloadSlice};
 use pcap::{Address, Packet, PacketHeader};
 use std::collections::HashMap;
 use std::net::IpAddr;
@@ -155,6 +158,15 @@ pub fn parse_packets(
                     let mut icmp_type = IcmpType::default();
                     let mut arp_type = ArpType::default();
 
+                    // Capture the UDP/TCP payload before `analyze_headers` consumes
+                    // `headers`. The returned slice borrows `packet.data`, not
+                    // `headers`, so it remains valid after the move.
+                    let transport_payload: Option<&[u8]> = match &headers.payload {
+                        LaxPayloadSlice::Udp { payload, .. }
+                        | LaxPayloadSlice::Tcp { payload, .. } => Some(payload),
+                        _ => None,
+                    };
+
                     let key_option = analyze_headers(
                         headers,
                         &mut mac_addresses,
@@ -166,6 +178,28 @@ pub fn parse_packets(
                     let Some(key) = key_option else {
                         continue;
                     };
+
+                    // If this is DNS traffic (port 53), parse the message from the
+                    // transport payload and record it as a DNS event.
+                    if key.sport == Some(53) || key.dport == Some(53) {
+                        if let Some(payload) = transport_payload {
+                            // DNS over TCP is prefixed by a 2-byte length field.
+                            let dns_bytes = if key.protocol == Protocol::TCP {
+                                payload.get(2..)
+                            } else {
+                                Some(payload)
+                            };
+                            if let Some(message) = dns_bytes.and_then(parse_dns) {
+                                info_traffic_msg.dns_events.push(DnsEvent {
+                                    timestamp: next_packet_timestamp,
+                                    src: key.source,
+                                    dst: key.dest,
+                                    transport: key.protocol,
+                                    message,
+                                });
+                            }
+                        }
+                    }
 
                     // save this packet to PCAP file
                     if let Some(file) = savefile.as_mut() {

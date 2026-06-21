@@ -1,4 +1,5 @@
 use crate::Service;
+use crate::networking::dns::types::DnsEvent;
 use crate::networking::manage_packets::get_local_port;
 use crate::networking::types::address_port_pair::AddressPortPair;
 use crate::networking::types::data_info::DataInfo;
@@ -26,6 +27,9 @@ pub struct InfoTraffic {
     pub services: HashMap<Service, DataInfo>,
     /// Map of the hosts with their data info
     pub hosts: HashMap<Host, DataInfoHost>,
+    /// DNS messages parsed during the current interval (drained by the GUI each
+    /// tick; not accumulated in the global `InfoTraffic`).
+    pub dns_events: Vec<DnsEvent>,
 }
 
 impl InfoTraffic {
