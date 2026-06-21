@@ -121,6 +121,27 @@ Not what you're looking for? Check out [alternative installation methods](https:
 - 🎨 choose the **style** that fits you the most, including custom themes support
 - ...and more!
 
+## DNS analyzer (course project feature)
+
+This fork adds a dedicated **DNS** tab that parses the DNS protocol
+(RFC 1035) directly from the bytes of UDP/TCP traffic on port 53 and shows,
+in real time: a query/response log (domain, type, RCODE, resolved values),
+per-query **resolution latency**, a **most-queried domains** ranking, and
+**filters** by record type and response code.
+
+**Try it:**
+
+```sh
+cargo build
+sudo ./target/debug/sniffnet      # capture needs privileges
+```
+
+Start a capture, open the **DNS** tab (globe icon), then generate traffic
+(`nslookup example.com 8.8.8.8`). To reproduce offline without live traffic,
+import [`docs/samples/dns_sample.pcap`](docs/samples/) — see its README for
+the expected output. Implementation lives in `src/networking/dns/` and
+`src/gui/pages/dns_page.rs`.
+
 ## User manual
 
 Do you want to **learn more**? <br>
