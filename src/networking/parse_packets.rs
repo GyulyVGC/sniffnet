@@ -587,3 +587,83 @@ struct PacketOwned {
     header: PacketHeader,
     data: Box<[u8]>,
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::networking::dns::types::{DnsMessage, DnsRData, DnsRecordType};
+    use crate::networking::types::my_link_type::MyLinkType;
+    use std::net::Ipv4Addr;
+
+    /// End-to-end test of the capture-to-parse path: reads the sample pcap and
+    /// runs each packet through the exact production logic (sniffable headers ->
+    /// payload extraction -> header analysis -> DNS parsing), then checks the
+    /// recovered DNS messages.
+    #[test]
+    fn parses_dns_from_sample_pcap() {
+        let path = concat!(env!("CARGO_MANIFEST_DIR"), "/docs/samples/dns_sample.pcap");
+        let mut cap = pcap::Capture::from_file(path).expect("open sample pcap");
+        let my_link_type = MyLinkType::from_pcap_link_type(cap.get_datalink());
+
+        let mut messages: Vec<DnsMessage> = Vec::new();
+        while let Ok(packet) = cap.next_packet() {
+            let Some(headers) = get_sniffable_headers(&packet.data, my_link_type) else {
+                continue;
+            };
+
+            // Same extraction as the live pipeline: grab the payload before
+            // `analyze_headers` consumes `headers`.
+            let transport_payload: Option<&[u8]> = match &headers.payload {
+                LaxPayloadSlice::Udp { payload, .. } | LaxPayloadSlice::Tcp { payload, .. } => {
+                    Some(payload)
+                }
+                _ => None,
+            };
+
+            let mut exchanged_bytes = 0;
+            let mut mac_addresses = (None, None);
+            let mut icmp_type = IcmpType::default();
+            let mut arp_type = ArpType::default();
+            let Some(key) = analyze_headers(
+                headers,
+                &mut mac_addresses,
+                &mut exchanged_bytes,
+                &mut icmp_type,
+                &mut arp_type,
+            ) else {
+                continue;
+            };
+
+            if key.sport == Some(53) || key.dport == Some(53) {
+                if let Some(payload) = transport_payload {
+                    let dns_bytes = if key.protocol == Protocol::TCP {
+                        payload.get(2..)
+                    } else {
+                        Some(payload)
+                    };
+                    if let Some(message) = dns_bytes.and_then(parse_dns) {
+                        messages.push(message);
+                    }
+                }
+            }
+        }
+
+        // The sample carries exactly one query and one response for google.com.
+        assert_eq!(messages.len(), 2, "expected one query and one response");
+
+        let query = &messages[0];
+        assert!(!query.is_response);
+        assert_eq!(query.query_name(), Some("google.com"));
+        assert_eq!(query.query_type(), Some(DnsRecordType::A));
+
+        let response = &messages[1];
+        assert!(response.is_response);
+        assert_eq!(response.query_name(), Some("google.com"));
+        assert_eq!(response.answers.len(), 1);
+        assert_eq!(response.answers[0].rtype, DnsRecordType::A);
+        assert_eq!(
+            response.answers[0].rdata,
+            DnsRData::A(Ipv4Addr::new(8, 8, 8, 8))
+        );
+    }
+}
