@@ -76,7 +76,7 @@ fn dns_log<'a>(sniffer: &Sniffer) -> Column<'a, Message, StyleType> {
         .height(Length::Fill)
         .align_x(Alignment::Start)
         .push(summary_row(sniffer.dns_state.len(), matching.len(), filter.is_active()))
-        .push(ranking_row(sniffer))
+        .push(ranking_section(sniffer))
         .push(Space::new().height(4))
         .push(filter_row(sniffer))
         .push(Space::new().height(4))
@@ -141,24 +141,22 @@ fn summary_row<'a>(total: usize, shown: usize, filter_active: bool) -> Row<'a, M
         .push(Text::new(label).class(TextType::Title))
 }
 
-/// A compact "most queried domains" ranking line.
-fn ranking_row<'a>(sniffer: &Sniffer) -> Row<'a, Message, StyleType> {
+/// A vertical "most queried domains" ranking: a title followed by one domain
+/// per line, to avoid horizontal overflow.
+fn ranking_section<'a>(sniffer: &Sniffer) -> Column<'a, Message, StyleType> {
     let top = sniffer.dns_state.top_domains(TOP_DOMAINS);
-    let mut row = Row::new()
-        .padding([0, 2])
-        .spacing(12)
-        .align_y(Alignment::Center);
+    let mut col = Column::new().padding([0, 2]).spacing(1).align_x(Alignment::Start);
     if top.is_empty() {
-        return row;
+        return col;
     }
-    row = row.push(Text::new("Top domains:").size(FONT_SIZE_FOOTER).class(TextType::Subtitle));
+    col = col.push(Text::new("Top domains").size(FONT_SIZE_FOOTER).class(TextType::Subtitle));
     for (rank, (domain, count)) in top.into_iter().enumerate() {
-        row = row.push(
-            Text::new(format!("{}. {} ({})", rank + 1, clip_text(&domain, 30), count))
+        col = col.push(
+            Text::new(format!("{}. {} ({})", rank + 1, clip_text(&domain, 60), count))
                 .size(FONT_SIZE_FOOTER),
         );
     }
-    row
+    col
 }
 
 fn header_row<'a>() -> Row<'a, Message, StyleType> {
