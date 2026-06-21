@@ -115,6 +115,7 @@ Not what you're looking for? Check out [alternative installation methods](https:
 - ⭐ save your **favorite** network hosts, services, and programs
 - 📌 keep an eye on your network even when the application is **minimized**
 - ️🔎 search and **inspect** each of your network connections in real time
+- 🧬 analyze the **DNS protocol** (RFC 1035) with a dedicated live log of queries and responses
 - 🔉 set custom **notifications** to inform you when defined network events occur
 - 🚫 import custom **IP blacklists** to highlight potentially dangerous connections
 - 🎨 choose the **style** that fits you the most, including custom themes support
