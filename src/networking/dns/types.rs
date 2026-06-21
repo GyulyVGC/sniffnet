@@ -59,12 +59,13 @@ impl DnsMessage {
         self.questions.first().map(|q| q.qtype)
     }
 
-    /// Human-readable, comma-separated summary of the answer records' data,
+    /// Human-readable, comma-separated summary of the answer records, each
+    /// prefixed by its record type (e.g. "CNAME cdn.example.net, A 1.2.3.4"),
     /// suitable for a single table cell.
     pub fn answers_summary(&self) -> String {
         self.answers
             .iter()
-            .map(|r| r.rdata.to_string())
+            .map(|r| format!("{} {}", r.rtype, r.rdata))
             .collect::<Vec<_>>()
             .join(", ")
     }
