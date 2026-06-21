@@ -109,7 +109,7 @@ pub struct DnsFilter {
 impl DnsFilter {
     /// Whether the given log entry passes the active filters.
     pub fn matches(&self, entry: &DnsEntry) -> bool {
-        self.record_type.matches(entry.qtype) && self.rcode.matches(entry.rcode)
+        self.record_type.matches(entry) && self.rcode.matches(entry.rcode)
     }
 
     /// Whether any filter is active.
@@ -146,7 +146,10 @@ impl DnsTypeFilter {
         DnsTypeFilter::Soa,
     ];
 
-    fn matches(self, qtype: Option<DnsRecordType>) -> bool {
+    /// Matches if the entry's query type **or** any of its answer record types
+    /// equals the selected type. This lets, e.g., a "CNAME" filter surface
+    /// responses to A queries whose answer chain contains a CNAME.
+    fn matches(self, entry: &DnsEntry) -> bool {
         let expected = match self {
             DnsTypeFilter::All => return true,
             DnsTypeFilter::A => DnsRecordType::A,
@@ -158,7 +161,7 @@ impl DnsTypeFilter {
             DnsTypeFilter::Ptr => DnsRecordType::Ptr,
             DnsTypeFilter::Soa => DnsRecordType::Soa,
         };
-        qtype == Some(expected)
+        entry.qtype == Some(expected) || entry.answer_types.contains(&expected)
     }
 }
 
@@ -243,6 +246,8 @@ pub struct DnsEntry {
     pub domain: String,
     /// Queried record type, if a question was present.
     pub qtype: Option<DnsRecordType>,
+    /// Record types present in the answer section (for filtering).
+    pub answer_types: Vec<DnsRecordType>,
     pub rcode: DnsRCode,
     /// Comma-separated summary of the answers (empty for queries).
     pub answers: String,
@@ -263,6 +268,7 @@ impl From<&DnsEvent> for DnsEntry {
             is_response: message.is_response,
             domain: message.query_name().unwrap_or("-").to_string(),
             qtype: message.query_type(),
+            answer_types: message.answers.iter().map(|r| r.rtype).collect(),
             rcode: message.rcode,
             answers: message.answers_summary(),
             latency_ms: None,
@@ -273,7 +279,9 @@ impl From<&DnsEvent> for DnsEntry {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::networking::dns::types::{DnsFlags, DnsMessage, DnsQuestion};
+    use crate::networking::dns::types::{
+        DnsFlags, DnsMessage, DnsQuestion, DnsRData, DnsRecord,
+    };
     use std::net::Ipv4Addr;
 
     const CLIENT: IpAddr = IpAddr::V4(Ipv4Addr::new(192, 168, 0, 2));
@@ -367,6 +375,60 @@ mod tests {
             rcode: DnsRCodeFilter::NxDomain,
         };
         assert!(!f_nx.matches(a_query));
+    }
+
+    #[test]
+    fn type_filter_matches_answer_records_not_just_query_type() {
+        // Response to an A query whose answer chain contains a CNAME (as in a
+        // real Vercel/CDN-hosted domain).
+        let mut msg = message(7, true, "tabnews.example.com");
+        msg.answers = vec![
+            DnsRecord {
+                name: "tabnews.example.com".to_string(),
+                rtype: DnsRecordType::Cname,
+                class: 1,
+                ttl: 300,
+                rdata: DnsRData::Name("cdn.example.net".to_string()),
+            },
+            DnsRecord {
+                name: "cdn.example.net".to_string(),
+                rtype: DnsRecordType::A,
+                class: 1,
+                ttl: 60,
+                rdata: DnsRData::A(Ipv4Addr::new(64, 29, 17, 1)),
+            },
+        ];
+        let mut state = DnsState::default();
+        state.ingest(vec![DnsEvent {
+            timestamp: Timestamp::new(1, 0),
+            src: SERVER,
+            dst: CLIENT,
+            transport: Protocol::UDP,
+            message: msg,
+        }]);
+        let entry = state.log.back().unwrap();
+
+        // The query type is A, but a CNAME filter must still match because the
+        // answer section contains a CNAME record.
+        let f_cname = DnsFilter {
+            record_type: DnsTypeFilter::Cname,
+            rcode: DnsRCodeFilter::All,
+        };
+        assert!(f_cname.matches(entry));
+
+        // A also matches (query type and an answer A record).
+        let f_a = DnsFilter {
+            record_type: DnsTypeFilter::A,
+            rcode: DnsRCodeFilter::All,
+        };
+        assert!(f_a.matches(entry));
+
+        // MX matches neither the query type nor any answer record.
+        let f_mx = DnsFilter {
+            record_type: DnsTypeFilter::Mx,
+            rcode: DnsRCodeFilter::All,
+        };
+        assert!(!f_mx.matches(entry));
     }
 
     #[test]
