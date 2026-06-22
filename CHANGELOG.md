@@ -6,6 +6,7 @@ All Sniffnet releases with the relative changes are documented in this file.
 - Support CIDR ranges in imported IP blacklists ([#1181](https://github.com/GyulyVGC/sniffnet/pull/1181))
 - Show number of IP addresses and CIDR ranges in imported IP blacklists ([#1183](https://github.com/GyulyVGC/sniffnet/pull/1183))
 - Added Hungarian translation 🇭🇺 ([#1197](https://github.com/GyulyVGC/sniffnet/pull/1197))
+- Added Sinhala (Sri Lanka) translation 🇱🇰 (with Noto Sans Sinhala font fallback)
 - Updated some of the existing translations to v1.5:
   - Ukrainian ([#1039](https://github.com/GyulyVGC/sniffnet/pull/1039))
   - German ([#1122](https://github.com/GyulyVGC/sniffnet/pull/1122))

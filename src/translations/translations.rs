@@ -117,6 +117,7 @@ pub fn start_translation(language: Language) -> &'static str {
         Language::VI => "Bắt đầu!",
         Language::ID => "Mulai!",
         Language::HU => "Kezdés!",
+        Language::LK => "TODO_LK",
     }
 }
 
@@ -144,6 +145,7 @@ pub fn address_translation(language: Language) -> &'static str {
         Language::VI => "Địa chỉ",
         Language::ID => "Alamat",
         Language::HU => "Cím",
+        Language::LK => "TODO_LK",
     }
 }
 
@@ -253,6 +255,7 @@ pub fn protocol_translation(language: Language) -> &'static str {
         Language::UZ => "Protokoli",
         Language::VI => "Phương thức",
         Language::ID | Language::CS => "Protokol",
+        Language::LK => "TODO_LK",
     }
 }
 
@@ -283,6 +286,7 @@ pub fn traffic_rate_translation<'a>(language: Language) -> Text<'a, StyleType> {
         Language::ID => "Tingkat lalulintas",
         Language::NL => "Verkeerssnelheid",
         Language::HU => "Adatráta",
+        Language::LK => "TODO_LK",
     })
 }
 
@@ -339,6 +343,7 @@ pub fn settings_translation(language: Language) -> &'static str {
         Language::ID => "Pengaturan",
         Language::NL => "Instellingen",
         Language::HU => "Beállítások",
+        Language::LK => "TODO_LK",
     }
 }
 
@@ -366,6 +371,7 @@ pub fn yes_translation<'a>(language: Language) -> Text<'a, StyleType> {
         Language::VI => "Chấp nhận",
         Language::ID => "Ya",
         Language::HU => "Igen",
+        Language::LK => "TODO_LK",
     })
 }
 
@@ -396,6 +402,7 @@ pub fn ask_quit_translation<'a>(language: Language) -> Text<'a, StyleType> {
         Language::ID => "Apa kamu yakin untuk berhenti analisa?",
         Language::NL => "Weet je zeker dat je deze analyse wilt afsluiten?",
         Language::HU => "Biztosan le akarod állítani ezt az elemzést?",
+        Language::LK => "TODO_LK",
     })
 }
 
@@ -426,6 +433,7 @@ pub fn quit_analysis_translation(language: Language) -> &'static str {
         Language::ID => "Berhenti analisa",
         Language::NL => "Analyse afsluiten",
         Language::HU => "Elemzés leállítása",
+        Language::LK => "TODO_LK",
     }
 }
 
@@ -456,6 +464,7 @@ pub fn ask_clear_all_translation<'a>(language: Language) -> Text<'a, StyleType> 
         Language::ID => "Apa kamu yakin untuk membersihkan notifikasi?",
         Language::NL => "Weet je zeker dat je alle meldingen wilt wissen?",
         Language::HU => "Biztosan törölni akarod az értesítéseket?",
+        Language::LK => "TODO_LK",
     })
 }
 
@@ -485,6 +494,7 @@ pub fn clear_all_translation(language: Language) -> &'static str {
         Language::ID => "Bersihkan semua",
         Language::NL => "Alles wissen",
         Language::HU => "Összes törlése",
+        Language::LK => "TODO_LK",
     }
 }
 
@@ -514,6 +524,7 @@ pub fn hide_translation(language: Language) -> &'static str {
         Language::ID => "Sembunyikan",
         Language::NL | Language::DE => "Verbergen",
         Language::HU => "Elrejtés",
+        Language::LK => "TODO_LK",
     }
 }
 
@@ -543,6 +554,7 @@ pub fn network_adapter_translation(language: Language) -> &'static str {
         Language::ID => "Adapter jaringan",
         Language::NL => "Netwerkadapter",
         Language::HU => "Hálózati adapter",
+        Language::LK => "TODO_LK",
     }
 }
 
@@ -648,6 +660,7 @@ pub fn no_addresses_translation(language: Language) -> &'static str {
             "Nem megfigyelhető a forgalom mivel a kiválasztott adapternek nincs aktív címe...\n\n\
                                 Ha biztos vagy benne, hogy csatlakozva vagy az internethez, próbálj meg egy másik adaptert használni."
         }
+        Language::LK => "TODO_LK",
     }
 }
 
@@ -753,6 +766,7 @@ pub fn waiting_translation(language: Language) -> &'static str {
             "Nem észleltünk még forgalmat. Várakozás hálózati csomagokra...\n\n\
                                  Biztosan csatlakozva vagy az internethez és helyes adaptert választottál ki?"
         }
+        Language::LK => "TODO_LK",
     }
 }
 
@@ -1095,6 +1109,7 @@ pub fn error_translation(language: Language) -> &'static str {
         Language::ID => "Terjadi kesalahan!",
         Language::NL => "Er is een fout opgetreden!",
         Language::HU => "Hiba történt!",
+        Language::LK => "TODO_LK",
     }
 }
 
@@ -1200,6 +1215,7 @@ pub fn packets_translation(language: Language) -> &'static str {
         Language::VI => "các gói tin",
         Language::NL => "pakketten",
         Language::HU => "csomagok",
+        Language::LK => "TODO_LK",
     }
 }
 
@@ -1259,6 +1275,7 @@ pub fn bytes_translation(language: Language) -> &'static str {
         Language::FI => "tavua",
         Language::JA => "バイト",
         Language::HU => "bájtok",
+        Language::LK => "TODO_LK",
     }
 }
 
@@ -1430,6 +1447,7 @@ pub fn notifications_title_translation<'a>(language: Language) -> Text<'a, Style
         Language::ID => "Sesuaikan notifikasi Anda",
         Language::NL => "Pas je meldingen aan",
         Language::HU => "Értesítések személyre szabása",
+        Language::LK => "TODO_LK",
     })
 }
 
@@ -1460,6 +1478,7 @@ pub fn appearance_title_translation<'a>(language: Language) -> Text<'a, StyleTyp
         Language::ID => "Pilih tema favorit Kamu",
         Language::NL => "Kies je favoriete thema",
         Language::HU => "Válaszd ki a kedvenc témád",
+        Language::LK => "TODO_LK",
     })
 }
 
@@ -1490,6 +1509,7 @@ pub fn active_filters_translation(language: Language) -> &'static str {
         Language::ID => "Filter aktif",
         Language::NL => "Actieve filters",
         Language::HU => "Aktív szűrők",
+        Language::LK => "TODO_LK",
     }
 }
 
@@ -1520,6 +1540,7 @@ pub fn none_translation(language: Language) -> &'static str {
         Language::ID => "Tidak ada",
         Language::NL => "geen",
         Language::HU => "semmi",
+        Language::LK => "TODO_LK",
     }
 }
 
@@ -1668,6 +1689,7 @@ pub fn incoming_translation(language: Language) -> &'static str {
         Language::ID => "Masuk",
         Language::NL => "Inkomend",
         Language::HU => "Beérkező",
+        Language::LK => "TODO_LK",
     }
 }
 
@@ -1697,6 +1719,7 @@ pub fn outgoing_translation(language: Language) -> &'static str {
         Language::ID => "Keluar",
         Language::NL => "Uitgaand",
         Language::HU => "Kimenő",
+        Language::LK => "TODO_LK",
     }
 }
 
@@ -1724,6 +1747,7 @@ pub fn notifications_translation(language: Language) -> &'static str {
         Language::ID => "Pemberitahuan",
         Language::NL => "Notificaties",
         Language::HU => "Értesítések",
+        Language::LK => "TODO_LK",
     }
 }
 
@@ -1748,6 +1772,7 @@ pub fn style_translation(language: Language) -> &'static str {
         Language::ID => "Gaya",
         Language::NL => "Stijl",
         Language::HU => "Kinézet",
+        Language::LK => "TODO_LK",
     }
 }
 
@@ -1778,6 +1803,7 @@ pub fn language_translation(language: Language) -> &'static str {
         Language::ID => "Bahasa",
         Language::NL => "Taal",
         Language::HU => "Nyelv",
+        Language::LK => "TODO_LK",
     }
 }
 
@@ -1808,6 +1834,7 @@ pub fn overview_translation(language: Language) -> &'static str {
         Language::ID => "Ringkasan",
         Language::NL => "Overzicht",
         Language::HU => "Áttekintés",
+        Language::LK => "TODO_LK",
     }
 }
 
@@ -1895,6 +1922,7 @@ pub fn per_second_translation(language: Language) -> &'static str {
         Language::ID => "(per detik)",
         Language::NL => "(per seconde)",
         Language::HU => "(másodpercenként)",
+        Language::LK => "TODO_LK",
     }
 }
 
@@ -1987,6 +2015,7 @@ pub fn threshold_translation(language: Language) -> &'static str {
         Language::ID => "Ambang batas",
         Language::NL => "Grens",
         Language::HU => "Küszöb",
+        Language::LK => "TODO_LK",
     }
 }
 
@@ -2012,6 +2041,7 @@ pub fn volume_translation(language: Language) -> &'static str {
         Language::VI => "Âm lượng",
         Language::ID => "Bunyi",
         Language::HU => "Hangerő",
+        Language::LK => "TODO_LK",
     }
 }
 
@@ -2040,6 +2070,7 @@ pub fn sound_translation(language: Language) -> &'static str {
         Language::ID => "Suara",
         Language::NL => "Geluid",
         Language::HU => "Hang",
+        Language::LK => "TODO_LK",
     }
 }
 
@@ -2070,6 +2101,7 @@ pub fn bytes_exceeded_translation(language: Language) -> &'static str {
         Language::ID => "Ambang batas byte terlampaui",
         Language::NL => "Byte-drempel overschreden",
         Language::HU => "Bájtküszöb meghaladva",
+        Language::LK => "TODO_LK",
     }
 }
 
@@ -2130,6 +2162,7 @@ pub fn packets_exceeded_translation(language: Language) -> &'static str {
         Language::ID => "Ambang batas paket terlampaui",
         Language::NL => "Pakketdrempel overschreden",
         Language::HU => "Csomagküszöb meghaladva",
+        Language::LK => "TODO_LK",
     }
 }
 
@@ -2217,6 +2250,7 @@ pub fn favorite_transmitted_translation(language: Language) -> &'static str {
         Language::ID => "Data baru dipertukarkan dari favorit",
         Language::NL => "Nieuwe gegevens uitgewisseld van favorieten",
         Language::HU => "Új adatforgalom a kedvencekből",
+        Language::LK => "TODO_LK",
     }
 }
 
@@ -2346,6 +2380,7 @@ pub fn no_notifications_set_translation<'a>(language: Language) -> Text<'a, Styl
                                  Miután engedélyezed őket, ez az oldal fogja mutatni az összes értesítésed.\n\n\
                                  A beállításokban tudod őket engedélyezni:"
         }
+        Language::LK => "TODO_LK",
     })
 }
 
@@ -2451,6 +2486,7 @@ pub fn no_notifications_received_translation<'a>(language: Language) -> Text<'a,
             "Semmi látnivaló...\n\n\
                                  Amint érkezik egy értesítés, azt itt fogod látni"
         }
+        Language::LK => "TODO_LK",
     })
 }
 
@@ -2481,5 +2517,6 @@ pub fn only_last_30_translation(language: Language) -> &'static str {
         Language::ID => "Hanya 30 notifikasi terakhir yang ditampilkan",
         Language::NL => "Alleen de laatste 30 meldingen worden weergegeven",
         Language::HU => "Itt csak az utolsó 30 értesítés van megjelenítve",
+        Language::LK => "TODO_LK",
     }
 }
