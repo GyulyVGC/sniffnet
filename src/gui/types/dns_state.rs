@@ -270,9 +270,22 @@ impl From<&DnsEvent> for DnsEntry {
             qtype: message.query_type(),
             answer_types: message.answers.iter().map(|r| r.rtype).collect(),
             rcode: message.rcode,
-            answers: message.answers_summary(),
+            answers: answers_with_counts(message),
             latency_ms: None,
         }
+    }
+}
+
+/// Builds the Answer(s) cell text: the answer records' summary, plus a note for
+/// the Authority/Additional sections counted via NSCOUNT/ARCOUNT but not
+/// expanded (e.g. EDNS OPT records).
+fn answers_with_counts(message: &crate::networking::dns::types::DnsMessage) -> String {
+    let summary = message.answers_summary();
+    let note = message.extra_sections_note();
+    match (summary.is_empty(), note.is_empty()) {
+        (_, true) => summary,
+        (true, false) => format!("[{note}]"),
+        (false, false) => format!("{summary}  [{note}]"),
     }
 }
 
@@ -294,6 +307,8 @@ mod tests {
             opcode: 0,
             flags: DnsFlags::default(),
             rcode: DnsRCode::NoError,
+            nscount: 0,
+            arcount: 0,
             questions: vec![DnsQuestion {
                 name: domain.to_string(),
                 qtype: DnsRecordType::A,

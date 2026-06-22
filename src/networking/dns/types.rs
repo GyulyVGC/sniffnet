@@ -42,6 +42,10 @@ pub struct DnsMessage {
     pub flags: DnsFlags,
     /// `RCODE` field (response code).
     pub rcode: DnsRCode,
+    /// `NSCOUNT`: number of Resource Records in the Authority section.
+    pub nscount: u16,
+    /// `ARCOUNT`: number of Resource Records in the Additional section.
+    pub arcount: u16,
     /// Entries of the Question section.
     pub questions: Vec<DnsQuestion>,
     /// Resource Records of the Answer section.
@@ -57,6 +61,19 @@ impl DnsMessage {
     /// Type of the first question, if any.
     pub fn query_type(&self) -> Option<DnsRecordType> {
         self.questions.first().map(|q| q.qtype)
+    }
+
+    /// Short note about the Authority/Additional sections, which are counted
+    /// (NSCOUNT/ARCOUNT) but not expanded. Empty when both counts are zero.
+    pub fn extra_sections_note(&self) -> String {
+        let mut parts = Vec::new();
+        if self.nscount > 0 {
+            parts.push(format!("+{} auth", self.nscount));
+        }
+        if self.arcount > 0 {
+            parts.push(format!("+{} add'l", self.arcount));
+        }
+        parts.join(" ")
     }
 
     /// Human-readable, comma-separated summary of the answer records, each

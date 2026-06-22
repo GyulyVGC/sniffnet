@@ -37,7 +37,10 @@ pub fn parse_dns(buf: &[u8]) -> Option<DnsMessage> {
     let rcode = (flags & 0x0F) as u8;
     let qdcount = u16::from_be_bytes([buf[4], buf[5]]);
     let ancount = u16::from_be_bytes([buf[6], buf[7]]);
-    // NSCOUNT (buf[8..10]) and ARCOUNT (buf[10..12]) are not parsed.
+    let nscount = u16::from_be_bytes([buf[8], buf[9]]);
+    let arcount = u16::from_be_bytes([buf[10], buf[11]]);
+    // The Authority and Additional sections themselves are not expanded; only
+    // their record counts (NSCOUNT/ARCOUNT) are interpreted.
 
     let mut pos = 12;
 
@@ -76,6 +79,8 @@ pub fn parse_dns(buf: &[u8]) -> Option<DnsMessage> {
         opcode,
         flags: DnsFlags { aa, tc, rd, ra },
         rcode: DnsRCode::from_u8(rcode),
+        nscount,
+        arcount,
         questions,
         answers,
     })
@@ -277,6 +282,20 @@ mod tests {
         assert_eq!(msg.query_type(), Some(DnsRecordType::A));
         assert_eq!(msg.questions[0].qclass, 1);
         assert!(msg.answers.is_empty());
+        assert_eq!(msg.nscount, 0);
+        assert_eq!(msg.arcount, 0);
+    }
+
+    #[test]
+    fn parses_authority_and_additional_counts() {
+        // Header only: QDCOUNT=0, ANCOUNT=0, NSCOUNT=2, ARCOUNT=1.
+        let buf = [
+            0x00, 0x05, 0x81, 0x80, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0x00, 0x01,
+        ];
+        let msg = parse_dns(&buf).expect("should parse header");
+        assert_eq!(msg.nscount, 2);
+        assert_eq!(msg.arcount, 1);
+        assert_eq!(msg.extra_sections_note(), "+2 auth +1 add'l");
     }
 
     /// Response for `google.com` A, using a compression pointer (0xC00C) in the
