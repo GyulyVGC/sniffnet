@@ -51,7 +51,7 @@ listeners = "0.6.0"
 maxminddb = "0.28.1"
 pcap = "2.4.0"
 phf = "0.13.1"
-phf_shared = "0.13.1"
+phf_shared = "0.14.0"
 picon = "0.1.0"
 plotters = { version = "0.3.7", default-features = false, features = ["area_series", "line_series"] }
 plotters-iced2 = "0.14.0"
@@ -80,7 +80,7 @@ serial_test = { version = "3.5.0", default-features = false }
 
 [build-dependencies]
 phf_codegen = "0.13.1"
-phf_shared = "0.13.1"
+phf_shared = "0.14.0"
 rustrict = { version = "0.7.38", default-features = false, features = ["censor"] }
 
 [target."cfg(windows)".build-dependencies]
