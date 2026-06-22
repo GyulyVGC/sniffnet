@@ -50,7 +50,7 @@ ipnet = "2.12.0"
 listeners = "0.6.0"
 maxminddb = "0.28.1"
 pcap = "2.4.0"
-phf = "0.13.1"
+phf = "0.14.0"
 phf_shared = "0.13.1"
 picon = "0.1.0"
 plotters = { version = "0.3.7", default-features = false, features = ["area_series", "line_series"] }
