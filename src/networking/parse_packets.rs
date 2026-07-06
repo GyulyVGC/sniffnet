@@ -26,7 +26,7 @@ use crate::utils::formatted_strings::get_domain_from_r_dns;
 use crate::utils::types::timestamp::Timestamp;
 use async_channel::Sender;
 use dns_lookup::lookup_addr;
-use etherparse::{EtherType, LaxPacketHeaders};
+use etherparse::{EtherType, LaxPacketHeaders, TransportHeader};
 use pcap::{Address, Packet, PacketHeader};
 use std::collections::HashMap;
 use std::net::IpAddr;
@@ -58,6 +58,8 @@ pub fn parse_packets(
     };
 
     let mut info_traffic_msg = InfoTraffic::default();
+
+    let mut pending_syns: HashMap<(IpAddr, u16, IpAddr, u16), Timestamp> = HashMap::new();
 
     let (lookup_request_tx, lookup_request_rx) = std::sync::mpsc::channel();
     let (lookup_result_tx, lookup_result_rx) = std::sync::mpsc::channel();
@@ -130,6 +132,10 @@ pub fn parse_packets(
             }
             Ok(packet) => {
                 if let Some(headers) = get_sniffable_headers(&packet.data, my_link_type) {
+                    let tcp_flags = match &headers.transport {
+                        Some(TransportHeader::Tcp(tcp)) => Some((tcp.syn, tcp.ack)),
+                        _ => None,
+                    };
                     #[allow(clippy::useless_conversion)]
                     let secs = i64::from(packet.header.ts.tv_sec);
                     #[allow(clippy::useless_conversion)]
@@ -167,14 +173,35 @@ pub fn parse_packets(
                         continue;
                     };
 
-                    // save this packet to PCAP file
+                    let mut latency = None;
+                    if let Some((true, false)) = tcp_flags
+                        && key.protocol == crate::Protocol::TCP
+                        && let (Some(sport), Some(dport)) = (key.sport, key.dport)
+                    {
+                        pending_syns.insert(
+                            (key.source, sport, key.dest, dport),
+                            next_packet_timestamp,
+                        );
+                        if pending_syns.len() > 4096 {
+                            pending_syns.clear();
+                        }
+                    } else if let Some((true, true)) = tcp_flags
+                        && key.protocol == crate::Protocol::TCP
+                        && let (Some(sport), Some(dport)) = (key.sport, key.dport)
+                    {
+                        let syn_key = (key.dest, dport, key.source, sport);
+                        if let Some(syn_ts) = pending_syns.get(&syn_key).copied() {
+                            latency = compute_rtt(syn_ts, next_packet_timestamp);
+                            pending_syns.remove(&syn_key);
+                        }
+                    }
+
                     if let Some(file) = savefile.as_mut() {
                         file.write(&Packet {
                             header: &packet.header,
                             data: &packet.data,
                         });
                     }
-                    // update the map
                     let (traffic_direction, service) = modify_or_insert_in_map(
                         &mut info_traffic_msg,
                         &key,
@@ -184,6 +211,7 @@ pub fn parse_packets(
                         arp_type,
                         exchanged_bytes,
                         ip_blacklist,
+                        latency,
                     );
 
                     info_traffic_msg
@@ -552,4 +580,69 @@ fn packet_stream(
 struct PacketOwned {
     header: PacketHeader,
     data: Box<[u8]>,
+}
+
+fn compute_rtt(syn_ts: Timestamp, synack_ts: Timestamp) -> Option<Duration> {
+    let syn_us = syn_ts.to_usecs()?;
+    let ack_us = synack_ts.to_usecs()?;
+    let diff = ack_us - syn_us;
+    if diff >= 0 {
+        Some(Duration::from_micros(diff as u64))
+    } else {
+        None
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_compute_rtt_basic() {
+        let syn = Timestamp::new(100, 0);
+        let synack = Timestamp::new(100, 5000);
+        let rtt = compute_rtt(syn, synack);
+        assert_eq!(rtt, Some(Duration::from_micros(5000)));
+    }
+
+    #[test]
+    fn test_compute_rtt_crossing_second() {
+        let syn = Timestamp::new(100, 999999);
+        let synack = Timestamp::new(101, 1);
+        let rtt = compute_rtt(syn, synack);
+        assert_eq!(rtt, Some(Duration::from_micros(2)));
+    }
+
+    #[test]
+    fn test_compute_rtt_large_gap() {
+        let syn = Timestamp::new(100, 0);
+        let synack = Timestamp::new(105, 500000);
+        let rtt = compute_rtt(syn, synack);
+        assert_eq!(rtt, Some(Duration::from_millis(5500)));
+    }
+
+    #[test]
+    fn test_compute_rtt_zero() {
+        let syn = Timestamp::new(100, 500);
+        let synack = Timestamp::new(100, 500);
+        let rtt = compute_rtt(syn, synack);
+        assert_eq!(rtt, Some(Duration::from_micros(0)));
+    }
+
+    #[test]
+    fn test_compute_rtt_negative_returns_none() {
+        let syn = Timestamp::new(101, 0);
+        let synack = Timestamp::new(100, 0);
+        let rtt = compute_rtt(syn, synack);
+        assert_eq!(rtt, None);
+    }
+
+    #[test]
+    fn test_compute_rtt_display_ms() {
+        let syn = Timestamp::new(0, 0);
+        let synack = Timestamp::new(0, 25000);
+        let rtt = compute_rtt(syn, synack).unwrap();
+        let display = format!("{:.1} ms", rtt.as_secs_f64() * 1000.0);
+        assert_eq!(display, "25.0 ms");
+    }
 }

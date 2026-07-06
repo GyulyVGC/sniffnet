@@ -12,7 +12,7 @@ use crate::report::types::sort_type::SortType;
 use crate::utils::types::timestamp::Timestamp;
 use std::cmp::Ordering;
 use std::collections::HashMap;
-use std::time::Instant;
+use std::time::{Duration, Instant};
 
 /// Struct useful to format the output report file and to keep track of statistics about the sniffed traffic.
 ///
@@ -43,8 +43,8 @@ pub struct InfoAddressPortPair {
     pub arp_types: HashMap<ArpType, usize>,
     /// Whether the remote address is blacklisted
     pub is_blacklisted: bool,
-    /// The program associated to this pair
     pub program: Program,
+    pub latency: Option<Duration>,
 }
 
 impl InfoAddressPortPair {
@@ -57,6 +57,9 @@ impl InfoAddressPortPair {
         self.service = other.service;
         self.is_blacklisted = other.is_blacklisted;
         self.traffic_direction = other.traffic_direction;
+        if other.latency.is_some() {
+            self.latency = other.latency;
+        }
         for (icmp_type, count) in &other.icmp_types {
             self.icmp_types
                 .entry(*icmp_type)
@@ -119,6 +122,7 @@ impl Default for InfoAddressPortPair {
             arp_types: HashMap::new(),
             is_blacklisted: false,
             program: Program::default(),
+            latency: None,
         }
     }
 }
@@ -190,5 +194,30 @@ mod tests {
             pair1.compare(&pair2, SortType::Neutral, DataRepr::Bits),
             Ordering::Greater
         );
+    }
+
+    #[test]
+    fn test_latency_default_is_none() {
+        let pair = InfoAddressPortPair::default();
+        assert!(pair.latency.is_none());
+    }
+
+    #[test]
+    fn test_latency_refresh_overwrites_when_some() {
+        let mut base = InfoAddressPortPair::default();
+        base.latency = Some(Duration::from_millis(50));
+        let mut new = InfoAddressPortPair::default();
+        new.latency = Some(Duration::from_millis(20));
+        base.refresh(&new);
+        assert_eq!(base.latency, Some(Duration::from_millis(20)));
+    }
+
+    #[test]
+    fn test_latency_refresh_preserves_when_other_none() {
+        let mut base = InfoAddressPortPair::default();
+        base.latency = Some(Duration::from_millis(50));
+        let new = InfoAddressPortPair::default();
+        base.refresh(&new);
+        assert_eq!(base.latency, Some(Duration::from_millis(50)));
     }
 }

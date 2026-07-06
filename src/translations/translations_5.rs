@@ -178,3 +178,24 @@ pub fn no_favorites_saved_translation(language: Language) -> &'static str {
         _ => "No favorites saved yet",
     }
 }
+
+pub fn latency_translation(language: Language) -> &'static str {
+    match language {
+        Language::EN => "Latency",
+        Language::IT => "Latenza",
+        Language::DE => "Latenz",
+        Language::ZH => "延迟",
+        Language::ZH_TW => "延遲",
+        Language::TR => "Gecikme",
+        Language::JA => "レイテンシ",
+        Language::ES => "Latencia",
+        Language::RO => "Latență",
+        Language::ID => "Latensi",
+        Language::FR => "Latence",
+        Language::UK => "Затримка",
+        Language::SV => "Latens",
+        Language::EL => "Α latencia",
+        Language::HU => "Késleltetés",
+        _ => "Latency",
+    }
+}

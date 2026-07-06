@@ -21,7 +21,7 @@ use crate::networking::types::service_query::ServiceQuery;
 use crate::networking::types::traffic_direction::TrafficDirection;
 use crate::networking::types::traffic_type::TrafficType;
 use std::fmt::Write;
-use std::time::Instant;
+use std::time::{Duration, Instant};
 
 include!(concat!(env!("OUT_DIR"), "/services.rs"));
 
@@ -266,6 +266,7 @@ pub fn modify_or_insert_in_map(
     arp_type: ArpType,
     exchanged_bytes: u128,
     ip_blacklist: &IpBlacklist,
+    latency: Option<Duration>,
 ) -> (TrafficDirection, Service) {
     let mut traffic_direction = TrafficDirection::default();
     let mut service = Service::Unknown;
@@ -313,6 +314,9 @@ pub fn modify_or_insert_in_map(
                     .and_modify(|n| *n += 1)
                     .or_insert(1);
             }
+            if latency.is_some() {
+                info.latency = latency;
+            }
         })
         .or_insert_with(|| InfoAddressPortPair {
             mac_address1: mac_addresses.0,
@@ -336,6 +340,7 @@ pub fn modify_or_insert_in_map(
             },
             is_blacklisted,
             program: Program::NotApplicable,
+            latency,
         });
 
     (new_info.traffic_direction, new_info.service)

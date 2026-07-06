@@ -34,7 +34,7 @@ use crate::translations::translations_2::{
 use crate::translations::translations_3::{
     copy_translation, messages_translation, service_translation,
 };
-use crate::translations::translations_5::program_translation;
+use crate::translations::translations_5::{latency_translation, program_translation};
 use crate::utils::formatted_strings::{get_formatted_timestamp, get_socket_address};
 use crate::utils::types::icon::Icon;
 use crate::{Language, Protocol, Sniffer, StyleType};
@@ -199,6 +199,13 @@ fn col_info<'a>(
                 program_translation(language),
                 &val.program.to_string(),
             ));
+    }
+
+    if let Some(lat) = val.latency {
+        ret_val = ret_val.push(TextType::highlighted_subtitle_with_desc(
+            latency_translation(language),
+            &format!("{:.1} ms", lat.as_secs_f64() * 1000.0),
+        ));
     }
 
     ret_val = ret_val.push(TextType::highlighted_subtitle_with_desc(
