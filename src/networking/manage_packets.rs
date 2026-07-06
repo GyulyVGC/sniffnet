@@ -426,20 +426,16 @@ fn is_broadcast_address(address: &IpAddr, my_interface_addresses: &[Address]) ->
 /// Determines if the connection is local
 pub fn is_local_connection(
     address_to_lookup: &IpAddr,
-    my_interface_addresses: &Vec<Address>,
+    my_interface_addresses: &[Address],
 ) -> bool {
-    let mut ret_val = false;
-
     for address in my_interface_addresses {
         match address.addr {
             IpAddr::V4(local_addr) => {
                 if let IpAddr::V4(address_to_lookup_v4) = address_to_lookup {
-                    // remote is link local?
                     if address_to_lookup_v4.is_link_local() {
-                        ret_val = true;
+                        return true;
                     }
-                    // is the same subnet?
-                    else if let Some(IpAddr::V4(netmask)) = address.netmask {
+                    if let Some(IpAddr::V4(netmask)) = address.netmask {
                         let netmask_digits = netmask.octets();
                         let local_addr_digits = local_addr.octets();
                         let remote_addr_digits = address_to_lookup_v4.octets();
@@ -448,19 +444,17 @@ pub fn is_local_connection(
                             .enumerate()
                             .all(|(i, m)| (m & local_addr_digits[i]) == (m & remote_addr_digits[i]))
                         {
-                            ret_val = true;
+                            return true;
                         }
                     }
                 }
             }
             IpAddr::V6(local_addr) => {
                 if let IpAddr::V6(address_to_lookup_v6) = address_to_lookup {
-                    // remote is link local?
                     if address_to_lookup_v6.is_unicast_link_local() {
-                        ret_val = true;
+                        return true;
                     }
-                    // is the same subnet?
-                    else if let Some(IpAddr::V6(netmask)) = address.netmask {
+                    if let Some(IpAddr::V6(netmask)) = address.netmask {
                         let netmask_digits = netmask.octets();
                         let local_addr_digits = local_addr.octets();
                         let remote_addr_digits = address_to_lookup_v6.octets();
@@ -469,7 +463,7 @@ pub fn is_local_connection(
                             .enumerate()
                             .all(|(i, m)| (m & local_addr_digits[i]) == (m & remote_addr_digits[i]))
                         {
-                            ret_val = true;
+                            return true;
                         }
                     }
                 }
@@ -477,11 +471,11 @@ pub fn is_local_connection(
         }
     }
 
-    ret_val
+    false
 }
 
 /// Determines if the address passed as parameter belong to the chosen adapter
-pub fn is_my_address(local_address: &IpAddr, my_interface_addresses: &Vec<Address>) -> bool {
+pub fn is_my_address(local_address: &IpAddr, my_interface_addresses: &[Address]) -> bool {
     for address in my_interface_addresses {
         if address.addr.eq(local_address) {
             return true;
