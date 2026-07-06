@@ -27,9 +27,25 @@ pub fn traffic_preview(tx: &Sender<TrafficPreview>) {
     handle_devices_and_previews(&mut data, tx, &pcap_tx);
 
     loop {
-        let (packet_res, _) = pcap_rx
-            .recv_timeout(Duration::from_millis(150))
-            .unwrap_or((Err(pcap::Error::TimeoutExpired), None));
+        let (packet_res, _) = match pcap_rx.recv_timeout(Duration::from_millis(150)) {
+            Ok(pair) => pair,
+            Err(std::sync::mpsc::RecvTimeoutError::Timeout) => {
+                (Err(pcap::Error::TimeoutExpired), None)
+            }
+            Err(std::sync::mpsc::RecvTimeoutError::Disconnected) => {
+                if tx.is_closed() {
+                    return;
+                }
+                std::thread::sleep(Duration::from_millis(150));
+                if ticks.elapsed() >= Duration::from_secs(1) {
+                    ticks = ticks
+                        .checked_add(Duration::from_secs(1))
+                        .unwrap_or(Instant::now());
+                    handle_devices_and_previews(&mut data, tx, &pcap_tx);
+                }
+                continue;
+            }
+        };
 
         if tx.is_closed() {
             return;
@@ -42,22 +58,28 @@ pub fn traffic_preview(tx: &Sender<TrafficPreview>) {
             handle_devices_and_previews(&mut data, tx, &pcap_tx);
         }
 
-        if let Ok(packet) = packet_res {
-            let dev_info = packet.dev_info;
-            let my_link_type = dev_info.my_link_type;
-            if let Some(headers) = get_sniffable_headers(&packet.data, my_link_type)
-                && analyze_headers(
-                    headers,
-                    &mut (None, None),
-                    &mut 0,
-                    &mut IcmpType::default(),
-                    &mut ArpType::default(),
-                )
-                .is_some()
-            {
-                data.entry(dev_info.name)
-                    .and_modify(|p| *p += 1)
-                    .or_insert(1);
+        match packet_res {
+            Ok(packet) => {
+                let dev_info = packet.dev_info;
+                let my_link_type = dev_info.my_link_type;
+                if let Some(headers) = get_sniffable_headers(&packet.data, my_link_type)
+                    && analyze_headers(
+                        headers,
+                        &mut (None, None),
+                        &mut 0,
+                        &mut IcmpType::default(),
+                        &mut ArpType::default(),
+                    )
+                    .is_some()
+                {
+                    data.entry(dev_info.name)
+                        .and_modify(|p| *p += 1)
+                        .or_insert(1);
+                }
+            }
+            Err(pcap::Error::TimeoutExpired) => {}
+            Err(e) => {
+                eprintln!("Sniffnet traffic preview: pcap error: {e}");
             }
         }
     }
