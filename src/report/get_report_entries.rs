@@ -3,6 +3,7 @@ use crate::networking::manage_packets::get_address_to_lookup;
 use crate::networking::types::address_port_pair::AddressPortPair;
 use crate::networking::types::data_info::DataInfo;
 use crate::networking::types::info_address_port_pair::InfoAddressPortPair;
+use crate::report::types::REPORT_ENTRIES_PER_PAGE;
 use std::cmp::min;
 
 /// Return the elements that satisfy the search constraints and belong to the given page,
@@ -53,11 +54,11 @@ pub fn get_searched_entries(
         a.compare(b, sniffer.conf.report_sort_type, sniffer.conf.data_repr)
     });
 
-    let upper_bound = min(sniffer.page_number * 30, all_results.len());
+    let upper_bound = min(sniffer.page_number * REPORT_ENTRIES_PER_PAGE, all_results.len());
 
     (
         all_results
-            .get((sniffer.page_number.saturating_sub(1)) * 30..upper_bound)
+            .get((sniffer.page_number.saturating_sub(1)) * REPORT_ENTRIES_PER_PAGE..upper_bound)
             .unwrap_or_default()
             .to_vec(),
         all_results.len(),

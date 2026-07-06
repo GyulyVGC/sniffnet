@@ -30,6 +30,7 @@ use crate::report::get_report_entries::get_searched_entries;
 use crate::report::types::report_col::ReportCol;
 use crate::report::types::search_parameters::{FilterInputType, SearchParameters};
 use crate::report::types::sort_type::SortType;
+use crate::report::types::REPORT_ENTRIES_PER_PAGE;
 use crate::translations::translations_2::{
     country_translation, domain_translation, no_search_results_translation,
     only_show_favorites_translation, showing_results_translation,
@@ -101,7 +102,7 @@ fn report<'a>(sniffer: &Sniffer) -> Column<'a, Message, StyleType> {
         .align_x(Alignment::Start);
 
     let mut scroll_report = Column::new().align_x(Alignment::Start);
-    let start_entry_num = (sniffer.page_number.saturating_sub(1)) * 30 + 1;
+    let start_entry_num = (sniffer.page_number.saturating_sub(1)) * REPORT_ENTRIES_PER_PAGE + 1;
     let end_entry_num = start_entry_num + search_results.len() - 1;
     for (key, val) in search_results {
         scroll_report = scroll_report.push(
@@ -590,7 +591,7 @@ fn get_change_page_row<'a>(
             end_entry_num,
             results_number,
         )))
-        .push(if page_number < results_number.div_ceil(30) {
+        .push(if page_number < results_number.div_ceil(REPORT_ENTRIES_PER_PAGE) {
             Container::new(get_button_change_page(true).width(25))
         } else {
             Container::new(Space::new().width(25))

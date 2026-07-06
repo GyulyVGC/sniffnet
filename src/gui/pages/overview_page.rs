@@ -23,6 +23,7 @@ use crate::networking::types::capture_context::CaptureSource;
 use crate::networking::types::data_info::DataInfo;
 use crate::networking::types::data_representation::DataRepr;
 use crate::report::types::sort_type::SortType;
+use crate::report::types::REPORT_ENTRIES_PER_PAGE;
 use crate::translations::translations::{
     active_filters_translation, incoming_translation, none_translation, outgoing_translation,
     traffic_rate_translation,
@@ -148,7 +149,7 @@ fn col_favorite_item(
         );
     }
 
-    if entries.len() >= 30 {
+    if entries.len() >= REPORT_ENTRIES_PER_PAGE {
         scroll_item = scroll_item.push(
             Text::new(only_top_30_items_translation(language))
                 .height(50)
