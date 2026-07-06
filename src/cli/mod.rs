@@ -37,12 +37,17 @@ impl Args {
         #[cfg(all(windows, not(debug_assertions)))]
         if let Some(logs_file) = crate::utils::formatted_strings::get_logs_file_path() {
             if args.logs {
-                std::process::Command::new("explorer")
-                    .arg(logs_file)
+                match std::process::Command::new("explorer")
+                    .arg(&logs_file)
                     .spawn()
-                    .unwrap()
-                    .wait()
-                    .unwrap_or_default();
+                {
+                    Ok(child) => {
+                        let _ = child.wait();
+                    }
+                    Err(e) => {
+                        eprintln!("Failed to open logs file '{logs_file}': {e}");
+                    }
+                }
                 std::process::exit(0);
             } else {
                 // truncate logs file

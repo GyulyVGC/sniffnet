@@ -25,7 +25,6 @@ async fn is_newer_release_available(max_retries: u8, seconds_between_retries: u8
         .ok()?;
     let response = client
         .get("https://api.github.com/repos/GyulyVGC/sniffnet/releases/latest")
-        .header("User-agent", format!("{SNIFFNET_LOWERCASE}-{APP_VERSION}"))
         .header("Accept", "application/vnd.github+json")
         .header("X-GitHub-Api-Version", "2022-11-28")
         .send()
@@ -38,21 +37,35 @@ async fn is_newer_release_available(max_retries: u8, seconds_between_retries: u8
         if result_json.is_err() {
             let response2 = client
                 .get("https://api.github.com/repos/GyulyVGC/sniffnet/releases/latest")
-                .header("User-agent", format!("{SNIFFNET_LOWERCASE}-{APP_VERSION}"))
                 .header("Accept", "application/vnd.github+json")
                 .header("X-GitHub-Api-Version", "2022-11-28")
                 .send()
                 .await;
-            println!("\nResponse text: {:?}", response2.unwrap());
+            if let Ok(resp) = response2 {
+                if let Ok(text) = resp.text().await {
+                    println!("\nResponse text: {text}");
+                }
+            }
             println!("JSON result: {result_json:?}\n");
         }
 
-        let mut latest_version = result_json
-            .unwrap_or_else(|_| AppVersion {
-                name: String::from(":-("),
-            })
-            .name;
-        latest_version = latest_version.trim().to_string();
+        let latest_version = match result_json {
+            Ok(v) => v.name,
+            Err(e) => {
+                eprintln!("Sniffnet update-check: JSON parse failed: {e}");
+                let retries_left = max_retries - 1;
+                if retries_left > 0 {
+                    tokio::time::sleep(Duration::from_secs(u64::from(seconds_between_retries))).await;
+                    return Box::pin(is_newer_release_available(
+                        retries_left,
+                        seconds_between_retries,
+                    ))
+                    .await;
+                }
+                return None;
+            }
+        };
+        let latest_version = latest_version.trim().to_string();
 
         // release name sample: v1.2.3
         let stripped = latest_version.trim_start_matches('v');
