@@ -17,7 +17,9 @@ use crate::gui::types::settings::Settings;
 use crate::networking::types::capture_context::{CaptureSource, CaptureSourcePicklist};
 use crate::networking::types::my_device::MyDevice;
 use crate::networking::types::my_link_type::MyLinkType;
-use crate::translations::translations::{network_adapter_translation, start_translation};
+use crate::translations::translations::{
+    error_translation, network_adapter_translation, start_translation,
+};
 use crate::translations::translations_3::{
     directory_translation, export_capture_translation, file_name_translation,
 };
@@ -157,10 +159,26 @@ fn get_col_data_source(sniffer: &Sniffer, language: Language) -> Column<'_, Mess
 }
 
 fn get_col_adapter(sniffer: &Sniffer) -> Column<'_, Message, StyleType> {
-    Column::new()
-        .spacing(5)
-        .height(Length::Fill)
-        .push(if sniffer.preview_charts.is_empty() {
+    Column::new().spacing(5).height(Length::Fill).push(
+        if let Some(error) = &sniffer.traffic_preview_device_list_error {
+            Into::<iced::Element<Message, StyleType>>::into(center(
+                Column::new()
+                    .align_x(Alignment::Center)
+                    .spacing(15)
+                    .push(Icon::Error.to_text().size(60))
+                    .push(
+                        Text::new(error_translation(sniffer.conf.settings.language))
+                            .class(TextType::Danger)
+                            .size(FONT_SIZE_SUBTITLE)
+                            .align_x(alignment::Alignment::Center),
+                    )
+                    .push(
+                        Text::new(error)
+                            .width(Length::Fill)
+                            .align_x(alignment::Alignment::Center),
+                    ),
+            ))
+        } else if sniffer.preview_charts.is_empty() {
             Into::<iced::Element<Message, StyleType>>::into(center(
                 Icon::get_hourglass(sniffer.dots_pulse.0.len()).size(60),
             ))
@@ -212,7 +230,8 @@ fn get_col_adapter(sniffer: &Sniffer) -> Column<'_, Message, StyleType> {
                 Direction::Vertical(ScrollbarType::properties()),
             )
             .into()
-        })
+        },
+    )
 }
 
 pub(crate) fn get_addresses_row(

@@ -17,6 +17,7 @@ use std::time::{Duration, Instant};
 #[derive(Default, Clone, Debug)]
 pub struct TrafficPreview {
     pub data: Vec<(MyDevice, u128)>,
+    pub error: Option<String>,
 }
 
 pub fn traffic_preview(tx: &Sender<TrafficPreview>) {
@@ -68,8 +69,28 @@ fn handle_devices_and_previews(
     tx: &Sender<TrafficPreview>,
     pcap_tx: &std::sync::mpsc::SyncSender<(Result<PacketOwned, pcap::Error>, Option<Stat>)>,
 ) {
+    handle_device_list_result(Device::list(), data, tx, pcap_tx);
+}
+
+fn handle_device_list_result(
+    devices: Result<Vec<Device>, pcap::Error>,
+    data: &mut HashMap<String, u128>,
+    tx: &Sender<TrafficPreview>,
+    pcap_tx: &std::sync::mpsc::SyncSender<(Result<PacketOwned, pcap::Error>, Option<Stat>)>,
+) {
     let mut traffic_preview = TrafficPreview::default();
-    for dev in Device::list().unwrap_or_default() {
+    let devices = match devices {
+        Ok(devices) => devices,
+        Err(error) => {
+            traffic_preview.error = Some(error.to_string());
+            let _ = tx.send_blocking(traffic_preview);
+            for v in data.values_mut() {
+                *v = 0;
+            }
+            return;
+        }
+    };
+    for dev in devices {
         let dev_name = dev.name.clone();
         let my_dev = MyDevice::from_pcap_device(dev);
         if let Some(n) = data.get(&dev_name) {
@@ -132,4 +153,31 @@ struct DevInfo {
 struct PacketOwned {
     data: Box<[u8]>,
     dev_info: DevInfo,
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn traffic_preview_device_list_error() {
+        let (preview_tx, preview_rx) = async_channel::unbounded();
+        let (pcap_tx, _pcap_rx) = std::sync::mpsc::sync_channel(1);
+        let mut data = HashMap::from([("stale-device".to_string(), 42)]);
+
+        handle_device_list_result(
+            Err(pcap::Error::PcapError("invalid UTF-8 sequence".to_string())),
+            &mut data,
+            &preview_tx,
+            &pcap_tx,
+        );
+
+        let preview = preview_rx.try_recv().unwrap();
+        assert!(preview.data.is_empty());
+        assert_eq!(
+            preview.error.as_deref(),
+            Some("libpcap error: invalid UTF-8 sequence")
+        );
+        assert_eq!(data.get("stale-device"), Some(&0));
+    }
 }

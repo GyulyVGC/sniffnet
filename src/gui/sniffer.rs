@@ -106,6 +106,8 @@ pub struct Sniffer {
     pub capture_source: CaptureSource,
     /// Signals if a pcap error occurred
     pub pcap_error: Option<String>,
+    /// Signals if a traffic-preview device list error occurred
+    pub traffic_preview_device_list_error: Option<String>,
     /// Messages status
     pub dots_pulse: (String, u8),
     /// Traffic chart displayed in the Overview page
@@ -168,6 +170,7 @@ impl Sniffer {
             newer_release_available: None,
             capture_source,
             pcap_error: None,
+            traffic_preview_device_list_error: None,
             dots_pulse: (".".to_string(), 0),
             traffic_chart: TrafficChart::new(style, language, data_repr),
             preview_charts,
@@ -864,6 +867,13 @@ impl Sniffer {
     }
 
     fn traffic_preview(&mut self, msg: TrafficPreview) {
+        if let Some(error) = msg.error {
+            self.traffic_preview_device_list_error = Some(error);
+            self.preview_charts.clear();
+            return;
+        }
+
+        self.traffic_preview_device_list_error = None;
         self.preview_charts.retain(|(my_dev, _)| {
             msg.data
                 .iter()
@@ -1065,6 +1075,7 @@ impl Sniffer {
         self.addresses_resolved = HashMap::new();
         self.logged_notifications = LoggedNotifications::default();
         self.pcap_error = None;
+        self.traffic_preview_device_list_error = None;
         self.traffic_chart = TrafficChart::new(style, language, self.conf.data_repr);
         self.modal = None;
         self.settings_page = None;
@@ -1429,6 +1440,7 @@ mod tests {
     use std::path::Path;
     use std::time::Duration;
 
+    use crate::chart::types::preview_chart::PreviewChart;
     use crate::countries::types::country::Country;
     use crate::gui::components::types::my_modal::MyModal;
     use crate::gui::pages::types::settings_page::SettingsPage;
@@ -1441,11 +1453,13 @@ mod tests {
     use crate::gui::types::message::Message;
     use crate::gui::types::settings::Settings;
     use crate::gui::types::timing_events::TimingEvents;
+    use crate::networking::traffic_preview::TrafficPreview;
     use crate::networking::types::capture_context::CaptureSourcePicklist;
     use crate::networking::types::config_device::ConfigDevice;
     use crate::networking::types::data_info::DataInfo;
     use crate::networking::types::data_representation::DataRepr;
     use crate::networking::types::host::Host;
+    use crate::networking::types::my_device::MyDevice;
     use crate::networking::types::program::Program;
     use crate::networking::types::service::Service;
     use crate::networking::types::traffic_direction::TrafficDirection;
@@ -1458,6 +1472,7 @@ mod tests {
     use crate::notifications::types::sound::Sound;
     use crate::report::types::sort_type::SortType;
     use crate::{ByteMultiple, Language, RunningPage, Sniffer, StyleType};
+    use pcap::Device;
 
     // helpful to clean up files generated from tests
     impl Drop for Sniffer {
@@ -1614,6 +1629,41 @@ mod tests {
 
         sniffer.update(Message::Periodic);
         assert_eq!(sniffer.dots_pulse, ("..".to_string(), 0));
+    }
+
+    #[test]
+    #[parallel] // needed to not collide with other tests generating configs files
+    fn test_traffic_preview_error_clears_adapter_list() {
+        let mut sniffer = Sniffer::new(Conf::default());
+        let stale_device = MyDevice::from_pcap_device(Device::from("stale-device"));
+        sniffer.preview_charts =
+            vec![(stale_device, PreviewChart::new(sniffer.conf.settings.style))];
+        sniffer.pcap_error = Some("capture failed".to_string());
+
+        sniffer.update(Message::TrafficPreview(TrafficPreview {
+            data: vec![],
+            error: Some("libpcap returned invalid UTF-8".to_string()),
+        }));
+
+        assert!(sniffer.preview_charts.is_empty());
+        assert_eq!(
+            sniffer.traffic_preview_device_list_error.as_deref(),
+            Some("libpcap returned invalid UTF-8")
+        );
+        assert_eq!(sniffer.pcap_error.as_deref(), Some("capture failed"));
+
+        let recovered_device = MyDevice::from_pcap_device(Device::from("recovered-device"));
+        sniffer.update(Message::TrafficPreview(TrafficPreview {
+            data: vec![(recovered_device, 3)],
+            error: None,
+        }));
+
+        assert!(sniffer.traffic_preview_device_list_error.is_none());
+        assert_eq!(sniffer.preview_charts.len(), 1);
+        assert_eq!(
+            sniffer.preview_charts[0].0.get_name().as_str(),
+            "recovered-device"
+        );
     }
 
     #[test]
