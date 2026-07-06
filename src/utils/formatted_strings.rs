@@ -7,19 +7,6 @@ use chrono::{Local, TimeZone};
 /// Application version number (to be displayed in gui footer)
 pub const APP_VERSION: &str = env!("CARGO_PKG_VERSION");
 
-// /// Computes the String representing the percentage of filtered bytes/packets
-// pub fn get_percentage_string(observed: u128, filtered: u128) -> String {
-//     #[allow(clippy::cast_precision_loss)]
-//     let filtered_float = filtered as f32;
-//     #[allow(clippy::cast_precision_loss)]
-//     let observed_float = observed as f32;
-//     if format!("{:.1}", 100.0 * filtered_float / observed_float).eq("0.0") {
-//         "<0.1%".to_string()
-//     } else {
-//         format!("{:.1}%", 100.0 * filtered_float / observed_float)
-//     }
-// }
-
 pub fn print_cli_welcome_message() {
     let ver = APP_VERSION;
     print!(

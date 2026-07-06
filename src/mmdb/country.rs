@@ -82,10 +82,6 @@ mod tests {
             let res = get_country(&IpAddr::from([1, 0, 8, 0]), &reader);
             assert_eq!(res, Country::CN);
 
-            // known IPv6
-            // let res = get_country(&IpAddr::from_str("2a0e:1d80::").unwrap(), &reader);
-            // assert_eq!(res, Country::RO);
-
             // unknown IP
             let res = get_country(&IpAddr::from([127, 0, 0, 1]), &reader);
             assert_eq!(res, Country::ZZ);
@@ -115,10 +111,6 @@ mod tests {
             // another known IP
             let res = get_country(&IpAddr::from([1, 6, 230, 0]), &reader);
             assert_eq!(res, Country::IN);
-
-            // known IPv6
-            // let res = get_country(&IpAddr::from_str("2a02:6ea0:f001::").unwrap(), &reader);
-            // assert_eq!(res, Country::AR);
 
             // unknown IP
             let res = get_country(&IpAddr::from([127, 0, 0, 1]), &reader);
