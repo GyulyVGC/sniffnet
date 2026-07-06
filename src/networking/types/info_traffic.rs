@@ -34,15 +34,15 @@ impl InfoTraffic {
 
         self.dropped_packets = msg.dropped_packets;
 
-        // it can happen they're equal due to dis-alignments in the PCAP timestamp
         if self.last_packet_timestamp.secs() == msg.last_packet_timestamp.secs() {
             msg.last_packet_timestamp.add_secs(1);
         }
         self.last_packet_timestamp = msg.last_packet_timestamp;
 
-        for (key, value) in &mut msg.map {
-            let local_port = get_local_port(key, value.traffic_direction);
-            let entry = self.map.entry(*key);
+        let msg_map = std::mem::take(&mut msg.map);
+        for (key, mut value) in msg_map {
+            let local_port = get_local_port(&key, value.traffic_direction);
+            let entry = self.map.entry(key);
             match entry {
                 Entry::Occupied(mut o) => {
                     if let Some(program_lookup) = program_lookup_opt
@@ -53,11 +53,10 @@ impl InfoTraffic {
                             false,
                             value.data_info(),
                         );
-                        // set program in msg (used for favorite notifications)
                         value.program = program;
                     }
 
-                    o.get_mut().refresh(value);
+                    o.get_mut().refresh(&value);
                 }
                 Entry::Vacant(v) => {
                     if let Some(program_lookup) = program_lookup_opt
@@ -65,27 +64,28 @@ impl InfoTraffic {
                     {
                         let program =
                             program_lookup.lookup_and_add_data(local_port, true, value.data_info());
-                        // set program in msg (used for favorite notifications)
                         value.program = program;
                     }
 
-                    v.insert(value.clone());
+                    v.insert(value);
                 }
             }
         }
 
-        for (key, value) in &msg.services {
+        let msg_services = std::mem::take(&mut msg.services);
+        for (key, value) in msg_services {
             self.services
-                .entry(*key)
-                .and_modify(|x| x.refresh(*value))
-                .or_insert(*value);
+                .entry(key)
+                .and_modify(|x| x.refresh(value))
+                .or_insert(value);
         }
 
-        for (key, value) in &msg.hosts {
+        let msg_hosts = std::mem::take(&mut msg.hosts);
+        for (key, value) in msg_hosts {
             self.hosts
-                .entry(key.clone())
-                .and_modify(|x| x.refresh(value))
-                .or_insert(*value);
+                .entry(key)
+                .and_modify(|x| x.refresh(&value))
+                .or_insert(value);
         }
     }
 
