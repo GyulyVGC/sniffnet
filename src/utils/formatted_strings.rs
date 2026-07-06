@@ -75,19 +75,21 @@ pub fn get_socket_address(address: &IpAddr, port: Option<u16>) -> String {
 }
 
 pub fn get_path_termination_string(full_path: &str, i: usize) -> String {
-    let chars = full_path.chars().collect::<Vec<char>>();
-    if chars.is_empty() {
+    if full_path.is_empty() {
         return String::new();
     }
-    let tot_len = chars.len();
+    let tot_len = full_path.chars().count();
     let slice_len = min(i, tot_len);
     let suspensions = if tot_len > i { "…" } else { "" };
-    [
-        suspensions,
-        &chars[tot_len - slice_len..].iter().collect::<String>(),
-        " ",
-    ]
-    .concat()
+    let start_byte = full_path
+        .char_indices()
+        .nth(tot_len - slice_len)
+        .map_or(full_path.len(), |(idx, _)| idx);
+    let mut out = String::with_capacity(slice_len + 2);
+    out.push_str(suspensions);
+    out.push_str(&full_path[start_byte..]);
+    out.push(' ');
+    out
 }
 
 pub fn get_formatted_num_seconds(num_seconds: u128) -> String {
@@ -139,20 +141,20 @@ pub fn redirect_stdout_stderr_to_file()
 
 pub fn clip_text(text: &str, max_chars: usize) -> String {
     let text = text.trim();
-    let chars = text.chars().collect::<Vec<char>>();
-    let tot_len = chars.len();
-    let slice_len = min(max_chars, tot_len);
+    let tot_len = text.chars().count();
 
-    let suspensions = if tot_len > max_chars { "…" } else { "" };
-    let slice = if tot_len > max_chars {
-        &chars[..slice_len.saturating_sub(2)]
-    } else {
-        &chars[..slice_len]
+    if tot_len <= max_chars {
+        return text.to_string();
     }
-    .iter()
-    .collect::<String>();
 
-    [slice.trim(), suspensions].concat()
+    let end_byte = text
+        .char_indices()
+        .nth(max_chars.saturating_sub(2))
+        .map_or(text.len(), |(idx, _)| idx);
+    let mut out = String::with_capacity(end_byte + 1);
+    out.push_str(text[..end_byte].trim_end());
+    out.push('…');
+    out
 }
 
 #[cfg(test)]
