@@ -1002,6 +1002,15 @@
       "contributions": [
         "translation"
       ]
+    },
+    {
+      "login": "EfesX",
+      "name": "Ivan Guzhba",
+      "avatar_url": "https://avatars.githubusercontent.com/u/24487499?v=4",
+      "profile": "https://github.com/EfesX",
+      "contributions": [
+        "translation"
+      ]
     }
   ],
   "contributorsPerLine": 7,
