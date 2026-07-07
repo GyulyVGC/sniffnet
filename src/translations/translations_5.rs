@@ -21,7 +21,7 @@ pub fn filter_traffic_translation(language: Language) -> String {
         Language::SV => "Filtrera trafik",
         Language::EL => "Φιλτράρισμα ροής",
         Language::HU => "Forgalom szűrése",
-        Language::LK => "TODO_LK",
+        Language::LK => "ට්‍රැෆික් පෙරහන් කරන්න",
         _ => "Filter traffic",
     }
     .to_string()
@@ -47,7 +47,7 @@ pub fn traffic_source_translation(language: Language) -> &'static str {
         Language::SV => "Trafikkälla",
         Language::EL => "Πηγή ροής",
         Language::HU => "Forgalom forrása",
-        Language::LK => "TODO_LK",
+        Language::LK => "ට්‍රැෆික් මූලාශ්‍රය",
         _ => "Traffic source",
     }
 }
@@ -70,7 +70,7 @@ pub fn remote_notifications_translation(language: Language) -> &'static str {
         Language::SV => "Fjärrnotiser",
         Language::EL => "Απομακρυσμένες ειδοποιήσεις",
         Language::HU => "Távoli értesítések",
-        Language::LK => "TODO_LK",
+        Language::LK => "දුරස්ථ දැනුම්දීම්",
         _ => "Remote notifications",
     }
 }
@@ -93,7 +93,7 @@ pub fn ip_blacklist_translation(language: Language) -> &'static str {
         Language::SV => "IP-svartlista",
         Language::EL => "Λίστα μπλοκαρισμένων διευθύνσεων",
         Language::HU => "IP feketelista",
-        Language::LK => "TODO_LK",
+        Language::LK => "IP කළු ලැයිස්තුව",
         _ => "IP blacklist",
     }
 }
@@ -116,7 +116,7 @@ pub fn blacklisted_transmitted_translation(language: Language) -> &'static str {
         Language::SV => "Ny data utbytt från en svartlistad IP-adress",
         Language::EL => "Νέα δεδομένα ανταλλαχθηκαν από μια μπλοκαρισμένη διεύθυνση",
         Language::HU => "Új adatforgalom egy feketelistán lévő IP-vel",
-        Language::LK => "TODO_LK",
+        Language::LK => "කළු ලැයිස්තුගත IP එකකින් නව දත්ත හුවමාරු විය",
         _ => "New data exchanged from a blacklisted IP",
     }
 }
@@ -139,7 +139,7 @@ pub fn only_show_blacklisted_translation(language: Language) -> &'static str {
         Language::SV => "Visa endast svartlistade",
         Language::EL => "Εμφάνιση μόνο μπλοκαρισμένων διευθύνσεων",
         Language::HU => "Csak feketelistán lévők mutatása",
-        Language::LK => "TODO_LK",
+        Language::LK => "කළු ලැයිස්තුගත ඒවා පමණක් පෙන්වන්න",
         _ => "Only show blacklisted",
     }
 }
@@ -159,7 +159,7 @@ pub fn program_translation(language: Language) -> &'static str {
         Language::FR => "Programme",
         Language::UK => "Програма",
         Language::EL => "Πρόγραμμα",
-        Language::LK => "TODO_LK",
+        Language::LK => "මෘදුකාංගය",
         _ => "Program",
     }
 }
@@ -182,7 +182,7 @@ pub fn no_favorites_saved_translation(language: Language) -> &'static str {
         Language::SV => "Inga favoriter sparade ännu",
         Language::EL => "Δεν έχει αποθηκευτεί κανένα αγαπημένο στοιχείο ακόμη",
         Language::HU => "Még nincsenek elmentve kedvencek",
-        Language::LK => "TODO_LK",
+        Language::LK => "ප්‍රියතම කිසිවක් එක්කර නොමැත",
         _ => "No favorites saved yet",
     }
 }

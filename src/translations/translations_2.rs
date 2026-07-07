@@ -27,7 +27,7 @@ pub fn new_version_available_translation(language: Language) -> &'static str {
         Language::ID => "Versi baru tersedia!",
         Language::NL => "Een nieuwere versie is beschikbaar!",
         Language::HU => "Elérhető egy újabb verzió!",
-        Language::LK => "TODO_LK",
+        Language::LK => "අලුත් අප්ඩේට් එකක් ඇවිත්!",
     }
 }
 
@@ -58,7 +58,7 @@ pub fn inspect_translation(language: Language) -> &'static str {
         Language::NL => "Inspecteren",
         Language::EL => "Επιθεώρηση",
         Language::HU => "Megvizsgálás",
-        Language::LK => "TODO_LK",
+        Language::LK => "පරීක්ෂා කරන්න",
     }
 }
 
@@ -89,7 +89,7 @@ pub fn connection_details_translation(language: Language) -> &'static str {
         Language::NL => "Verbindingsdetails",
         Language::EL => "Λεπτομέρειες σύνδεσης",
         Language::HU => "Kapcsolat részletei",
-        Language::LK => "TODO_LK",
+        Language::LK => "කනෙක්ෂන් එකෙහි විස්තර",
     }
 }
 
@@ -119,7 +119,7 @@ pub fn dropped_translation(language: Language) -> &'static str {
         Language::ID => "Dihapus",
         Language::EL => "Απορριμμένα",
         Language::HU => "Elvesztett",
-        Language::LK => "TODO_LK",
+        Language::LK => "ඉවත දැමූ",
     }
 }
 
@@ -150,7 +150,7 @@ pub fn data_representation_translation(language: Language) -> &'static str {
         Language::NL => "Gegevensweergave",
         Language::EL => "Αναπαράσταση δεδομένων",
         Language::HU => "Adat reprezentació",
-        Language::LK => "TODO_LK",
+        Language::LK => "දත්ත නිරූපණය",
     }
 }
 
@@ -181,7 +181,7 @@ pub fn host_translation(language: Language) -> &'static str {
         Language::NL => "Netwerk host",
         Language::EL => "Κόμβος δικτύου",
         Language::HU => "Hálózati gazda",
-        Language::LK => "TODO_LK",
+        Language::LK => "නෙට්වර්ක් හොස්ට් එ​ක",
     }
 }
 
@@ -212,7 +212,7 @@ pub fn only_top_30_items_translation(language: Language) -> &'static str {
         Language::NL => "Alleen de bovenste 30 items worden hier weergegeven",
         Language::EL => "Εμφανίζονται μόνο τα κορυφαία 30 στοιχεία",
         Language::HU => "Itt csak az első 30 elem van megjelenítve",
-        Language::LK => "TODO_LK",
+        Language::LK => "මෙහි පෙන්වන්නේ අවසන් අයිතම 30 පමණි",
     }
 }
 
@@ -271,7 +271,7 @@ pub fn local_translation(language: Language) -> &'static str {
         Language::NL => "Lokaal netwerk",
         Language::EL => "Τοπικό δίκτυο",
         Language::HU => "Helyi hálózat",
-        Language::LK => "TODO_LK",
+        Language::LK => "ලෝකල් නෙට්වර්ක් එ​ක",
     }
 }
 
@@ -302,7 +302,7 @@ pub fn unknown_translation(language: Language) -> &'static str {
         Language::NL => "Onbekende locatie",
         Language::EL => "Άγνωστη τοποθεσία",
         Language::HU => "Ismeretlen hely",
-        Language::LK => "TODO_LK",
+        Language::LK => "නොදන්නා ස්ථානයක්",
     }
 }
 
@@ -333,7 +333,7 @@ pub fn your_network_adapter_translation(language: Language) -> &'static str {
         Language::NL => "Uw netwerkadapter",
         Language::EL => "Ο προσαρμογέας δικτύου σας",
         Language::HU => "A hálózati adaptered",
-        Language::LK => "TODO_LK",
+        Language::LK => "ඔබේ නෙට්වර්ක් ඇඩැප්ටරය",
     }
 }
 
@@ -364,7 +364,7 @@ pub fn socket_address_translation(language: Language) -> &'static str {
         Language::NL => "Socket adres",
         Language::EL => "Διεύθυνση υποδοχής",
         Language::HU => "Socket cím",
-        Language::LK => "TODO_LK",
+        Language::LK => "සොකට් ලිපිනය",
     }
 }
 
@@ -395,7 +395,7 @@ pub fn mac_address_translation(language: Language) -> &'static str {
         Language::NL => "MAC-adres",
         Language::EL => "Διεύθυνση MAC",
         Language::HU => "MAC-cím",
-        Language::LK => "TODO_LK",
+        Language::LK => "MAC ලිපිනය",
     }
 }
 
@@ -425,7 +425,7 @@ pub fn source_translation(language: Language) -> &'static str {
         Language::NL => "Bron",
         Language::EL => "Πηγή",
         Language::HU => "Forrás",
-        Language::LK => "TODO_LK",
+        Language::LK => "ආරම්භ​ය",
     }
 }
 
@@ -453,7 +453,7 @@ pub fn destination_translation(language: Language) -> &'static str {
         Language::NL => "Bestemming",
         Language::EL => "Προορισμός",
         Language::HU => "Cél",
-        Language::LK => "TODO_LK",
+        Language::LK => "ගමනාන්තය",
     }
 }
 
@@ -482,7 +482,7 @@ pub fn fqdn_translation(language: Language) -> &'static str {
         Language::NL => "Volledig gekwalificeerde domeinnaam",
         Language::EL => "Πλήρως προσδιορισμένο όνομα τομέα",
         Language::HU => "Teljesen minősített tartománynév",
-        Language::LK => "TODO_LK",
+        Language::LK => "සම්පූර්ණයෙන් සුදුසුකම් ලත් ඩොමේන් නාමය",
     }
 }
 
@@ -543,7 +543,7 @@ pub fn transmitted_data_translation(language: Language) -> &'static str {
         Language::NL => "Verzonden gegevens",
         Language::EL => "Μεταδιδόμενα δεδομένα",
         Language::HU => "Átvitt adat",
-        Language::LK => "TODO_LK",
+        Language::LK => "සම්ප්‍රේෂිත දත්ත",
     }
 }
 
@@ -571,7 +571,7 @@ pub fn country_translation(language: Language) -> &'static str {
         Language::ID => "Negara",
         Language::EL => "Χώρα",
         Language::HU => "Ország",
-        Language::LK => "TODO_LK",
+        Language::LK => "රට",
     }
 }
 
@@ -600,7 +600,7 @@ pub fn domain_translation(language: Language) -> &'static str {
         Language::NL => "Domeinnaam",
         Language::EL => "Τομέας",
         Language::HU => "Tartománynév",
-        Language::LK => "TODO_LK",
+        Language::LK => "ඩොමේන් නාමය",
     }
 }
 
@@ -631,7 +631,7 @@ pub fn only_show_favorites_translation(language: Language) -> &'static str {
         Language::NL => "Toon alleen favorieten",
         Language::EL => "Εμφάνιση μόνο αγαπημένων",
         Language::HU => "Csak kedvencek mutatása",
-        Language::LK => "TODO_LK",
+        Language::LK => "ප්‍රියතමයන් පමණක් පෙන්වන්න",
     }
 }
 
@@ -693,7 +693,7 @@ pub fn no_search_results_translation(language: Language) -> &'static str {
             "Δεν υπάρχουν διαθέσιμα αποτελέσματα σύμφωνα με τα καθορισμένα φίλτρα αναζήτησης"
         }
         Language::HU => "Nincs a megadott keresési szűrőknek megfelelő találat",
-        Language::LK => "TODO_LK",
+        Language::LK => "තෝරාගත් සෙවුම් පෙරහන් අනුව කිසිදු ප්‍රතිඵලයක් නොමැත",
     }
 }
 
@@ -731,7 +731,7 @@ pub fn showing_results_translation(
         }
         Language::EL => format!("Εμφάνιση {start}-{end} από {total} συνολικά αποτελέσματα"),
         Language::HU => format!("{start}-{end}. találatok megjelenítve, összesen {total}"),
-        Language::LK => "TODO_LK".to_string(),
+        Language::LK => format!("මුළු ප්‍රතිඵල {total} න් {start}-{end} ක්"),
     }
 }
 
@@ -762,6 +762,6 @@ pub fn color_gradients_translation(language: Language) -> &'static str {
         Language::NL => "Kleurverlopen toepassen",
         Language::EL => "Εφαρμογή χρωματικών διαβαθμίσεων",
         Language::HU => "Színátmenet alkalmazása",
-        Language::LK => "TODO_LK",
+        Language::LK => "වර්ණ අනුක්‍රමණ (Gradients) යොදන්න",
     }
 }

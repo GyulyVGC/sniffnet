@@ -28,7 +28,7 @@ pub fn general_translation(language: Language) -> &'static str {
         Language::NL => "Algemeen",
         Language::EL => "Γενικά",
         Language::HU => "Általános",
-        Language::LK => "TODO_LK",
+        Language::LK => "සාමාන්‍ය",
         _ => "General",
     }
 }
@@ -59,7 +59,7 @@ pub fn zoom_translation(language: Language) -> &'static str {
         Language::ID => "Perbesar",
         Language::EL => "Εστίαση",
         Language::HU => "Közelítés",
-        Language::LK => "TODO_LK",
+        Language::LK => "විශාලනය",
         _ => "Zoom",
     }
 }
@@ -90,7 +90,7 @@ pub fn mmdb_files_translation(language: Language) -> &'static str {
         Language::NL => "Database bestanden",
         Language::EL => "Αρχεία βάσης δεδομένων",
         Language::HU => "Adatbázis fájlok",
-        Language::LK => "TODO_LK",
+        Language::LK => "ඩේටාබේස් ගොනු",
         _ => "Database files",
     }
 }
@@ -123,7 +123,7 @@ pub fn params_not_editable_translation(language: Language) -> &'static str {
             "Οι ακόλουθες παράμετροι δεν μπορούν να τροποποιηθούν κατά τη διάρκεια της ανάλυσης"
         }
         Language::HU => "A következő paramétereken nem lehet elemzés közben változtatni",
-        Language::LK => "TODO_LK",
+        Language::LK => "විශ්ලේෂණය අතරතුර පහත පරාමිතීන් වෙනස් කළ නොහැක",
         _ => "The following parameters can't be modified during the analysis",
     }
 }
@@ -153,7 +153,7 @@ pub fn custom_style_translation(language: Language) -> &'static str {
         Language::NL => "Aangepaste stijl",
         Language::EL => "Προσαρμοσμένο στυλ",
         Language::HU => "Egyedi stílus",
-        Language::LK => "TODO_LK",
+        Language::LK => "අභිරුචි ශෛලිය",
         _ => "Custom style",
     }
 }
@@ -182,7 +182,7 @@ pub fn copy_translation(language: Language) -> &'static str {
         Language::NL => "Kopiëren",
         Language::EL => "Αντιγραφή",
         Language::HU => "Másolás",
-        Language::LK => "TODO_LK",
+        Language::LK => "කොපි කරන්න",
         _ => "Copy",
     }
 }
@@ -212,7 +212,7 @@ pub fn port_translation(language: Language) -> &'static str {
         Language::UK => "Порт",
         Language::NL => "Poort",
         Language::EL => "Θύρα",
-        Language::LK => "TODO_LK",
+        Language::LK => "පෝට්",
         _ => "Port",
     }
 }
@@ -271,7 +271,7 @@ pub fn messages_translation(language: Language) -> &'static str {
         Language::NL => "Berichten",
         Language::EL => "Μηνύματα",
         Language::HU => "Üzenetek",
-        Language::LK => "TODO_LK",
+        Language::LK => "පණිවිඩ",
         _ => "Messages",
     }
 }
@@ -301,7 +301,7 @@ pub fn link_type_translation(language: Language) -> &'static str {
         Language::ID => "Tipe koneksi",
         Language::EL => "Τύπος σύνδεσης",
         Language::HU => "Link típus",
-        Language::LK => "TODO_LK",
+        Language::LK => "සබැඳි වර්ගය",
         _ => "Link type",
     }
 }
@@ -368,7 +368,9 @@ pub fn unsupported_link_type_translation(language: Language) -> &'static str {
         Language::HU => {
             "Az ezzel az adapterrel asszociált link típust még nem támogatja a Sniffnet..."
         }
-        Language::LK => "TODO_LK",
+        Language::LK => {
+            "මෙම ඇඩැප්ටරයට සම්බන්ධ සබැඳි වර්ගයට දැන​ට Sniffnet සහාය නොමැත."
+        }
         _ => "The link type associated with this adapter is not supported by Sniffnet yet...",
     }
 }
@@ -486,7 +488,7 @@ pub fn service_translation(language: Language) -> &'static str {
         Language::NL => "Dienst",
         Language::EL => "Υπηρεσία",
         Language::HU => "Szolgáltatás",
-        Language::LK => "TODO_LK",
+        Language::LK => "සේවාව",
         _ => "Service",
     }
 }
@@ -517,7 +519,7 @@ pub fn export_capture_translation(language: Language) -> &'static str {
         Language::NL => "Exporteer capture bestand",
         Language::EL => "Εξαγωγή αρχείου καταγραφής",
         Language::HU => "Gyűjtött forgalom exportálása fájlba",
-        Language::LK => "TODO_LK",
+        Language::LK => "කැප්චර් (Capture) ගොනුව අපනයනය කරන්න",
         _ => "Export capture file",
     }
 }
@@ -547,7 +549,7 @@ pub fn directory_translation(language: Language) -> &'static str {
         Language::NL => "Map",
         Language::EL => "Κατάλογος",
         Language::HU => "Mappa",
-        Language::LK => "TODO_LK",
+        Language::LK => "නාමාවලිය",
         _ => "Directory",
     }
 }
@@ -578,7 +580,7 @@ pub fn select_dest_directory_translation(language: Language) -> &'static str {
         Language::NL => "Selecteer doelmap",
         Language::EL => "Επιλογή καταλόγου προορισμού",
         Language::HU => "Cél mappa kiválasztása",
-        Language::LK => "TODO_LK",
+        Language::LK => "ගමනාන්ත නාමාවලිය තෝරන්න",
         _ => "Select destination directory",
     }
 }
@@ -609,7 +611,7 @@ pub fn file_name_translation(language: Language) -> &'static str {
         Language::NL => "Bestandsnaam",
         Language::EL => "Όνομα αρχείου",
         Language::HU => "Fájlnév",
-        Language::LK => "TODO_LK",
+        Language::LK => "ගොනු නාමය",
         _ => "File name",
     }
 }
@@ -639,7 +641,7 @@ pub fn thumbnail_mode_translation(language: Language) -> &'static str {
         Language::NL => "Miniatuur modus",
         Language::EL => "Λειτουργία μικρογραφιών",
         Language::HU => "Miniatűr nézet",
-        Language::LK => "TODO_LK",
+        Language::LK => "කුඩා රූප මාදිලිය",
         _ => "Thumbnail mode",
     }
 }
