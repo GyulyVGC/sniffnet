@@ -15,6 +15,7 @@ All Sniffnet releases with the relative changes are documented in this file.
   - Swedish ([#1068](https://github.com/GyulyVGC/sniffnet/pull/1068))
   - Greek ([#1175](https://github.com/GyulyVGC/sniffnet/pull/1175))
   - Persian ([#1196](https://github.com/GyulyVGC/sniffnet/pull/1196))
+  - Russian ([#1224](https://github.com/GyulyVGC/sniffnet/pull/1224))
 - Fix unseen hosts and services not appearing dimmed in thumbnail mode (fixes [#1142](https://github.com/GyulyVGC/sniffnet/issues/1142))
 - Fix `X-AppImage-Version` field in Linux AppImage metadata to correctly reflect the app version ([#1174](https://github.com/GyulyVGC/sniffnet/pull/1174) — fixes [#1003](https://github.com/GyulyVGC/sniffnet/issues/1003))
 
