@@ -368,7 +368,7 @@ pub fn unsupported_link_type_translation(language: Language) -> &'static str {
         Language::HU => {
             "Az ezzel az adapterrel asszociált link típust még nem támogatja a Sniffnet..."
         }
-        Language::SI => "මෙම ඇඩැප්ටරයට සම්බන්ධ සබැඳි වර්ගයට දැන​ට Sniffnet සහාය නොමැත.",
+        Language::SI => "මෙම ඇඩැප්ටරයට සම්බන්ධ සබැඳි වර්ගයට දැනට Sniffnet සහාය නොමැත...",
         _ => "The link type associated with this adapter is not supported by Sniffnet yet...",
     }
 }

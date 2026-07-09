@@ -181,7 +181,7 @@ pub fn host_translation(language: Language) -> &'static str {
         Language::NL => "Netwerk host",
         Language::EL => "Κόμβος δικτύου",
         Language::HU => "Hálózati gazda",
-        Language::SI => "නෙට්වර්ක් හොස්ට් එ​ක",
+        Language::SI => "නෙට්වර්ක් හොස්ට් එක",
     }
 }
 
@@ -271,7 +271,7 @@ pub fn local_translation(language: Language) -> &'static str {
         Language::NL => "Lokaal netwerk",
         Language::EL => "Τοπικό δίκτυο",
         Language::HU => "Helyi hálózat",
-        Language::SI => "ලෝකල් නෙට්වර්ක් එ​ක",
+        Language::SI => "ලෝකල් නෙට්වර්ක් එක",
     }
 }
 
@@ -425,7 +425,7 @@ pub fn source_translation(language: Language) -> &'static str {
         Language::NL => "Bron",
         Language::EL => "Πηγή",
         Language::HU => "Forrás",
-        Language::SI => "ආරම්භ​ය",
+        Language::SI => "ආරම්භය",
     }
 }
 

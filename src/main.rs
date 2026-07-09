@@ -21,9 +21,7 @@ use translations::types::language::Language;
 use utils::formatted_strings::print_cli_welcome_message;
 
 use crate::gui::sniffer::FONT_FAMILY_NAME;
-use crate::gui::styles::style_constants::{
-    ICONS_BYTES, NOTO_SANS_SINHALA_BYTES, SARASA_MONO_BYTES,
-};
+use crate::gui::styles::style_constants::{ICONS_BYTES, SARASA_MONO_BYTES};
 use crate::gui::types::conf::CONF;
 
 mod chart;
@@ -84,11 +82,7 @@ pub fn main() -> iced::Result {
     .settings(iced::Settings {
         // id needed for Linux Wayland; should match StartupWMClass in .desktop file; see issue #292
         id: Some(String::from(SNIFFNET_LOWERCASE)),
-        fonts: vec![
-            Cow::Borrowed(SARASA_MONO_BYTES),
-            Cow::Borrowed(ICONS_BYTES),
-            Cow::Borrowed(NOTO_SANS_SINHALA_BYTES),
-        ],
+        fonts: vec![Cow::Borrowed(SARASA_MONO_BYTES), Cow::Borrowed(ICONS_BYTES)],
         default_font: Font::with_name(FONT_FAMILY_NAME),
         default_text_size: Pixels(FONT_SIZE_BODY),
         antialiasing: true,

@@ -149,6 +149,7 @@ impl Language {
                 | Language::EL
                 | Language::HU
                 | Language::RU
+                | Language::SI
         )
     }
 }

@@ -1695,7 +1695,7 @@ pub fn incoming_translation(language: Language) -> &'static str {
         Language::ID => "Masuk",
         Language::NL => "Inkomend",
         Language::HU => "Beérkező",
-        Language::SI => "එ​න",
+        Language::SI => "එන",
     }
 }
 
@@ -1725,7 +1725,7 @@ pub fn outgoing_translation(language: Language) -> &'static str {
         Language::ID => "Keluar",
         Language::NL => "Uitgaand",
         Language::HU => "Kimenő",
-        Language::SI => "ය​න",
+        Language::SI => "යන",
     }
 }
 
