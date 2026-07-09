@@ -20,6 +20,10 @@ pub const SARASA_MONO: Font = Font {
 pub const ICONS_BYTES: &[u8] = include_bytes!("../../../resources/fonts/subset/icons.ttf");
 pub const ICONS: Font = Font::with_name(ICON_FONT_FAMILY_NAME);
 
+// fallback font for Sinhala script
+pub const NOTO_SANS_SINHALA_BYTES: &[u8] =
+    include_bytes!("../../../resources/fonts/subset/NotoSansSinhala-Regular.subset.ttf");
+
 // font sizes
 pub const FONT_SIZE_FOOTER: f32 = 14.3;
 pub const FONT_SIZE_BODY: f32 = 16.8;
