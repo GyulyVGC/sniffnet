@@ -1011,6 +1011,15 @@
       "contributions": [
         "translation"
       ]
+    },
+    {
+      "login": "thambaru",
+      "name": "Thambaru Wijesekara",
+      "avatar_url": "https://avatars.githubusercontent.com/u/4795173?v=4",
+      "profile": "https://thambaru.com",
+      "contributions": [
+        "translation"
+      ]
     }
   ],
   "contributorsPerLine": 7,
