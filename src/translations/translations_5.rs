@@ -22,6 +22,7 @@ pub fn filter_traffic_translation(language: Language) -> String {
         Language::EL => "Φιλτράρισμα ροής",
         Language::HU => "Forgalom szűrése",
         Language::LK => "ට්‍රැෆික් පෙරහන් කරන්න",
+        Language::RU => "Фильтр трафика",
         _ => "Filter traffic",
     }
     .to_string()
@@ -48,6 +49,7 @@ pub fn traffic_source_translation(language: Language) -> &'static str {
         Language::EL => "Πηγή ροής",
         Language::HU => "Forgalom forrása",
         Language::LK => "ට්‍රැෆික් මූලාශ්‍රය",
+        Language::RU => "Источник трафика",
         _ => "Traffic source",
     }
 }
@@ -71,6 +73,7 @@ pub fn remote_notifications_translation(language: Language) -> &'static str {
         Language::EL => "Απομακρυσμένες ειδοποιήσεις",
         Language::HU => "Távoli értesítések",
         Language::LK => "දුරස්ථ දැනුම්දීම්",
+        Language::RU => "Удалённые уведомления",
         _ => "Remote notifications",
     }
 }
@@ -94,6 +97,7 @@ pub fn ip_blacklist_translation(language: Language) -> &'static str {
         Language::EL => "Λίστα μπλοκαρισμένων διευθύνσεων",
         Language::HU => "IP feketelista",
         Language::LK => "IP කළු ලැයිස්තුව",
+        Language::RU => "Черный список IP",
         _ => "IP blacklist",
     }
 }
@@ -117,6 +121,7 @@ pub fn blacklisted_transmitted_translation(language: Language) -> &'static str {
         Language::EL => "Νέα δεδομένα ανταλλαχθηκαν από μια μπλοκαρισμένη διεύθυνση",
         Language::HU => "Új adatforgalom egy feketelistán lévő IP-vel",
         Language::LK => "කළු ලැයිස්තුගත IP එකකින් නව දත්ත හුවමාරු විය",
+        Language::RU => "Новые данные от IP из черного списка",
         _ => "New data exchanged from a blacklisted IP",
     }
 }
@@ -140,6 +145,7 @@ pub fn only_show_blacklisted_translation(language: Language) -> &'static str {
         Language::EL => "Εμφάνιση μόνο μπλοκαρισμένων διευθύνσεων",
         Language::HU => "Csak feketelistán lévők mutatása",
         Language::LK => "කළු ලැයිස්තුගත ඒවා පමණක් පෙන්වන්න",
+        Language::RU => "Показывать только из черного списка",
         _ => "Only show blacklisted",
     }
 }
@@ -160,6 +166,7 @@ pub fn program_translation(language: Language) -> &'static str {
         Language::UK => "Програма",
         Language::EL => "Πρόγραμμα",
         Language::LK => "මෘදුකාංගය",
+        Language::RU => "Программа",
         _ => "Program",
     }
 }
@@ -183,6 +190,7 @@ pub fn no_favorites_saved_translation(language: Language) -> &'static str {
         Language::EL => "Δεν έχει αποθηκευτεί κανένα αγαπημένο στοιχείο ακόμη",
         Language::HU => "Még nincsenek elmentve kedvencek",
         Language::LK => "ප්‍රියතම කිසිවක් එක්කර නොමැත",
+        Language::RU => "В избранном пока пусто",
         _ => "No favorites saved yet",
     }
 }

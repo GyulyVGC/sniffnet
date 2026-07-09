@@ -26,6 +26,7 @@ pub fn reserved_address_translation(language: Language, info: &str) -> String {
         Language::SV => format!("Reserverad adress ({info})"),
         Language::HU => format!("Foglalt cím ({info})"),
         Language::LK => format!("වෙන් කළ ලිපිනය ({info})"),
+        Language::RU => format!("Зарезервированный адрес ({info})"),
         _ => format!("Reserved address ({info})"),
     }
 }
@@ -53,6 +54,7 @@ pub fn share_feedback_translation(language: Language) -> &'static str {
         Language::SV => "Dela din feedback",
         Language::HU => "Visszajelzés megosztása",
         Language::LK => "ඔබේ අදහස් ලබා දෙන්න",
+        Language::RU => "Оставить отзыв",
         _ => "Share your feedback",
     }
 }
@@ -78,6 +80,7 @@ pub fn share_feedback_translation(language: Language) -> &'static str {
 //         Language::VI => "Loại trừ",
 //         Language::TR => "Hariç tutulan",
 //         Language::HU => "Kizárva",
+//         Language::RU => "Исключено",
 //         _ => "Excluded",
 //     }
 // }
@@ -105,6 +108,7 @@ pub fn capture_file_translation(language: Language) -> &'static str {
         Language::SV => "Inspelningsfil",
         Language::HU => "Adatforgalmi fájl",
         Language::LK => "කැප්චර් (Capture) ගොනුව",
+        Language::RU => "Файл захвата",
         _ => "Capture file",
     }
 }
@@ -132,6 +136,7 @@ pub fn select_file_translation(language: Language) -> &'static str {
         Language::SV => "Välj fil",
         Language::HU => "Fájl kiválasztása",
         Language::LK => "ගොනුව තෝරන්න",
+        Language::RU => "Выбрать файл",
         _ => "Select file",
     }
 }
@@ -221,6 +226,9 @@ pub fn reading_from_pcap_translation(language: Language) -> &'static str {
         Language::LK => {
             "ගොනුවෙන් පැකට් කියවමින්...\n\n\
                                 ඔබ තෝරාගත් ගොනුව හිස් එකක් නොවන බවට විශ්වාසද?"
+        Language::RU => {
+            "Чтение пакетов из файла...\n\n\
+                                 Вы уверены, что выбранный файл не пуст?"
         }
         _ => {
             "Reading packets from file...\n\n\
@@ -251,6 +259,7 @@ pub fn data_exceeded_translation(language: Language) -> &'static str {
         Language::SV => "Datagräns överskriden",
         Language::HU => "Adatküszöb túllépve",
         Language::LK => "දත්ත සීමාව ඉක්මවා ඇත",
+        Language::RU => "Превышен лимит данных",
         _ => "Data threshold exceeded",
     }
 }
@@ -278,6 +287,7 @@ pub fn bits_exceeded_translation(language: Language) -> &'static str {
         Language::SV => "Bitgräns överskriden",
         Language::HU => "Bitküszöb túllépve",
         Language::LK => "බිට් සීමාව ඉක්මවා ඇත",
+        Language::RU => "Превышен лимит битов",
         _ => "Bits threshold exceeded",
     }
 }
@@ -304,6 +314,7 @@ pub fn bits_translation(language: Language) -> &'static str {
         Language::UK => "біти",
         Language::HU => "bitek",
         Language::LK => "බිට්",
+        Language::RU => "биты",
         _ => "bits",
     }
 }
@@ -325,7 +336,7 @@ pub fn pause_translation(language: Language) -> &'static str {
         Language::EL => "Παύση",
         Language::VI => "Tạm dừng",
         Language::TR => "Duraklat",
-        Language::UK => "Пауза",
+        Language::UK | Language::RU => "Пауза",
         Language::HU => "Szüneteltetés",
         Language::LK => "මඳකට නවත්වන්න",
         _ => "Pause",
@@ -356,6 +367,7 @@ pub fn resume_translation(language: Language) -> &'static str {
         Language::SV => "Återuppta",
         Language::HU => "Folytatás",
         Language::LK => "නැවත ආරම්භ කරන්න",
+        Language::RU => "Продолжить",
         _ => "Resume",
     }
 }
