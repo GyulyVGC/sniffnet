@@ -345,7 +345,7 @@ pub(crate) fn col_device<'a>(
                 .push(
                     Row::new()
                         .spacing(10)
-                        .push(Text::new(format!("   {}", &cs_info)))
+                        .push(Text::new(format!("   {cs_info}")))
                         .push(get_info_tooltip(
                             Column::new()
                                 .spacing(10)
