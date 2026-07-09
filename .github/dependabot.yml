@@ -11,6 +11,8 @@ updates:
   directory: "/"
   schedule:
     interval: "daily"
+  cooldown:
+    default-days: 7
   
 # Maintain dependencies for cargo
 - package-ecosystem: cargo
@@ -18,3 +20,5 @@ updates:
   schedule:
     interval: "daily"
   target-branch: "main"
+  cooldown:
+    default-days: 7
