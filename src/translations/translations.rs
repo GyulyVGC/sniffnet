@@ -2,8 +2,8 @@
 
 use iced::widget::Text;
 
-use crate::translations::types::language::Language;
 use crate::StyleType;
+use crate::translations::types::language::Language;
 
 // pub fn choose_adapters_translation<'a>(language: Language) -> Text<'a, StyleType> {
 //     Text::new(match language {
@@ -117,7 +117,7 @@ pub fn start_translation(language: Language) -> &'static str {
         Language::VI => "Bắt đầu!",
         Language::ID => "Mulai!",
         Language::HU => "Kezdés!",
-        Language::LK => "ආරම්භ කරන්න!",
+        Language::SI => "ආරම්භ කරන්න!",
     }
 }
 
@@ -145,7 +145,7 @@ pub fn address_translation(language: Language) -> &'static str {
         Language::VI => "Địa chỉ",
         Language::ID => "Alamat",
         Language::HU => "Cím",
-        Language::LK => "ලිපිනය",
+        Language::SI => "ලිපිනය",
     }
 }
 
@@ -255,7 +255,7 @@ pub fn protocol_translation(language: Language) -> &'static str {
         Language::UZ => "Protokoli",
         Language::VI => "Phương thức",
         Language::ID | Language::CS => "Protokol",
-        Language::LK => "ප්‍රොටෝකෝලය",
+        Language::SI => "ප්‍රොටෝකෝලය",
     }
 }
 
@@ -286,7 +286,7 @@ pub fn traffic_rate_translation<'a>(language: Language) -> Text<'a, StyleType> {
         Language::ID => "Tingkat lalulintas",
         Language::NL => "Verkeerssnelheid",
         Language::HU => "Adatráta",
-        Language::LK => "ට්‍රැෆික් ප්‍රමාණය",
+        Language::SI => "ට්‍රැෆික් ප්‍රමාණය",
     })
 }
 
@@ -343,7 +343,7 @@ pub fn settings_translation(language: Language) -> &'static str {
         Language::ID => "Pengaturan",
         Language::NL => "Instellingen",
         Language::HU => "Beállítások",
-        Language::LK => "සැකසුම්",
+        Language::SI => "සැකසුම්",
     }
 }
 
@@ -371,7 +371,7 @@ pub fn yes_translation<'a>(language: Language) -> Text<'a, StyleType> {
         Language::VI => "Chấp nhận",
         Language::ID => "Ya",
         Language::HU => "Igen",
-        Language::LK => "ඔව්",
+        Language::SI => "ඔව්",
     })
 }
 
@@ -402,7 +402,7 @@ pub fn ask_quit_translation<'a>(language: Language) -> Text<'a, StyleType> {
         Language::ID => "Apa kamu yakin untuk berhenti analisa?",
         Language::NL => "Weet je zeker dat je deze analyse wilt afsluiten?",
         Language::HU => "Biztosan le akarod állítani ezt az elemzést?",
-        Language::LK => "ඔබට මෙම විශ්ලේෂණයෙන් ඉවත් වීමට අවශ්‍යද?",
+        Language::SI => "ඔබට මෙම විශ්ලේෂණයෙන් ඉවත් වීමට අවශ්‍යද?",
     })
 }
 
@@ -433,7 +433,7 @@ pub fn quit_analysis_translation(language: Language) -> &'static str {
         Language::ID => "Berhenti analisa",
         Language::NL => "Analyse afsluiten",
         Language::HU => "Elemzés leállítása",
-        Language::LK => "විශ්ලේෂණයෙන් ඉවත් වන්න",
+        Language::SI => "විශ්ලේෂණයෙන් ඉවත් වන්න",
     }
 }
 
@@ -464,7 +464,7 @@ pub fn ask_clear_all_translation<'a>(language: Language) -> Text<'a, StyleType> 
         Language::ID => "Apa kamu yakin untuk membersihkan notifikasi?",
         Language::NL => "Weet je zeker dat je alle meldingen wilt wissen?",
         Language::HU => "Biztosan törölni akarod az értesítéseket?",
-        Language::LK => "ඔබට සියලු දැනුම්දීම් මකා දැමීමට අවශ්‍යද?",
+        Language::SI => "ඔබට සියලු දැනුම්දීම් මකා දැමීමට අවශ්‍යද?",
     })
 }
 
@@ -494,7 +494,7 @@ pub fn clear_all_translation(language: Language) -> &'static str {
         Language::ID => "Bersihkan semua",
         Language::NL => "Alles wissen",
         Language::HU => "Összes törlése",
-        Language::LK => "සියල්ල මකා දමන්න",
+        Language::SI => "සියල්ල මකා දමන්න",
     }
 }
 
@@ -524,7 +524,7 @@ pub fn hide_translation(language: Language) -> &'static str {
         Language::ID => "Sembunyikan",
         Language::NL | Language::DE => "Verbergen",
         Language::HU => "Elrejtés",
-        Language::LK => "සඟවන්න",
+        Language::SI => "සඟවන්න",
     }
 }
 
@@ -554,7 +554,7 @@ pub fn network_adapter_translation(language: Language) -> &'static str {
         Language::ID => "Adapter jaringan",
         Language::NL => "Netwerkadapter",
         Language::HU => "Hálózati adapter",
-        Language::LK => "නෙට්වර්ක් ඇඩැප්ටරය",
+        Language::SI => "නෙට්වර්ක් ඇඩැප්ටරය",
     }
 }
 
@@ -660,7 +660,7 @@ pub fn no_addresses_translation(language: Language) -> &'static str {
             "Nem megfigyelhető a forgalom mivel a kiválasztott adapternek nincs aktív címe...\n\n\
                                 Ha biztos vagy benne, hogy csatlakozva vagy az internethez, próbálj meg egy másik adaptert használni."
         }
-        Language::LK => {
+        Language::SI => {
             "ඔබ තෝරාගත් ඇඩැප්ටරයට සක්‍රිය ලිපින නොමැති නිසා කිසිවක් නිරීක්ෂණය කළ නොහැක...\n\n\
                                  ඔබ අන්තර්ජාලයට සම්බන්ධ වී ඇති බව විශ්වාස නම්, වෙනත් ඇඩැප්ටරයක් තෝරා බලන්න."
         }
@@ -769,7 +769,7 @@ pub fn waiting_translation(language: Language) -> &'static str {
             "Nem észleltünk még forgalmat. Várakozás hálózati csomagokra...\n\n\
                                  Biztosan csatlakozva vagy az internethez és helyes adaptert választottál ki?"
         }
-        Language::LK => {
+        Language::SI => {
             "තවම කිසිදු ට්‍රැෆික් එකක් නිරීක්ෂණය වී නැත. නෙට්වර්ක් පැකට් ලැබෙනතෙක් රැඳෙන්න...\n\n\
                                  ඔබ අන්තර්ජාලයට සම්බන්ධ වී නිවැරදි ඇඩැප්ටරය තෝරා ඇති බව ඔබට විශ්වාසද?"
         }
@@ -1115,7 +1115,7 @@ pub fn error_translation(language: Language) -> &'static str {
         Language::ID => "Terjadi kesalahan!",
         Language::NL => "Er is een fout opgetreden!",
         Language::HU => "Hiba történt!",
-        Language::LK => "දෝෂයක් ඇති විය!",
+        Language::SI => "දෝෂයක් ඇති විය!",
     }
 }
 
@@ -1221,7 +1221,7 @@ pub fn packets_translation(language: Language) -> &'static str {
         Language::VI => "các gói tin",
         Language::NL => "pakketten",
         Language::HU => "csomagok",
-        Language::LK => "පැකට්",
+        Language::SI => "පැකට්",
     }
 }
 
@@ -1281,7 +1281,7 @@ pub fn bytes_translation(language: Language) -> &'static str {
         Language::FI => "tavua",
         Language::JA => "バイト",
         Language::HU => "bájtok",
-        Language::LK => "බයිට්",
+        Language::SI => "බයිට්",
     }
 }
 
@@ -1453,7 +1453,7 @@ pub fn notifications_title_translation<'a>(language: Language) -> Text<'a, Style
         Language::ID => "Sesuaikan notifikasi Anda",
         Language::NL => "Pas je meldingen aan",
         Language::HU => "Értesítések személyre szabása",
-        Language::LK => "ඔබේ දැනුම්දීම් අභිරුචිකරණය කරන්න",
+        Language::SI => "ඔබේ දැනුම්දීම් අභිරුචිකරණය කරන්න",
     })
 }
 
@@ -1484,7 +1484,7 @@ pub fn appearance_title_translation<'a>(language: Language) -> Text<'a, StyleTyp
         Language::ID => "Pilih tema favorit Kamu",
         Language::NL => "Kies je favoriete thema",
         Language::HU => "Válaszd ki a kedvenc témád",
-        Language::LK => "ඔබේ කැමති තේමාව තෝරන්න",
+        Language::SI => "ඔබේ කැමති තේමාව තෝරන්න",
     })
 }
 
@@ -1515,7 +1515,7 @@ pub fn active_filters_translation(language: Language) -> &'static str {
         Language::ID => "Filter aktif",
         Language::NL => "Actieve filters",
         Language::HU => "Aktív szűrők",
-        Language::LK => "සක්‍රිය පෙරහන්",
+        Language::SI => "සක්‍රිය පෙරහන්",
     }
 }
 
@@ -1546,7 +1546,7 @@ pub fn none_translation(language: Language) -> &'static str {
         Language::ID => "Tidak ada",
         Language::NL => "geen",
         Language::HU => "semmi",
-        Language::LK => "කිසිවක් නැත",
+        Language::SI => "කිසිවක් නැත",
     }
 }
 
@@ -1695,7 +1695,7 @@ pub fn incoming_translation(language: Language) -> &'static str {
         Language::ID => "Masuk",
         Language::NL => "Inkomend",
         Language::HU => "Beérkező",
-        Language::LK => "එ​න",
+        Language::SI => "එ​න",
     }
 }
 
@@ -1725,7 +1725,7 @@ pub fn outgoing_translation(language: Language) -> &'static str {
         Language::ID => "Keluar",
         Language::NL => "Uitgaand",
         Language::HU => "Kimenő",
-        Language::LK => "ය​න",
+        Language::SI => "ය​න",
     }
 }
 
@@ -1753,7 +1753,7 @@ pub fn notifications_translation(language: Language) -> &'static str {
         Language::ID => "Pemberitahuan",
         Language::NL => "Notificaties",
         Language::HU => "Értesítések",
-        Language::LK => "දැනුම්දීම්",
+        Language::SI => "දැනුම්දීම්",
     }
 }
 
@@ -1778,7 +1778,7 @@ pub fn style_translation(language: Language) -> &'static str {
         Language::ID => "Gaya",
         Language::NL => "Stijl",
         Language::HU => "Kinézet",
-        Language::LK => "ශෛලිය",
+        Language::SI => "ශෛලිය",
     }
 }
 
@@ -1809,7 +1809,7 @@ pub fn language_translation(language: Language) -> &'static str {
         Language::ID => "Bahasa",
         Language::NL => "Taal",
         Language::HU => "Nyelv",
-        Language::LK => "භාෂාව",
+        Language::SI => "භාෂාව",
     }
 }
 
@@ -1840,7 +1840,7 @@ pub fn overview_translation(language: Language) -> &'static str {
         Language::ID => "Ringkasan",
         Language::NL => "Overzicht",
         Language::HU => "Áttekintés",
-        Language::LK => "දළ විශ්ලේෂණය",
+        Language::SI => "දළ විශ්ලේෂණය",
     }
 }
 
@@ -1928,7 +1928,7 @@ pub fn per_second_translation(language: Language) -> &'static str {
         Language::ID => "(per detik)",
         Language::NL => "(per seconde)",
         Language::HU => "(másodpercenként)",
-        Language::LK => "(තත්පරයකට)",
+        Language::SI => "(තත්පරයකට)",
     }
 }
 
@@ -2021,7 +2021,7 @@ pub fn threshold_translation(language: Language) -> &'static str {
         Language::ID => "Ambang batas",
         Language::NL => "Grens",
         Language::HU => "Küszöb",
-        Language::LK => "සීමාව",
+        Language::SI => "සීමාව",
     }
 }
 
@@ -2047,7 +2047,7 @@ pub fn volume_translation(language: Language) -> &'static str {
         Language::VI => "Âm lượng",
         Language::ID => "Bunyi",
         Language::HU => "Hangerő",
-        Language::LK => "ශබ්ද මට්ටම",
+        Language::SI => "ශබ්ද මට්ටම",
     }
 }
 
@@ -2076,7 +2076,7 @@ pub fn sound_translation(language: Language) -> &'static str {
         Language::ID => "Suara",
         Language::NL => "Geluid",
         Language::HU => "Hang",
-        Language::LK => "ශබ්දය",
+        Language::SI => "ශබ්දය",
     }
 }
 
@@ -2107,7 +2107,7 @@ pub fn bytes_exceeded_translation(language: Language) -> &'static str {
         Language::ID => "Ambang batas byte terlampaui",
         Language::NL => "Byte-drempel overschreden",
         Language::HU => "Bájtküszöb meghaladva",
-        Language::LK => "බයිට් සීමාව ඉක්මවා ඇත",
+        Language::SI => "බයිට් සීමාව ඉක්මවා ඇත",
     }
 }
 
@@ -2168,7 +2168,7 @@ pub fn packets_exceeded_translation(language: Language) -> &'static str {
         Language::ID => "Ambang batas paket terlampaui",
         Language::NL => "Pakketdrempel overschreden",
         Language::HU => "Csomagküszöb meghaladva",
-        Language::LK => "පැකට් සීමාව ඉක්මවා ඇත",
+        Language::SI => "පැකට් සීමාව ඉක්මවා ඇත",
     }
 }
 
@@ -2256,7 +2256,7 @@ pub fn favorite_transmitted_translation(language: Language) -> &'static str {
         Language::ID => "Data baru dipertukarkan dari favorit",
         Language::NL => "Nieuwe gegevens uitgewisseld van favorieten",
         Language::HU => "Új adatforgalom a kedvencekből",
-        Language::LK => "ප්‍රියතමවලින් නව දත්ත හුවමාරු විය",
+        Language::SI => "ප්‍රියතමවලින් නව දත්ත හුවමාරු විය",
     }
 }
 
@@ -2386,7 +2386,7 @@ pub fn no_notifications_set_translation<'a>(language: Language) -> Text<'a, Styl
                                  Miután engedélyezed őket, ez az oldal fogja mutatni az összes értesítésed.\n\n\
                                  A beállításokban tudod őket engedélyezni:"
         }
-        Language::LK => {
+        Language::SI => {
             "ඔබ තවම දැනුම්දීම් සක්‍රිය කර නැත!\n\n\
                                  ඒවා සක්‍රිය කළ පසු, මෙම පිටුව ඔබේ දැනුම්දීම් පෙන්වනු ඇත\n\n\
                                  ඔබට සැකසුම් තුළින් දැනුම්දීම් සක්‍රිය කළ හැක:"
@@ -2496,7 +2496,7 @@ pub fn no_notifications_received_translation<'a>(language: Language) -> Text<'a,
             "Semmi látnivaló...\n\n\
                                  Amint érkezik egy értesítés, azt itt fogod látni"
         }
-        Language::LK => {
+        Language::SI => {
             "මේ මොහොතේ පෙන්වීමට කිසිවක් නැත...\n\n\
                                  ඔබට දැනුම්දීමක් ලැබුණු විට එය මෙහි දිස්වනු ඇත"
         }
@@ -2530,6 +2530,6 @@ pub fn only_last_30_translation(language: Language) -> &'static str {
         Language::ID => "Hanya 30 notifikasi terakhir yang ditampilkan",
         Language::NL => "Alleen de laatste 30 meldingen worden weergegeven",
         Language::HU => "Itt csak az utolsó 30 értesítés van megjelenítve",
-        Language::LK => "අවසන් දැනුම්දීම් 30 පමණක් පෙන්වනු ලැබේ",
+        Language::SI => "අවසන් දැනුම්දීම් 30 පමණක් පෙන්වනු ලැබේ",
     }
 }

@@ -21,7 +21,9 @@ use translations::types::language::Language;
 use utils::formatted_strings::print_cli_welcome_message;
 
 use crate::gui::sniffer::FONT_FAMILY_NAME;
-use crate::gui::styles::style_constants::{ICONS_BYTES, NOTO_SANS_SINHALA_BYTES, SARASA_MONO_BYTES};
+use crate::gui::styles::style_constants::{
+    ICONS_BYTES, NOTO_SANS_SINHALA_BYTES, SARASA_MONO_BYTES,
+};
 use crate::gui::types::conf::CONF;
 
 mod chart;

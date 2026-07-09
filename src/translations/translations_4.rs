@@ -25,7 +25,7 @@ pub fn reserved_address_translation(language: Language, info: &str) -> String {
         Language::TR => format!("Rezerve edilmiş adres ({info})"),
         Language::SV => format!("Reserverad adress ({info})"),
         Language::HU => format!("Foglalt cím ({info})"),
-        Language::LK => format!("වෙන් කළ ලිපිනය ({info})"),
+        Language::SI => format!("වෙන් කළ ලිපිනය ({info})"),
         Language::RU => format!("Зарезервированный адрес ({info})"),
         _ => format!("Reserved address ({info})"),
     }
@@ -53,7 +53,7 @@ pub fn share_feedback_translation(language: Language) -> &'static str {
         Language::UK => "Надіслати відгук",
         Language::SV => "Dela din feedback",
         Language::HU => "Visszajelzés megosztása",
-        Language::LK => "ඔබේ අදහස් ලබා දෙන්න",
+        Language::SI => "ඔබේ අදහස් ලබා දෙන්න",
         Language::RU => "Оставить отзыв",
         _ => "Share your feedback",
     }
@@ -107,7 +107,7 @@ pub fn capture_file_translation(language: Language) -> &'static str {
         Language::UK => "Захопити файл",
         Language::SV => "Inspelningsfil",
         Language::HU => "Adatforgalmi fájl",
-        Language::LK => "කැප්චර් (Capture) ගොනුව",
+        Language::SI => "කැප්චර් (Capture) ගොනුව",
         Language::RU => "Файл захвата",
         _ => "Capture file",
     }
@@ -135,7 +135,7 @@ pub fn select_file_translation(language: Language) -> &'static str {
         Language::UK => "Обрати файл",
         Language::SV => "Välj fil",
         Language::HU => "Fájl kiválasztása",
-        Language::LK => "ගොනුව තෝරන්න",
+        Language::SI => "ගොනුව තෝරන්න",
         Language::RU => "Выбрать файл",
         _ => "Select file",
     }
@@ -223,9 +223,10 @@ pub fn reading_from_pcap_translation(language: Language) -> &'static str {
             "Csomagok olvasása fájlból...\n\n\
                                 Biztos, hogy a kiválasztott fájl nem üres?"
         }
-        Language::LK => {
+        Language::SI => {
             "ගොනුවෙන් පැකට් කියවමින්...\n\n\
                                 ඔබ තෝරාගත් ගොනුව හිස් එකක් නොවන බවට විශ්වාසද?"
+        }
         Language::RU => {
             "Чтение пакетов из файла...\n\n\
                                  Вы уверены, что выбранный файл не пуст?"
@@ -258,7 +259,7 @@ pub fn data_exceeded_translation(language: Language) -> &'static str {
         Language::UK => "Перевищено ліміт даних",
         Language::SV => "Datagräns överskriden",
         Language::HU => "Adatküszöb túllépve",
-        Language::LK => "දත්ත සීමාව ඉක්මවා ඇත",
+        Language::SI => "දත්ත සීමාව ඉක්මවා ඇත",
         Language::RU => "Превышен лимит данных",
         _ => "Data threshold exceeded",
     }
@@ -286,7 +287,7 @@ pub fn bits_exceeded_translation(language: Language) -> &'static str {
         Language::UK => "Перевищено ліміт бітів",
         Language::SV => "Bitgräns överskriden",
         Language::HU => "Bitküszöb túllépve",
-        Language::LK => "බිට් සීමාව ඉක්මවා ඇත",
+        Language::SI => "බිට් සීමාව ඉක්මවා ඇත",
         Language::RU => "Превышен лимит битов",
         _ => "Bits threshold exceeded",
     }
@@ -313,7 +314,7 @@ pub fn bits_translation(language: Language) -> &'static str {
         Language::VI | Language::TR => "bit",
         Language::UK => "біти",
         Language::HU => "bitek",
-        Language::LK => "බිට්",
+        Language::SI => "බිට්",
         Language::RU => "биты",
         _ => "bits",
     }
@@ -338,7 +339,7 @@ pub fn pause_translation(language: Language) -> &'static str {
         Language::TR => "Duraklat",
         Language::UK | Language::RU => "Пауза",
         Language::HU => "Szüneteltetés",
-        Language::LK => "මඳකට නවත්වන්න",
+        Language::SI => "මඳකට නවත්වන්න",
         _ => "Pause",
     }
 }
@@ -366,7 +367,7 @@ pub fn resume_translation(language: Language) -> &'static str {
         Language::UK => "Продовжити",
         Language::SV => "Återuppta",
         Language::HU => "Folytatás",
-        Language::LK => "නැවත ආරම්භ කරන්න",
+        Language::SI => "නැවත ආරම්භ කරන්න",
         Language::RU => "Продолжить",
         _ => "Resume",
     }
