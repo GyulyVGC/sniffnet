@@ -2394,6 +2394,7 @@ pub fn no_notifications_set_translation<'a>(language: Language) -> Text<'a, Styl
     })
 }
 
+#[allow(clippy::too_many_lines)]
 pub fn no_notifications_received_translation<'a>(language: Language) -> Text<'a, StyleType> {
     Text::new(match language {
         Language::EN => {
