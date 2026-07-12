@@ -8,4 +8,4 @@ Icon=sniffnet
 Exec=/usr/bin/sniffnet
 StartupWMClass=sniffnet
 Terminal=false
-Keywords=traffic;inspect;
+Keywords=traffic;inspect;monitor;
