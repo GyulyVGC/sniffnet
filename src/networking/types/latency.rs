@@ -3,10 +3,11 @@ use std::sync::atomic::{AtomicU16, Ordering};
 use std::sync::{Arc, OnceLock};
 use std::time::Duration;
 
-use surge_ping::{Client, Config, ICMP, PingIdentifier, PingSequence};
+use surge_ping::{Client, Config, ICMP, PingIdentifier, PingSequence, SurgeError};
 
 const PING_TIMEOUT: Duration = Duration::from_secs(1);
 const PING_PAYLOAD: [u8; 8] = [0; 8];
+const PING_COUNT: usize = 3;
 
 static IPV4_CLIENT: OnceLock<Arc<Client>> = OnceLock::new();
 static IPV6_CLIENT: OnceLock<Arc<Client>> = OnceLock::new();
@@ -42,9 +43,26 @@ async fn measure_latency_inner(ip: IpAddr) -> LatencyStatus {
     let mut pinger = client.pinger(ip, ping_identifier()).await;
     pinger.timeout(PING_TIMEOUT);
 
-    match pinger.ping(next_sequence(), &PING_PAYLOAD).await {
-        Ok((_packet, latency)) => LatencyStatus::Measured(latency),
-        Err(error) => LatencyStatus::Failed(error.to_string()),
+    let mut sum = Duration::ZERO;
+    let mut received: u32 = 0;
+    let mut last_error = None;
+    for _ in 0..PING_COUNT {
+        match pinger.ping(next_sequence(), &PING_PAYLOAD).await {
+            Ok((_packet, latency)) => {
+                sum += latency;
+                received += 1;
+            }
+            Err(error @ SurgeError::Timeout { .. }) => last_error = Some(error.to_string()),
+            Err(error) => {
+                last_error = Some(error.to_string());
+                break;
+            }
+        }
+    }
+
+    match received {
+        0 => LatencyStatus::Failed(last_error.unwrap_or_else(|| "no reply".to_string())),
+        n => LatencyStatus::Measured(sum / n),
     }
 }
 
