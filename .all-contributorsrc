@@ -975,6 +975,69 @@
       "contributions": [
         "ideas"
       ]
+    },
+    {
+      "login": "golanbenoni",
+      "name": "golanbenoni",
+      "avatar_url": "https://avatars.githubusercontent.com/u/108551998?v=4",
+      "profile": "https://github.com/golanbenoni",
+      "contributions": [
+        "financial"
+      ]
+    },
+    {
+      "login": "pml68",
+      "name": "Polesznyák Márk László",
+      "avatar_url": "https://avatars.githubusercontent.com/u/116908301?v=4",
+      "profile": "http://pml68.dev",
+      "contributions": [
+        "translation"
+      ]
+    },
+    {
+      "login": "Hurdadd",
+      "name": "Hurdad Ashouri",
+      "avatar_url": "https://avatars.githubusercontent.com/u/197808737?v=4",
+      "profile": "https://github.com/Hurdadd",
+      "contributions": [
+        "translation"
+      ]
+    },
+    {
+      "login": "EfesX",
+      "name": "Ivan Guzhba",
+      "avatar_url": "https://avatars.githubusercontent.com/u/24487499?v=4",
+      "profile": "https://github.com/EfesX",
+      "contributions": [
+        "translation"
+      ]
+    },
+    {
+      "login": "thambaru",
+      "name": "Thambaru Wijesekara",
+      "avatar_url": "https://avatars.githubusercontent.com/u/4795173?v=4",
+      "profile": "https://thambaru.com",
+      "contributions": [
+        "translation"
+      ]
+    },
+    {
+      "login": "orbisai0security",
+      "name": "OrbisAI Security",
+      "avatar_url": "https://avatars.githubusercontent.com/u/242526317?v=4",
+      "profile": "https://orbisappsec.com/",
+      "contributions": [
+        "security"
+      ]
+    },
+    {
+      "login": "coderabbitai",
+      "name": "CodeRabbit",
+      "avatar_url": "https://avatars.githubusercontent.com/u/132028505?v=4",
+      "profile": "https://www.coderabbit.ai/?utm_source=cr_org&utm_medium=github",
+      "contributions": [
+        "financial"
+      ]
     }
   ],
   "contributorsPerLine": 7,

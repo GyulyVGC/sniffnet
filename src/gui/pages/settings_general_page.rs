@@ -196,7 +196,7 @@ fn scale_factor_slider<'a>(
                     let scale_factor = scale_factor_str.parse().unwrap_or(1.0);
                     Message::ChangeScaleFactor(scale_factor)
                 })
-                .step(0.01)
+                .step(0.01_f32)
                 .width(slider_width),
             )
             .push(Space::new().height(Length::Fill)),

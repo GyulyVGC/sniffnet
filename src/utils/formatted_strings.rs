@@ -28,7 +28,7 @@ pub fn print_cli_welcome_message() {
 │                                                                    │\n\
 │                           Sniffnet {ver}                           │\n\
 │                                                                    │\n\
-│           → Website: https://sniffnet.net                          │\n\
+│           → Website: https://sniffnet.app                          │\n\
 │           → GitHub:  https://github.com/GyulyVGC/sniffnet          │\n\
 │                                                                    │\n\
 ╰────────────────────────────────────────────────────────────────────╯\n\n"
@@ -245,8 +245,8 @@ mod tests {
         assert_eq!(clip_text("protocol90 23456", 13), "protocol90…");
 
         assert_eq!(
-            clip_text("      \n\t    sniffnet.net       ", 26),
-            "sniffnet.net"
+            clip_text("      \n\t    sniffnet.app       ", 26),
+            "sniffnet.app"
         );
         assert_eq!(
             clip_text("        protocol90 23456    \n      ", 12),

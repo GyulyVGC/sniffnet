@@ -26,6 +26,8 @@ pub fn new_version_available_translation(language: Language) -> &'static str {
         Language::VI => "Phiên bản mới đã sẵn sàng!",
         Language::ID => "Versi baru tersedia!",
         Language::NL => "Een nieuwere versie is beschikbaar!",
+        Language::HU => "Elérhető egy újabb verzió!",
+        Language::SI => "අලුත් අප්ඩේට් එකක් ඇවිත්!",
     }
 }
 
@@ -55,6 +57,8 @@ pub fn inspect_translation(language: Language) -> &'static str {
         Language::ID => "Memeriksa",
         Language::NL => "Inspecteren",
         Language::EL => "Επιθεώρηση",
+        Language::HU => "Megvizsgálás",
+        Language::SI => "පරීක්ෂා කරන්න",
     }
 }
 
@@ -84,6 +88,8 @@ pub fn connection_details_translation(language: Language) -> &'static str {
         Language::ID => "Rincian koneksi",
         Language::NL => "Verbindingsdetails",
         Language::EL => "Λεπτομέρειες σύνδεσης",
+        Language::HU => "Kapcsolat részletei",
+        Language::SI => "කනෙක්ෂන් එකෙහි විස්තර",
     }
 }
 
@@ -112,6 +118,8 @@ pub fn dropped_translation(language: Language) -> &'static str {
         Language::VI => "Mất",
         Language::ID => "Dihapus",
         Language::EL => "Απορριμμένα",
+        Language::HU => "Elvesztett",
+        Language::SI => "ඉවත දැමූ",
     }
 }
 
@@ -141,6 +149,8 @@ pub fn data_representation_translation(language: Language) -> &'static str {
         Language::ID => "Penyajian ulang data",
         Language::NL => "Gegevensweergave",
         Language::EL => "Αναπαράσταση δεδομένων",
+        Language::HU => "Adat reprezentació",
+        Language::SI => "දත්ත නිරූපණය",
     }
 }
 
@@ -170,6 +180,8 @@ pub fn host_translation(language: Language) -> &'static str {
         Language::ID => "Jaringan asal",
         Language::NL => "Netwerk host",
         Language::EL => "Κόμβος δικτύου",
+        Language::HU => "Hálózati gazda",
+        Language::SI => "නෙට්වර්ක් හොස්ට් එක",
     }
 }
 
@@ -199,6 +211,8 @@ pub fn only_top_30_items_translation(language: Language) -> &'static str {
         Language::ID => "Hanya 30 teratas yang ditampilkan disini",
         Language::NL => "Alleen de bovenste 30 items worden hier weergegeven",
         Language::EL => "Εμφανίζονται μόνο τα κορυφαία 30 στοιχεία",
+        Language::HU => "Itt csak az első 30 elem van megjelenítve",
+        Language::SI => "මෙහි පෙන්වන්නේ අවසන් අයිතම 30 පමණි",
     }
 }
 
@@ -225,6 +239,7 @@ pub fn only_top_30_items_translation(language: Language) -> &'static str {
 //         Language::UZ => "Saralash turi",
 //         Language::ID => "Urut berdasarkan",
 //         Language::NL => "Sorteren op",
+//         Language::HU => "Rendezés a következő szerint:",
 //         _ => "Sort by",
 //     }
 // }
@@ -255,6 +270,8 @@ pub fn local_translation(language: Language) -> &'static str {
         Language::ID => "Jaringan lokal",
         Language::NL => "Lokaal netwerk",
         Language::EL => "Τοπικό δίκτυο",
+        Language::HU => "Helyi hálózat",
+        Language::SI => "ලෝකල් නෙට්වර්ක් එක",
     }
 }
 
@@ -284,6 +301,8 @@ pub fn unknown_translation(language: Language) -> &'static str {
         Language::ID => "Lokasi tidak diketahui",
         Language::NL => "Onbekende locatie",
         Language::EL => "Άγνωστη τοποθεσία",
+        Language::HU => "Ismeretlen hely",
+        Language::SI => "නොදන්නා ස්ථානයක්",
     }
 }
 
@@ -313,6 +332,8 @@ pub fn your_network_adapter_translation(language: Language) -> &'static str {
         Language::ID => "Adaptor jaringan kamu",
         Language::NL => "Uw netwerkadapter",
         Language::EL => "Ο προσαρμογέας δικτύου σας",
+        Language::HU => "A hálózati adaptered",
+        Language::SI => "ඔබේ නෙට්වර්ක් ඇඩැප්ටරය",
     }
 }
 
@@ -342,6 +363,8 @@ pub fn socket_address_translation(language: Language) -> &'static str {
         Language::ID => "Alamat sambungan",
         Language::NL => "Socket adres",
         Language::EL => "Διεύθυνση υποδοχής",
+        Language::HU => "Socket cím",
+        Language::SI => "සොකට් ලිපිනය",
     }
 }
 
@@ -371,6 +394,8 @@ pub fn mac_address_translation(language: Language) -> &'static str {
         Language::ID => "Alamat MAC",
         Language::NL => "MAC-adres",
         Language::EL => "Διεύθυνση MAC",
+        Language::HU => "MAC-cím",
+        Language::SI => "MAC ලිපිනය",
     }
 }
 
@@ -399,6 +424,8 @@ pub fn source_translation(language: Language) -> &'static str {
         Language::ID => "Asal",
         Language::NL => "Bron",
         Language::EL => "Πηγή",
+        Language::HU => "Forrás",
+        Language::SI => "ආරම්භය",
     }
 }
 
@@ -425,6 +452,8 @@ pub fn destination_translation(language: Language) -> &'static str {
         Language::ID => "Tujuan",
         Language::NL => "Bestemming",
         Language::EL => "Προορισμός",
+        Language::HU => "Cél",
+        Language::SI => "ගමනාන්තය",
     }
 }
 
@@ -452,6 +481,8 @@ pub fn fqdn_translation(language: Language) -> &'static str {
         Language::ID => "Nama domain yang memenuhi syarat",
         Language::NL => "Volledig gekwalificeerde domeinnaam",
         Language::EL => "Πλήρως προσδιορισμένο όνομα τομέα",
+        Language::HU => "Teljesen minősített tartománynév",
+        Language::SI => "සම්පූර්ණයෙන් සුදුසුකම් ලත් ඩොමේන් නාමය",
     }
 }
 
@@ -481,6 +512,7 @@ pub fn fqdn_translation(language: Language) -> &'static str {
 //         Language::ID => "Nama System Otomatis",
 //         Language::NL => "Naam van het autonome systeem",
 //         Language::EL => "Όνομα αυτόνομου συστήματος",
+//         Language::HU => "Autonóm rendszer név",
 //     }
 // }
 
@@ -510,6 +542,8 @@ pub fn transmitted_data_translation(language: Language) -> &'static str {
         Language::ID => "Data terkirim",
         Language::NL => "Verzonden gegevens",
         Language::EL => "Μεταδιδόμενα δεδομένα",
+        Language::HU => "Átvitt adat",
+        Language::SI => "සම්ප්‍රේෂිත දත්ත",
     }
 }
 
@@ -536,6 +570,8 @@ pub fn country_translation(language: Language) -> &'static str {
         Language::VI => "Quốc gia",
         Language::ID => "Negara",
         Language::EL => "Χώρα",
+        Language::HU => "Ország",
+        Language::SI => "රට",
     }
 }
 
@@ -563,6 +599,8 @@ pub fn domain_translation(language: Language) -> &'static str {
         Language::VI => "Miền",
         Language::NL => "Domeinnaam",
         Language::EL => "Τομέας",
+        Language::HU => "Tartománynév",
+        Language::SI => "ඩොමේන් නාමය",
     }
 }
 
@@ -592,6 +630,8 @@ pub fn only_show_favorites_translation(language: Language) -> &'static str {
         Language::ID => "Hanya tunjukkan favorit",
         Language::NL => "Toon alleen favorieten",
         Language::EL => "Εμφάνιση μόνο αγαπημένων",
+        Language::HU => "Csak kedvencek mutatása",
+        Language::SI => "ප්‍රියතමයන් පමණක් පෙන්වන්න",
     }
 }
 
@@ -619,6 +659,7 @@ pub fn only_show_favorites_translation(language: Language) -> &'static str {
 //         Language::PT => "Filtros de busca",
 //         Language::ID => "Filter Pencarian",
 //         Language::NL => "Zoekfilters",
+//         Language::HU => "Keresési szűrők",
 //         _ => "Search filters",
 //     }
 // }
@@ -651,6 +692,8 @@ pub fn no_search_results_translation(language: Language) -> &'static str {
         Language::EL => {
             "Δεν υπάρχουν διαθέσιμα αποτελέσματα σύμφωνα με τα καθορισμένα φίλτρα αναζήτησης"
         }
+        Language::HU => "Nincs a megadott keresési szűrőknek megfelelő találat",
+        Language::SI => "තෝරාගත් සෙවුම් පෙරහන් අනුව කිසිදු ප්‍රතිඵලයක් නොමැත",
     }
 }
 
@@ -687,6 +730,8 @@ pub fn showing_results_translation(
             format!("{start}-{end} van de {total} totale resultaten worden weergegeven")
         }
         Language::EL => format!("Εμφάνιση {start}-{end} από {total} συνολικά αποτελέσματα"),
+        Language::HU => format!("{start}-{end}. találatok megjelenítve, összesen {total}"),
+        Language::SI => format!("මුළු ප්‍රතිඵල {total} න් {start}-{end} ක්"),
     }
 }
 
@@ -716,5 +761,7 @@ pub fn color_gradients_translation(language: Language) -> &'static str {
         Language::ID => "Aplikasikan gradasi warna",
         Language::NL => "Kleurverlopen toepassen",
         Language::EL => "Εφαρμογή χρωματικών διαβαθμίσεων",
+        Language::HU => "Színátmenet alkalmazása",
+        Language::SI => "වර්ණ අනුක්‍රමණ (Gradients) යොදන්න",
     }
 }

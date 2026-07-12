@@ -41,6 +41,10 @@ fn build_services_phf() {
     for line_res in input.lines() {
         // we want to panic if one of the lines is err...
         let line = line_res.unwrap();
+        // skip comment or blank lines
+        if line.trim().is_empty() || line.trim().starts_with('#') {
+            continue;
+        }
         let mut parts = line.split('\t');
         // we want to panic if one of the service names is invalid
         let val = Cow::Owned(get_valid_service_fmt_const(parts.next().unwrap()));

@@ -168,7 +168,7 @@ where
                         state.ellipsized.update(text::Text {
                             content: &format!(
                                 "{}… ",
-                                &self.fragment[..offset]
+                                self.fragment[..offset]
                                     .trim_end_matches(|s: char| !s.is_alphanumeric())
                             ),
                             bounds,

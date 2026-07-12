@@ -15,6 +15,8 @@ We'll use STRIDE, a widely adopted framework to help identify common types of th
 For how to report a vulnerability, see [`SECURITY.md`](https://github.com/GyulyVGC/sniffnet/blob/main/SECURITY.md).<br>
 For how incidents are handled, see [`INCIDENT_RESPONSE.md`](https://github.com/GyulyVGC/sniffnet/blob/main/INCIDENT_RESPONSE.md).
 
+For all security-related communications, please write to `security@sniffnet.app`.
+
 ## 1. Project overview and scope of this document
 
 - **Project name:** Sniffnet
