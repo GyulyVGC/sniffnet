@@ -17,6 +17,7 @@ use crate::networking::manage_packets::{
 use crate::networking::types::address_port_pair::AddressPortPair;
 use crate::networking::types::arp_type::ArpType;
 use crate::networking::types::bogon::is_bogon;
+use crate::networking::types::capture_context::CaptureSource;
 use crate::networking::types::data_representation::DataRepr;
 use crate::networking::types::host::Host;
 use crate::networking::types::icmp_type::IcmpType;
@@ -126,6 +127,7 @@ fn page_content<'a>(sniffer: &Sniffer, key: &AddressPortPair) -> Container<'a, M
         dest_col = dest_col.push(host_info_col);
     }
 
+    let measure_latency = matches!(sniffer.capture_source, CaptureSource::Device(_));
     let col_info = col_info(
         key,
         val,
@@ -133,6 +135,7 @@ fn page_content<'a>(sniffer: &Sniffer, key: &AddressPortPair) -> Container<'a, M
         language,
         address_to_lookup,
         sniffer.latency_statuses.get(&address_to_lookup),
+        measure_latency,
     );
 
     let content = assemble_widgets(col_info, source_col, dest_col);
@@ -176,6 +179,7 @@ fn col_info<'a>(
     language: Language,
     latency_target: IpAddr,
     latency_status: Option<&LatencyStatus>,
+    measure_latency: bool,
 ) -> Column<'a, Message, StyleType> {
     let is_icmp = key.protocol.eq(&Protocol::ICMP);
     let is_arp = key.protocol.eq(&Protocol::ARP);
@@ -232,7 +236,9 @@ fn col_info<'a>(
             .as_ref()),
     ));
 
-    ret_val = ret_val.push(latency_row(language, latency_target, latency_status));
+    if measure_latency {
+        ret_val = ret_val.push(latency_row(language, latency_target, latency_status));
+    }
 
     if is_icmp || is_arp {
         ret_val = ret_val.push(

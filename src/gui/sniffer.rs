@@ -1080,6 +1080,7 @@ impl Sniffer {
         self.current_capture_rx = (self.current_capture_rx.0 + 1, None);
         self.info_traffic = InfoTraffic::default();
         self.addresses_resolved = HashMap::new();
+        self.latency_statuses = HashMap::new();
         self.logged_notifications = LoggedNotifications::default();
         self.pcap_error = None;
         self.traffic_chart = TrafficChart::new(style, language, self.conf.data_repr);

@@ -1,6 +1,6 @@
 use std::net::IpAddr;
 use std::sync::atomic::{AtomicU16, Ordering};
-use std::sync::{Arc, LazyLock};
+use std::sync::{Arc, OnceLock};
 use std::time::Duration;
 
 use surge_ping::{Client, Config, ICMP, PingIdentifier, PingSequence};
@@ -8,10 +8,8 @@ use surge_ping::{Client, Config, ICMP, PingIdentifier, PingSequence};
 const PING_TIMEOUT: Duration = Duration::from_secs(1);
 const PING_PAYLOAD: [u8; 8] = [0; 8];
 
-static IPV4_CLIENT: LazyLock<Result<Arc<Client>, String>> =
-    LazyLock::new(|| latency_client(ICMP::V4));
-static IPV6_CLIENT: LazyLock<Result<Arc<Client>, String>> =
-    LazyLock::new(|| latency_client(ICMP::V6));
+static IPV4_CLIENT: OnceLock<Arc<Client>> = OnceLock::new();
+static IPV6_CLIENT: OnceLock<Arc<Client>> = OnceLock::new();
 static PING_SEQUENCE: AtomicU16 = AtomicU16::new(0);
 
 #[derive(Clone, Debug, PartialEq, Eq)]
@@ -51,12 +49,17 @@ async fn measure_latency_inner(ip: IpAddr) -> LatencyStatus {
 }
 
 fn client_for(ip: IpAddr) -> Result<Arc<Client>, String> {
-    let client = match ip {
-        IpAddr::V4(_) => &*IPV4_CLIENT,
-        IpAddr::V6(_) => &*IPV6_CLIENT,
+    let (cell, kind) = match ip {
+        IpAddr::V4(_) => (&IPV4_CLIENT, ICMP::V4),
+        IpAddr::V6(_) => (&IPV6_CLIENT, ICMP::V6),
     };
 
-    client.as_ref().map(Arc::clone).map_err(ToString::to_string)
+    if let Some(client) = cell.get() {
+        return Ok(Arc::clone(client));
+    }
+
+    let client = latency_client(kind)?;
+    Ok(Arc::clone(cell.get_or_init(|| client)))
 }
 
 fn latency_client(kind: ICMP) -> Result<Arc<Client>, String> {
