@@ -1,5 +1,6 @@
 pub mod conf;
 pub mod config_window;
+pub mod dns_state;
 pub mod export_pcap;
 pub mod favorite;
 pub mod filters;

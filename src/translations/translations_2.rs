@@ -31,6 +31,12 @@ pub fn new_version_available_translation(language: Language) -> &'static str {
     }
 }
 
+/// Tab label for the DNS analyzer page. "DNS" is a universal acronym, so the
+/// same label is used across all languages.
+pub fn dns_translation(_language: Language) -> &'static str {
+    "DNS"
+}
+
 pub fn inspect_translation(language: Language) -> &'static str {
     match language {
         Language::EN => "Inspect",

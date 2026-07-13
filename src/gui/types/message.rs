@@ -2,6 +2,7 @@ use crate::gui::components::types::my_modal::MyModal;
 use crate::gui::pages::types::running_page::RunningPage;
 use crate::gui::pages::types::settings_page::SettingsPage;
 use crate::gui::styles::types::gradient_type::GradientType;
+use crate::gui::types::dns_state::{DnsRCodeFilter, DnsTypeFilter};
 use crate::gui::types::favorite::FavoriteKey;
 use crate::networking::traffic_preview::TrafficPreview;
 use crate::networking::types::capture_context::CaptureSourcePicklist;
@@ -95,6 +96,10 @@ pub enum Message {
     CtrlDPressed,
     /// Update search parameters of inspect page
     Search(SearchParameters),
+    /// Update the record-type filter of the DNS page
+    DnsTypeFilterSelection(DnsTypeFilter),
+    /// Update the response-code filter of the DNS page
+    DnsRCodeFilterSelection(DnsRCodeFilter),
     /// Update page result number in inspect
     UpdatePageNumber(bool),
     /// Left (false) or Right (true) arrow key has been pressed

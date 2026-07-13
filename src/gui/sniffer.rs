@@ -6,6 +6,7 @@ use crate::gui::components::header::header;
 use crate::gui::components::modal::{get_clear_all_overlay, get_exit_overlay, modal};
 use crate::gui::components::types::my_modal::MyModal;
 use crate::gui::pages::connection_details_page::connection_details_page;
+use crate::gui::pages::dns_page::dns_page;
 use crate::gui::pages::initial_page::initial_page;
 use crate::gui::pages::inspect_page::inspect_page;
 use crate::gui::pages::notifications_page::notifications_page;
@@ -22,6 +23,7 @@ use crate::gui::styles::types::custom_palette::CustomPalette;
 use crate::gui::styles::types::gradient_type::GradientType;
 use crate::gui::styles::types::palette::Palette;
 use crate::gui::types::conf::Conf;
+use crate::gui::types::dns_state::{DnsFilter, DnsState};
 use crate::gui::types::favorite::FavoriteKey;
 use crate::gui::types::message::Message;
 use crate::gui::types::settings::Settings;
@@ -142,6 +144,10 @@ pub struct Sniffer {
     pub freeze_tx: Option<tokio::sync::broadcast::Sender<()>>,
     /// State of the port to program lookups
     pub program_lookup: Option<ProgramLookup>,
+    /// State backing the DNS analyzer page
+    pub dns_state: DnsState,
+    /// Active filters on the DNS analyzer page
+    pub dns_filter: DnsFilter,
 }
 
 impl Sniffer {
@@ -189,6 +195,8 @@ impl Sniffer {
             frozen: false,
             freeze_tx: None,
             program_lookup: None,
+            dns_state: DnsState::default(),
+            dns_filter: DnsFilter::default(),
         }
     }
 
@@ -317,6 +325,8 @@ impl Sniffer {
             Message::ResetButtonPressed => return self.reset_button_pressed(),
             Message::CtrlDPressed => self.ctrl_d_pressed(),
             Message::Search(parameters) => self.search(parameters),
+            Message::DnsTypeFilterSelection(filter) => self.dns_filter.record_type = filter,
+            Message::DnsRCodeFilterSelection(filter) => self.dns_filter.rcode = filter,
             Message::UpdatePageNumber(increment) => self.update_page_number(increment),
             Message::ArrowPressed(increment) => self.arrow_pressed(increment),
             Message::WindowFocused => self.window_focused(),
@@ -391,6 +401,7 @@ impl Sniffer {
                             RunningPage::Overview => overview_page(self),
                             RunningPage::Inspect => inspect_page(self),
                             RunningPage::Notifications => notifications_page(self),
+                            RunningPage::Dns => dns_page(self),
                         }
                     }
                 }
@@ -907,6 +918,9 @@ impl Sniffer {
     }
 
     fn refresh_data(&mut self, mut msg: InfoTraffic, no_more_packets: bool) {
+        // Drain the DNS events accumulated during this interval into the DNS
+        // page state (they are not retained in the merged `info_traffic`).
+        self.dns_state.ingest(std::mem::take(&mut msg.dns_events));
         self.info_traffic
             .refresh(&mut msg, &mut self.program_lookup);
         if self.info_traffic.tot_data_info.tot_data(DataRepr::Packets) == 0 {
@@ -1063,6 +1077,7 @@ impl Sniffer {
         self.current_capture_rx = (self.current_capture_rx.0 + 1, None);
         self.info_traffic = InfoTraffic::default();
         self.addresses_resolved = HashMap::new();
+        self.dns_state = DnsState::default();
         self.logged_notifications = LoggedNotifications::default();
         self.pcap_error = None;
         self.traffic_chart = TrafficChart::new(style, language, self.conf.data_repr);

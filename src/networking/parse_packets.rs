@@ -5,6 +5,8 @@ use crate::location;
 use crate::mmdb::asn::get_asn;
 use crate::mmdb::country::get_country;
 use crate::mmdb::types::mmdb_reader::MmdbReaders;
+use crate::networking::dns::parser::parse_dns;
+use crate::networking::dns::types::DnsEvent;
 use crate::networking::manage_packets::{
     analyze_headers, get_address_to_lookup, get_traffic_type, is_local_connection,
     modify_or_insert_in_map,
@@ -20,13 +22,14 @@ use crate::networking::types::icmp_type::IcmpType;
 use crate::networking::types::info_traffic::InfoTraffic;
 use crate::networking::types::ip_blacklist::IpBlacklist;
 use crate::networking::types::my_link_type::MyLinkType;
+use crate::networking::types::protocol::Protocol;
 use crate::networking::types::traffic_direction::TrafficDirection;
 use crate::utils::error_logger::{ErrorLogger, Location};
 use crate::utils::formatted_strings::get_domain_from_r_dns;
 use crate::utils::types::timestamp::Timestamp;
 use async_channel::Sender;
 use dns_lookup::lookup_addr;
-use etherparse::{EtherType, LaxPacketHeaders};
+use etherparse::{EtherType, LaxPacketHeaders, LaxPayloadSlice};
 use pcap::{Address, Packet, PacketHeader};
 use std::collections::HashMap;
 use std::net::IpAddr;
@@ -155,6 +158,15 @@ pub fn parse_packets(
                     let mut icmp_type = IcmpType::default();
                     let mut arp_type = ArpType::default();
 
+                    // Capture the UDP/TCP payload before `analyze_headers` consumes
+                    // `headers`. The returned slice borrows `packet.data`, not
+                    // `headers`, so it remains valid after the move.
+                    let transport_payload: Option<&[u8]> = match &headers.payload {
+                        LaxPayloadSlice::Udp { payload, .. }
+                        | LaxPayloadSlice::Tcp { payload, .. } => Some(payload),
+                        _ => None,
+                    };
+
                     let key_option = analyze_headers(
                         headers,
                         &mut mac_addresses,
@@ -166,6 +178,28 @@ pub fn parse_packets(
                     let Some(key) = key_option else {
                         continue;
                     };
+
+                    // If this is DNS traffic (port 53), parse the message from the
+                    // transport payload and record it as a DNS event.
+                    if key.sport == Some(53) || key.dport == Some(53) {
+                        if let Some(payload) = transport_payload {
+                            // DNS over TCP is prefixed by a 2-byte length field.
+                            let dns_bytes = if key.protocol == Protocol::TCP {
+                                payload.get(2..)
+                            } else {
+                                Some(payload)
+                            };
+                            if let Some(message) = dns_bytes.and_then(parse_dns) {
+                                info_traffic_msg.dns_events.push(DnsEvent {
+                                    timestamp: next_packet_timestamp,
+                                    src: key.source,
+                                    dst: key.dest,
+                                    transport: key.protocol,
+                                    message,
+                                });
+                            }
+                        }
+                    }
 
                     // save this packet to PCAP file
                     if let Some(file) = savefile.as_mut() {
@@ -552,4 +586,84 @@ fn packet_stream(
 struct PacketOwned {
     header: PacketHeader,
     data: Box<[u8]>,
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::networking::dns::types::{DnsMessage, DnsRData, DnsRecordType};
+    use crate::networking::types::my_link_type::MyLinkType;
+    use std::net::Ipv4Addr;
+
+    /// End-to-end test of the capture-to-parse path: reads the sample pcap and
+    /// runs each packet through the exact production logic (sniffable headers ->
+    /// payload extraction -> header analysis -> DNS parsing), then checks the
+    /// recovered DNS messages.
+    #[test]
+    fn parses_dns_from_sample_pcap() {
+        let path = concat!(env!("CARGO_MANIFEST_DIR"), "/docs/samples/dns_sample.pcap");
+        let mut cap = pcap::Capture::from_file(path).expect("open sample pcap");
+        let my_link_type = MyLinkType::from_pcap_link_type(cap.get_datalink());
+
+        let mut messages: Vec<DnsMessage> = Vec::new();
+        while let Ok(packet) = cap.next_packet() {
+            let Some(headers) = get_sniffable_headers(&packet.data, my_link_type) else {
+                continue;
+            };
+
+            // Same extraction as the live pipeline: grab the payload before
+            // `analyze_headers` consumes `headers`.
+            let transport_payload: Option<&[u8]> = match &headers.payload {
+                LaxPayloadSlice::Udp { payload, .. } | LaxPayloadSlice::Tcp { payload, .. } => {
+                    Some(payload)
+                }
+                _ => None,
+            };
+
+            let mut exchanged_bytes = 0;
+            let mut mac_addresses = (None, None);
+            let mut icmp_type = IcmpType::default();
+            let mut arp_type = ArpType::default();
+            let Some(key) = analyze_headers(
+                headers,
+                &mut mac_addresses,
+                &mut exchanged_bytes,
+                &mut icmp_type,
+                &mut arp_type,
+            ) else {
+                continue;
+            };
+
+            if key.sport == Some(53) || key.dport == Some(53) {
+                if let Some(payload) = transport_payload {
+                    let dns_bytes = if key.protocol == Protocol::TCP {
+                        payload.get(2..)
+                    } else {
+                        Some(payload)
+                    };
+                    if let Some(message) = dns_bytes.and_then(parse_dns) {
+                        messages.push(message);
+                    }
+                }
+            }
+        }
+
+        // The sample carries exactly one query and one response for google.com.
+        assert_eq!(messages.len(), 2, "expected one query and one response");
+
+        let query = &messages[0];
+        assert!(!query.is_response);
+        assert_eq!(query.query_name(), Some("google.com"));
+        assert_eq!(query.query_type(), Some(DnsRecordType::A));
+
+        let response = &messages[1];
+        assert!(response.is_response);
+        assert_eq!(response.query_name(), Some("google.com"));
+        assert_eq!(response.answers.len(), 1);
+        assert_eq!(response.answers[0].rtype, DnsRecordType::A);
+        assert_eq!(
+            response.answers[0].rdata,
+            DnsRData::A(Ipv4Addr::new(8, 8, 8, 8))
+        );
+    }
 }
