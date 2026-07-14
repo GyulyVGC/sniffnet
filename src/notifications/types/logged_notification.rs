@@ -5,7 +5,9 @@ use crate::networking::types::data_representation::DataRepr;
 use crate::networking::types::host::Host;
 use crate::networking::types::service::Service;
 use crate::translations::translations::favorite_transmitted_translation;
-use crate::translations::translations_5::blacklisted_transmitted_translation;
+use crate::translations::translations_5::{
+    blacklisted_transmitted_translation, suspicious_connection_detected_translation,
+};
 use crate::translations::types::language::Language;
 use serde_json::json;
 use std::collections::VecDeque;
@@ -67,6 +69,8 @@ pub enum LoggedNotification {
     FavoriteTransmitted(FavoriteTransmitted),
     /// Blacklisted connection exchanged data
     BlacklistedTransmitted(BlacklistedTransmitted),
+    /// Suspicious connection detected (new connection to malicious IP)
+    SuspiciousConnectionDetected(SuspiciousConnectionDetected),
 }
 
 impl LoggedNotification {
@@ -75,6 +79,7 @@ impl LoggedNotification {
             LoggedNotification::DataThresholdExceeded(d) => d.id,
             LoggedNotification::FavoriteTransmitted(f) => f.id,
             LoggedNotification::BlacklistedTransmitted(b) => b.id,
+            LoggedNotification::SuspiciousConnectionDetected(s) => s.id,
         }
     }
 
@@ -83,6 +88,7 @@ impl LoggedNotification {
             LoggedNotification::DataThresholdExceeded(d) => d.data_info,
             LoggedNotification::FavoriteTransmitted(f) => f.favorite.data_info(),
             LoggedNotification::BlacklistedTransmitted(b) => b.data_info_host.data_info,
+            LoggedNotification::SuspiciousConnectionDetected(_) => DataInfo::default(),
         }
     }
 
@@ -90,7 +96,8 @@ impl LoggedNotification {
         match self {
             LoggedNotification::DataThresholdExceeded(d) => d.is_expanded = expand,
             LoggedNotification::FavoriteTransmitted(_)
-            | LoggedNotification::BlacklistedTransmitted(_) => {}
+            | LoggedNotification::BlacklistedTransmitted(_)
+            | LoggedNotification::SuspiciousConnectionDetected(_) => {}
         }
     }
 
@@ -99,6 +106,7 @@ impl LoggedNotification {
             LoggedNotification::DataThresholdExceeded(d) => d.to_json(),
             LoggedNotification::FavoriteTransmitted(f) => f.to_json(),
             LoggedNotification::BlacklistedTransmitted(b) => b.to_json(),
+            LoggedNotification::SuspiciousConnectionDetected(s) => s.to_json(),
         }
     }
 }
@@ -140,7 +148,7 @@ impl FavoriteTransmitted {
             "info": favorite_transmitted_translation(Language::EN),
             "timestamp": self.timestamp,
             "favorite": match &self.favorite {
-                FavoriteItem::Host((host, _)) => json!({
+                FavoriteItem::Host((host, _, _)) => json!({
                     "country": host.country.to_string(),
                     "domain": host.domain,
                     "asn": host.asn.name,
@@ -179,6 +187,31 @@ impl BlacklistedTransmitted {
                 "asn": self.host.asn.name,
             },
             "data": DataRepr::Bytes.formatted_string(self.data_info_host.data_info.tot_data(DataRepr::Bytes)),
+        })
+        .to_string()
+    }
+    
+}
+
+#[derive(Clone)]
+pub struct SuspiciousConnectionDetected {
+    pub(crate) id: usize,
+    pub(crate) ip: IpAddr,
+    pub(crate) host: Host,
+    pub(crate) timestamp: String,
+}
+
+impl SuspiciousConnectionDetected {
+    fn to_json(&self) -> String {
+        json!({
+            "info": suspicious_connection_detected_translation(Language::EN),
+            "timestamp": self.timestamp,
+            "ip": self.ip.to_string(),
+            "host": {
+                "country": self.host.country.to_string(),
+                "domain": self.host.domain,
+                "asn": self.host.asn.name,
+            },
         })
         .to_string()
     }
@@ -231,7 +264,7 @@ mod tests {
             is_bogon: None,
             traffic_type: TrafficType::Unicast,
         };
-        let favorite_item = FavoriteItem::Host((host, data_info_host));
+        let favorite_item = FavoriteItem::Host((host, data_info_host, false));
         let notification = FavoriteTransmitted {
             id: 2,
             favorite: favorite_item,

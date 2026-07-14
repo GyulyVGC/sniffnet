@@ -96,7 +96,7 @@ fn col_favorite_item(
     sniffer: &Sniffer,
     favorite: Favorite,
 ) -> impl Into<Element<'_, Message, StyleType>> {
-    let Settings {
+let Settings {
         language, style, ..
     } = sniffer.conf.settings;
     let data_repr = sniffer.conf.data_repr;
@@ -126,6 +126,10 @@ fn col_favorite_item(
             1.0
         };
         let icon = fi.icon(language, program_lookup, false, icon_opacity);
+        
+        // Check if this entry is blacklisted
+        let is_blacklisted = fi.is_blacklisted();
+        
         let item_bar = item_bar(
             icon,
             fi.to_entry_string(),
@@ -139,6 +143,22 @@ fn col_favorite_item(
             .spacing(5)
             .push(star_button)
             .push(item_bar);
+
+        // Add blacklist indicator if needed
+        let content = if is_blacklisted {
+            Row::new()
+                .align_y(Alignment::Center)
+                .spacing(5)
+                .push(
+                    Icon::Forbidden
+                        .to_text()
+                        .size(14)
+                        .class(TextType::Danger),
+                )
+                .push(content)
+        } else {
+            content
+        };
 
         scroll_item = scroll_item.push(
             button(content)

@@ -83,7 +83,7 @@ fn host_col<'a>(sniffer: &Sniffer) -> Column<'a, Message, StyleType> {
     let mut thumbnail_hosts = Vec::new();
 
     for fi in &hosts {
-        let FavoriteItem::Host((host, data_info_host)) = fi else {
+        let FavoriteItem::Host((host, data_info_host, _)) = fi else {
             continue;
         };
 

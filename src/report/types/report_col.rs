@@ -7,13 +7,7 @@ use crate::translations::translations_2::{destination_translation, source_transl
 use crate::translations::translations_3::{port_translation, service_translation};
 use crate::translations::types::language::Language;
 
-// total width: 1012.0
-
-const LARGE_COL_WIDTH: f32 = 221.0;
-const SMALL_COL_WIDTH: f32 = 95.0;
-
-const LARGE_COL_MAX_CHARS: usize = 25;
-const SMALL_COL_MAX_CHARS: usize = 10;
+// total width: 1042.0
 
 #[derive(Eq, PartialEq)]
 pub enum ReportCol {
@@ -24,10 +18,11 @@ pub enum ReportCol {
     Proto,
     Service,
     Data,
+    Blacklist,
 }
 
 impl ReportCol {
-    pub(crate) const ALL: [ReportCol; 7] = [
+    pub(crate) const ALL: [ReportCol; 8] = [
         ReportCol::SrcIp,
         ReportCol::SrcPort,
         ReportCol::DstIp,
@@ -35,9 +30,10 @@ impl ReportCol {
         ReportCol::Proto,
         ReportCol::Service,
         ReportCol::Data,
+        ReportCol::Blacklist,
     ];
 
-    pub(crate) const FILTER_COLUMNS_WIDTH: f32 = 4.0 * SMALL_COL_WIDTH + 2.0 * LARGE_COL_WIDTH;
+    pub(crate) const FILTER_COLUMNS_WIDTH: f32 = 4.0 * 95.0 + 2.0 * 221.0 + 30.0;
 
     pub(crate) fn get_title(&self, language: Language, data_repr: DataRepr) -> String {
         match self {
@@ -46,9 +42,10 @@ impl ReportCol {
             ReportCol::Proto => protocol_translation(language).to_string(),
             ReportCol::Service => service_translation(language).to_string(),
             ReportCol::Data => {
-                let mut str = data_repr.get_label(language).to_string();
-                str.remove(0).to_uppercase().to_string() + &str
+                let mut s = data_repr.get_label(language).to_string();
+                s.remove(0).to_uppercase().to_string() + &s
             }
+            ReportCol::Blacklist => "⚠".to_string(),
         }
     }
 
@@ -90,13 +87,21 @@ impl ReportCol {
             ReportCol::Proto => key.protocol.to_string(),
             ReportCol::Service => val.service.to_string(),
             ReportCol::Data => data_repr.formatted_string(val.transmitted_data(data_repr)),
+            ReportCol::Blacklist => {
+                if val.is_blacklisted {
+                    "⚠".to_string()
+                } else {
+                    String::new()
+                }
+            }
         }
     }
 
     pub(crate) fn get_width(&self) -> f32 {
         match self {
-            ReportCol::SrcIp | ReportCol::DstIp => LARGE_COL_WIDTH,
-            _ => SMALL_COL_WIDTH,
+            ReportCol::SrcIp | ReportCol::DstIp => 221.0,
+            ReportCol::Blacklist => 30.0,
+            _ => 95.0,
         }
     }
 
@@ -109,8 +114,9 @@ impl ReportCol {
             1
         };
         match self {
-            ReportCol::SrcIp | ReportCol::DstIp => LARGE_COL_MAX_CHARS / reduction_factor,
-            _ => SMALL_COL_MAX_CHARS / reduction_factor,
+            ReportCol::SrcIp | ReportCol::DstIp => 25 / reduction_factor,
+            ReportCol::Blacklist => 2,
+            _ => 10 / reduction_factor,
         }
     }
 
@@ -122,7 +128,8 @@ impl ReportCol {
             ReportCol::DstPort => FilterInputType::PortDst,
             ReportCol::Proto => FilterInputType::Proto,
             ReportCol::Service => FilterInputType::Service,
-            ReportCol::Data => FilterInputType::Country, // just to not panic...
+            ReportCol::Data => FilterInputType::Country,
+            ReportCol::Blacklist => FilterInputType::Country,
         }
     }
 }

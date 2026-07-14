@@ -39,7 +39,7 @@ use crate::networking::types::combobox_data_states::ComboboxDataStates;
 use crate::networking::types::data_representation::DataRepr;
 use crate::networking::types::host::{Host, HostMessage};
 use crate::networking::types::info_traffic::InfoTraffic;
-use crate::networking::types::ip_blacklist::IpBlacklist;
+use crate::networking::types::ip_blacklist::{IpBlacklist, BlacklistSource};
 use crate::networking::types::my_device::MyDevice;
 use crate::networking::types::program::Program;
 use crate::networking::types::program_lookup::{ProgramLookup, get_picon, lookup_program};
@@ -73,6 +73,7 @@ use std::path::PathBuf;
 use std::sync::Arc;
 use std::thread;
 use std::time::Duration;
+use dirs;
 
 pub const FONT_FAMILY_NAME: &str = "Sarasa Mono SC for Sniffnet";
 pub const ICON_FONT_FAMILY_NAME: &str = "Icons for Sniffnet";
@@ -326,7 +327,9 @@ impl Sniffer {
             Message::WindowResized(width, height) => return self.window_resized(width, height),
             Message::CustomCountryDb(db) => self.custom_country_db(db),
             Message::CustomAsnDb(db) => self.custom_asn_db(db),
-            Message::LoadIpBlacklist(path) => return self.load_ip_blacklist(path),
+            Message::LoadIpBlacklist(path) => return self.load_ip_blacklist(BlacklistSource::File(path)),
+            Message::UpdateBlacklistSource(source) => return self.load_ip_blacklist(source),
+            Message::TriggerBlacklistUpdate => return self.trigger_blacklist_update(),
             Message::SetIpBlacklist(blacklist) => self.set_ip_blacklist(blacklist),
             Message::QuitWrapper => return self.quit_wrapper(),
             Message::Quit => return self.quit(),
@@ -467,11 +470,27 @@ impl Sniffer {
     fn start_app(&mut self, id: Option<Id>) -> Task<Message> {
         self.id = id;
         let previews_task = self.start_traffic_previews();
+        
+        let blacklist_task = match &self.conf.settings.ip_blacklist {
+            BlacklistSource::File(path) if !path.is_empty() => {
+                self.ip_blacklist.start_loading();
+                Task::perform(IpBlacklist::from_file(path.clone()), Message::SetIpBlacklist)
+            }
+            BlacklistSource::Remote { url, min_score, .. } => {
+                self.ip_blacklist.start_loading();
+                Task::perform(
+                    IpBlacklist::from_remote(url.clone(), *min_score, self.get_cache_path()),
+                    Message::SetIpBlacklist,
+                )
+            }
+            _ => Task::none(),
+        };
+        
         Task::batch([
             Sniffer::register_sigint_handler(),
             Task::perform(set_newer_release_status(), Message::SetNewerReleaseStatus),
             previews_task,
-            self.load_ip_blacklist(self.conf.settings.ip_blacklist.clone()),
+            blacklist_task,
         ])
     }
 
@@ -662,14 +681,52 @@ impl Sniffer {
         self.conf.settings.mmdb_asn = db;
     }
 
-    fn load_ip_blacklist(&mut self, path: String) -> Task<Message> {
-        self.conf.settings.ip_blacklist.clone_from(&path);
-        if path.is_empty() {
-            self.ip_blacklist = IpBlacklist::default();
-            Task::none()
-        } else {
+    fn load_ip_blacklist(&mut self, source: BlacklistSource) -> Task<Message> {
+        self.conf.settings.ip_blacklist = source.clone();
+        match source {
+            BlacklistSource::None => {
+                self.ip_blacklist = IpBlacklist::default();
+                Task::none()
+            }
+            BlacklistSource::File(path) => {
+                if path.is_empty() {
+                    self.ip_blacklist = IpBlacklist::default();
+                    Task::none()
+                } else {
+                    self.ip_blacklist.start_loading();
+                    Task::perform(IpBlacklist::from_file(path), Message::SetIpBlacklist)
+                }
+            }
+            BlacklistSource::Remote { url, min_score, .. } => {
+                self.ip_blacklist.start_loading();
+                Task::perform(
+                    IpBlacklist::from_remote(url, min_score, self.get_cache_path()),
+                    Message::SetIpBlacklist,
+                )
+            }
+        }
+    }
+
+    fn get_cache_path(&self) -> String {
+        dirs::cache_dir()
+            .unwrap_or_else(|| std::env::temp_dir())
+            .join("sniffnet")
+            .join("ipsum_cache.txt")
+            .to_string_lossy()
+            .to_string()
+    }
+
+    fn trigger_blacklist_update(&mut self) -> Task<Message> {
+        if let BlacklistSource::Remote { url, min_score, .. } = &self.conf.settings.ip_blacklist {
+            let url = url.clone();
+            let min_score = *min_score;
             self.ip_blacklist.start_loading();
-            Task::perform(IpBlacklist::from_file(path), Message::SetIpBlacklist)
+            Task::perform(
+                IpBlacklist::from_remote(url, min_score, self.get_cache_path()),
+                Message::SetIpBlacklist,
+            )
+        } else {
+            Task::none()
         }
     }
 
@@ -1446,6 +1503,7 @@ mod tests {
     use crate::networking::types::data_info::DataInfo;
     use crate::networking::types::data_representation::DataRepr;
     use crate::networking::types::host::Host;
+    use crate::networking::types::ip_blacklist::BlacklistSource;
     use crate::networking::types::program::Program;
     use crate::networking::types::service::Service;
     use crate::networking::types::traffic_direction::TrafficDirection;
@@ -2176,7 +2234,7 @@ mod tests {
                         ..Notifications::default()
                     },
                     style: StyleType::DraculaDark,
-                    ip_blacklist: "blacklist_file.csv".to_string(),
+                    ip_blacklist: BlacklistSource::File("blacklist_file.csv".to_string()),
                 },
                 favorites: Favorites::from([FavoriteKey::Service(Service::Name("https"))]),
                 host_favorites_filter: true,

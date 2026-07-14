@@ -109,6 +109,7 @@ mod tests {
     use crate::networking::types::capture_context::CaptureSourcePicklist;
     use crate::networking::types::config_device::ConfigDevice;
     use crate::networking::types::data_representation::DataRepr;
+    use crate::networking::types::ip_blacklist::BlacklistSource;
     use crate::networking::types::service::Service;
     use crate::notifications::types::notifications::Notifications;
     use crate::report::types::sort_type::SortType;
@@ -138,7 +139,7 @@ mod tests {
                     ip_blacklist_notification: Default::default(),
                 },
                 style: StyleType::DraculaDark,
-                ip_blacklist: "some-path".to_string(),
+                ip_blacklist: BlacklistSource::File("some-path".to_string()),
             },
             favorites: Favorites::from([FavoriteKey::Service(Service::Name("https"))]),
             device: ConfigDevice {

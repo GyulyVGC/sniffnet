@@ -126,6 +126,29 @@ pub fn blacklisted_transmitted_translation(language: Language) -> &'static str {
     }
 }
 
+pub fn suspicious_connection_detected_translation(language: Language) -> &'static str {
+    match language {
+        Language::EN => "Suspicious connection detected",
+        Language::IT => "Connessione sospetta rilevata",
+        Language::DE => "Verdächtige Verbindung erkannt",
+        Language::ZH => "检测到可疑连接",
+        Language::ZH_TW => "偵測到可疑連接",
+        Language::TR => "Şüpheli bağlantı tespit edildi",
+        Language::JA => "不審な接続を検出",
+        Language::ES => "Conexión sospechosa detectada",
+        Language::RO => "Conexiune suspectă detectată",
+        Language::ID => "Koneksi mencurigakan terdeteksi",
+        Language::FR => "Connexion suspecte détectée",
+        Language::UK => "Виявлено підозріле з'єднання",
+        Language::SV => "Misstänkt anslutning upptäckt",
+        Language::EL => "Εντοπίστηκε ύποπτη σύνδεση",
+        Language::HU => "Gyanús kapcsolat észlelve",
+        Language::SI => "සැකකාර සම්බන්ධතාව සොයාගෙන ඇත",
+        Language::RU => "Обнаружено подозрительное соединение",
+        _ => "Suspicious connection detected",
+    }
+}
+
 pub fn only_show_blacklisted_translation(language: Language) -> &'static str {
     match language {
         Language::EN => "Only show blacklisted",
@@ -148,6 +171,75 @@ pub fn only_show_blacklisted_translation(language: Language) -> &'static str {
         Language::RU => "Показывать только из черного списка",
         _ => "Only show blacklisted",
     }
+}
+
+pub fn blacklist_source_translation(language: Language) -> &'static str {
+    match language {
+        Language::EN => "Source:",
+        Language::IT => "Origine:",
+        Language::DE => "Quelle:",
+        Language::ZH => "来源:",
+        Language::ZH_TW => "來源:",
+        Language::TR => "Kaynak:",
+        Language::JA => "ソース:",
+        Language::ES => "Origen:",
+        Language::RO => "Sursă:",
+        Language::ID => "Sumber:",
+        Language::FR => "Source :",
+        Language::UK => "Джерело:",
+        Language::SV => "Källa:",
+        Language::EL => "Πηγή:",
+        Language::HU => "Forrás:",
+        Language::SI => "මූලාශ්‍ර:",
+        Language::RU => "Источник:",
+        _ => "Source:",
+    }
+}
+
+pub fn blacklist_source_file_translation(language: Language) -> &'static str {
+    match language {
+        Language::EN => "Local file",
+        Language::IT => "File locale",
+        Language::DE => "Lokale Datei",
+        Language::ZH => "本地文件",
+        Language::ZH_TW => "本地文件",
+        Language::TR => "Yerel dosya",
+        Language::JA => "ローカルファイル",
+        Language::ES => "Archivo local",
+        Language::RO => "Fișier local",
+        Language::ID => "File lokal",
+        Language::FR => "Fichier local",
+        Language::UK => "Локальний файл",
+        Language::SV => "Lokal fil",
+        Language::EL => "Τοπικό αρχείο",
+        Language::HU => "Helyi fájl",
+        Language::SI => "ස්ථානීය ගොනුව",
+        Language::RU => "Локальный файл",
+        _ => "Local file",
+    }
+}
+
+pub fn blacklist_source_remote_translation(language: Language) -> &'static str {
+    match language {
+        Language::EN => "Remote (ipsum)",
+        Language::IT => "Remoto (ipsum)",
+        Language::DE => "Remote (ipsum)",
+        Language::ZH => "远程 (ipsum)",
+        Language::ZH_TW => "遠程 (ipsum)",
+        Language::TR => "Uzak (ipsum)",
+        Language::JA => "リモート (ipsum)",
+        Language::ES => "Remoto (ipsum)",
+        Language::RO => "Remote (ipsum)",
+        Language::ID => "Remote (ipsum)",
+        Language::FR => "Distant (ipsum)",
+        Language::UK => "Віддалений (ipsum)",
+        Language::SV => "Fjärran (ipsum)",
+        Language::EL => "Απομακρυσμένο (ipsum)",
+        Language::HU => "Távoli (ipsum)",
+        Language::SI => "දුරස්ථ (ipsum)",
+        Language::RU => "Удалённый (ipsum)",
+        _ => "Remote (ipsum)",
+}
 }
 
 pub fn program_translation(language: Language) -> &'static str {

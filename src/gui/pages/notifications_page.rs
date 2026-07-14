@@ -20,6 +20,7 @@ use crate::networking::types::program_lookup::ProgramLookup;
 use crate::networking::types::service::Service;
 use crate::notifications::types::logged_notification::{
     BlacklistedTransmitted, DataThresholdExceeded, FavoriteTransmitted, LoggedNotification,
+    SuspiciousConnectionDetected,
 };
 use crate::report::types::sort_type::SortType;
 use crate::translations::translations::{
@@ -27,7 +28,7 @@ use crate::translations::translations::{
     no_notifications_set_translation, only_last_30_translation, per_second_translation,
     threshold_translation,
 };
-use crate::translations::translations_5::blacklisted_transmitted_translation;
+use crate::translations::translations_5::{blacklisted_transmitted_translation, suspicious_connection_detected_translation};
 use crate::utils::types::icon::Icon;
 use crate::{Language, RunningPage, Sniffer, StyleType};
 use iced::Length::FillPortion;
@@ -291,6 +292,51 @@ fn blacklisted_notification_log<'a>(
         .class(ContainerType::BorderedRound)
 }
 
+fn suspicious_connection_notification_log<'a>(
+    suspicious_connection: &SuspiciousConnectionDetected,
+    language: Language,
+) -> Container<'a, Message, StyleType> {
+    let icon = Icon::Forbidden.to_text().size(60).class(TextType::Danger);
+    let content = Column::new()
+        .align_x(Alignment::Center)
+        .spacing(7)
+        .push(icon)
+        .push(
+            Text::new(suspicious_connection_detected_translation(language))
+                .class(TextType::Title)
+                .size(18),
+        )
+        .push(
+            Text::new(format!(
+                "{}: {}",
+                "IP",
+                suspicious_connection.ip
+            ))
+            .class(TextType::Subtitle),
+        )
+        .push(
+            Text::new(format!(
+                "{}: {}",
+                "Host",
+                suspicious_connection.host.to_entry_string()
+            ))
+            .class(TextType::Subtitle),
+        )
+        .push(
+            Text::new(format!(
+                "{}: {}",
+                "Timestamp",
+                suspicious_connection.timestamp
+            ))
+            .class(TextType::Subtitle),
+        );
+
+    Container::new(content)
+        .width(Length::Fill)
+        .padding(15)
+        .class(ContainerType::BorderedRound)
+}
+
 fn get_button_clear_all<'a>(language: Language) -> Tooltip<'a, Message, StyleType> {
     let content = button(
         Icon::Bin
@@ -351,6 +397,9 @@ fn logged_notifications(sniffer: &Sniffer) -> Column<'_, Message, StyleType> {
                     data_repr,
                     language,
                 )
+            }
+            LoggedNotification::SuspiciousConnectionDetected(suspicious_connection_detected) => {
+                suspicious_connection_notification_log(suspicious_connection_detected, language)
             }
         });
     }

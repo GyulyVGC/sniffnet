@@ -25,6 +25,7 @@ use crate::networking::types::combobox_data_states::ComboboxStates;
 use crate::networking::types::data_info::DataInfo;
 use crate::networking::types::data_representation::DataRepr;
 use crate::networking::types::info_address_port_pair::InfoAddressPortPair;
+use crate::networking::types::ip_blacklist::IpBlacklist;
 use crate::networking::types::traffic_direction::TrafficDirection;
 use crate::report::get_report_entries::get_searched_entries;
 use crate::report::types::report_col::ReportCol;
@@ -105,7 +106,7 @@ fn report<'a>(sniffer: &Sniffer) -> Column<'a, Message, StyleType> {
     let end_entry_num = start_entry_num + search_results.len() - 1;
     for (key, val) in search_results {
         scroll_report = scroll_report.push(
-            button(row_report_entry(key, val, data_repr))
+            button(row_report_entry(key, val, data_repr, &sniffer.ip_blacklist))
                 .padding(2)
                 .on_press(Message::ShowModal(MyModal::ConnectionDetails(*key)))
                 .class(ButtonType::Neutral),
@@ -249,6 +250,7 @@ fn row_report_entry<'a>(
     key: &AddressPortPair,
     val: &InfoAddressPortPair,
     data_repr: DataRepr,
+    _ip_blacklist: &IpBlacklist,
 ) -> Row<'a, Message, StyleType> {
     let text_type = if val.traffic_direction == TrafficDirection::Outgoing {
         TextType::Outgoing
@@ -256,17 +258,40 @@ fn row_report_entry<'a>(
         TextType::Incoming
     };
 
+    // Check if this entry is blacklisted
+    let is_blacklisted = val.is_blacklisted;
+
     let mut ret_val = Row::new().align_y(Alignment::Center);
 
     for report_col in ReportCol::ALL {
         let max_chars = report_col.get_max_chars(None);
         let col_value = report_col.get_value(key, val, data_repr);
+        let text_type = if is_blacklisted {
+            TextType::Danger
+        } else {
+            text_type
+        };
         ret_val = ret_val.push(
             Container::new(Text::new(clip_text(&col_value, max_chars)).class(text_type))
                 .align_x(Alignment::Center)
                 .width(report_col.get_width()),
         );
     }
+    
+    // Add blacklist indicator column if blacklisted
+    if is_blacklisted {
+        ret_val = ret_val.push(
+            Container::new(
+                Icon::Forbidden
+                    .to_text()
+                    .size(14)
+                    .class(TextType::Danger),
+            )
+            .align_x(Alignment::Center)
+            .width(30),
+        );
+    }
+    
     ret_val
 }
 

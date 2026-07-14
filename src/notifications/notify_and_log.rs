@@ -8,7 +8,7 @@ use crate::networking::types::host::Host;
 use crate::networking::types::service::Service;
 use crate::notifications::types::logged_notification::{
     BlacklistedTransmitted, DataThresholdExceeded, FavoriteTransmitted, LoggedNotification,
-    LoggedNotifications,
+    LoggedNotifications, SuspiciousConnectionDetected,
 };
 use crate::notifications::types::notifications::{Notifications, RemoteNotifications};
 use crate::notifications::types::sound::{Sound, play};
@@ -124,7 +124,7 @@ pub fn notify_and_log(
                     LoggedNotification::BlacklistedTransmitted(BlacklistedTransmitted {
                         id: logged_notifications.tot(),
                         ip,
-                        host,
+                        host: host.clone(),
                         data_info_host,
                         timestamp: get_formatted_timestamp(timestamp),
                     });
@@ -134,6 +134,18 @@ pub fn notify_and_log(
 
                 // send remote notification
                 send_remote_notification(notification, notifications.remote_notifications.clone());
+
+                // Also emit SuspiciousConnectionDetected for new suspicious connections
+                let suspicious_notification =
+                    LoggedNotification::SuspiciousConnectionDetected(SuspiciousConnectionDetected {
+                        id: logged_notifications.tot(),
+                        ip,
+                        host,
+                        timestamp: get_formatted_timestamp(timestamp),
+                    });
+
+                logged_notifications.push(&suspicious_notification);
+                send_remote_notification(suspicious_notification, notifications.remote_notifications.clone());
             }
 
             // register sound to play
@@ -191,7 +203,7 @@ fn favorites_last_interval(
         info_traffic_msg
             .hosts
             .get(h)
-            .map(|d| FavoriteItem::Host((h.clone(), *d)))
+            .map(|d| FavoriteItem::Host((h.clone(), *d, false)))
     });
 
     let services = favorites.services().iter().filter_map(|s| {

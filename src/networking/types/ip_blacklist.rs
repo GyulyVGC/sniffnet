@@ -1,15 +1,58 @@
 use std::collections::HashSet;
+use std::fmt;
 use std::net::IpAddr;
 use std::sync::Arc;
 
 use ipnet::IpNet;
 use prefix_trie::joint::set::JointPrefixSet;
+use reqwest;
+use serde::{Deserialize, Serialize};
+
+#[derive(Clone, Debug, Serialize, Deserialize, PartialEq, Eq)]
+#[serde(rename_all = "lowercase")]
+pub enum BlacklistSource {
+    None,
+    File(String),
+    Remote {
+        url: String,
+        min_score: u32,
+        cache_path: String,
+        last_update: u64,
+    },
+}
+
+impl Default for BlacklistSource {
+    fn default() -> Self {
+        Self::None
+    }
+}
+
+impl fmt::Display for BlacklistSource {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self {
+            BlacklistSource::None => write!(f, "None"),
+            BlacklistSource::File(_) => write!(f, "Local file"),
+            BlacklistSource::Remote { .. } => write!(f, "Remote (ipsum)"),
+        }
+    }
+}
+
+impl BlacklistSource {
+    pub fn is_remote(&self) -> bool {
+        matches!(self, BlacklistSource::Remote { .. })
+    }
+
+    pub fn is_file(&self) -> bool {
+        matches!(self, BlacklistSource::File(_))
+    }
+}
 
 #[derive(Clone, Default, Debug)]
 pub struct IpBlacklist {
     ips: Arc<HashSet<IpAddr>>,
     cidrs: Arc<JointPrefixSet<IpNet>>,
     is_loading: bool,
+    source: BlacklistSource,
 }
 
 impl IpBlacklist {
@@ -17,9 +60,75 @@ impl IpBlacklist {
         let Ok(buf) = tokio::fs::read_to_string(&path).await else {
             return IpBlacklist::default();
         };
+        let (ips, cidrs) = Self::parse_content(&buf);
+        IpBlacklist {
+            ips: Arc::new(ips),
+            cidrs: Arc::new(cidrs),
+            is_loading: false,
+            source: BlacklistSource::File(path),
+        }
+    }
+
+    pub async fn from_remote(url: String, min_score: u32, cache_path: String) -> Self {
+        // First try to load from cache
+        let mut blacklist = Self::load_from_cache(&cache_path).await;
+        
+        // Also fetch from remote
+        let remote_result = Self::fetch_and_parse_remote(&url, min_score).await;
+        
+        if let Some((remote_ips, remote_cidrs)) = remote_result {
+            // Merge remote data with cached data
+            let mut merged_ips = (*blacklist.ips).clone();
+            let mut merged_cidrs = (*blacklist.cidrs).clone();
+            
+            merged_ips.extend(remote_ips);
+            for cidr in remote_cidrs {
+                merged_cidrs.insert(cidr);
+            }
+            
+            blacklist.ips = Arc::new(merged_ips);
+            blacklist.cidrs = Arc::new(merged_cidrs);
+        }
+        
+        blacklist.source = BlacklistSource::Remote {
+            url: url.clone(),
+            min_score,
+            cache_path: cache_path.clone(),
+            last_update: 0,
+        };
+        blacklist.start_loading();
+        blacklist
+    }
+
+    async fn load_from_cache(cache_path: &str) -> Self {
+        let Ok(buf) = tokio::fs::read_to_string(cache_path).await else {
+            return IpBlacklist::default();
+        };
+        let (ips, cidrs) = Self::parse_content(&buf);
+        IpBlacklist {
+            ips: Arc::new(ips),
+            cidrs: Arc::new(cidrs),
+            is_loading: false,
+            source: BlacklistSource::None,
+        }
+    }
+
+    async fn fetch_and_parse_remote(url: &str, min_score: u32) -> Option<(HashSet<IpAddr>, JointPrefixSet<IpNet>)> {
+        let response = reqwest::get(url).await.ok()?;
+        let text = response.text().await.ok()?;
+        let (ips, cidrs) = Self::parse_ipsum_content(&text, min_score);
+        if ips.is_empty() && cidrs.is_empty() {
+            None
+        } else {
+            Some((ips, cidrs))
+        }
+    }
+
+    fn parse_content(content: &str) -> (HashSet<IpAddr>, JointPrefixSet<IpNet>) {
         let mut ips = HashSet::new();
         let mut cidrs = JointPrefixSet::new();
-        for line in buf.lines() {
+
+        for line in content.lines() {
             let Some(first) = line.split_whitespace().next() else {
                 continue;
             };
@@ -30,11 +139,40 @@ impl IpBlacklist {
                 cidrs.insert(cidr);
             }
         }
-        IpBlacklist {
-            ips: Arc::new(ips),
-            cidrs: Arc::new(cidrs),
-            is_loading: false,
+
+        (ips, cidrs)
+    }
+
+    fn parse_ipsum_content(content: &str, min_score: u32) -> (HashSet<IpAddr>, JointPrefixSet<IpNet>) {
+        let mut ips = HashSet::new();
+        let mut cidrs = JointPrefixSet::new();
+
+        for line in content.lines() {
+            let line = line.trim();
+            if line.is_empty() || line.starts_with('#') {
+                continue;
+            }
+
+            let parts: Vec<&str> = line.split('\t').collect();
+            if parts.len() < 2 {
+                continue;
+            }
+
+            let ip_str = parts[0];
+            let score: u32 = parts[1].parse().unwrap_or(0);
+
+            if score < min_score {
+                continue;
+            }
+
+            if let Ok(ip) = ip_str.parse::<IpAddr>() {
+                ips.insert(ip);
+            } else if let Ok(cidr) = ip_str.parse::<IpNet>() {
+                cidrs.insert(cidr);
+            }
         }
+
+        (ips, cidrs)
     }
 
     pub fn contains(&self, ip: &IpAddr) -> bool {
@@ -195,5 +333,26 @@ mod tests {
         assert!(!blacklist.contains(&IpAddr::V4(Ipv4Addr::new(209, 186, 32, 0))));
         assert!(!blacklist.contains(&IpAddr::V4(Ipv4Addr::new(209, 186, 237, 0))));
         assert!(!blacklist.contains(&IpAddr::V4(Ipv4Addr::new(209, 233, 160, 0))));
+    }
+
+    #[test]
+    fn test_parse_ipsum_content() {
+        let content = "193.46.255.86\t10\n1.2.3.4\t5\n# comment\n203.0.113.0/24\t15\n";
+        let (ips, cidrs) = IpBlacklist::parse_ipsum_content(content, 5);
+
+        assert_eq!(ips.len(), 2);
+        assert!(ips.contains(&"193.46.255.86".parse::<IpAddr>().unwrap()));
+        assert!(ips.contains(&"1.2.3.4".parse::<IpAddr>().unwrap()));
+        assert_eq!(cidrs.len(), 1);
+        assert!(cidrs.get_lpm(&"203.0.113.0/24".parse::<IpNet>().unwrap()).is_some());
+    }
+
+    #[test]
+    fn test_parse_ipsum_content_min_score() {
+        let content = "193.46.255.86\t10\n1.2.3.4\t5\n";
+        let (ips, _) = IpBlacklist::parse_ipsum_content(content, 8);
+
+        assert_eq!(ips.len(), 1);
+        assert!(ips.contains(&"193.46.255.86".parse::<IpAddr>().unwrap()));
     }
 }

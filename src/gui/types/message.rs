@@ -8,7 +8,7 @@ use crate::networking::types::capture_context::CaptureSourcePicklist;
 use crate::networking::types::data_representation::DataRepr;
 use crate::networking::types::host::HostMessage;
 use crate::networking::types::info_traffic::InfoTraffic;
-use crate::networking::types::ip_blacklist::IpBlacklist;
+use crate::networking::types::ip_blacklist::{BlacklistSource, IpBlacklist};
 use crate::notifications::types::notifications::Notification;
 use crate::report::types::search_parameters::SearchParameters;
 use crate::report::types::sort_type::SortType;
@@ -115,6 +115,8 @@ pub enum Message {
     CustomAsnDb(String),
     /// Load IP blacklist from file
     LoadIpBlacklist(String),
+    /// Update blacklist source type
+    UpdateBlacklistSource(BlacklistSource),
     /// Set new IP blacklist content
     SetIpBlacklist(IpBlacklist),
     /// Wrapper around the Quit message
@@ -145,6 +147,8 @@ pub enum Message {
     SetNewerReleaseStatus(Option<bool>),
     /// Set the pcap import path
     SetPcapImport(String),
+    /// Trigger remote blacklist update
+    TriggerBlacklistUpdate,
     /// Sent by the backend parsing packets at the end of an offline capture; includes all the pending hosts
     PendingHosts(usize, Vec<HostMessage>),
     /// Sent by offline captures: ticks without packets

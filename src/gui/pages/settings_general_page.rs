@@ -15,14 +15,17 @@ use crate::gui::styles::text::TextType;
 use crate::gui::types::message::Message;
 use crate::gui::types::settings::Settings;
 use crate::mmdb::types::mmdb_reader::{MmdbReader, MmdbReaders};
-use crate::networking::types::ip_blacklist::IpBlacklist;
+use crate::networking::types::ip_blacklist::{BlacklistSource, IpBlacklist};
 use crate::translations::translations::language_translation;
 use crate::translations::translations_2::country_translation;
 use crate::translations::translations_3::{
     mmdb_files_translation, params_not_editable_translation, zoom_translation,
 };
 use crate::translations::translations_4::share_feedback_translation;
-use crate::translations::translations_5::ip_blacklist_translation;
+use crate::translations::translations_5::{
+    ip_blacklist_translation, blacklist_source_translation, blacklist_source_file_translation,
+    blacklist_source_remote_translation,
+};
 use crate::utils::formatted_strings::get_path_termination_string;
 use crate::utils::types::file_info::FileInfo;
 use crate::utils::types::icon::Icon;
@@ -44,7 +47,7 @@ pub fn settings_general_page(sniffer: &Sniffer) -> Container<'_, Message, StyleT
         .push(Space::new().height(10))
         .push(column_all_general_setting(sniffer));
 
-    Container::new(content)
+Container::new(content)
         .height(400)
         .width(800)
         .class(ContainerType::Modal)
@@ -56,10 +59,10 @@ fn column_all_general_setting(sniffer: &Sniffer) -> Column<'_, Message, StyleTyp
         scale_factor,
         ref mmdb_country,
         ref mmdb_asn,
-        ip_blacklist: ref ip_blacklist_str,
+        ref ip_blacklist,
         ..
     } = sniffer.conf.settings;
-    let ip_blacklist = &sniffer.ip_blacklist;
+    let ip_blacklist_obj = &sniffer.ip_blacklist;
 
     let is_editable = sniffer.running_page.is_none();
 
@@ -82,7 +85,7 @@ fn column_all_general_setting(sniffer: &Sniffer) -> Column<'_, Message, StyleTyp
 
     let import_files_row = Row::new()
         .align_y(Alignment::Start)
-        .height(100)
+        .height(200)
         .push(mmdb_settings(
             is_editable,
             language,
@@ -93,8 +96,8 @@ fn column_all_general_setting(sniffer: &Sniffer) -> Column<'_, Message, StyleTyp
         .push(RuleType::Standard.vertical(25))
         .push(blacklist_selection(
             is_editable,
-            ip_blacklist_str,
             ip_blacklist,
+            ip_blacklist_obj,
             language,
         ));
 
@@ -320,18 +323,34 @@ fn mmdb_selection_row<'a>(
 
 fn blacklist_selection<'a>(
     is_editable: bool,
-    custom_path: &str,
+    blacklist_source: &BlacklistSource,
     ip_blacklist: &IpBlacklist,
     language: Language,
 ) -> Column<'a, Message, StyleType> {
-    let is_error = if custom_path.is_empty() {
-        false
+    let is_remote = blacklist_source.is_remote();
+    let is_file = blacklist_source.is_file();
+
+    let file_path = if let BlacklistSource::File(path) = blacklist_source {
+        path.as_str()
     } else {
-        ip_blacklist.is_invalid()
+        ""
     };
 
-    let message = Message::LoadIpBlacklist;
-    Column::new()
+    let is_error = if is_file {
+        ip_blacklist.is_invalid()
+    } else if is_remote {
+        ip_blacklist.is_invalid()
+    } else {
+        false
+    };
+
+    let source_label = match blacklist_source {
+        BlacklistSource::None => blacklist_source_translation(language),
+        BlacklistSource::File(_) => blacklist_source_file_translation(language),
+        BlacklistSource::Remote { .. } => blacklist_source_remote_translation(language),
+    };
+
+    let mut col = Column::new()
         .width(Length::Fill)
         .spacing(5)
         .align_x(Alignment::Center)
@@ -343,31 +362,65 @@ fn blacklist_selection<'a>(
         .push(
             Row::new()
                 .align_y(Alignment::Center)
+                .push(Text::new(source_label).size(FONT_SIZE_SUBTITLE))
                 .push(
-                    Text::new(get_path_termination_string(custom_path, 25)).class(if is_error {
+                    PickList::new(
+                        [
+                            BlacklistSource::None,
+                            BlacklistSource::File(String::new()),
+                            BlacklistSource::Remote {
+                                url: DEFAULT_IPSUM_URL.to_string(),
+                                min_score: DEFAULT_MIN_SCORE,
+                                cache_path: String::new(),
+                                last_update: 0,
+                            },
+                        ],
+                        Some(blacklist_source.clone()),
+                        Message::UpdateBlacklistSource,
+                    )
+                    .menu_height(200)
+                    .padding([2, 7]),
+                ),
+        );
+
+    if is_file {
+        col = col.push(
+            Row::new()
+                .align_y(Alignment::Center)
+                .push(
+                    Text::new(get_path_termination_string(file_path, 25)).class(if is_error {
                         TextType::Danger
                     } else {
                         TextType::Standard
                     }),
                 )
-                .push(if custom_path.is_empty() {
+                .push(if file_path.is_empty() {
                     button_open_file(
-                        custom_path.to_owned(),
+                        file_path.to_owned(),
                         FileInfo::Blacklist,
                         language,
                         is_editable,
-                        message,
+                        Message::LoadIpBlacklist,
                     )
                 } else {
-                    button_clear_mmdb(message, is_editable)
+                    button_clear_mmdb(Message::LoadIpBlacklist, is_editable)
                 }),
-        )
-        .push(
+        );
+    }
+
+    if is_remote {
+        col = col.push(
             ip_blacklist
                 .imported_items_info()
                 .map(|info| Text::new(info).size(FONT_SIZE_FOOTER)),
-        )
+        );
+    }
+
+    col
 }
+
+const DEFAULT_IPSUM_URL: &str = "https://raw.githubusercontent.com/stamparm/ipsum/master/levels/3.txt";
+const DEFAULT_MIN_SCORE: u32 = 3;
 
 fn button_clear_mmdb<'a>(
     message: fn(String) -> Message,

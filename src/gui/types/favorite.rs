@@ -225,7 +225,7 @@ impl Favorite {
 
 #[derive(Clone)]
 pub enum FavoriteItem {
-    Host((Host, DataInfoHost)),
+    Host((Host, DataInfoHost, bool)), // (host, data_info_host, is_blacklisted)
     Service((Service, DataInfo)),
     Program((Program, DataInfo)),
 }
@@ -233,16 +233,23 @@ pub enum FavoriteItem {
 impl FavoriteItem {
     pub fn data_info(&self) -> DataInfo {
         match self {
-            FavoriteItem::Host((_, data_info_host)) => data_info_host.data_info,
+            FavoriteItem::Host((_, data_info_host, _)) => data_info_host.data_info,
             FavoriteItem::Service((_, data_info)) | FavoriteItem::Program((_, data_info)) => {
                 *data_info
             }
         }
     }
 
+    pub fn is_blacklisted(&self) -> bool {
+        match self {
+            FavoriteItem::Host((_, _, is_blacklisted)) => *is_blacklisted,
+            _ => false,
+        }
+    }
+
     pub fn star_button<'a>(&self, favorites: &Favorites) -> Button<'a, Message, StyleType> {
         let is_favorite = match self {
-            FavoriteItem::Host((h, _)) => favorites.contains_host(h),
+            FavoriteItem::Host((h, _, _)) => favorites.contains_host(h),
             FavoriteItem::Service((s, _)) => favorites.contains_service(s),
             FavoriteItem::Program((p, _)) => favorites.contains_program(p),
         };
@@ -277,7 +284,7 @@ impl FavoriteItem {
         opacity: f32,
     ) -> impl Into<Element<'a, Message, StyleType>> {
         match self {
-            FavoriteItem::Host((host, data_info_host)) => Some(
+            FavoriteItem::Host((host, data_info_host, _)) => Some(
                 get_flag_tooltip(host.country, data_info_host, language, false, opacity).into(),
             ),
             FavoriteItem::Service(_) => {
@@ -300,7 +307,7 @@ impl FavoriteItem {
 
     pub fn to_entry_string(&self) -> String {
         match self {
-            FavoriteItem::Host((host, _)) => host.to_entry_string(),
+            FavoriteItem::Host((host, _, _)) => host.to_entry_string(),
             FavoriteItem::Service((service, _)) => service.to_string(),
             FavoriteItem::Program((program, _)) => program.to_string(),
         }
@@ -308,7 +315,7 @@ impl FavoriteItem {
 
     pub fn new_entry_search(&self) -> SearchParameters {
         match self {
-            FavoriteItem::Host((host, _)) => SearchParameters::new_host_search(host),
+            FavoriteItem::Host((host, _, _)) => SearchParameters::new_host_search(host),
             FavoriteItem::Service((service, _)) => SearchParameters::new_service_search(service),
             FavoriteItem::Program((program, _)) => SearchParameters::new_program_search(program),
         }
@@ -325,7 +332,7 @@ pub enum FavoriteKey {
 impl From<FavoriteItem> for FavoriteKey {
     fn from(item: FavoriteItem) -> Self {
         match item {
-            FavoriteItem::Host((h, _)) => FavoriteKey::Host(h),
+            FavoriteItem::Host((h, _, _)) => FavoriteKey::Host(h),
             FavoriteItem::Service((s, _)) => FavoriteKey::Service(s),
             FavoriteItem::Program((p, _)) => FavoriteKey::Program(p),
         }
@@ -363,7 +370,7 @@ fn get_host_entries(
     sorted_vec[0..n_entry]
         .iter()
         .map(|&(host, data_info_host)| {
-            FavoriteItem::Host((host.to_owned(), data_info_host.to_owned()))
+            FavoriteItem::Host((host.to_owned(), data_info_host.to_owned(), false))
         })
         .collect()
 }
