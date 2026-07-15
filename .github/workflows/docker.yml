@@ -2,10 +2,14 @@ name: Docker
 
 on:
   workflow_dispatch:
+    inputs:
+      force_publish:
+        description: 'Skip version existence check'
+        type: boolean
+        default: false
 
 env:
   REGISTRY: ghcr.io
-  IMAGE_NAME: ${{ github.repository }}
 
 jobs:
   check-version:
@@ -13,8 +17,10 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: read
+      packages: read
     outputs:
       version: ${{ steps.cargo-version.outputs.version }}
+      image: ${{ steps.image-name.outputs.image }}
     steps:
       - name: Checkout
         uses: actions/checkout@v7
@@ -25,6 +31,21 @@ jobs:
           VERSION=v$(grep -m1 "^version" Cargo.toml | cut -d'"' -f2)
           echo "VERSION=$VERSION" >> $GITHUB_ENV
           echo "version=$VERSION" >> $GITHUB_OUTPUT
+
+      - name: Compute lowercase image name
+        id: image-name
+        run: |
+          IMAGE="ghcr.io/${GITHUB_REPOSITORY,,}"
+          echo "image=$IMAGE" >> $GITHUB_OUTPUT
+
+      - name: Check existing version
+        if: inputs.force_publish != true
+        run: |
+          if docker buildx imagetools inspect "${{ steps.image-name.outputs.image }}:${{ steps.cargo-version.outputs.version }}" > /dev/null 2>&1; then
+            echo "Image with version ${{ steps.cargo-version.outputs.version }} already exists"
+            echo "Re-run with force_publish=true to overwrite"
+            exit 1
+          fi
 
   build:
     name: Build ${{ matrix.arch }}
@@ -61,9 +82,9 @@ jobs:
           platforms: linux/${{ matrix.arch }}
           push: true
           tags: |
-            ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ needs.check-version.outputs.version }}-${{ matrix.arch }}
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
+            ${{ needs.check-version.outputs.image }}:${{ needs.check-version.outputs.version }}-${{ matrix.arch }}
+          cache-from: type=gha,scope=sniffnet-${{ matrix.arch }}
+          cache-to: type=gha,mode=max,scope=sniffnet-${{ matrix.arch }}
 
   merge-manifest:
     name: Merge multi-arch manifest
@@ -83,10 +104,18 @@ jobs:
       - name: Create and push multi-arch manifest
         run: |
           VERSION=${{ needs.check-version.outputs.version }}
-          BASE="${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}"
-          docker buildx imagetools create -t "${BASE}:latest" \
-            "${BASE}:${VERSION}-amd64" \
-            "${BASE}:${VERSION}-arm64"
-          docker buildx imagetools create -t "${BASE}:${VERSION}" \
-            "${BASE}:${VERSION}-amd64" \
-            "${BASE}:${VERSION}-arm64"
+          IMAGE=${{ needs.check-version.outputs.image }}
+          docker buildx imagetools create \
+            -t "${IMAGE}:latest" \
+            -t "${IMAGE}:${VERSION}" \
+            "${IMAGE}:${VERSION}-amd64" \
+            "${IMAGE}:${VERSION}-arm64"
+
+      - name: Verify manifest
+        run: |
+          IMAGE=${{ needs.check-version.outputs.image }}
+          VERSION=${{ needs.check-version.outputs.version }}
+          echo "=== Manifest: ${IMAGE}:${VERSION} ==="
+          docker buildx imagetools inspect "${IMAGE}:${VERSION}"
+          echo "=== Manifest: ${IMAGE}:latest ==="
+          docker buildx imagetools inspect "${IMAGE}:latest"

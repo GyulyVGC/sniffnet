@@ -33,9 +33,6 @@ RUN apt-get update && apt-get install -y \
     libgtk-3-0 \
     && rm -rf /var/lib/apt/lists/*
 
-RUN useradd -m -u 1000 sniffnet
-USER sniffnet
-
 COPY --from=builder /app/target/release/sniffnet /usr/local/bin/sniffnet
 
 ENTRYPOINT ["sniffnet"]
