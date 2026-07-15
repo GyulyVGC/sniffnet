@@ -1,6 +1,5 @@
 FROM rust:1.88-slim AS builder
 
-# Install build dependencies for both X11 and Wayland
 RUN apt-get update && apt-get install -y \
     libfreetype6-dev \
     libexpat1-dev \
@@ -11,15 +10,20 @@ RUN apt-get update && apt-get install -y \
     pkg-config \
     && rm -rf /var/lib/apt/lists/*
 
-WORKDIR /usr/src/sniffnet
+WORKDIR /app
+
+COPY Cargo.toml Cargo.lock build.rs services.txt ./
+COPY src/networking/types/service_query.rs src/networking/types/service_query.rs
+COPY src/networking/types/protocol.rs src/networking/types/protocol.rs
+RUN mkdir -p src && echo 'fn main() {}' > src/main.rs
+RUN cargo build --release --config 'profile.release.lto="thin"'
+RUN rm -rf src
+
 COPY . .
+RUN cargo build --release --config 'profile.release.lto="thin"'
 
-RUN cargo build --release
-
-# Runtime stage
 FROM debian:bookworm-slim
 
-# Install runtime dependencies for both X11 and Wayland
 RUN apt-get update && apt-get install -y \
     libfreetype6 \
     libexpat1 \
@@ -29,6 +33,9 @@ RUN apt-get update && apt-get install -y \
     libgtk-3-0 \
     && rm -rf /var/lib/apt/lists/*
 
-COPY --from=builder /usr/src/sniffnet/target/release/sniffnet /usr/local/bin/sniffnet
+RUN useradd -m -u 1000 sniffnet
+USER sniffnet
+
+COPY --from=builder /app/target/release/sniffnet /usr/local/bin/sniffnet
 
 ENTRYPOINT ["sniffnet"]

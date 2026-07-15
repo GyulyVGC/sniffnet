@@ -1,13 +1,9 @@
-# Ignore everything
 *
-
-# Explicitly allow files
-!src/**/*.rs
-!build.rs
 !Cargo.toml
 !Cargo.lock
-!Dockerfile
+!build.rs
 !services.txt
+!src/**/*.rs
 !resources/embedded_icons/**/*.svg
 !resources/DB/*.mmdb
 !resources/fonts/subset/*.ttf
