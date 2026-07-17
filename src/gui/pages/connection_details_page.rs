@@ -24,6 +24,7 @@ use crate::networking::types::icmp_type::IcmpType;
 use crate::networking::types::info_address_port_pair::InfoAddressPortPair;
 use crate::networking::types::latency::LatencyStatus;
 use crate::networking::types::traffic_direction::TrafficDirection;
+use crate::networking::types::traffic_type::TrafficType;
 use crate::translations::translations::{
     address_translation, incoming_translation, outgoing_translation, packets_translation,
     protocol_translation,
@@ -46,7 +47,7 @@ use iced::widget::scrollable::Direction;
 use iced::widget::tooltip::Position;
 use iced::widget::{Column, Container, Row, Space, Text, Tooltip};
 use iced::widget::{Scrollable, button};
-use iced::{Alignment, Length, Padding};
+use iced::{Alignment, Element, Length, Padding};
 
 pub fn connection_details_page(
     sniffer: &Sniffer,
@@ -169,8 +170,12 @@ fn col_info<'a>(
 ) -> Column<'a, Message, StyleType> {
     let Settings { language, .. } = sniffer.conf.settings;
     let data_repr = sniffer.conf.data_repr;
-    // TODO: only compute for unicast!
-    let measure_latency = matches!(sniffer.capture_source, CaptureSource::Device(_));
+    let is_unicast = get_traffic_type(
+        &latency_target,
+        sniffer.capture_source.get_addresses(),
+        val.traffic_direction,
+    ) == TrafficType::Unicast;
+    let measure_latency = matches!(sniffer.capture_source, CaptureSource::Device(_)) && is_unicast;
     let is_icmp = key.protocol.eq(&Protocol::ICMP);
     let is_arp = key.protocol.eq(&Protocol::ARP);
 
@@ -270,18 +275,39 @@ fn latency_row<'a>(
     latency_target: IpAddr,
     latency_status: Option<&LatencyStatus>,
     hourglass: Text<'a, StyleType>,
-) -> Row<'a, Message, StyleType> {
-    let status = latency_status.map_or_else(|| "-".to_string(), LatencyStatus::formatted);
+) -> Column<'a, Message, StyleType> {
     let measuring = latency_status.is_some_and(|s| matches!(s, LatencyStatus::Measuring));
 
-    Row::new()
-        .spacing(10)
-        .align_y(Alignment::End)
-        .push(TextType::highlighted_subtitle_with_desc(
-            latency_translation(language),
-            &status,
-        ))
-        .push(get_button_ping(latency_target, measuring, hourglass))
+    let value: Element<'a, Message, StyleType> = match latency_status {
+        Some(LatencyStatus::Failed(error)) => Row::new()
+            .align_y(Alignment::End)
+            .push(Text::new("   "))
+            .push(get_error_tooltip(error))
+            .into(),
+        Some(LatencyStatus::Measuring) => Text::new("   ...").into(),
+        Some(LatencyStatus::Measured(latency)) => {
+            Text::new(format!("   {} ms", latency.as_millis())).into()
+        }
+        None => Text::new("   -").into(),
+    };
+
+    Column::new()
+        .push(Text::new(format!("{}:", latency_translation(language))).class(TextType::Subtitle))
+        .push(Row::new().spacing(30).push(value).push(get_button_ping(
+            latency_target,
+            measuring,
+            hourglass,
+        )))
+}
+
+fn get_error_tooltip<'a>(error: &str) -> Tooltip<'a, Message, StyleType> {
+    Tooltip::new(
+        Icon::Error.to_text(),
+        Text::new(error.to_string()),
+        Position::FollowCursor,
+    )
+    .class(ContainerType::Tooltip)
+    .delay(TOOLTIP_DELAY)
 }
 
 fn get_host_info_col<'a>(

@@ -20,17 +20,6 @@ pub enum LatencyStatus {
     Failed(String),
 }
 
-impl LatencyStatus {
-    // TODO: fix these
-    pub fn formatted(&self) -> String {
-        match self {
-            Self::Measuring => "...".to_string(),
-            Self::Measured(latency) => format!("{} ms", latency.as_millis()),
-            Self::Failed(error) => error.clone(),
-        }
-    }
-}
-
 pub async fn measure_latency(ip: IpAddr) -> (IpAddr, LatencyStatus) {
     (ip, measure_latency_inner(ip).await)
 }
