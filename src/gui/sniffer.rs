@@ -685,7 +685,7 @@ impl Sniffer {
 
     fn measure_latency(&mut self, ip: IpAddr) -> Task<Message> {
         self.latency_statuses.insert(ip, LatencyStatus::Measuring);
-        Task::perform(measure_latency(ip), |(ip, status)| {
+        Task::perform(measure_latency(ip), move |status| {
             Message::LatencyMeasured(ip, status)
         })
     }
@@ -1444,6 +1444,7 @@ mod tests {
     use serial_test::{parallel, serial};
     use std::collections::VecDeque;
     use std::fs::remove_file;
+    use std::net::{IpAddr, Ipv4Addr};
     use std::path::Path;
     use std::time::Duration;
 
@@ -1464,6 +1465,7 @@ mod tests {
     use crate::networking::types::data_info::DataInfo;
     use crate::networking::types::data_representation::DataRepr;
     use crate::networking::types::host::Host;
+    use crate::networking::types::latency::LatencyStatus;
     use crate::networking::types::program::Program;
     use crate::networking::types::service::Service;
     use crate::networking::types::traffic_direction::TrafficDirection;
@@ -2386,6 +2388,39 @@ mod tests {
         assert_eq!(
             format!("{:.2}", sniffer.conf.settings.scale_factor),
             "0.30".to_string()
+        );
+    }
+
+    #[test]
+    #[parallel] // needed to not collide with other tests generating configs files
+    fn test_correctly_store_latency_measurement() {
+        let mut sniffer = Sniffer::new(Conf::default());
+        let ip = IpAddr::V4(Ipv4Addr::new(8, 8, 8, 8));
+
+        sniffer.update(Message::MeasureLatency(ip));
+        assert_eq!(
+            sniffer.latency_statuses.get(&ip),
+            Some(&LatencyStatus::Measuring)
+        );
+
+        // a completed measurement overwrites the Measuring status
+        sniffer.update(Message::LatencyMeasured(
+            ip,
+            LatencyStatus::Measured(Duration::from_millis(42)),
+        ));
+        assert_eq!(
+            sniffer.latency_statuses.get(&ip),
+            Some(&LatencyStatus::Measured(Duration::from_millis(42)))
+        );
+
+        // a failed measurement is stored too
+        sniffer.update(Message::LatencyMeasured(
+            ip,
+            LatencyStatus::Failed("no reply".to_string()),
+        ));
+        assert_eq!(
+            sniffer.latency_statuses.get(&ip),
+            Some(&LatencyStatus::Failed("no reply".to_string()))
         );
     }
 }

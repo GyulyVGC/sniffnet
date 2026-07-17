@@ -293,7 +293,7 @@ fn latency_row<'a>(
 
     Column::new()
         .push(Text::new(format!("{}:", latency_translation(language))).class(TextType::Subtitle))
-        .push(Row::new().spacing(30).push(value).push(get_button_ping(
+        .push(Row::new().spacing(10).push(value).push(get_button_ping(
             latency_target,
             measuring,
             hourglass,

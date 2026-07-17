@@ -20,11 +20,7 @@ pub enum LatencyStatus {
     Failed(String),
 }
 
-pub async fn measure_latency(ip: IpAddr) -> (IpAddr, LatencyStatus) {
-    (ip, measure_latency_inner(ip).await)
-}
-
-async fn measure_latency_inner(ip: IpAddr) -> LatencyStatus {
+pub async fn measure_latency(ip: IpAddr) -> LatencyStatus {
     let client = match client_for(ip) {
         Ok(client) => client,
         Err(error) => return LatencyStatus::Failed(error),
@@ -91,18 +87,17 @@ fn next_sequence() -> PingSequence {
 
 #[cfg(test)]
 mod tests {
-    use std::env;
     use std::net::{IpAddr, Ipv4Addr, Ipv6Addr};
 
-    use super::{LatencyStatus, measure_latency_inner, next_sequence, ping_identifier};
+    use super::{LatencyStatus, measure_latency, next_sequence, ping_identifier};
 
     #[test]
-    fn uses_process_id_as_ping_identifier() {
+    fn test_uses_process_id_as_ping_identifier() {
         assert_eq!(ping_identifier().0, std::process::id() as u16);
     }
 
     #[test]
-    fn increments_ping_sequence() {
+    fn test_increments_ping_sequence() {
         let first = next_sequence().0;
         let second = next_sequence().0;
 
@@ -110,32 +105,14 @@ mod tests {
     }
 
     #[tokio::test]
-    async fn measures_ipv4_loopback_latency_end_to_end() {
-        let status = measure_latency_inner(IpAddr::V4(Ipv4Addr::LOCALHOST)).await;
-
-        assert_measured_or_local_permission_error(status);
+    async fn test_measures_ipv4_loopback_latency_end_to_end() {
+        let status = measure_latency(IpAddr::V4(Ipv4Addr::LOCALHOST)).await;
+        assert!(matches!(status, LatencyStatus::Measured(_)));
     }
 
     #[tokio::test]
-    async fn measures_ipv6_loopback_latency_end_to_end() {
-        let status = measure_latency_inner(IpAddr::V6(Ipv6Addr::LOCALHOST)).await;
-
-        assert_measured_or_local_permission_error(status);
-    }
-
-    fn assert_measured_or_local_permission_error(status: LatencyStatus) {
-        match status {
-            LatencyStatus::Measured(_) => {}
-            LatencyStatus::Failed(error)
-                if env::var_os("CI").is_none()
-                    && (error.contains("Operation not permitted")
-                        || error.contains("Permission denied")) => {}
-            LatencyStatus::Failed(error) => {
-                panic!("expected loopback latency, got error: {error}");
-            }
-            LatencyStatus::Measuring => {
-                panic!("expected completed loopback latency");
-            }
-        }
+    async fn test_measures_ipv6_loopback_latency_end_to_end() {
+        let status = measure_latency(IpAddr::V6(Ipv6Addr::LOCALHOST)).await;
+        assert!(matches!(status, LatencyStatus::Measured(_)));
     }
 }
