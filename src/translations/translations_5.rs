@@ -171,46 +171,6 @@ pub fn program_translation(language: Language) -> &'static str {
     }
 }
 
-pub fn latency_translation(language: Language) -> &'static str {
-    match language {
-        Language::EN => "Latency",
-        Language::IT => "Latenza",
-        Language::DE => "Latenz",
-        Language::ZH => "延迟",
-        Language::ZH_TW => "延遲",
-        Language::TR => "Gecikme",
-        Language::JA => "レイテンシ",
-        Language::ES => "Latencia",
-        Language::RO => "Latență",
-        Language::ID => "Latensi",
-        Language::FR => "Latence",
-        Language::UK => "Затримка",
-        Language::SV => "Latens",
-        Language::EL => "Καθυστέρηση",
-        _ => "Latency",
-    }
-}
-
-pub fn measure_latency_translation(language: Language) -> &'static str {
-    match language {
-        Language::EN => "Measure latency",
-        Language::IT => "Misura latenza",
-        Language::DE => "Latenz messen",
-        Language::ZH => "测量延迟",
-        Language::ZH_TW => "測量延遲",
-        Language::TR => "Gecikmeyi ölç",
-        Language::JA => "レイテンシを測定",
-        Language::ES => "Medir latencia",
-        Language::RO => "Măsoară latența",
-        Language::ID => "Ukur latensi",
-        Language::FR => "Mesurer la latence",
-        Language::UK => "Виміряти затримку",
-        Language::SV => "Mät latens",
-        Language::EL => "Μέτρηση καθυστέρησης",
-        _ => "Measure latency",
-    }
-}
-
 pub fn no_favorites_saved_translation(language: Language) -> &'static str {
     match language {
         Language::EN => "No favorites saved yet",

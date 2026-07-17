@@ -21,9 +21,10 @@ pub enum LatencyStatus {
 }
 
 impl LatencyStatus {
+    // TODO: fix these
     pub fn formatted(&self) -> String {
         match self {
-            Self::Measuring => "Measuring...".to_string(),
+            Self::Measuring => "...".to_string(),
             Self::Measured(latency) => format!("{} ms", latency.as_millis()),
             Self::Failed(error) => error.clone(),
         }

@@ -40,6 +40,7 @@ pub enum Icon {
     OpenLink,
     Overview,
     PacketsThreshold,
+    Ping,
     // Restore,
     Roadmap,
     // Rocket,
@@ -71,6 +72,7 @@ impl Icon {
         match self {
             Icon::ArrowBack => 'C',
             Icon::ArrowLeft => 'i',
+            Icon::Ping => 'I',
             Icon::ArrowRight => 'j',
             Icon::ArrowsDown => ':',
             Icon::AudioHigh => 'Z',

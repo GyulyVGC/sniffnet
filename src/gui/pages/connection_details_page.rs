@@ -36,9 +36,8 @@ use crate::translations::translations_2::{
 use crate::translations::translations_3::{
     copy_translation, messages_translation, service_translation,
 };
-use crate::translations::translations_5::{
-    latency_translation, measure_latency_translation, program_translation,
-};
+use crate::translations::translations_5::program_translation;
+use crate::translations::translations_6::latency_translation;
 use crate::utils::formatted_strings::{get_formatted_timestamp, get_socket_address};
 use crate::utils::types::icon::Icon;
 use crate::{Language, Protocol, Sniffer, StyleType};
@@ -62,7 +61,6 @@ fn page_content<'a>(sniffer: &Sniffer, key: &AddressPortPair) -> Container<'a, M
         color_gradient,
         ..
     } = sniffer.conf.settings;
-    let data_repr = sniffer.conf.data_repr;
 
     let info_traffic = &sniffer.info_traffic;
     let default_val = InfoAddressPortPair::default();
@@ -127,16 +125,7 @@ fn page_content<'a>(sniffer: &Sniffer, key: &AddressPortPair) -> Container<'a, M
         dest_col = dest_col.push(host_info_col);
     }
 
-    let measure_latency = matches!(sniffer.capture_source, CaptureSource::Device(_));
-    let col_info = col_info(
-        key,
-        val,
-        data_repr,
-        language,
-        address_to_lookup,
-        sniffer.latency_statuses.get(&address_to_lookup),
-        measure_latency,
-    );
+    let col_info = col_info(sniffer, key, val, address_to_lookup);
 
     let content = assemble_widgets(col_info, source_col, dest_col);
 
@@ -173,14 +162,15 @@ fn page_header<'a>(
 }
 
 fn col_info<'a>(
+    sniffer: &Sniffer,
     key: &AddressPortPair,
     val: &InfoAddressPortPair,
-    data_repr: DataRepr,
-    language: Language,
     latency_target: IpAddr,
-    latency_status: Option<&LatencyStatus>,
-    measure_latency: bool,
 ) -> Column<'a, Message, StyleType> {
+    let Settings { language, .. } = sniffer.conf.settings;
+    let data_repr = sniffer.conf.data_repr;
+    // TODO: only compute for unicast!
+    let measure_latency = matches!(sniffer.capture_source, CaptureSource::Device(_));
     let is_icmp = key.protocol.eq(&Protocol::ICMP);
     let is_arp = key.protocol.eq(&Protocol::ARP);
 
@@ -237,7 +227,14 @@ fn col_info<'a>(
     ));
 
     if measure_latency {
-        ret_val = ret_val.push(latency_row(language, latency_target, latency_status));
+        let latency_status = sniffer.latency_statuses.get(&latency_target);
+        let hourglass = Icon::get_hourglass(sniffer.dots_pulse.0.len());
+        ret_val = ret_val.push(latency_row(
+            language,
+            latency_target,
+            latency_status,
+            hourglass,
+        ));
     }
 
     if is_icmp || is_arp {
@@ -272,43 +269,19 @@ fn latency_row<'a>(
     language: Language,
     latency_target: IpAddr,
     latency_status: Option<&LatencyStatus>,
+    hourglass: Text<'a, StyleType>,
 ) -> Row<'a, Message, StyleType> {
     let status = latency_status.map_or_else(|| "-".to_string(), LatencyStatus::formatted);
     let measuring = latency_status.is_some_and(|s| matches!(s, LatencyStatus::Measuring));
-    let icon = if measuring {
-        Icon::Hourglass1.to_text().size(12)
-    } else {
-        Icon::Lightning.to_text().size(12)
-    };
-
-    let button = button(icon.align_x(Alignment::Center).align_y(Alignment::Center))
-        .padding(0)
-        .height(25)
-        .width(25);
-
-    let button = if measuring {
-        button
-    } else {
-        button.on_press(Message::MeasureLatency(latency_target))
-    };
 
     Row::new()
-        .spacing(8)
-        .align_y(Alignment::Center)
+        .spacing(10)
+        .align_y(Alignment::End)
         .push(TextType::highlighted_subtitle_with_desc(
             latency_translation(language),
             &status,
         ))
-        .push(
-            Tooltip::new(
-                button,
-                Text::new(measure_latency_translation(language)),
-                Position::Right,
-            )
-            .gap(5)
-            .class(ContainerType::Tooltip)
-            .delay(TOOLTIP_DELAY),
-        )
+        .push(get_button_ping(latency_target, measuring, hourglass))
 }
 
 fn get_host_info_col<'a>(
@@ -462,4 +435,32 @@ fn get_button_copy<'a>(
     .gap(5)
     .class(ContainerType::Tooltip)
     .delay(TOOLTIP_DELAY)
+}
+
+fn get_button_ping<'a>(
+    ip: IpAddr,
+    measuring: bool,
+    hourglass: Text<'a, StyleType>,
+) -> Tooltip<'a, Message, StyleType> {
+    let icon = if measuring {
+        hourglass.size(14)
+    } else {
+        Icon::Ping.to_text().size(15)
+    };
+
+    let button = button(icon.align_x(Alignment::Center).align_y(Alignment::Center))
+        .padding(0)
+        .height(25)
+        .width(25);
+
+    let button = if measuring {
+        button
+    } else {
+        button.on_press(Message::MeasureLatency(ip))
+    };
+
+    Tooltip::new(button, "Ping", Position::Right)
+        .gap(5)
+        .class(ContainerType::Tooltip)
+        .delay(TOOLTIP_DELAY)
 }
