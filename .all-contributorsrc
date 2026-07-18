@@ -1047,6 +1047,15 @@
       "contributions": [
         "platform"
       ]
+    },
+    {
+      "login": "ethical-buddy",
+      "name": "suryansh deshwal",
+      "avatar_url": "https://avatars.githubusercontent.com/u/169056304?v=4",
+      "profile": "https://suryansh-deshwal.vercel.app/",
+      "contributions": [
+        "code"
+      ]
     }
   ],
   "contributorsPerLine": 7,
