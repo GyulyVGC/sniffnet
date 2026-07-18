@@ -280,7 +280,6 @@ fn latency_row<'a>(
 
     let value: Element<'a, Message, StyleType> = match latency_status {
         Some(LatencyStatus::Failed(error)) => Row::new()
-            .align_y(Alignment::End)
             .push(Text::new("   "))
             .push(get_error_tooltip(error))
             .into(),
@@ -293,11 +292,13 @@ fn latency_row<'a>(
 
     Column::new()
         .push(Text::new(format!("{}:", latency_translation(language))).class(TextType::Subtitle))
-        .push(Row::new().spacing(10).push(value).push(get_button_ping(
-            latency_target,
-            measuring,
-            hourglass,
-        )))
+        .push(
+            Row::new()
+                .align_y(Alignment::Center)
+                .spacing(10)
+                .push(value)
+                .push(get_button_ping(latency_target, measuring, hourglass)),
+        )
 }
 
 fn get_error_tooltip<'a>(error: &str) -> Tooltip<'a, Message, StyleType> {
@@ -463,27 +464,25 @@ fn get_button_copy<'a>(
     .delay(TOOLTIP_DELAY)
 }
 
-fn get_button_ping<'a>(
+fn get_button_ping(
     ip: IpAddr,
     measuring: bool,
-    hourglass: Text<'a, StyleType>,
-) -> Tooltip<'a, Message, StyleType> {
+    hourglass: Text<StyleType>,
+) -> Tooltip<Message, StyleType> {
     let icon = if measuring {
         hourglass.size(14)
     } else {
-        Icon::Ping.to_text().size(15)
+        Icon::Ping.to_text().size(16)
     };
 
-    let button = button(icon.align_x(Alignment::Center).align_y(Alignment::Center))
+    let mut button = button(icon.align_x(Alignment::Center).align_y(Alignment::Center))
         .padding(0)
         .height(25)
         .width(25);
 
-    let button = if measuring {
-        button
-    } else {
-        button.on_press(Message::MeasureLatency(ip))
-    };
+    if !measuring {
+        button = button.on_press(Message::MeasureLatency(ip));
+    }
 
     Tooltip::new(button, "Ping", Position::Right)
         .gap(5)

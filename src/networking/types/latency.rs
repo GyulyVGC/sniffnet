@@ -5,7 +5,7 @@ use std::time::Duration;
 
 use surge_ping::{Client, Config, ICMP, PingIdentifier, PingSequence, SurgeError};
 
-const PING_TIMEOUT: Duration = Duration::from_secs(1);
+const PING_TIMEOUT: Duration = Duration::from_secs(2);
 const PING_PAYLOAD: [u8; 8] = [0; 8];
 const PING_COUNT: usize = 3;
 
@@ -34,7 +34,7 @@ pub async fn measure_latency(ip: IpAddr) -> LatencyStatus {
     let mut last_error = None;
     for _ in 0..PING_COUNT {
         match pinger.ping(next_sequence(), &PING_PAYLOAD).await {
-            Ok((_packet, latency)) => {
+            Ok((_, latency)) => {
                 sum += latency;
                 received += 1;
             }
@@ -47,7 +47,7 @@ pub async fn measure_latency(ip: IpAddr) -> LatencyStatus {
     }
 
     match received {
-        0 => LatencyStatus::Failed(last_error.unwrap_or_else(|| "no reply".to_string())),
+        0 => LatencyStatus::Failed(last_error.unwrap_or_else(|| "No reply".to_string())),
         n => LatencyStatus::Measured(sum / n),
     }
 }
@@ -78,6 +78,7 @@ fn latency_client(kind: ICMP) -> Result<Arc<Client>, String> {
 }
 
 fn ping_identifier() -> PingIdentifier {
+    #[allow(clippy::cast_possible_truncation)]
     PingIdentifier(std::process::id() as u16)
 }
 
@@ -99,19 +100,21 @@ mod tests {
     #[test]
     fn test_increments_ping_sequence() {
         let first = next_sequence().0;
+        assert_eq!(first, 0);
         let second = next_sequence().0;
-
-        assert_eq!(second, first.wrapping_add(1));
+        assert_eq!(second, 1);
+        let third = next_sequence().0;
+        assert_eq!(third, 2);
     }
 
     #[tokio::test]
-    async fn test_measures_ipv4_loopback_latency_end_to_end() {
+    async fn test_measures_ipv4_loopback_latency() {
         let status = measure_latency(IpAddr::V4(Ipv4Addr::LOCALHOST)).await;
         assert!(matches!(status, LatencyStatus::Measured(_)));
     }
 
     #[tokio::test]
-    async fn test_measures_ipv6_loopback_latency_end_to_end() {
+    async fn test_measures_ipv6_loopback_latency() {
         let status = measure_latency(IpAddr::V6(Ipv6Addr::LOCALHOST)).await;
         assert!(matches!(status, LatencyStatus::Measured(_)));
     }
