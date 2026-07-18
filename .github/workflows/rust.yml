@@ -64,6 +64,11 @@ jobs:
         if: matrix.os != 'windows' || github.event_name != 'pull_request'
         run: cargo clippy -- -D warnings
 
+      # needed to make latency tests succeed
+      - name: Enable unprivileged ICMP (Linux)
+        if: matrix.os == 'ubuntu'
+        run: sudo sysctl -w net.ipv4.ping_group_range="0 2147483647"
+
       - name: test
         if: matrix.os != 'windows' || github.event_name != 'pull_request'
         run: cargo test --verbose -- --nocapture

@@ -86,6 +86,11 @@ jobs:
       - name: Clippy (release mode)
         run: cargo clippy --release -- -D warnings
 
+      # needed to make latency tests succeed
+      - name: Enable unprivileged ICMP (Linux)
+        if: matrix.os == 'ubuntu'
+        run: sudo sysctl -w net.ipv4.ping_group_range="0 2147483647"
+
       - name: Test (release mode)
         if: matrix.os == 'macos' || matrix.os == 'ubuntu' || matrix.os == 'windows' && matrix.arch == 'amd64'
         run: |
