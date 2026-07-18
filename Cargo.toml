@@ -40,11 +40,11 @@ codegen-units = 1
 [dependencies]
 async-channel = "2.5.0"
 chrono = "0.4.45"
-clap = { version = "4.6.1", features = ["derive"] }
+clap = { version = "4.6.2", features = ["derive"] }
 confy = "2.0.0"
 ctrlc = { version = "3.5.2", features = ["termination"] }
 dns-lookup = "3.0.1"
-etherparse = "0.20.2"
+etherparse = "0.20.3"
 iced = { version = "0.14.0", features = ["tokio", "svg", "advanced", "lazy", "image"] }
 ipnet = "2.12.0"
 listeners = "0.6.0"
@@ -55,7 +55,7 @@ phf_shared = "0.14.0"
 picon = "0.1.0"
 plotters = { version = "0.3.7", default-features = false, features = ["area_series", "line_series"] }
 plotters-iced2 = "0.14.0"
-prefix-trie = { version = "0.9.2", features = ["ipnet"] }
+prefix-trie = { version = "0.9.3", features = ["ipnet"] }
 reqwest = { version = "0.13.4", features = ["json"] }
 rfd = "0.17.2"
 rodio = { version = "0.22.2", default-features = false, features = ["mp3", "playback"] }
@@ -64,8 +64,8 @@ serde = { version = "1.0.228", features = ["derive"] }
 serde_json = { version = "1.0.150", features = ["preserve_order"] }
 splines = "5.0.0"
 surge-ping = "0.9.0"
-tokio = { version = "1.52.3", features = ["macros", "fs"] }
-toml = "1.1.2"
+tokio = { version = "1.53.0", features = ["macros", "fs"] }
+toml = "1.1.3"
 
 [target.'cfg(windows)'.dependencies]
 gag = "1.0.0"
