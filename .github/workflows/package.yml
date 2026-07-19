@@ -58,7 +58,7 @@ jobs:
         run: |
           Write-Host "::group::Npcap SDK"
           $ARCH = "${{ matrix.arch }}"
-          Invoke-WebRequest -Uri "https://npcap.com/dist/npcap-sdk-1.13.zip" -OutFile "$env:TEMP\npcap-sdk.zip" -Verbose
+          Invoke-WebRequest -Uri "https://npcap.com/dist/npcap-sdk-1.16.zip" -OutFile "$env:TEMP\npcap-sdk.zip" -Verbose
           Expand-Archive -LiteralPath "$env:TEMP\npcap-sdk.zip" -DestinationPath "$env:TEMP\npcap-sdk" -Verbose
           $LibPath = switch ($ARCH)
           {
