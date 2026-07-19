@@ -1,5 +1,5 @@
 #[cfg(windows)]
-extern crate winres;
+extern crate winresource;
 
 use std::borrow::Cow;
 use std::env;
@@ -24,7 +24,7 @@ fn main() {
 fn set_icon() {
     #[cfg(windows)]
     {
-        let mut res = winres::WindowsResource::new();
+        let mut res = winresource::WindowsResource::new();
         res.set_icon(WINDOWS_ICON_PATH);
         res.compile().unwrap();
     }

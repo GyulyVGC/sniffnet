@@ -48,19 +48,19 @@ etherparse = "0.20.3"
 iced = { version = "0.14.0", features = ["tokio", "svg", "advanced", "lazy", "image"] }
 ipnet = "2.12.0"
 listeners = "0.6.0"
-maxminddb = "0.29.0"
+maxminddb = "0.30.0"
 pcap = "2.4.0"
 phf = "0.14.0"
 phf_shared = "0.14.0"
 picon = "0.1.0"
 plotters = { version = "0.3.7", default-features = false, features = ["area_series", "line_series"] }
 plotters-iced2 = "0.14.0"
-prefix-trie = { version = "0.9.3", features = ["ipnet"] }
+prefix-trie = { version = "0.9.4", features = ["ipnet"] }
 reqwest = { version = "0.13.4", features = ["json"] }
 rfd = "0.17.2"
 rodio = { version = "0.22.2", default-features = false, features = ["mp3", "playback"] }
 semver = "1.0.28"
-serde = { version = "1.0.228", features = ["derive"] }
+serde = { version = "1.0.229", features = ["derive"] }
 serde_json = { version = "1.0.150", features = ["preserve_order"] }
 splines = "5.0.0"
 surge-ping = "0.9.0"
@@ -85,7 +85,7 @@ phf_shared = "0.14.0"
 rustrict = { version = "0.7.38", default-features = false, features = ["censor"] }
 
 [target."cfg(windows)".build-dependencies]
-winres = "0.1.12"
+winresource = "0.1.31"
 
 #═══════════════════════════════════════════════════════════════════════════════════════════════════════════════════════
 
