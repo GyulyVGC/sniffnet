@@ -34,12 +34,14 @@ use std::thread;
 use std::time::{Duration, Instant};
 use tokio::sync::broadcast::Receiver;
 
+const REVERSE_DNS_LOOKUP_THREADS: usize = 5;
+
 /// The calling thread enters a loop in which it waits for network packets
 #[allow(clippy::too_many_lines, clippy::too_many_arguments)]
 pub fn parse_packets(
     cap_id: usize,
     mut cs: CaptureSource,
-    mmdb_readers: MmdbReaders,
+    mmdb_readers: &MmdbReaders,
     ip_blacklist: &IpBlacklist,
     capture_context: CaptureContext,
     filters: Filters,
@@ -59,15 +61,21 @@ pub fn parse_packets(
 
     let mut info_traffic_msg = InfoTraffic::default();
 
-    let (lookup_request_tx, lookup_request_rx) = std::sync::mpsc::channel();
+    let (lookup_request_tx, lookup_request_rx) = async_channel::unbounded();
     let (lookup_result_tx, lookup_result_rx) = std::sync::mpsc::channel();
     let mut resolutions_state = AddressesResolutionState::new(lookup_request_tx, lookup_result_rx);
-    let _ = thread::Builder::new()
-        .name("thread_reverse_dns_lookups".to_string())
-        .spawn(move || {
-            reverse_dns_lookups(&lookup_request_rx, &lookup_result_tx, &mmdb_readers);
-        })
-        .log_err(location!());
+    // a pool of threads shares the request queue, so one slow blocking lookup doesn't stall the others
+    for i in 0..REVERSE_DNS_LOOKUP_THREADS {
+        let lookup_request_rx = lookup_request_rx.clone();
+        let lookup_result_tx = lookup_result_tx.clone();
+        let mmdb_readers = mmdb_readers.clone();
+        let _ = thread::Builder::new()
+            .name(format!("thread_reverse_dns_lookups_{i}"))
+            .spawn(move || {
+                reverse_dns_lookups(&lookup_request_rx, &lookup_result_tx, &mmdb_readers);
+            })
+            .log_err(location!());
+    }
 
     // instant of the first parsed packet plus multiples of 1 second (only used in live captures)
     let mut first_packet_ticks = None;
@@ -213,8 +221,8 @@ pub fn parse_packets(
                                 DataInfo::new_with_first_packet(exchanged_bytes, traffic_direction),
                             );
 
-                            // send the rDNS lookup request to the corresponding thread
-                            let _ = resolutions_state.lookup_request_tx.send((
+                            // send the rDNS lookup request to the thread pool
+                            let _ = resolutions_state.lookup_request_tx.try_send((
                                 key,
                                 traffic_direction,
                                 cs.get_addresses().clone(),
@@ -360,15 +368,12 @@ fn from_linux_sll(packet: &[u8], is_v1: bool) -> Option<LaxPacketHeaders<'_>> {
 }
 
 fn reverse_dns_lookups(
-    lookup_request_rx: &std::sync::mpsc::Receiver<(
-        AddressPortPair,
-        TrafficDirection,
-        Vec<Address>,
-    )>,
+    lookup_request_rx: &async_channel::Receiver<(AddressPortPair, TrafficDirection, Vec<Address>)>,
     lookup_result_tx: &std::sync::mpsc::Sender<HostMessage>,
     mmdb_readers: &MmdbReaders,
 ) {
-    while let Ok((key, traffic_direction, interface_addresses)) = lookup_request_rx.recv() {
+    while let Ok((key, traffic_direction, interface_addresses)) = lookup_request_rx.recv_blocking()
+    {
         let address_to_lookup = get_address_to_lookup(&key, traffic_direction);
 
         // perform rDNS lookup
@@ -418,7 +423,7 @@ fn reverse_dns_lookups(
 }
 
 pub struct AddressesResolutionState {
-    lookup_request_tx: std::sync::mpsc::Sender<(AddressPortPair, TrafficDirection, Vec<Address>)>,
+    lookup_request_tx: async_channel::Sender<(AddressPortPair, TrafficDirection, Vec<Address>)>,
     lookup_result_rx: std::sync::mpsc::Receiver<HostMessage>,
     /// Map of the addresses waiting for a rDNS resolution; used to NOT send multiple rDNS for the same address
     addresses_waiting_resolution: HashMap<IpAddr, DataInfo>,
@@ -428,11 +433,7 @@ pub struct AddressesResolutionState {
 
 impl AddressesResolutionState {
     fn new(
-        lookup_request_tx: std::sync::mpsc::Sender<(
-            AddressPortPair,
-            TrafficDirection,
-            Vec<Address>,
-        )>,
+        lookup_request_tx: async_channel::Sender<(AddressPortPair, TrafficDirection, Vec<Address>)>,
         lookup_result_rx: std::sync::mpsc::Receiver<HostMessage>,
     ) -> Self {
         Self {
