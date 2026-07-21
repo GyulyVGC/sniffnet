@@ -1,35 +1,29 @@
 [target.x86_64-unknown-linux-gnu]
+# pin the 0.2.5 image (glibc 2.23) to keep releases running on older distros (fixes #1256):
+# cross's `main` images moved to Ubuntu 24.04 (glibc 2.39)
+image = "ghcr.io/cross-rs/x86_64-unknown-linux-gnu:0.2.5"
 pre-build = [
     "dpkg --add-architecture amd64",
-    "apt update -y && apt install -y libpcap-dev:amd64 libasound2-dev:amd64 libfontconfig1-dev:amd64",
-    # aws-lc-sys's custom build script errors with this:
-    # Your compiler (cc) is not supported due to a memcmp related bug reported in https://gcc.gnu.org/bugzilla/show_bug.cgi?id=95189. We strongly recommend against using this compiler.
-    "apt-get -y install gcc-10 && update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-10 60"
+    "apt update -y && apt install -y libpcap0.8-dev:amd64 libasound2-dev:amd64 libfontconfig1-dev:amd64"
 ]
 
 [target.i686-unknown-linux-gnu]
+image = "ghcr.io/cross-rs/i686-unknown-linux-gnu:0.2.5"
 pre-build = [
     "dpkg --add-architecture i386",
-    "apt update -y && apt install -y libpcap-dev:i386 libasound2-dev:i386 libfontconfig1-dev:i386",
-    # aws-lc-sys's custom build script errors with this:
-    # Your compiler (cc) is not supported due to a memcmp related bug reported in https://gcc.gnu.org/bugzilla/show_bug.cgi?id=95189. We strongly recommend against using this compiler.
-    "apt-get -y install gcc-10 && update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-10 60"
+    "apt update -y && apt install -y libpcap0.8-dev:i386 libasound2-dev:i386 libfontconfig1-dev:i386"
 ]
 
 [target.aarch64-unknown-linux-gnu]
+image = "ghcr.io/cross-rs/aarch64-unknown-linux-gnu:0.2.5"
 pre-build = [
     "dpkg --add-architecture arm64",
-    "apt update -y && apt install -y libpcap-dev:arm64 libasound2-dev:arm64 libfontconfig1-dev:arm64",
-    # aws-lc-sys's custom build script errors with this:
-    # Your compiler (cc) is not supported due to a memcmp related bug reported in https://gcc.gnu.org/bugzilla/show_bug.cgi?id=95189. We strongly recommend against using this compiler.
-    "apt-get -y install gcc-10 && update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-10 60"
+    "apt update -y && apt install -y libpcap0.8-dev:arm64 libasound2-dev:arm64 libfontconfig1-dev:arm64"
 ]
 
 [target.armv7-unknown-linux-gnueabihf]
+image = "ghcr.io/cross-rs/armv7-unknown-linux-gnueabihf:0.2.5"
 pre-build = [
     "dpkg --add-architecture armhf",
-    "apt update -y && apt install -y libpcap-dev:armhf libasound2-dev:armhf libfontconfig1-dev:armhf",
-    # aws-lc-sys's custom build script errors with this:
-    # Your compiler (cc) is not supported due to a memcmp related bug reported in https://gcc.gnu.org/bugzilla/show_bug.cgi?id=95189. We strongly recommend against using this compiler.
-    "apt-get -y install gcc-10 && update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-10 60"
+    "apt update -y && apt install -y libpcap0.8-dev:armhf libasound2-dev:armhf libfontconfig1-dev:armhf"
 ]

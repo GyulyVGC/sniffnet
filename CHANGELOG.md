@@ -22,6 +22,7 @@ All Sniffnet releases with the relative changes are documented in this file.
 - Use a thread pool for reverse DNS lookups to avoid stalling hosts resolutions (fixes [#1257](https://github.com/GyulyVGC/sniffnet/issues/1257))
 - Fix unseen hosts and services not appearing dimmed in thumbnail mode (fixes [#1142](https://github.com/GyulyVGC/sniffnet/issues/1142))
 - Fix `X-AppImage-Version` field in Linux AppImage metadata to correctly reflect the app version ([#1174](https://github.com/GyulyVGC/sniffnet/pull/1174) — fixes [#1003](https://github.com/GyulyVGC/sniffnet/issues/1003))
+- Fix Linux packages failing to run on distros with `glibc` older than 2.39 (fixes [#1256](https://github.com/GyulyVGC/sniffnet/issues/1256))
 
 ## [1.5.0] - 2026-04-14
 - Show which apps and programs are generating network traffic ([#1056](https://github.com/GyulyVGC/sniffnet/pull/1056) — fixes [#170](https://github.com/GyulyVGC/sniffnet/issues/170))
