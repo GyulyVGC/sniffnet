@@ -11,7 +11,7 @@ jobs:
   build:
     runs-on: ${{ matrix.os }}-latest
     strategy:
-      fail-fast: true
+      fail-fast: false
       matrix:
         include:
           - os: ubuntu
@@ -103,7 +103,18 @@ jobs:
 
       - name: Build binary (Linux)
         if: matrix.os == 'ubuntu'
-        run: cross build --release --target ${{ matrix.target }}
+        # alsa-sys and fontconfig-sys use pkg-config to locate their C libs, but the 0.2.5
+        # cross image doesn't pre-configure pkg-config for cross-compilation: point it at the
+        # target arch's .pc files (installed by the Cross.toml pre-build) and allow cross lookups
+        env:
+          PKG_CONFIG_ALLOW_CROSS: "1"
+        run: |
+          case "${{ matrix.arch }}" in
+            i386)  export PKG_CONFIG_PATH=/usr/lib/i386-linux-gnu/pkgconfig ;;
+            armhf) export PKG_CONFIG_PATH=/usr/lib/arm-linux-gnueabihf/pkgconfig ;;
+            arm64) export PKG_CONFIG_PATH=/usr/lib/aarch64-linux-gnu/pkgconfig ;;
+          esac
+          cross build --release --target ${{ matrix.target }}
 
       - name: Build binary (macOS/Windows)
         if: matrix.os == 'macos' || matrix.os == 'windows'

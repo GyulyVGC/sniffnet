@@ -1,3 +1,7 @@
+# forward the pkg-config cross settings (set in the Package workflow) into the containers
+[build.env]
+passthrough = ["PKG_CONFIG_ALLOW_CROSS", "PKG_CONFIG_PATH"]
+
 [target.x86_64-unknown-linux-gnu]
 # pin the 0.2.5 image (glibc 2.23) to keep releases running on older distros (fixes #1256):
 # cross's `main` images moved to Ubuntu 24.04 (glibc 2.39)
