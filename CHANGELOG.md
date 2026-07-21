@@ -2,7 +2,7 @@
 
 All Sniffnet releases with the relative changes are documented in this file.
 
-## [1.5.1] - 2026-07-20
+## [1.5.1] - 2026-07-22
 - Show latency of connections ([#1194](https://github.com/GyulyVGC/sniffnet/pull/1194) — fixes [#845](https://github.com/GyulyVGC/sniffnet/issues/845))
 - Added Hungarian translation 🇭🇺 ([#1197](https://github.com/GyulyVGC/sniffnet/pull/1197))
 - Added Sinhala translation 🇱🇰 ([#1239](https://github.com/GyulyVGC/sniffnet/pull/1239))
