@@ -334,6 +334,9 @@ jobs:
             target/release/bundle/osx/Sniffnet.app/Contents/MacOS/
           cp resources/packaging/macos/wrapper.sh \
             target/release/bundle/osx/Sniffnet.app/Contents/MacOS/
+          cp resources/packaging/macos/configure_bpf.sh \
+            target/release/bundle/osx/Sniffnet.app/Contents/MacOS/
+          chmod +x target/release/bundle/osx/Sniffnet.app/Contents/MacOS/{wrapper.sh,configure_bpf.sh}
           create-dmg \
             --volname "Sniffnet Installer" \
             --background "resources/packaging/macos/graphics/dmg_bg.png" \
