@@ -12,7 +12,7 @@ Application to comfortably monitor your Internet traffic.<br>
 Cross-platform. Intuitive. Reliable.
 
 Translated in:<br>
-🇨🇳 🇩🇪 🇫🇷 🇷🇺 🇵🇹 🇪🇦 🇮🇹 🇵🇱 [+&nbsp;17&nbsp;more&nbsp;languages](https://github.com/GyulyVGC/sniffnet/issues/60)
+🇨🇳 🇩🇪 🇫🇷 🇷🇺 🇵🇹 🇪🇦 🇮🇹 🇵🇱 [+&nbsp;18&nbsp;more&nbsp;languages](https://github.com/GyulyVGC/sniffnet/issues/60)
 </div>
 
 <p>

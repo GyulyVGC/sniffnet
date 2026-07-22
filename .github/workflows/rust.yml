@@ -42,12 +42,12 @@ jobs:
 
       - name: Install Linux dependencies
         if: matrix.os == 'ubuntu'
-        run: sudo apt-get update -y && sudo apt-get install -y libpcap-dev libasound2-dev libgtk-3-dev
+        run: sudo apt-get update -y && sudo apt-get install -y libpcap-dev libasound2-dev
 
       - name: Install Windows dependencies
         if: matrix.os == 'windows' && github.event_name != 'pull_request'
         run: |
-          Invoke-WebRequest -Uri "https://npcap.com/dist/npcap-sdk-1.13.zip" -OutFile "C:/npcap-sdk.zip"
+          Invoke-WebRequest -Uri "https://npcap.com/dist/npcap-sdk-1.16.zip" -OutFile "C:/npcap-sdk.zip"
           Expand-Archive -LiteralPath C:/npcap-sdk.zip -DestinationPath C:/npcap-sdk
           echo "LIB=C:/npcap-sdk/Lib/x64" >> $env:GITHUB_ENV
           Invoke-WebRequest -Uri ${{secrets.NPCAP_OEM_URL}} -OutFile C:/npcap-oem.exe
