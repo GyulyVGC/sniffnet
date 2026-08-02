@@ -2,7 +2,7 @@ use std::cmp::min;
 use std::net::IpAddr;
 
 use crate::utils::types::timestamp::Timestamp;
-use chrono::{Local, TimeZone};
+use jiff::tz::TimeZone;
 
 /// Application version number (to be displayed in gui footer)
 pub const APP_VERSION: &str = env!("CARGO_PKG_VERSION");
@@ -105,9 +105,10 @@ pub fn get_formatted_num_seconds(num_seconds: u128) -> String {
 pub fn get_formatted_timestamp(t: Timestamp) -> String {
     let date_opt = t
         .to_usecs()
-        .and_then(|usecs| Local.timestamp_micros(usecs).latest());
+        .and_then(|usecs| jiff::Timestamp::from_microsecond(usecs).ok())
+        .map(|ts| TimeZone::system().to_datetime(ts));
     if let Some(date) = date_opt {
-        date.format("%Y/%m/%d %H:%M:%S").to_string()
+        date.strftime("%Y/%m/%d %H:%M:%S").to_string()
     } else {
         "?".to_string()
     }
@@ -188,6 +189,31 @@ mod tests {
         assert_eq!(
             get_formatted_num_seconds(u128::MAX),
             "94522879700260684295381835397713392:04:15"
+        );
+    }
+
+    #[test]
+    fn test_get_formatted_timestamp() {
+        // 2023/11/14 22:13:20 UTC: the rendered day is 14 or 15 depending on the system time zone
+        let formatted = get_formatted_timestamp(Timestamp::new(1_700_000_000, 123_456));
+        assert!(formatted.starts_with("2023/11/1"), "{formatted}");
+        assert!(
+            formatted.chars().enumerate().all(|(i, c)| match i {
+                4 | 7 => c == '/',
+                10 => c == ' ',
+                13 | 16 => c == ':',
+                _ => c.is_ascii_digit(),
+            }) && formatted.len() == 19,
+            "{formatted}"
+        );
+
+        // microseconds overflow
+        assert_eq!(get_formatted_timestamp(Timestamp::new(i64::MAX, 0)), "?");
+        assert_eq!(get_formatted_timestamp(Timestamp::new(i64::MIN, 0)), "?");
+        // out of the range of dates that can be represented
+        assert_eq!(
+            get_formatted_timestamp(Timestamp::new(1_800_000_000_000, 0)),
+            "?"
         );
     }
 
