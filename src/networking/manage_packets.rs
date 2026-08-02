@@ -200,6 +200,11 @@ fn analyze_transport_header(
             *icmp_type = IcmpTypeV6::from_etherparse(&icmpv6_header.icmp_type);
             true
         }
+        Some(TransportHeader::Igmp(_)) => {
+            #[allow(clippy::match_same_arms)]
+            // TODO!
+            false
+        }
         None => false,
     }
 }

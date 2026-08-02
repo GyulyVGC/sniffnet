@@ -39,11 +39,11 @@ codegen-units = 1
 
 [dependencies]
 async-channel = "2.5.0"
-clap = { version = "4.6.2", features = ["derive"] }
+clap = { version = "4.6.5", features = ["derive"] }
 confy = "2.0.0"
 ctrlc = { version = "3.5.2", features = ["termination"] }
 dns-lookup = "3.0.1"
-etherparse = "0.20.3"
+etherparse = "0.21.0"
 iced = { version = "0.14.0", features = ["tokio", "svg", "advanced", "lazy", "image"] }
 ipnet = "2.12.0"
 jiff = "0.2.35"
@@ -55,7 +55,7 @@ phf_shared = "0.14.0"
 picon = "0.1.0"
 plotters = { version = "0.3.7", default-features = false, features = ["area_series", "line_series"] }
 plotters-iced2 = "0.14.0"
-prefix-trie = { version = "0.9.4", features = ["ipnet"] }
+prefix-trie = { version = "0.10.1", features = ["ipnet"] }
 reqwest = { version = "0.13.4", features = ["json"] }
 rfd = "0.17.2"
 rodio = { version = "0.22.2", default-features = false, features = ["mp3", "playback"] }
