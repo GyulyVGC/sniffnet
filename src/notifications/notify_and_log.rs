@@ -234,6 +234,7 @@ fn send_remote_notification(
             let Ok(response) = client
                 .post(remote_notifications.url())
                 .header("User-agent", format!("{SNIFFNET_LOWERCASE}-{APP_VERSION}"))
+                .header("Content-Type", "application/json")
                 .body(notification.to_json())
                 .send()
                 .await
