@@ -9,6 +9,7 @@ use crate::networking::types::data_representation::DataRepr;
 use crate::networking::types::host::HostMessage;
 use crate::networking::types::info_traffic::InfoTraffic;
 use crate::networking::types::ip_blacklist::IpBlacklist;
+use crate::networking::types::latency::LatencyStatus;
 use crate::notifications::types::notifications::Notification;
 use crate::report::types::search_parameters::SearchParameters;
 use crate::report::types::sort_type::SortType;
@@ -123,6 +124,10 @@ pub enum Message {
     Quit,
     /// Copies the given string to clipboard
     CopyIp(IpAddr),
+    /// Start measuring latency for the given remote address
+    MeasureLatency(IpAddr),
+    /// Latency measurement has completed for the given remote address
+    LatencyMeasured(IpAddr, LatencyStatus),
     /// Launch a new file dialog
     OpenFile(String, FileInfo, fn(String) -> Message),
     /// Toggle export pcap file

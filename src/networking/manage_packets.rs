@@ -200,6 +200,11 @@ fn analyze_transport_header(
             *icmp_type = IcmpTypeV6::from_etherparse(&icmpv6_header.icmp_type);
             true
         }
+        Some(TransportHeader::Igmp(_)) => {
+            #[allow(clippy::match_same_arms)]
+            // TODO!
+            false
+        }
         None => false,
     }
 }
@@ -492,7 +497,7 @@ pub fn is_my_address(local_address: &IpAddr, my_interface_addresses: &Vec<Addres
 
 /// Converts a MAC address in its hexadecimal form
 fn mac_from_dec_to_hex(mac_dec: [u8; 6]) -> String {
-    let mut mac_hex = String::new();
+    let mut mac_hex = String::with_capacity(17);
     for n in &mac_dec {
         let _ = write!(mac_hex, "{n:02x}:");
     }

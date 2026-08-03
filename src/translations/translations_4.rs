@@ -6,6 +6,7 @@ pub fn reserved_address_translation(language: Language, info: &str) -> String {
     match language {
         Language::EN => format!("Reserved address ({info})"),
         Language::CS => format!("Rezervovaná adresa ({info})"),
+        // Language::FA => format!("آدرس رزرو شده ({info})"),
         Language::IT => format!("Indirizzo riservato ({info})"),
         Language::JA => format!("予約済みアドレス ({info})"),
         Language::PT => format!("Endereço reservado ({info})"),
@@ -23,6 +24,9 @@ pub fn reserved_address_translation(language: Language, info: &str) -> String {
         Language::VI => format!("Địa chỉ dự trữ ({info})"),
         Language::TR => format!("Rezerve edilmiş adres ({info})"),
         Language::SV => format!("Reserverad adress ({info})"),
+        Language::HU => format!("Foglalt cím ({info})"),
+        Language::SI => format!("වෙන් කළ ලිපිනය ({info})"),
+        Language::RU => format!("Зарезервированный адрес ({info})"),
         _ => format!("Reserved address ({info})"),
     }
 }
@@ -31,6 +35,7 @@ pub fn share_feedback_translation(language: Language) -> &'static str {
     match language {
         Language::EN => "Share your feedback",
         Language::CS => "Sdílejte své hodnocení",
+        // Language::FA => "اشتراک‌گذاری بازخورد",
         Language::IT => "Condividi il tuo feedback",
         Language::JA => "フィードバックを共有",
         Language::ZH => "分享您的反馈",
@@ -47,6 +52,9 @@ pub fn share_feedback_translation(language: Language) -> &'static str {
         Language::TR => "Geri bildirimlerinizi paylaşın",
         Language::UK => "Надіслати відгук",
         Language::SV => "Dela din feedback",
+        Language::HU => "Visszajelzés megosztása",
+        Language::SI => "ඔබේ අදහස් ලබා දෙන්න",
+        Language::RU => "Оставить отзыв",
         _ => "Share your feedback",
     }
 }
@@ -56,6 +64,7 @@ pub fn share_feedback_translation(language: Language) -> &'static str {
 //     match language {
 //         Language::EN => "Excluded",
 //         Language::CS => "Vyloučeno",
+//         Language::FA => "حذف‌شده",
 //         Language::IT => "Esclusi",
 //         Language::JA => "除外",
 //         Language::ZH => "已被过滤",
@@ -70,6 +79,8 @@ pub fn share_feedback_translation(language: Language) -> &'static str {
 //         Language::ES => "Excluidos",
 //         Language::VI => "Loại trừ",
 //         Language::TR => "Hariç tutulan",
+//         Language::HU => "Kizárva",
+//         Language::RU => "Исключено",
 //         _ => "Excluded",
 //     }
 // }
@@ -78,6 +89,7 @@ pub fn capture_file_translation(language: Language) -> &'static str {
     match language {
         Language::EN => "Capture file",
         Language::CS => "Soubor zachycení",
+        // Language::FA => "فایل ضبط",
         Language::IT => "File di cattura",
         Language::FR => "Fichier de capture",
         Language::JA => "キャプチャファイル",
@@ -94,6 +106,9 @@ pub fn capture_file_translation(language: Language) -> &'static str {
         Language::TR => "Yakalama dosyası",
         Language::UK => "Захопити файл",
         Language::SV => "Inspelningsfil",
+        Language::HU => "Adatforgalmi fájl",
+        Language::SI => "කැප්චර් (Capture) ගොනුව",
+        Language::RU => "Файл захвата",
         _ => "Capture file",
     }
 }
@@ -102,6 +117,7 @@ pub fn select_file_translation(language: Language) -> &'static str {
     match language {
         Language::EN => "Select file",
         Language::CS => "Výběr souboru",
+        // Language::FA => "انتخاب فایل",
         Language::IT => "Seleziona file",
         Language::FR => "Sélectionner fichier",
         Language::JA => "ファイルを選択",
@@ -118,6 +134,9 @@ pub fn select_file_translation(language: Language) -> &'static str {
         Language::TR => "Dosya seç",
         Language::UK => "Обрати файл",
         Language::SV => "Välj fil",
+        Language::HU => "Fájl kiválasztása",
+        Language::SI => "ගොනුව තෝරන්න",
+        Language::RU => "Выбрать файл",
         _ => "Select file",
     }
 }
@@ -132,6 +151,10 @@ pub fn reading_from_pcap_translation(language: Language) -> &'static str {
             "Čtení paketů ze souuboru...\n\n\
                                  Jste si jistý že vybraný soubor není prázdný?"
         }
+        //  Language::FA => {
+        //     "در حال خواندن بسته‌ها از فایل...\n\n\
+        //      مطمئن هستید فایلی که انتخاب کرده‌اید خالی نیست؟"
+        // }
         Language::IT => {
             "Lettura pacchetti da file...\n\n\
                                 Sei sicuro che il file che hai selezionato non sia vuoto?"
@@ -196,6 +219,18 @@ pub fn reading_from_pcap_translation(language: Language) -> &'static str {
             "Läser paket från fil...\n\n\
                                 Är du säker på att filen du valde inte är tom?"
         }
+        Language::HU => {
+            "Csomagok olvasása fájlból...\n\n\
+                                Biztos, hogy a kiválasztott fájl nem üres?"
+        }
+        Language::SI => {
+            "ගොනුවෙන් පැකට් කියවමින්...\n\n\
+                                ඔබ තෝරාගත් ගොනුව හිස් එකක් නොවන බවට විශ්වාසද?"
+        }
+        Language::RU => {
+            "Чтение пакетов из файла...\n\n\
+                                 Вы уверены, что выбранный файл не пуст?"
+        }
         _ => {
             "Reading packets from file...\n\n\
                                 Are you sure the file you selected isn't empty?"
@@ -207,6 +242,7 @@ pub fn data_exceeded_translation(language: Language) -> &'static str {
     match language {
         Language::EN => "Data threshold exceeded",
         Language::CS => "Překročen limit dat",
+        // Language::FA => "محدودیت داده فراتر رفت",
         Language::IT => "Soglia di dati superata",
         Language::FR => "Seuil de données dépassé",
         Language::JA => "データの閾値を超えました",
@@ -222,6 +258,9 @@ pub fn data_exceeded_translation(language: Language) -> &'static str {
         Language::TR => "Veri limiti aşıldı",
         Language::UK => "Перевищено ліміт даних",
         Language::SV => "Datagräns överskriden",
+        Language::HU => "Adatküszöb túllépve",
+        Language::SI => "දත්ත සීමාව ඉක්මවා ඇත",
+        Language::RU => "Превышен лимит данных",
         _ => "Data threshold exceeded",
     }
 }
@@ -230,6 +269,7 @@ pub fn bits_exceeded_translation(language: Language) -> &'static str {
     match language {
         Language::EN => "Bits threshold exceeded",
         Language::CS => "Překročen limit bitů",
+        // Language::FA => "محدودیت بیت فراتر رفت",
         Language::IT => "Soglia di bit superata",
         Language::FR => "Seuil de bits dépassé",
         Language::JA => "ビットの閾値を超えました",
@@ -246,6 +286,9 @@ pub fn bits_exceeded_translation(language: Language) -> &'static str {
         Language::TR => "Bit limiti aşıldı",
         Language::UK => "Перевищено ліміт бітів",
         Language::SV => "Bitgräns överskriden",
+        Language::HU => "Bitküszöb túllépve",
+        Language::SI => "බිට් සීමාව ඉක්මවා ඇත",
+        Language::RU => "Превышен лимит битов",
         _ => "Bits threshold exceeded",
     }
 }
@@ -261,6 +304,7 @@ pub fn bits_translation(language: Language) -> &'static str {
         | Language::ES
         | Language::SV => "bits",
         Language::CS => "bity",
+        // Language::FA => "بیت",
         Language::JA => "ビット",
         Language::ZH => "比特",
         Language::UZ => "bitlar",
@@ -269,6 +313,9 @@ pub fn bits_translation(language: Language) -> &'static str {
         Language::ZH_TW => "位元",
         Language::VI | Language::TR => "bit",
         Language::UK => "біти",
+        Language::HU => "bitek",
+        Language::SI => "බිට්",
+        Language::RU => "биты",
         _ => "bits",
     }
 }
@@ -278,6 +325,7 @@ pub fn pause_translation(language: Language) -> &'static str {
     match language {
         Language::EN | Language::DE | Language::FR => "Pause",
         Language::CS => "Pauza",
+        // Language::FA => "توقف",
         Language::IT | Language::ES | Language::SV => "Pausa",
         Language::JA => "一時停止",
         Language::ZH => "暂停",
@@ -289,7 +337,9 @@ pub fn pause_translation(language: Language) -> &'static str {
         Language::EL => "Παύση",
         Language::VI => "Tạm dừng",
         Language::TR => "Duraklat",
-        Language::UK => "Пауза",
+        Language::UK | Language::RU => "Пауза",
+        Language::HU => "Szüneteltetés",
+        Language::SI => "මඳකට නවත්වන්න",
         _ => "Pause",
     }
 }
@@ -299,6 +349,7 @@ pub fn resume_translation(language: Language) -> &'static str {
     match language {
         Language::EN => "Resume",
         Language::CS => "Obnovit",
+        // Language::FA => "ادامه",
         Language::IT => "Riprendi",
         Language::FR => "Reprendre",
         Language::JA => "再開",
@@ -315,6 +366,9 @@ pub fn resume_translation(language: Language) -> &'static str {
         Language::TR => "Devam et",
         Language::UK => "Продовжити",
         Language::SV => "Återuppta",
+        Language::HU => "Folytatás",
+        Language::SI => "නැවත ආරම්භ කරන්න",
+        Language::RU => "Продолжить",
         _ => "Resume",
     }
 }

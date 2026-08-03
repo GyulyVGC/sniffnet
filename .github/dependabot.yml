@@ -10,11 +10,31 @@ updates:
 - package-ecosystem: "github-actions"
   directory: "/"
   schedule:
-    interval: "daily"
-  
+    interval: "weekly"
+  cooldown:
+    default-days: 7
+  ignore:
+    # Major-pinned actions: only surface major updates.
+    - dependency-name: "actions/*"
+      update-types: ["version-update:semver-minor", "version-update:semver-patch"]
+    - dependency-name: "codecov/codecov-action"
+      update-types: ["version-update:semver-minor", "version-update:semver-patch"]
+    - dependency-name: "github/codeql-action"
+      update-types: ["version-update:semver-minor", "version-update:semver-patch"]
+  groups:
+    # Bundle all action updates into a single PR to review at once
+    github-actions:
+      patterns: ["*"]
+
 # Maintain dependencies for cargo
 - package-ecosystem: cargo
   directory: "/"
   schedule:
-    interval: "daily"
+    interval: "weekly"
   target-branch: "main"
+  cooldown:
+    default-days: 7
+  groups:
+    # Bundle all cargo updates into a single PR to review at once
+    cargo:
+      patterns: ["*"]
