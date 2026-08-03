@@ -103,8 +103,10 @@ impl DataNotification {
             let without_multiple: String = chars[0..chars.len() - 1].iter().collect();
             if without_multiple.parse::<u64>().is_ok()
                 && TryInto::<u64>::try_into(
-                    without_multiple.parse::<u128>().unwrap_or_default()
-                        * u128::from(byte_multiple_inserted.multiplier()),
+                    without_multiple
+                        .parse::<u128>()
+                        .unwrap_or_default()
+                        .saturating_mul(u128::from(byte_multiple_inserted.multiplier())),
                 )
                 .is_ok()
             {
