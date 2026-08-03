@@ -1056,6 +1056,15 @@
       "contributions": [
         "code"
       ]
+    },
+    {
+      "login": "karpovantonme",
+      "name": "Anton Karpov",
+      "avatar_url": "https://avatars.githubusercontent.com/u/30812217?v=4",
+      "profile": "http://karpovanton.com",
+      "contributions": [
+        "code"
+      ]
     }
   ],
   "contributorsPerLine": 7,
