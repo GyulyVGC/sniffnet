@@ -2,6 +2,9 @@
 
 All Sniffnet releases with the relative changes are documented in this file.
 
+## [UNRELEASED]
+- Set `Content-Type: application/json` header on remote notifications ([#1266](https://github.com/GyulyVGC/sniffnet/pull/1266))
+
 ## [1.5.1] - 2026-07-22
 - Show latency of connections ([#1194](https://github.com/GyulyVGC/sniffnet/pull/1194) — fixes [#845](https://github.com/GyulyVGC/sniffnet/issues/845))
 - Added Hungarian translation 🇭🇺 ([#1197](https://github.com/GyulyVGC/sniffnet/pull/1197))
