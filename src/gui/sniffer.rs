@@ -203,46 +203,16 @@ impl Sniffer {
 
         if self.thumbnail {
             iced::event::listen_with(|event, _, _| match event {
-                Keyboard(Event::KeyPressed {
-                    key,
-                    modifiers: Modifiers::COMMAND,
-                    ..
-                }) => match key.as_ref() {
-                    Key::Character("q") => Some(Message::QuitWrapper),
-                    Key::Character("t") => Some(Message::CtrlTPressed),
-                    Key::Named(Named::Space) => Some(Message::CtrlSpacePressed),
-                    _ => None,
-                },
+                Keyboard(Event::KeyPressed { key, modifiers, .. }) => {
+                    hotkey_message(&key, modifiers, true)
+                }
                 _ => None,
             })
         } else {
             iced::event::listen_with(|event, _, _| match event {
-                Keyboard(Event::KeyPressed { key, modifiers, .. }) => match modifiers {
-                    Modifiers::COMMAND => match key.as_ref() {
-                        Key::Character("q") => Some(Message::QuitWrapper),
-                        Key::Character("t") => Some(Message::CtrlTPressed),
-                        Key::Named(Named::Space) => Some(Message::CtrlSpacePressed),
-                        Key::Character(",") => Some(Message::OpenLastSettings),
-                        Key::Named(Named::Backspace) => Some(Message::ResetButtonPressed),
-                        Key::Character("d") => Some(Message::CtrlDPressed),
-                        Key::Named(Named::ArrowLeft) => Some(Message::ArrowPressed(false)),
-                        Key::Named(Named::ArrowRight) => Some(Message::ArrowPressed(true)),
-                        Key::Character("-") => Some(Message::ScaleFactorShortcut(false)),
-                        Key::Character("+") => Some(Message::ScaleFactorShortcut(true)),
-                        _ => None,
-                    },
-                    Modifiers::SHIFT => match key {
-                        Key::Named(Named::Tab) => Some(Message::SwitchPage(false)),
-                        _ => None,
-                    },
-                    Modifiers::NONE => match key {
-                        Key::Named(Named::Enter) => Some(Message::ReturnKeyPressed),
-                        Key::Named(Named::Escape) => Some(Message::EscKeyPressed),
-                        Key::Named(Named::Tab) => Some(Message::SwitchPage(true)),
-                        _ => None,
-                    },
-                    _ => None,
-                },
+                Keyboard(Event::KeyPressed { key, modifiers, .. }) => {
+                    hotkey_message(&key, modifiers, false)
+                }
                 _ => None,
             })
         }
@@ -1436,6 +1406,56 @@ impl Sniffer {
     }
 }
 
+/// Maps a key press to the message it triggers, if any.
+fn hotkey_message(key: &Key, modifiers: Modifiers, thumbnail: bool) -> Option<Message> {
+    /// `+` is typed as `shift` + `=` on most layouts, so the zoom in shortcut
+    /// arrives with `shift` held down.
+    const COMMAND_SHIFT: Modifiers = Modifiers::COMMAND.union(Modifiers::SHIFT);
+
+    if thumbnail {
+        return match modifiers {
+            Modifiers::COMMAND => match key.as_ref() {
+                Key::Character("q") => Some(Message::QuitWrapper),
+                Key::Character("t") => Some(Message::CtrlTPressed),
+                Key::Named(Named::Space) => Some(Message::CtrlSpacePressed),
+                _ => None,
+            },
+            _ => None,
+        };
+    }
+
+    match modifiers {
+        Modifiers::COMMAND => match key.as_ref() {
+            Key::Character("q") => Some(Message::QuitWrapper),
+            Key::Character("t") => Some(Message::CtrlTPressed),
+            Key::Named(Named::Space) => Some(Message::CtrlSpacePressed),
+            Key::Character(",") => Some(Message::OpenLastSettings),
+            Key::Named(Named::Backspace) => Some(Message::ResetButtonPressed),
+            Key::Character("d") => Some(Message::CtrlDPressed),
+            Key::Named(Named::ArrowLeft) => Some(Message::ArrowPressed(false)),
+            Key::Named(Named::ArrowRight) => Some(Message::ArrowPressed(true)),
+            Key::Character("-") => Some(Message::ScaleFactorShortcut(false)),
+            Key::Character("+" | "=") => Some(Message::ScaleFactorShortcut(true)),
+            _ => None,
+        },
+        COMMAND_SHIFT => match key.as_ref() {
+            Key::Character("+" | "=") => Some(Message::ScaleFactorShortcut(true)),
+            _ => None,
+        },
+        Modifiers::SHIFT => match key {
+            Key::Named(Named::Tab) => Some(Message::SwitchPage(false)),
+            _ => None,
+        },
+        Modifiers::NONE => match key {
+            Key::Named(Named::Enter) => Some(Message::ReturnKeyPressed),
+            Key::Named(Named::Escape) => Some(Message::EscKeyPressed),
+            Key::Named(Named::Tab) => Some(Message::SwitchPage(true)),
+            _ => None,
+        },
+        _ => None,
+    }
+}
+
 #[cfg(test)]
 mod tests {
     #![allow(unused_must_use)]
@@ -1478,6 +1498,9 @@ mod tests {
     use crate::notifications::types::sound::Sound;
     use crate::report::types::sort_type::SortType;
     use crate::{ByteMultiple, Language, RunningPage, Sniffer, StyleType};
+
+    use super::hotkey_message;
+    use iced::keyboard::{Key, Modifiers};
 
     // helpful to clean up files generated from tests
     impl Drop for Sniffer {
@@ -2422,5 +2445,56 @@ mod tests {
             sniffer.latency_statuses.get(&ip),
             Some(&LatencyStatus::Failed("no reply".to_string()))
         );
+    }
+
+    #[test]
+    #[parallel]
+    fn test_zoom_hotkeys() {
+        let plus = Key::Character("+".into());
+        let equal = Key::Character("=".into());
+        let minus = Key::Character("-".into());
+        let command_shift = Modifiers::COMMAND | Modifiers::SHIFT;
+
+        // zoom out needs no shift and has always worked
+        assert!(matches!(
+            hotkey_message(&minus, Modifiers::COMMAND, false),
+            Some(Message::ScaleFactorShortcut(true_if_increase)) if !true_if_increase
+        ));
+
+        // on layouts where '+' sits on its own key, no shift is reported
+        assert!(matches!(
+            hotkey_message(&plus, Modifiers::COMMAND, false),
+            Some(Message::ScaleFactorShortcut(true))
+        ));
+
+        // on layouts where '+' is shift + '=', shift reaches us as well
+        assert!(matches!(
+            hotkey_message(&plus, command_shift, false),
+            Some(Message::ScaleFactorShortcut(true))
+        ));
+
+        // '=' without shift is the same shortcut in browsers, accept it too
+        assert!(matches!(
+            hotkey_message(&equal, Modifiers::COMMAND, false),
+            Some(Message::ScaleFactorShortcut(true))
+        ));
+
+        // no zoom shortcuts in thumbnail mode
+        assert!(hotkey_message(&plus, command_shift, true).is_none());
+        assert!(hotkey_message(&minus, Modifiers::COMMAND, true).is_none());
+    }
+
+    #[test]
+    #[parallel]
+    fn test_hotkeys_ignore_unknown_modifier_combinations() {
+        let quit = Key::Character("q".into());
+
+        assert!(matches!(
+            hotkey_message(&quit, Modifiers::COMMAND, false),
+            Some(Message::QuitWrapper)
+        ));
+        // adding shift must not trigger the plain command shortcut
+        assert!(hotkey_message(&quit, Modifiers::COMMAND | Modifiers::SHIFT, false).is_none());
+        assert!(hotkey_message(&quit, Modifiers::NONE, false).is_none());
     }
 }
