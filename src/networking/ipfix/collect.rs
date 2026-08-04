@@ -15,18 +15,13 @@ use crate::networking::ipfix::templates::TemplateCache;
 use crate::networking::ipfix::wire::{
     self, FlowRecord, IPFIX_VERSION, Set, decode_data_record, format_mac, parse_message,
 };
-use crate::networking::manage_packets::{
-    get_address_to_lookup, get_traffic_type, is_local_connection, modify_or_insert_in_map,
-};
+use crate::networking::manage_packets::{account_flow, modify_or_insert_in_map};
 use crate::networking::parse_packets::{
     AddressesResolutionState, BackendTrafficMessage, REVERSE_DNS_LOOKUP_THREADS,
     reverse_dns_lookups,
 };
 use crate::networking::types::address_port_pair::AddressPortPair;
 use crate::networking::types::arp_type::ArpType;
-use crate::networking::types::bogon::is_bogon;
-use crate::networking::types::data_info::DataInfo;
-use crate::networking::types::data_info_host::DataInfoHost;
 use crate::networking::types::icmp_type::IcmpType;
 use crate::networking::types::info_traffic::InfoTraffic;
 use crate::networking::types::ip_blacklist::IpBlacklist;
@@ -268,114 +263,16 @@ fn ingest_flow_record(
         timestamps_hint,
     );
 
-    info_traffic_msg.tot_data_info.add_packets(
-        exchanged_packets,
+    account_flow(
+        info_traffic_msg,
+        resolutions_state,
+        &key,
+        exporter_addresses,
         exchanged_bytes,
+        exchanged_packets,
         traffic_direction,
-        Instant::now(),
+        service,
     );
-
-    let address_to_lookup = get_address_to_lookup(&key, traffic_direction);
-    let already_resolved = resolutions_state
-        .addresses_resolved
-        .contains_key(&address_to_lookup);
-    let waiting_resolution = resolutions_state
-        .addresses_waiting_resolution
-        .contains_key(&address_to_lookup);
-
-    match (waiting_resolution, already_resolved) {
-        (false, false) => {
-            let mut data_info = DataInfo::default();
-            data_info.add_packets(
-                exchanged_packets,
-                exchanged_bytes,
-                traffic_direction,
-                Instant::now(),
-            );
-            resolutions_state
-                .addresses_waiting_resolution
-                .insert(address_to_lookup, data_info);
-            let _ = resolutions_state.lookup_request_tx.try_send((
-                key,
-                traffic_direction,
-                exporter_addresses.to_vec(),
-            ));
-        }
-        (true, false) => {
-            resolutions_state
-                .addresses_waiting_resolution
-                .entry(address_to_lookup)
-                .and_modify(|data_info| {
-                    data_info.add_packets(
-                        exchanged_packets,
-                        exchanged_bytes,
-                        traffic_direction,
-                        Instant::now(),
-                    );
-                });
-        }
-        (_, true) => {
-            let host = resolutions_state
-                .addresses_resolved
-                .get(&address_to_lookup)
-                .cloned()
-                .unwrap_or_default();
-            info_traffic_msg
-                .hosts
-                .entry(host)
-                .and_modify(|data_info_host| {
-                    data_info_host.data_info.add_packets(
-                        exchanged_packets,
-                        exchanged_bytes,
-                        traffic_direction,
-                        Instant::now(),
-                    );
-                })
-                .or_insert_with(|| {
-                    let traffic_type =
-                        get_traffic_type(&address_to_lookup, exporter_addresses, traffic_direction);
-                    let is_loopback = address_to_lookup.is_loopback();
-                    let is_local = is_local_connection(&address_to_lookup, exporter_addresses);
-                    let is_bogon = is_bogon(&address_to_lookup);
-                    let mut data_info = DataInfo::default();
-                    data_info.add_packets(
-                        exchanged_packets,
-                        exchanged_bytes,
-                        traffic_direction,
-                        Instant::now(),
-                    );
-                    DataInfoHost {
-                        data_info,
-                        is_loopback,
-                        is_local,
-                        is_bogon,
-                        traffic_type,
-                    }
-                });
-        }
-    }
-
-    info_traffic_msg
-        .services
-        .entry(service)
-        .and_modify(|data_info| {
-            data_info.add_packets(
-                exchanged_packets,
-                exchanged_bytes,
-                traffic_direction,
-                Instant::now(),
-            );
-        })
-        .or_insert_with(|| {
-            let mut data_info = DataInfo::default();
-            data_info.add_packets(
-                exchanged_packets,
-                exchanged_bytes,
-                traffic_direction,
-                Instant::now(),
-            );
-            data_info
-        });
 }
 
 fn build_key(record: &FlowRecord) -> Option<AddressPortPair> {

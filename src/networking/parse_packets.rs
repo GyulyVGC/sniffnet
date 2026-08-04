@@ -6,7 +6,7 @@ use crate::mmdb::asn::get_asn;
 use crate::mmdb::country::get_country;
 use crate::mmdb::types::mmdb_reader::MmdbReaders;
 use crate::networking::manage_packets::{
-    analyze_headers, get_address_to_lookup, get_traffic_type, is_local_connection,
+    account_flow, analyze_headers, get_address_to_lookup, get_traffic_type, is_local_connection,
     modify_or_insert_in_map,
 };
 use crate::networking::types::address_port_pair::AddressPortPair;
@@ -197,103 +197,16 @@ pub fn parse_packets(
                         None,
                     );
 
-                    info_traffic_msg
-                        .tot_data_info
-                        .add_packet(exchanged_bytes, traffic_direction);
-
-                    // check the rDNS status of this address and act accordingly
-                    let address_to_lookup = get_address_to_lookup(&key, traffic_direction);
-                    let mut r_dns_waiting_resolution = false;
-                    let r_dns_already_resolved = resolutions_state
-                        .addresses_resolved
-                        .contains_key(&address_to_lookup);
-                    if !r_dns_already_resolved {
-                        r_dns_waiting_resolution = resolutions_state
-                            .addresses_waiting_resolution
-                            .contains_key(&address_to_lookup);
-                    }
-
-                    match (r_dns_waiting_resolution, r_dns_already_resolved) {
-                        (false, false) => {
-                            // rDNS not requested yet (first occurrence of this address to lookup)
-
-                            // Add this address to the map of addresses waiting for a resolution
-                            // Useful to NOT perform again a rDNS lookup for this entry
-                            resolutions_state.addresses_waiting_resolution.insert(
-                                address_to_lookup,
-                                DataInfo::new_with_first_packet(exchanged_bytes, traffic_direction),
-                            );
-
-                            // send the rDNS lookup request to the thread pool
-                            let _ = resolutions_state.lookup_request_tx.try_send((
-                                key,
-                                traffic_direction,
-                                cs.get_addresses().clone(),
-                            ));
-                        }
-                        (true, false) => {
-                            // waiting for a previously requested rDNS resolution
-                            // update the corresponding waiting address data
-                            resolutions_state
-                                .addresses_waiting_resolution
-                                .entry(address_to_lookup)
-                                .and_modify(|data_info| {
-                                    data_info.add_packet(exchanged_bytes, traffic_direction);
-                                });
-                        }
-                        (_, true) => {
-                            // rDNS already resolved
-                            // update the corresponding host's data info
-                            let host = resolutions_state
-                                .addresses_resolved
-                                .get(&address_to_lookup)
-                                .unwrap_or(&Host::default())
-                                .clone();
-                            info_traffic_msg
-                                .hosts
-                                .entry(host)
-                                .and_modify(|data_info_host| {
-                                    data_info_host
-                                        .data_info
-                                        .add_packet(exchanged_bytes, traffic_direction);
-                                })
-                                .or_insert_with(|| {
-                                    let my_interface_addresses = cs.get_addresses();
-                                    let traffic_type = get_traffic_type(
-                                        &address_to_lookup,
-                                        my_interface_addresses,
-                                        traffic_direction,
-                                    );
-                                    let is_loopback = address_to_lookup.is_loopback();
-                                    let is_local = is_local_connection(
-                                        &address_to_lookup,
-                                        my_interface_addresses,
-                                    );
-                                    let is_bogon = is_bogon(&address_to_lookup);
-                                    DataInfoHost {
-                                        data_info: DataInfo::new_with_first_packet(
-                                            exchanged_bytes,
-                                            traffic_direction,
-                                        ),
-                                        is_loopback,
-                                        is_local,
-                                        is_bogon,
-                                        traffic_type,
-                                    }
-                                });
-                        }
-                    }
-
-                    //increment the packet count for the sniffed service
-                    info_traffic_msg
-                        .services
-                        .entry(service)
-                        .and_modify(|data_info| {
-                            data_info.add_packet(exchanged_bytes, traffic_direction);
-                        })
-                        .or_insert_with(|| {
-                            DataInfo::new_with_first_packet(exchanged_bytes, traffic_direction)
-                        });
+                    account_flow(
+                        &mut info_traffic_msg,
+                        &mut resolutions_state,
+                        &key,
+                        cs.get_addresses(),
+                        exchanged_bytes,
+                        1,
+                        traffic_direction,
+                        service,
+                    );
 
                     // update dropped packets number
                     if let Some(stats) = cap_stats {

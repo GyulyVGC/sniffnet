@@ -7,9 +7,12 @@ use etherparse::{
 use pcap::Address;
 
 use crate::Protocol;
+use crate::networking::parse_packets::AddressesResolutionState;
 use crate::networking::types::address_port_pair::AddressPortPair;
 use crate::networking::types::arp_type::ArpType;
 use crate::networking::types::bogon::is_bogon;
+use crate::networking::types::data_info::DataInfo;
+use crate::networking::types::data_info_host::DataInfoHost;
 use crate::networking::types::icmp_type::{IcmpType, IcmpTypeV4, IcmpTypeV6};
 use crate::networking::types::info_address_port_pair::InfoAddressPortPair;
 use crate::networking::types::info_traffic::InfoTraffic;
@@ -354,6 +357,119 @@ pub fn modify_or_insert_in_map(
         });
 
     (new_info.traffic_direction, new_info.service)
+}
+
+/// Accounts an already-classified flow against the totals, the rDNS resolution
+/// state, the per-host map, and the per-service map.
+///
+/// Shared by both capture backends: the pcap pipeline calls it once per packet
+/// (`packets` = 1), the IPFIX collector once per flow record (`packets` = the
+/// record's packet count).
+#[allow(clippy::too_many_arguments)]
+pub fn account_flow(
+    info_traffic_msg: &mut InfoTraffic,
+    resolutions_state: &mut AddressesResolutionState,
+    key: &AddressPortPair,
+    my_interface_addresses: &[Address],
+    bytes: u128,
+    packets: u128,
+    direction: TrafficDirection,
+    service: Service,
+) {
+    let now = Instant::now();
+
+    info_traffic_msg
+        .tot_data_info
+        .add_packets(packets, bytes, direction, now);
+
+    // check the rDNS status of this address and act accordingly
+    let address_to_lookup = get_address_to_lookup(key, direction);
+    let mut r_dns_waiting_resolution = false;
+    let r_dns_already_resolved = resolutions_state
+        .addresses_resolved
+        .contains_key(&address_to_lookup);
+    if !r_dns_already_resolved {
+        r_dns_waiting_resolution = resolutions_state
+            .addresses_waiting_resolution
+            .contains_key(&address_to_lookup);
+    }
+
+    match (r_dns_waiting_resolution, r_dns_already_resolved) {
+        (false, false) => {
+            // rDNS not requested yet (first occurrence of this address to lookup)
+
+            // Add this address to the map of addresses waiting for a resolution
+            // Useful to NOT perform again a rDNS lookup for this entry
+            let mut data_info = DataInfo::default();
+            data_info.add_packets(packets, bytes, direction, now);
+            resolutions_state
+                .addresses_waiting_resolution
+                .insert(address_to_lookup, data_info);
+
+            // send the rDNS lookup request to the thread pool
+            let _ = resolutions_state.lookup_request_tx.try_send((
+                *key,
+                direction,
+                my_interface_addresses.to_vec(),
+            ));
+        }
+        (true, false) => {
+            // waiting for a previously requested rDNS resolution
+            // update the corresponding waiting address data
+            resolutions_state
+                .addresses_waiting_resolution
+                .entry(address_to_lookup)
+                .and_modify(|data_info| {
+                    data_info.add_packets(packets, bytes, direction, now);
+                });
+        }
+        (_, true) => {
+            // rDNS already resolved
+            // update the corresponding host's data info
+            let host = resolutions_state
+                .addresses_resolved
+                .get(&address_to_lookup)
+                .cloned()
+                .unwrap_or_default();
+            info_traffic_msg
+                .hosts
+                .entry(host)
+                .and_modify(|data_info_host| {
+                    data_info_host
+                        .data_info
+                        .add_packets(packets, bytes, direction, now);
+                })
+                .or_insert_with(|| {
+                    let traffic_type =
+                        get_traffic_type(&address_to_lookup, my_interface_addresses, direction);
+                    let is_loopback = address_to_lookup.is_loopback();
+                    let is_local = is_local_connection(&address_to_lookup, my_interface_addresses);
+                    let is_bogon = is_bogon(&address_to_lookup);
+                    let mut data_info = DataInfo::default();
+                    data_info.add_packets(packets, bytes, direction, now);
+                    DataInfoHost {
+                        data_info,
+                        is_loopback,
+                        is_local,
+                        is_bogon,
+                        traffic_type,
+                    }
+                });
+        }
+    }
+
+    //increment the packet count for the sniffed service
+    info_traffic_msg
+        .services
+        .entry(service)
+        .and_modify(|data_info| {
+            data_info.add_packets(packets, bytes, direction, now);
+        })
+        .or_insert_with(|| {
+            let mut data_info = DataInfo::default();
+            data_info.add_packets(packets, bytes, direction, now);
+            data_info
+        });
 }
 
 /// Returns the traffic direction observed (incoming or outgoing)
