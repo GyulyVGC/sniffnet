@@ -37,6 +37,23 @@ codegen-units = 1
 
 #═══════════════════════════════════════════════════════════════════════════════════════════════════════════════════════
 
+[lints.rust]
+unsafe_code = "forbid"
+
+[lints.clippy]
+pedantic = { level = "warn", priority = -1 }
+unwrap_used = "warn"
+expect_used = "warn"
+panic = "warn"
+todo = "warn"
+unimplemented = "warn"
+unreachable = "warn"
+dbg_macro = "warn"
+print_stdout = "warn"
+print_stderr = "warn"
+
+#═══════════════════════════════════════════════════════════════════════════════════════════════════════════════════════
+
 [dependencies]
 async-channel = "2.5.0"
 clap = { version = "4.6.5", features = ["derive"] }

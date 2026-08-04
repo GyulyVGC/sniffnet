@@ -20,6 +20,7 @@ pub const APP_VERSION: &str = env!("CARGO_PKG_VERSION");
 //     }
 // }
 
+#[allow(clippy::print_stdout)]
 pub fn print_cli_welcome_message() {
     let ver = APP_VERSION;
     print!(

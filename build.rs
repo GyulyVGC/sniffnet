@@ -1,3 +1,5 @@
+#![allow(clippy::unwrap_used, clippy::panic)]
+
 #[cfg(windows)]
 extern crate winresource;
 

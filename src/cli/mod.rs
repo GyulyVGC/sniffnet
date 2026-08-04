@@ -31,6 +31,7 @@ pub(crate) struct Args {
 
 impl Args {
     /// Handle and return CLI arguments
+    #[allow(clippy::print_stdout, clippy::print_stderr)]
     pub fn handle() -> Self {
         let args = Args::parse();
 
