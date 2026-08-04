@@ -19,7 +19,8 @@ use crate::networking::manage_packets::{
     get_address_to_lookup, get_traffic_type, is_local_connection, modify_or_insert_in_map,
 };
 use crate::networking::parse_packets::{
-    AddressesResolutionState, BackendTrafficMessage, reverse_dns_lookups,
+    AddressesResolutionState, BackendTrafficMessage, REVERSE_DNS_LOOKUP_THREADS,
+    reverse_dns_lookups,
 };
 use crate::networking::types::address_port_pair::AddressPortPair;
 use crate::networking::types::arp_type::ArpType;
@@ -43,7 +44,7 @@ const RECV_BUF_LEN: usize = 65_535;
 pub fn collect_ipfix(
     cap_id: usize,
     socket: UdpSocket,
-    mmdb_readers: MmdbReaders,
+    mmdb_readers: &MmdbReaders,
     ip_blacklist: &IpBlacklist,
     tx: &Sender<BackendTrafficMessage>,
     freeze_rxs: (Receiver<()>, Receiver<()>),
@@ -55,15 +56,21 @@ pub fn collect_ipfix(
     let mut buf = vec![0u8; RECV_BUF_LEN];
     let mut first_packet_ticks: Option<Instant> = None;
 
-    let (lookup_request_tx, lookup_request_rx) = std::sync::mpsc::channel();
+    let (lookup_request_tx, lookup_request_rx) = async_channel::unbounded();
     let (lookup_result_tx, lookup_result_rx) = std::sync::mpsc::channel();
     let mut resolutions_state = AddressesResolutionState::new(lookup_request_tx, lookup_result_rx);
-    let _ = thread::Builder::new()
-        .name("thread_reverse_dns_lookups".to_string())
-        .spawn(move || {
-            reverse_dns_lookups(&lookup_request_rx, &lookup_result_tx, &mmdb_readers);
-        })
-        .log_err(location!());
+    // a pool of threads shares the request queue, so one slow blocking lookup doesn't stall the others
+    for i in 0..REVERSE_DNS_LOOKUP_THREADS {
+        let lookup_request_rx = lookup_request_rx.clone();
+        let lookup_result_tx = lookup_result_tx.clone();
+        let mmdb_readers = mmdb_readers.clone();
+        let _ = thread::Builder::new()
+            .name(format!("thread_reverse_dns_lookups_{i}"))
+            .spawn(move || {
+                reverse_dns_lookups(&lookup_request_rx, &lookup_result_tx, &mmdb_readers);
+            })
+            .log_err(location!());
+    }
 
     loop {
         if tx.is_closed() {
@@ -288,7 +295,7 @@ fn ingest_flow_record(
             resolutions_state
                 .addresses_waiting_resolution
                 .insert(address_to_lookup, data_info);
-            let _ = resolutions_state.lookup_request_tx.send((
+            let _ = resolutions_state.lookup_request_tx.try_send((
                 key,
                 traffic_direction,
                 exporter_addresses.to_vec(),

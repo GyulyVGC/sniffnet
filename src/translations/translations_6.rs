@@ -2,6 +2,14 @@
 
 use crate::translations::types::language::Language;
 
+pub fn latency_translation(language: Language) -> &'static str {
+    match language {
+        Language::EN => "Latency",
+        Language::IT => "Latenza",
+        _ => "Latency",
+    }
+}
+
 pub fn ipfix_collector_translation(language: Language) -> &'static str {
     match language {
         Language::EN => "IPFIX collector",

@@ -8,6 +8,7 @@ pub trait ErrorLogger<T, E> {
 }
 
 impl<T, E: Display> ErrorLogger<T, E> for Result<T, E> {
+    #[allow(clippy::print_stderr)]
     fn log_err(self, location: Location) -> Result<T, E> {
         if let Err(e) = &self {
             let file = location.file;
@@ -15,7 +16,10 @@ impl<T, E: Display> ErrorLogger<T, E> for Result<T, E> {
             eprintln!("Sniffnet error at [{file}:{line}]: {e}");
             // in debug mode, panic on error
             #[cfg(debug_assertions)]
-            panic!();
+            #[allow(clippy::panic)]
+            {
+                panic!();
+            }
         }
 
         self

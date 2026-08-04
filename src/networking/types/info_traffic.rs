@@ -98,7 +98,10 @@ impl InfoTraffic {
             DataRepr::Packets => u128::from(self.dropped_packets),
             DataRepr::Bytes | DataRepr::Bits => {
                 // assume that the dropped packets have the same size as the average packet
-                u128::from(self.dropped_packets) * all / all_packets
+                u128::from(self.dropped_packets)
+                    .saturating_mul(all)
+                    .checked_div(all_packets)
+                    .unwrap_or_default()
             }
         };
 

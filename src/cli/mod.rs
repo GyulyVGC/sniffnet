@@ -31,25 +31,30 @@ pub(crate) struct Args {
 
 impl Args {
     /// Handle and return CLI arguments
+    #[allow(clippy::print_stdout, clippy::print_stderr)]
     pub fn handle() -> Self {
         let args = Args::parse();
 
         #[cfg(all(windows, not(debug_assertions)))]
         if let Some(logs_file) = crate::utils::formatted_strings::get_logs_file_path() {
+            use crate::utils::error_logger::{ErrorLogger, Location};
             if args.logs {
-                std::process::Command::new("explorer")
+                if let Ok(mut explorer) = std::process::Command::new("explorer")
                     .arg(logs_file)
                     .spawn()
-                    .unwrap()
-                    .wait()
-                    .unwrap_or_default();
-                std::process::exit(0);
+                    .log_err(crate::location!())
+                {
+                    let _ = explorer.wait().log_err(crate::location!());
+                    std::process::exit(0);
+                }
+                std::process::exit(1);
             } else {
                 // truncate logs file
                 let _ = std::fs::OpenOptions::new()
                     .write(true)
                     .truncate(true)
-                    .open(logs_file);
+                    .open(logs_file)
+                    .log_err(crate::location!());
             }
         }
 

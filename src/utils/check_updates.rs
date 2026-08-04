@@ -25,7 +25,6 @@ async fn is_newer_release_available(max_retries: u8, seconds_between_retries: u8
         .ok()?;
     let response = client
         .get("https://api.github.com/repos/GyulyVGC/sniffnet/releases/latest")
-        .header("User-agent", format!("{SNIFFNET_LOWERCASE}-{APP_VERSION}"))
         .header("Accept", "application/vnd.github+json")
         .header("X-GitHub-Api-Version", "2022-11-28")
         .send()
@@ -38,7 +37,6 @@ async fn is_newer_release_available(max_retries: u8, seconds_between_retries: u8
         if result_json.is_err() {
             let response2 = client
                 .get("https://api.github.com/repos/GyulyVGC/sniffnet/releases/latest")
-                .header("User-agent", format!("{SNIFFNET_LOWERCASE}-{APP_VERSION}"))
                 .header("Accept", "application/vnd.github+json")
                 .header("X-GitHub-Api-Version", "2022-11-28")
                 .send()
@@ -63,7 +61,7 @@ async fn is_newer_release_available(max_retries: u8, seconds_between_retries: u8
             return Some(latest_semver > current_semver);
         }
     }
-    let retries_left = max_retries - 1;
+    let retries_left = max_retries.saturating_sub(1);
     if retries_left > 0 {
         // sleep seconds_between_retries and retries the request
         tokio::time::sleep(Duration::from_secs(u64::from(seconds_between_retries))).await;

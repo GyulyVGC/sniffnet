@@ -3,12 +3,14 @@
 We consider the security of Sniffnet a top priority.<br>
 The application is developed with a **security-first approach**:
 it has always been designed to **protect users' data privacy and system integrity**,
-as demonstrated by [security audits](https://sniffnet.net/news/security-audit/) assessing the application safety.
+as demonstrated by [security audits](https://sniffnet.app/news/security-audit/) assessing the application safety.
 
 But no matter how much effort we put into securing the app, there can still be **vulnerabilities** present.
 
 For how incidents are handled, see [`INCIDENT_RESPONSE.md`](https://github.com/GyulyVGC/sniffnet/blob/main/INCIDENT_RESPONSE.md).<br>
 For the project's threat model, see [`THREAT_MODEL.md`](https://github.com/GyulyVGC/sniffnet/blob/main/THREAT_MODEL.md).
+
+For all security-related communications, please write to `security@sniffnet.app`.
 
 ***
 
@@ -16,7 +18,7 @@ If you discover a vulnerability, we would like to know about it so we can take s
 
 Please do the following:
 
-- E-mail your findings to gyulyvgc99@gmail.com
+- E-mail your findings to `security@sniffnet.app`
 - Do not take advantage of the vulnerability or problem you have discovered
 - Do not reveal the problem to others until it has been resolved
 - Do provide sufficient information to reproduce the problem, so we will be able to resolve it as quickly as possible

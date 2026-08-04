@@ -41,6 +41,7 @@ use crate::networking::types::data_representation::DataRepr;
 use crate::networking::types::host::{Host, HostMessage};
 use crate::networking::types::info_traffic::InfoTraffic;
 use crate::networking::types::ip_blacklist::IpBlacklist;
+use crate::networking::types::latency::{LatencyStatus, measure_latency};
 use crate::networking::types::my_device::MyDevice;
 use crate::networking::types::program::Program;
 use crate::networking::types::program_lookup::{ProgramLookup, get_picon, lookup_program};
@@ -129,6 +130,8 @@ pub struct Sniffer {
     pub mmdb_readers: MmdbReaders,
     /// IP blacklist
     pub ip_blacklist: IpBlacklist,
+    /// Latest latency measurements by remote address
+    pub latency_statuses: HashMap<IpAddr, LatencyStatus>,
     /// Time-related events
     pub timing_events: TimingEvents,
     /// Whether thumbnail mode is currently active
@@ -183,6 +186,7 @@ impl Sniffer {
                 asn: Arc::new(MmdbReader::from(&mmdb_asn, ASN_MMDB)),
             },
             ip_blacklist: IpBlacklist::default(), // load it later
+            latency_statuses: HashMap::new(),
             timing_events: TimingEvents::default(),
             thumbnail: false,
             id: None,
@@ -333,6 +337,8 @@ impl Sniffer {
             Message::Quit => return self.quit(),
             Message::Welcome => self.welcome(),
             Message::CopyIp(ip) => return self.copy_ip(ip),
+            Message::MeasureLatency(ip) => return self.measure_latency(ip),
+            Message::LatencyMeasured(ip, status) => self.latency_measured(ip, status),
             Message::OpenFile(old_file, file_info, consumer_message) => {
                 return self.open_file(old_file, file_info, consumer_message);
             }
@@ -686,6 +692,17 @@ impl Sniffer {
         self.ip_blacklist = blacklist;
     }
 
+    fn measure_latency(&mut self, ip: IpAddr) -> Task<Message> {
+        self.latency_statuses.insert(ip, LatencyStatus::Measuring);
+        Task::perform(measure_latency(ip), move |status| {
+            Message::LatencyMeasured(ip, status)
+        })
+    }
+
+    fn latency_measured(&mut self, ip: IpAddr, status: LatencyStatus) {
+        self.latency_statuses.insert(ip, status);
+    }
+
     fn open_file(
         &mut self,
         old_file: String,
@@ -1018,7 +1035,7 @@ impl Sniffer {
                             collect_ipfix(
                                 curr_cap_id,
                                 socket,
-                                mmdb_readers,
+                                &mmdb_readers,
                                 &ip_blacklist,
                                 &tx,
                                 (freeze_rx, freeze_rx2),
@@ -1032,7 +1049,7 @@ impl Sniffer {
                             parse_packets(
                                 curr_cap_id,
                                 capture_source,
-                                mmdb_readers,
+                                &mmdb_readers,
                                 &ip_blacklist,
                                 capture_context,
                                 filters,
@@ -1100,6 +1117,7 @@ impl Sniffer {
         self.current_capture_rx = (self.current_capture_rx.0 + 1, None);
         self.info_traffic = InfoTraffic::default();
         self.addresses_resolved = HashMap::new();
+        self.latency_statuses = HashMap::new();
         self.logged_notifications = LoggedNotifications::default();
         self.pcap_error = None;
         self.traffic_chart = TrafficChart::new(style, language, self.conf.data_repr);
@@ -1465,6 +1483,7 @@ mod tests {
     use serial_test::{parallel, serial};
     use std::collections::VecDeque;
     use std::fs::remove_file;
+    use std::net::{IpAddr, Ipv4Addr};
     use std::path::Path;
     use std::time::Duration;
 
@@ -1485,6 +1504,7 @@ mod tests {
     use crate::networking::types::data_info::DataInfo;
     use crate::networking::types::data_representation::DataRepr;
     use crate::networking::types::host::Host;
+    use crate::networking::types::latency::LatencyStatus;
     use crate::networking::types::program::Program;
     use crate::networking::types::service::Service;
     use crate::networking::types::traffic_direction::TrafficDirection;
@@ -2408,6 +2428,39 @@ mod tests {
         assert_eq!(
             format!("{:.2}", sniffer.conf.settings.scale_factor),
             "0.30".to_string()
+        );
+    }
+
+    #[test]
+    #[parallel] // needed to not collide with other tests generating configs files
+    fn test_correctly_store_latency_measurement() {
+        let mut sniffer = Sniffer::new(Conf::default());
+        let ip = IpAddr::V4(Ipv4Addr::new(8, 8, 8, 8));
+
+        sniffer.update(Message::MeasureLatency(ip));
+        assert_eq!(
+            sniffer.latency_statuses.get(&ip),
+            Some(&LatencyStatus::Measuring)
+        );
+
+        // a completed measurement overwrites the Measuring status
+        sniffer.update(Message::LatencyMeasured(
+            ip,
+            LatencyStatus::Measured(Duration::from_millis(42)),
+        ));
+        assert_eq!(
+            sniffer.latency_statuses.get(&ip),
+            Some(&LatencyStatus::Measured(Duration::from_millis(42)))
+        );
+
+        // a failed measurement is stored too
+        sniffer.update(Message::LatencyMeasured(
+            ip,
+            LatencyStatus::Failed("no reply".to_string()),
+        ));
+        assert_eq!(
+            sniffer.latency_statuses.get(&ip),
+            Some(&LatencyStatus::Failed("no reply".to_string()))
         );
     }
 }

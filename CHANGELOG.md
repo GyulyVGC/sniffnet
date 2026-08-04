@@ -3,8 +3,15 @@
 All Sniffnet releases with the relative changes are documented in this file.
 
 ## [UNRELEASED]
+- Set `Content-Type: application/json` header on remote notifications ([#1266](https://github.com/GyulyVGC/sniffnet/pull/1266))
+
+## [1.5.1] - 2026-07-22
+- Show latency of connections ([#1194](https://github.com/GyulyVGC/sniffnet/pull/1194) — fixes [#845](https://github.com/GyulyVGC/sniffnet/issues/845))
+- Added Hungarian translation 🇭🇺 ([#1197](https://github.com/GyulyVGC/sniffnet/pull/1197))
+- Added Sinhala translation 🇱🇰 ([#1239](https://github.com/GyulyVGC/sniffnet/pull/1239))
 - Support CIDR ranges in imported IP blacklists ([#1181](https://github.com/GyulyVGC/sniffnet/pull/1181))
 - Show number of IP addresses and CIDR ranges in imported IP blacklists ([#1183](https://github.com/GyulyVGC/sniffnet/pull/1183))
+- Add relevant keywords to the `.desktop` file ([#1248](https://github.com/GyulyVGC/sniffnet/pull/1248))
 - Updated some of the existing translations to v1.5:
   - Ukrainian ([#1039](https://github.com/GyulyVGC/sniffnet/pull/1039))
   - German ([#1122](https://github.com/GyulyVGC/sniffnet/pull/1122))
@@ -13,8 +20,12 @@ All Sniffnet releases with the relative changes are documented in this file.
   - Indonesian ([#1145](https://github.com/GyulyVGC/sniffnet/pull/1145))
   - Swedish ([#1068](https://github.com/GyulyVGC/sniffnet/pull/1068))
   - Greek ([#1175](https://github.com/GyulyVGC/sniffnet/pull/1175))
+  - Persian ([#1196](https://github.com/GyulyVGC/sniffnet/pull/1196))
+  - Russian ([#1224](https://github.com/GyulyVGC/sniffnet/pull/1224))
+- Use a thread pool for reverse DNS lookups to avoid stalling hosts resolutions (fixes [#1257](https://github.com/GyulyVGC/sniffnet/issues/1257))
 - Fix unseen hosts and services not appearing dimmed in thumbnail mode (fixes [#1142](https://github.com/GyulyVGC/sniffnet/issues/1142))
 - Fix `X-AppImage-Version` field in Linux AppImage metadata to correctly reflect the app version ([#1174](https://github.com/GyulyVGC/sniffnet/pull/1174) — fixes [#1003](https://github.com/GyulyVGC/sniffnet/issues/1003))
+- Fix Linux packages failing to run on distros with `glibc` older than 2.39 (fixes [#1256](https://github.com/GyulyVGC/sniffnet/issues/1256))
 
 ## [1.5.0] - 2026-04-14
 - Show which apps and programs are generating network traffic ([#1056](https://github.com/GyulyVGC/sniffnet/pull/1056) — fixes [#170](https://github.com/GyulyVGC/sniffnet/issues/170))

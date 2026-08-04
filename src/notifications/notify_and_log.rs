@@ -19,6 +19,16 @@ use crate::utils::formatted_strings::get_formatted_timestamp;
 use crate::{InfoTraffic, SNIFFNET_LOWERCASE, location};
 use std::collections::HashMap;
 use std::net::IpAddr;
+use std::sync::LazyLock;
+
+/// Client used to send remote notifications; it's shared to reuse the underlying connection pool
+static REMOTE_NOTIFICATIONS_CLIENT: LazyLock<Option<reqwest::Client>> = LazyLock::new(|| {
+    reqwest::Client::builder()
+        .user_agent(format!("{SNIFFNET_LOWERCASE}-{APP_VERSION}"))
+        .build()
+        .log_err(location!())
+        .ok()
+});
 
 /// Checks if one or more notifications have to be emitted and logs them.
 ///
@@ -224,16 +234,12 @@ fn send_remote_notification(
 ) {
     if remote_notifications.is_active_and_set() {
         tokio::task::spawn(async move {
-            let Ok(client) = reqwest::Client::builder()
-                .user_agent(format!("{SNIFFNET_LOWERCASE}-{APP_VERSION}"))
-                .build()
-                .log_err(location!())
-            else {
+            let Some(client) = REMOTE_NOTIFICATIONS_CLIENT.as_ref() else {
                 return;
             };
             let Ok(response) = client
                 .post(remote_notifications.url())
-                .header("User-agent", format!("{SNIFFNET_LOWERCASE}-{APP_VERSION}"))
+                .header("Content-Type", "application/json")
                 .body(notification.to_json())
                 .send()
                 .await

@@ -47,7 +47,11 @@ impl ReportCol {
             ReportCol::Service => service_translation(language).to_string(),
             ReportCol::Data => {
                 let mut str = data_repr.get_label(language).to_string();
-                str.remove(0).to_uppercase().to_string() + &str
+                if str.is_empty() {
+                    str
+                } else {
+                    str.remove(0).to_uppercase().to_string() + &str
+                }
             }
         }
     }
