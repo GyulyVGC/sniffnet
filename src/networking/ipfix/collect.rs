@@ -20,7 +20,6 @@ use crate::networking::parse_packets::{
 };
 use crate::networking::types::address_port_pair::AddressPortPair;
 use crate::networking::types::arp_type::ArpType;
-use crate::networking::types::icmp_type::IcmpType;
 use crate::networking::types::info_traffic::InfoTraffic;
 use crate::networking::types::ip_blacklist::IpBlacklist;
 use crate::networking::types::protocol::Protocol;
@@ -202,12 +201,14 @@ fn ingest_flow_record(
     let Some(key) = build_key(record) else {
         return;
     };
+    // A record with neither counter carries nothing to account for — an
+    // exporter whose counters we can't read (see the total-counter note in
+    // `wire.rs`) would otherwise contribute a phantom packet per record.
+    if record.bytes == 0 && record.packets == 0 {
+        return;
+    }
     let exchanged_bytes = record.bytes;
-    let exchanged_packets = if record.packets == 0 {
-        1
-    } else {
-        record.packets
-    };
+    let exchanged_packets = record.packets;
     let mac_addresses = (
         record.src_mac.map(format_mac),
         record.dst_mac.map(format_mac),
@@ -219,7 +220,7 @@ fn ingest_flow_record(
         &key,
         exporter_addresses,
         mac_addresses,
-        IcmpType::default(),
+        None,
         ArpType::default(),
         exchanged_bytes,
         exchanged_packets,

@@ -175,7 +175,7 @@ pub fn parse_packets(
                         &key,
                         cs.get_addresses(),
                         mac_addresses,
-                        icmp_type,
+                        Some(icmp_type),
                         arp_type,
                         exchanged_bytes,
                         1,

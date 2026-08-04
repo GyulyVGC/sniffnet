@@ -270,7 +270,9 @@ pub fn modify_or_insert_in_map(
     key: &AddressPortPair,
     my_interface_addresses: &[Address],
     mac_addresses: (Option<String>, Option<String>),
-    icmp_type: IcmpType,
+    // `None` when the caller observes ICMP flows without being able to tell
+    // their type, as IPFIX records do unless the exporter sends the type IEs.
+    icmp_type: Option<IcmpType>,
     arp_type: ArpType,
     exchanged_bytes: u128,
     exchanged_packets: u128,
@@ -319,7 +321,9 @@ pub fn modify_or_insert_in_map(
                 info.final_timestamp = final_ts;
             }
             info.final_instant = Instant::now();
-            if key.protocol.eq(&Protocol::ICMP) {
+            if key.protocol.eq(&Protocol::ICMP)
+                && let Some(icmp_type) = icmp_type
+            {
                 info.icmp_types
                     .entry(icmp_type)
                     .and_modify(|n| *n += 1)
@@ -342,10 +346,11 @@ pub fn modify_or_insert_in_map(
             final_instant: Instant::now(),
             service,
             traffic_direction,
-            icmp_types: if key.protocol.eq(&Protocol::ICMP) {
-                HashMap::from([(icmp_type, 1)])
-            } else {
-                HashMap::new()
+            icmp_types: match icmp_type {
+                Some(icmp_type) if key.protocol.eq(&Protocol::ICMP) => {
+                    HashMap::from([(icmp_type, 1)])
+                }
+                _ => HashMap::new(),
             },
             arp_types: if key.protocol.eq(&Protocol::ARP) {
                 HashMap::from([(arp_type, 1)])

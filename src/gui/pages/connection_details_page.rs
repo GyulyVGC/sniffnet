@@ -242,7 +242,17 @@ fn col_info<'a>(
         ));
     }
 
-    if is_icmp || is_arp {
+    // Empty for ICMP flows learned from IPFIX, whose records don't carry the
+    // message type unless the exporter sends the relevant IEs.
+    let messages = if is_icmp {
+        IcmpType::pretty_print_types(&val.icmp_types)
+    } else if is_arp {
+        ArpType::pretty_print_types(&val.arp_types)
+    } else {
+        String::new()
+    };
+
+    if !messages.is_empty() {
         ret_val = ret_val.push(
             Column::new()
                 .push(
@@ -252,11 +262,7 @@ fn col_info<'a>(
                 .push(Scrollable::with_direction(
                     Column::new()
                         .padding(Padding::ZERO.right(10).bottom(10))
-                        .push(Text::new(if is_icmp {
-                            IcmpType::pretty_print_types(&val.icmp_types)
-                        } else {
-                            ArpType::pretty_print_types(&val.arp_types)
-                        })),
+                        .push(Text::new(messages)),
                     Direction::Both {
                         vertical: ScrollbarType::properties(),
                         horizontal: ScrollbarType::properties(),
