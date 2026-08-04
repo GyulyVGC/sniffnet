@@ -51,6 +51,7 @@ pub mod ie {
     pub const FLOW_END_SECONDS: u16 = 151;
     pub const FLOW_START_MILLISECONDS: u16 = 152;
     pub const FLOW_END_MILLISECONDS: u16 = 153;
+    pub const LAYER2_OCTET_DELTA_COUNT: u16 = 352;
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -255,7 +256,14 @@ fn read_field_bytes(input: &[u8], declared_length: u16) -> IResult<&[u8], &[u8]>
 
 fn apply_ie(ie_id: u16, raw: &[u8], record: &mut FlowRecord) {
     match ie_id {
-        ie::OCTET_DELTA_COUNT | ie::OCTET_TOTAL_COUNT => {
+        // TODO: a foreign exporter's template may carry several octet counters
+        // at once (e.g. octetDeltaCount + layer2OctetDeltaCount, or delta +
+        // total). Today they share one arm and overwrite `record.bytes`, so the
+        // value is whichever IE appears LAST in the template — order-dependent
+        // and arbitrary across exporters. Resolve by a deterministic priority
+        // instead (suggested: layer2 delta > IP delta > total). Same applies to
+        // the packet counters below.
+        ie::OCTET_DELTA_COUNT | ie::OCTET_TOTAL_COUNT | ie::LAYER2_OCTET_DELTA_COUNT => {
             if let Some(v) = read_unsigned(raw) {
                 record.bytes = v;
             }
@@ -375,6 +383,7 @@ fn read_ipv6(raw: &[u8]) -> Option<IpAddr> {
     Some(IpAddr::V6(Ipv6Addr::from(octets)))
 }
 
+// TODO: all zeros should be trated as None??
 fn read_mac(raw: &[u8]) -> Option<[u8; 6]> {
     if raw.len() != 6 {
         return None;

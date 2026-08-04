@@ -11,7 +11,6 @@ use tokio::sync::broadcast::Receiver;
 
 use crate::location;
 use crate::mmdb::types::mmdb_reader::MmdbReaders;
-use crate::networking::ipfix::MyIpfixSocket;
 use crate::networking::ipfix::templates::TemplateCache;
 use crate::networking::ipfix::wire::{
     self, FlowRecord, IPFIX_VERSION, Set, decode_data_record, format_mac, parse_message,
@@ -25,7 +24,6 @@ use crate::networking::parse_packets::{
 use crate::networking::types::address_port_pair::AddressPortPair;
 use crate::networking::types::arp_type::ArpType;
 use crate::networking::types::bogon::is_bogon;
-use crate::networking::types::capture_context::{CaptureContext, CaptureType};
 use crate::networking::types::data_info::DataInfo;
 use crate::networking::types::data_info_host::DataInfoHost;
 use crate::networking::types::icmp_type::IcmpType;
@@ -38,10 +36,6 @@ use crate::utils::types::timestamp::Timestamp;
 /// Buffer size for a single UDP datagram. RFC 7011 §10.3.1 recommends at least
 /// 1500; we size larger to accommodate jumbo-framed exporters.
 const RECV_BUF_LEN: usize = 65_535;
-
-/// Receive timeout — short enough to allow tick emission and freeze checks at
-/// roughly the same cadence as the pcap loop.
-const RECV_TIMEOUT: Duration = Duration::from_millis(150);
 
 /// Entry point for the IPFIX collector thread. Mirrors `parse_packets` in
 /// terms of channel contracts: it emits `BackendTrafficMessage::TickRun` every
@@ -403,8 +397,10 @@ fn build_key(record: &FlowRecord) -> Option<AddressPortPair> {
     })
 }
 
-/// Build a `[Address]` slice carrying just the exporter's IP, so direction
-/// classification treats the exporter as the local anchor.
+/// Build a `[Address]` slice carrying just the exporter's IP, so host
+/// classification treats the exporter as the local anchor. Flow direction
+/// itself comes from IE 61 when the exporter sends it; this is only the
+/// fallback for exporters that report `undefined`.
 fn exporter_as_addresses(peer: IpAddr) -> Vec<Address> {
     if peer.is_loopback() || peer.is_unspecified() {
         return vec![];

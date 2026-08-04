@@ -9,11 +9,8 @@ pub mod collect;
 pub mod templates;
 pub mod wire;
 
-use crate::location;
-use crate::utils::error_logger::ErrorLogger;
 use serde::{Deserialize, Serialize};
-use std::net::{IpAddr, Ipv4Addr, SocketAddr, UdpSocket};
-use std::time::Duration;
+use std::net::{IpAddr, Ipv4Addr, SocketAddr};
 
 /// IANA-registered default IPFIX collector port.
 pub const DEFAULT_IPFIX_PORT: u16 = 4739;

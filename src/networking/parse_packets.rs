@@ -343,6 +343,7 @@ fn from_null(packet: &[u8]) -> Option<LaxPacketHeaders<'_>> {
     }
 }
 
+// TODO: do this with etherparse once they support Linux SLL2
 fn from_linux_sll(packet: &[u8], is_v1: bool) -> Option<LaxPacketHeaders<'_>> {
     let header_len = if is_v1 { 16 } else { 20 };
     if packet.len() <= header_len {

@@ -34,7 +34,7 @@ use crate::networking::parse_packets::BackendTrafficMessage;
 use crate::networking::parse_packets::parse_packets;
 use crate::networking::traffic_preview::{TrafficPreview, traffic_preview};
 use crate::networking::types::capture_context::{
-    CaptureContext, CaptureSource, CaptureSourcePicklist, Ipfix, MyPcapImport,
+    CaptureContext, CaptureSource, CaptureSourcePicklist, MyPcapImport,
 };
 use crate::networking::types::combobox_data_states::ComboboxDataStates;
 use crate::networking::types::data_representation::DataRepr;

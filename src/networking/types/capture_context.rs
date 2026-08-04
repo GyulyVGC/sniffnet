@@ -131,10 +131,6 @@ pub struct Offline {
     cap: Capture<pcap::Offline>,
 }
 
-pub struct Ipfix {
-    socket: UdpSocket,
-}
-
 pub enum CaptureType {
     Live(Capture<Active>),
     Offline(Capture<pcap::Offline>),
