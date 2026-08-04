@@ -349,6 +349,14 @@ impl AddressesResolutionState {
         }
     }
 
+    /// Resolution state with no lookup threads behind it: requests queue up on
+    /// the channel and are never served, which is what tests of the accounting
+    /// path want.
+    #[cfg(test)]
+    pub(crate) fn new_detached() -> Self {
+        Self::new(async_channel::unbounded().0, std::sync::mpsc::channel().1)
+    }
+
     pub(crate) fn new_hosts_to_send(&mut self) -> Vec<HostMessage> {
         let mut new_hosts = Vec::new();
         while let Ok(mut host_msg) = self.lookup_result_rx.try_recv() {

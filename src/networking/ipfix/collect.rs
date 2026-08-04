@@ -283,3 +283,198 @@ fn exporter_as_addresses(peer: IpAddr) -> Vec<Address> {
         dst_addr: None,
     }]
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::networking::types::data_representation::DataRepr;
+    use crate::networking::types::traffic_direction::TrafficDirection;
+    use std::net::{Ipv4Addr, Ipv6Addr};
+
+    /// The field specifiers `sniffnet-agent` puts in its templates, after the
+    /// two address fields that differ between the IPv4 and IPv6 variants.
+    const AGENT_COMMON_FIELDS: [(u16, u16); 10] = [
+        (7, 2),
+        (11, 2),
+        (4, 1),
+        (56, 6),
+        (80, 6),
+        (61, 1),
+        (352, 8),
+        (2, 8),
+        (152, 8),
+        (153, 8),
+    ];
+
+    fn agent_fields(addr_fields: [(u16, u16); 2]) -> Vec<(u16, u16)> {
+        addr_fields.into_iter().chain(AGENT_COMMON_FIELDS).collect()
+    }
+
+    fn set(set_id: u16, body: &[u8]) -> Vec<u8> {
+        let mut out = set_id.to_be_bytes().to_vec();
+        out.extend_from_slice(&u16::try_from(body.len() + 4).unwrap().to_be_bytes());
+        out.extend_from_slice(body);
+        out
+    }
+
+    fn template_set(template_id: u16, fields: &[(u16, u16)]) -> Vec<u8> {
+        let mut body = template_id.to_be_bytes().to_vec();
+        body.extend_from_slice(&u16::try_from(fields.len()).unwrap().to_be_bytes());
+        for (ie, len) in fields {
+            body.extend_from_slice(&ie.to_be_bytes());
+            body.extend_from_slice(&len.to_be_bytes());
+        }
+        set(wire::SET_ID_TEMPLATE, &body)
+    }
+
+    /// Message header plus the given sets, with the length backfilled.
+    fn datagram(sets: &[Vec<u8>]) -> Vec<u8> {
+        let mut out = IPFIX_VERSION.to_be_bytes().to_vec();
+        out.extend_from_slice(&[0, 0]); // length placeholder
+        out.extend_from_slice(&[0; 4]); // export time
+        out.extend_from_slice(&[0; 4]); // sequence number
+        out.extend_from_slice(&[0; 4]); // observation domain
+        for s in sets {
+            out.extend_from_slice(s);
+        }
+        let len = u16::try_from(out.len()).unwrap().to_be_bytes();
+        out[2] = len[0];
+        out[3] = len[1];
+        out
+    }
+
+    /// Record tail shared by both address families, in the agent's field order.
+    fn record_tail(bytes: u64, packets: u64) -> Vec<u8> {
+        let mut r = Vec::new();
+        r.extend_from_slice(&443u16.to_be_bytes()); // source port
+        r.extend_from_slice(&50_000u16.to_be_bytes()); // destination port
+        r.push(6); // TCP
+        r.extend_from_slice(&[0xAA; 6]); // source MAC
+        r.extend_from_slice(&[0; 6]); // destination MAC: not observed
+        r.push(0x00); // flowDirection: ingress
+        r.extend_from_slice(&bytes.to_be_bytes());
+        r.extend_from_slice(&packets.to_be_bytes());
+        r.extend_from_slice(&20_000u64.to_be_bytes()); // flow start: 20s
+        r.extend_from_slice(&25_000u64.to_be_bytes()); // flow end: 25s
+        r
+    }
+
+    fn run(bytes: &[u8]) -> (InfoTraffic, AddressesResolutionState) {
+        let mut templates = TemplateCache::new();
+        let mut info = InfoTraffic::default();
+        let mut resolutions = AddressesResolutionState::new_detached();
+        process_datagram(
+            bytes,
+            "203.0.113.9:4739".parse().unwrap(),
+            &mut templates,
+            &mut info,
+            &IpBlacklist::default(),
+            &mut resolutions,
+        );
+        (info, resolutions)
+    }
+
+    /// A template set plus a one-record data set, shaped exactly as the agent
+    /// emits them.
+    fn agent_datagram(
+        template_id: u16,
+        addr_fields: [(u16, u16); 2],
+        addrs: &[u8],
+        bytes: u64,
+        packets: u64,
+    ) -> Vec<u8> {
+        let mut record = addrs.to_vec();
+        record.extend_from_slice(&record_tail(bytes, packets));
+        datagram(&[
+            template_set(template_id, &agent_fields(addr_fields)),
+            set(template_id, &record),
+        ])
+    }
+
+    #[test]
+    fn decodes_an_agent_shaped_ipv4_datagram() {
+        let mut addrs = Ipv4Addr::new(10, 0, 0, 1).octets().to_vec();
+        addrs.extend_from_slice(&Ipv4Addr::new(8, 8, 8, 8).octets());
+        let (info, resolutions) = run(&agent_datagram(256, [(8, 4), (12, 4)], &addrs, 1500, 10));
+
+        let key = AddressPortPair {
+            source: IpAddr::V4(Ipv4Addr::new(10, 0, 0, 1)),
+            sport: Some(443),
+            dest: IpAddr::V4(Ipv4Addr::new(8, 8, 8, 8)),
+            dport: Some(50_000),
+            protocol: Protocol::TCP,
+        };
+        let entry = info.map.get(&key).expect("flow present");
+        assert_eq!(entry.transmitted_bytes, 1500);
+        assert_eq!(entry.transmitted_packets, 10);
+        // flowDirection 0x00 is ingress, and it overrides any address guess
+        assert_eq!(entry.traffic_direction, TrafficDirection::Incoming);
+        assert_eq!(entry.mac_address1, Some("aa:aa:aa:aa:aa:aa".to_string()));
+        assert_eq!(entry.mac_address2, None, "all-zero MAC means not observed");
+        assert_eq!(entry.initial_timestamp, Timestamp::new(20, 0));
+        assert_eq!(entry.final_timestamp, Timestamp::new(25, 0));
+
+        assert_eq!(info.tot_data_info.tot_data(DataRepr::Bytes), 1500);
+        assert_eq!(info.tot_data_info.tot_data(DataRepr::Packets), 10);
+        assert_eq!(info.services.len(), 1);
+        // no rDNS threads are running, so the address is left awaiting lookup
+        assert_eq!(resolutions.addresses_waiting_resolution.len(), 1);
+        assert!(info.hosts.is_empty());
+    }
+
+    #[test]
+    fn decodes_an_agent_shaped_ipv6_datagram() {
+        let src = Ipv6Addr::new(0x2001, 0xdb8, 0, 0, 0, 0, 0, 1);
+        let dst = Ipv6Addr::new(0x2001, 0xdb8, 0, 0, 0, 0, 0, 2);
+        let mut addrs = src.octets().to_vec();
+        addrs.extend_from_slice(&dst.octets());
+        let (info, _) = run(&agent_datagram(257, [(27, 16), (28, 16)], &addrs, 800, 4));
+
+        let key = AddressPortPair {
+            source: IpAddr::V6(src),
+            sport: Some(443),
+            dest: IpAddr::V6(dst),
+            dport: Some(50_000),
+            protocol: Protocol::TCP,
+        };
+        let entry = info.map.get(&key).expect("flow present");
+        assert_eq!(entry.transmitted_bytes, 800);
+        assert_eq!(entry.transmitted_packets, 4);
+    }
+
+    #[test]
+    fn record_without_counters_is_skipped() {
+        let mut addrs = Ipv4Addr::new(10, 0, 0, 1).octets().to_vec();
+        addrs.extend_from_slice(&Ipv4Addr::new(8, 8, 8, 8).octets());
+        let (info, _) = run(&agent_datagram(256, [(8, 4), (12, 4)], &addrs, 0, 0));
+
+        assert!(info.map.is_empty(), "no traffic to account for");
+        assert_eq!(info.tot_data_info.tot_data(DataRepr::Packets), 0);
+    }
+
+    #[test]
+    fn data_set_without_a_known_template_is_skipped() {
+        // Data referencing template 256 before any template set has arrived.
+        let bytes = datagram(&[set(256, &[0xAA; 58])]);
+        let (info, _) = run(&bytes);
+        assert!(info.map.is_empty());
+    }
+
+    #[test]
+    fn trailing_padding_does_not_produce_an_extra_record() {
+        let mut addrs = Ipv4Addr::new(10, 0, 0, 1).octets().to_vec();
+        addrs.extend_from_slice(&Ipv4Addr::new(8, 8, 8, 8).octets());
+        let mut record = addrs;
+        record.extend_from_slice(&record_tail(1500, 10));
+        record.extend_from_slice(&[0; 3]); // pad to a 4-byte boundary
+
+        let bytes = datagram(&[
+            template_set(256, &agent_fields([(8, 4), (12, 4)])),
+            set(256, &record),
+        ]);
+        let (info, _) = run(&bytes);
+
+        assert_eq!(info.map.len(), 1);
+        assert_eq!(info.tot_data_info.tot_data(DataRepr::Packets), 10);
+    }
+}

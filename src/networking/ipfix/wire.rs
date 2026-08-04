@@ -612,4 +612,143 @@ mod tests {
         let (_, set) = parse_set(&bytes).unwrap();
         assert_eq!(set, Set::OptionsTemplate);
     }
+
+    /// Decode `payload` against a template built from `(ie, length)` pairs.
+    fn decode(fields: &[(u16, u16)], payload: &[u8]) -> FlowRecord {
+        let template: Vec<FieldSpec> = fields
+            .iter()
+            .map(|(ie_id, length)| FieldSpec {
+                ie_id: *ie_id,
+                length: *length,
+                enterprise: None,
+            })
+            .collect();
+        decode_data_record(&template, payload).expect("decode").1
+    }
+
+    #[test]
+    fn layer2_octets_win_over_ip_octets_in_either_order() {
+        // 1500 as layer2OctetDeltaCount, 1000 as octetDeltaCount
+        let l2 = [0, 0, 0, 0, 0, 0, 0x05, 0xDC];
+        let ip = [0, 0, 0, 0, 0, 0, 0x03, 0xE8];
+
+        let mut l2_first = Vec::new();
+        l2_first.extend_from_slice(&l2);
+        l2_first.extend_from_slice(&ip);
+        assert_eq!(
+            decode(
+                &[
+                    (ie::LAYER2_OCTET_DELTA_COUNT, 8),
+                    (ie::OCTET_DELTA_COUNT, 8)
+                ],
+                &l2_first,
+            )
+            .bytes,
+            1500,
+        );
+
+        let mut ip_first = Vec::new();
+        ip_first.extend_from_slice(&ip);
+        ip_first.extend_from_slice(&l2);
+        assert_eq!(
+            decode(
+                &[
+                    (ie::OCTET_DELTA_COUNT, 8),
+                    (ie::LAYER2_OCTET_DELTA_COUNT, 8)
+                ],
+                &ip_first,
+            )
+            .bytes,
+            1500,
+        );
+    }
+
+    #[test]
+    fn cumulative_totals_are_not_read_as_deltas() {
+        // The collector adds each record's counts onto a running tally, so a
+        // total would be re-added in full every time the exporter reports it.
+        let payload = [0, 0, 0, 0, 0, 0, 0x05, 0xDC, 0, 0, 0, 0, 0, 0, 0, 10];
+        let record = decode(
+            &[(ie::OCTET_TOTAL_COUNT, 8), (ie::PACKET_TOTAL_COUNT, 8)],
+            &payload,
+        );
+        assert_eq!(record.bytes, 0);
+        assert_eq!(record.packets, 0);
+    }
+
+    #[test]
+    fn milliseconds_win_over_seconds_in_either_order() {
+        let secs = [0x00, 0x00, 0x00, 0x0A]; // 10s
+        let millis = [0, 0, 0, 0, 0, 0, 0x4E, 0x20]; // 20_000ms == 20s
+        let expected = Timestamp::new(20, 0);
+
+        let mut secs_first = Vec::new();
+        secs_first.extend_from_slice(&secs);
+        secs_first.extend_from_slice(&millis);
+        assert_eq!(
+            decode(
+                &[
+                    (ie::FLOW_START_SECONDS, 4),
+                    (ie::FLOW_START_MILLISECONDS, 8)
+                ],
+                &secs_first,
+            )
+            .flow_start,
+            Some(expected),
+        );
+
+        let mut millis_first = Vec::new();
+        millis_first.extend_from_slice(&millis);
+        millis_first.extend_from_slice(&secs);
+        assert_eq!(
+            decode(
+                &[
+                    (ie::FLOW_START_MILLISECONDS, 8),
+                    (ie::FLOW_START_SECONDS, 4)
+                ],
+                &millis_first,
+            )
+            .flow_start,
+            Some(expected),
+        );
+    }
+
+    #[test]
+    fn second_granularity_timestamps_decode_on_their_own() {
+        let payload = [0x00, 0x00, 0x00, 0x0A, 0x00, 0x00, 0x00, 0x14];
+        let record = decode(
+            &[(ie::FLOW_START_SECONDS, 4), (ie::FLOW_END_SECONDS, 4)],
+            &payload,
+        );
+        assert_eq!(record.flow_start, Some(Timestamp::new(10, 0)));
+        assert_eq!(record.flow_end, Some(Timestamp::new(20, 0)));
+    }
+
+    #[test]
+    fn all_zero_mac_decodes_to_none() {
+        // `sniffnet-agent` writes all-zero when a flow carries no link header.
+        let payload = [0, 0, 0, 0, 0, 0, 0xAA, 0xBB, 0xCC, 0xDD, 0xEE, 0xFF];
+        let record = decode(
+            &[
+                (ie::SOURCE_MAC_ADDRESS, 6),
+                (ie::DESTINATION_MAC_ADDRESS, 6),
+            ],
+            &payload,
+        );
+        assert_eq!(record.src_mac, None);
+        assert_eq!(record.dst_mac, Some([0xAA, 0xBB, 0xCC, 0xDD, 0xEE, 0xFF]));
+    }
+
+    #[test]
+    fn flow_direction_maps_ingress_egress_and_undefined() {
+        let cases = [
+            (0x00, Some(TrafficDirection::Incoming)),
+            (0x01, Some(TrafficDirection::Outgoing)),
+            (0xFF, None),
+        ];
+        for (raw, expected) in cases {
+            let record = decode(&[(ie::FLOW_DIRECTION, 1)], &[raw]);
+            assert_eq!(record.direction, expected, "flowDirection {raw:#04x}");
+        }
+    }
 }
