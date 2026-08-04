@@ -25,13 +25,12 @@ pub const SET_ID_OPTIONS_TEMPLATE: u16 = 3;
 pub const MIN_DATA_SET_ID: u16 = 256;
 pub const VARIABLE_LENGTH: u16 = 0xFFFF;
 
-#[allow(dead_code)]
 pub mod ie {
     //! IANA-assigned IPFIX Information Element identifiers used by Sniffnet.
     //!
-    //! Constants for flow-timestamp IEs are kept even though we don't decode
-    //! them today — they document which fields a future maintainer would wire
-    //! up if per-flow timestamps from the exporter become useful.
+    //! Note the crossed naming in the IANA registry: the "post" counterpart of
+    //! `sourceMacAddress` (56) is 81, while the one of `destinationMacAddress`
+    //! (80) is 57.
     pub const OCTET_DELTA_COUNT: u16 = 1;
     pub const PACKET_DELTA_COUNT: u16 = 2;
     pub const PROTOCOL_IDENTIFIER: u16 = 4;
@@ -42,8 +41,9 @@ pub mod ie {
     pub const SOURCE_IPV6_ADDRESS: u16 = 27;
     pub const DESTINATION_IPV6_ADDRESS: u16 = 28;
     pub const SOURCE_MAC_ADDRESS: u16 = 56;
+    pub const POST_DESTINATION_MAC_ADDRESS: u16 = 57;
     pub const FLOW_DIRECTION: u16 = 61;
-    pub const POST_DESTINATION_MAC_ADDRESS: u16 = 80;
+    pub const DESTINATION_MAC_ADDRESS: u16 = 80;
     pub const POST_SOURCE_MAC_ADDRESS: u16 = 81;
     pub const OCTET_TOTAL_COUNT: u16 = 85;
     pub const PACKET_TOTAL_COUNT: u16 = 86;
@@ -81,6 +81,8 @@ pub enum Set<'a> {
     Template(Vec<TemplateRecord>),
     /// Options templates are parsed but not interpreted; the collector skips them.
     OptionsTemplate,
+    /// Reserved or unrecognised set id — consumed and skipped.
+    Ignored,
     /// Data set: the payload is left as raw bytes and decoded against the
     /// referenced template by the collector layer.
     Data {
@@ -159,7 +161,7 @@ fn parse_set(input: &[u8]) -> IResult<&[u8], Set<'_>> {
             payload: body,
         },
         // reserved set ids 0, 1, and 4..=255 — skip silently
-        _ => Set::OptionsTemplate,
+        _ => Set::Ignored,
     };
     Ok((rest, set))
 }
@@ -217,6 +219,7 @@ pub fn decode_data_record<'a>(
     input: &'a [u8],
 ) -> IResult<&'a [u8], FlowRecord> {
     let mut record = FlowRecord::default();
+    let mut counters = CounterPriority::default();
     let mut remaining = input;
 
     for spec in template {
@@ -229,10 +232,39 @@ pub fn decode_data_record<'a>(
             continue;
         }
 
-        apply_ie(spec.ie_id, raw, &mut record);
+        apply_ie(spec.ie_id, raw, &mut record, &mut counters);
     }
 
     Ok((remaining, record))
+}
+
+/// Rank of the counter IE that supplied the value currently held in the record.
+///
+/// A template may legitimately carry several octet counters at once (e.g.
+/// `octetDeltaCount` alongside `layer2OctetDeltaCount`). Ranking them means the
+/// outcome no longer depends on which one happens to appear last in the
+/// template.
+#[derive(Default)]
+struct CounterPriority {
+    bytes: u8,
+    packets: u8,
+}
+
+/// Higher wins. Layer-2 deltas match what the pcap pipeline counts — frame
+/// bytes including the link header — so they outrank IP-layer deltas.
+fn octet_rank(ie_id: u16) -> u8 {
+    match ie_id {
+        ie::LAYER2_OCTET_DELTA_COUNT => 2,
+        ie::OCTET_DELTA_COUNT => 1,
+        _ => 0,
+    }
+}
+
+fn packet_rank(ie_id: u16) -> u8 {
+    match ie_id {
+        ie::PACKET_DELTA_COUNT => 1,
+        _ => 0,
+    }
 }
 
 /// Read the bytes belonging to a single field, accounting for the
@@ -254,25 +286,34 @@ fn read_field_bytes(input: &[u8], declared_length: u16) -> IResult<&[u8], &[u8]>
     Ok((input, bytes))
 }
 
-fn apply_ie(ie_id: u16, raw: &[u8], record: &mut FlowRecord) {
+fn apply_ie(ie_id: u16, raw: &[u8], record: &mut FlowRecord, counters: &mut CounterPriority) {
     match ie_id {
-        // TODO: a foreign exporter's template may carry several octet counters
-        // at once (e.g. octetDeltaCount + layer2OctetDeltaCount, or delta +
-        // total). Today they share one arm and overwrite `record.bytes`, so the
-        // value is whichever IE appears LAST in the template — order-dependent
-        // and arbitrary across exporters. Resolve by a deterministic priority
-        // instead (suggested: layer2 delta > IP delta > total). Same applies to
-        // the packet counters below.
-        ie::OCTET_DELTA_COUNT | ie::OCTET_TOTAL_COUNT | ie::LAYER2_OCTET_DELTA_COUNT => {
-            if let Some(v) = read_unsigned(raw) {
+        ie::OCTET_DELTA_COUNT | ie::LAYER2_OCTET_DELTA_COUNT => {
+            let rank = octet_rank(ie_id);
+            if rank >= counters.bytes
+                && let Some(v) = read_unsigned(raw)
+            {
                 record.bytes = v;
+                counters.bytes = rank;
             }
         }
-        ie::PACKET_DELTA_COUNT | ie::PACKET_TOTAL_COUNT => {
-            if let Some(v) = read_unsigned(raw) {
+        ie::PACKET_DELTA_COUNT => {
+            let rank = packet_rank(ie_id);
+            if rank >= counters.packets
+                && let Some(v) = read_unsigned(raw)
+            {
                 record.packets = v;
+                counters.packets = rank;
             }
         }
+        // Deliberately not decoded: the total counters are cumulative for the
+        // lifetime of the flow, whereas the collector adds every record's
+        // counts onto a running tally. Feeding a total in would re-add the
+        // whole flow each time the exporter reports it. Supporting exporters
+        // that only send totals means differencing them against the previous
+        // value per flow, which is state the decoder doesn't have.
+        #[allow(clippy::match_same_arms)]
+        ie::OCTET_TOTAL_COUNT | ie::PACKET_TOTAL_COUNT => {}
         ie::PROTOCOL_IDENTIFIER => {
             if let Some(b) = raw.first() {
                 record.protocol = Some(*b);
@@ -313,7 +354,7 @@ fn apply_ie(ie_id: u16, raw: &[u8], record: &mut FlowRecord) {
                 record.src_mac = Some(v);
             }
         }
-        ie::POST_DESTINATION_MAC_ADDRESS => {
+        ie::DESTINATION_MAC_ADDRESS | ie::POST_DESTINATION_MAC_ADDRESS => {
             if let Some(v) = read_mac(raw) {
                 record.dst_mac = Some(v);
             }
@@ -333,8 +374,26 @@ fn apply_ie(ie_id: u16, raw: &[u8], record: &mut FlowRecord) {
         ie::FLOW_END_MILLISECONDS => {
             record.flow_end = read_timestamp_ms(raw);
         }
+        // Second-granularity timestamps only fill a slot the millisecond IEs
+        // haven't, so the finer value wins whichever order the template lists
+        // them in.
+        ie::FLOW_START_SECONDS if record.flow_start.is_none() => {
+            record.flow_start = read_timestamp_secs(raw);
+        }
+        ie::FLOW_END_SECONDS if record.flow_end.is_none() => {
+            record.flow_end = read_timestamp_secs(raw);
+        }
         _ => {}
     }
+}
+
+/// IPFIX `dateTimeSeconds` is 4 bytes big-endian, seconds since UNIX epoch.
+fn read_timestamp_secs(raw: &[u8]) -> Option<Timestamp> {
+    if raw.len() != 4 {
+        return None;
+    }
+    let secs = u32::from_be_bytes(raw.try_into().ok()?);
+    Some(Timestamp::new(i64::from(secs), 0))
 }
 
 /// IPFIX `dateTimeMilliseconds` is 8 bytes big-endian, ms since UNIX epoch.
@@ -383,9 +442,11 @@ fn read_ipv6(raw: &[u8]) -> Option<IpAddr> {
     Some(IpAddr::V6(Ipv6Addr::from(octets)))
 }
 
-// TODO: all zeros should be trated as None??
+/// An all-zero MAC is how exporters spell "not observed" — `sniffnet-agent`
+/// writes it whenever a flow has no link header — so it decodes to `None`
+/// rather than being shown as a genuine `00:00:00:00:00:00` address.
 fn read_mac(raw: &[u8]) -> Option<[u8; 6]> {
-    if raw.len() != 6 {
+    if raw.len() != 6 || raw.iter().all(|b| *b == 0) {
         return None;
     }
     let mut mac = [0u8; 6];
