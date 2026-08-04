@@ -29,9 +29,8 @@ use crate::gui::types::timing_events::TimingEvents;
 use crate::mmdb::asn::ASN_MMDB;
 use crate::mmdb::country::COUNTRY_MMDB;
 use crate::mmdb::types::mmdb_reader::{MmdbReader, MmdbReaders};
-use crate::networking::ipfix::collect::collect_ipfix;
+use crate::networking::capture::spawn_capture_thread;
 use crate::networking::parse_packets::BackendTrafficMessage;
-use crate::networking::parse_packets::parse_packets;
 use crate::networking::traffic_preview::{TrafficPreview, traffic_preview};
 use crate::networking::types::capture_context::{
     CaptureContext, CaptureSource, CaptureSourcePicklist, MyPcapImport,
@@ -1028,37 +1027,16 @@ impl Sniffer {
                 let (freeze_tx, freeze_rx) = tokio::sync::broadcast::channel(1_048_575);
                 let freeze_rx2 = freeze_tx.subscribe();
                 let filters = self.conf.filters.clone();
-                if let CaptureContext::Ipfix(socket) = capture_context {
-                    let _ = thread::Builder::new()
-                        .name("thread_collect_ipfix".to_string())
-                        .spawn(move || {
-                            collect_ipfix(
-                                curr_cap_id,
-                                socket,
-                                &mmdb_readers,
-                                &ip_blacklist,
-                                &tx,
-                                (freeze_rx, freeze_rx2),
-                            );
-                        })
-                        .log_err(location!());
-                } else {
-                    let _ = thread::Builder::new()
-                        .name("thread_parse_packets".to_string())
-                        .spawn(move || {
-                            parse_packets(
-                                curr_cap_id,
-                                capture_source,
-                                &mmdb_readers,
-                                &ip_blacklist,
-                                capture_context,
-                                filters,
-                                &tx,
-                                (freeze_rx, freeze_rx2),
-                            );
-                        })
-                        .log_err(location!());
-                }
+                spawn_capture_thread(
+                    curr_cap_id,
+                    capture_source,
+                    capture_context,
+                    mmdb_readers,
+                    ip_blacklist,
+                    filters,
+                    tx,
+                    (freeze_rx, freeze_rx2),
+                );
                 self.current_capture_rx.1 = Some(rx.clone());
                 self.freeze_tx = Some(freeze_tx);
 

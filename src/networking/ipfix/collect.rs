@@ -5,8 +5,7 @@
 use async_channel::Sender;
 use pcap::Address;
 use std::net::{IpAddr, SocketAddr, UdpSocket};
-use std::thread;
-use std::time::{Duration, Instant};
+use std::time::Instant;
 use tokio::sync::broadcast::Receiver;
 
 use crate::location;
@@ -17,8 +16,7 @@ use crate::networking::ipfix::wire::{
 };
 use crate::networking::manage_packets::{account_flow, modify_or_insert_in_map};
 use crate::networking::parse_packets::{
-    AddressesResolutionState, BackendTrafficMessage, REVERSE_DNS_LOOKUP_THREADS,
-    reverse_dns_lookups,
+    AddressesResolutionState, BackendTrafficMessage, maybe_send_tick, spawn_reverse_dns_pool,
 };
 use crate::networking::types::address_port_pair::AddressPortPair;
 use crate::networking::types::arp_type::ArpType;
@@ -51,21 +49,7 @@ pub fn collect_ipfix(
     let mut buf = vec![0u8; RECV_BUF_LEN];
     let mut first_packet_ticks: Option<Instant> = None;
 
-    let (lookup_request_tx, lookup_request_rx) = async_channel::unbounded();
-    let (lookup_result_tx, lookup_result_rx) = std::sync::mpsc::channel();
-    let mut resolutions_state = AddressesResolutionState::new(lookup_request_tx, lookup_result_rx);
-    // a pool of threads shares the request queue, so one slow blocking lookup doesn't stall the others
-    for i in 0..REVERSE_DNS_LOOKUP_THREADS {
-        let lookup_request_rx = lookup_request_rx.clone();
-        let lookup_result_tx = lookup_result_tx.clone();
-        let mmdb_readers = mmdb_readers.clone();
-        let _ = thread::Builder::new()
-            .name(format!("thread_reverse_dns_lookups_{i}"))
-            .spawn(move || {
-                reverse_dns_lookups(&lookup_request_rx, &lookup_result_tx, &mmdb_readers);
-            })
-            .log_err(location!());
-    }
+    let mut resolutions_state = spawn_reverse_dns_pool(mmdb_readers);
 
     loop {
         if tx.is_closed() {
@@ -118,25 +102,6 @@ fn current_timestamp() -> Timestamp {
         .unwrap_or_default();
     #[allow(clippy::cast_possible_wrap)]
     Timestamp::new(now.as_secs() as i64, i64::from(now.subsec_micros()))
-}
-
-fn maybe_send_tick(
-    cap_id: usize,
-    info_traffic_msg: &mut InfoTraffic,
-    first_packet_ticks: &mut Option<Instant>,
-    tx: &Sender<BackendTrafficMessage>,
-    resolutions_state: &mut AddressesResolutionState,
-) {
-    if first_packet_ticks.is_some_and(|i| i.elapsed() >= Duration::from_secs(1)) {
-        *first_packet_ticks =
-            first_packet_ticks.and_then(|i| i.checked_add(Duration::from_secs(1)));
-        let _ = tx.send_blocking(BackendTrafficMessage::TickRun(
-            cap_id,
-            info_traffic_msg.take_but_leave_something(),
-            resolutions_state.new_hosts_to_send(),
-            false,
-        ));
-    }
 }
 
 fn process_datagram(
