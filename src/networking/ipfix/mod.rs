@@ -16,6 +16,7 @@ use std::net::{IpAddr, Ipv4Addr, SocketAddr};
 
 /// IANA-registered default IPFIX collector port.
 pub const DEFAULT_IPFIX_PORT: u16 = 4739;
+pub const DEFAULT_IPFIX_ADDR: IpAddr = IpAddr::V4(Ipv4Addr::UNSPECIFIED);
 
 /// Persisted IPFIX collector configuration.
 #[derive(Serialize, Deserialize, Clone, PartialEq, Debug)]
@@ -43,26 +44,42 @@ impl MyIpfixSocket {
     }
 
     pub fn display_name(&self) -> String {
-        format!("{}:{}", self.addr, self.port)
+        let addr = if self.addr.is_empty() {
+            &DEFAULT_IPFIX_ADDR.to_string()
+        } else {
+            &self.addr
+        };
+        let port = if self.port.is_empty() {
+            &DEFAULT_IPFIX_PORT.to_string()
+        } else {
+            &self.port
+        };
+        format!("{addr}:{port}")
     }
 
     pub fn socket_addr(&self) -> Result<SocketAddr, String> {
-        let port = self
-            .port
-            .parse::<u16>()
-            .map_err(|_| format!("Invalid port number: {}", self.port))?;
-        let ip_addr = self
-            .addr
-            .parse::<IpAddr>()
-            .map_err(|_| format!("Invalid IP address: {}", self.addr))?;
-        Ok(SocketAddr::new(ip_addr, port))
+        let port = if self.port.is_empty() {
+            DEFAULT_IPFIX_PORT
+        } else {
+            self.port
+                .parse::<u16>()
+                .map_err(|_| format!("Invalid port number: {}", self.port))?
+        };
+        let addr = if self.addr.is_empty() {
+            DEFAULT_IPFIX_ADDR
+        } else {
+            self.addr
+                .parse::<IpAddr>()
+                .map_err(|_| format!("Invalid IP address: {}", self.addr))?
+        };
+        Ok(SocketAddr::new(addr, port))
     }
 }
 
 impl Default for MyIpfixSocket {
     fn default() -> Self {
         Self {
-            addr: IpAddr::V4(Ipv4Addr::UNSPECIFIED).to_string(),
+            addr: DEFAULT_IPFIX_ADDR.to_string(),
             port: DEFAULT_IPFIX_PORT.to_string(),
         }
     }
