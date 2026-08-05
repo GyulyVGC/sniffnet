@@ -51,7 +51,12 @@ pub mod ie {
     pub const FLOW_END_SECONDS: u16 = 151;
     pub const FLOW_START_MILLISECONDS: u16 = 152;
     pub const FLOW_END_MILLISECONDS: u16 = 153;
+    pub const FLOW_START_MICROSECONDS: u16 = 154;
+    pub const FLOW_END_MICROSECONDS: u16 = 155;
+    pub const FLOW_START_NANOSECONDS: u16 = 156;
+    pub const FLOW_END_NANOSECONDS: u16 = 157;
     pub const LAYER2_OCTET_DELTA_COUNT: u16 = 352;
+    pub const LAYER2_OCTET_TOTAL_COUNT: u16 = 353;
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -99,6 +104,12 @@ pub struct IpfixMessage<'a> {
 
 /// Decoded fields from a single data record. Each `Option` is `None` when the
 /// template doesn't carry that IE.
+///
+/// `bytes` / `packets` come from the delta counters, which are already the
+/// increment since the exporter's previous report. `bytes_total` /
+/// `packets_total` come from the cumulative counters instead, and mean nothing
+/// on their own — the collector differences them against the same flow's
+/// previous report (see `totals.rs`).
 #[derive(Debug, Clone, Default, PartialEq, Eq)]
 pub struct FlowRecord {
     pub src_ip: Option<IpAddr>,
@@ -108,6 +119,8 @@ pub struct FlowRecord {
     pub protocol: Option<u8>,
     pub bytes: u128,
     pub packets: u128,
+    pub bytes_total: Option<u128>,
+    pub packets_total: Option<u128>,
     pub src_mac: Option<[u8; 6]>,
     pub dst_mac: Option<[u8; 6]>,
     pub direction: Option<TrafficDirection>,
@@ -219,7 +232,7 @@ pub fn decode_data_record<'a>(
     input: &'a [u8],
 ) -> IResult<&'a [u8], FlowRecord> {
     let mut record = FlowRecord::default();
-    let mut counters = CounterPriority::default();
+    let mut priority = FieldPriority::default();
     let mut remaining = input;
 
     for spec in template {
@@ -232,22 +245,26 @@ pub fn decode_data_record<'a>(
             continue;
         }
 
-        apply_ie(spec.ie_id, raw, &mut record, &mut counters);
+        apply_ie(spec.ie_id, raw, &mut record, &mut priority);
     }
 
     Ok((remaining, record))
 }
 
-/// Rank of the counter IE that supplied the value currently held in the record.
+/// Rank of the IE that supplied the value currently held in each record slot.
 ///
-/// A template may legitimately carry several octet counters at once (e.g.
-/// `octetDeltaCount` alongside `layer2OctetDeltaCount`). Ranking them means the
-/// outcome no longer depends on which one happens to appear last in the
-/// template.
+/// A template may legitimately carry several IEs that fill the same slot (e.g.
+/// `octetDeltaCount` alongside `layer2OctetDeltaCount`, or both a second- and a
+/// millisecond-granularity flow start). Ranking them means the outcome no
+/// longer depends on which one happens to appear last in the template.
 #[derive(Default)]
-struct CounterPriority {
+struct FieldPriority {
     bytes: u8,
     packets: u8,
+    bytes_total: u8,
+    packets_total: u8,
+    flow_start: u8,
+    flow_end: u8,
 }
 
 /// Higher wins. Layer-2 deltas match what the pcap pipeline counts — frame
@@ -263,6 +280,33 @@ fn octet_rank(ie_id: u16) -> u8 {
 fn packet_rank(ie_id: u16) -> u8 {
     match ie_id {
         ie::PACKET_DELTA_COUNT => 1,
+        _ => 0,
+    }
+}
+
+/// Same layer-2-over-IP preference as `octet_rank`, for the cumulative counters.
+fn octet_total_rank(ie_id: u16) -> u8 {
+    match ie_id {
+        ie::LAYER2_OCTET_TOTAL_COUNT => 2,
+        ie::OCTET_TOTAL_COUNT => 1,
+        _ => 0,
+    }
+}
+
+fn packet_total_rank(ie_id: u16) -> u8 {
+    match ie_id {
+        ie::PACKET_TOTAL_COUNT => 1,
+        _ => 0,
+    }
+}
+
+/// Higher wins, so the finest granularity the exporter offers is the one kept.
+fn timestamp_rank(ie_id: u16) -> u8 {
+    match ie_id {
+        ie::FLOW_START_NANOSECONDS | ie::FLOW_END_NANOSECONDS => 4,
+        ie::FLOW_START_MICROSECONDS | ie::FLOW_END_MICROSECONDS => 3,
+        ie::FLOW_START_MILLISECONDS | ie::FLOW_END_MILLISECONDS => 2,
+        ie::FLOW_START_SECONDS | ie::FLOW_END_SECONDS => 1,
         _ => 0,
     }
 }
@@ -286,34 +330,15 @@ fn read_field_bytes(input: &[u8], declared_length: u16) -> IResult<&[u8], &[u8]>
     Ok((input, bytes))
 }
 
-fn apply_ie(ie_id: u16, raw: &[u8], record: &mut FlowRecord, counters: &mut CounterPriority) {
+fn apply_ie(ie_id: u16, raw: &[u8], record: &mut FlowRecord, priority: &mut FieldPriority) {
+    if apply_delta_counter_ie(ie_id, raw, record, priority)
+        || apply_total_counter_ie(ie_id, raw, record, priority)
+        || apply_timestamp_ie(ie_id, raw, record, priority)
+    {
+        return;
+    }
+
     match ie_id {
-        ie::OCTET_DELTA_COUNT | ie::LAYER2_OCTET_DELTA_COUNT => {
-            let rank = octet_rank(ie_id);
-            if rank >= counters.bytes
-                && let Some(v) = read_unsigned(raw)
-            {
-                record.bytes = v;
-                counters.bytes = rank;
-            }
-        }
-        ie::PACKET_DELTA_COUNT => {
-            let rank = packet_rank(ie_id);
-            if rank >= counters.packets
-                && let Some(v) = read_unsigned(raw)
-            {
-                record.packets = v;
-                counters.packets = rank;
-            }
-        }
-        // Deliberately not decoded: the total counters are cumulative for the
-        // lifetime of the flow, whereas the collector adds every record's
-        // counts onto a running tally. Feeding a total in would re-add the
-        // whole flow each time the exporter reports it. Supporting exporters
-        // that only send totals means differencing them against the previous
-        // value per flow, which is state the decoder doesn't have.
-        #[allow(clippy::match_same_arms)]
-        ie::OCTET_TOTAL_COUNT | ie::PACKET_TOTAL_COUNT => {}
         ie::PROTOCOL_IDENTIFIER => {
             if let Some(b) = raw.first() {
                 record.protocol = Some(*b);
@@ -368,22 +393,116 @@ fn apply_ie(ie_id: u16, raw: &[u8], record: &mut FlowRecord, counters: &mut Coun
                 _ => None,
             };
         }
-        ie::FLOW_START_MILLISECONDS => {
-            record.flow_start = read_timestamp_ms(raw);
-        }
-        ie::FLOW_END_MILLISECONDS => {
-            record.flow_end = read_timestamp_ms(raw);
-        }
-        // Second-granularity timestamps only fill a slot the millisecond IEs
-        // haven't, so the finer value wins whichever order the template lists
-        // them in.
-        ie::FLOW_START_SECONDS if record.flow_start.is_none() => {
-            record.flow_start = read_timestamp_secs(raw);
-        }
-        ie::FLOW_END_SECONDS if record.flow_end.is_none() => {
-            record.flow_end = read_timestamp_secs(raw);
-        }
         _ => {}
+    }
+}
+
+/// Apply a delta counter IE, which is already an increment over the exporter's
+/// previous report. Returns whether `ie_id` was one.
+fn apply_delta_counter_ie(
+    ie_id: u16,
+    raw: &[u8],
+    record: &mut FlowRecord,
+    priority: &mut FieldPriority,
+) -> bool {
+    let (rank, slot, slot_priority): (u8, &mut u128, &mut u8) = match ie_id {
+        ie::OCTET_DELTA_COUNT | ie::LAYER2_OCTET_DELTA_COUNT => {
+            (octet_rank(ie_id), &mut record.bytes, &mut priority.bytes)
+        }
+        ie::PACKET_DELTA_COUNT => (
+            packet_rank(ie_id),
+            &mut record.packets,
+            &mut priority.packets,
+        ),
+        _ => return false,
+    };
+
+    if rank >= *slot_priority
+        && let Some(v) = read_unsigned(raw)
+    {
+        *slot = v;
+        *slot_priority = rank;
+    }
+    true
+}
+
+/// Apply a cumulative counter IE. These are counted for the lifetime of the
+/// flow, so they are kept apart from the deltas: the collector turns them into
+/// an increment by differencing against the flow's previous report. Returns
+/// whether `ie_id` was one.
+fn apply_total_counter_ie(
+    ie_id: u16,
+    raw: &[u8],
+    record: &mut FlowRecord,
+    priority: &mut FieldPriority,
+) -> bool {
+    let (rank, slot, slot_priority): (u8, &mut Option<u128>, &mut u8) = match ie_id {
+        ie::OCTET_TOTAL_COUNT | ie::LAYER2_OCTET_TOTAL_COUNT => (
+            octet_total_rank(ie_id),
+            &mut record.bytes_total,
+            &mut priority.bytes_total,
+        ),
+        ie::PACKET_TOTAL_COUNT => (
+            packet_total_rank(ie_id),
+            &mut record.packets_total,
+            &mut priority.packets_total,
+        ),
+        _ => return false,
+    };
+
+    if rank >= *slot_priority
+        && let Some(v) = read_unsigned(raw)
+    {
+        *slot = Some(v);
+        *slot_priority = rank;
+    }
+    true
+}
+
+/// Apply a flow start or end timestamp IE. Returns whether `ie_id` was one.
+fn apply_timestamp_ie(
+    ie_id: u16,
+    raw: &[u8],
+    record: &mut FlowRecord,
+    priority: &mut FieldPriority,
+) -> bool {
+    let (slot, slot_priority) = match ie_id {
+        ie::FLOW_START_SECONDS
+        | ie::FLOW_START_MILLISECONDS
+        | ie::FLOW_START_MICROSECONDS
+        | ie::FLOW_START_NANOSECONDS => (&mut record.flow_start, &mut priority.flow_start),
+        ie::FLOW_END_SECONDS
+        | ie::FLOW_END_MILLISECONDS
+        | ie::FLOW_END_MICROSECONDS
+        | ie::FLOW_END_NANOSECONDS => (&mut record.flow_end, &mut priority.flow_end),
+        _ => return false,
+    };
+
+    let rank = timestamp_rank(ie_id);
+    if rank >= *slot_priority
+        && let Some(ts) = read_timestamp(ie_id, raw)
+    {
+        *slot = Some(ts);
+        *slot_priority = rank;
+    }
+    true
+}
+
+/// Read a timestamp field using the encoding its IE prescribes. The four
+/// granularities use three different wire formats (RFC 7011 §6.1.7-6.1.10),
+/// so the IE id has to pick the reader.
+fn read_timestamp(ie_id: u16, raw: &[u8]) -> Option<Timestamp> {
+    match ie_id {
+        ie::FLOW_START_SECONDS | ie::FLOW_END_SECONDS => read_timestamp_secs(raw),
+        ie::FLOW_START_MILLISECONDS | ie::FLOW_END_MILLISECONDS => read_timestamp_ms(raw),
+        // Both the microsecond and the nanosecond IEs carry an NTP timestamp;
+        // they differ only in how many of the fraction bits the exporter is
+        // allowed to set, which doesn't change how we read them.
+        ie::FLOW_START_MICROSECONDS
+        | ie::FLOW_END_MICROSECONDS
+        | ie::FLOW_START_NANOSECONDS
+        | ie::FLOW_END_NANOSECONDS => read_timestamp_ntp(raw),
+        _ => None,
     }
 }
 
@@ -403,8 +522,31 @@ fn read_timestamp_ms(raw: &[u8]) -> Option<Timestamp> {
         return None;
     }
     let ms = u64::from_be_bytes(raw.try_into().ok()?);
-    let secs = (ms / 1_000) as i64;
-    let usecs = ((ms % 1_000) * 1_000) as i64;
+    let secs = i64::try_from(ms / 1_000).ok()?;
+    let usecs = i64::try_from((ms % 1_000) * 1_000).ok()?;
+    Some(Timestamp::new(secs, usecs))
+}
+
+/// Seconds between the NTP epoch (1900-01-01) and the UNIX epoch (1970-01-01).
+const NTP_UNIX_OFFSET: u64 = 2_208_988_800;
+
+/// IPFIX `dateTimeMicroseconds` and `dateTimeNanoseconds` are 8-byte NTP
+/// timestamps (RFC 5905): 32 bits of seconds since 1900 followed by a 32-bit
+/// binary fraction of a second.
+///
+/// Only NTP era 0 is decoded, so timestamps beyond 2036-02-07 read as `None`
+/// rather than silently wrapping to 1900.
+fn read_timestamp_ntp(raw: &[u8]) -> Option<Timestamp> {
+    if raw.len() != 8 {
+        return None;
+    }
+    let ntp = u64::from_be_bytes(raw.try_into().ok()?);
+    let ntp_secs = ntp >> 32;
+    let fraction = ntp & 0xFFFF_FFFF;
+    // Pre-1970 timestamps aren't representable as a UNIX instant here, and in
+    // practice only show up on exporters with a broken clock.
+    let secs = i64::try_from(ntp_secs.checked_sub(NTP_UNIX_OFFSET)?).ok()?;
+    let usecs = i64::try_from((fraction * 1_000_000) >> 32).ok()?;
     Some(Timestamp::new(secs, usecs))
 }
 
@@ -664,9 +806,9 @@ mod tests {
     }
 
     #[test]
-    fn cumulative_totals_are_not_read_as_deltas() {
-        // The collector adds each record's counts onto a running tally, so a
-        // total would be re-added in full every time the exporter reports it.
+    fn cumulative_totals_are_kept_apart_from_deltas() {
+        // Totals are cumulative, so they must not land in the delta slots the
+        // collector adds straight onto its running tally.
         let payload = [0, 0, 0, 0, 0, 0, 0x05, 0xDC, 0, 0, 0, 0, 0, 0, 0, 10];
         let record = decode(
             &[(ie::OCTET_TOTAL_COUNT, 8), (ie::PACKET_TOTAL_COUNT, 8)],
@@ -674,6 +816,116 @@ mod tests {
         );
         assert_eq!(record.bytes, 0);
         assert_eq!(record.packets, 0);
+        assert_eq!(record.bytes_total, Some(1500));
+        assert_eq!(record.packets_total, Some(10));
+    }
+
+    #[test]
+    fn layer2_totals_win_over_ip_totals_in_either_order() {
+        let l2 = [0, 0, 0, 0, 0, 0, 0x05, 0xDC]; // 1500
+        let ip = [0, 0, 0, 0, 0, 0, 0x03, 0xE8]; // 1000
+
+        let mut l2_first = Vec::new();
+        l2_first.extend_from_slice(&l2);
+        l2_first.extend_from_slice(&ip);
+        assert_eq!(
+            decode(
+                &[
+                    (ie::LAYER2_OCTET_TOTAL_COUNT, 8),
+                    (ie::OCTET_TOTAL_COUNT, 8)
+                ],
+                &l2_first,
+            )
+            .bytes_total,
+            Some(1500),
+        );
+
+        let mut ip_first = Vec::new();
+        ip_first.extend_from_slice(&ip);
+        ip_first.extend_from_slice(&l2);
+        assert_eq!(
+            decode(
+                &[
+                    (ie::OCTET_TOTAL_COUNT, 8),
+                    (ie::LAYER2_OCTET_TOTAL_COUNT, 8)
+                ],
+                &ip_first,
+            )
+            .bytes_total,
+            Some(1500),
+        );
+    }
+
+    #[test]
+    fn ntp_timestamps_decode_against_the_unix_epoch() {
+        // 1900-01-01 + NTP_UNIX_OFFSET seconds == the UNIX epoch, so this is 20s
+        // past the UNIX epoch with a half-second fraction.
+        let ntp_secs = u32::try_from(NTP_UNIX_OFFSET + 20).unwrap();
+        let mut payload = ntp_secs.to_be_bytes().to_vec();
+        payload.extend_from_slice(&0x8000_0000u32.to_be_bytes()); // 0.5s
+
+        let record = decode(&[(ie::FLOW_START_MICROSECONDS, 8)], &payload);
+        assert_eq!(record.flow_start, Some(Timestamp::new(20, 500_000)));
+
+        // The nanosecond IEs use the very same encoding.
+        let record = decode(&[(ie::FLOW_END_NANOSECONDS, 8)], &payload);
+        assert_eq!(record.flow_end, Some(Timestamp::new(20, 500_000)));
+    }
+
+    #[test]
+    fn ntp_timestamps_before_the_unix_epoch_are_rejected() {
+        // Era-0 NTP seconds below the offset would otherwise decode to a
+        // negative UNIX instant.
+        let payload = 1_000u64.to_be_bytes();
+        let record = decode(&[(ie::FLOW_START_MICROSECONDS, 8)], &payload);
+        assert_eq!(record.flow_start, None);
+    }
+
+    #[test]
+    fn finest_timestamp_granularity_wins_regardless_of_order() {
+        let secs = [0x00, 0x00, 0x00, 0x0A]; // 10s
+        let millis = 20_000u64.to_be_bytes(); // 20s
+        let micros = {
+            let mut v = u32::try_from(NTP_UNIX_OFFSET + 30)
+                .unwrap()
+                .to_be_bytes()
+                .to_vec();
+            v.extend_from_slice(&0u32.to_be_bytes()); // 30s
+            v
+        };
+        let expected = Some(Timestamp::new(30, 0));
+
+        let mut coarse_first = secs.to_vec();
+        coarse_first.extend_from_slice(&millis);
+        coarse_first.extend_from_slice(&micros);
+        assert_eq!(
+            decode(
+                &[
+                    (ie::FLOW_START_SECONDS, 4),
+                    (ie::FLOW_START_MILLISECONDS, 8),
+                    (ie::FLOW_START_MICROSECONDS, 8),
+                ],
+                &coarse_first,
+            )
+            .flow_start,
+            expected,
+        );
+
+        let mut fine_first = micros.clone();
+        fine_first.extend_from_slice(&millis);
+        fine_first.extend_from_slice(&secs);
+        assert_eq!(
+            decode(
+                &[
+                    (ie::FLOW_START_MICROSECONDS, 8),
+                    (ie::FLOW_START_MILLISECONDS, 8),
+                    (ie::FLOW_START_SECONDS, 4),
+                ],
+                &fine_first,
+            )
+            .flow_start,
+            expected,
+        );
     }
 
     #[test]

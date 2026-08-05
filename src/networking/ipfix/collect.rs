@@ -4,13 +4,14 @@
 
 use async_channel::Sender;
 use pcap::Address;
-use std::net::{IpAddr, SocketAddr, UdpSocket};
+use std::net::{SocketAddr, UdpSocket};
 use std::time::Instant;
 use tokio::sync::broadcast::Receiver;
 
 use crate::location;
 use crate::mmdb::types::mmdb_reader::MmdbReaders;
 use crate::networking::ipfix::templates::TemplateCache;
+use crate::networking::ipfix::totals::TotalsCache;
 use crate::networking::ipfix::wire::{
     self, FlowRecord, IPFIX_VERSION, Set, decode_data_record, format_mac, parse_message,
 };
@@ -45,6 +46,7 @@ pub fn collect_ipfix(
 
     let mut info_traffic_msg = InfoTraffic::default();
     let mut templates = TemplateCache::new();
+    let mut totals = TotalsCache::new(Instant::now());
     let mut buf = vec![0u8; RECV_BUF_LEN];
     let mut first_packet_ticks: Option<Instant> = None;
 
@@ -78,6 +80,7 @@ pub fn collect_ipfix(
                     &buf[..len],
                     peer,
                     &mut templates,
+                    &mut totals,
                     &mut info_traffic_msg,
                     ip_blacklist,
                     &mut resolutions_state,
@@ -103,10 +106,12 @@ fn current_timestamp() -> Timestamp {
     Timestamp::new(now.as_secs() as i64, i64::from(now.subsec_micros()))
 }
 
+#[allow(clippy::too_many_arguments)]
 fn process_datagram(
     bytes: &[u8],
     peer: SocketAddr,
     templates: &mut TemplateCache,
+    totals: &mut TotalsCache,
     info_traffic_msg: &mut InfoTraffic,
     ip_blacklist: &IpBlacklist,
     resolutions_state: &mut AddressesResolutionState,
@@ -119,7 +124,7 @@ fn process_datagram(
         return;
     }
 
-    let exporter_addresses = exporter_as_addresses(peer.ip());
+    let now = Instant::now();
 
     // First pass: register all templates so later data sets in the same
     // datagram can reference them.
@@ -165,7 +170,10 @@ fn process_datagram(
                 remaining = rest;
                 ingest_flow_record(
                     &record,
-                    &exporter_addresses,
+                    peer,
+                    message.header.observation_domain_id,
+                    totals,
+                    now,
                     info_traffic_msg,
                     ip_blacklist,
                     resolutions_state,
@@ -191,9 +199,13 @@ fn record_fits(template: &[wire::FieldSpec], remaining: &[u8]) -> bool {
     remaining.len() >= needed && needed > 0
 }
 
+#[allow(clippy::too_many_arguments)]
 fn ingest_flow_record(
     record: &FlowRecord,
-    exporter_addresses: &[Address],
+    peer: SocketAddr,
+    observation_domain_id: u32,
+    totals: &mut TotalsCache,
+    now: Instant,
     info_traffic_msg: &mut InfoTraffic,
     ip_blacklist: &IpBlacklist,
     resolutions_state: &mut AddressesResolutionState,
@@ -201,14 +213,16 @@ fn ingest_flow_record(
     let Some(key) = build_key(record) else {
         return;
     };
-    // A record with neither counter carries nothing to account for — an
-    // exporter whose counters we can't read (see the total-counter note in
-    // `wire.rs`) would otherwise contribute a phantom packet per record.
-    if record.bytes == 0 && record.packets == 0 {
+
+    let (exchanged_bytes, exchanged_packets) =
+        resolve_counters(record, peer, observation_domain_id, &key, totals, now);
+    // A record that resolved to nothing carries nothing to account for — an
+    // exporter whose counters we can't read at all would otherwise contribute a
+    // phantom flow per record.
+    if exchanged_bytes == 0 && exchanged_packets == 0 {
         return;
     }
-    let exchanged_bytes = record.bytes;
-    let exchanged_packets = record.packets;
+
     let mac_addresses = (
         record.src_mac.map(format_mac),
         record.dst_mac.map(format_mac),
@@ -218,7 +232,7 @@ fn ingest_flow_record(
     let (traffic_direction, service) = modify_or_insert_in_map(
         info_traffic_msg,
         &key,
-        exporter_addresses,
+        NO_INTERFACE_ADDRESSES,
         mac_addresses,
         None,
         ArpType::default(),
@@ -233,12 +247,49 @@ fn ingest_flow_record(
         info_traffic_msg,
         resolutions_state,
         &key,
-        exporter_addresses,
+        NO_INTERFACE_ADDRESSES,
         exchanged_bytes,
         exchanged_packets,
         traffic_direction,
         service,
     );
+}
+
+/// Work out how much traffic this record actually adds.
+///
+/// Delta counters are already increments, so they're used as they stand.
+/// Cumulative counters have to be differenced against the flow's previous
+/// report. The totals are handed to the cache either way, so that a template
+/// carrying both kinds keeps the baseline current for the records that need it.
+fn resolve_counters(
+    record: &FlowRecord,
+    peer: SocketAddr,
+    observation_domain_id: u32,
+    key: &AddressPortPair,
+    totals: &mut TotalsCache,
+    now: Instant,
+) -> (u128, u128) {
+    let (bytes_from_totals, packets_from_totals) = totals.delta(
+        peer,
+        observation_domain_id,
+        key,
+        record.bytes_total,
+        record.packets_total,
+        now,
+    );
+
+    let bytes = if record.bytes > 0 {
+        record.bytes
+    } else {
+        bytes_from_totals
+    };
+    let packets = if record.packets > 0 {
+        record.packets
+    } else {
+        packets_from_totals
+    };
+
+    (bytes, packets)
 }
 
 fn build_key(record: &FlowRecord) -> Option<AddressPortPair> {
@@ -267,29 +318,21 @@ fn build_key(record: &FlowRecord) -> Option<AddressPortPair> {
     })
 }
 
-/// Build a `[Address]` slice carrying just the exporter's IP, so host
-/// classification treats the exporter as the local anchor. Flow direction
-/// itself comes from IE 61 when the exporter sends it; this is only the
-/// fallback for exporters that report `undefined`.
-fn exporter_as_addresses(peer: IpAddr) -> Vec<Address> {
-    if peer.is_loopback() || peer.is_unspecified() {
-        return vec![];
-    }
-
-    vec![Address {
-        addr: peer,
-        netmask: None,
-        broadcast_addr: None,
-        dst_addr: None,
-    }]
-}
+/// Flows are observed somewhere else entirely, so there is no local interface
+/// to classify them against — the exporter's own IP is no help either, since a
+/// router exports flows between hosts that are both remote to it.
+///
+/// Passing no addresses is what PCAP import does, and it makes the downstream
+/// classifiers fall back to their bogon heuristic. Flow direction proper comes
+/// from IE 61 whenever the exporter sends it, which overrides the heuristic.
+const NO_INTERFACE_ADDRESSES: &[Address] = &[];
 
 #[cfg(test)]
 mod tests {
     use super::*;
     use crate::networking::types::data_representation::DataRepr;
     use crate::networking::types::traffic_direction::TrafficDirection;
-    use std::net::{Ipv4Addr, Ipv6Addr};
+    use std::net::{IpAddr, Ipv4Addr, Ipv6Addr};
 
     /// The field specifiers `sniffnet-agent` puts in its templates, after the
     /// two address fields that differ between the IPv4 and IPv6 variants.
@@ -360,18 +403,30 @@ mod tests {
     }
 
     fn run(bytes: &[u8]) -> (InfoTraffic, AddressesResolutionState) {
+        let (info, resolutions, _) = run_all(&[bytes]);
+        (info, resolutions)
+    }
+
+    /// Feed a sequence of datagrams to one collector, so state that spans
+    /// datagrams (templates, counter baselines) behaves as it would live.
+    fn run_all(datagrams: &[&[u8]]) -> (InfoTraffic, AddressesResolutionState, TotalsCache) {
+        let now = Instant::now();
         let mut templates = TemplateCache::new();
+        let mut totals = TotalsCache::new(now);
         let mut info = InfoTraffic::default();
         let mut resolutions = AddressesResolutionState::new_detached();
-        process_datagram(
-            bytes,
-            "203.0.113.9:4739".parse().unwrap(),
-            &mut templates,
-            &mut info,
-            &IpBlacklist::default(),
-            &mut resolutions,
-        );
-        (info, resolutions)
+        for bytes in datagrams {
+            process_datagram(
+                bytes,
+                "203.0.113.9:4739".parse().unwrap(),
+                &mut templates,
+                &mut totals,
+                &mut info,
+                &IpBlacklist::default(),
+                &mut resolutions,
+            );
+        }
+        (info, resolutions, totals)
     }
 
     /// A template set plus a one-record data set, shaped exactly as the agent
@@ -450,6 +505,121 @@ mod tests {
 
         assert!(info.map.is_empty(), "no traffic to account for");
         assert_eq!(info.tot_data_info.tot_data(DataRepr::Packets), 0);
+    }
+
+    /// A template in the shape exporters that only report cumulative counters
+    /// use: no delta IEs, no flowDirection.
+    const TOTALS_FIELDS: [(u16, u16); 7] = [
+        (8, 4),
+        (12, 4),
+        (7, 2),
+        (11, 2),
+        (4, 1),
+        (85, 8), // octetTotalCount
+        (86, 8), // packetTotalCount
+    ];
+
+    fn totals_record(bytes: u64, packets: u64) -> Vec<u8> {
+        let mut r = Ipv4Addr::new(10, 0, 0, 1).octets().to_vec();
+        r.extend_from_slice(&Ipv4Addr::new(8, 8, 8, 8).octets());
+        r.extend_from_slice(&443u16.to_be_bytes());
+        r.extend_from_slice(&50_000u16.to_be_bytes());
+        r.push(6); // TCP
+        r.extend_from_slice(&bytes.to_be_bytes());
+        r.extend_from_slice(&packets.to_be_bytes());
+        r
+    }
+
+    fn totals_key() -> AddressPortPair {
+        AddressPortPair {
+            source: IpAddr::V4(Ipv4Addr::new(10, 0, 0, 1)),
+            sport: Some(443),
+            dest: IpAddr::V4(Ipv4Addr::new(8, 8, 8, 8)),
+            dport: Some(50_000),
+            protocol: Protocol::TCP,
+        }
+    }
+
+    #[test]
+    fn a_lone_totals_record_is_accounted_in_full() {
+        // The single-record-per-flow-at-expiry case: the total is the flow.
+        let bytes = datagram(&[
+            template_set(300, &TOTALS_FIELDS),
+            set(300, &totals_record(1500, 10)),
+        ]);
+        let (info, _, _) = run_all(&[&bytes]);
+
+        let entry = info.map.get(&totals_key()).expect("flow present");
+        assert_eq!(entry.transmitted_bytes, 1500);
+        assert_eq!(entry.transmitted_packets, 10);
+    }
+
+    #[test]
+    fn repeated_totals_are_differenced_not_re_added() {
+        let first = datagram(&[
+            template_set(300, &TOTALS_FIELDS),
+            set(300, &totals_record(1500, 10)),
+        ]);
+        let grown = datagram(&[set(300, &totals_record(4000, 25))]);
+        let unchanged = datagram(&[set(300, &totals_record(4000, 25))]);
+        let (info, _, _) = run_all(&[&first, &grown, &unchanged]);
+
+        // 1500 + 2500 + 0 — not 1500 + 4000 + 4000.
+        let entry = info.map.get(&totals_key()).expect("flow present");
+        assert_eq!(entry.transmitted_bytes, 4000);
+        assert_eq!(entry.transmitted_packets, 25);
+        assert_eq!(info.tot_data_info.tot_data(DataRepr::Bytes), 4000);
+        assert_eq!(info.tot_data_info.tot_data(DataRepr::Packets), 25);
+    }
+
+    #[test]
+    fn deltas_are_preferred_when_a_template_carries_both() {
+        // layer2OctetDeltaCount + packetDeltaCount alongside the totals: the
+        // deltas are already increments, so they're what gets accounted.
+        let fields = [
+            (8, 4),
+            (12, 4),
+            (7, 2),
+            (11, 2),
+            (4, 1),
+            (352, 8), // layer2OctetDeltaCount
+            (2, 8),   // packetDeltaCount
+            (85, 8),  // octetTotalCount
+            (86, 8),  // packetTotalCount
+        ];
+        let record =
+            |delta_bytes: u64, delta_packets: u64, total_bytes: u64, total_packets: u64| {
+                let mut r = totals_record(delta_bytes, delta_packets);
+                r.extend_from_slice(&total_bytes.to_be_bytes());
+                r.extend_from_slice(&total_packets.to_be_bytes());
+                r
+            };
+
+        let first = datagram(&[
+            template_set(300, &fields),
+            set(300, &record(600, 4, 600, 4)),
+        ]);
+        let second = datagram(&[set(300, &record(900, 6, 1500, 10))]);
+        let (info, _, _) = run_all(&[&first, &second]);
+
+        let entry = info.map.get(&totals_key()).expect("flow present");
+        assert_eq!(entry.transmitted_bytes, 1500);
+        assert_eq!(entry.transmitted_packets, 10);
+    }
+
+    #[test]
+    fn direction_falls_back_to_the_bogon_heuristic_without_ie_61() {
+        // No flowDirection in this template and no interface addresses to
+        // compare against, so the private source has to carry the decision —
+        // the same way PCAP import classifies it.
+        let bytes = datagram(&[
+            template_set(300, &TOTALS_FIELDS),
+            set(300, &totals_record(1500, 10)),
+        ]);
+        let (info, _, _) = run_all(&[&bytes]);
+
+        let entry = info.map.get(&totals_key()).expect("flow present");
+        assert_eq!(entry.traffic_direction, TrafficDirection::Outgoing);
     }
 
     #[test]
