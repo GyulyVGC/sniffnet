@@ -9,39 +9,29 @@
 //! Keyed by `(peer, observation_domain, flow)` for the same reason the template
 //! cache is: one exporter's numbers must never be differenced against another's.
 
-use std::collections::HashMap;
 use std::net::SocketAddr;
-use std::time::{Duration, Instant};
+use std::time::Instant;
 
+use crate::networking::ipfix::ttl_map::TtlMap;
 use crate::networking::types::address_port_pair::AddressPortPair;
 
-/// How long a flow's last reported totals are remembered. Long enough to cover
-/// the active timeout of the usual exporters (30s to 5min), so consecutive
-/// reports of a long-lived flow keep differencing against a live baseline.
-const ENTRY_TTL: Duration = Duration::from_mins(30);
-
-/// How often expired entries are swept out. Sweeping is proportional to the map
-/// size, so it deliberately doesn't run on every record.
-const PRUNE_INTERVAL: Duration = Duration::from_mins(1);
-
-#[derive(Debug)]
-struct Entry {
+/// The counters a flow last reported, against which the next report is
+/// differenced. A flow we've never seen starts from zero, which is what makes
+/// its first report count in full.
+#[derive(Debug, Default)]
+struct Baseline {
     bytes: u128,
     packets: u128,
-    last_seen: Instant,
 }
 
-#[derive(Debug)]
 pub struct TotalsCache {
-    map: HashMap<(SocketAddr, u32, AddressPortPair), Entry>,
-    last_prune: Instant,
+    map: TtlMap<(SocketAddr, u32, AddressPortPair), Baseline>,
 }
 
 impl TotalsCache {
     pub fn new(now: Instant) -> Self {
         Self {
-            map: HashMap::new(),
-            last_prune: now,
+            map: TtlMap::new(now),
         }
     }
 
@@ -64,40 +54,21 @@ impl TotalsCache {
         packets_total: Option<u128>,
         now: Instant,
     ) -> (u128, u128) {
+        // Nothing to difference, and no reason to remember this flow.
         if bytes_total.is_none() && packets_total.is_none() {
             return (0, 0);
         }
 
-        self.maybe_prune(now);
+        let baseline = self.map.get_or_insert_with(
+            (peer, observation_domain_id, *key),
+            now,
+            Baseline::default,
+        );
 
-        match self.map.entry((peer, observation_domain_id, *key)) {
-            std::collections::hash_map::Entry::Occupied(mut o) => {
-                let entry = o.get_mut();
-                let bytes = step(&mut entry.bytes, bytes_total);
-                let packets = step(&mut entry.packets, packets_total);
-                entry.last_seen = now;
-                (bytes, packets)
-            }
-            std::collections::hash_map::Entry::Vacant(v) => {
-                let bytes = bytes_total.unwrap_or_default();
-                let packets = packets_total.unwrap_or_default();
-                v.insert(Entry {
-                    bytes,
-                    packets,
-                    last_seen: now,
-                });
-                (bytes, packets)
-            }
-        }
-    }
-
-    fn maybe_prune(&mut self, now: Instant) {
-        if now.duration_since(self.last_prune) < PRUNE_INTERVAL {
-            return;
-        }
-        self.map
-            .retain(|_, entry| now.duration_since(entry.last_seen) < ENTRY_TTL);
-        self.last_prune = now;
+        (
+            step(&mut baseline.bytes, bytes_total),
+            step(&mut baseline.packets, packets_total),
+        )
     }
 }
 
@@ -115,8 +86,10 @@ fn step(baseline: &mut u128, total: Option<u128>) -> u128 {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::networking::ipfix::ttl_map::{ENTRY_TTL, PRUNE_INTERVAL};
     use crate::networking::types::protocol::Protocol;
     use std::net::{IpAddr, Ipv4Addr};
+    use std::time::Duration;
 
     fn peer(port: u16) -> SocketAddr {
         format!("203.0.113.9:{port}").parse().unwrap()
@@ -243,21 +216,5 @@ mod tests {
             (3000, 20)
         );
         assert_eq!(cache.map.len(), 1, "the swept entry was replaced, not kept");
-    }
-
-    #[test]
-    fn pruning_keeps_entries_still_in_use() {
-        let start = Instant::now();
-        let mut cache = TotalsCache::new(start);
-        cache.delta(peer(1), 0, &key(1000), Some(1500), Some(10), start);
-        cache.delta(peer(1), 0, &key(1001), Some(1500), Some(10), start);
-
-        // Refresh only the first flow, then run a sweep well past the TTL.
-        let mid = start + ENTRY_TTL - Duration::from_secs(1);
-        cache.delta(peer(1), 0, &key(1000), Some(2000), Some(12), mid);
-        let sweep = mid + PRUNE_INTERVAL + Duration::from_secs(1);
-        cache.delta(peer(1), 0, &key(1000), Some(2500), Some(14), sweep);
-
-        assert_eq!(cache.map.len(), 1, "only the idle flow was swept");
     }
 }

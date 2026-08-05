@@ -26,6 +26,19 @@ impl<T, E: Display> ErrorLogger<T, E> for Result<T, E> {
     }
 }
 
+/// Log a non-fatal anomaly and its location.
+///
+/// Unlike [`ErrorLogger::log_err`], this never panics in debug builds. It's for
+/// conditions caused by input Sniffnet doesn't control — a malformed datagram
+/// arriving from the network, say — where aborting would hand whoever sent it a
+/// way to kill the application.
+#[allow(clippy::print_stderr)]
+pub fn log_warning(location: &Location, message: &str) {
+    let file = location.file;
+    let line = location.line;
+    eprintln!("Sniffnet warning at [{file}:{line}]: {message}");
+}
+
 /// Struct to store the location in the code (file and line)
 pub struct Location {
     pub file: &'static str,

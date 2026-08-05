@@ -11,8 +11,8 @@ use crate::translations::types::language::Language;
 use crate::utils::error_logger::{ErrorLogger, Location};
 use pcap::{Active, Address, Capture, Device, Error, Packet, Savefile, Stat};
 use serde::{Deserialize, Serialize};
-use std::net::UdpSocket;
-use std::time::Duration;
+use std::net::{SocketAddr, UdpSocket};
+use std::time::{Duration, Instant};
 
 pub enum CaptureContext {
     Live(Live),
@@ -108,13 +108,40 @@ impl CaptureContext {
     }
 
     fn new_ipfix(ipfix_socket: &MyIpfixSocket) -> Result<Self, String> {
-        let socket_addr = ipfix_socket.socket_addr().map_err(|e| e.to_string())?;
+        let socket_addr = ipfix_socket.socket_addr()?;
 
-        let socket = UdpSocket::bind(socket_addr).map_err(|e| e.to_string())?;
+        let socket = bind_collector_socket(socket_addr).map_err(|e| e.to_string())?;
 
-        let _ = socket.set_read_timeout(Some(Duration::from_millis(150)));
+        let _ = socket
+            .set_read_timeout(Some(IPFIX_READ_TIMEOUT))
+            .log_err(location!());
 
         Ok(Self::Ipfix(socket))
+    }
+}
+
+/// How long the collector blocks on a receive before looping round to check
+/// whether the capture has been stopped or frozen.
+const IPFIX_READ_TIMEOUT: Duration = Duration::from_millis(150);
+
+/// Restarting a capture on the same port races the outgoing collector: it only
+/// notices the closed channel — and so only drops its socket — once its current
+/// receive times out. Retry across that window rather than failing on a socket
+/// that is about to go away.
+///
+/// `SO_REUSEADDR` would be the shorter fix and the wrong one: it would let two
+/// collectors hold the port at once and split the incoming flows between them.
+fn bind_collector_socket(addr: SocketAddr) -> std::io::Result<UdpSocket> {
+    const RETRY_DELAY: Duration = Duration::from_millis(20);
+    let give_up_at = Instant::now() + IPFIX_READ_TIMEOUT * 3;
+
+    loop {
+        match UdpSocket::bind(addr) {
+            Err(e) if e.kind() == std::io::ErrorKind::AddrInUse && Instant::now() < give_up_at => {
+                std::thread::sleep(RETRY_DELAY);
+            }
+            result => return result,
+        }
     }
 }
 
