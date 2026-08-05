@@ -105,8 +105,10 @@ pub struct Sniffer {
     pub newer_release_available: Option<bool>,
     /// Network device to be analyzed, or PCAP file to be imported
     pub capture_source: CaptureSource,
-    /// Signals if a pcap error occurred
-    pub pcap_error: Option<String>,
+    /// Signals if the capture backend reported a problem; empty when the problem
+    /// is the IPFIX collector rejecting datagrams, whose text the waiting page
+    /// supplies itself so that it follows a language change
+    pub capture_error: Option<String>,
     /// Messages status
     pub dots_pulse: (String, u8),
     /// Traffic chart displayed in the Overview page
@@ -170,7 +172,7 @@ impl Sniffer {
             logged_notifications: LoggedNotifications::default(),
             newer_release_available: None,
             capture_source,
-            pcap_error: None,
+            capture_error: None,
             dots_pulse: (".".to_string(), 0),
             traffic_chart: TrafficChart::new(style, language, data_repr),
             preview_charts,
@@ -363,6 +365,7 @@ impl Sniffer {
             Message::SetIpfixPort(port) => self.set_ipfix_port(port),
             Message::PendingHosts(cap_id, host_msgs) => self.pending_hosts(cap_id, host_msgs),
             Message::OfflineGap(cap_id, gap) => self.offline_gap(cap_id, gap),
+            Message::IpfixRejection(cap_id) => self.ipfix_rejection(cap_id),
             Message::Periodic => self.periodic(),
             Message::ExpandNotification(id, expand) => self.expand_notification(id, expand),
             Message::ToggleRemoteNotifications => self.toggle_remote_notifications(),
@@ -858,6 +861,13 @@ impl Sniffer {
         }
     }
 
+    fn ipfix_rejection(&mut self, cap_id: usize) {
+        if cap_id == self.current_capture_rx.0 {
+            // the correct translated error is displayed in waiting_page
+            self.capture_error = Some(String::new());
+        }
+    }
+
     fn periodic(&mut self) {
         self.update_waiting_dots();
         self.capture_source.set_addresses();
@@ -1007,7 +1017,7 @@ impl Sniffer {
             let pcap_path = self.conf.export_pcap.full_path();
             let capture_context =
                 CaptureContext::new(&self.capture_source, pcap_path.as_ref(), &self.conf.filters);
-            self.pcap_error = capture_context.error().map(ToString::to_string);
+            self.capture_error = capture_context.error().map(ToString::to_string);
             self.running_page = Some(self.conf.last_opened_page);
 
             if capture_context.error().is_none() {
@@ -1077,6 +1087,9 @@ impl Sniffer {
                     BackendTrafficMessage::OfflineGap(cap_id, gap) => {
                         Message::OfflineGap(cap_id, gap)
                     }
+                    BackendTrafficMessage::IpfixRejection(cap_id) => {
+                        Message::IpfixRejection(cap_id)
+                    }
                 });
             }
         }
@@ -1097,7 +1110,7 @@ impl Sniffer {
         self.addresses_resolved = HashMap::new();
         self.latency_statuses = HashMap::new();
         self.logged_notifications = LoggedNotifications::default();
-        self.pcap_error = None;
+        self.capture_error = None;
         self.traffic_chart = TrafficChart::new(style, language, self.conf.data_repr);
         self.modal = None;
         self.settings_page = None;

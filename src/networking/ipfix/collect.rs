@@ -4,7 +4,6 @@
 
 use async_channel::Sender;
 use pcap::Address;
-use std::collections::HashSet;
 use std::net::{SocketAddr, UdpSocket};
 use std::time::Instant;
 use tokio::sync::broadcast::Receiver;
@@ -14,7 +13,7 @@ use crate::mmdb::types::mmdb_reader::MmdbReaders;
 use crate::networking::ipfix::templates::TemplateCache;
 use crate::networking::ipfix::totals::TotalsCache;
 use crate::networking::ipfix::wire::{
-    self, FlowRecord, IPFIX_VERSION, Set, decode_data_record, format_mac, parse_message,
+    self, FlowRecord, Set, decode_data_record, format_mac, parse_message,
 };
 use crate::networking::manage_packets::{account_flow, modify_or_insert_in_map};
 use crate::networking::parse_packets::{
@@ -25,7 +24,7 @@ use crate::networking::types::arp_type::ArpType;
 use crate::networking::types::info_traffic::InfoTraffic;
 use crate::networking::types::ip_blacklist::IpBlacklist;
 use crate::networking::types::protocol::Protocol;
-use crate::utils::error_logger::{ErrorLogger, Location, log_warning};
+use crate::utils::error_logger::{ErrorLogger, Location};
 use crate::utils::types::timestamp::Timestamp;
 
 /// Buffer size for a single UDP datagram. RFC 7011 §10.3.1 recommends at least
@@ -36,7 +35,6 @@ const RECV_BUF_LEN: usize = 65_535;
 struct CollectorState {
     templates: TemplateCache,
     totals: TotalsCache,
-    rejections: RejectionLog,
 }
 
 impl CollectorState {
@@ -44,54 +42,7 @@ impl CollectorState {
         Self {
             templates: TemplateCache::new(now),
             totals: TotalsCache::new(now),
-            rejections: RejectionLog::default(),
         }
-    }
-}
-
-/// Why a whole datagram was thrown away. Both cases mean the exporter is
-/// misconfigured rather than merely chatty, so they're worth surfacing.
-#[derive(Clone, Copy, PartialEq, Eq, Hash)]
-enum Rejection {
-    Malformed,
-    UnsupportedVersion(u16),
-}
-
-impl Rejection {
-    fn message(self, peer: SocketAddr) -> String {
-        match self {
-            Self::Malformed => {
-                format!("ignoring datagrams from {peer}: not decodable as IPFIX")
-            }
-            Self::UnsupportedVersion(version) => format!(
-                "ignoring datagrams from {peer}: exported as version {version}, \
-                 and this collector reads IPFIX (version 10) only"
-            ),
-        }
-    }
-}
-
-/// A rejection is reported once per exporter, not once per datagram: the point
-/// is to flag a misconfiguration, and a misconfigured exporter keeps sending at
-/// its normal rate.
-#[derive(Default)]
-struct RejectionLog {
-    reported: HashSet<(SocketAddr, Rejection)>,
-}
-
-/// Peer addresses come off the network, so the set of them can't be allowed to
-/// grow without bound. Past this many, rejections stop being reported at all —
-/// anyone reading the logs has long since got the message.
-const MAX_REPORTED_REJECTIONS: usize = 64;
-
-impl RejectionLog {
-    fn report(&mut self, peer: SocketAddr, rejection: Rejection) {
-        if self.reported.len() >= MAX_REPORTED_REJECTIONS
-            || !self.reported.insert((peer, rejection))
-        {
-            return;
-        }
-        log_warning(&location!(), &rejection.message(peer));
     }
 }
 
@@ -112,6 +63,9 @@ pub fn collect_ipfix(
     let mut state = CollectorState::new(Instant::now());
     let mut buf = vec![0u8; RECV_BUF_LEN];
     let mut first_packet_ticks: Option<Instant> = None;
+    // the GUI only needs telling once: a misconfigured exporter keeps sending at
+    // its normal rate, and every rejection says exactly the same thing
+    let mut rejection_reported = false;
 
     let mut resolutions_state = spawn_reverse_dns_pool(mmdb_readers);
 
@@ -139,7 +93,7 @@ pub fn collect_ipfix(
                     first_packet_ticks = Some(Instant::now());
                 }
                 info_traffic_msg.last_packet_timestamp = current_timestamp();
-                process_datagram(
+                let rejected = process_datagram(
                     &buf[..len],
                     peer,
                     &mut state,
@@ -147,6 +101,10 @@ pub fn collect_ipfix(
                     ip_blacklist,
                     &mut resolutions_state,
                 );
+                if rejected && !rejection_reported {
+                    rejection_reported = true;
+                    let _ = tx.send_blocking(BackendTrafficMessage::IpfixRejection(cap_id));
+                }
             }
             Err(e) => match e.kind() {
                 // expected — timeout fires regularly so we can tick and check freeze
@@ -168,6 +126,9 @@ fn current_timestamp() -> Timestamp {
     Timestamp::new(now.as_secs() as i64, i64::from(now.subsec_micros()))
 }
 
+/// Returns whether the whole datagram was thrown away because it isn't
+/// decodable as IPFIX — which means the exporter is misconfigured rather than
+/// merely chatty, so it's worth surfacing to the user.
 fn process_datagram(
     bytes: &[u8],
     peer: SocketAddr,
@@ -175,25 +136,9 @@ fn process_datagram(
     info_traffic_msg: &mut InfoTraffic,
     ip_blacklist: &IpBlacklist,
     resolutions_state: &mut AddressesResolutionState,
-) {
-    // Read the version straight off the wire rather than via the parsed header:
-    // a NetFlow v9 datagram can fail the IPFIX parse for reasons that have
-    // nothing to do with its version, and "you're exporting v9" is the more
-    // useful thing to tell someone than "that didn't parse".
-    let Some(version) = bytes.get(..2).map(|b| u16::from_be_bytes([b[0], b[1]])) else {
-        state.rejections.report(peer, Rejection::Malformed);
-        return;
-    };
-    if version != IPFIX_VERSION {
-        state
-            .rejections
-            .report(peer, Rejection::UnsupportedVersion(version));
-        return;
-    }
-
+) -> bool {
     let Ok((_, message)) = parse_message(bytes) else {
-        state.rejections.report(peer, Rejection::Malformed);
-        return;
+        return true;
     };
 
     let now = Instant::now();
@@ -256,6 +201,8 @@ fn process_datagram(
             }
         }
     }
+
+    false
 }
 
 fn record_fits(template: &[wire::FieldSpec], remaining: &[u8]) -> bool {
@@ -405,6 +352,7 @@ const NO_INTERFACE_ADDRESSES: &[Address] = &[];
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::networking::ipfix::wire::IPFIX_VERSION;
     use crate::networking::types::data_representation::DataRepr;
     use crate::networking::types::traffic_direction::TrafficDirection;
     use std::net::{IpAddr, Ipv4Addr, Ipv6Addr};
@@ -483,13 +431,15 @@ mod tests {
     }
 
     /// Feed a sequence of datagrams to one collector, so state that spans
-    /// datagrams (templates, counter baselines) behaves as it would live.
-    fn run_all(datagrams: &[&[u8]]) -> (InfoTraffic, AddressesResolutionState, CollectorState) {
+    /// datagrams (templates, counter baselines) behaves as it would live. The
+    /// last element reports whether every datagram was rejected.
+    fn run_all(datagrams: &[&[u8]]) -> (InfoTraffic, AddressesResolutionState, bool) {
         let mut state = CollectorState::new(Instant::now());
         let mut info = InfoTraffic::default();
         let mut resolutions = AddressesResolutionState::new_detached();
+        let mut all_rejected = true;
         for bytes in datagrams {
-            process_datagram(
+            all_rejected &= process_datagram(
                 bytes,
                 "203.0.113.9:4739".parse().unwrap(),
                 &mut state,
@@ -498,7 +448,7 @@ mod tests {
                 &mut resolutions,
             );
         }
-        (info, resolutions, state)
+        (info, resolutions, all_rejected)
     }
 
     /// A template set plus a one-record data set, shaped exactly as the agent
@@ -695,44 +645,26 @@ mod tests {
     }
 
     #[test]
-    fn a_netflow_v9_exporter_is_rejected_and_reported_once() {
-        // A v9 header, which is a different shape entirely — the point is that
-        // the user hears about the version rather than a parse failure.
+    fn a_netflow_v9_exporter_is_rejected() {
+        // A v9 header, which is a different shape entirely: the version check
+        // in `parse_message_header` is what turns it into a rejection.
         let mut v9 = 9u16.to_be_bytes().to_vec();
         v9.extend_from_slice(&[0; 18]);
-        let (info, _, state) = run_all(&[&v9, &v9, &v9]);
+        let (info, _, rejected) = run_all(&[&v9, &v9, &v9]);
 
         assert!(info.map.is_empty());
-        assert_eq!(
-            state.rejections.reported.len(),
-            1,
-            "one report per exporter, not per datagram"
-        );
-        assert!(
-            state
-                .rejections
-                .reported
-                .iter()
-                .all(|(_, r)| matches!(r, Rejection::UnsupportedVersion(9)))
-        );
+        assert!(rejected);
     }
 
     #[test]
-    fn an_undecodable_datagram_is_reported_without_panicking() {
+    fn an_undecodable_datagram_is_rejected_without_panicking() {
         // Claims a 200-byte message but carries only the header: exactly the
         // kind of input that must never take the application down.
         let truncated = vec![0x00, 0x0A, 0x00, 0xC8, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0];
-        let (info, _, state) = run_all(&[&truncated, &truncated]);
+        let (info, _, rejected) = run_all(&[&truncated, &truncated]);
 
         assert!(info.map.is_empty());
-        assert_eq!(state.rejections.reported.len(), 1);
-        assert!(
-            state
-                .rejections
-                .reported
-                .iter()
-                .all(|(_, r)| matches!(r, Rejection::Malformed))
-        );
+        assert!(rejected);
     }
 
     #[test]

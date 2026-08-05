@@ -11,6 +11,10 @@ use crate::translations::translations::{
 };
 use crate::translations::translations_3::unsupported_link_type_translation;
 use crate::translations::translations_4::reading_from_pcap_translation;
+use crate::translations::translations_6::{
+    invalid_ipfix_received_translation, make_sure_valid_ipfix_translation,
+    waiting_ipfix_connections_translation,
+};
 use crate::utils::types::icon::Icon;
 use iced::widget::{Column, Container, Space, Text};
 use iced::{Alignment, Length};
@@ -21,27 +25,46 @@ pub fn waiting_page(sniffer: &Sniffer) -> Option<Container<'_, Message, StyleTyp
     let dots = &sniffer.dots_pulse.0;
     let cs = &sniffer.capture_source;
 
-    let pcap_error = sniffer.pcap_error.as_ref();
+    let capture_error = sniffer.capture_error.as_ref();
     let tot_packets = sniffer
         .info_traffic
         .tot_data_info
         .tot_data(DataRepr::Packets);
 
-    if pcap_error.is_none() && tot_packets > 0 {
+    // a rejected IPFIX exporter doesn't stop the others from being read, so the
+    // page makes way as soon as any traffic is actually observed
+    if tot_packets > 0 {
         return None;
     }
 
     let link_type = cs.get_link_type();
-    let (icon_text, nothing_to_see_text) = if let Some(error) = pcap_error {
-        (
-            Icon::Error.to_text().size(60),
-            format!("{}\n\n{error}", error_translation(language)),
-        )
+    let (icon_text, nothing_to_see_text) = if let Some(error) = capture_error {
+        // the IPFIX collector reports rejected datagrams as an empty error: the
+        // capture is running fine, so it's a warning and its text is static.
+        // A non-empty one is a failure to start, and keeps its own message.
+        if matches!(cs, CaptureSource::Ipfix(_)) && error.is_empty() {
+            (
+                Icon::Warning.to_text().size(60),
+                format!(
+                    "{}\n\n{}",
+                    invalid_ipfix_received_translation(language),
+                    make_sure_valid_ipfix_translation(language)
+                ),
+            )
+        } else {
+            (
+                Icon::Error.to_text().size(60),
+                format!("{}\n\n{error}", error_translation(language)),
+            )
+        }
     } else if matches!(cs, CaptureSource::Ipfix(_)) {
-        // TODO!
         (
-            Icon::File.to_text().size(60),
-            reading_from_pcap_translation(language).to_string(),
+            Icon::get_hourglass(dots.len()).size(60),
+            format!(
+                "{}\n\n{}",
+                waiting_ipfix_connections_translation(language),
+                make_sure_valid_ipfix_translation(language)
+            ),
         )
     } else if !link_type.is_supported() {
         (

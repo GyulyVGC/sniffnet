@@ -12,6 +12,7 @@
 use nom::IResult;
 use nom::Parser;
 use nom::bytes::complete::take;
+use nom::combinator::verify;
 use nom::multi::many0;
 use nom::number::complete::{be_u8, be_u16, be_u32};
 use std::net::{IpAddr, Ipv4Addr, Ipv6Addr};
@@ -128,7 +129,8 @@ pub struct FlowRecord {
     pub flow_end: Option<Timestamp>,
 }
 
-/// Parse a complete IPFIX message (header + sets).
+/// Parse a complete IPFIX message (header + sets). Fails on anything that
+/// isn't IPFIX, a `NetFlow` v9 datagram included.
 pub fn parse_message(input: &[u8]) -> IResult<&[u8], IpfixMessage<'_>> {
     let (input, header) = parse_message_header(input)?;
     // header.length is the total message length including the 16-byte header
@@ -139,7 +141,10 @@ pub fn parse_message(input: &[u8]) -> IResult<&[u8], IpfixMessage<'_>> {
 }
 
 fn parse_message_header(input: &[u8]) -> IResult<&[u8], MessageHeader> {
-    let (input, version) = be_u16(input)?;
+    // The version is what the parse hinges on: nothing further down would
+    // reject a NetFlow v9 datagram, whose header is a different shape entirely,
+    // so it would otherwise be read as IPFIX and decode into garbage.
+    let (input, version) = verify(be_u16, |v: &u16| *v == IPFIX_VERSION).parse(input)?;
     let (input, length) = be_u16(input)?;
     let (input, export_time) = be_u32(input)?;
     let (input, sequence_number) = be_u32(input)?;
@@ -621,6 +626,16 @@ mod tests {
         assert_eq!(hdr.export_time, 0xDEAD_BEEF);
         assert_eq!(hdr.sequence_number, 0x0102_0304);
         assert_eq!(hdr.observation_domain_id, 0);
+    }
+
+    #[test]
+    fn rejects_a_header_that_is_not_ipfix() {
+        // A NetFlow v9 header: no later step of the parse would catch it, so
+        // the version has to be what fails.
+        let mut v9 = 9u16.to_be_bytes().to_vec();
+        v9.extend_from_slice(&[0; 18]);
+        assert!(parse_message_header(&v9).is_err());
+        assert!(parse_message(&v9).is_err());
     }
 
     #[test]
