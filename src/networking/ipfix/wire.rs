@@ -26,6 +26,12 @@ pub const SET_ID_OPTIONS_TEMPLATE: u16 = 3;
 pub const MIN_DATA_SET_ID: u16 = 256;
 pub const VARIABLE_LENGTH: u16 = 0xFFFF;
 
+/// The enterprise number IANA set aside for RFC 5103 biflows. It isn't a
+/// vendor: an IE carrying it is the *reverse* of the very same IE without it,
+/// counting what travels from the flow's destination back to its source. Every
+/// other enterprise number is genuinely vendor-private and stays ignored.
+pub const REVERSE_PEN: u32 = 29305;
+
 pub mod ie {
     //! IANA-assigned IPFIX Information Element identifiers used by Sniffnet.
     //!
@@ -127,6 +133,21 @@ pub struct FlowRecord {
     pub direction: Option<TrafficDirection>,
     pub flow_start: Option<Timestamp>,
     pub flow_end: Option<Timestamp>,
+    /// Set only when the exporter sends a biflow: what the same conversation
+    /// carried in the opposite direction. The collector turns it into a record
+    /// of its own against the swapped 5-tuple.
+    pub reverse: Option<ReverseCounters>,
+}
+
+/// The counters of an RFC 5103 biflow's reverse direction. Only the counters:
+/// the reverse addresses, ports and protocol are the forward ones swapped, and
+/// carry no information of their own.
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq)]
+pub struct ReverseCounters {
+    pub bytes: u128,
+    pub packets: u128,
+    pub bytes_total: Option<u128>,
+    pub packets_total: Option<u128>,
 }
 
 /// Parse a complete IPFIX message (header + sets). Fails on anything that
@@ -238,20 +259,35 @@ pub fn decode_data_record<'a>(
 ) -> IResult<&'a [u8], FlowRecord> {
     let mut record = FlowRecord::default();
     let mut priority = FieldPriority::default();
+    // Reverse IEs are the same IEs, so they decode through the same code into a
+    // scratch record; only its counters are kept.
+    let mut reverse = FlowRecord::default();
+    let mut reverse_priority = FieldPriority::default();
+    let mut saw_reverse = false;
     let mut remaining = input;
 
     for spec in template {
         let (after, raw) = read_field_bytes(remaining, spec.length)?;
         remaining = after;
 
-        // Enterprise-specific IEs and unknown IEs are skipped; the bytes were
-        // already consumed above by `read_field_bytes`.
-        if spec.enterprise.is_some() {
-            continue;
+        // Unknown IEs are skipped, as are vendor-private ones; either way the
+        // bytes were already consumed above by `read_field_bytes`.
+        match spec.enterprise {
+            None => apply_ie(spec.ie_id, raw, &mut record, &mut priority),
+            Some(REVERSE_PEN) => {
+                saw_reverse = true;
+                apply_ie(spec.ie_id, raw, &mut reverse, &mut reverse_priority);
+            }
+            Some(_) => {}
         }
-
-        apply_ie(spec.ie_id, raw, &mut record, &mut priority);
     }
+
+    record.reverse = saw_reverse.then_some(ReverseCounters {
+        bytes: reverse.bytes,
+        packets: reverse.packets,
+        bytes_total: reverse.bytes_total,
+        packets_total: reverse.packets_total,
+    });
 
     Ok((remaining, record))
 }
@@ -732,6 +768,50 @@ mod tests {
         let (rest, record) = decode_data_record(&[spec], &payload).unwrap();
         assert!(rest.is_empty());
         assert_eq!(record, FlowRecord::default());
+    }
+
+    #[test]
+    fn reverse_pen_ies_decode_into_the_reverse_counters() {
+        // Same IE ids as the forward counters, under PEN 29305.
+        let reverse_spec = |ie_id: u16| FieldSpec {
+            ie_id,
+            length: 8,
+            enterprise: Some(REVERSE_PEN),
+        };
+        let template = [
+            FieldSpec {
+                ie_id: ie::OCTET_DELTA_COUNT,
+                length: 8,
+                enterprise: None,
+            },
+            reverse_spec(ie::OCTET_DELTA_COUNT),
+            reverse_spec(ie::PACKET_DELTA_COUNT),
+        ];
+        let mut payload = 1500u64.to_be_bytes().to_vec();
+        payload.extend_from_slice(&9000u64.to_be_bytes());
+        payload.extend_from_slice(&60u64.to_be_bytes());
+
+        let (rest, record) = decode_data_record(&template, &payload).unwrap();
+        assert!(rest.is_empty());
+        // the forward slots must be untouched by the reverse fields
+        assert_eq!(record.bytes, 1500);
+        assert_eq!(record.packets, 0);
+        assert_eq!(
+            record.reverse,
+            Some(ReverseCounters {
+                bytes: 9000,
+                packets: 60,
+                bytes_total: None,
+                packets_total: None,
+            })
+        );
+    }
+
+    #[test]
+    fn a_uniflow_record_has_no_reverse_counters() {
+        let record = decode(&[(ie::OCTET_DELTA_COUNT, 8)], &1500u64.to_be_bytes());
+        assert_eq!(record.bytes, 1500);
+        assert_eq!(record.reverse, None, "not a biflow");
     }
 
     #[test]

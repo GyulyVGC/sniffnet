@@ -24,6 +24,7 @@ use crate::networking::types::arp_type::ArpType;
 use crate::networking::types::info_traffic::InfoTraffic;
 use crate::networking::types::ip_blacklist::IpBlacklist;
 use crate::networking::types::protocol::Protocol;
+use crate::networking::types::traffic_direction::TrafficDirection;
 use crate::utils::error_logger::{ErrorLogger, Location};
 use crate::utils::types::timestamp::Timestamp;
 
@@ -188,16 +189,21 @@ fn process_datagram(
                     break;
                 }
                 remaining = rest;
-                ingest_flow_record(
-                    &record,
-                    peer,
-                    message.header.observation_domain_id,
-                    &mut state.totals,
-                    now,
-                    info_traffic_msg,
-                    ip_blacklist,
-                    resolutions_state,
-                );
+                // A biflow is accounted as the two records the pcap pipeline
+                // would have produced for the same conversation.
+                let reverse = reverse_record(&record);
+                for flow in [Some(record), reverse].into_iter().flatten() {
+                    ingest_flow_record(
+                        &flow,
+                        peer,
+                        message.header.observation_domain_id,
+                        &mut state.totals,
+                        now,
+                        info_traffic_msg,
+                        ip_blacklist,
+                        resolutions_state,
+                    );
+                }
             }
         }
     }
@@ -219,6 +225,34 @@ fn record_fits(template: &[wire::FieldSpec], remaining: &[u8]) -> bool {
         }
     }
     remaining.len() >= needed && needed > 0
+}
+
+/// The other half of an RFC 5103 biflow, as a record in its own right: the
+/// 5-tuple and the MAC addresses swapped, and the reverse counters moved into
+/// the slots the forward ones occupy. Everything downstream — the totals
+/// baseline, the direction, the zero-counter guard — then applies to it exactly
+/// as it does to any other record.
+fn reverse_record(record: &FlowRecord) -> Option<FlowRecord> {
+    let reverse = record.reverse?;
+    Some(FlowRecord {
+        src_ip: record.dst_ip,
+        dst_ip: record.src_ip,
+        src_port: record.dst_port,
+        dst_port: record.src_port,
+        protocol: record.protocol,
+        bytes: reverse.bytes,
+        packets: reverse.packets,
+        bytes_total: reverse.bytes_total,
+        packets_total: reverse.packets_total,
+        src_mac: record.dst_mac,
+        dst_mac: record.src_mac,
+        // IE 61 describes the forward direction at the observation point, so
+        // the reverse half travels the other way
+        direction: record.direction.map(TrafficDirection::opposite),
+        flow_start: record.flow_start,
+        flow_end: record.flow_end,
+        reverse: None,
+    })
 }
 
 #[allow(clippy::too_many_arguments)]
@@ -355,7 +389,6 @@ mod tests {
     use super::*;
     use crate::networking::ipfix::wire::IPFIX_VERSION;
     use crate::networking::types::data_representation::DataRepr;
-    use crate::networking::types::traffic_direction::TrafficDirection;
     use std::net::{IpAddr, Ipv4Addr, Ipv6Addr};
 
     /// The field specifiers `sniffnet-agent` puts in its templates, after the
@@ -385,11 +418,22 @@ mod tests {
     }
 
     fn template_set(template_id: u16, fields: &[(u16, u16)]) -> Vec<u8> {
+        let fields: Vec<_> = fields.iter().map(|(ie, len)| (*ie, *len, None)).collect();
+        template_set_with_pens(template_id, &fields)
+    }
+
+    /// A template whose fields are `(ie, length, enterprise)` triples; an
+    /// enterprise field sets the high bit of the ie id and appends the PEN.
+    fn template_set_with_pens(template_id: u16, fields: &[(u16, u16, Option<u32>)]) -> Vec<u8> {
         let mut body = template_id.to_be_bytes().to_vec();
         body.extend_from_slice(&u16::try_from(fields.len()).unwrap().to_be_bytes());
-        for (ie, len) in fields {
-            body.extend_from_slice(&ie.to_be_bytes());
+        for (ie, len, pen) in fields {
+            let raw_ie = if pen.is_some() { ie | 0x8000 } else { *ie };
+            body.extend_from_slice(&raw_ie.to_be_bytes());
             body.extend_from_slice(&len.to_be_bytes());
+            if let Some(pen) = pen {
+                body.extend_from_slice(&pen.to_be_bytes());
+            }
         }
         set(wire::SET_ID_TEMPLATE, &body)
     }
@@ -655,6 +699,105 @@ mod tests {
 
         let entry = info.map.get(&totals_key()).expect("flow present");
         assert_eq!(entry.traffic_direction, TrafficDirection::Outgoing);
+    }
+
+    #[test]
+    fn a_biflow_is_accounted_as_two_flows() {
+        // What YAF sends: forward counters, then the same IEs under PEN 29305.
+        let fields = [
+            (8, 4, None),
+            (12, 4, None),
+            (7, 2, None),
+            (11, 2, None),
+            (4, 1, None),
+            (1, 8, None), // octetDeltaCount
+            (2, 8, None), // packetDeltaCount
+            (1, 8, Some(wire::REVERSE_PEN)),
+            (2, 8, Some(wire::REVERSE_PEN)),
+        ];
+        let mut record = totals_record(1500, 10);
+        record.extend_from_slice(&9000u64.to_be_bytes());
+        record.extend_from_slice(&60u64.to_be_bytes());
+
+        let bytes = datagram(&[template_set_with_pens(300, &fields), set(300, &record)]);
+        let (info, _, _) = run_all(&[&bytes]);
+
+        assert_eq!(info.map.len(), 2, "one entry per direction");
+
+        let forward = info.map.get(&totals_key()).expect("forward flow present");
+        assert_eq!(forward.transmitted_bytes, 1500);
+        assert_eq!(forward.transmitted_packets, 10);
+
+        // the reverse half is the same conversation with the tuple swapped
+        let reverse_key = AddressPortPair {
+            source: totals_key().dest,
+            sport: totals_key().dport,
+            dest: totals_key().source,
+            dport: totals_key().sport,
+            protocol: Protocol::TCP,
+        };
+        let reverse = info.map.get(&reverse_key).expect("reverse flow present");
+        assert_eq!(reverse.transmitted_bytes, 9000);
+        assert_eq!(reverse.transmitted_packets, 60);
+
+        // ...and it travels the other way
+        assert_eq!(forward.traffic_direction, TrafficDirection::Outgoing);
+        assert_eq!(reverse.traffic_direction, TrafficDirection::Incoming);
+
+        assert_eq!(info.tot_data_info.tot_data(DataRepr::Bytes), 10_500);
+        assert_eq!(info.tot_data_info.tot_data(DataRepr::Packets), 70);
+    }
+
+    #[test]
+    fn an_empty_reverse_half_adds_no_flow() {
+        // A biflow template on a conversation that only ever went one way.
+        let fields = [
+            (8, 4, None),
+            (12, 4, None),
+            (7, 2, None),
+            (11, 2, None),
+            (4, 1, None),
+            (1, 8, None),
+            (2, 8, None),
+            (1, 8, Some(wire::REVERSE_PEN)),
+            (2, 8, Some(wire::REVERSE_PEN)),
+        ];
+        let mut record = totals_record(1500, 10);
+        record.extend_from_slice(&0u64.to_be_bytes());
+        record.extend_from_slice(&0u64.to_be_bytes());
+
+        let bytes = datagram(&[template_set_with_pens(300, &fields), set(300, &record)]);
+        let (info, _, _) = run_all(&[&bytes]);
+
+        assert_eq!(info.map.len(), 1, "the empty reverse half is dropped");
+        assert_eq!(info.tot_data_info.tot_data(DataRepr::Packets), 10);
+    }
+
+    #[test]
+    fn a_vendor_enterprise_ie_is_still_ignored() {
+        // Same shape as the biflow, under a vendor PEN instead: the counters
+        // must not be read as a reverse direction.
+        let fields = [
+            (8, 4, None),
+            (12, 4, None),
+            (7, 2, None),
+            (11, 2, None),
+            (4, 1, None),
+            (1, 8, None),
+            (2, 8, None),
+            (1, 8, Some(9)), // Cisco
+            (2, 8, Some(9)),
+        ];
+        let mut record = totals_record(1500, 10);
+        record.extend_from_slice(&9000u64.to_be_bytes());
+        record.extend_from_slice(&60u64.to_be_bytes());
+
+        let bytes = datagram(&[template_set_with_pens(300, &fields), set(300, &record)]);
+        let (info, _, _) = run_all(&[&bytes]);
+
+        assert_eq!(info.map.len(), 1);
+        assert_eq!(info.tot_data_info.tot_data(DataRepr::Bytes), 1500);
+        assert_eq!(info.tot_data_info.tot_data(DataRepr::Packets), 10);
     }
 
     #[test]
