@@ -324,15 +324,11 @@ fn read_field_bytes(input: &[u8], declared_length: u16) -> IResult<&[u8], &[u8]>
     }
     // Variable length: 1-byte length, with 0xFF sentinel switching to 2-byte length
     let (input, first) = be_u8(input)?;
-    let actual_len = if first == 0xFF {
-        let (input2, real) = be_u16(input)?;
-        let (input2, bytes) = take(real as usize)(input2)?;
-        return Ok((input2, bytes));
-    } else {
-        first as usize
-    };
-    let (input, bytes) = take(actual_len)(input)?;
-    Ok((input, bytes))
+    if first == 0xFF {
+        let (input, actual_len) = be_u16(input)?;
+        return take(actual_len as usize)(input);
+    }
+    take(first as usize)(input)
 }
 
 fn apply_ie(ie_id: u16, raw: &[u8], record: &mut FlowRecord, priority: &mut FieldPriority) {

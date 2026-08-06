@@ -4,7 +4,7 @@ use crate::gui::styles::container::ContainerType;
 use crate::gui::styles::types::style_type::StyleType;
 use crate::gui::types::message::Message;
 use crate::gui::types::settings::Settings;
-use crate::networking::types::capture_context::CaptureSource;
+use crate::networking::types::capture_context::{CaptureError, CaptureSource};
 use crate::networking::types::data_representation::DataRepr;
 use crate::translations::translations::{
     error_translation, no_addresses_translation, waiting_translation,
@@ -38,25 +38,21 @@ pub fn waiting_page(sniffer: &Sniffer) -> Option<Container<'_, Message, StyleTyp
     }
 
     let link_type = cs.get_link_type();
-    let (icon_text, nothing_to_see_text) = if let Some(error) = capture_error {
-        // the IPFIX collector reports rejected datagrams as an empty error: the
-        // capture is running fine, so it's a warning and its text is static.
-        // A non-empty one is a failure to start, and keeps its own message.
-        if matches!(cs, CaptureSource::Ipfix(_)) && error.is_empty() {
-            (
-                Icon::Warning.to_text().size(60),
-                format!(
-                    "{}\n\n{}",
-                    invalid_ipfix_received_translation(language),
-                    make_sure_valid_ipfix_translation(language)
-                ),
-            )
-        } else {
-            (
-                Icon::Error.to_text().size(60),
-                format!("{}\n\n{error}", error_translation(language)),
-            )
-        }
+    let (icon_text, nothing_to_see_text) = if let Some(CaptureError::Fatal(error)) = capture_error {
+        (
+            Icon::Error.to_text().size(60),
+            format!("{}\n\n{error}", error_translation(language)),
+        )
+    } else if matches!(capture_error, Some(CaptureError::IpfixUndecodable)) {
+        // the capture is running fine, so this is a warning rather than an error
+        (
+            Icon::Warning.to_text().size(60),
+            format!(
+                "{}\n\n{}",
+                invalid_ipfix_received_translation(language),
+                make_sure_valid_ipfix_translation(language)
+            ),
+        )
     } else if matches!(cs, CaptureSource::Ipfix(_)) {
         (
             Icon::get_hourglass(dots.len()).size(60),

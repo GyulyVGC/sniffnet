@@ -33,7 +33,7 @@ use crate::networking::capture::spawn_capture_thread;
 use crate::networking::parse_packets::BackendTrafficMessage;
 use crate::networking::traffic_preview::{TrafficPreview, traffic_preview};
 use crate::networking::types::capture_context::{
-    CaptureContext, CaptureSource, CaptureSourcePicklist, MyPcapImport,
+    CaptureContext, CaptureError, CaptureSource, CaptureSourcePicklist, MyPcapImport,
 };
 use crate::networking::types::combobox_data_states::ComboboxDataStates;
 use crate::networking::types::data_representation::DataRepr;
@@ -105,10 +105,8 @@ pub struct Sniffer {
     pub newer_release_available: Option<bool>,
     /// Network device to be analyzed, or PCAP file to be imported
     pub capture_source: CaptureSource,
-    /// Signals if the capture backend reported a problem; empty when the problem
-    /// is the IPFIX collector rejecting datagrams, whose text the waiting page
-    /// supplies itself so that it follows a language change
-    pub capture_error: Option<String>,
+    /// Signals if the capture backend reported a problem
+    pub capture_error: Option<CaptureError>,
     /// Messages status
     pub dots_pulse: (String, u8),
     /// Traffic chart displayed in the Overview page
@@ -863,8 +861,7 @@ impl Sniffer {
 
     fn ipfix_rejection(&mut self, cap_id: usize) {
         if cap_id == self.current_capture_rx.0 {
-            // the correct translated error is displayed in waiting_page
-            self.capture_error = Some(String::new());
+            self.capture_error = Some(CaptureError::IpfixUndecodable);
         }
     }
 
@@ -1017,7 +1014,9 @@ impl Sniffer {
             let pcap_path = self.conf.export_pcap.full_path();
             let capture_context =
                 CaptureContext::new(&self.capture_source, pcap_path.as_ref(), &self.conf.filters);
-            self.capture_error = capture_context.error().map(ToString::to_string);
+            self.capture_error = capture_context
+                .error()
+                .map(|e| CaptureError::Fatal(e.to_string()));
             self.running_page = Some(self.conf.last_opened_page);
 
             if capture_context.error().is_none() {

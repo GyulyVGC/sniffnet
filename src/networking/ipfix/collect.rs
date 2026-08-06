@@ -238,10 +238,11 @@ fn ingest_flow_record(
 
     let (exchanged_bytes, exchanged_packets) =
         resolve_counters(record, peer, observation_domain_id, &key, totals, now);
-    // A record that resolved to nothing carries nothing to account for — an
-    // exporter whose counters we can't read at all would otherwise contribute a
-    // phantom flow per record.
-    if exchanged_bytes == 0 && exchanged_packets == 0 {
+    // Both counters have to be there for the record to be worth accounting: a
+    // flow with no bytes has nothing to report, and one with no packets would
+    // add bytes that never show up in the packet totals the rest of the
+    // application counts by.
+    if exchanged_bytes == 0 || exchanged_packets == 0 {
         return;
     }
 
@@ -520,13 +521,25 @@ mod tests {
     }
 
     #[test]
-    fn record_without_counters_is_skipped() {
+    fn a_record_with_either_counter_at_zero_is_skipped() {
         let mut addrs = Ipv4Addr::new(10, 0, 0, 1).octets().to_vec();
         addrs.extend_from_slice(&Ipv4Addr::new(8, 8, 8, 8).octets());
-        let (info, _) = run(&agent_datagram(256, [(8, 4), (12, 4)], &addrs, 0, 0));
 
-        assert!(info.map.is_empty(), "no traffic to account for");
-        assert_eq!(info.tot_data_info.tot_data(DataRepr::Packets), 0);
+        // Bytes without packets would grow the byte totals while leaving the
+        // packet ones at zero, which the rest of the application counts by.
+        for (bytes, packets) in [(0, 0), (1500, 0), (0, 10)] {
+            let (info, _) = run(&agent_datagram(
+                256,
+                [(8, 4), (12, 4)],
+                &addrs,
+                bytes,
+                packets,
+            ));
+
+            assert!(info.map.is_empty(), "no traffic to account for");
+            assert_eq!(info.tot_data_info.tot_data(DataRepr::Bytes), 0);
+            assert_eq!(info.tot_data_info.tot_data(DataRepr::Packets), 0);
+        }
     }
 
     /// A template in the shape exporters that only report cumulative counters

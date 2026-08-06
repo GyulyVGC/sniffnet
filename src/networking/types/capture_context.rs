@@ -1,7 +1,7 @@
 use crate::gui::types::conf::Conf;
 use crate::gui::types::filters::Filters;
+use crate::gui::types::ipfix_socket::MyIpfixSocket;
 use crate::location;
-use crate::networking::ipfix::MyIpfixSocket;
 use crate::networking::types::my_device::MyDevice;
 use crate::networking::types::my_link_type::MyLinkType;
 use crate::translations::translations::network_adapter_translation;
@@ -20,6 +20,16 @@ pub enum CaptureContext {
     Offline(Offline),
     Ipfix(UdpSocket),
     Error(String),
+}
+
+/// A problem the capture backend has reported, for the waiting page to show.
+pub enum CaptureError {
+    /// The capture failed to start; the string is the underlying error.
+    Fatal(String),
+    /// The IPFIX collector is running but what reaches it isn't decodable as
+    /// IPFIX. Only a warning — the collector keeps listening — and it carries
+    /// no text of its own so that the message follows a language change.
+    IpfixUndecodable,
 }
 
 impl CaptureContext {
@@ -92,7 +102,7 @@ impl CaptureContext {
                 (Some(CaptureType::Live(onws.live.cap)), Some(onws.savefile))
             }
             Self::Offline(off) => (Some(CaptureType::Offline(off.cap)), None),
-            _ => (None, None),
+            Self::Ipfix(_) | Self::Error(_) => (None, None),
         }
     }
 
@@ -103,7 +113,7 @@ impl CaptureContext {
                 MyLinkType::from_pcap_link_type(onws.live.cap.get_datalink())
             }
             Self::Offline(off) => MyLinkType::from_pcap_link_type(off.cap.get_datalink()),
-            _ => MyLinkType::default(),
+            Self::Ipfix(_) | Self::Error(_) => MyLinkType::default(),
         }
     }
 
@@ -258,11 +268,12 @@ impl CaptureSource {
         }
     }
 
-    pub fn get_addresses(&self) -> &Vec<Address> {
-        const EMPTY: &Vec<Address> = &Vec::new();
+    pub fn get_addresses(&self) -> &[Address] {
         match self {
             Self::Device(device) => device.get_addresses(),
-            _ => EMPTY,
+            // neither a PCAP file nor an IPFIX exporter has local addresses to
+            // classify traffic against
+            Self::File(_) | Self::Ipfix(_) => &[],
         }
     }
 

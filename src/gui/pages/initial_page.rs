@@ -12,9 +12,9 @@ use crate::gui::styles::text::TextType;
 use crate::gui::styles::types::gradient_type::GradientType;
 use crate::gui::types::export_pcap::ExportPcap;
 use crate::gui::types::filters::Filters;
+use crate::gui::types::ipfix_socket::{DEFAULT_IPFIX_ADDR, DEFAULT_IPFIX_PORT, MyIpfixSocket};
 use crate::gui::types::message::Message;
 use crate::gui::types::settings::Settings;
-use crate::networking::ipfix::{DEFAULT_IPFIX_ADDR, DEFAULT_IPFIX_PORT, MyIpfixSocket};
 use crate::networking::types::capture_context::{CaptureSource, CaptureSourcePicklist};
 use crate::networking::types::my_device::MyDevice;
 use crate::networking::types::my_link_type::MyLinkType;
@@ -232,7 +232,7 @@ fn get_col_adapter(sniffer: &Sniffer) -> Column<'_, Message, StyleType> {
 
 pub(crate) fn get_addresses_row(
     link_type: MyLinkType,
-    addresses: &Vec<Address>,
+    addresses: &[Address],
 ) -> Option<row::Wrapping<'_, Message, StyleType>> {
     if addresses.is_empty()
         || matches!(

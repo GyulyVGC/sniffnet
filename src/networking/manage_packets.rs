@@ -614,7 +614,7 @@ pub fn is_local_connection(address_to_lookup: &IpAddr, my_interface_addresses: &
 }
 
 /// Determines if the address passed as parameter belong to the chosen adapter
-pub fn is_my_address(local_address: &IpAddr, my_interface_addresses: &Vec<Address>) -> bool {
+pub fn is_my_address(local_address: &IpAddr, my_interface_addresses: &[Address]) -> bool {
     for address in my_interface_addresses {
         if address.addr.eq(local_address) {
             return true;
