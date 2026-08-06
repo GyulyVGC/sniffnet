@@ -36,7 +36,7 @@ impl CaptureContext {
                 Err(e) => return Self::Error(e),
             },
             CaptureSource::Ipfix(ipfix) => {
-                return Self::new_ipfix(ipfix).unwrap_or_else(|e| Self::Error(e));
+                return Self::new_ipfix(ipfix).unwrap_or_else(Self::Error);
             }
         };
 
@@ -112,9 +112,9 @@ impl CaptureContext {
 
         let socket = bind_collector_socket(socket_addr).map_err(|e| e.to_string())?;
 
-        let _ = socket
+        socket
             .set_read_timeout(Some(IPFIX_READ_TIMEOUT))
-            .log_err(location!());
+            .map_err(|e| e.to_string())?;
 
         Ok(Self::Ipfix(socket))
     }
@@ -243,7 +243,10 @@ impl CaptureSource {
                 let path = conf.import_pcap_path.clone();
                 Self::File(MyPcapImport::new(path))
             }
-            CaptureSourcePicklist::Ipfix => Self::Ipfix(conf.ipfix_socket.clone()),
+            CaptureSourcePicklist::Ipfix => {
+                let socket = conf.ipfix_socket.clone();
+                Self::Ipfix(socket)
+            }
         }
     }
 

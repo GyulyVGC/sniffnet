@@ -51,7 +51,7 @@ impl CollectorState {
 /// second with the accumulated `InfoTraffic`.
 pub fn collect_ipfix(
     cap_id: usize,
-    socket: UdpSocket,
+    socket: &UdpSocket,
     mmdb_readers: &MmdbReaders,
     ip_blacklist: &IpBlacklist,
     tx: &Sender<BackendTrafficMessage>,

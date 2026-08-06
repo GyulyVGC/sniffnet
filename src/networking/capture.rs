@@ -36,7 +36,7 @@ pub fn spawn_capture_thread(
                 .spawn(move || {
                     collect_ipfix(
                         cap_id,
-                        socket,
+                        &socket,
                         &mmdb_readers,
                         &ip_blacklist,
                         &tx,

@@ -329,7 +329,7 @@ fn get_col_ipfix_collector<'a>(
             bind_address_translation(language)
         )))
         .push(
-            TextInput::new(&DEFAULT_IPFIX_ADDR.to_string(), &ipfix_socket.addr())
+            TextInput::new(&DEFAULT_IPFIX_ADDR.to_string(), ipfix_socket.addr())
                 .on_input(Message::SetIpfixAddr)
                 .padding([2, 5]),
         );
@@ -338,7 +338,7 @@ fn get_col_ipfix_collector<'a>(
         .spacing(5)
         .push(Text::new(format!("{}:", port_translation(language))))
         .push(
-            TextInput::new(&DEFAULT_IPFIX_PORT.to_string(), &ipfix_socket.port())
+            TextInput::new(&DEFAULT_IPFIX_PORT.to_string(), ipfix_socket.port())
                 .on_input(Message::SetIpfixPort)
                 .padding([2, 5]),
         );

@@ -1449,12 +1449,12 @@ impl Sniffer {
     }
 
     pub fn is_capture_source_consistent(&self) -> bool {
-        match (self.conf.capture_source_picklist, &self.capture_source) {
+        matches!(
+            (self.conf.capture_source_picklist, &self.capture_source),
             (CaptureSourcePicklist::Device, CaptureSource::Device(_))
-            | (CaptureSourcePicklist::File, CaptureSource::File(_))
-            | (CaptureSourcePicklist::Ipfix, CaptureSource::Ipfix(_)) => true,
-            _ => false,
-        }
+                | (CaptureSourcePicklist::File, CaptureSource::File(_))
+                | (CaptureSourcePicklist::Ipfix, CaptureSource::Ipfix(_))
+        )
     }
 
     fn change_charts_style(&mut self) {
@@ -1476,7 +1476,7 @@ mod tests {
     use std::fs::remove_file;
     use std::net::{IpAddr, Ipv4Addr};
     use std::path::Path;
-    use std::time::Duration;
+    use std::time::{Duration, Instant};
 
     use crate::countries::types::country::Country;
     use crate::gui::components::types::my_modal::MyModal;
@@ -1854,10 +1854,12 @@ mod tests {
             ));
             // Threshold adjustments won't be updated if `info_traffic.tot_in_packets`
             // and `info_traffic.tot_out_packets` are both `0`.
-            sniffer
-                .info_traffic
-                .tot_data_info
-                .add_packet(0, TrafficDirection::Outgoing);
+            sniffer.info_traffic.tot_data_info.add_packets(
+                1,
+                0,
+                TrafficDirection::Outgoing,
+                Instant::now(),
+            );
 
             // Simulate an update to apply the settings
             sniffer.update(Message::Periodic);
@@ -2120,10 +2122,12 @@ mod tests {
         assert_eq!(sniffer.running_page, Some(RunningPage::Overview));
         assert_eq!(sniffer.settings_page, None);
         // switch with closed setting and some packets received => change running page
-        sniffer
-            .info_traffic
-            .tot_data_info
-            .add_packet(0, TrafficDirection::Outgoing);
+        sniffer.info_traffic.tot_data_info.add_packets(
+            1,
+            0,
+            TrafficDirection::Outgoing,
+            Instant::now(),
+        );
         sniffer.update(Message::SwitchPage(true));
         assert_eq!(sniffer.running_page, Some(RunningPage::Inspect));
         assert_eq!(sniffer.settings_page, None);

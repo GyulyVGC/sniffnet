@@ -43,17 +43,6 @@ impl DataInfo {
         self.incoming_data(data_repr) + self.outgoing_data(data_repr)
     }
 
-    pub fn add_packet(&mut self, bytes: u128, traffic_direction: TrafficDirection) {
-        if traffic_direction.eq(&TrafficDirection::Outgoing) {
-            self.outgoing_packets += 1;
-            self.outgoing_bytes += bytes;
-        } else {
-            self.incoming_packets += 1;
-            self.incoming_bytes += bytes;
-        }
-        self.final_instant = Some(Instant::now());
-    }
-
     pub fn add_packets(
         &mut self,
         packets: u128,
@@ -69,26 +58,6 @@ impl DataInfo {
             self.incoming_bytes += bytes;
         }
         self.final_instant = Some(final_instant);
-    }
-
-    pub fn new_with_first_packet(bytes: u128, traffic_direction: TrafficDirection) -> Self {
-        if traffic_direction.eq(&TrafficDirection::Outgoing) {
-            Self {
-                incoming_packets: 0,
-                outgoing_packets: 1,
-                incoming_bytes: 0,
-                outgoing_bytes: bytes,
-                final_instant: Some(Instant::now()),
-            }
-        } else {
-            Self {
-                incoming_packets: 1,
-                outgoing_packets: 0,
-                incoming_bytes: bytes,
-                outgoing_bytes: 0,
-                final_instant: Some(Instant::now()),
-            }
-        }
     }
 
     pub fn refresh(&mut self, rhs: Self) {
@@ -148,11 +117,12 @@ mod tests {
     #[test]
     fn test_data_info() {
         // in_packets: 0, out_packets: 0, in_bytes: 0, out_bytes: 0
-        let mut data_info_1 = DataInfo::new_with_first_packet(123, TrafficDirection::Incoming);
+        let mut data_info_1 = DataInfo::default();
+        data_info_1.add_packets(1, 123, TrafficDirection::Incoming, Instant::now());
         // 1, 0, 123, 0
-        data_info_1.add_packet(100, TrafficDirection::Incoming);
+        data_info_1.add_packets(1, 100, TrafficDirection::Incoming, Instant::now());
         // 2, 0, 223, 0
-        data_info_1.add_packet(200, TrafficDirection::Outgoing);
+        data_info_1.add_packets(1, 200, TrafficDirection::Outgoing, Instant::now());
         // 2, 1, 223, 200
         data_info_1.add_packets(11, 1200, TrafficDirection::Outgoing, Instant::now());
         // 2, 12, 223, 1400
@@ -178,7 +148,8 @@ mod tests {
 
         // sleep a little to have a different final_instant
         std::thread::sleep(std::time::Duration::from_millis(10));
-        let mut data_info_2 = DataInfo::new_with_first_packet(100, TrafficDirection::Outgoing);
+        let mut data_info_2 = DataInfo::default();
+        data_info_2.add_packets(1, 100, TrafficDirection::Outgoing, Instant::now());
         // 0, 1, 0, 100
         data_info_2.add_packets(19, 300, TrafficDirection::Outgoing, Instant::now());
         // 0, 20, 0, 400
