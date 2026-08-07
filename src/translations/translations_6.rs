@@ -18,14 +18,6 @@ pub fn ipfix_collector_translation(language: Language) -> &'static str {
     }
 }
 
-pub fn bind_address_translation(language: Language) -> &'static str {
-    match language {
-        Language::EN => "Bind address",
-        Language::IT => "Indirizzo di bind",
-        _ => "Bind address",
-    }
-}
-
 pub fn waiting_ipfix_connections_translation(language: Language) -> &'static str {
     match language {
         Language::EN => "No traffic has been observed yet. Waiting for IPFIX flows...",

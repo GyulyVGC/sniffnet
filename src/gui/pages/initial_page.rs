@@ -18,13 +18,15 @@ use crate::gui::types::settings::Settings;
 use crate::networking::types::capture_context::{CaptureSource, CaptureSourcePicklist};
 use crate::networking::types::my_device::MyDevice;
 use crate::networking::types::my_link_type::MyLinkType;
-use crate::translations::translations::{network_adapter_translation, start_translation};
+use crate::translations::translations::{
+    address_translation, network_adapter_translation, start_translation,
+};
 use crate::translations::translations_3::{
     directory_translation, export_capture_translation, file_name_translation, port_translation,
 };
 use crate::translations::translations_4::capture_file_translation;
 use crate::translations::translations_5::{filter_traffic_translation, traffic_source_translation};
-use crate::translations::translations_6::{bind_address_translation, ipfix_collector_translation};
+use crate::translations::translations_6::ipfix_collector_translation;
 use crate::utils::formatted_strings::get_path_termination_string;
 use crate::utils::types::file_info::FileInfo;
 use crate::utils::types::icon::Icon;
@@ -321,10 +323,7 @@ fn get_col_ipfix_collector<'a>(
     let addr_row = Row::new()
         .align_y(Alignment::Center)
         .spacing(5)
-        .push(Text::new(format!(
-            "{}:",
-            bind_address_translation(language)
-        )))
+        .push(Text::new(format!("{}:", address_translation(language))))
         .push(
             TextInput::new(&DEFAULT_IPFIX_ADDR.to_string(), ipfix_socket.addr())
                 .on_input(Message::SetIpfixAddr)
