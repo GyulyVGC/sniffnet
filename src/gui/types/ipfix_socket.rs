@@ -2,6 +2,7 @@
 //! binds to. Kept as free text so a partially typed value survives in the
 //! settings; it's validated into a `SocketAddr` when the capture starts.
 
+use crate::gui::types::conf::deserialize_or_default;
 use serde::{Deserialize, Serialize};
 use std::net::{IpAddr, Ipv4Addr, SocketAddr};
 
@@ -12,7 +13,9 @@ pub const DEFAULT_IPFIX_ADDR: IpAddr = IpAddr::V4(Ipv4Addr::UNSPECIFIED);
 #[derive(Serialize, Deserialize, Clone, PartialEq, Debug)]
 #[serde(default)]
 pub struct MyIpfixSocket {
+    #[serde(deserialize_with = "deserialize_or_default")]
     addr: String,
+    #[serde(deserialize_with = "deserialize_or_default")]
     port: String,
 }
 

@@ -85,15 +85,15 @@ pub struct Conf {
     /// Last selected network device name
     #[serde(deserialize_with = "deserialize_or_default")]
     pub device: ConfigDevice,
+    /// IPFIX collector configuration (bind address and port)
+    #[serde(deserialize_with = "deserialize_or_default")]
+    pub ipfix_socket: MyIpfixSocket,
     /// BPF filter program to be applied to the capture
     #[serde(deserialize_with = "deserialize_or_default")]
     pub filters: Filters,
     /// Information about PCAP file export
     #[serde(deserialize_with = "deserialize_or_default")]
     pub export_pcap: ExportPcap,
-    /// IPFIX collector configuration (bind address and port)
-    #[serde(deserialize_with = "deserialize_or_default")]
-    pub ipfix_socket: MyIpfixSocket,
     /// Parameters from settings pages
     #[serde(deserialize_with = "deserialize_or_default")]
     pub settings: Settings,
