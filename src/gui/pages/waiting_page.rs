@@ -31,8 +31,6 @@ pub fn waiting_page(sniffer: &Sniffer) -> Option<Container<'_, Message, StyleTyp
         .tot_data_info
         .tot_data(DataRepr::Packets);
 
-    // a rejected IPFIX exporter doesn't stop the others from being read, so the
-    // page makes way as soon as any traffic is actually observed
     if tot_packets > 0 {
         return None;
     }
@@ -44,7 +42,6 @@ pub fn waiting_page(sniffer: &Sniffer) -> Option<Container<'_, Message, StyleTyp
             format!("{}\n\n{error}", error_translation(language)),
         )
     } else if matches!(capture_error, Some(CaptureError::IpfixUndecodable)) {
-        // the capture is running fine, so this is a warning rather than an error
         (
             Icon::Warning.to_text().size(60),
             format!(

@@ -154,7 +154,7 @@ pub fn notify_and_log(
     }
 
     // don't play sound when importing data from pcap file
-    if !matches!(cs, CaptureSource::File(_)) {
+    if cs.supports_notification_sound() {
         play(sound_to_play, notifications.volume);
     }
 

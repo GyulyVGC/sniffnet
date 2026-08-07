@@ -17,7 +17,6 @@ use crate::networking::manage_packets::{
 use crate::networking::types::address_port_pair::AddressPortPair;
 use crate::networking::types::arp_type::ArpType;
 use crate::networking::types::bogon::is_bogon;
-use crate::networking::types::capture_context::CaptureSource;
 use crate::networking::types::data_representation::DataRepr;
 use crate::networking::types::host::Host;
 use crate::networking::types::icmp_type::IcmpType;
@@ -175,7 +174,7 @@ fn col_info<'a>(
         sniffer.capture_source.get_addresses(),
         val.traffic_direction,
     ) == TrafficType::Unicast;
-    let measure_latency = matches!(sniffer.capture_source, CaptureSource::Device(_)) && is_unicast;
+    let measure_latency = sniffer.capture_source.supports_latency() && is_unicast;
     let is_icmp = key.protocol.eq(&Protocol::ICMP);
     let is_arp = key.protocol.eq(&Protocol::ARP);
 
@@ -242,8 +241,6 @@ fn col_info<'a>(
         ));
     }
 
-    // Empty for ICMP flows learned from IPFIX, whose records don't carry the
-    // message type unless the exporter sends the relevant IEs.
     let messages = if is_icmp {
         IcmpType::pretty_print_types(&val.icmp_types)
     } else if is_arp {

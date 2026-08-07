@@ -49,10 +49,7 @@ pub fn initial_page(sniffer: &Sniffer) -> Container<'_, Message, StyleType> {
     let col_data_source = get_col_data_source(sniffer, language);
 
     let mut col_checkboxes = Column::new().spacing(10);
-    if !matches!(
-        sniffer.conf.capture_source_picklist,
-        CaptureSourcePicklist::Ipfix
-    ) {
+    if sniffer.conf.capture_source_picklist.supports_filters() {
         col_checkboxes = col_checkboxes.push(get_filters_group(&sniffer.conf.filters, language));
     }
     col_checkboxes = col_checkboxes.push(get_export_pcap_group_maybe(
@@ -399,10 +396,7 @@ fn get_export_pcap_group_maybe<'a>(
     export_pcap: &ExportPcap,
     language: Language,
 ) -> Option<Container<'a, Message, StyleType>> {
-    if matches!(
-        cs_pick,
-        CaptureSourcePicklist::File | CaptureSourcePicklist::Ipfix
-    ) {
+    if !cs_pick.supports_export_pcap() {
         return None;
     }
 

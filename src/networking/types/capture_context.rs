@@ -326,6 +326,48 @@ impl CaptureSource {
             Self::File(_) | Self::Ipfix(_) => None,
         }
     }
+
+    pub fn supports_link_type(&self) -> bool {
+        match self {
+            Self::Device(_) | Self::File(_) => true,
+            Self::Ipfix(_) => false,
+        }
+    }
+
+    pub fn supports_filters(&self) -> bool {
+        match self {
+            Self::Device(_) | Self::File(_) => true,
+            Self::Ipfix(_) => false,
+        }
+    }
+
+    pub fn supports_latency(&self) -> bool {
+        match self {
+            Self::Device(_) => true,
+            Self::Ipfix(_) | Self::File(_) => false,
+        }
+    }
+
+    pub fn supports_live_chart(&self) -> bool {
+        match self {
+            Self::Device(_) | Self::Ipfix(_) => true,
+            Self::File(_) => false,
+        }
+    }
+
+    pub fn supports_programs(&self) -> bool {
+        match self {
+            Self::Device(_) => true,
+            Self::File(_) | Self::Ipfix(_) => false,
+        }
+    }
+
+    pub fn supports_notification_sound(&self) -> bool {
+        match self {
+            Self::Device(_) | Self::Ipfix(_) => true,
+            Self::File(_) => false,
+        }
+    }
 }
 
 #[derive(Clone)]
@@ -349,4 +391,20 @@ pub enum CaptureSourcePicklist {
     Device,
     File,
     Ipfix,
+}
+
+impl CaptureSourcePicklist {
+    pub fn supports_filters(self) -> bool {
+        match self {
+            Self::Device | Self::File => true,
+            Self::Ipfix => false,
+        }
+    }
+
+    pub fn supports_export_pcap(self) -> bool {
+        match self {
+            Self::Device => true,
+            Self::Ipfix | Self::File => false,
+        }
+    }
 }

@@ -1020,7 +1020,7 @@ impl Sniffer {
             self.running_page = Some(self.conf.last_opened_page);
 
             if capture_context.error().is_none() {
-                // no pcap error
+                // no fatal pcap error
                 let curr_cap_id = self.current_capture_rx.0;
                 let mmdb_readers = self.mmdb_readers.clone();
                 let ip_blacklist = self.ip_blacklist.clone();
@@ -1028,10 +1028,8 @@ impl Sniffer {
                     .set_link_type(capture_context.my_link_type());
                 self.capture_source.set_addresses();
                 let capture_source = self.capture_source.clone();
-                self.traffic_chart.change_capture_source(matches!(
-                    capture_source,
-                    CaptureSource::Device(_) | CaptureSource::Ipfix(_)
-                ));
+                self.traffic_chart
+                    .change_capture_source(capture_source.supports_live_chart());
                 let (tx, rx) = async_channel::unbounded();
                 let (freeze_tx, freeze_rx) = tokio::sync::broadcast::channel(1_048_575);
                 let freeze_rx2 = freeze_tx.subscribe();
@@ -1049,7 +1047,7 @@ impl Sniffer {
                 self.current_capture_rx.1 = Some(rx.clone());
                 self.freeze_tx = Some(freeze_tx);
 
-                if matches!(self.capture_source, CaptureSource::Device(_)) {
+                if self.capture_source.supports_programs() {
                     let (port_tx, port_rx) = std::sync::mpsc::channel();
                     let (program_tx, program_rx) = std::sync::mpsc::channel();
                     let _ = thread::Builder::new()

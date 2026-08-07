@@ -346,37 +346,31 @@ pub(crate) fn col_device<'a>(
                     Row::new()
                         .spacing(10)
                         .push(Text::new(format!("   {cs_info}")))
-                        .push(
-                            // no tooltip for IPFIX (it has no link type and no addresses)
-                            if matches!(cs, CaptureSource::Ipfix(_)) {
-                                None
-                            } else {
-                                Some(get_info_tooltip(
-                                    Column::new()
-                                        .spacing(10)
-                                        .push(Text::new(link_type.full_print_on_one_line(language)))
-                                        .push(get_addresses_row(link_type, cs.get_addresses()))
-                                        .into(),
-                                ))
-                            },
-                        ),
+                        .push(if cs.supports_link_type() {
+                            Some(get_info_tooltip(
+                                Column::new()
+                                    .spacing(10)
+                                    .push(Text::new(link_type.full_print_on_one_line(language)))
+                                    .push(get_addresses_row(link_type, cs.get_addresses()))
+                                    .into(),
+                            ))
+                        } else {
+                            None
+                        }),
                 ),
         )
-        .push(
-            // there are no filters for IPFIX
-            if matches!(cs, CaptureSource::Ipfix(_)) {
-                None
-            } else {
-                Some(
-                    Column::new()
-                        .push(
-                            Text::new(format!("{}:", active_filters_translation(language)))
-                                .class(TextType::Subtitle),
-                        )
-                        .push(Row::new().push(Text::new("   ")).push(filters_desc)),
-                )
-            },
-        )
+        .push(if cs.supports_filters() {
+            Some(
+                Column::new()
+                    .push(
+                        Text::new(format!("{}:", active_filters_translation(language)))
+                            .class(TextType::Subtitle),
+                    )
+                    .push(Row::new().push(Text::new("   ")).push(filters_desc)),
+            )
+        } else {
+            None
+        })
 }
 
 fn col_data_representation<'a>(
