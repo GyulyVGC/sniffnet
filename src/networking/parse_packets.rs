@@ -197,7 +197,7 @@ pub fn parse_packets(
 
                     // update dropped packets number
                     if let Some(stats) = cap_stats {
-                        info_traffic_msg.dropped_packets = stats.dropped;
+                        info_traffic_msg.dropped_packets = Some(stats.dropped);
                     }
                 }
             }

@@ -426,12 +426,7 @@ fn donut_row(language: Language, sniffer: &Sniffer) -> Container<'_, Message, St
             RuleType::Outgoing(true),
             language,
         ))
-        .push(donut_legend_entry(
-            dropped,
-            data_repr,
-            RuleType::Dropped,
-            language,
-        ));
+        .push(dropped.map(|d| donut_legend_entry(d, data_repr, RuleType::Dropped, language)));
 
     let donut_row = Row::new()
         .align_y(Vertical::Center)
