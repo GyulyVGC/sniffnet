@@ -13,7 +13,7 @@ pub struct DonutChart {
     data_repr: DataRepr,
     incoming: u128,
     outgoing: u128,
-    dropped: u128,
+    dropped: Option<u128>,
     thumbnail: bool,
 }
 
@@ -22,7 +22,7 @@ impl DonutChart {
         data_repr: DataRepr,
         incoming: u128,
         outgoing: u128,
-        dropped: u128,
+        dropped: Option<u128>,
         thumbnail: bool,
     ) -> Self {
         Self {
@@ -35,7 +35,7 @@ impl DonutChart {
     }
 
     fn total(&self) -> u128 {
-        self.incoming + self.outgoing + self.dropped
+        self.incoming + self.outgoing + self.dropped.unwrap_or_default()
     }
 
     fn title(&self) -> String {
@@ -48,7 +48,7 @@ impl DonutChart {
         let mut values = [
             self.incoming as f32,
             self.outgoing as f32,
-            self.dropped as f32,
+            self.dropped.unwrap_or_default() as f32,
         ];
         let total: f32 = values.iter().sum();
         let min_val = 2.0 * total / 100.0;
@@ -143,7 +143,7 @@ pub fn donut_chart<Message, Theme: Catalog>(
     data_repr: DataRepr,
     incoming: u128,
     outgoing: u128,
-    dropped: u128,
+    dropped: Option<u128>,
     thumbnail: bool,
 ) -> Canvas<DonutChart, Message, Theme, Renderer> {
     let size = if thumbnail {

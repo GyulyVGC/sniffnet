@@ -6,7 +6,7 @@ use crate::mmdb::asn::get_asn;
 use crate::mmdb::country::get_country;
 use crate::mmdb::types::mmdb_reader::MmdbReaders;
 use crate::networking::manage_packets::{
-    analyze_headers, get_address_to_lookup, get_traffic_type, is_local_connection,
+    account_flow, analyze_headers, get_address_to_lookup, get_traffic_type, is_local_connection,
     modify_or_insert_in_map,
 };
 use crate::networking::types::address_port_pair::AddressPortPair;
@@ -61,21 +61,7 @@ pub fn parse_packets(
 
     let mut info_traffic_msg = InfoTraffic::default();
 
-    let (lookup_request_tx, lookup_request_rx) = async_channel::unbounded();
-    let (lookup_result_tx, lookup_result_rx) = std::sync::mpsc::channel();
-    let mut resolutions_state = AddressesResolutionState::new(lookup_request_tx, lookup_result_rx);
-    // a pool of threads shares the request queue, so one slow blocking lookup doesn't stall the others
-    for i in 0..REVERSE_DNS_LOOKUP_THREADS {
-        let lookup_request_rx = lookup_request_rx.clone();
-        let lookup_result_tx = lookup_result_tx.clone();
-        let mmdb_readers = mmdb_readers.clone();
-        let _ = thread::Builder::new()
-            .name(format!("thread_reverse_dns_lookups_{i}"))
-            .spawn(move || {
-                reverse_dns_lookups(&lookup_request_rx, &lookup_result_tx, &mmdb_readers);
-            })
-            .log_err(location!());
-    }
+    let mut resolutions_state = spawn_reverse_dns_pool(mmdb_readers);
 
     // instant of the first parsed packet plus multiples of 1 second (only used in live captures)
     let mut first_packet_ticks = None;
@@ -103,15 +89,16 @@ pub fn parse_packets(
             return;
         }
 
-        if matches!(cs, CaptureSource::Device(_)) {
-            maybe_send_tick_run_live(
+        if matches!(cs, CaptureSource::Device(_))
+            && maybe_send_tick(
                 cap_id,
                 &mut info_traffic_msg,
-                &mut cs,
                 &mut first_packet_ticks,
                 tx,
                 &mut resolutions_state,
-            );
+            )
+        {
+            cs.set_addresses();
         }
 
         match packet_res {
@@ -186,115 +173,31 @@ pub fn parse_packets(
                     let (traffic_direction, service) = modify_or_insert_in_map(
                         &mut info_traffic_msg,
                         &key,
-                        &cs,
+                        cs.get_addresses(),
                         mac_addresses,
-                        icmp_type,
+                        Some(icmp_type),
                         arp_type,
                         exchanged_bytes,
+                        1,
                         ip_blacklist,
+                        None,
+                        None,
                     );
 
-                    info_traffic_msg
-                        .tot_data_info
-                        .add_packet(exchanged_bytes, traffic_direction);
-
-                    // check the rDNS status of this address and act accordingly
-                    let address_to_lookup = get_address_to_lookup(&key, traffic_direction);
-                    let mut r_dns_waiting_resolution = false;
-                    let r_dns_already_resolved = resolutions_state
-                        .addresses_resolved
-                        .contains_key(&address_to_lookup);
-                    if !r_dns_already_resolved {
-                        r_dns_waiting_resolution = resolutions_state
-                            .addresses_waiting_resolution
-                            .contains_key(&address_to_lookup);
-                    }
-
-                    match (r_dns_waiting_resolution, r_dns_already_resolved) {
-                        (false, false) => {
-                            // rDNS not requested yet (first occurrence of this address to lookup)
-
-                            // Add this address to the map of addresses waiting for a resolution
-                            // Useful to NOT perform again a rDNS lookup for this entry
-                            resolutions_state.addresses_waiting_resolution.insert(
-                                address_to_lookup,
-                                DataInfo::new_with_first_packet(exchanged_bytes, traffic_direction),
-                            );
-
-                            // send the rDNS lookup request to the thread pool
-                            let _ = resolutions_state.lookup_request_tx.try_send((
-                                key,
-                                traffic_direction,
-                                cs.get_addresses().clone(),
-                            ));
-                        }
-                        (true, false) => {
-                            // waiting for a previously requested rDNS resolution
-                            // update the corresponding waiting address data
-                            resolutions_state
-                                .addresses_waiting_resolution
-                                .entry(address_to_lookup)
-                                .and_modify(|data_info| {
-                                    data_info.add_packet(exchanged_bytes, traffic_direction);
-                                });
-                        }
-                        (_, true) => {
-                            // rDNS already resolved
-                            // update the corresponding host's data info
-                            let host = resolutions_state
-                                .addresses_resolved
-                                .get(&address_to_lookup)
-                                .unwrap_or(&Host::default())
-                                .clone();
-                            info_traffic_msg
-                                .hosts
-                                .entry(host)
-                                .and_modify(|data_info_host| {
-                                    data_info_host
-                                        .data_info
-                                        .add_packet(exchanged_bytes, traffic_direction);
-                                })
-                                .or_insert_with(|| {
-                                    let my_interface_addresses = cs.get_addresses();
-                                    let traffic_type = get_traffic_type(
-                                        &address_to_lookup,
-                                        my_interface_addresses,
-                                        traffic_direction,
-                                    );
-                                    let is_loopback = address_to_lookup.is_loopback();
-                                    let is_local = is_local_connection(
-                                        &address_to_lookup,
-                                        my_interface_addresses,
-                                    );
-                                    let is_bogon = is_bogon(&address_to_lookup);
-                                    DataInfoHost {
-                                        data_info: DataInfo::new_with_first_packet(
-                                            exchanged_bytes,
-                                            traffic_direction,
-                                        ),
-                                        is_loopback,
-                                        is_local,
-                                        is_bogon,
-                                        traffic_type,
-                                    }
-                                });
-                        }
-                    }
-
-                    //increment the packet count for the sniffed service
-                    info_traffic_msg
-                        .services
-                        .entry(service)
-                        .and_modify(|data_info| {
-                            data_info.add_packet(exchanged_bytes, traffic_direction);
-                        })
-                        .or_insert_with(|| {
-                            DataInfo::new_with_first_packet(exchanged_bytes, traffic_direction)
-                        });
+                    account_flow(
+                        &mut info_traffic_msg,
+                        &mut resolutions_state,
+                        &key,
+                        cs.get_addresses(),
+                        exchanged_bytes,
+                        1,
+                        traffic_direction,
+                        service,
+                    );
 
                     // update dropped packets number
                     if let Some(stats) = cap_stats {
-                        info_traffic_msg.dropped_packets = stats.dropped;
+                        info_traffic_msg.dropped_packets = Some(stats.dropped);
                     }
                 }
             }
@@ -348,6 +251,7 @@ fn from_null(packet: &[u8]) -> Option<LaxPacketHeaders<'_>> {
     }
 }
 
+// TODO: do this with etherparse once they support Linux SLL2
 fn from_linux_sll(packet: &[u8], is_v1: bool) -> Option<LaxPacketHeaders<'_>> {
     let header_len = if is_v1 { 16 } else { 20 };
     if packet.len() <= header_len {
@@ -423,12 +327,13 @@ fn reverse_dns_lookups(
 }
 
 pub struct AddressesResolutionState {
-    lookup_request_tx: async_channel::Sender<(AddressPortPair, TrafficDirection, Vec<Address>)>,
-    lookup_result_rx: std::sync::mpsc::Receiver<HostMessage>,
+    pub(crate) lookup_request_tx:
+        async_channel::Sender<(AddressPortPair, TrafficDirection, Vec<Address>)>,
+    pub(crate) lookup_result_rx: std::sync::mpsc::Receiver<HostMessage>,
     /// Map of the addresses waiting for a rDNS resolution; used to NOT send multiple rDNS for the same address
-    addresses_waiting_resolution: HashMap<IpAddr, DataInfo>,
+    pub(crate) addresses_waiting_resolution: HashMap<IpAddr, DataInfo>,
     /// Map of the resolved addresses with the corresponding host
-    addresses_resolved: HashMap<IpAddr, Host>,
+    pub(crate) addresses_resolved: HashMap<IpAddr, Host>,
 }
 
 impl AddressesResolutionState {
@@ -444,7 +349,15 @@ impl AddressesResolutionState {
         }
     }
 
-    fn new_hosts_to_send(&mut self) -> Vec<HostMessage> {
+    /// Resolution state with no lookup threads behind it: requests queue up on
+    /// the channel and are never served, which is what tests of the accounting
+    /// path want.
+    #[cfg(test)]
+    pub(crate) fn new_detached() -> Self {
+        Self::new(async_channel::unbounded().0, std::sync::mpsc::channel().1)
+    }
+
+    pub(crate) fn new_hosts_to_send(&mut self) -> Vec<HostMessage> {
         let mut new_hosts = Vec::new();
         while let Ok(mut host_msg) = self.lookup_result_rx.try_recv() {
             let address_to_lookup = host_msg.address_to_lookup;
@@ -470,16 +383,39 @@ pub enum BackendTrafficMessage {
     TickRun(usize, InfoTraffic, Vec<HostMessage>, bool),
     PendingHosts(usize, Vec<HostMessage>),
     OfflineGap(usize, u32),
+    IpfixRejection(usize),
 }
 
-fn maybe_send_tick_run_live(
+/// Spawns the pool of reverse-DNS lookup threads and returns the resolution
+/// state wired to it. Shared by both capture backends.
+pub(crate) fn spawn_reverse_dns_pool(mmdb_readers: &MmdbReaders) -> AddressesResolutionState {
+    let (lookup_request_tx, lookup_request_rx) = async_channel::unbounded();
+    let (lookup_result_tx, lookup_result_rx) = std::sync::mpsc::channel();
+    // a pool of threads shares the request queue, so one slow blocking lookup doesn't stall the others
+    for i in 0..REVERSE_DNS_LOOKUP_THREADS {
+        let lookup_request_rx = lookup_request_rx.clone();
+        let lookup_result_tx = lookup_result_tx.clone();
+        let mmdb_readers = mmdb_readers.clone();
+        let _ = thread::Builder::new()
+            .name(format!("thread_reverse_dns_lookups_{i}"))
+            .spawn(move || {
+                reverse_dns_lookups(&lookup_request_rx, &lookup_result_tx, &mmdb_readers);
+            })
+            .log_err(location!());
+    }
+    AddressesResolutionState::new(lookup_request_tx, lookup_result_rx)
+}
+
+/// Emits a `TickRun` message if at least one second has elapsed since the last
+/// one. Returns whether a tick was actually sent, so callers can hang their own
+/// once-per-second work off it.
+pub(crate) fn maybe_send_tick(
     cap_id: usize,
     info_traffic_msg: &mut InfoTraffic,
-    cs: &mut CaptureSource,
     first_packet_ticks: &mut Option<Instant>,
     tx: &Sender<BackendTrafficMessage>,
     resolutions_state: &mut AddressesResolutionState,
-) {
+) -> bool {
     if first_packet_ticks.is_some_and(|i| i.elapsed() >= Duration::from_secs(1)) {
         *first_packet_ticks =
             first_packet_ticks.and_then(|i| i.checked_add(Duration::from_secs(1)));
@@ -489,7 +425,9 @@ fn maybe_send_tick_run_live(
             resolutions_state.new_hosts_to_send(),
             false,
         ));
-        cs.set_addresses();
+        true
+    } else {
+        false
     }
 }
 

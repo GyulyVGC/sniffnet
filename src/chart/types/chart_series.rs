@@ -223,7 +223,7 @@ mod tests {
         };
         let mut info_traffic = InfoTraffic {
             tot_data_info,
-            dropped_packets: 0,
+            dropped_packets: Some(0),
             ..Default::default()
         };
 

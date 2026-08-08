@@ -4,6 +4,7 @@ use crate::gui::types::config_window::ConfigWindow;
 use crate::gui::types::export_pcap::ExportPcap;
 use crate::gui::types::favorite::Favorites;
 use crate::gui::types::filters::Filters;
+use crate::gui::types::ipfix_socket::MyIpfixSocket;
 use crate::gui::types::settings::Settings;
 use crate::networking::types::capture_context::CaptureSourcePicklist;
 use crate::networking::types::config_device::ConfigDevice;
@@ -84,6 +85,9 @@ pub struct Conf {
     /// Last selected network device name
     #[serde(deserialize_with = "deserialize_or_default")]
     pub device: ConfigDevice,
+    /// IPFIX collector configuration (bind address and port)
+    #[serde(deserialize_with = "deserialize_or_default")]
+    pub ipfix_socket: MyIpfixSocket,
     /// BPF filter program to be applied to the capture
     #[serde(deserialize_with = "deserialize_or_default")]
     pub filters: Filters,

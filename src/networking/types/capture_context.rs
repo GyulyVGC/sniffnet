@@ -1,27 +1,53 @@
 use crate::gui::types::conf::Conf;
 use crate::gui::types::filters::Filters;
+use crate::gui::types::ipfix_socket::MyIpfixSocket;
 use crate::location;
 use crate::networking::types::my_device::MyDevice;
 use crate::networking::types::my_link_type::MyLinkType;
 use crate::translations::translations::network_adapter_translation;
 use crate::translations::translations_4::capture_file_translation;
+use crate::translations::translations_6::ipfix_collector_translation;
 use crate::translations::types::language::Language;
 use crate::utils::error_logger::{ErrorLogger, Location};
 use pcap::{Active, Address, Capture, Device, Error, Packet, Savefile, Stat};
 use serde::{Deserialize, Serialize};
+use std::net::{SocketAddr, UdpSocket};
+use std::time::{Duration, Instant};
 
 pub enum CaptureContext {
     Live(Live),
     LiveWithSavefile(LiveWithSavefile),
     Offline(Offline),
+    Ipfix(UdpSocket),
     Error(String),
+}
+
+/// A problem the capture backend has reported, for the waiting page to show.
+pub enum CaptureError {
+    /// The capture failed to start; the string is the underlying error.
+    Fatal(String),
+    /// The IPFIX collector is running but what reaches it isn't decodable as
+    /// IPFIX. Only a warning — the collector keeps listening — and it carries
+    /// no text of its own so that the message follows a language change.
+    IpfixUndecodable,
 }
 
 impl CaptureContext {
     pub fn new(source: &CaptureSource, pcap_out_path: Option<&String>, filters: &Filters) -> Self {
-        let mut cap_type = match CaptureType::from_source(source, pcap_out_path) {
-            Ok(c) => c,
-            Err(e) => return Self::Error(e.to_string()),
+        let mut cap_type = match source {
+            CaptureSource::Device(device) => {
+                match CaptureType::from_device(device, pcap_out_path) {
+                    Ok(c) => c,
+                    Err(e) => return Self::Error(e),
+                }
+            }
+            CaptureSource::File(file) => match CaptureType::from_file(file) {
+                Ok(c) => c,
+                Err(e) => return Self::Error(e),
+            },
+            CaptureSource::Ipfix(ipfix) => {
+                return Self::new_ipfix(ipfix).unwrap_or_else(Self::Error);
+            }
         };
 
         // only apply BPF filter if it is active, and return an error if it fails to apply
@@ -76,7 +102,7 @@ impl CaptureContext {
                 (Some(CaptureType::Live(onws.live.cap)), Some(onws.savefile))
             }
             Self::Offline(off) => (Some(CaptureType::Offline(off.cap)), None),
-            Self::Error(_) => (None, None),
+            Self::Ipfix(_) | Self::Error(_) => (None, None),
         }
     }
 
@@ -87,7 +113,44 @@ impl CaptureContext {
                 MyLinkType::from_pcap_link_type(onws.live.cap.get_datalink())
             }
             Self::Offline(off) => MyLinkType::from_pcap_link_type(off.cap.get_datalink()),
-            Self::Error(_) => MyLinkType::default(),
+            Self::Ipfix(_) | Self::Error(_) => MyLinkType::default(),
+        }
+    }
+
+    fn new_ipfix(ipfix_socket: &MyIpfixSocket) -> Result<Self, String> {
+        let socket_addr = ipfix_socket.socket_addr()?;
+
+        let socket = bind_collector_socket(socket_addr).map_err(|e| e.to_string())?;
+
+        socket
+            .set_read_timeout(Some(IPFIX_READ_TIMEOUT))
+            .map_err(|e| e.to_string())?;
+
+        Ok(Self::Ipfix(socket))
+    }
+}
+
+/// How long the collector blocks on a receive before looping round to check
+/// whether the capture has been stopped or frozen.
+const IPFIX_READ_TIMEOUT: Duration = Duration::from_millis(150);
+
+/// Restarting a capture on the same port races the outgoing collector: it only
+/// notices the closed channel — and so only drops its socket — once its current
+/// receive times out. Retry across that window rather than failing on a socket
+/// that is about to go away.
+///
+/// `SO_REUSEADDR` would be the shorter fix and the wrong one: it would let two
+/// collectors hold the port at once and split the incoming flows between them.
+fn bind_collector_socket(addr: SocketAddr) -> std::io::Result<UdpSocket> {
+    const RETRY_DELAY: Duration = Duration::from_millis(20);
+    let give_up_at = Instant::now() + IPFIX_READ_TIMEOUT * 3;
+
+    loop {
+        match UdpSocket::bind(addr) {
+            Err(e) if e.kind() == std::io::ErrorKind::AddrInUse && Instant::now() < give_up_at => {
+                std::thread::sleep(RETRY_DELAY);
+            }
+            result => return result,
         }
     }
 }
@@ -125,25 +188,27 @@ impl CaptureType {
         }
     }
 
-    fn from_source(source: &CaptureSource, pcap_out_path: Option<&String>) -> Result<Self, Error> {
-        match source {
-            CaptureSource::Device(device) => {
-                let inactive = Capture::from_device(device.to_pcap_device())?;
-                let cap = inactive
-                    .promisc(false)
-                    .buffer_size(2_000_000) // 2MB buffer -> 10k packets of 200 bytes
-                    .snaplen(if pcap_out_path.is_some() {
-                        i32::from(u16::MAX)
-                    } else {
-                        200 // limit stored packets slice dimension (to keep more in the buffer)
-                    })
-                    .immediate_mode(false)
-                    .timeout(150) // ensure UI is updated even if no packets are captured
-                    .open()?;
-                Ok(Self::Live(cap))
-            }
-            CaptureSource::File(file) => Ok(Self::Offline(Capture::from_file(&file.path)?)),
-        }
+    fn from_device(device: &MyDevice, pcap_out_path: Option<&String>) -> Result<Self, String> {
+        let inactive = Capture::from_device(device.to_pcap_device()).map_err(|e| e.to_string())?;
+        let cap = inactive
+            .promisc(false)
+            .buffer_size(2_000_000) // 2MB buffer -> 10k packets of 200 bytes
+            .snaplen(if pcap_out_path.is_some() {
+                i32::from(u16::MAX)
+            } else {
+                200 // limit stored packets slice dimension (to keep more in the buffer)
+            })
+            .immediate_mode(false)
+            .timeout(150) // ensure UI is updated even if no packets are captured
+            .open()
+            .map_err(|e| e.to_string())?;
+        Ok(Self::Live(cap))
+    }
+
+    fn from_file(file: &MyPcapImport) -> Result<Self, String> {
+        Ok(Self::Offline(
+            Capture::from_file(&file.path).map_err(|e| e.to_string())?,
+        ))
     }
 
     fn set_bpf(&mut self, bpf: &str) -> Result<(), Error> {
@@ -174,6 +239,7 @@ impl CaptureType {
 pub enum CaptureSource {
     Device(MyDevice),
     File(MyPcapImport),
+    Ipfix(MyIpfixSocket),
 }
 
 impl CaptureSource {
@@ -187,6 +253,10 @@ impl CaptureSource {
                 let path = conf.import_pcap_path.clone();
                 Self::File(MyPcapImport::new(path))
             }
+            CaptureSourcePicklist::Ipfix => {
+                let socket = conf.ipfix_socket.clone();
+                Self::Ipfix(socket)
+            }
         }
     }
 
@@ -194,13 +264,16 @@ impl CaptureSource {
         match self {
             Self::Device(_) => network_adapter_translation(language),
             Self::File(_) => capture_file_translation(language),
+            Self::Ipfix(_) => ipfix_collector_translation(language),
         }
     }
 
-    pub fn get_addresses(&self) -> &Vec<Address> {
+    pub fn get_addresses(&self) -> &[Address] {
         match self {
             Self::Device(device) => device.get_addresses(),
-            Self::File(file) => &file.addresses,
+            // neither a PCAP file nor an IPFIX exporter has local addresses to
+            // classify traffic against
+            Self::File(_) | Self::Ipfix(_) => &[],
         }
     }
 
@@ -226,6 +299,7 @@ impl CaptureSource {
         match self {
             Self::Device(device) => device.get_link_type(),
             Self::File(file) => file.link_type,
+            Self::Ipfix(_) => MyLinkType::default(),
         }
     }
 
@@ -233,6 +307,7 @@ impl CaptureSource {
         match self {
             Self::Device(device) => device.set_link_type(link_type),
             Self::File(file) => file.link_type = link_type,
+            Self::Ipfix(_) => {}
         }
     }
 
@@ -240,6 +315,7 @@ impl CaptureSource {
         match self {
             Self::Device(device) => device.get_name().clone(),
             Self::File(file) => file.path.clone(),
+            Self::Ipfix(c) => c.display_name(),
         }
     }
 
@@ -247,7 +323,49 @@ impl CaptureSource {
     pub fn get_desc(&self) -> Option<String> {
         match self {
             Self::Device(device) => device.get_desc().cloned(),
-            Self::File(_) => None,
+            Self::File(_) | Self::Ipfix(_) => None,
+        }
+    }
+
+    pub fn supports_link_type(&self) -> bool {
+        match self {
+            Self::Device(_) | Self::File(_) => true,
+            Self::Ipfix(_) => false,
+        }
+    }
+
+    pub fn supports_filters(&self) -> bool {
+        match self {
+            Self::Device(_) | Self::File(_) => true,
+            Self::Ipfix(_) => false,
+        }
+    }
+
+    pub fn supports_latency(&self) -> bool {
+        match self {
+            Self::Device(_) => true,
+            Self::Ipfix(_) | Self::File(_) => false,
+        }
+    }
+
+    pub fn supports_live_chart(&self) -> bool {
+        match self {
+            Self::Device(_) | Self::Ipfix(_) => true,
+            Self::File(_) => false,
+        }
+    }
+
+    pub fn supports_programs(&self) -> bool {
+        match self {
+            Self::Device(_) => true,
+            Self::File(_) | Self::Ipfix(_) => false,
+        }
+    }
+
+    pub fn supports_notification_sound(&self) -> bool {
+        match self {
+            Self::Device(_) | Self::Ipfix(_) => true,
+            Self::File(_) => false,
         }
     }
 }
@@ -256,7 +374,6 @@ impl CaptureSource {
 pub struct MyPcapImport {
     path: String,
     link_type: MyLinkType,
-    addresses: Vec<Address>, // this is always empty!
 }
 
 impl MyPcapImport {
@@ -264,7 +381,6 @@ impl MyPcapImport {
         Self {
             path,
             link_type: MyLinkType::default(),
-            addresses: vec![],
         }
     }
 }
@@ -274,4 +390,21 @@ pub enum CaptureSourcePicklist {
     #[default]
     Device,
     File,
+    Ipfix,
+}
+
+impl CaptureSourcePicklist {
+    pub fn supports_filters(self) -> bool {
+        match self {
+            Self::Device | Self::File => true,
+            Self::Ipfix => false,
+        }
+    }
+
+    pub fn supports_export_pcap(self) -> bool {
+        match self {
+            Self::Device => true,
+            Self::Ipfix | Self::File => false,
+        }
+    }
 }

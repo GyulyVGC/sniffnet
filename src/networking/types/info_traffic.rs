@@ -16,8 +16,8 @@ use std::collections::hash_map::Entry;
 pub struct InfoTraffic {
     /// Total amount of exchanged data
     pub tot_data_info: DataInfo,
-    /// Number of dropped packets
-    pub dropped_packets: u32,
+    /// Number of dropped packets, if applicable
+    pub dropped_packets: Option<u32>,
     /// Timestamp of the latest parsed packet
     pub last_packet_timestamp: Timestamp,
     /// Map of the traffic
@@ -89,21 +89,21 @@ impl InfoTraffic {
         }
     }
 
-    pub fn get_thumbnail_data(&self, data_repr: DataRepr) -> (u128, u128, u128) {
+    pub fn get_thumbnail_data(&self, data_repr: DataRepr) -> (u128, u128, Option<u128>) {
         let incoming = self.tot_data_info.incoming_data(data_repr);
         let outgoing = self.tot_data_info.outgoing_data(data_repr);
         let all = incoming + outgoing;
         let all_packets = self.tot_data_info.tot_data(DataRepr::Packets);
-        let dropped = match data_repr {
-            DataRepr::Packets => u128::from(self.dropped_packets),
+        let dropped = self.dropped_packets.map(|dp| match data_repr {
+            DataRepr::Packets => u128::from(dp),
             DataRepr::Bytes | DataRepr::Bits => {
                 // assume that the dropped packets have the same size as the average packet
-                u128::from(self.dropped_packets)
+                u128::from(dp)
                     .saturating_mul(all)
                     .checked_div(all_packets)
                     .unwrap_or_default()
             }
-        };
+        });
 
         (incoming, outgoing, dropped)
     }

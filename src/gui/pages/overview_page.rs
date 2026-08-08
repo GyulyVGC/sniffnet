@@ -346,23 +346,31 @@ pub(crate) fn col_device<'a>(
                     Row::new()
                         .spacing(10)
                         .push(Text::new(format!("   {cs_info}")))
-                        .push(get_info_tooltip(
-                            Column::new()
-                                .spacing(10)
-                                .push(Text::new(link_type.full_print_on_one_line(language)))
-                                .push(get_addresses_row(link_type, cs.get_addresses()))
-                                .into(),
-                        )),
+                        .push(if cs.supports_link_type() {
+                            Some(get_info_tooltip(
+                                Column::new()
+                                    .spacing(10)
+                                    .push(Text::new(link_type.full_print_on_one_line(language)))
+                                    .push(get_addresses_row(link_type, cs.get_addresses()))
+                                    .into(),
+                            ))
+                        } else {
+                            None
+                        }),
                 ),
         )
-        .push(
-            Column::new()
-                .push(
-                    Text::new(format!("{}:", active_filters_translation(language)))
-                        .class(TextType::Subtitle),
-                )
-                .push(Row::new().push(Text::new("   ")).push(filters_desc)),
-        )
+        .push(if cs.supports_filters() {
+            Some(
+                Column::new()
+                    .push(
+                        Text::new(format!("{}:", active_filters_translation(language)))
+                            .class(TextType::Subtitle),
+                    )
+                    .push(Row::new().push(Text::new("   ")).push(filters_desc)),
+            )
+        } else {
+            None
+        })
 }
 
 fn col_data_representation<'a>(
@@ -418,12 +426,7 @@ fn donut_row(language: Language, sniffer: &Sniffer) -> Container<'_, Message, St
             RuleType::Outgoing(true),
             language,
         ))
-        .push(donut_legend_entry(
-            dropped,
-            data_repr,
-            RuleType::Dropped,
-            language,
-        ));
+        .push(dropped.map(|d| donut_legend_entry(d, data_repr, RuleType::Dropped, language)));
 
     let donut_row = Row::new()
         .align_y(Vertical::Center)
