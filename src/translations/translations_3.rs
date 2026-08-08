@@ -29,6 +29,7 @@ pub fn general_translation(language: Language) -> &'static str {
         Language::EL => "Γενικά",
         Language::HU => "Általános",
         Language::SI => "සාමාන්‍ය",
+        Language::AR => "عام",
         _ => "General",
     }
 }
@@ -60,6 +61,7 @@ pub fn zoom_translation(language: Language) -> &'static str {
         Language::EL => "Εστίαση",
         Language::HU => "Közelítés",
         Language::SI => "විශාලනය",
+        Language::AR => "التكبير",
         _ => "Zoom",
     }
 }
@@ -91,6 +93,7 @@ pub fn mmdb_files_translation(language: Language) -> &'static str {
         Language::EL => "Αρχεία βάσης δεδομένων",
         Language::HU => "Adatbázis fájlok",
         Language::SI => "ඩේටාබේස් ගොනු",
+        Language::AR => "ملفات قاعدة البيانات",
         _ => "Database files",
     }
 }
@@ -124,6 +127,7 @@ pub fn params_not_editable_translation(language: Language) -> &'static str {
         }
         Language::HU => "A következő paramétereken nem lehet elemzés közben változtatni",
         Language::SI => "විශ්ලේෂණය අතරතුර පහත පරාමිතීන් වෙනස් කළ නොහැක",
+        Language::AR => "لا يمكن تعديل المعلمات التالية أثناء التحليل",
         _ => "The following parameters can't be modified during the analysis",
     }
 }
@@ -154,6 +158,7 @@ pub fn custom_style_translation(language: Language) -> &'static str {
         Language::EL => "Προσαρμοσμένο στυλ",
         Language::HU => "Egyedi stílus",
         Language::SI => "අභිරුචි ශෛලිය",
+        Language::AR => "نمط مخصص",
         _ => "Custom style",
     }
 }
@@ -183,6 +188,7 @@ pub fn copy_translation(language: Language) -> &'static str {
         Language::EL => "Αντιγραφή",
         Language::HU => "Másolás",
         Language::SI => "කොපි කරන්න",
+        Language::AR => "نسخ",
         _ => "Copy",
     }
 }
@@ -213,6 +219,7 @@ pub fn port_translation(language: Language) -> &'static str {
         Language::NL => "Poort",
         Language::EL => "Θύρα",
         Language::SI => "පෝට්",
+        Language::AR => "المنفذ",
         _ => "Port",
     }
 }
@@ -242,6 +249,7 @@ pub fn port_translation(language: Language) -> &'static str {
 //         Language::NL => "Ongeldige filters",
 //         Language::EL => "Μη έγκυρα φίλτρα",
 //         Language::HU => "Érvénytelen szűrők",
+//         Language::AR => "مرشحات غير صالحة",
 //         _ => "Invalid filters",
 //     }
 // }
@@ -272,6 +280,7 @@ pub fn messages_translation(language: Language) -> &'static str {
         Language::EL => "Μηνύματα",
         Language::HU => "Üzenetek",
         Language::SI => "පණිවිඩ",
+        Language::AR => "الرسائل",
         _ => "Messages",
     }
 }
@@ -302,6 +311,7 @@ pub fn link_type_translation(language: Language) -> &'static str {
         Language::EL => "Τύπος σύνδεσης",
         Language::HU => "Link típus",
         Language::SI => "සබැඳි වර්ගය",
+        Language::AR => "نوع الرابط",
         _ => "Link type",
     }
 }
@@ -369,6 +379,7 @@ pub fn unsupported_link_type_translation(language: Language) -> &'static str {
             "Az ezzel az adapterrel asszociált link típust még nem támogatja a Sniffnet..."
         }
         Language::SI => "මෙම ඇඩැප්ටරයට සම්බන්ධ සබැඳි වර්ගයට දැනට Sniffnet සහාය නොමැත...",
+        Language::AR => "نوع الرابط المرتبط بهذا المحوّل غير مدعوم من Sniffnet بعد...",
         _ => "The link type associated with this adapter is not supported by Sniffnet yet...",
     }
 }
@@ -399,6 +410,7 @@ pub fn unsupported_link_type_translation(language: Language) -> &'static str {
 //         Language::NL => "Selecteer stijl vanuit een bestand",
 //         Language::EL => "Επιλογή στυλ από αρχείο",
 //         Language::HU => "Stílus kiválasztása fájlból",
+//         Language::AR => "اختيار النمط من ملف",
 //         _ => "Select style from a file",
 //     }
 // }
@@ -429,6 +441,7 @@ pub fn unsupported_link_type_translation(language: Language) -> &'static str {
 //         Language::NL => "Selecteer database bestand",
 //         Language::EL => "Επιλογή αρχείου βάσης δεδομένων",
 //         Language::HU => "Adatbázis fájl kiválasztása",
+//         Language::AR => "اختيار ملف قاعدة البيانات",
 //         _ => "Select database file",
 //     }
 // }
@@ -459,6 +472,7 @@ pub fn unsupported_link_type_translation(language: Language) -> &'static str {
 //         Language::NL => "Filteren op netwerk host",
 //         Language::EL => "Φίλτρο ανά διακομιστή δικτύου",
 //         Language::HU => "Szűrés hálózati gazda szerint",
+//         Language::AR => "التصفية حسب مضيف الشبكة",
 //         _ => "Filter by network host",
 //     }
 // }
@@ -487,6 +501,7 @@ pub fn service_translation(language: Language) -> &'static str {
         Language::EL => "Υπηρεσία",
         Language::HU => "Szolgáltatás",
         Language::SI => "සේවාව",
+        Language::AR => "الخدمة",
         _ => "Service",
     }
 }
@@ -518,6 +533,7 @@ pub fn export_capture_translation(language: Language) -> &'static str {
         Language::EL => "Εξαγωγή αρχείου καταγραφής",
         Language::HU => "Gyűjtött forgalom exportálása fájlba",
         Language::SI => "කැප්චර් (Capture) ගොනුව අපනයනය කරන්න",
+        Language::AR => "تصدير ملف الالتقاط",
         _ => "Export capture file",
     }
 }
@@ -548,6 +564,7 @@ pub fn directory_translation(language: Language) -> &'static str {
         Language::EL => "Κατάλογος",
         Language::HU => "Mappa",
         Language::SI => "නාමාවලිය",
+        Language::AR => "المجلد",
         _ => "Directory",
     }
 }
@@ -579,6 +596,7 @@ pub fn select_dest_directory_translation(language: Language) -> &'static str {
         Language::EL => "Επιλογή καταλόγου προορισμού",
         Language::HU => "Cél mappa kiválasztása",
         Language::SI => "ගමනාන්ත නාමාවලිය තෝරන්න",
+        Language::AR => "اختيار مجلد الوجهة",
         _ => "Select destination directory",
     }
 }
@@ -610,6 +628,7 @@ pub fn file_name_translation(language: Language) -> &'static str {
         Language::EL => "Όνομα αρχείου",
         Language::HU => "Fájlnév",
         Language::SI => "ගොනු නාමය",
+        Language::AR => "اسم الملف",
         _ => "File name",
     }
 }
@@ -640,6 +659,7 @@ pub fn thumbnail_mode_translation(language: Language) -> &'static str {
         Language::EL => "Λειτουργία μικρογραφιών",
         Language::HU => "Miniatűr nézet",
         Language::SI => "කුඩා රූප මාදිලිය",
+        Language::AR => "الوضع المصغّر",
         _ => "Thumbnail mode",
     }
 }
@@ -669,6 +689,7 @@ pub fn thumbnail_mode_translation(language: Language) -> &'static str {
 //         Language::ES => "¿Quieres aprender más?",
 //         Language::NL => "Wil je meer leren?",
 //         Language::HU => "Szeretnél többet megtudni?"
+//         Language::AR => "هل تريد معرفة المزيد؟",
 //         _ => "Do you want to learn more?",
 //     }
 // }
