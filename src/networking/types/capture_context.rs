@@ -22,13 +22,11 @@ pub enum CaptureContext {
     Error(String),
 }
 
-/// A problem the capture backend has reported, for the waiting page to show.
+/// A problem the capture backend has encountered
 pub enum CaptureError {
-    /// The capture failed to start; the string is the underlying error.
+    /// The capture failed to start (fatal)
     Fatal(String),
-    /// The IPFIX collector is running but what reaches it isn't decodable as
-    /// IPFIX. Only a warning — the collector keeps listening — and it carries
-    /// no text of its own so that the message follows a language change.
+    /// The IPFIX collector is running but what reaches it isn't decodable at the moment (warning)
     IpfixUndecodable,
 }
 
@@ -118,40 +116,30 @@ impl CaptureContext {
     }
 
     fn new_ipfix(ipfix_socket: &MyIpfixSocket) -> Result<Self, String> {
+        const IPFIX_READ_TIMEOUT: Duration = Duration::from_millis(150);
+        const RETRY_BIND_DELAY: Duration = Duration::from_millis(20);
         let socket_addr = ipfix_socket.socket_addr()?;
 
-        let socket = bind_collector_socket(socket_addr).map_err(|e| e.to_string())?;
+        // restarting a capture on the same port races the just finished collector
+        // retry across its read window rather than failing on the socket that is about to go away
+        let give_up_at = Instant::now() + IPFIX_READ_TIMEOUT * 3;
+        let bind_socket = |socket_addr: SocketAddr| loop {
+            match UdpSocket::bind(socket_addr) {
+                Err(e)
+                    if e.kind() == std::io::ErrorKind::AddrInUse && Instant::now() < give_up_at =>
+                {
+                    std::thread::sleep(RETRY_BIND_DELAY);
+                }
+                result => return result,
+            }
+        };
 
+        let socket = bind_socket(socket_addr).map_err(|e| e.to_string())?;
         socket
             .set_read_timeout(Some(IPFIX_READ_TIMEOUT))
             .map_err(|e| e.to_string())?;
 
         Ok(Self::Ipfix(socket))
-    }
-}
-
-/// How long the collector blocks on a receive before looping round to check
-/// whether the capture has been stopped or frozen.
-const IPFIX_READ_TIMEOUT: Duration = Duration::from_millis(150);
-
-/// Restarting a capture on the same port races the outgoing collector: it only
-/// notices the closed channel — and so only drops its socket — once its current
-/// receive times out. Retry across that window rather than failing on a socket
-/// that is about to go away.
-///
-/// `SO_REUSEADDR` would be the shorter fix and the wrong one: it would let two
-/// collectors hold the port at once and split the incoming flows between them.
-fn bind_collector_socket(addr: SocketAddr) -> std::io::Result<UdpSocket> {
-    const RETRY_DELAY: Duration = Duration::from_millis(20);
-    let give_up_at = Instant::now() + IPFIX_READ_TIMEOUT * 3;
-
-    loop {
-        match UdpSocket::bind(addr) {
-            Err(e) if e.kind() == std::io::ErrorKind::AddrInUse && Instant::now() < give_up_at => {
-                std::thread::sleep(RETRY_DELAY);
-            }
-            result => return result,
-        }
     }
 }
 
@@ -271,8 +259,6 @@ impl CaptureSource {
     pub fn get_addresses(&self) -> &[Address] {
         match self {
             Self::Device(device) => device.get_addresses(),
-            // neither a PCAP file nor an IPFIX exporter has local addresses to
-            // classify traffic against
             Self::File(_) | Self::Ipfix(_) => &[],
         }
     }
