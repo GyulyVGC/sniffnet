@@ -159,7 +159,7 @@ pub enum Message {
     /// Sent by offline captures: ticks without packets
     OfflineGap(usize, u32),
     /// Sent by the IPFIX collector: incoming datagrams aren't decodable as IPFIX
-    IpfixRejection(usize),
+    IpfixUndecodable(usize),
     /// Emitted every second to repeat certain tasks (such as fetching the network devices)
     Periodic,
     /// Expand or collapse the given logged notification

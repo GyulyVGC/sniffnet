@@ -1,8 +1,5 @@
-//! Entry point for starting a capture backend.
-//!
-//! Picks the implementation that matches the opened capture context — the IPFIX
-//! collector for a bound UDP socket, the pcap pipeline for everything else — so
-//! callers only have to ask for "the capture thread".
+//! Entry point for starting a traffic capture backend:
+//! `pcap`-based for devices and files, `ipfix`-based for bound UDP sockets
 
 use async_channel::Sender;
 use std::thread;

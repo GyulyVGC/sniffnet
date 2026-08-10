@@ -104,7 +104,7 @@ pub fn collect_ipfix(
                 );
                 if rejected && !rejection_reported {
                     rejection_reported = true;
-                    let _ = tx.send_blocking(BackendTrafficMessage::IpfixRejection(cap_id));
+                    let _ = tx.send_blocking(BackendTrafficMessage::IpfixUndecodable(cap_id));
                 }
             }
             Err(e) => match e.kind() {

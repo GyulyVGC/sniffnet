@@ -383,7 +383,7 @@ pub enum BackendTrafficMessage {
     TickRun(usize, InfoTraffic, Vec<HostMessage>, bool),
     PendingHosts(usize, Vec<HostMessage>),
     OfflineGap(usize, u32),
-    IpfixRejection(usize),
+    IpfixUndecodable(usize),
 }
 
 /// Spawns the pool of reverse-DNS lookup threads and returns the resolution
