@@ -1,10 +1,6 @@
-//! Persisted IPFIX collector configuration: the address and port the collector
-//! binds to. Kept as free text so a partially typed value survives in the
-//! settings; it's validated into a `SocketAddr` when the capture starts.
-
 use crate::gui::types::conf::deserialize_or_default;
 use serde::{Deserialize, Serialize};
-use std::net::{IpAddr, Ipv4Addr, SocketAddr};
+use std::net::{IpAddr, Ipv4Addr, Ipv6Addr, SocketAddr};
 
 /// IANA-registered default IPFIX collector port.
 pub const DEFAULT_IPFIX_PORT: u16 = 4739;
@@ -47,7 +43,12 @@ impl MyIpfixSocket {
         } else {
             &self.port
         };
-        format!("{addr}:{port}")
+
+        if addr.parse::<Ipv6Addr>().is_ok() {
+            format!("[{addr}]:{port}")
+        } else {
+            format!("{addr}:{port}")
+        }
     }
 
     pub fn socket_addr(&self) -> Result<SocketAddr, String> {
@@ -75,5 +76,86 @@ impl Default for MyIpfixSocket {
             addr: DEFAULT_IPFIX_ADDR.to_string(),
             port: DEFAULT_IPFIX_PORT.to_string(),
         }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_socket_addr() {
+        let mut socket = MyIpfixSocket::default();
+        assert_eq!(
+            socket.socket_addr().unwrap(),
+            SocketAddr::new(DEFAULT_IPFIX_ADDR, DEFAULT_IPFIX_PORT)
+        );
+
+        socket.set_addr("10.0.0.1".to_string());
+        socket.set_port("1234".to_string());
+        assert_eq!(
+            socket.socket_addr().unwrap(),
+            SocketAddr::new("10.0.0.1".parse().unwrap(), 1234)
+        );
+
+        socket.set_addr("::1".to_string());
+        socket.set_port("5678".to_string());
+        assert_eq!(
+            socket.socket_addr().unwrap(),
+            SocketAddr::new("::1".parse().unwrap(), 5678)
+        );
+
+        // invalid IP address
+        socket.set_addr("invalid".to_string());
+        assert_eq!(
+            socket.socket_addr().unwrap_err(),
+            "Invalid IP address: invalid"
+        );
+
+        // invalid port number
+        socket.set_addr("10.0.0.1".to_string());
+        socket.set_port("invalid".to_string());
+        assert_eq!(
+            socket.socket_addr().unwrap_err(),
+            "Invalid port number: invalid"
+        );
+
+        // empty
+        socket.set_addr("".to_string());
+        socket.set_port("".to_string());
+        assert_eq!(
+            socket.socket_addr().unwrap(),
+            SocketAddr::new(DEFAULT_IPFIX_ADDR, DEFAULT_IPFIX_PORT)
+        );
+    }
+
+    #[test]
+    fn test_display_name() {
+        let mut socket = MyIpfixSocket::default();
+        assert_eq!(
+            socket.display_name(),
+            format!("{DEFAULT_IPFIX_ADDR}:{DEFAULT_IPFIX_PORT}")
+        );
+
+        socket.set_addr("10.0.0.1".to_string());
+        socket.set_port("1234".to_string());
+        assert_eq!(socket.display_name(), "10.0.0.1:1234");
+
+        socket.set_addr("::1".to_string());
+        socket.set_port("5678".to_string());
+        assert_eq!(socket.display_name(), "[::1]:5678");
+
+        // invalid is also accepted by display_name
+        socket.set_addr("invalid".to_string());
+        socket.set_port("invalid".to_string());
+        assert_eq!(socket.display_name(), "invalid:invalid");
+
+        // empty
+        socket.set_addr("".to_string());
+        socket.set_port("".to_string());
+        assert_eq!(
+            socket.display_name(),
+            format!("{DEFAULT_IPFIX_ADDR}:{DEFAULT_IPFIX_PORT}")
+        );
     }
 }
