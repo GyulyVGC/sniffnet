@@ -8,7 +8,7 @@
 <a href="https://sniffnet.app"><img alt="" title="Website" src="https://raw.githubusercontent.com/GyulyVGC/sniffnet/main/resources/repository/badges/website.svg"/></a>
 <a href="https://github.com/GyulyVGC/sniffnet/wiki"><img alt="" title="Wiki" src="https://raw.githubusercontent.com/GyulyVGC/sniffnet/main/resources/repository/badges/wiki.svg"/></a>
 
-Application to comfortably monitor your Internet traffic.<br>
+Application to comfortably monitor your network traffic.<br>
 Cross-platform. Intuitive. Reliable.
 
 Translated in:<br>
@@ -115,7 +115,7 @@ Not what you're looking for? Check out [alternative installation methods](https:
 - 🌍 discover the **geographical location** of remote hosts
 - 🌐 find out **domain name** and **ASN** of the hosts you are exchanging traffic with
 - 📖 identify **6000+ upper layer services**, protocols, trojans, and worms
-- 🎮 see which **programs** are generating network traffic
+- 🎮 see which **programs** are generating network bandwidth
 - ⭐ save your **favorite** network hosts, services, and programs
 - 📌 keep an eye on your network even when the application is **minimized**
 - ️🔎 search and **inspect** each of your network connections in real time
@@ -178,7 +178,7 @@ ICED_BACKEND=tiny-skia
 ## Stay in the loop
 
 Wait... there's more!<br>Sniffnet is rapidly evolving, and new features are added on a regular basis.<br>
-Follow the <a href="https://sniffnet.app/news"><b>news</b></a> and Sniffnet socials to never miss an update.
+Follow the <a href="https://sniffnet.app/news/"><b>news</b></a> and Sniffnet socials to never miss an update.
 
 <table align="center">
   <tr>
