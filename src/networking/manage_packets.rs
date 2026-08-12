@@ -270,12 +270,10 @@ pub fn modify_or_insert_in_map(
     key: &AddressPortPair,
     my_interface_addresses: &[Address],
     mac_addresses: (Option<String>, Option<String>),
-    // `None` when the caller observes ICMP flows without being able to tell
-    // their type, as IPFIX records do unless the exporter sends the type IEs.
     icmp_type: Option<IcmpType>,
     arp_type: ArpType,
-    exchanged_bytes: u128,
     exchanged_packets: u128,
+    exchanged_bytes: u128,
     ip_blacklist: &IpBlacklist,
     direction_hint: Option<TrafficDirection>,
     timestamps_hint: Option<(Timestamp, Timestamp)>,
@@ -287,7 +285,7 @@ pub fn modify_or_insert_in_map(
     if !info_traffic_msg.map.contains_key(key) {
         // first occurrence of key (in this time interval)
 
-        // determine traffic direction — caller's hint wins when present
+        // determine traffic direction (IPFIX hint wins when present)
         let source_ip = &key.source;
         let destination_ip = &key.dest;
         traffic_direction = direction_hint.unwrap_or_else(|| {
@@ -346,11 +344,12 @@ pub fn modify_or_insert_in_map(
             final_instant: Instant::now(),
             service,
             traffic_direction,
-            icmp_types: match icmp_type {
-                Some(icmp_type) if key.protocol.eq(&Protocol::ICMP) => {
-                    HashMap::from([(icmp_type, 1)])
-                }
-                _ => HashMap::new(),
+            icmp_types: if key.protocol.eq(&Protocol::ICMP)
+                && let Some(icmp_type) = icmp_type
+            {
+                HashMap::from([(icmp_type, 1)])
+            } else {
+                HashMap::new()
             },
             arp_types: if key.protocol.eq(&Protocol::ARP) {
                 HashMap::from([(arp_type, 1)])
@@ -364,20 +363,20 @@ pub fn modify_or_insert_in_map(
     (new_info.traffic_direction, new_info.service)
 }
 
-/// Accounts an already-classified flow against the totals, the rDNS resolution
-/// state, the per-host map, and the per-service map.
+/// Updates stats for a known connection (already present in map):
+/// totals, rDNS resolution state, per-host map, per-service map.
 ///
-/// Shared by both capture backends: the pcap pipeline calls it once per packet
-/// (`packets` = 1), the IPFIX collector once per flow record (`packets` = the
-/// record's packet count).
+/// Shared by both capture backends:
+/// - the pcap pipeline calls it once per packet (`packets` = 1)
+/// - the IPFIX collector once per flow record (`packets` = the record's packet count).
 #[allow(clippy::too_many_arguments)]
-pub fn account_flow(
+pub fn update_connection_stats(
     info_traffic_msg: &mut InfoTraffic,
     resolutions_state: &mut AddressesResolutionState,
     key: &AddressPortPair,
     my_interface_addresses: &[Address],
-    bytes: u128,
     packets: u128,
+    bytes: u128,
     direction: TrafficDirection,
     service: Service,
 ) {

@@ -18,7 +18,7 @@ use crate::networking::ipfix::totals::TotalsCache;
 use crate::networking::ipfix::wire::{
     self, FlowRecord, Set, decode_data_record, format_mac, parse_message,
 };
-use crate::networking::manage_packets::{account_flow, modify_or_insert_in_map};
+use crate::networking::manage_packets::{modify_or_insert_in_map, update_connection_stats};
 use crate::networking::types::address_port_pair::AddressPortPair;
 use crate::networking::types::arp_type::ArpType;
 use crate::networking::types::info_traffic::InfoTraffic;
@@ -293,20 +293,20 @@ fn ingest_flow_record(
         mac_addresses,
         None,
         ArpType::default(),
-        exchanged_bytes,
         exchanged_packets,
+        exchanged_bytes,
         ip_blacklist,
         record.direction,
         timestamps_hint,
     );
 
-    account_flow(
+    update_connection_stats(
         info_traffic_msg,
         resolutions_state,
         &key,
         NO_INTERFACE_ADDRESSES,
-        exchanged_bytes,
         exchanged_packets,
+        exchanged_bytes,
         traffic_direction,
         service,
     );

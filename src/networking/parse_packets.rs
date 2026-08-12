@@ -6,7 +6,9 @@ use crate::mmdb::types::mmdb_reader::MmdbReaders;
 use crate::networking::capture::{
     AddressesResolutionState, BackendTrafficMessage, maybe_send_tick, spawn_reverse_dns_pool,
 };
-use crate::networking::manage_packets::{account_flow, analyze_headers, modify_or_insert_in_map};
+use crate::networking::manage_packets::{
+    analyze_headers, modify_or_insert_in_map, update_connection_stats,
+};
 use crate::networking::types::arp_type::ArpType;
 use crate::networking::types::capture_context::{CaptureContext, CaptureSource, CaptureType};
 use crate::networking::types::icmp_type::IcmpType;
@@ -164,20 +166,20 @@ pub fn parse_packets(
                         mac_addresses,
                         Some(icmp_type),
                         arp_type,
-                        exchanged_bytes,
                         1,
+                        exchanged_bytes,
                         ip_blacklist,
                         None,
                         None,
                     );
 
-                    account_flow(
+                    update_connection_stats(
                         &mut info_traffic_msg,
                         &mut resolutions_state,
                         &key,
                         cs.get_addresses(),
-                        exchanged_bytes,
                         1,
+                        exchanged_bytes,
                         traffic_direction,
                         service,
                     );
