@@ -7,7 +7,7 @@ use etherparse::{
 use pcap::Address;
 
 use crate::Protocol;
-use crate::networking::parse_packets::AddressesResolutionState;
+use crate::networking::capture::AddressesResolutionState;
 use crate::networking::types::address_port_pair::AddressPortPair;
 use crate::networking::types::arp_type::ArpType;
 use crate::networking::types::bogon::is_bogon;

@@ -29,8 +29,8 @@ use crate::gui::types::timing_events::TimingEvents;
 use crate::mmdb::asn::ASN_MMDB;
 use crate::mmdb::country::COUNTRY_MMDB;
 use crate::mmdb::types::mmdb_reader::{MmdbReader, MmdbReaders};
+use crate::networking::capture::BackendTrafficMessage;
 use crate::networking::capture::spawn_capture_thread;
-use crate::networking::parse_packets::BackendTrafficMessage;
 use crate::networking::traffic_preview::{TrafficPreview, traffic_preview};
 use crate::networking::types::capture_context::{
     CaptureContext, CaptureError, CaptureSource, CaptureSourcePicklist, MyPcapImport,

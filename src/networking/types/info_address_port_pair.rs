@@ -52,9 +52,6 @@ impl InfoAddressPortPair {
         // self.program MUST NOT be refreshed here
         self.transmitted_bytes += other.transmitted_bytes;
         self.transmitted_packets += other.transmitted_packets;
-        // Records can reach a tick out of order — IPFIX reports carry the
-        // exporter's own flow timestamps — so these track the outer bounds
-        // rather than whatever arrived last.
         if other.initial_timestamp < self.initial_timestamp {
             self.initial_timestamp = other.initial_timestamp;
         }
@@ -140,14 +137,14 @@ mod tests {
     use crate::report::types::sort_type::SortType;
 
     #[test]
-    fn refresh_widens_the_timestamp_window_rather_than_overwriting_it() {
+    fn test_refresh_only_widens_the_timestamp_window() {
         let mut pair = InfoAddressPortPair {
             initial_timestamp: Timestamp::new(10, 0),
             final_timestamp: Timestamp::new(20, 0),
             ..Default::default()
         };
 
-        // An update wholly inside the window must not shrink it.
+        // inside the window does not change anything
         pair.refresh(&InfoAddressPortPair {
             initial_timestamp: Timestamp::new(12, 0),
             final_timestamp: Timestamp::new(18, 0),
@@ -156,7 +153,7 @@ mod tests {
         assert_eq!(pair.initial_timestamp, Timestamp::new(10, 0));
         assert_eq!(pair.final_timestamp, Timestamp::new(20, 0));
 
-        // One outside it extends both ends.
+        // outside the window extends
         pair.refresh(&InfoAddressPortPair {
             initial_timestamp: Timestamp::new(5, 0),
             final_timestamp: Timestamp::new(25, 0),

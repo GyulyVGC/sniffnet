@@ -10,15 +10,15 @@ use tokio::sync::broadcast::Receiver;
 
 use crate::location;
 use crate::mmdb::types::mmdb_reader::MmdbReaders;
+use crate::networking::capture::{
+    AddressesResolutionState, BackendTrafficMessage, maybe_send_tick, spawn_reverse_dns_pool,
+};
 use crate::networking::ipfix::templates::TemplateCache;
 use crate::networking::ipfix::totals::TotalsCache;
 use crate::networking::ipfix::wire::{
     self, FlowRecord, Set, decode_data_record, format_mac, parse_message,
 };
 use crate::networking::manage_packets::{account_flow, modify_or_insert_in_map};
-use crate::networking::parse_packets::{
-    AddressesResolutionState, BackendTrafficMessage, maybe_send_tick, spawn_reverse_dns_pool,
-};
 use crate::networking::types::address_port_pair::AddressPortPair;
 use crate::networking::types::arp_type::ArpType;
 use crate::networking::types::info_traffic::InfoTraffic;
@@ -481,7 +481,7 @@ mod tests {
     fn run_all(datagrams: &[&[u8]]) -> (InfoTraffic, AddressesResolutionState, bool) {
         let mut state = CollectorState::new(Instant::now());
         let mut info = InfoTraffic::default();
-        let mut resolutions = AddressesResolutionState::new_detached();
+        let mut resolutions = AddressesResolutionState::new_for_tests();
         let mut all_rejected = true;
         for bytes in datagrams {
             all_rejected &= process_datagram(
