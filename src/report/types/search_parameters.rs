@@ -68,10 +68,7 @@ impl SearchParameters {
     }
 
     fn is_some_host_filter_active(&self) -> bool {
-        self.only_favorites
-            || !self.country.is_empty()
-            || !self.as_name.is_empty()
-            || !self.domain.is_empty()
+        !self.country.is_empty() || !self.as_name.is_empty() || !self.domain.is_empty()
     }
 
     pub fn new_host_search(host: &Host) -> Self {
@@ -99,6 +96,31 @@ impl SearchParameters {
             program: program.to_string_with_equal_prefix(),
             ..SearchParameters::default()
         }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::SearchParameters;
+
+    #[test]
+    fn favorites_only_does_not_require_reverse_dns() {
+        let search = SearchParameters {
+            only_favorites: true,
+            ..SearchParameters::default()
+        };
+
+        assert!(!search.is_some_host_filter_active());
+    }
+
+    #[test]
+    fn host_filters_still_require_reverse_dns() {
+        let search = SearchParameters {
+            domain: "example.com".to_string(),
+            ..SearchParameters::default()
+        };
+
+        assert!(search.is_some_host_filter_active());
     }
 }
 
