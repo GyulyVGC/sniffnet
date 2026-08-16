@@ -20,76 +20,76 @@ use std::net::{IpAddr, Ipv4Addr, Ipv6Addr};
 use crate::networking::types::traffic_direction::TrafficDirection;
 use crate::utils::types::timestamp::Timestamp;
 
-pub const IPFIX_VERSION: u16 = 0x000A;
-pub const SET_ID_TEMPLATE: u16 = 2;
-pub const SET_ID_OPTIONS_TEMPLATE: u16 = 3;
-pub const MIN_DATA_SET_ID: u16 = 256;
-pub const VARIABLE_LENGTH: u16 = 0xFFFF;
+pub(super) const IPFIX_VERSION: u16 = 0x000A;
+pub(super) const SET_ID_TEMPLATE: u16 = 2;
+pub(super) const VARIABLE_LENGTH: u16 = 0xFFFF;
+const SET_ID_OPTIONS_TEMPLATE: u16 = 3;
+const MIN_DATA_SET_ID: u16 = 256;
 
 /// The enterprise number IANA set aside for RFC 5103 biflows. It isn't a
 /// vendor: an IE carrying it is the *reverse* of the very same IE without it,
 /// counting what travels from the flow's destination back to its source. Every
 /// other enterprise number is genuinely vendor-private and stays ignored.
-pub const REVERSE_PEN: u32 = 29305;
+pub(super) const REVERSE_PEN: u32 = 29305;
 
-pub mod ie {
+mod ie {
     //! IANA-assigned IPFIX Information Element identifiers used by Sniffnet.
     //!
     //! Note the crossed naming in the IANA registry: the "post" counterpart of
     //! `sourceMacAddress` (56) is 81, while the one of `destinationMacAddress`
     //! (80) is 57.
-    pub const OCTET_DELTA_COUNT: u16 = 1;
-    pub const PACKET_DELTA_COUNT: u16 = 2;
-    pub const PROTOCOL_IDENTIFIER: u16 = 4;
-    pub const SOURCE_TRANSPORT_PORT: u16 = 7;
-    pub const SOURCE_IPV4_ADDRESS: u16 = 8;
-    pub const DESTINATION_TRANSPORT_PORT: u16 = 11;
-    pub const DESTINATION_IPV4_ADDRESS: u16 = 12;
-    pub const SOURCE_IPV6_ADDRESS: u16 = 27;
-    pub const DESTINATION_IPV6_ADDRESS: u16 = 28;
-    pub const SOURCE_MAC_ADDRESS: u16 = 56;
-    pub const POST_DESTINATION_MAC_ADDRESS: u16 = 57;
-    pub const FLOW_DIRECTION: u16 = 61;
-    pub const DESTINATION_MAC_ADDRESS: u16 = 80;
-    pub const POST_SOURCE_MAC_ADDRESS: u16 = 81;
-    pub const OCTET_TOTAL_COUNT: u16 = 85;
-    pub const PACKET_TOTAL_COUNT: u16 = 86;
-    pub const FLOW_START_SECONDS: u16 = 150;
-    pub const FLOW_END_SECONDS: u16 = 151;
-    pub const FLOW_START_MILLISECONDS: u16 = 152;
-    pub const FLOW_END_MILLISECONDS: u16 = 153;
-    pub const FLOW_START_MICROSECONDS: u16 = 154;
-    pub const FLOW_END_MICROSECONDS: u16 = 155;
-    pub const FLOW_START_NANOSECONDS: u16 = 156;
-    pub const FLOW_END_NANOSECONDS: u16 = 157;
-    pub const LAYER2_OCTET_DELTA_COUNT: u16 = 352;
-    pub const LAYER2_OCTET_TOTAL_COUNT: u16 = 353;
+    pub(super) const OCTET_DELTA_COUNT: u16 = 1;
+    pub(super) const PACKET_DELTA_COUNT: u16 = 2;
+    pub(super) const PROTOCOL_IDENTIFIER: u16 = 4;
+    pub(super) const SOURCE_TRANSPORT_PORT: u16 = 7;
+    pub(super) const SOURCE_IPV4_ADDRESS: u16 = 8;
+    pub(super) const DESTINATION_TRANSPORT_PORT: u16 = 11;
+    pub(super) const DESTINATION_IPV4_ADDRESS: u16 = 12;
+    pub(super) const SOURCE_IPV6_ADDRESS: u16 = 27;
+    pub(super) const DESTINATION_IPV6_ADDRESS: u16 = 28;
+    pub(super) const SOURCE_MAC_ADDRESS: u16 = 56;
+    pub(super) const POST_DESTINATION_MAC_ADDRESS: u16 = 57;
+    pub(super) const FLOW_DIRECTION: u16 = 61;
+    pub(super) const DESTINATION_MAC_ADDRESS: u16 = 80;
+    pub(super) const POST_SOURCE_MAC_ADDRESS: u16 = 81;
+    pub(super) const OCTET_TOTAL_COUNT: u16 = 85;
+    pub(super) const PACKET_TOTAL_COUNT: u16 = 86;
+    pub(super) const FLOW_START_SECONDS: u16 = 150;
+    pub(super) const FLOW_END_SECONDS: u16 = 151;
+    pub(super) const FLOW_START_MILLISECONDS: u16 = 152;
+    pub(super) const FLOW_END_MILLISECONDS: u16 = 153;
+    pub(super) const FLOW_START_MICROSECONDS: u16 = 154;
+    pub(super) const FLOW_END_MICROSECONDS: u16 = 155;
+    pub(super) const FLOW_START_NANOSECONDS: u16 = 156;
+    pub(super) const FLOW_END_NANOSECONDS: u16 = 157;
+    pub(super) const LAYER2_OCTET_DELTA_COUNT: u16 = 352;
+    pub(super) const LAYER2_OCTET_TOTAL_COUNT: u16 = 353;
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
-pub struct MessageHeader {
-    pub version: u16,
-    pub length: u16,
-    pub export_time: u32,
-    pub sequence_number: u32,
-    pub observation_domain_id: u32,
+pub(super) struct MessageHeader {
+    version: u16,
+    length: u16,
+    export_time: u32,
+    sequence_number: u32,
+    pub(super) observation_domain_id: u32,
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub struct FieldSpec {
-    pub ie_id: u16,
-    pub length: u16,
-    pub enterprise: Option<u32>,
+pub(super) struct FieldSpec {
+    pub(super) ie_id: u16,
+    pub(super) length: u16,
+    pub(super) enterprise: Option<u32>,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
-pub struct TemplateRecord {
-    pub template_id: u16,
-    pub fields: Vec<FieldSpec>,
+pub(super) struct TemplateRecord {
+    pub(super) template_id: u16,
+    pub(super) fields: Vec<FieldSpec>,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
-pub enum Set<'a> {
+pub(super) enum Set<'a> {
     Template(Vec<TemplateRecord>),
     /// Options templates are parsed but not interpreted; the collector skips them.
     OptionsTemplate,
@@ -104,9 +104,9 @@ pub enum Set<'a> {
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
-pub struct IpfixMessage<'a> {
-    pub header: MessageHeader,
-    pub sets: Vec<Set<'a>>,
+pub(super) struct IpfixMessage<'a> {
+    pub(super) header: MessageHeader,
+    pub(super) sets: Vec<Set<'a>>,
 }
 
 /// Decoded fields from a single data record. Each `Option` is `None` when the
@@ -118,41 +118,41 @@ pub struct IpfixMessage<'a> {
 /// on their own — the collector differences them against the same flow's
 /// previous report (see `totals.rs`).
 #[derive(Debug, Clone, Default, PartialEq, Eq)]
-pub struct FlowRecord {
-    pub src_ip: Option<IpAddr>,
-    pub dst_ip: Option<IpAddr>,
-    pub src_port: Option<u16>,
-    pub dst_port: Option<u16>,
-    pub protocol: Option<u8>,
-    pub bytes: u128,
-    pub packets: u128,
-    pub bytes_total: Option<u128>,
-    pub packets_total: Option<u128>,
-    pub src_mac: Option<[u8; 6]>,
-    pub dst_mac: Option<[u8; 6]>,
-    pub direction: Option<TrafficDirection>,
-    pub flow_start: Option<Timestamp>,
-    pub flow_end: Option<Timestamp>,
+pub(super) struct FlowRecord {
+    pub(super) src_ip: Option<IpAddr>,
+    pub(super) dst_ip: Option<IpAddr>,
+    pub(super) src_port: Option<u16>,
+    pub(super) dst_port: Option<u16>,
+    pub(super) protocol: Option<u8>,
+    pub(super) bytes: u128,
+    pub(super) packets: u128,
+    pub(super) bytes_total: Option<u128>,
+    pub(super) packets_total: Option<u128>,
+    pub(super) src_mac: Option<[u8; 6]>,
+    pub(super) dst_mac: Option<[u8; 6]>,
+    pub(super) direction: Option<TrafficDirection>,
+    pub(super) flow_start: Option<Timestamp>,
+    pub(super) flow_end: Option<Timestamp>,
     /// Set only when the exporter sends a biflow: what the same conversation
     /// carried in the opposite direction. The collector turns it into a record
     /// of its own against the swapped 5-tuple.
-    pub reverse: Option<ReverseCounters>,
+    pub(super) reverse: Option<ReverseCounters>,
 }
 
 /// The counters of an RFC 5103 biflow's reverse direction. Only the counters:
 /// the reverse addresses, ports and protocol are the forward ones swapped, and
 /// carry no information of their own.
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq)]
-pub struct ReverseCounters {
-    pub bytes: u128,
-    pub packets: u128,
-    pub bytes_total: Option<u128>,
-    pub packets_total: Option<u128>,
+pub(super) struct ReverseCounters {
+    pub(super) bytes: u128,
+    pub(super) packets: u128,
+    pub(super) bytes_total: Option<u128>,
+    pub(super) packets_total: Option<u128>,
 }
 
 /// Parse a complete IPFIX message (header + sets). Fails on anything that
 /// isn't IPFIX, a `NetFlow` v9 datagram included.
-pub fn parse_message(input: &[u8]) -> IResult<&[u8], IpfixMessage<'_>> {
+pub(super) fn parse_message(input: &[u8]) -> IResult<&[u8], IpfixMessage<'_>> {
     let (input, header) = parse_message_header(input)?;
     // header.length is the total message length including the 16-byte header
     let payload_len = (header.length as usize).saturating_sub(16);
@@ -253,7 +253,7 @@ fn parse_field_spec(input: &[u8]) -> IResult<&[u8], FieldSpec> {
 
 /// Decode a single data record against its template. Returns the consumed
 /// number of bytes alongside the parsed `FlowRecord`.
-pub fn decode_data_record<'a>(
+pub(super) fn decode_data_record<'a>(
     template: &[FieldSpec],
     input: &'a [u8],
 ) -> IResult<&'a [u8], FlowRecord> {
@@ -631,14 +631,6 @@ fn read_mac(raw: &[u8]) -> Option<[u8; 6]> {
     let mut mac = [0u8; 6];
     mac.copy_from_slice(raw);
     Some(mac)
-}
-
-/// Format a MAC address as a colon-separated hex string.
-pub fn format_mac(mac: [u8; 6]) -> String {
-    format!(
-        "{:02x}:{:02x}:{:02x}:{:02x}:{:02x}:{:02x}",
-        mac[0], mac[1], mac[2], mac[3], mac[4], mac[5]
-    )
 }
 
 #[cfg(test)]

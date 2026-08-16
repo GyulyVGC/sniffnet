@@ -15,18 +15,18 @@ use std::time::Instant;
 use crate::networking::ipfix::ttl_map::TtlMap;
 use crate::networking::ipfix::wire::FieldSpec;
 
-pub struct TemplateCache {
+pub(super) struct TemplateCache {
     map: TtlMap<(SocketAddr, u32, u16), Vec<FieldSpec>>,
 }
 
 impl TemplateCache {
-    pub fn new(now: Instant) -> Self {
+    pub(super) fn new(now: Instant) -> Self {
         Self {
             map: TtlMap::new(now),
         }
     }
 
-    pub fn insert(
+    pub(super) fn insert(
         &mut self,
         peer: SocketAddr,
         observation_domain_id: u32,
@@ -38,7 +38,7 @@ impl TemplateCache {
             .insert((peer, observation_domain_id, template_id), fields, now);
     }
 
-    pub fn get(
+    pub(super) fn get(
         &mut self,
         peer: SocketAddr,
         observation_domain_id: u32,

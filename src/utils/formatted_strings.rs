@@ -1,4 +1,5 @@
 use std::cmp::min;
+use std::fmt::Write;
 use std::net::IpAddr;
 
 use crate::utils::types::timestamp::Timestamp;
@@ -157,6 +158,16 @@ pub fn clip_text(text: &str, max_chars: usize) -> String {
     [slice.trim(), suspensions].concat()
 }
 
+/// Converts a MAC address in its hexadecimal form
+pub fn mac_from_dec_to_hex(mac_dec: [u8; 6]) -> String {
+    let mut mac_hex = String::with_capacity(17);
+    for n in &mac_dec {
+        let _ = write!(mac_hex, "{n:02x}:");
+    }
+    mac_hex.pop();
+    mac_hex
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -283,5 +294,13 @@ mod tests {
             clip_text("        protocol90 23456          ", 26),
             "protocol90 23456"
         );
+    }
+
+    #[test]
+    fn test_mac_from_dec_to_hex() {
+        let result = mac_from_dec_to_hex([255, 255, 10, 177, 9, 15]);
+        assert_eq!(result, "ff:ff:0a:b1:09:0f".to_string());
+        let result = mac_from_dec_to_hex([0, 0, 0, 0, 0, 0]);
+        assert_eq!(result, "00:00:00:00:00:00".to_string());
     }
 }

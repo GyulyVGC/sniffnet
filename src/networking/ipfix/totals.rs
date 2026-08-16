@@ -24,12 +24,12 @@ struct Baseline {
     packets: u128,
 }
 
-pub struct TotalsCache {
+pub(super) struct TotalsCache {
     map: TtlMap<(SocketAddr, u32, AddressPortPair), Baseline>,
 }
 
 impl TotalsCache {
-    pub fn new(now: Instant) -> Self {
+    pub(super) fn new(now: Instant) -> Self {
         Self {
             map: TtlMap::new(now),
         }
@@ -45,7 +45,7 @@ impl TotalsCache {
     ///
     /// A total below the stored baseline means the 5-tuple has been reused by a
     /// new flow, so the counter restarted; the new total is taken in full.
-    pub fn delta(
+    pub(super) fn delta(
         &mut self,
         peer: SocketAddr,
         observation_domain_id: u32,

@@ -15,9 +15,7 @@ use crate::networking::capture::{
 };
 use crate::networking::ipfix::templates::TemplateCache;
 use crate::networking::ipfix::totals::TotalsCache;
-use crate::networking::ipfix::wire::{
-    self, FlowRecord, Set, decode_data_record, format_mac, parse_message,
-};
+use crate::networking::ipfix::wire::{self, FlowRecord, Set, decode_data_record, parse_message};
 use crate::networking::manage_packets::{modify_or_insert_in_map, update_connection_stats};
 use crate::networking::types::address_port_pair::AddressPortPair;
 use crate::networking::types::arp_type::ArpType;
@@ -26,6 +24,7 @@ use crate::networking::types::ip_blacklist::IpBlacklist;
 use crate::networking::types::protocol::Protocol;
 use crate::networking::types::traffic_direction::TrafficDirection;
 use crate::utils::error_logger::{ErrorLogger, Location};
+use crate::utils::formatted_strings::mac_from_dec_to_hex;
 use crate::utils::types::timestamp::Timestamp;
 
 /// Buffer size for a single UDP datagram. RFC 7011 §10.3.1 recommends at least
@@ -50,7 +49,7 @@ impl CollectorState {
 /// Entry point for the IPFIX collector thread. Mirrors `parse_packets` in
 /// terms of channel contracts: it emits `BackendTrafficMessage::TickRun` every
 /// second with the accumulated `InfoTraffic`.
-pub fn collect_ipfix(
+pub(crate) fn collect_ipfix(
     cap_id: usize,
     socket: &UdpSocket,
     mmdb_readers: &MmdbReaders,
@@ -281,8 +280,8 @@ fn ingest_flow_record(
     }
 
     let mac_addresses = (
-        record.src_mac.map(format_mac),
-        record.dst_mac.map(format_mac),
+        record.src_mac.map(mac_from_dec_to_hex),
+        record.dst_mac.map(mac_from_dec_to_hex),
     );
 
     let timestamps_hint = record.flow_start.zip(record.flow_end);

@@ -22,8 +22,8 @@ use crate::networking::types::service::Service;
 use crate::networking::types::service_query::ServiceQuery;
 use crate::networking::types::traffic_direction::TrafficDirection;
 use crate::networking::types::traffic_type::TrafficType;
+use crate::utils::formatted_strings::mac_from_dec_to_hex;
 use crate::utils::types::timestamp::Timestamp;
-use std::fmt::Write;
 use std::time::Instant;
 
 include!(concat!(env!("OUT_DIR"), "/services.rs"));
@@ -622,16 +622,6 @@ pub fn is_my_address(local_address: &IpAddr, my_interface_addresses: &[Address])
     local_address.is_loopback()
 }
 
-/// Converts a MAC address in its hexadecimal form
-fn mac_from_dec_to_hex(mac_dec: [u8; 6]) -> String {
-    let mut mac_hex = String::with_capacity(17);
-    for n in &mac_dec {
-        let _ = write!(mac_hex, "{n:02x}:");
-    }
-    mac_hex.pop();
-    mac_hex
-}
-
 pub fn get_address_to_lookup(key: &AddressPortPair, traffic_direction: TrafficDirection) -> IpAddr {
     match traffic_direction {
         TrafficDirection::Outgoing => key.dest,
@@ -666,7 +656,6 @@ mod tests {
     use crate::Service;
     use crate::networking::manage_packets::{
         get_service, get_traffic_direction, get_traffic_type, is_local_connection,
-        mac_from_dec_to_hex,
     };
     use crate::networking::types::address_port_pair::AddressPortPair;
     use crate::networking::types::service_query::ServiceQuery;
@@ -674,18 +663,6 @@ mod tests {
     use crate::networking::types::traffic_type::TrafficType;
 
     include!(concat!(env!("OUT_DIR"), "/services.rs"));
-
-    #[test]
-    fn mac_simple_test() {
-        let result = mac_from_dec_to_hex([255, 255, 10, 177, 9, 15]);
-        assert_eq!(result, "ff:ff:0a:b1:09:0f".to_string());
-    }
-
-    #[test]
-    fn mac_all_zero_test() {
-        let result = mac_from_dec_to_hex([0, 0, 0, 0, 0, 0]);
-        assert_eq!(result, "00:00:00:00:00:00".to_string());
-    }
 
     #[test]
     fn ipv6_simple_test() {

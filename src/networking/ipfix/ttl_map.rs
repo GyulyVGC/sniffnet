@@ -14,31 +14,31 @@ use std::time::{Duration, Instant};
 /// the template refresh and active timeout intervals exporters use in practice
 /// (tens of seconds to a few minutes), so only state belonging to an exporter
 /// that has genuinely gone away is dropped.
-pub(crate) const ENTRY_TTL: Duration = Duration::from_mins(30);
+pub(super) const ENTRY_TTL: Duration = Duration::from_mins(30);
 
 /// How often expired entries are swept out. Sweeping walks the whole map, so it
 /// deliberately doesn't run on every lookup.
-pub(crate) const PRUNE_INTERVAL: Duration = Duration::from_mins(1);
+pub(super) const PRUNE_INTERVAL: Duration = Duration::from_mins(1);
 
 struct Aging<V> {
     value: V,
     last_used: Instant,
 }
 
-pub struct TtlMap<K, V> {
+pub(super) struct TtlMap<K, V> {
     map: HashMap<K, Aging<V>>,
     last_prune: Instant,
 }
 
 impl<K: Eq + Hash, V> TtlMap<K, V> {
-    pub fn new(now: Instant) -> Self {
+    pub(super) fn new(now: Instant) -> Self {
         Self {
             map: HashMap::new(),
             last_prune: now,
         }
     }
 
-    pub fn insert(&mut self, key: K, value: V, now: Instant) {
+    pub(super) fn insert(&mut self, key: K, value: V, now: Instant) {
         self.maybe_prune(now);
         self.map.insert(
             key,
@@ -50,7 +50,7 @@ impl<K: Eq + Hash, V> TtlMap<K, V> {
     }
 
     /// Look up an entry, marking it as still in use.
-    pub fn get(&mut self, key: &K, now: Instant) -> Option<&V> {
+    pub(super) fn get(&mut self, key: &K, now: Instant) -> Option<&V> {
         self.maybe_prune(now);
         let aging = self.map.get_mut(key)?;
         aging.last_used = now;
@@ -59,7 +59,7 @@ impl<K: Eq + Hash, V> TtlMap<K, V> {
 
     /// Look up an entry for modification, creating it from `default` if it isn't
     /// there. Either way it counts as use.
-    pub fn get_or_insert_with(
+    pub(super) fn get_or_insert_with(
         &mut self,
         key: K,
         now: Instant,
@@ -84,12 +84,12 @@ impl<K: Eq + Hash, V> TtlMap<K, V> {
     }
 
     #[cfg(test)]
-    pub fn len(&self) -> usize {
+    pub(super) fn len(&self) -> usize {
         self.map.len()
     }
 
     #[cfg(test)]
-    pub fn is_empty(&self) -> bool {
+    pub(super) fn is_empty(&self) -> bool {
         self.map.is_empty()
     }
 }
@@ -110,7 +110,7 @@ mod tests {
     }
 
     #[test]
-    fn stores_and_reads_back() {
+    fn test_stores_and_reads_back() {
         let now = Instant::now();
         let mut map = TtlMap::new(now);
         map.insert("k", 1, now);
@@ -119,7 +119,7 @@ mod tests {
     }
 
     #[test]
-    fn insertion_replaces_the_previous_value() {
+    fn test_insertion_replaces_the_previous_value() {
         let now = Instant::now();
         let mut map = TtlMap::new(now);
         map.insert("k", 1, now);
@@ -129,7 +129,7 @@ mod tests {
     }
 
     #[test]
-    fn idle_entries_are_swept() {
+    fn test_idle_entries_are_swept() {
         let start = Instant::now();
         let mut map = TtlMap::new(start);
         map.insert("k", 1, start);
@@ -138,7 +138,7 @@ mod tests {
     }
 
     #[test]
-    fn reading_an_entry_keeps_it_alive() {
+    fn test_reading_an_entry_keeps_it_alive() {
         let start = Instant::now();
         let mut map = TtlMap::new(start);
         map.insert("k", 1, start);
@@ -156,7 +156,7 @@ mod tests {
     }
 
     #[test]
-    fn sweeping_spares_entries_still_in_use() {
+    fn test_sweeping_spares_entries_still_in_use() {
         let start = Instant::now();
         let mut map = TtlMap::new(start);
         map.insert("used", 1, start);
@@ -172,7 +172,7 @@ mod tests {
     }
 
     #[test]
-    fn get_or_insert_with_creates_then_reuses() {
+    fn test_get_or_insert_with_creates_then_reuses() {
         let now = Instant::now();
         let mut map = TtlMap::new(now);
         *map.get_or_insert_with("k", now, || 10) += 1;
