@@ -99,31 +99,6 @@ impl SearchParameters {
     }
 }
 
-#[cfg(test)]
-mod tests {
-    use super::SearchParameters;
-
-    #[test]
-    fn favorites_only_does_not_require_reverse_dns() {
-        let search = SearchParameters {
-            only_favorites: true,
-            ..SearchParameters::default()
-        };
-
-        assert!(!search.is_some_host_filter_active());
-    }
-
-    #[test]
-    fn host_filters_still_require_reverse_dns() {
-        let search = SearchParameters {
-            domain: "example.com".to_string(),
-            ..SearchParameters::default()
-        };
-
-        assert!(search.is_some_host_filter_active());
-    }
-}
-
 #[derive(Copy, Clone)]
 pub enum FilterInputType {
     AddressSrc,

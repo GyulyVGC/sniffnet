@@ -3,6 +3,7 @@
 All Sniffnet releases with the relative changes are documented in this file.
 
 ## [UNRELEASED]
+- Correctly filter by favorites-only before rDNS completes ([#1275](https://github.com/GyulyVGC/sniffnet/pull/1275))
 - Set `Content-Type: application/json` header on remote notifications ([#1266](https://github.com/GyulyVGC/sniffnet/pull/1266))
 
 ## [1.5.1] - 2026-07-22
