@@ -1,33 +1,18 @@
-<p align="center"><a href="https://github.com/GyulyVGC/sniffnet"><img alt="" title="Sniffnet" src="https://github.com/GyulyVGC/sniffnet/blob/main/resources/repository/header_repository.png?raw=true" width="100%"/></a></p>
+# Contributing Manifesto
 
-# How can you contribute to the Sniffnet project?
+To keep Sniffnet quality high, we're very selective about submitted contributions.<br>
+For this reason, you're encouraged to read the following points before submitting a pull request (PR):
+1. purely LLM-generated code contributions are strongly discouraged and will most likely be rejected: you must understand and be able to defend every line you submit, and disclose AI assistance if any was used in the process
+2. before starting to work on a feature, make sure the corresponding issue isn't already assigned to someone else, and prefer picking up issues that are labeled with the tag "[help wanted](https://github.com/GyulyVGC/sniffnet/labels/help%20wanted)"
+3. in case there's no GitHub issue for the feature or fix you want to work on, please open an issue: if it's a feature we can discuss it and give you feedback; if it's a bug make sure the problem is real, reproducible, not already reported, and provide as much information as possible (including screenshots if applicable)
+4. reuse existing code and libraries where possible, and keep your PR small and focused, prioritizing quality over quantity
+5. if you end up adding a UI-facing sentence, make sure to internationalize it by adding a method to the `src/translations` module with the corresponding English translation (only add other languages if you natively speak them)
+6. if you end up modifying the `Sniffer` struct, include the new field in the `Conf` struct if it has to be persisted across runs of the app, or else consider cleaning it up in `Sniffer::reset()` if it has to be reset at every capture session
+7. include unit tests to assert the implementation is sound (if applicable), and make sure that `cargo test`, `cargo clippy -- -D warnings`, and `cargo fmt --all -- --check` all pass
+8. be sure to update the `CHANGELOG.md` file `[UNRELEASED]` section with a one-line description of the change, including a link to the corresponding PR and issue if applicable (following the format of the existing entries)
+9. be mindful that reviewing the PR may take a while, especially if it introduces substantial changes
+10. be mindful that the contribution can still be rejected at our discretion (even if it satisfies all the points above) if it doesn't align with the project's vision or if it introduces unnecessary complexity
 
-There are basically two ways: 
-- you can donate to show your support
-- you can use your technical expertise to help improve the application
+You can read the [_Build from source_](https://github.com/GyulyVGC/sniffnet/wiki/Build-from-source) Wiki page to learn how to set up the development environment, and the [_Code of Conduct_](https://github.com/GyulyVGC/sniffnet/blob/main/CODE_OF_CONDUCT.md) for the expected behavior in the community.
 
-In the first case, you may be interested in giving a look at [my sponsor page](https://github.com/sponsors/GyulyVGC).
-
-In the second case, this file is what you're searching for.
-
-## Did you find a bug?
-
-If you have found a bug in the application, it'd be awesome if you could open an issue describing the problem. 
-
-You should include a title, a description, and possibly a screenshot demonstrating the problem.
-
-Before opening an issue, please make sure the bug was not already reported.
-
-
-## Did you write a patch that fixes a bug?
-
-If you have detected a bug and solved it, please open a pull request with your patch. 
-
-Ensure the pull request description clearly describes the problem and your solution to that problem.
-
-
-## Are you willing to help but don't know where to start?
-
-You can give a look at the [project roadmap](https://github.com/GyulyVGC/sniffnet/blob/main/ROADMAP.md) to see the features I'd like to implement next, or check out issues labeled with the tag "[help wanted](https://github.com/GyulyVGC/sniffnet/labels/help%20wanted)" to see what I'm struggling with.
-
-All proposals to enlarge or improve Sniffnet are warmly welcomed, join the discussion and don't hesitate to share your thoughts!
+Despite our strictness, don't be afraid to share your thoughts: all proposals to enlarge or improve Sniffnet are warmly welcomed!

@@ -68,10 +68,7 @@ impl SearchParameters {
     }
 
     fn is_some_host_filter_active(&self) -> bool {
-        self.only_favorites
-            || !self.country.is_empty()
-            || !self.as_name.is_empty()
-            || !self.domain.is_empty()
+        !self.country.is_empty() || !self.as_name.is_empty() || !self.domain.is_empty()
     }
 
     pub fn new_host_search(host: &Host) -> Self {

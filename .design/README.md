@@ -8,7 +8,7 @@
 
 ## 👋 Welcome
 
-Sniffnet is an application to empower everyone with a tool to comfortably monitor their Internet traffic.
+Sniffnet is an application to empower everyone with a tool to comfortably monitor their network traffic.
 
 The main pillar of Sniffnet is to represent in a straightforward way concepts that are usually considered advanced:
 for this reason implementing an optimal UI for the application is crucially important.
