@@ -237,6 +237,7 @@ fn ingest_flow_record(
         &[],
         mac_addresses,
         None,
+        None,
         ArpType::default(),
         exchanged_packets,
         exchanged_bytes,

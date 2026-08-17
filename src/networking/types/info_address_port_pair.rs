@@ -6,6 +6,7 @@ use crate::networking::types::arp_type::ArpType;
 use crate::networking::types::data_info::DataInfo;
 use crate::networking::types::data_representation::DataRepr;
 use crate::networking::types::icmp_type::IcmpType;
+use crate::networking::types::igmp_type::IgmpType;
 use crate::networking::types::program::Program;
 use crate::networking::types::traffic_direction::TrafficDirection;
 use crate::report::types::sort_type::SortType;
@@ -39,6 +40,8 @@ pub struct InfoAddressPortPair {
     pub traffic_direction: TrafficDirection,
     /// Types of the ICMP messages exchanged, with the relative count (this is empty if not ICMP)
     pub icmp_types: HashMap<IcmpType, usize>,
+    /// Types of the IGMP messages exchanged, with the relative count (this is empty if not IGMP)
+    pub igmp_types: HashMap<IgmpType, usize>,
     /// Types of the ARP operations, with the relative count (this is empty if not ARP)
     pub arp_types: HashMap<ArpType, usize>,
     /// Whether the remote address is blacklisted
@@ -67,6 +70,12 @@ impl InfoAddressPortPair {
         for (icmp_type, count) in &other.icmp_types {
             self.icmp_types
                 .entry(*icmp_type)
+                .and_modify(|v| *v += count)
+                .or_insert(*count);
+        }
+        for (igmp_type, count) in &other.igmp_types {
+            self.igmp_types
+                .entry(*igmp_type)
                 .and_modify(|v| *v += count)
                 .or_insert(*count);
         }
@@ -123,6 +132,7 @@ impl Default for InfoAddressPortPair {
             service: Service::default(),
             traffic_direction: TrafficDirection::default(),
             icmp_types: HashMap::new(),
+            igmp_types: HashMap::new(),
             arp_types: HashMap::new(),
             is_blacklisted: false,
             program: Program::default(),

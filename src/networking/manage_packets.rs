@@ -14,6 +14,7 @@ use crate::networking::types::bogon::is_bogon;
 use crate::networking::types::data_info::DataInfo;
 use crate::networking::types::data_info_host::DataInfoHost;
 use crate::networking::types::icmp_type::{IcmpType, IcmpTypeV4, IcmpTypeV6};
+use crate::networking::types::igmp_type::IgmpType;
 use crate::networking::types::info_address_port_pair::InfoAddressPortPair;
 use crate::networking::types::info_traffic::InfoTraffic;
 use crate::networking::types::ip_blacklist::IpBlacklist;
@@ -29,11 +30,13 @@ include!(concat!(env!("OUT_DIR"), "/services.rs"));
 
 /// Calls methods to analyze link, network, and transport headers.
 /// Returns the relevant collected information.
+#[allow(clippy::similar_names)]
 pub fn analyze_headers(
     headers: LaxPacketHeaders,
     mac_addresses: &mut (Option<[u8; 6]>, Option<[u8; 6]>),
     exchanged_bytes: &mut u128,
     icmp_type: &mut IcmpType,
+    igmp_type: &mut IgmpType,
     arp_type: &mut ArpType,
 ) -> Option<AddressPortPair> {
     let mut retval = AddressPortPair::default();
@@ -64,6 +67,7 @@ pub fn analyze_headers(
             &mut retval.dport,
             &mut retval.protocol,
             icmp_type,
+            igmp_type,
         )
     {
         return None;
@@ -168,12 +172,14 @@ fn analyze_network_header(
 /// This function analyzes the transport layer header passed as parameter and updates variables
 /// passed by reference on the basis of the packet header content.
 /// Returns false if packet has to be skipped.
+#[allow(clippy::similar_names)]
 fn analyze_transport_header(
     transport_header: Option<TransportHeader>,
     port1: &mut Option<u16>,
     port2: &mut Option<u16>,
     protocol: &mut Protocol,
     icmp_type: &mut IcmpType,
+    igmp_type: &mut IgmpType,
 ) -> bool {
     match transport_header {
         Some(TransportHeader::Udp(udp_header)) => {
@@ -202,10 +208,12 @@ fn analyze_transport_header(
             *icmp_type = IcmpTypeV6::from_etherparse(&icmpv6_header.icmp_type);
             true
         }
-        Some(TransportHeader::Igmp(_)) => {
-            #[allow(clippy::match_same_arms)]
-            // TODO!
-            false
+        Some(TransportHeader::Igmp(igmp_header)) => {
+            *port1 = None;
+            *port2 = None;
+            *protocol = Protocol::IGMP;
+            *igmp_type = IgmpType::from_etherparse(&igmp_header.igmp_type);
+            true
         }
         None => false,
     }
@@ -216,7 +224,10 @@ pub fn get_service(
     traffic_direction: TrafficDirection,
     my_interface_addresses: &[Address],
 ) -> Service {
-    if key.protocol == Protocol::ICMP || key.protocol == Protocol::ARP {
+    if key.protocol == Protocol::ICMP
+        || key.protocol == Protocol::IGMP
+        || key.protocol == Protocol::ARP
+    {
         return Service::NotApplicable;
     }
 
@@ -263,13 +274,14 @@ pub fn get_service(
 }
 
 /// Function to insert the source and destination of a packet into the map containing the analyzed traffic
-#[allow(clippy::too_many_arguments)]
+#[allow(clippy::too_many_arguments, clippy::similar_names)]
 pub fn modify_or_insert_in_map(
     info_traffic_msg: &mut InfoTraffic,
     key: &AddressPortPair,
     my_interface_addresses: &[Address],
     mac_addresses: (Option<[u8; 6]>, Option<[u8; 6]>),
     icmp_type: Option<IcmpType>,
+    igmp_type: Option<IgmpType>,
     arp_type: ArpType,
     exchanged_packets: u128,
     exchanged_bytes: u128,
@@ -326,6 +338,14 @@ pub fn modify_or_insert_in_map(
                     .and_modify(|n| *n += 1)
                     .or_insert(1);
             }
+            if key.protocol.eq(&Protocol::IGMP)
+                && let Some(igmp_type) = igmp_type
+            {
+                info.igmp_types
+                    .entry(igmp_type)
+                    .and_modify(|n| *n += 1)
+                    .or_insert(1);
+            }
             if key.protocol.eq(&Protocol::ARP) {
                 info.arp_types
                     .entry(arp_type)
@@ -347,6 +367,13 @@ pub fn modify_or_insert_in_map(
                 && let Some(icmp_type) = icmp_type
             {
                 HashMap::from([(icmp_type, 1)])
+            } else {
+                HashMap::new()
+            },
+            igmp_types: if key.protocol.eq(&Protocol::IGMP)
+                && let Some(igmp_type) = igmp_type
+            {
+                HashMap::from([(igmp_type, 1)])
             } else {
                 HashMap::new()
             },

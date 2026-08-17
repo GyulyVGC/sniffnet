@@ -10,6 +10,8 @@ pub enum Protocol {
     UDP,
     /// Internet Control Message Protocol
     ICMP,
+    /// Internet Group Management Protocol
+    IGMP,
     /// Address Resolution Protocol
     ARP,
 }

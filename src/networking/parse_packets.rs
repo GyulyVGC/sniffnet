@@ -12,6 +12,7 @@ use crate::networking::manage_packets::{
 use crate::networking::types::arp_type::ArpType;
 use crate::networking::types::capture_context::{CaptureContext, CaptureSource, CaptureType};
 use crate::networking::types::icmp_type::IcmpType;
+use crate::networking::types::igmp_type::IgmpType;
 use crate::networking::types::info_traffic::InfoTraffic;
 use crate::networking::types::ip_blacklist::IpBlacklist;
 use crate::networking::types::my_link_type::MyLinkType;
@@ -25,7 +26,11 @@ use std::time::{Duration, Instant};
 use tokio::sync::broadcast::Receiver;
 
 /// The calling thread enters a loop in which it waits for network packets
-#[allow(clippy::too_many_lines, clippy::too_many_arguments)]
+#[allow(
+    clippy::too_many_lines,
+    clippy::too_many_arguments,
+    clippy::similar_names
+)]
 pub fn parse_packets(
     cap_id: usize,
     mut cs: CaptureSource,
@@ -137,6 +142,7 @@ pub fn parse_packets(
                     let mut exchanged_bytes = 0;
                     let mut mac_addresses = (None, None);
                     let mut icmp_type = IcmpType::default();
+                    let mut igmp_type = IgmpType::default();
                     let mut arp_type = ArpType::default();
 
                     let key_option = analyze_headers(
@@ -144,6 +150,7 @@ pub fn parse_packets(
                         &mut mac_addresses,
                         &mut exchanged_bytes,
                         &mut icmp_type,
+                        &mut igmp_type,
                         &mut arp_type,
                     );
 
@@ -166,6 +173,7 @@ pub fn parse_packets(
                         cs.get_addresses(),
                         mac_addresses,
                         Some(icmp_type),
+                        Some(igmp_type),
                         arp_type,
                         1,
                         exchanged_bytes,

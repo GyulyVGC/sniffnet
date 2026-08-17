@@ -20,6 +20,7 @@ use crate::networking::types::bogon::is_bogon;
 use crate::networking::types::data_representation::DataRepr;
 use crate::networking::types::host::Host;
 use crate::networking::types::icmp_type::IcmpType;
+use crate::networking::types::igmp_type::IgmpType;
 use crate::networking::types::info_address_port_pair::InfoAddressPortPair;
 use crate::networking::types::latency::LatencyStatus;
 use crate::networking::types::traffic_direction::TrafficDirection;
@@ -163,7 +164,7 @@ fn page_header<'a>(
     .class(ContainerType::Gradient(color_gradient))
 }
 
-#[allow(clippy::too_many_lines)]
+#[allow(clippy::too_many_lines, clippy::similar_names)]
 fn col_info<'a>(
     sniffer: &Sniffer,
     key: &AddressPortPair,
@@ -179,6 +180,7 @@ fn col_info<'a>(
     ) == TrafficType::Unicast;
     let measure_latency = sniffer.capture_source.supports_latency() && is_unicast;
     let is_icmp = key.protocol.eq(&Protocol::ICMP);
+    let is_igmp = key.protocol.eq(&Protocol::IGMP);
     let is_arp = key.protocol.eq(&Protocol::ARP);
 
     let mut ret_val = Column::new()
@@ -211,7 +213,7 @@ fn col_info<'a>(
         &key.protocol.to_string(),
     ));
 
-    if !is_icmp && !is_arp {
+    if !is_icmp && !is_igmp && !is_arp {
         ret_val = ret_val.push(TextType::highlighted_subtitle_with_desc(
             service_translation(language),
             &val.service.to_string(),
@@ -256,6 +258,8 @@ fn col_info<'a>(
 
     let messages = if is_icmp {
         IcmpType::pretty_print_types(&val.icmp_types)
+    } else if is_igmp {
+        IgmpType::pretty_print_types(&val.igmp_types)
     } else if is_arp {
         ArpType::pretty_print_types(&val.arp_types)
     } else {
