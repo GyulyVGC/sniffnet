@@ -91,7 +91,7 @@ mod tests {
     }
 
     #[test]
-    fn test_stores_and_reads_back() {
+    fn test_ttl_map_stores_and_reads_back() {
         let now = Instant::now();
         let mut map = TtlMap::new(now);
         assert_eq!(map.len(), 0);
@@ -108,7 +108,7 @@ mod tests {
     }
 
     #[test]
-    fn test_idle_entries_are_swept() {
+    fn test_ttl_map_idle_entries_are_swept() {
         let start = Instant::now();
         let mut map = TtlMap::new(start);
         map.insert("k", 1, start);
@@ -118,7 +118,7 @@ mod tests {
     }
 
     #[test]
-    fn test_reading_an_entry_keeps_it_alive() {
+    fn test_ttl_map_reading_an_entry_keeps_it_alive() {
         let start = Instant::now();
         let mut map = TtlMap::new(start);
         map.insert("k", 1, start);
@@ -130,11 +130,11 @@ mod tests {
         }
 
         assert!(now.duration_since(start) > ENTRY_TTL * 2);
-        assert_eq!(map.len(), 1);
+        assert_eq!(map.get(&"k", now), Some(&1));
     }
 
     #[test]
-    fn test_sweeping_spares_entries_still_in_use() {
+    fn test_ttl_map_sweeping_spares_entries_still_in_use() {
         let start = Instant::now();
         let mut map = TtlMap::new(start);
         map.insert("used", 1, start);
@@ -150,7 +150,7 @@ mod tests {
     }
 
     #[test]
-    fn test_get_or_insert_with_creates_then_reuses() {
+    fn test_ttl_map_get_or_insert_with_creates_then_reuses() {
         let now = Instant::now();
         let mut map = TtlMap::new(now);
         *map.get_or_insert_with("k", now, || 10) += 1;

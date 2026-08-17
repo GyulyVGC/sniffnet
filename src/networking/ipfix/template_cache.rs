@@ -1,20 +1,11 @@
-//! Per-exporter IPFIX template cache.
-//!
-//! Templates are carried in their own sets and referenced by data records that
-//! arrive in later packets. The cache is keyed by `(peer, observation_domain,
-//! template_id)` so a misbehaving exporter cannot corrupt another's templates.
-//!
-//! Entries expire once they stop being used, so templates belonging to an
-//! exporter that has gone away don't accumulate for the life of the capture.
-//! Decoding a record counts as use, which matters for exporters that announce
-//! their templates far less often than they send data.
-
 use std::net::SocketAddr;
 use std::time::Instant;
 
 use crate::networking::ipfix::ttl_map::TtlMap;
 use crate::networking::ipfix::wire::FieldSpec;
 
+/// Per-exporter IPFIX template cache.
+/// The cache is keyed by `(peer, observation_domain, template_id)`.
 pub(super) struct TemplateCache {
     map: TtlMap<(SocketAddr, u32, u16), Vec<FieldSpec>>,
 }
@@ -70,23 +61,27 @@ mod tests {
     }
 
     #[test]
-    fn insertion_and_lookup_are_per_peer() {
+    fn test_template_cache_insertion_and_lookup() {
         let now = Instant::now();
         let mut cache = TemplateCache::new(now);
         let f1 = fields(8);
         let f2 = fields(12);
+        let f3 = fields(16);
+        let f4 = fields(20);
         cache.insert(peer(1000), 0, 256, f1.clone(), now);
         cache.insert(peer(1001), 0, 256, f2.clone(), now);
+        cache.insert(peer(1000), 1, 256, f3.clone(), now);
+        cache.insert(peer(1001), 0, 257, f4.clone(), now);
 
         assert_eq!(cache.get(peer(1000), 0, 256, now), Some(f1.as_slice()));
         assert_eq!(cache.get(peer(1001), 0, 256, now), Some(f2.as_slice()));
-        assert_eq!(cache.get(peer(1002), 0, 256, now), None);
-    }
+        assert_eq!(cache.get(peer(1000), 1, 256, now), Some(f3.as_slice()));
+        assert_eq!(cache.get(peer(1001), 0, 257, now), Some(f4.as_slice()));
 
-    #[test]
-    fn redefinition_replaces_existing_template() {
-        let now = Instant::now();
-        let mut cache = TemplateCache::new(now);
+        assert_eq!(cache.get(peer(1000), 0, 257, now), None);
+        assert_eq!(cache.get(peer(1001), 1, 256, now), None);
+        assert_eq!(cache.get(peer(1002), 0, 256, now), None);
+
         let replacement = vec![
             FieldSpec {
                 ie_id: 8,
@@ -99,7 +94,6 @@ mod tests {
                 enterprise: None,
             },
         ];
-        cache.insert(peer(1000), 0, 256, fields(8), now);
         cache.insert(peer(1000), 0, 256, replacement.clone(), now);
         assert_eq!(
             cache.get(peer(1000), 0, 256, now),
@@ -108,9 +102,7 @@ mod tests {
     }
 
     #[test]
-    fn a_template_still_decoding_records_is_never_evicted() {
-        // Exporters may announce templates far less often than they send data,
-        // so use has to be what keeps one alive.
+    fn test_template_cache_still_decoding_records_is_never_evicted() {
         let start = Instant::now();
         let mut cache = TemplateCache::new(start);
         cache.insert(peer(1000), 0, 256, fields(8), start);
@@ -121,10 +113,11 @@ mod tests {
             assert!(cache.get(peer(1000), 0, 256, now).is_some());
         }
         assert!(now.duration_since(start) > ENTRY_TTL * 2);
+        assert!(cache.get(peer(1000), 0, 256, now).is_some());
     }
 
     #[test]
-    fn a_template_from_a_departed_exporter_is_evicted() {
+    fn test_template_cache_departed_exporter_is_evicted() {
         let start = Instant::now();
         let mut cache = TemplateCache::new(start);
         cache.insert(peer(1000), 0, 256, fields(8), start);
