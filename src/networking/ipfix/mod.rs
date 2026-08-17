@@ -1,5 +1,5 @@
+pub mod baseline_cache;
 pub mod collect;
-pub mod templates;
-pub mod totals;
+pub mod template_cache;
 pub mod ttl_map;
 pub mod wire;

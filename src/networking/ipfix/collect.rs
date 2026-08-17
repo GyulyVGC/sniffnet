@@ -13,8 +13,8 @@ use crate::mmdb::types::mmdb_reader::MmdbReaders;
 use crate::networking::capture::{
     AddressesResolutionState, BackendTrafficMessage, maybe_send_tick, spawn_reverse_dns_pool,
 };
-use crate::networking::ipfix::templates::TemplateCache;
-use crate::networking::ipfix::totals::TotalsCache;
+use crate::networking::ipfix::baseline_cache::BaselineCache;
+use crate::networking::ipfix::template_cache::TemplateCache;
 use crate::networking::ipfix::wire::{self, FlowRecord, Set, decode_data_record, parse_message};
 use crate::networking::manage_packets::{modify_or_insert_in_map, update_connection_stats};
 use crate::networking::types::address_port_pair::AddressPortPair;
@@ -34,14 +34,14 @@ const RECV_BUF_LEN: usize = 65_535;
 /// Per-exporter state the collector carries between datagrams.
 struct CollectorState {
     templates: TemplateCache,
-    totals: TotalsCache,
+    baselines: BaselineCache,
 }
 
 impl CollectorState {
     fn new(now: Instant) -> Self {
         Self {
             templates: TemplateCache::new(now),
-            totals: TotalsCache::new(now),
+            baselines: BaselineCache::new(now),
         }
     }
 }
@@ -196,7 +196,7 @@ fn process_datagram(
                         &flow,
                         peer,
                         message.header.observation_domain_id,
-                        &mut state.totals,
+                        &mut state.baselines,
                         now,
                         info_traffic_msg,
                         ip_blacklist,
@@ -259,7 +259,7 @@ fn ingest_flow_record(
     record: &FlowRecord,
     peer: SocketAddr,
     observation_domain_id: u32,
-    totals: &mut TotalsCache,
+    baselines: &mut BaselineCache,
     now: Instant,
     info_traffic_msg: &mut InfoTraffic,
     ip_blacklist: &IpBlacklist,
@@ -270,7 +270,7 @@ fn ingest_flow_record(
     };
 
     let (exchanged_bytes, exchanged_packets) =
-        resolve_counters(record, peer, observation_domain_id, &key, totals, now);
+        resolve_counters(record, peer, observation_domain_id, &key, baselines, now);
     // Both counters have to be there for the record to be worth accounting: a
     // flow with no bytes has nothing to report, and one with no packets would
     // add bytes that never show up in the packet totals the rest of the
@@ -322,10 +322,10 @@ fn resolve_counters(
     peer: SocketAddr,
     observation_domain_id: u32,
     key: &AddressPortPair,
-    totals: &mut TotalsCache,
+    baselines: &mut BaselineCache,
     now: Instant,
 ) -> (u128, u128) {
-    let (bytes_from_totals, packets_from_totals) = totals.delta(
+    let (bytes_from_baseline, packets_from_baseline) = baselines.delta(
         peer,
         observation_domain_id,
         key,
@@ -337,12 +337,12 @@ fn resolve_counters(
     let bytes = if record.bytes > 0 {
         record.bytes
     } else {
-        bytes_from_totals
+        bytes_from_baseline
     };
     let packets = if record.packets > 0 {
         record.packets
     } else {
-        packets_from_totals
+        packets_from_baseline
     };
 
     (bytes, packets)

@@ -24,11 +24,11 @@ struct Baseline {
     packets: u128,
 }
 
-pub(super) struct TotalsCache {
+pub(super) struct BaselineCache {
     map: TtlMap<(SocketAddr, u32, AddressPortPair), Baseline>,
 }
 
-impl TotalsCache {
+impl BaselineCache {
     pub(super) fn new(now: Instant) -> Self {
         Self {
             map: TtlMap::new(now),
@@ -108,7 +108,7 @@ mod tests {
     #[test]
     fn first_report_of_a_flow_counts_the_whole_total() {
         let now = Instant::now();
-        let mut cache = TotalsCache::new(now);
+        let mut cache = BaselineCache::new(now);
         assert_eq!(
             cache.delta(peer(1), 0, &key(1000), Some(1500), Some(10), now),
             (1500, 10)
@@ -118,7 +118,7 @@ mod tests {
     #[test]
     fn later_reports_count_only_the_increment() {
         let now = Instant::now();
-        let mut cache = TotalsCache::new(now);
+        let mut cache = BaselineCache::new(now);
         cache.delta(peer(1), 0, &key(1000), Some(1500), Some(10), now);
         assert_eq!(
             cache.delta(peer(1), 0, &key(1000), Some(4000), Some(25), now),
@@ -135,7 +135,7 @@ mod tests {
     fn a_counter_restart_is_taken_in_full() {
         // The 5-tuple got reused by a new flow, so the total went backwards.
         let now = Instant::now();
-        let mut cache = TotalsCache::new(now);
+        let mut cache = BaselineCache::new(now);
         cache.delta(peer(1), 0, &key(1000), Some(9000), Some(60), now);
         assert_eq!(
             cache.delta(peer(1), 0, &key(1000), Some(200), Some(2), now),
@@ -151,7 +151,7 @@ mod tests {
     #[test]
     fn baselines_are_per_exporter_and_per_flow() {
         let now = Instant::now();
-        let mut cache = TotalsCache::new(now);
+        let mut cache = BaselineCache::new(now);
         cache.delta(peer(1), 0, &key(1000), Some(1500), Some(10), now);
 
         // Same flow, different exporter: not the same counter.
@@ -174,7 +174,7 @@ mod tests {
     #[test]
     fn records_without_totals_are_inert() {
         let now = Instant::now();
-        let mut cache = TotalsCache::new(now);
+        let mut cache = BaselineCache::new(now);
         assert_eq!(cache.delta(peer(1), 0, &key(1000), None, None, now), (0, 0));
         assert_eq!(cache.map.len(), 0);
     }
@@ -182,7 +182,7 @@ mod tests {
     #[test]
     fn a_missing_counter_leaves_its_baseline_untouched() {
         let now = Instant::now();
-        let mut cache = TotalsCache::new(now);
+        let mut cache = BaselineCache::new(now);
         cache.delta(peer(1), 0, &key(1000), Some(1500), Some(10), now);
         // Byte totals only: the packet baseline must not be reset to zero.
         assert_eq!(
@@ -198,7 +198,7 @@ mod tests {
     #[test]
     fn stale_entries_are_swept_and_start_over() {
         let start = Instant::now();
-        let mut cache = TotalsCache::new(start);
+        let mut cache = BaselineCache::new(start);
         cache.delta(peer(1), 0, &key(1000), Some(1500), Some(10), start);
 
         // Before the TTL: still differencing against the stored baseline.
