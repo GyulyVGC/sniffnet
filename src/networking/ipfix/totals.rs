@@ -176,7 +176,7 @@ mod tests {
         let now = Instant::now();
         let mut cache = TotalsCache::new(now);
         assert_eq!(cache.delta(peer(1), 0, &key(1000), None, None, now), (0, 0));
-        assert!(cache.map.is_empty(), "nothing to remember");
+        assert_eq!(cache.map.len(), 0);
     }
 
     #[test]
