@@ -239,8 +239,8 @@ fn reverse_record(record: &FlowRecord) -> Option<FlowRecord> {
         src_port: record.dst_port,
         dst_port: record.src_port,
         protocol: record.protocol,
-        bytes: reverse.bytes,
-        packets: reverse.packets,
+        bytes_delta: reverse.bytes_delta,
+        packets_delta: reverse.packets_delta,
         bytes_total: reverse.bytes_total,
         packets_total: reverse.packets_total,
         src_mac: record.dst_mac,
@@ -334,13 +334,13 @@ fn resolve_counters(
         now,
     );
 
-    let bytes = if record.bytes > 0 {
-        record.bytes
+    let bytes = if let Some(bytes_delta) = record.bytes_delta {
+        bytes_delta
     } else {
         bytes_from_baseline
     };
-    let packets = if record.packets > 0 {
-        record.packets
+    let packets = if let Some(packets_delta) = record.packets_delta {
+        packets_delta
     } else {
         packets_from_baseline
     };

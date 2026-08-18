@@ -60,6 +60,14 @@ mod ie {
     pub(super) const POST_LAYER2_OCTET_TOTAL_COUNT: u16 = 420;
 }
 
+/// IPFIX complete message
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub(super) struct IpfixMessage<'a> {
+    pub(super) header: MessageHeader,
+    pub(super) sets: Vec<Set<'a>>,
+}
+
+/// IPFIX message header
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub(super) struct MessageHeader {
     version: u16,
@@ -69,6 +77,23 @@ pub(super) struct MessageHeader {
     pub(super) observation_domain_id: u32,
 }
 
+/// IPFIX set: either a template set, an options template set, or a data set
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub(super) enum Set<'a> {
+    Template(Vec<TemplateRecord>),
+    Data { template_id: u16, payload: &'a [u8] },
+    OptionsTemplate,
+    Ignored,
+}
+
+/// IPFIX template record, as carried in a template set
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub(super) struct TemplateRecord {
+    pub(super) template_id: u16,
+    pub(super) fields: Vec<FieldSpec>,
+}
+
+/// IPFIX field specification, as carried in a template record
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub(super) struct FieldSpec {
     pub(super) ie_id: u16,
@@ -76,41 +101,7 @@ pub(super) struct FieldSpec {
     pub(super) enterprise: Option<u32>,
 }
 
-#[derive(Debug, Clone, PartialEq, Eq)]
-pub(super) struct TemplateRecord {
-    pub(super) template_id: u16,
-    pub(super) fields: Vec<FieldSpec>,
-}
-
-#[derive(Debug, Clone, PartialEq, Eq)]
-pub(super) enum Set<'a> {
-    Template(Vec<TemplateRecord>),
-    /// Options templates are parsed but not interpreted; the collector skips them.
-    OptionsTemplate,
-    /// Reserved or unrecognised set id — consumed and skipped.
-    Ignored,
-    /// Data set: the payload is left as raw bytes and decoded against the
-    /// referenced template by the collector layer.
-    Data {
-        template_id: u16,
-        payload: &'a [u8],
-    },
-}
-
-#[derive(Debug, Clone, PartialEq, Eq)]
-pub(super) struct IpfixMessage<'a> {
-    pub(super) header: MessageHeader,
-    pub(super) sets: Vec<Set<'a>>,
-}
-
-/// Decoded fields from a single data record. Each `Option` is `None` when the
-/// template doesn't carry that IE.
-///
-/// `bytes` / `packets` come from the delta counters, which are already the
-/// increment since the exporter's previous report. `bytes_total` /
-/// `packets_total` come from the cumulative counters instead, and mean nothing
-/// on their own — the collector differences them against the same flow's
-/// previous report (see `totals.rs`).
+/// Decoded fields from a single data record
 #[derive(Debug, Clone, Default, PartialEq, Eq)]
 pub(super) struct FlowRecord {
     pub(super) src_ip: Option<IpAddr>,
@@ -118,8 +109,8 @@ pub(super) struct FlowRecord {
     pub(super) src_port: Option<u16>,
     pub(super) dst_port: Option<u16>,
     pub(super) protocol: Option<u8>,
-    pub(super) bytes: u128,
-    pub(super) packets: u128,
+    pub(super) bytes_delta: Option<u128>,
+    pub(super) packets_delta: Option<u128>,
     pub(super) bytes_total: Option<u128>,
     pub(super) packets_total: Option<u128>,
     pub(super) src_mac: Option<[u8; 6]>,
@@ -127,19 +118,15 @@ pub(super) struct FlowRecord {
     pub(super) direction: Option<TrafficDirection>,
     pub(super) flow_start: Option<Timestamp>,
     pub(super) flow_end: Option<Timestamp>,
-    /// Set only when the exporter sends a biflow: what the same conversation
-    /// carried in the opposite direction. The collector turns it into a record
-    /// of its own against the swapped 5-tuple.
+    /// Set only when the exporter sends a biflow (same flow in the opposite direction)
     pub(super) reverse: Option<ReverseCounters>,
 }
 
-/// The counters of an RFC 5103 biflow's reverse direction. Only the counters:
-/// the reverse addresses, ports and protocol are the forward ones swapped, and
-/// carry no information of their own.
+/// The counters of an RFC 5103 biflow's reverse direction
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq)]
 pub(super) struct ReverseCounters {
-    pub(super) bytes: u128,
-    pub(super) packets: u128,
+    pub(super) bytes_delta: Option<u128>,
+    pub(super) packets_delta: Option<u128>,
     pub(super) bytes_total: Option<u128>,
     pub(super) packets_total: Option<u128>,
 }
@@ -277,8 +264,8 @@ pub(super) fn decode_data_record<'a>(
     }
 
     record.reverse = saw_reverse.then_some(ReverseCounters {
-        bytes: reverse.bytes,
-        packets: reverse.packets,
+        bytes_delta: reverse.bytes_delta,
+        packets_delta: reverse.packets_delta,
         bytes_total: reverse.bytes_total,
         packets_total: reverse.packets_total,
     });
@@ -294,8 +281,8 @@ pub(super) fn decode_data_record<'a>(
 /// longer depends on which one happens to appear last in the template.
 #[derive(Default)]
 struct FieldPriority {
-    bytes: u8,
-    packets: u8,
+    bytes_delta: u8,
+    packets_delta: u8,
     bytes_total: u8,
     packets_total: u8,
     flow_start: u8,
@@ -308,7 +295,7 @@ struct FieldPriority {
 /// way with the flow — gives way to its plain counterpart. Layer-2-ness is the
 /// stronger preference of the two: a post-middlebox frame count still counts
 /// the link header, whereas an IP-layer count omits it on every packet.
-fn octet_rank(ie_id: u16) -> u8 {
+fn octet_delta_rank(ie_id: u16) -> u8 {
     match ie_id {
         ie::LAYER2_OCTET_DELTA_COUNT => 4,
         ie::POST_LAYER2_OCTET_DELTA_COUNT => 3,
@@ -318,7 +305,7 @@ fn octet_rank(ie_id: u16) -> u8 {
     }
 }
 
-fn packet_rank(ie_id: u16) -> u8 {
+fn packet_delta_rank(ie_id: u16) -> u8 {
     match ie_id {
         ie::PACKET_DELTA_COUNT => 2,
         ie::POST_PACKET_DELTA_COUNT => 1,
@@ -446,17 +433,19 @@ fn apply_delta_counter_ie(
     record: &mut FlowRecord,
     priority: &mut FieldPriority,
 ) -> bool {
-    let (rank, slot, slot_priority): (u8, &mut u128, &mut u8) = match ie_id {
+    let (rank, slot, slot_priority): (u8, &mut Option<u128>, &mut u8) = match ie_id {
         ie::OCTET_DELTA_COUNT
         | ie::LAYER2_OCTET_DELTA_COUNT
         | ie::POST_OCTET_DELTA_COUNT
-        | ie::POST_LAYER2_OCTET_DELTA_COUNT => {
-            (octet_rank(ie_id), &mut record.bytes, &mut priority.bytes)
-        }
+        | ie::POST_LAYER2_OCTET_DELTA_COUNT => (
+            octet_delta_rank(ie_id),
+            &mut record.bytes_delta,
+            &mut priority.bytes_delta,
+        ),
         ie::PACKET_DELTA_COUNT | ie::POST_PACKET_DELTA_COUNT => (
-            packet_rank(ie_id),
-            &mut record.packets,
-            &mut priority.packets,
+            packet_delta_rank(ie_id),
+            &mut record.packets_delta,
+            &mut priority.packets_delta,
         ),
         _ => return false,
     };
@@ -464,7 +453,7 @@ fn apply_delta_counter_ie(
     if rank >= *slot_priority
         && let Some(v) = read_unsigned(raw)
     {
-        *slot = v;
+        *slot = Some(v);
         *slot_priority = rank;
     }
     true
@@ -748,8 +737,8 @@ mod tests {
             record.dst_ip,
             Some(IpAddr::V4(Ipv4Addr::new(192, 168, 1, 5)))
         );
-        assert_eq!(record.bytes, 1500);
-        assert_eq!(record.packets, 10);
+        assert_eq!(record.bytes_delta, Some(1500));
+        assert_eq!(record.packets_delta, Some(10));
     }
 
     #[test]
@@ -796,13 +785,13 @@ mod tests {
         let (rest, record) = decode_data_record(&template, &payload).unwrap();
         assert!(rest.is_empty());
         // the forward slots must be untouched by the reverse fields
-        assert_eq!(record.bytes, 1500);
-        assert_eq!(record.packets, 0);
+        assert_eq!(record.bytes_delta, Some(1500));
+        assert_eq!(record.packets_delta, None);
         assert_eq!(
             record.reverse,
             Some(ReverseCounters {
-                bytes: 9000,
-                packets: 60,
+                bytes_delta: Some(9000),
+                packets_delta: Some(60),
                 bytes_total: None,
                 packets_total: None,
             })
@@ -812,7 +801,7 @@ mod tests {
     #[test]
     fn a_uniflow_record_has_no_reverse_counters() {
         let record = decode(&[(ie::OCTET_DELTA_COUNT, 8)], &1500u64.to_be_bytes());
-        assert_eq!(record.bytes, 1500);
+        assert_eq!(record.bytes_delta, Some(1500));
         assert_eq!(record.reverse, None, "not a biflow");
     }
 
@@ -878,8 +867,8 @@ mod tests {
                 ],
                 &l2_first,
             )
-            .bytes,
-            1500,
+            .bytes_delta,
+            Some(1500),
         );
 
         let mut ip_first = Vec::new();
@@ -893,8 +882,8 @@ mod tests {
                 ],
                 &ip_first,
             )
-            .bytes,
-            1500,
+            .bytes_delta,
+            Some(1500),
         );
     }
 
@@ -907,8 +896,8 @@ mod tests {
             &[(ie::OCTET_TOTAL_COUNT, 8), (ie::PACKET_TOTAL_COUNT, 8)],
             &payload,
         );
-        assert_eq!(record.bytes, 0);
-        assert_eq!(record.packets, 0);
+        assert_eq!(record.bytes_delta, None);
+        assert_eq!(record.packets_delta, None);
         assert_eq!(record.bytes_total, Some(1500));
         assert_eq!(record.packets_total, Some(10));
     }
@@ -962,8 +951,8 @@ mod tests {
             ],
             &payload,
         );
-        assert_eq!(record.bytes, 1500);
-        assert_eq!(record.packets, 10);
+        assert_eq!(record.bytes_delta, Some(1500));
+        assert_eq!(record.packets_delta, Some(10));
 
         let record = decode(
             &[
@@ -995,8 +984,8 @@ mod tests {
                 ],
                 &l2_first,
             )
-            .bytes,
-            1500,
+            .bytes_delta,
+            Some(1500),
         );
 
         let mut ip_first = Vec::new();
@@ -1030,7 +1019,7 @@ mod tests {
             ],
             &payload,
         );
-        assert_eq!(record.bytes, 1500);
+        assert_eq!(record.bytes_delta, Some(1500));
 
         let record = decode(
             &[
@@ -1055,8 +1044,8 @@ mod tests {
                 &[(ie::OCTET_DELTA_COUNT, 8), (ie::POST_OCTET_DELTA_COUNT, 8)],
                 &plain_first,
             )
-            .bytes,
-            1500,
+            .bytes_delta,
+            Some(1500),
         );
 
         let mut post_first = Vec::new();
@@ -1067,8 +1056,8 @@ mod tests {
                 &[(ie::POST_OCTET_DELTA_COUNT, 8), (ie::OCTET_DELTA_COUNT, 8)],
                 &post_first,
             )
-            .bytes,
-            1500,
+            .bytes_delta,
+            Some(1500),
         );
     }
 
