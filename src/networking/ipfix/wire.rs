@@ -1,13 +1,4 @@
 //! RFC 7011 IPFIX wire format decoding.
-//!
-//! This module parses the bytes of an IPFIX datagram into structured records.
-//! It is deliberately minimal: only the Information Elements relevant for
-//! 5-tuple flow visualization are interpreted; unknown IEs are skipped by
-//! their declared length so future-template fields don't break decoding.
-//!
-//! All parsers are built on `nom` combinators so every byte read is bounded
-//! by construction — malformed datagrams produce parse errors rather than
-//! panics.
 
 use nom::IResult;
 use nom::Parser;
@@ -20,24 +11,21 @@ use std::net::{IpAddr, Ipv4Addr, Ipv6Addr};
 use crate::networking::types::traffic_direction::TrafficDirection;
 use crate::utils::types::timestamp::Timestamp;
 
+/// IPFIX version number (10)
 pub(super) const IPFIX_VERSION: u16 = 0x000A;
+/// The set id for a template set
 pub(super) const SET_ID_TEMPLATE: u16 = 2;
+/// Variable-length field length sentinel
 pub(super) const VARIABLE_LENGTH: u16 = 0xFFFF;
+/// Direction flag to export reverse-direction counterparts of standard IEs
+pub(super) const REVERSE_PEN: u32 = 29305;
+/// The set id for an options template set (skipped by Sniffnet)
 const SET_ID_OPTIONS_TEMPLATE: u16 = 3;
+/// The minimum set id for a data set
 const MIN_DATA_SET_ID: u16 = 256;
 
-/// The enterprise number IANA set aside for RFC 5103 biflows. It isn't a
-/// vendor: an IE carrying it is the *reverse* of the very same IE without it,
-/// counting what travels from the flow's destination back to its source. Every
-/// other enterprise number is genuinely vendor-private and stays ignored.
-pub(super) const REVERSE_PEN: u32 = 29305;
-
+/// IANA-assigned IPFIX Information Element identifiers used by Sniffnet
 mod ie {
-    //! IANA-assigned IPFIX Information Element identifiers used by Sniffnet.
-    //!
-    //! Note the crossed naming in the IANA registry: the "post" counterpart of
-    //! `sourceMacAddress` (56) is 81, while the one of `destinationMacAddress`
-    //! (80) is 57.
     pub(super) const OCTET_DELTA_COUNT: u16 = 1;
     pub(super) const PACKET_DELTA_COUNT: u16 = 2;
     pub(super) const PROTOCOL_IDENTIFIER: u16 = 4;
@@ -45,6 +33,8 @@ mod ie {
     pub(super) const SOURCE_IPV4_ADDRESS: u16 = 8;
     pub(super) const DESTINATION_TRANSPORT_PORT: u16 = 11;
     pub(super) const DESTINATION_IPV4_ADDRESS: u16 = 12;
+    pub(super) const POST_OCTET_DELTA_COUNT: u16 = 23;
+    pub(super) const POST_PACKET_DELTA_COUNT: u16 = 24;
     pub(super) const SOURCE_IPV6_ADDRESS: u16 = 27;
     pub(super) const DESTINATION_IPV6_ADDRESS: u16 = 28;
     pub(super) const SOURCE_MAC_ADDRESS: u16 = 56;
@@ -62,8 +52,12 @@ mod ie {
     pub(super) const FLOW_END_MICROSECONDS: u16 = 155;
     pub(super) const FLOW_START_NANOSECONDS: u16 = 156;
     pub(super) const FLOW_END_NANOSECONDS: u16 = 157;
+    pub(super) const POST_OCTET_TOTAL_COUNT: u16 = 171;
+    pub(super) const POST_PACKET_TOTAL_COUNT: u16 = 172;
     pub(super) const LAYER2_OCTET_DELTA_COUNT: u16 = 352;
     pub(super) const LAYER2_OCTET_TOTAL_COUNT: u16 = 353;
+    pub(super) const POST_LAYER2_OCTET_DELTA_COUNT: u16 = 417;
+    pub(super) const POST_LAYER2_OCTET_TOTAL_COUNT: u16 = 420;
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -309,34 +303,44 @@ struct FieldPriority {
 }
 
 /// Higher wins. Layer-2 deltas match what the pcap pipeline counts — frame
-/// bytes including the link header — so they outrank IP-layer deltas.
+/// bytes including the link header — so they outrank IP-layer deltas. Within
+/// each of those, the `post` counter — measured after a middlebox has had its
+/// way with the flow — gives way to its plain counterpart. Layer-2-ness is the
+/// stronger preference of the two: a post-middlebox frame count still counts
+/// the link header, whereas an IP-layer count omits it on every packet.
 fn octet_rank(ie_id: u16) -> u8 {
     match ie_id {
-        ie::LAYER2_OCTET_DELTA_COUNT => 2,
-        ie::OCTET_DELTA_COUNT => 1,
+        ie::LAYER2_OCTET_DELTA_COUNT => 4,
+        ie::POST_LAYER2_OCTET_DELTA_COUNT => 3,
+        ie::OCTET_DELTA_COUNT => 2,
+        ie::POST_OCTET_DELTA_COUNT => 1,
         _ => 0,
     }
 }
 
 fn packet_rank(ie_id: u16) -> u8 {
     match ie_id {
-        ie::PACKET_DELTA_COUNT => 1,
+        ie::PACKET_DELTA_COUNT => 2,
+        ie::POST_PACKET_DELTA_COUNT => 1,
         _ => 0,
     }
 }
 
-/// Same layer-2-over-IP preference as `octet_rank`, for the cumulative counters.
+/// Same preference order as `octet_rank`, for the cumulative counters.
 fn octet_total_rank(ie_id: u16) -> u8 {
     match ie_id {
-        ie::LAYER2_OCTET_TOTAL_COUNT => 2,
-        ie::OCTET_TOTAL_COUNT => 1,
+        ie::LAYER2_OCTET_TOTAL_COUNT => 4,
+        ie::POST_LAYER2_OCTET_TOTAL_COUNT => 3,
+        ie::OCTET_TOTAL_COUNT => 2,
+        ie::POST_OCTET_TOTAL_COUNT => 1,
         _ => 0,
     }
 }
 
 fn packet_total_rank(ie_id: u16) -> u8 {
     match ie_id {
-        ie::PACKET_TOTAL_COUNT => 1,
+        ie::PACKET_TOTAL_COUNT => 2,
+        ie::POST_PACKET_TOTAL_COUNT => 1,
         _ => 0,
     }
 }
@@ -443,10 +447,13 @@ fn apply_delta_counter_ie(
     priority: &mut FieldPriority,
 ) -> bool {
     let (rank, slot, slot_priority): (u8, &mut u128, &mut u8) = match ie_id {
-        ie::OCTET_DELTA_COUNT | ie::LAYER2_OCTET_DELTA_COUNT => {
+        ie::OCTET_DELTA_COUNT
+        | ie::LAYER2_OCTET_DELTA_COUNT
+        | ie::POST_OCTET_DELTA_COUNT
+        | ie::POST_LAYER2_OCTET_DELTA_COUNT => {
             (octet_rank(ie_id), &mut record.bytes, &mut priority.bytes)
         }
-        ie::PACKET_DELTA_COUNT => (
+        ie::PACKET_DELTA_COUNT | ie::POST_PACKET_DELTA_COUNT => (
             packet_rank(ie_id),
             &mut record.packets,
             &mut priority.packets,
@@ -474,12 +481,15 @@ fn apply_total_counter_ie(
     priority: &mut FieldPriority,
 ) -> bool {
     let (rank, slot, slot_priority): (u8, &mut Option<u128>, &mut u8) = match ie_id {
-        ie::OCTET_TOTAL_COUNT | ie::LAYER2_OCTET_TOTAL_COUNT => (
+        ie::OCTET_TOTAL_COUNT
+        | ie::LAYER2_OCTET_TOTAL_COUNT
+        | ie::POST_OCTET_TOTAL_COUNT
+        | ie::POST_LAYER2_OCTET_TOTAL_COUNT => (
             octet_total_rank(ie_id),
             &mut record.bytes_total,
             &mut priority.bytes_total,
         ),
-        ie::PACKET_TOTAL_COUNT => (
+        ie::PACKET_TOTAL_COUNT | ie::POST_PACKET_TOTAL_COUNT => (
             packet_total_rank(ie_id),
             &mut record.packets_total,
             &mut priority.packets_total,
@@ -686,7 +696,7 @@ mod tests {
         bytes.extend_from_slice(&[0x00, 1, 0x00, 8]); // IE 1 (octetDelta), len 8
         bytes.extend_from_slice(&[0x00, 2, 0x00, 8]); // IE 2 (packetDelta), len 8
         let tset_len = (bytes.len() - tset_len_off + 2) as u16; // includes the 4-byte set header
-        let tset_len_bytes = (tset_len).to_be_bytes();
+        let tset_len_bytes = tset_len.to_be_bytes();
         bytes[tset_len_off] = tset_len_bytes[0];
         bytes[tset_len_off + 1] = tset_len_bytes[1];
 
@@ -935,6 +945,165 @@ mod tests {
                 &ip_first,
             )
             .bytes_total,
+            Some(1500),
+        );
+    }
+
+    #[test]
+    fn post_counters_are_used_when_no_others_are_exported() {
+        // An exporter observing the flow after a middlebox may carry only the
+        // post counters; without them the record would decode to zero bytes and
+        // the collector would drop it outright.
+        let payload = [0, 0, 0, 0, 0, 0, 0x05, 0xDC, 0, 0, 0, 0, 0, 0, 0, 10];
+        let record = decode(
+            &[
+                (ie::POST_OCTET_DELTA_COUNT, 8),
+                (ie::POST_PACKET_DELTA_COUNT, 8),
+            ],
+            &payload,
+        );
+        assert_eq!(record.bytes, 1500);
+        assert_eq!(record.packets, 10);
+
+        let record = decode(
+            &[
+                (ie::POST_OCTET_TOTAL_COUNT, 8),
+                (ie::POST_PACKET_TOTAL_COUNT, 8),
+            ],
+            &payload,
+        );
+        assert_eq!(record.bytes_total, Some(1500));
+        assert_eq!(record.packets_total, Some(10));
+    }
+
+    #[test]
+    fn layer2_post_octets_win_over_ip_octets_in_either_order() {
+        // The layer-2 preference outranks the pre/post one: a post-middlebox
+        // frame count still includes the link header, an IP-layer count never
+        // does.
+        let l2_post = [0, 0, 0, 0, 0, 0, 0x05, 0xDC]; // 1500
+        let ip = [0, 0, 0, 0, 0, 0, 0x03, 0xE8]; // 1000
+
+        let mut l2_first = Vec::new();
+        l2_first.extend_from_slice(&l2_post);
+        l2_first.extend_from_slice(&ip);
+        assert_eq!(
+            decode(
+                &[
+                    (ie::POST_LAYER2_OCTET_DELTA_COUNT, 8),
+                    (ie::OCTET_DELTA_COUNT, 8)
+                ],
+                &l2_first,
+            )
+            .bytes,
+            1500,
+        );
+
+        let mut ip_first = Vec::new();
+        ip_first.extend_from_slice(&ip);
+        ip_first.extend_from_slice(&l2_post);
+        assert_eq!(
+            decode(
+                &[
+                    (ie::OCTET_TOTAL_COUNT, 8),
+                    (ie::POST_LAYER2_OCTET_TOTAL_COUNT, 8)
+                ],
+                &ip_first,
+            )
+            .bytes_total,
+            Some(1500),
+        );
+    }
+
+    #[test]
+    fn plain_layer2_octets_win_over_their_post_counterparts() {
+        let plain = [0, 0, 0, 0, 0, 0, 0x05, 0xDC]; // 1500
+        let post = [0, 0, 0, 0, 0, 0, 0x03, 0xE8]; // 1000
+
+        let mut payload = Vec::new();
+        payload.extend_from_slice(&post);
+        payload.extend_from_slice(&plain);
+        let record = decode(
+            &[
+                (ie::POST_LAYER2_OCTET_DELTA_COUNT, 8),
+                (ie::LAYER2_OCTET_DELTA_COUNT, 8),
+            ],
+            &payload,
+        );
+        assert_eq!(record.bytes, 1500);
+
+        let record = decode(
+            &[
+                (ie::POST_LAYER2_OCTET_TOTAL_COUNT, 8),
+                (ie::LAYER2_OCTET_TOTAL_COUNT, 8),
+            ],
+            &payload,
+        );
+        assert_eq!(record.bytes_total, Some(1500));
+    }
+
+    #[test]
+    fn plain_deltas_win_over_post_deltas_in_either_order() {
+        let plain = [0, 0, 0, 0, 0, 0, 0x05, 0xDC]; // 1500
+        let post = [0, 0, 0, 0, 0, 0, 0x03, 0xE8]; // 1000
+
+        let mut plain_first = Vec::new();
+        plain_first.extend_from_slice(&plain);
+        plain_first.extend_from_slice(&post);
+        assert_eq!(
+            decode(
+                &[(ie::OCTET_DELTA_COUNT, 8), (ie::POST_OCTET_DELTA_COUNT, 8)],
+                &plain_first,
+            )
+            .bytes,
+            1500,
+        );
+
+        let mut post_first = Vec::new();
+        post_first.extend_from_slice(&post);
+        post_first.extend_from_slice(&plain);
+        assert_eq!(
+            decode(
+                &[(ie::POST_OCTET_DELTA_COUNT, 8), (ie::OCTET_DELTA_COUNT, 8)],
+                &post_first,
+            )
+            .bytes,
+            1500,
+        );
+    }
+
+    #[test]
+    fn plain_totals_win_over_post_totals_in_either_order() {
+        let plain = [0, 0, 0, 0, 0, 0, 0x05, 0xDC]; // 1500
+        let post = [0, 0, 0, 0, 0, 0, 0x03, 0xE8]; // 1000
+
+        let mut plain_first = Vec::new();
+        plain_first.extend_from_slice(&plain);
+        plain_first.extend_from_slice(&post);
+        assert_eq!(
+            decode(
+                &[
+                    (ie::PACKET_TOTAL_COUNT, 8),
+                    (ie::POST_PACKET_TOTAL_COUNT, 8)
+                ],
+                &plain_first,
+            )
+            .packets_total,
+            Some(1500),
+        );
+
+        let mut post_first = Vec::new();
+        post_first.extend_from_slice(&post);
+        post_first.extend_from_slice(&plain);
+        assert_eq!(
+            decode(
+                &[
+                    (ie::POST_PACKET_TOTAL_COUNT, 8),
+                    (ie::PACKET_TOTAL_COUNT, 8)
+                ],
+                &post_first,
+            )
+            .packets_total,
             Some(1500),
         );
     }
