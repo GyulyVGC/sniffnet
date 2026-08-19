@@ -1,5 +1,11 @@
 //! RFC 7011 IPFIX wire format decoding.
 
+use crate::networking::ipfix::field_priority::{
+    FieldPriority, bytes_delta_rank, bytes_total_rank, mac_rank, packets_delta_rank,
+    packets_total_rank, timestamp_rank,
+};
+use crate::networking::types::traffic_direction::TrafficDirection;
+use crate::utils::types::timestamp::Timestamp;
 use nom::IResult;
 use nom::Parser;
 use nom::bytes::complete::take;
@@ -7,9 +13,6 @@ use nom::combinator::verify;
 use nom::multi::many0;
 use nom::number::complete::{be_u8, be_u16, be_u32};
 use std::net::{IpAddr, Ipv4Addr, Ipv6Addr};
-
-use crate::networking::types::traffic_direction::TrafficDirection;
-use crate::utils::types::timestamp::Timestamp;
 
 /// IPFIX version number (10)
 pub(super) const IPFIX_VERSION: u16 = 0x000A;
@@ -19,45 +22,43 @@ pub(super) const SET_ID_TEMPLATE: u16 = 2;
 pub(super) const VARIABLE_LENGTH: u16 = 0xFFFF;
 /// Direction flag to export reverse-direction counterparts of standard IEs
 pub(super) const REVERSE_PEN: u32 = 29305;
-/// The set id for an options template set (skipped by Sniffnet)
-const SET_ID_OPTIONS_TEMPLATE: u16 = 3;
 /// The minimum set id for a data set
 const MIN_DATA_SET_ID: u16 = 256;
 
 /// IANA-assigned IPFIX Information Element identifiers used by Sniffnet
-mod ie {
-    pub(super) const OCTET_DELTA_COUNT: u16 = 1;
-    pub(super) const PACKET_DELTA_COUNT: u16 = 2;
-    pub(super) const PROTOCOL_IDENTIFIER: u16 = 4;
-    pub(super) const SOURCE_TRANSPORT_PORT: u16 = 7;
-    pub(super) const SOURCE_IPV4_ADDRESS: u16 = 8;
-    pub(super) const DESTINATION_TRANSPORT_PORT: u16 = 11;
-    pub(super) const DESTINATION_IPV4_ADDRESS: u16 = 12;
-    pub(super) const POST_OCTET_DELTA_COUNT: u16 = 23;
-    pub(super) const POST_PACKET_DELTA_COUNT: u16 = 24;
-    pub(super) const SOURCE_IPV6_ADDRESS: u16 = 27;
-    pub(super) const DESTINATION_IPV6_ADDRESS: u16 = 28;
-    pub(super) const SOURCE_MAC_ADDRESS: u16 = 56;
-    pub(super) const POST_DESTINATION_MAC_ADDRESS: u16 = 57;
-    pub(super) const FLOW_DIRECTION: u16 = 61;
-    pub(super) const DESTINATION_MAC_ADDRESS: u16 = 80;
-    pub(super) const POST_SOURCE_MAC_ADDRESS: u16 = 81;
-    pub(super) const OCTET_TOTAL_COUNT: u16 = 85;
-    pub(super) const PACKET_TOTAL_COUNT: u16 = 86;
-    pub(super) const FLOW_START_SECONDS: u16 = 150;
-    pub(super) const FLOW_END_SECONDS: u16 = 151;
-    pub(super) const FLOW_START_MILLISECONDS: u16 = 152;
-    pub(super) const FLOW_END_MILLISECONDS: u16 = 153;
-    pub(super) const FLOW_START_MICROSECONDS: u16 = 154;
-    pub(super) const FLOW_END_MICROSECONDS: u16 = 155;
-    pub(super) const FLOW_START_NANOSECONDS: u16 = 156;
-    pub(super) const FLOW_END_NANOSECONDS: u16 = 157;
-    pub(super) const POST_OCTET_TOTAL_COUNT: u16 = 171;
-    pub(super) const POST_PACKET_TOTAL_COUNT: u16 = 172;
-    pub(super) const LAYER2_OCTET_DELTA_COUNT: u16 = 352;
-    pub(super) const LAYER2_OCTET_TOTAL_COUNT: u16 = 353;
-    pub(super) const POST_LAYER2_OCTET_DELTA_COUNT: u16 = 417;
-    pub(super) const POST_LAYER2_OCTET_TOTAL_COUNT: u16 = 420;
+pub(super) mod ie {
+    pub(in crate::networking::ipfix) const OCTET_DELTA_COUNT: u16 = 1;
+    pub(in crate::networking::ipfix) const PACKET_DELTA_COUNT: u16 = 2;
+    pub(in crate::networking::ipfix) const PROTOCOL_IDENTIFIER: u16 = 4;
+    pub(in crate::networking::ipfix) const SOURCE_TRANSPORT_PORT: u16 = 7;
+    pub(in crate::networking::ipfix) const SOURCE_IPV4_ADDRESS: u16 = 8;
+    pub(in crate::networking::ipfix) const DESTINATION_TRANSPORT_PORT: u16 = 11;
+    pub(in crate::networking::ipfix) const DESTINATION_IPV4_ADDRESS: u16 = 12;
+    pub(in crate::networking::ipfix) const POST_OCTET_DELTA_COUNT: u16 = 23;
+    pub(in crate::networking::ipfix) const POST_PACKET_DELTA_COUNT: u16 = 24;
+    pub(in crate::networking::ipfix) const SOURCE_IPV6_ADDRESS: u16 = 27;
+    pub(in crate::networking::ipfix) const DESTINATION_IPV6_ADDRESS: u16 = 28;
+    pub(in crate::networking::ipfix) const SOURCE_MAC_ADDRESS: u16 = 56;
+    pub(in crate::networking::ipfix) const POST_DESTINATION_MAC_ADDRESS: u16 = 57;
+    pub(in crate::networking::ipfix) const FLOW_DIRECTION: u16 = 61;
+    pub(in crate::networking::ipfix) const DESTINATION_MAC_ADDRESS: u16 = 80;
+    pub(in crate::networking::ipfix) const POST_SOURCE_MAC_ADDRESS: u16 = 81;
+    pub(in crate::networking::ipfix) const OCTET_TOTAL_COUNT: u16 = 85;
+    pub(in crate::networking::ipfix) const PACKET_TOTAL_COUNT: u16 = 86;
+    pub(in crate::networking::ipfix) const FLOW_START_SECONDS: u16 = 150;
+    pub(in crate::networking::ipfix) const FLOW_END_SECONDS: u16 = 151;
+    pub(in crate::networking::ipfix) const FLOW_START_MILLISECONDS: u16 = 152;
+    pub(in crate::networking::ipfix) const FLOW_END_MILLISECONDS: u16 = 153;
+    pub(in crate::networking::ipfix) const FLOW_START_MICROSECONDS: u16 = 154;
+    pub(in crate::networking::ipfix) const FLOW_END_MICROSECONDS: u16 = 155;
+    pub(in crate::networking::ipfix) const FLOW_START_NANOSECONDS: u16 = 156;
+    pub(in crate::networking::ipfix) const FLOW_END_NANOSECONDS: u16 = 157;
+    pub(in crate::networking::ipfix) const POST_OCTET_TOTAL_COUNT: u16 = 171;
+    pub(in crate::networking::ipfix) const POST_PACKET_TOTAL_COUNT: u16 = 172;
+    pub(in crate::networking::ipfix) const LAYER2_OCTET_DELTA_COUNT: u16 = 352;
+    pub(in crate::networking::ipfix) const LAYER2_OCTET_TOTAL_COUNT: u16 = 353;
+    pub(in crate::networking::ipfix) const POST_LAYER2_OCTET_DELTA_COUNT: u16 = 417;
+    pub(in crate::networking::ipfix) const POST_LAYER2_OCTET_TOTAL_COUNT: u16 = 420;
 }
 
 /// IPFIX complete message
@@ -77,12 +78,11 @@ pub(super) struct MessageHeader {
     pub(super) observation_domain_id: u32,
 }
 
-/// IPFIX set: either a template set, an options template set, or a data set
+/// IPFIX set: either a template set or a data set
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub(super) enum Set<'a> {
     Template(Vec<TemplateRecord>),
     Data { template_id: u16, payload: &'a [u8] },
-    OptionsTemplate,
     Ignored,
 }
 
@@ -131,21 +131,18 @@ pub(super) struct ReverseCounters {
     pub(super) packets_total: Option<u128>,
 }
 
-/// Parse a complete IPFIX message (header + sets). Fails on anything that
-/// isn't IPFIX, a `NetFlow` v9 datagram included.
+/// Parse a complete IPFIX message (header + sets)
 pub(super) fn parse_message(input: &[u8]) -> IResult<&[u8], IpfixMessage<'_>> {
     let (input, header) = parse_message_header(input)?;
-    // header.length is the total message length including the 16-byte header
-    let payload_len = (header.length as usize).saturating_sub(16);
+    // header.length includes the 16-byte header already parsed
+    let payload_len = header.length.saturating_sub(16);
     let (rest, payload) = take(payload_len)(input)?;
     let (_, sets) = many0(parse_set).parse(payload)?;
     Ok((rest, IpfixMessage { header, sets }))
 }
 
+/// Parse an IPFIX message header (16 bytes)
 fn parse_message_header(input: &[u8]) -> IResult<&[u8], MessageHeader> {
-    // The version is what the parse hinges on: nothing further down would
-    // reject a NetFlow v9 datagram, whose header is a different shape entirely,
-    // so it would otherwise be read as IPFIX and decode into garbage.
     let (input, version) = verify(be_u16, |v: &u16| *v == IPFIX_VERSION).parse(input)?;
     let (input, length) = be_u16(input)?;
     let (input, export_time) = be_u32(input)?;
@@ -163,11 +160,12 @@ fn parse_message_header(input: &[u8]) -> IResult<&[u8], MessageHeader> {
     ))
 }
 
+/// Parse a single IPFIX set
 fn parse_set(input: &[u8]) -> IResult<&[u8], Set<'_>> {
     let (input, set_id) = be_u16(input)?;
     let (input, set_length) = be_u16(input)?;
-    // set_length includes the 4-byte set header
-    let body_len = (set_length as usize).saturating_sub(4);
+    // set_length includes the 4-byte set header already parsed
+    let body_len = set_length.saturating_sub(4);
     let (rest, body) = take(body_len)(input)?;
 
     let set = match set_id {
@@ -175,17 +173,17 @@ fn parse_set(input: &[u8]) -> IResult<&[u8], Set<'_>> {
             let (_, templates) = many0(parse_template_record).parse(body)?;
             Set::Template(templates)
         }
-        SET_ID_OPTIONS_TEMPLATE => Set::OptionsTemplate,
         id if id >= MIN_DATA_SET_ID => Set::Data {
             template_id: id,
             payload: body,
         },
-        // reserved set ids 0, 1, and 4..=255 — skip silently
         _ => Set::Ignored,
     };
+
     Ok((rest, set))
 }
 
+/// Parse a single template record from a template set
 fn parse_template_record(input: &[u8]) -> IResult<&[u8], TemplateRecord> {
     let (input, template_id) = be_u16(input)?;
     let (input, field_count) = be_u16(input)?;
@@ -205,6 +203,7 @@ fn parse_template_record(input: &[u8]) -> IResult<&[u8], TemplateRecord> {
     ))
 }
 
+/// Parse a single field specification from a template record
 fn parse_field_spec(input: &[u8]) -> IResult<&[u8], FieldSpec> {
     let (input, raw_ie) = be_u16(input)?;
     let (input, length) = be_u16(input)?;
@@ -232,27 +231,23 @@ fn parse_field_spec(input: &[u8]) -> IResult<&[u8], FieldSpec> {
     }
 }
 
-/// Decode a single data record against its template. Returns the consumed
-/// number of bytes alongside the parsed `FlowRecord`.
+/// Decode a single data record against its template
 pub(super) fn decode_data_record<'a>(
     template: &[FieldSpec],
     input: &'a [u8],
 ) -> IResult<&'a [u8], FlowRecord> {
     let mut record = FlowRecord::default();
     let mut priority = FieldPriority::default();
-    // Reverse IEs are the same IEs, so they decode through the same code into a
-    // scratch record; only its counters are kept.
     let mut reverse = FlowRecord::default();
     let mut reverse_priority = FieldPriority::default();
     let mut saw_reverse = false;
+
     let mut remaining = input;
 
     for spec in template {
         let (after, raw) = read_field_bytes(remaining, spec.length)?;
         remaining = after;
 
-        // Unknown IEs are skipped, as are vendor-private ones; either way the
-        // bytes were already consumed above by `read_field_bytes`.
         match spec.enterprise {
             None => apply_ie(spec.ie_id, raw, &mut record, &mut priority),
             Some(REVERSE_PEN) => {
@@ -273,95 +268,26 @@ pub(super) fn decode_data_record<'a>(
     Ok((remaining, record))
 }
 
-/// Rank of the IE that supplied the value currently held in each record slot.
-///
-/// A template may legitimately carry several IEs that fill the same slot (e.g.
-/// `octetDeltaCount` alongside `layer2OctetDeltaCount`, or both a second- and a
-/// millisecond-granularity flow start). Ranking them means the outcome no
-/// longer depends on which one happens to appear last in the template.
-#[derive(Default)]
-struct FieldPriority {
-    bytes_delta: u8,
-    packets_delta: u8,
-    bytes_total: u8,
-    packets_total: u8,
-    flow_start: u8,
-    flow_end: u8,
-}
-
-/// Higher wins. Layer-2 deltas match what the pcap pipeline counts — frame
-/// bytes including the link header — so they outrank IP-layer deltas. Within
-/// each of those, the `post` counter — measured after a middlebox has had its
-/// way with the flow — gives way to its plain counterpart. Layer-2-ness is the
-/// stronger preference of the two: a post-middlebox frame count still counts
-/// the link header, whereas an IP-layer count omits it on every packet.
-fn octet_delta_rank(ie_id: u16) -> u8 {
-    match ie_id {
-        ie::LAYER2_OCTET_DELTA_COUNT => 4,
-        ie::POST_LAYER2_OCTET_DELTA_COUNT => 3,
-        ie::OCTET_DELTA_COUNT => 2,
-        ie::POST_OCTET_DELTA_COUNT => 1,
-        _ => 0,
-    }
-}
-
-fn packet_delta_rank(ie_id: u16) -> u8 {
-    match ie_id {
-        ie::PACKET_DELTA_COUNT => 2,
-        ie::POST_PACKET_DELTA_COUNT => 1,
-        _ => 0,
-    }
-}
-
-/// Same preference order as `octet_rank`, for the cumulative counters.
-fn octet_total_rank(ie_id: u16) -> u8 {
-    match ie_id {
-        ie::LAYER2_OCTET_TOTAL_COUNT => 4,
-        ie::POST_LAYER2_OCTET_TOTAL_COUNT => 3,
-        ie::OCTET_TOTAL_COUNT => 2,
-        ie::POST_OCTET_TOTAL_COUNT => 1,
-        _ => 0,
-    }
-}
-
-fn packet_total_rank(ie_id: u16) -> u8 {
-    match ie_id {
-        ie::PACKET_TOTAL_COUNT => 2,
-        ie::POST_PACKET_TOTAL_COUNT => 1,
-        _ => 0,
-    }
-}
-
-/// Higher wins, so the finest granularity the exporter offers is the one kept.
-fn timestamp_rank(ie_id: u16) -> u8 {
-    match ie_id {
-        ie::FLOW_START_NANOSECONDS | ie::FLOW_END_NANOSECONDS => 4,
-        ie::FLOW_START_MICROSECONDS | ie::FLOW_END_MICROSECONDS => 3,
-        ie::FLOW_START_MILLISECONDS | ie::FLOW_END_MILLISECONDS => 2,
-        ie::FLOW_START_SECONDS | ie::FLOW_END_SECONDS => 1,
-        _ => 0,
-    }
-}
-
-/// Read the bytes belonging to a single field, accounting for the
-/// variable-length encoding (RFC 7011 §7).
+/// Read a field's bytes, handling the variable-length encoding if necessary
 fn read_field_bytes(input: &[u8], declared_length: u16) -> IResult<&[u8], &[u8]> {
     if declared_length != VARIABLE_LENGTH {
-        return take(declared_length as usize)(input);
+        return take(declared_length)(input);
     }
-    // Variable length: 1-byte length, with 0xFF sentinel switching to 2-byte length
+    // variable length: 1-byte length, with 0xFF sentinel switching to 2-byte length
     let (input, first) = be_u8(input)?;
     if first == 0xFF {
         let (input, actual_len) = be_u16(input)?;
-        return take(actual_len as usize)(input);
+        return take(actual_len)(input);
     }
-    take(first as usize)(input)
+    take(first)(input)
 }
 
+/// Apply a single IE to the flow record, using the field priority to resolve conflicts
 fn apply_ie(ie_id: u16, raw: &[u8], record: &mut FlowRecord, priority: &mut FieldPriority) {
     if apply_delta_counter_ie(ie_id, raw, record, priority)
         || apply_total_counter_ie(ie_id, raw, record, priority)
         || apply_timestamp_ie(ie_id, raw, record, priority)
+        || apply_mac_ie(ie_id, raw, record, priority)
     {
         return;
     }
@@ -402,48 +328,38 @@ fn apply_ie(ie_id: u16, raw: &[u8], record: &mut FlowRecord, priority: &mut Fiel
                 record.dst_ip = Some(v);
             }
         }
-        ie::SOURCE_MAC_ADDRESS | ie::POST_SOURCE_MAC_ADDRESS => {
-            if let Some(v) = read_mac(raw) {
-                record.src_mac = Some(v);
-            }
-        }
-        ie::DESTINATION_MAC_ADDRESS | ie::POST_DESTINATION_MAC_ADDRESS => {
-            if let Some(v) = read_mac(raw) {
-                record.dst_mac = Some(v);
-            }
-        }
         ie::FLOW_DIRECTION => {
-            // IANA: 0x00 = ingress, 0x01 = egress, 0xFF = undefined.
-            // Unknown values are treated as undefined.
-            record.direction = match raw.first() {
+            // 0x00 is ingress, 0x01 is egress
+            if let Some(dir) = match raw.first() {
                 Some(0x00) => Some(TrafficDirection::Incoming),
                 Some(0x01) => Some(TrafficDirection::Outgoing),
                 _ => None,
-            };
+            } {
+                record.direction = Some(dir);
+            }
         }
         _ => {}
     }
 }
 
-/// Apply a delta counter IE, which is already an increment over the exporter's
-/// previous report. Returns whether `ie_id` was one.
+/// Apply a delta counter IE, returning whether `ie_id` was one
 fn apply_delta_counter_ie(
     ie_id: u16,
     raw: &[u8],
     record: &mut FlowRecord,
     priority: &mut FieldPriority,
 ) -> bool {
-    let (rank, slot, slot_priority): (u8, &mut Option<u128>, &mut u8) = match ie_id {
+    let (rank, slot, slot_priority) = match ie_id {
         ie::OCTET_DELTA_COUNT
         | ie::LAYER2_OCTET_DELTA_COUNT
         | ie::POST_OCTET_DELTA_COUNT
         | ie::POST_LAYER2_OCTET_DELTA_COUNT => (
-            octet_delta_rank(ie_id),
+            bytes_delta_rank(ie_id),
             &mut record.bytes_delta,
             &mut priority.bytes_delta,
         ),
         ie::PACKET_DELTA_COUNT | ie::POST_PACKET_DELTA_COUNT => (
-            packet_delta_rank(ie_id),
+            packets_delta_rank(ie_id),
             &mut record.packets_delta,
             &mut priority.packets_delta,
         ),
@@ -459,27 +375,24 @@ fn apply_delta_counter_ie(
     true
 }
 
-/// Apply a cumulative counter IE. These are counted for the lifetime of the
-/// flow, so they are kept apart from the deltas: the collector turns them into
-/// an increment by differencing against the flow's previous report. Returns
-/// whether `ie_id` was one.
+/// Apply a cumulative counter IE, returning whether `ie_id` was one
 fn apply_total_counter_ie(
     ie_id: u16,
     raw: &[u8],
     record: &mut FlowRecord,
     priority: &mut FieldPriority,
 ) -> bool {
-    let (rank, slot, slot_priority): (u8, &mut Option<u128>, &mut u8) = match ie_id {
+    let (rank, slot, slot_priority) = match ie_id {
         ie::OCTET_TOTAL_COUNT
         | ie::LAYER2_OCTET_TOTAL_COUNT
         | ie::POST_OCTET_TOTAL_COUNT
         | ie::POST_LAYER2_OCTET_TOTAL_COUNT => (
-            octet_total_rank(ie_id),
+            bytes_total_rank(ie_id),
             &mut record.bytes_total,
             &mut priority.bytes_total,
         ),
         ie::PACKET_TOTAL_COUNT | ie::POST_PACKET_TOTAL_COUNT => (
-            packet_total_rank(ie_id),
+            packets_total_rank(ie_id),
             &mut record.packets_total,
             &mut priority.packets_total,
         ),
@@ -495,7 +408,7 @@ fn apply_total_counter_ie(
     true
 }
 
-/// Apply a flow start or end timestamp IE. Returns whether `ie_id` was one.
+/// Apply a flow start timestamp or flow end timestamp IE, returning whether `ie_id` was one
 fn apply_timestamp_ie(
     ie_id: u16,
     raw: &[u8],
@@ -524,16 +437,38 @@ fn apply_timestamp_ie(
     true
 }
 
-/// Read a timestamp field using the encoding its IE prescribes. The four
-/// granularities use three different wire formats (RFC 7011 §6.1.7-6.1.10),
-/// so the IE id has to pick the reader.
+/// Apply a MAC address IE, returning whether `ie_id` was one
+fn apply_mac_ie(
+    ie_id: u16,
+    raw: &[u8],
+    record: &mut FlowRecord,
+    priority: &mut FieldPriority,
+) -> bool {
+    let (slot, slot_priority) = match ie_id {
+        ie::SOURCE_MAC_ADDRESS | ie::POST_SOURCE_MAC_ADDRESS => {
+            (&mut record.src_mac, &mut priority.src_mac)
+        }
+        ie::DESTINATION_MAC_ADDRESS | ie::POST_DESTINATION_MAC_ADDRESS => {
+            (&mut record.dst_mac, &mut priority.dst_mac)
+        }
+        _ => return false,
+    };
+
+    let rank = mac_rank(ie_id);
+    if rank >= *slot_priority
+        && let Some(v) = read_mac(raw)
+    {
+        *slot = Some(v);
+        *slot_priority = rank;
+    }
+    true
+}
+
+/// Read a timestamp field using the encoding its IE prescribes
 fn read_timestamp(ie_id: u16, raw: &[u8]) -> Option<Timestamp> {
     match ie_id {
         ie::FLOW_START_SECONDS | ie::FLOW_END_SECONDS => read_timestamp_secs(raw),
         ie::FLOW_START_MILLISECONDS | ie::FLOW_END_MILLISECONDS => read_timestamp_ms(raw),
-        // Both the microsecond and the nanosecond IEs carry an NTP timestamp;
-        // they differ only in how many of the fraction bits the exporter is
-        // allowed to set, which doesn't change how we read them.
         ie::FLOW_START_MICROSECONDS
         | ie::FLOW_END_MICROSECONDS
         | ie::FLOW_START_NANOSECONDS
@@ -542,7 +477,7 @@ fn read_timestamp(ie_id: u16, raw: &[u8]) -> Option<Timestamp> {
     }
 }
 
-/// IPFIX `dateTimeSeconds` is 4 bytes big-endian, seconds since UNIX epoch.
+/// IPFIX `dateTimeSeconds` is 4 bytes big-endian, seconds since UNIX epoch
 fn read_timestamp_secs(raw: &[u8]) -> Option<Timestamp> {
     if raw.len() != 4 {
         return None;
@@ -551,8 +486,7 @@ fn read_timestamp_secs(raw: &[u8]) -> Option<Timestamp> {
     Some(Timestamp::new(i64::from(secs), 0))
 }
 
-/// IPFIX `dateTimeMilliseconds` is 8 bytes big-endian, ms since UNIX epoch.
-/// Converted to Sniffnet's `Timestamp(secs, usecs)` representation.
+/// IPFIX `dateTimeMilliseconds` is 8 bytes big-endian, ms since UNIX epoch
 fn read_timestamp_ms(raw: &[u8]) -> Option<Timestamp> {
     if raw.len() != 8 {
         return None;
@@ -563,15 +497,11 @@ fn read_timestamp_ms(raw: &[u8]) -> Option<Timestamp> {
     Some(Timestamp::new(secs, usecs))
 }
 
-/// Seconds between the NTP epoch (1900-01-01) and the UNIX epoch (1970-01-01).
+/// Seconds between the NTP epoch (1900-01-01) and the UNIX epoch (1970-01-01)
 const NTP_UNIX_OFFSET: u64 = 2_208_988_800;
 
-/// IPFIX `dateTimeMicroseconds` and `dateTimeNanoseconds` are 8-byte NTP
-/// timestamps (RFC 5905): 32 bits of seconds since 1900 followed by a 32-bit
-/// binary fraction of a second.
-///
-/// Only NTP era 0 is decoded, so timestamps beyond 2036-02-07 read as `None`
-/// rather than silently wrapping to 1900.
+/// IPFIX `dateTimeMicroseconds` and `dateTimeNanoseconds` are 8-byte NTP timestamps:
+/// 32 bits of seconds since 1900 followed by a 32-bit binary fraction of a second
 fn read_timestamp_ntp(raw: &[u8]) -> Option<Timestamp> {
     if raw.len() != 8 {
         return None;
@@ -579,14 +509,13 @@ fn read_timestamp_ntp(raw: &[u8]) -> Option<Timestamp> {
     let ntp = u64::from_be_bytes(raw.try_into().ok()?);
     let ntp_secs = ntp >> 32;
     let fraction = ntp & 0xFFFF_FFFF;
-    // Pre-1970 timestamps aren't representable as a UNIX instant here, and in
-    // practice only show up on exporters with a broken clock.
+    // pre-1970 timestamps aren't representable as a UNIX instant
     let secs = i64::try_from(ntp_secs.checked_sub(NTP_UNIX_OFFSET)?).ok()?;
     let usecs = i64::try_from((fraction * 1_000_000) >> 32).ok()?;
     Some(Timestamp::new(secs, usecs))
 }
 
-/// Read a big-endian unsigned integer of 1..=8 bytes into a `u128`.
+/// Read a big-endian unsigned integer of 1 to 8 bytes into a `u128`
 fn read_unsigned(raw: &[u8]) -> Option<u128> {
     if raw.is_empty() || raw.len() > 8 {
         return None;
@@ -596,6 +525,7 @@ fn read_unsigned(raw: &[u8]) -> Option<u128> {
     Some(u128::from(u64::from_be_bytes(buf)))
 }
 
+/// Read a big-endian unsigned integer of 1 or 2 bytes into a `u16`
 fn read_u16(raw: &[u8]) -> Option<u16> {
     match raw.len() {
         1 => Some(u16::from(raw[0])),
@@ -604,6 +534,7 @@ fn read_u16(raw: &[u8]) -> Option<u16> {
     }
 }
 
+/// Read a big-endian IPv4 address from 4 bytes
 fn read_ipv4(raw: &[u8]) -> Option<IpAddr> {
     if raw.len() != 4 {
         return None;
@@ -611,6 +542,7 @@ fn read_ipv4(raw: &[u8]) -> Option<IpAddr> {
     Some(IpAddr::V4(Ipv4Addr::new(raw[0], raw[1], raw[2], raw[3])))
 }
 
+/// Read a big-endian IPv6 address from 16 bytes
 fn read_ipv6(raw: &[u8]) -> Option<IpAddr> {
     if raw.len() != 16 {
         return None;
@@ -620,9 +552,7 @@ fn read_ipv6(raw: &[u8]) -> Option<IpAddr> {
     Some(IpAddr::V6(Ipv6Addr::from(octets)))
 }
 
-/// An all-zero MAC is how exporters spell "not observed" — `sniffnet-agent`
-/// writes it whenever a flow has no link header — so it decodes to `None`
-/// rather than being shown as a genuine `00:00:00:00:00:00` address.
+/// Read a big-endian MAC address from 6 bytes, returning `None` for all-zero addresses
 fn read_mac(raw: &[u8]) -> Option<[u8; 6]> {
     if raw.len() != 6 || raw.iter().all(|b| *b == 0) {
         return None;
@@ -826,15 +756,6 @@ mod tests {
         let bytes: Vec<u8> = vec![0x00, 0x0A, 0x00, 0xC8, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0];
         let result = parse_message(&bytes);
         assert!(result.is_err());
-    }
-
-    #[test]
-    fn options_template_set_is_returned_as_marker() {
-        // Options template set with a 2-byte body — content doesn't matter
-        // for our purposes; we just want it skipped cleanly.
-        let bytes: Vec<u8> = vec![0x00, 0x03, 0x00, 0x06, 0xAA, 0xBB];
-        let (_, set) = parse_set(&bytes).unwrap();
-        assert_eq!(set, Set::OptionsTemplate);
     }
 
     /// Decode `payload` against a template built from `(ie, length)` pairs.
@@ -1059,6 +980,49 @@ mod tests {
             .bytes_delta,
             Some(1500),
         );
+    }
+
+    #[test]
+    fn plain_macs_win_over_post_macs_in_either_order() {
+        let plain = [0xAA, 0xBB, 0xCC, 0xDD, 0xEE, 0xFF];
+        let post = [0x11, 0x22, 0x33, 0x44, 0x55, 0x66];
+
+        let mut plain_first = Vec::new();
+        plain_first.extend_from_slice(&plain);
+        plain_first.extend_from_slice(&post);
+        assert_eq!(
+            decode(
+                &[
+                    (ie::SOURCE_MAC_ADDRESS, 6),
+                    (ie::POST_SOURCE_MAC_ADDRESS, 6)
+                ],
+                &plain_first,
+            )
+            .src_mac,
+            Some(plain),
+        );
+
+        let mut post_first = Vec::new();
+        post_first.extend_from_slice(&post);
+        post_first.extend_from_slice(&plain);
+        assert_eq!(
+            decode(
+                &[
+                    (ie::POST_DESTINATION_MAC_ADDRESS, 6),
+                    (ie::DESTINATION_MAC_ADDRESS, 6),
+                ],
+                &post_first,
+            )
+            .dst_mac,
+            Some(plain),
+        );
+    }
+
+    #[test]
+    fn post_macs_are_used_when_no_others_are_exported() {
+        let post = [0x11, 0x22, 0x33, 0x44, 0x55, 0x66];
+        let record = decode(&[(ie::POST_SOURCE_MAC_ADDRESS, 6)], &post);
+        assert_eq!(record.src_mac, Some(post));
     }
 
     #[test]
