@@ -4,6 +4,7 @@ use crate::networking::ipfix::field_priority::{
     FieldPriority, bytes_delta_rank, bytes_total_rank, mac_rank, packets_delta_rank,
     packets_total_rank, timestamp_rank,
 };
+use crate::networking::types::protocol::Protocol;
 use crate::networking::types::traffic_direction::TrafficDirection;
 use crate::utils::types::timestamp::Timestamp;
 use nom::IResult;
@@ -108,7 +109,7 @@ pub(super) struct FlowRecord {
     pub(super) dst_ip: Option<IpAddr>,
     pub(super) src_port: Option<u16>,
     pub(super) dst_port: Option<u16>,
-    pub(super) protocol: Option<u8>,
+    pub(super) protocol: Option<Protocol>,
     pub(super) bytes_delta: Option<u128>,
     pub(super) packets_delta: Option<u128>,
     pub(super) bytes_total: Option<u128>,
@@ -294,8 +295,13 @@ fn apply_ie(ie_id: u16, raw: &[u8], record: &mut FlowRecord, priority: &mut Fiel
 
     match ie_id {
         ie::PROTOCOL_IDENTIFIER => {
-            if let Some(b) = raw.first() {
-                record.protocol = Some(*b);
+            if let Some(proto) = match raw.first() {
+                Some(6) => Some(Protocol::TCP),
+                Some(17) => Some(Protocol::UDP),
+                Some(1 | 58) => Some(Protocol::ICMP),
+                _ => None,
+            } {
+                record.protocol = Some(proto);
             }
         }
         ie::SOURCE_TRANSPORT_PORT => {

@@ -345,28 +345,23 @@ fn resolve_counters(
 }
 
 fn build_key(record: &FlowRecord) -> Option<AddressPortPair> {
-    let src = record.src_ip?;
-    let dst = record.dst_ip?;
-    let proto = match record.protocol {
-        Some(6) => Protocol::TCP,
-        Some(17) => Protocol::UDP,
-        Some(1 | 58) => Protocol::ICMP, // ICMP / ICMPv6
-        _ => return None,
-    };
-    let sport = match proto {
+    let source = record.src_ip?;
+    let dest = record.dst_ip?;
+    let protocol = record.protocol?;
+    let sport = match protocol {
         Protocol::TCP | Protocol::UDP => record.src_port,
         _ => None,
     };
-    let dport = match proto {
+    let dport = match protocol {
         Protocol::TCP | Protocol::UDP => record.dst_port,
         _ => None,
     };
     Some(AddressPortPair {
-        source: src,
+        source,
         sport,
-        dest: dst,
+        dest,
         dport,
-        protocol: proto,
+        protocol,
     })
 }
 
