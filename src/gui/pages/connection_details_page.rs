@@ -38,7 +38,9 @@ use crate::translations::translations_3::{
 };
 use crate::translations::translations_5::program_translation;
 use crate::translations::translations_6::latency_translation;
-use crate::utils::formatted_strings::{get_formatted_timestamp, get_socket_address};
+use crate::utils::formatted_strings::{
+    get_formatted_timestamp, get_socket_address, mac_from_dec_to_hex,
+};
 use crate::utils::types::icon::Icon;
 use crate::{Language, Protocol, Sniffer, StyleType};
 use iced::alignment::Vertical;
@@ -106,7 +108,7 @@ fn page_content<'a>(sniffer: &Sniffer, key: &AddressPortPair) -> Container<'a, M
         source_caption,
         &key.source,
         key.sport,
-        val.mac_address1.as_ref(),
+        val.mac_address1,
         language,
         &sniffer.timing_events,
     );
@@ -114,7 +116,7 @@ fn page_content<'a>(sniffer: &Sniffer, key: &AddressPortPair) -> Container<'a, M
         dest_caption,
         &key.dest,
         key.dport,
-        val.mac_address2.as_ref(),
+        val.mac_address2,
         language,
         &sniffer.timing_events,
     );
@@ -373,7 +375,7 @@ fn get_src_or_dest_col<'a>(
     caption: Row<'a, Message, StyleType>,
     ip: &IpAddr,
     port: Option<u16>,
-    mac: Option<&String>,
+    mac: Option<[u8; 6]>,
     language: Language,
     timing_events: &TimingEvents,
 ) -> Column<'a, Message, StyleType> {
@@ -383,7 +385,11 @@ fn get_src_or_dest_col<'a>(
         address_translation(language)
     };
 
-    let mac_str = if let Some(val) = mac { val } else { "-" };
+    let mac_str = if let Some(val) = mac {
+        &mac_from_dec_to_hex(val)
+    } else {
+        "-"
+    };
 
     Column::new()
         .spacing(4)

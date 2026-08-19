@@ -22,7 +22,6 @@ use crate::networking::types::service::Service;
 use crate::networking::types::service_query::ServiceQuery;
 use crate::networking::types::traffic_direction::TrafficDirection;
 use crate::networking::types::traffic_type::TrafficType;
-use crate::utils::formatted_strings::mac_from_dec_to_hex;
 use crate::utils::types::timestamp::Timestamp;
 use std::time::Instant;
 
@@ -32,7 +31,7 @@ include!(concat!(env!("OUT_DIR"), "/services.rs"));
 /// Returns the relevant collected information.
 pub fn analyze_headers(
     headers: LaxPacketHeaders,
-    mac_addresses: &mut (Option<String>, Option<String>),
+    mac_addresses: &mut (Option<[u8; 6]>, Option<[u8; 6]>),
     exchanged_bytes: &mut u128,
     icmp_type: &mut IcmpType,
     arp_type: &mut ArpType,
@@ -78,15 +77,15 @@ pub fn analyze_headers(
 /// Returns false if packet has to be skipped.
 fn analyze_link_header(
     link_header: Option<LinkHeader>,
-    mac_address1: &mut Option<String>,
-    mac_address2: &mut Option<String>,
+    mac_address1: &mut Option<[u8; 6]>,
+    mac_address2: &mut Option<[u8; 6]>,
     exchanged_bytes: &mut u128,
 ) {
     match link_header {
         Some(LinkHeader::Ethernet2(header)) => {
             *exchanged_bytes += 14;
-            *mac_address1 = Some(mac_from_dec_to_hex(header.source));
-            *mac_address2 = Some(mac_from_dec_to_hex(header.destination));
+            *mac_address1 = Some(header.source);
+            *mac_address2 = Some(header.destination);
         }
         Some(LinkHeader::LinuxSll(header)) => {
             *exchanged_bytes += 16;
@@ -94,7 +93,7 @@ fn analyze_link_header(
                 && header.arp_hrd_type == ArpHardwareId::ETHERNET
                 && let Ok(sender) = header.sender_address[0..6].try_into()
             {
-                Some(mac_from_dec_to_hex(sender))
+                Some(sender)
             } else {
                 None
             };
@@ -269,7 +268,7 @@ pub fn modify_or_insert_in_map(
     info_traffic_msg: &mut InfoTraffic,
     key: &AddressPortPair,
     my_interface_addresses: &[Address],
-    mac_addresses: (Option<String>, Option<String>),
+    mac_addresses: (Option<[u8; 6]>, Option<[u8; 6]>),
     icmp_type: Option<IcmpType>,
     arp_type: ArpType,
     exchanged_packets: u128,

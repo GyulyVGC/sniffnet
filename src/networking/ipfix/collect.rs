@@ -24,7 +24,6 @@ use crate::networking::types::ip_blacklist::IpBlacklist;
 use crate::networking::types::protocol::Protocol;
 use crate::networking::types::traffic_direction::TrafficDirection;
 use crate::utils::error_logger::{ErrorLogger, Location};
-use crate::utils::formatted_strings::mac_from_dec_to_hex;
 use crate::utils::types::timestamp::Timestamp;
 
 /// Buffer size for a single UDP datagram. RFC 7011 §10.3.1 recommends at least
@@ -279,10 +278,7 @@ fn ingest_flow_record(
         return;
     }
 
-    let mac_addresses = (
-        record.src_mac.map(mac_from_dec_to_hex),
-        record.dst_mac.map(mac_from_dec_to_hex),
-    );
+    let mac_addresses = (record.src_mac, record.dst_mac);
 
     let timestamps_hint = record.flow_start.zip(record.flow_end);
     let (traffic_direction, service) = modify_or_insert_in_map(
@@ -530,7 +526,7 @@ mod tests {
         assert_eq!(entry.transmitted_packets, 10);
         // flowDirection 0x00 is ingress, and it overrides any address guess
         assert_eq!(entry.traffic_direction, TrafficDirection::Incoming);
-        assert_eq!(entry.mac_address1, Some("aa:aa:aa:aa:aa:aa".to_string()));
+        assert_eq!(entry.mac_address1, Some([0xAA; 6]),);
         assert_eq!(entry.mac_address2, None, "all-zero MAC means not observed");
         assert_eq!(entry.initial_timestamp, Timestamp::new(20, 0));
         assert_eq!(entry.final_timestamp, Timestamp::new(25, 0));

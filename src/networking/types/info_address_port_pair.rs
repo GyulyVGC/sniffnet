@@ -20,9 +20,9 @@ use std::time::Instant;
 #[derive(Clone, Debug)]
 pub struct InfoAddressPortPair {
     /// Source MAC address
-    pub mac_address1: Option<String>,
+    pub mac_address1: Option<[u8; 6]>,
     /// Destination MAC address
-    pub mac_address2: Option<String>,
+    pub mac_address2: Option<[u8; 6]>,
     /// Amount of bytes transmitted between the pair.
     pub transmitted_bytes: u128,
     /// Amount of packets transmitted between the pair.
