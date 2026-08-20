@@ -10,6 +10,7 @@ pub mod data_info_host;
 pub mod data_representation;
 pub mod host;
 pub mod icmp_type;
+pub mod igmp_type;
 pub mod info_address_port_pair;
 pub mod info_traffic;
 pub mod ip_blacklist;

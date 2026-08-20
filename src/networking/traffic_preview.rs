@@ -5,6 +5,7 @@ use crate::networking::parse_packets::get_sniffable_headers;
 use crate::networking::types::arp_type::ArpType;
 use crate::networking::types::capture_context::{CaptureContext, CaptureSource, CaptureType};
 use crate::networking::types::icmp_type::IcmpType;
+use crate::networking::types::igmp_type::IgmpType;
 use crate::networking::types::my_device::MyDevice;
 use crate::networking::types::my_link_type::MyLinkType;
 use crate::utils::error_logger::{ErrorLogger, Location};
@@ -51,6 +52,7 @@ pub fn traffic_preview(tx: &Sender<TrafficPreview>) {
                     &mut (None, None),
                     &mut 0,
                     &mut IcmpType::default(),
+                    &mut IgmpType::default(),
                     &mut ArpType::default(),
                 )
                 .is_some()
