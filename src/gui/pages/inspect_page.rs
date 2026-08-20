@@ -25,6 +25,7 @@ use crate::networking::types::combobox_data_states::ComboboxStates;
 use crate::networking::types::data_info::DataInfo;
 use crate::networking::types::data_representation::DataRepr;
 use crate::networking::types::info_address_port_pair::InfoAddressPortPair;
+use crate::networking::types::program_lookup::ProgramLookup;
 use crate::networking::types::traffic_direction::TrafficDirection;
 use crate::report::get_report_entries::get_searched_entries;
 use crate::report::types::report_col::ReportCol;
@@ -76,6 +77,7 @@ pub fn inspect_page(sniffer: &Sniffer) -> Container<'_, Message, StyleType> {
             &sniffer.search,
             &sniffer.combobox_data_states.states,
             language,
+            sniffer.program_lookup.as_ref(),
         ))
         .push(
             Container::new(col_report)
@@ -275,6 +277,7 @@ fn additional_filters_row<'a>(
     search_params: &'a SearchParameters,
     combobox_states: &'a ComboboxStates,
     language: Language,
+    program_lookup: Option<&'a ProgramLookup>,
 ) -> Row<'a, Message, StyleType> {
     let clear_all_filters: Element<'a, Message, StyleType> =
         if SearchParameters::default().eq(search_params) {
@@ -317,12 +320,14 @@ fn additional_filters_row<'a>(
     )
     .width(160);
 
-    let combobox_program = filter_combobox(
-        FilterInputType::Program,
-        &combobox_states.programs,
-        search_params.clone(),
-    )
-    .width(160);
+    let combobox_program = program_lookup.is_some().then(|| {
+        filter_combobox(
+            FilterInputType::Program,
+            &combobox_states.programs,
+            search_params.clone(),
+        )
+        .width(160)
+    });
 
     let container_country = Row::new()
         .spacing(5)
@@ -342,11 +347,13 @@ fn additional_filters_row<'a>(
         .push(Text::new("ASN:"))
         .push(combobox_as_name);
 
-    let container_program = Row::new()
-        .spacing(5)
-        .align_y(Alignment::Center)
-        .push(Text::new(format!("{}:", program_translation(language))))
-        .push(combobox_program);
+    let container_program = combobox_program.map(|combobox_program| {
+        Row::new()
+            .spacing(5)
+            .align_y(Alignment::Center)
+            .push(Text::new(format!("{}:", program_translation(language))))
+            .push(combobox_program)
+    });
 
     let favorites_only = toggler_filter(
         search_params.only_favorites,

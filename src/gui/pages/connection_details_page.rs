@@ -202,15 +202,16 @@ fn col_info<'a>(
         ));
 
     if !is_icmp && !is_arp {
-        ret_val = ret_val
-            .push(TextType::highlighted_subtitle_with_desc(
-                service_translation(language),
-                &val.service.to_string(),
-            ))
-            .push(TextType::highlighted_subtitle_with_desc(
+        ret_val = ret_val.push(TextType::highlighted_subtitle_with_desc(
+            service_translation(language),
+            &val.service.to_string(),
+        ));
+        if sniffer.program_lookup.is_some() {
+            ret_val = ret_val.push(TextType::highlighted_subtitle_with_desc(
                 program_translation(language),
                 &val.program.to_string(),
             ));
+        }
     }
 
     ret_val = ret_val.push(TextType::highlighted_subtitle_with_desc(
