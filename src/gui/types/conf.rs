@@ -2,6 +2,8 @@ use crate::gui::pages::types::running_page::RunningPage;
 use crate::gui::pages::types::settings_page::SettingsPage;
 use crate::gui::types::config_window::ConfigWindow;
 use crate::gui::types::export_pcap::ExportPcap;
+#[cfg(not(test))]
+use crate::gui::types::favorite::FavoriteKey;
 use crate::gui::types::favorite::Favorites;
 use crate::gui::types::filters::Filters;
 use crate::gui::types::ipfix_socket::MyIpfixSocket;
@@ -9,6 +11,10 @@ use crate::gui::types::settings::Settings;
 use crate::networking::types::capture_context::CaptureSourcePicklist;
 use crate::networking::types::config_device::ConfigDevice;
 use crate::networking::types::data_representation::DataRepr;
+#[cfg(not(test))]
+use crate::networking::types::program::Program;
+#[cfg(not(test))]
+use crate::networking::types::service::Service;
 use crate::report::types::sort_type::SortType;
 #[cfg(not(test))]
 use crate::utils::error_logger::{ErrorLogger, Location};
@@ -117,19 +123,7 @@ impl Conf {
         };
 
         // sanitize Conf...
-
-        // check scale factor validity
-        if !(0.3..=3.0).contains(&conf.settings.scale_factor) {
-            conf.settings.scale_factor = 1.0;
-        }
-
-        // sanitize window parameters
-        conf.window.sanitize(conf.settings.scale_factor);
-
-        // check sound volume validity
-        if !(0..=100).contains(&conf.settings.notifications.volume) {
-            conf.settings.notifications.volume = 50;
-        }
+        conf.sanitize();
 
         conf
     }
@@ -137,6 +131,30 @@ impl Conf {
     #[cfg(not(test))]
     pub fn store(&self) -> Result<(), ConfyError> {
         confy::store(SNIFFNET_LOWERCASE, Self::FILE_NAME, self).log_err(location!())
+    }
+
+    #[cfg(not(test))]
+    fn sanitize(&mut self) {
+        // check scale factor validity
+        if !(0.3..=3.0).contains(&self.settings.scale_factor) {
+            self.settings.scale_factor = 1.0;
+        }
+
+        // sanitize window parameters
+        self.window.sanitize(self.settings.scale_factor);
+
+        // check sound volume validity
+        if !(0..=100).contains(&self.settings.notifications.volume) {
+            self.settings.notifications.volume = 50;
+        }
+
+        // Service::NotApplicable is not allowed in favorites
+        self.favorites
+            .remove(&FavoriteKey::Service(Service::NotApplicable));
+
+        // Program::NotApplicable is not allowed in favorites
+        self.favorites
+            .remove(&FavoriteKey::Program(Program::NotApplicable));
     }
 }
 
