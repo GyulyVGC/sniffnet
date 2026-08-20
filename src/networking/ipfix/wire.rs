@@ -1,4 +1,4 @@
-//! RFC 7011 IPFIX wire format decoding.
+//! RFC 7011 IPFIX wire format decoding
 
 use crate::networking::ipfix::field_priority::{
     FieldPriority, bytes_delta_rank, bytes_total_rank, mac_rank, packets_delta_rank,

@@ -158,6 +158,7 @@ pub fn parse_packets(
                             data: &packet.data,
                         });
                     }
+
                     // update the map
                     let (traffic_direction, service) = modify_or_insert_in_map(
                         &mut info_traffic_msg,

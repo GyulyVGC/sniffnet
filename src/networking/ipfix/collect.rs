@@ -1,6 +1,4 @@
-//! IPFIX collector runtime — binds a UDP socket, decodes incoming IPFIX
-//! datagrams, and projects flow records into the same `InfoTraffic` shape the
-//! pcap pipeline produces.
+//! IPFIX collector runtime
 
 use async_channel::Sender;
 use pcap::Address;
@@ -8,7 +6,6 @@ use std::net::{SocketAddr, UdpSocket};
 use std::time::Instant;
 use tokio::sync::broadcast::Receiver;
 
-use crate::location;
 use crate::mmdb::types::mmdb_reader::MmdbReaders;
 use crate::networking::capture::{
     AddressesResolutionState, BackendTrafficMessage, maybe_send_tick, spawn_reverse_dns_pool,
@@ -23,14 +20,15 @@ use crate::networking::types::info_traffic::InfoTraffic;
 use crate::networking::types::ip_blacklist::IpBlacklist;
 use crate::networking::types::protocol::Protocol;
 use crate::networking::types::traffic_direction::TrafficDirection;
-use crate::utils::error_logger::{ErrorLogger, Location};
 use crate::utils::types::timestamp::Timestamp;
 
-/// Buffer size for a single UDP datagram. RFC 7011 §10.3.1 recommends at least
-/// 1500; we size larger to accommodate jumbo-framed exporters.
+/// Buffer size for a single UDP datagram
 const RECV_BUF_LEN: usize = 65_535;
 
-/// Per-exporter state the collector carries between datagrams.
+/// Max number of datagrams discarded when resuming a capture (queued on the socket while paused)
+const MAX_RESUME_DRAIN: usize = 10_000;
+
+/// State the collector needs to carry across datagrams: registered templates and cumulative counters
 struct CollectorState {
     templates: TemplateCache,
     baselines: BaselineCache,
@@ -45,9 +43,7 @@ impl CollectorState {
     }
 }
 
-/// Entry point for the IPFIX collector thread. Mirrors `parse_packets` in
-/// terms of channel contracts: it emits `BackendTrafficMessage::TickRun` every
-/// second with the accumulated `InfoTraffic`.
+/// Entry point for the IPFIX collector thread (IPFIX mirror of PCAP's `parse_packets`)
 pub(crate) fn collect_ipfix(
     cap_id: usize,
     socket: &UdpSocket,
@@ -56,26 +52,41 @@ pub(crate) fn collect_ipfix(
     tx: &Sender<BackendTrafficMessage>,
     freeze_rxs: (Receiver<()>, Receiver<()>),
 ) {
-    let (mut freeze_rx, _freeze_rx_2) = freeze_rxs;
+    let (mut freeze_rx, _) = freeze_rxs;
 
     let mut info_traffic_msg = InfoTraffic::default();
-    let mut state = CollectorState::new(Instant::now());
-    let mut buf = vec![0u8; RECV_BUF_LEN];
-    let mut first_packet_ticks: Option<Instant> = None;
-    // the GUI only needs telling once: a misconfigured exporter keeps sending at
-    // its normal rate, and every rejection says exactly the same thing
-    let mut rejection_reported = false;
 
     let mut resolutions_state = spawn_reverse_dns_pool(mmdb_readers);
 
+    // instant of the first parsed packet plus multiples of 1 second
+    let mut first_packet_ticks = None;
+
+    // whether we've already reported to the GUI that a datagram was rejected as undecodable
+    let mut rejection_reported = false;
+    let mut state = CollectorState::new(Instant::now());
+    let mut buf = vec![0u8; RECV_BUF_LEN];
+
     loop {
-        if tx.is_closed() {
-            return;
+        // check if we need to freeze the parsing
+        if freeze_rx.try_recv().is_ok() {
+            // wait until unfreeze
+            let _ = freeze_rx.blocking_recv();
+            // discard whatever the socket queued while we were frozen
+            if socket.set_nonblocking(true).is_ok() {
+                let mut left = MAX_RESUME_DRAIN;
+                while left > 0 && socket.recv_from(&mut buf).is_ok() {
+                    left -= 1;
+                }
+                let _ = socket.set_nonblocking(false);
+            }
+            // reset the first packet ticks
+            first_packet_ticks = Some(Instant::now());
         }
 
-        if freeze_rx.try_recv().is_ok() {
-            let _ = freeze_rx.blocking_recv();
-            first_packet_ticks = Some(Instant::now());
+        let recv_res = socket.recv_from(&mut buf);
+
+        if tx.is_closed() {
+            return;
         }
 
         maybe_send_tick(
@@ -86,33 +97,30 @@ pub(crate) fn collect_ipfix(
             &mut resolutions_state,
         );
 
-        match socket.recv_from(&mut buf) {
-            Ok((len, peer)) => {
-                if first_packet_ticks.is_none() {
-                    first_packet_ticks = Some(Instant::now());
-                }
-                info_traffic_msg.last_packet_timestamp = current_timestamp();
-                let rejected = process_datagram(
-                    &buf[..len],
-                    peer,
-                    &mut state,
-                    &mut info_traffic_msg,
-                    ip_blacklist,
-                    &mut resolutions_state,
-                );
-                if rejected && !rejection_reported {
-                    rejection_reported = true;
-                    let _ = tx.send_blocking(BackendTrafficMessage::IpfixUndecodable(cap_id));
-                }
+        if let Ok((len, peer)) = recv_res {
+            let Some(datagram) = buf.get(..len) else {
+                continue;
+            };
+
+            if first_packet_ticks.is_none() {
+                first_packet_ticks = Some(Instant::now());
             }
-            Err(e) => match e.kind() {
-                // expected — timeout fires regularly so we can tick and check freeze
-                std::io::ErrorKind::WouldBlock | std::io::ErrorKind::TimedOut => {}
-                _ => {
-                    // Real socket error: log and keep listening.
-                    let _: Result<(), std::io::Error> = Err(e).log_err(location!());
-                }
-            },
+
+            info_traffic_msg.last_packet_timestamp = current_timestamp();
+
+            let success = process_datagram(
+                datagram,
+                peer,
+                &mut state,
+                &mut info_traffic_msg,
+                ip_blacklist,
+                &mut resolutions_state,
+            );
+
+            if !success && !rejection_reported {
+                rejection_reported = true;
+                let _ = tx.send_blocking(BackendTrafficMessage::IpfixUndecodable(cap_id));
+            }
         }
     }
 }
@@ -125,9 +133,7 @@ fn current_timestamp() -> Timestamp {
     Timestamp::new(now.as_secs() as i64, i64::from(now.subsec_micros()))
 }
 
-/// Returns whether the whole datagram was thrown away because it isn't
-/// decodable as IPFIX — which means the exporter is misconfigured rather than
-/// merely chatty, so it's worth surfacing to the user.
+/// Process the whole datagram and returns whether the parsing succeeded
 fn process_datagram(
     bytes: &[u8],
     peer: SocketAddr,
@@ -137,7 +143,7 @@ fn process_datagram(
     resolutions_state: &mut AddressesResolutionState,
 ) -> bool {
     let Ok((_, message)) = parse_message(bytes) else {
-        return true;
+        return false;
     };
 
     let now = Instant::now();
@@ -206,7 +212,7 @@ fn process_datagram(
         }
     }
 
-    false
+    true
 }
 
 fn record_fits(template: &[wire::FieldSpec], remaining: &[u8]) -> bool {
@@ -567,14 +573,14 @@ mod tests {
 
     /// Feed a sequence of datagrams to one collector, so state that spans
     /// datagrams (templates, counter baselines) behaves as it would live. The
-    /// last element reports whether every datagram was rejected.
+    /// last element reports whether every datagram succeeded.
     fn run_all(datagrams: &[&[u8]]) -> (InfoTraffic, AddressesResolutionState, bool) {
         let mut state = CollectorState::new(Instant::now());
         let mut info = InfoTraffic::default();
         let mut resolutions = AddressesResolutionState::new_for_tests();
-        let mut all_rejected = true;
+        let mut all_succeeded = true;
         for bytes in datagrams {
-            all_rejected &= process_datagram(
+            all_succeeded &= process_datagram(
                 bytes,
                 peer(),
                 &mut state,
@@ -583,7 +589,7 @@ mod tests {
                 &mut resolutions,
             );
         }
-        (info, resolutions, all_rejected)
+        (info, resolutions, all_succeeded)
     }
 
     #[test]
@@ -612,12 +618,9 @@ mod tests {
         // an agent-shaped datagram: a template set, then a data set against it
         let mut addrs = Ipv4Addr::new(10, 0, 0, 1).octets().to_vec();
         addrs.extend_from_slice(&Ipv4Addr::new(8, 8, 8, 8).octets());
-        let (info, resolutions, rejected) =
+        let (info, resolutions, succeeded) =
             run_all(&[&agent_datagram(256, [(8, 4), (12, 4)], &addrs, 1500, 10)]);
-        assert!(
-            !rejected,
-            "a well-formed datagram is not a misconfiguration"
-        );
+        assert!(succeeded);
 
         let entry = info.map.get(&totals_key()).expect("flow present");
         assert_eq!(entry.transmitted_bytes, 1500);
@@ -768,19 +771,19 @@ mod tests {
         // in `parse_message_header` is what turns it into a rejection
         let mut v9 = 9u16.to_be_bytes().to_vec();
         v9.extend_from_slice(&[0; 18]);
-        let (info, _, rejected) = run_all(&[&v9, &v9, &v9]);
+        let (info, _, succeeded) = run_all(&[&v9, &v9, &v9]);
         assert!(info.map.is_empty());
-        assert!(rejected);
+        assert!(!succeeded);
 
         // claims a 200-byte message but carries only the header: exactly the
         // kind of input that must never take the application down
         let truncated = vec![0x00, 0x0A, 0x00, 0xC8, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0];
-        let (info, _, rejected) = run_all(&[&truncated, &truncated]);
+        let (info, _, succeeded) = run_all(&[&truncated, &truncated]);
         assert!(info.map.is_empty());
-        assert!(rejected);
+        assert!(!succeeded);
 
-        // an empty datagram isn't a misconfigured exporter, but it is nothing
-        assert!(run_all(&[&[]]).2);
+        // an empty datagram
+        assert!(!run_all(&[&[]]).2);
     }
 
     #[test]
@@ -788,9 +791,9 @@ mod tests {
         // data referencing a template that hasn't arrived is skipped silently
         // per RFC 7011 §8 — the exporter is fine, we just can't read it yet
         let bytes = datagram(&[set(256, &[0xAA; 58])]);
-        let (info, _, rejected) = run_all(&[&bytes]);
+        let (info, _, succeeded) = run_all(&[&bytes]);
         assert!(info.map.is_empty());
-        assert!(!rejected, "an unknown template is not a rejection");
+        assert!(succeeded, "an unknown template is not a rejection");
 
         // bytes left over below one record's worth are padding (RFC 7011 §3.3.1),
         // not the start of another record
