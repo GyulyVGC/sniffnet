@@ -57,7 +57,9 @@ impl MyIpfixSocket {
         } else {
             self.port
                 .parse::<u16>()
-                .map_err(|_| format!("Invalid port number: {}", self.port))?
+                .ok()
+                .filter(|port| *port != 0)
+                .ok_or_else(|| format!("Invalid port number: {}", self.port))?
         };
         let addr = if self.addr.is_empty() {
             DEFAULT_IPFIX_ADDR
@@ -119,6 +121,9 @@ mod tests {
             socket.socket_addr().unwrap_err(),
             "Invalid port number: invalid"
         );
+
+        socket.set_port("0".to_string());
+        assert_eq!(socket.socket_addr().unwrap_err(), "Invalid port number: 0");
 
         // empty
         socket.set_addr("".to_string());
