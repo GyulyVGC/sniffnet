@@ -572,646 +572,758 @@ fn read_mac(raw: &[u8]) -> Option<[u8; 6]> {
 mod tests {
     use super::*;
 
-    #[test]
-    fn parses_message_header() {
-        // version=10, length=16, export_time=0xDEADBEEF, seq=0x01020304, odid=0
-        let bytes: Vec<u8> = vec![
-            0x00, 0x0A, 0x00, 0x10, 0xDE, 0xAD, 0xBE, 0xEF, 0x01, 0x02, 0x03, 0x04, 0x00, 0x00,
-            0x00, 0x00,
-        ];
-        let (_, hdr) = parse_message_header(&bytes).unwrap();
-        assert_eq!(hdr.version, IPFIX_VERSION);
-        assert_eq!(hdr.length, 16);
-        assert_eq!(hdr.export_time, 0xDEAD_BEEF);
-        assert_eq!(hdr.sequence_number, 0x0102_0304);
-        assert_eq!(hdr.observation_domain_id, 0);
-    }
+    /// 1500 as an 8-byte counter
+    const C1500: [u8; 8] = [0, 0, 0, 0, 0, 0, 0x05, 0xDC];
+    /// 1000 as an 8-byte counter
+    const C1000: [u8; 8] = [0, 0, 0, 0, 0, 0, 0x03, 0xE8];
+    const MAC_A: [u8; 6] = [0xAA, 0xBB, 0xCC, 0xDD, 0xEE, 0xFF];
+    const MAC_B: [u8; 6] = [0x11, 0x22, 0x33, 0x44, 0x55, 0x66];
 
-    #[test]
-    fn rejects_a_header_that_is_not_ipfix() {
-        // A NetFlow v9 header: no later step of the parse would catch it, so
-        // the version has to be what fails.
-        let mut v9 = 9u16.to_be_bytes().to_vec();
-        v9.extend_from_slice(&[0; 18]);
-        assert!(parse_message_header(&v9).is_err());
-        assert!(parse_message(&v9).is_err());
-    }
-
-    #[test]
-    fn parses_template_set_and_data_set() {
-        // Message containing a template (id=256, fields: srcIPv4, dstIPv4, octets, packets)
-        // followed by a data set with one record.
-        let mut bytes = Vec::new();
-        // Header (will fill length later)
-        bytes.extend_from_slice(&[0x00, 0x0A]); // version
-        let len_off = bytes.len();
-        bytes.extend_from_slice(&[0x00, 0x00]); // length placeholder
-        bytes.extend_from_slice(&[0, 0, 0, 0]); // export time
-        bytes.extend_from_slice(&[0, 0, 0, 1]); // seq
-        bytes.extend_from_slice(&[0, 0, 0, 0]); // odid
-
-        // Template set
-        bytes.extend_from_slice(&[0x00, 0x02]); // set id = 2
-        let tset_len_off = bytes.len();
-        bytes.extend_from_slice(&[0x00, 0x00]); // set length placeholder
-        bytes.extend_from_slice(&[0x01, 0x00]); // template id = 256
-        bytes.extend_from_slice(&[0x00, 0x04]); // field count = 4
-        bytes.extend_from_slice(&[0x00, 8, 0x00, 4]); // IE 8 (srcIPv4), len 4
-        bytes.extend_from_slice(&[0x00, 12, 0x00, 4]); // IE 12 (dstIPv4), len 4
-        bytes.extend_from_slice(&[0x00, 1, 0x00, 8]); // IE 1 (octetDelta), len 8
-        bytes.extend_from_slice(&[0x00, 2, 0x00, 8]); // IE 2 (packetDelta), len 8
-        let tset_len = (bytes.len() - tset_len_off + 2) as u16; // includes the 4-byte set header
-        let tset_len_bytes = tset_len.to_be_bytes();
-        bytes[tset_len_off] = tset_len_bytes[0];
-        bytes[tset_len_off + 1] = tset_len_bytes[1];
-
-        // Data set
-        bytes.extend_from_slice(&[0x01, 0x00]); // set id = 256
-        let dset_len_off = bytes.len();
-        bytes.extend_from_slice(&[0x00, 0x00]); // set length placeholder
-        // record: src=10.0.0.1, dst=192.168.1.5, bytes=1500, packets=10
-        bytes.extend_from_slice(&[10, 0, 0, 1]);
-        bytes.extend_from_slice(&[192, 168, 1, 5]);
-        bytes.extend_from_slice(&[0, 0, 0, 0, 0, 0, 0x05, 0xDC]); // 1500
-        bytes.extend_from_slice(&[0, 0, 0, 0, 0, 0, 0, 10]); // 10
-        let dset_len = (bytes.len() - dset_len_off + 2) as u16;
-        let dset_len_bytes = dset_len.to_be_bytes();
-        bytes[dset_len_off] = dset_len_bytes[0];
-        bytes[dset_len_off + 1] = dset_len_bytes[1];
-
-        // Finalize message length
-        let msg_len = (bytes.len() as u16).to_be_bytes();
-        bytes[len_off] = msg_len[0];
-        bytes[len_off + 1] = msg_len[1];
-
-        let (_, msg) = parse_message(&bytes).expect("parse");
-        assert_eq!(msg.header.version, IPFIX_VERSION);
-        assert_eq!(msg.sets.len(), 2);
-
-        let template = match &msg.sets[0] {
-            Set::Template(t) => t,
-            other => panic!("expected template, got {other:?}"),
-        };
-        assert_eq!(template.len(), 1);
-        assert_eq!(template[0].template_id, 256);
-        assert_eq!(template[0].fields.len(), 4);
-
-        let (template_id, payload) = match &msg.sets[1] {
-            Set::Data {
-                template_id,
-                payload,
-            } => (*template_id, *payload),
-            other => panic!("expected data, got {other:?}"),
-        };
-        assert_eq!(template_id, 256);
-
-        let (rest, record) =
-            decode_data_record(&template[0].fields, payload).expect("decode record");
-        assert!(rest.is_empty());
-        assert_eq!(record.src_ip, Some(IpAddr::V4(Ipv4Addr::new(10, 0, 0, 1))));
-        assert_eq!(
-            record.dst_ip,
-            Some(IpAddr::V4(Ipv4Addr::new(192, 168, 1, 5)))
-        );
-        assert_eq!(record.bytes_delta, Some(1500));
-        assert_eq!(record.packets_delta, Some(10));
-    }
-
-    #[test]
-    fn enterprise_ie_is_skipped_but_consumes_bytes() {
-        // Template: one enterprise IE of length 4
-        let bytes: Vec<u8> = vec![
-            0x80, 0x01, 0x00, 0x04, // ie_id=1 with enterprise bit, length=4
-            0x00, 0x00, 0x00, 0x2A, // enterprise number = 42
-        ];
-        let (_, spec) = parse_field_spec(&bytes).unwrap();
-        assert_eq!(spec.ie_id, 1);
-        assert_eq!(spec.length, 4);
-        assert_eq!(spec.enterprise, Some(42));
-
-        // Decoding a data record with this single enterprise field should
-        // consume 4 bytes and leave the record untouched.
-        let payload: Vec<u8> = vec![0xDE, 0xAD, 0xBE, 0xEF];
-        let (rest, record) = decode_data_record(&[spec], &payload).unwrap();
-        assert!(rest.is_empty());
-        assert_eq!(record, FlowRecord::default());
-    }
-
-    #[test]
-    fn reverse_pen_ies_decode_into_the_reverse_counters() {
-        // Same IE ids as the forward counters, under PEN 29305.
-        let reverse_spec = |ie_id: u16| FieldSpec {
-            ie_id,
-            length: 8,
-            enterprise: Some(REVERSE_PEN),
-        };
-        let template = [
-            FieldSpec {
-                ie_id: ie::OCTET_DELTA_COUNT,
-                length: 8,
-                enterprise: None,
-            },
-            reverse_spec(ie::OCTET_DELTA_COUNT),
-            reverse_spec(ie::PACKET_DELTA_COUNT),
-        ];
-        let mut payload = 1500u64.to_be_bytes().to_vec();
-        payload.extend_from_slice(&9000u64.to_be_bytes());
-        payload.extend_from_slice(&60u64.to_be_bytes());
-
-        let (rest, record) = decode_data_record(&template, &payload).unwrap();
-        assert!(rest.is_empty());
-        // the forward slots must be untouched by the reverse fields
-        assert_eq!(record.bytes_delta, Some(1500));
-        assert_eq!(record.packets_delta, None);
-        assert_eq!(
-            record.reverse,
-            Some(ReverseCounters {
-                bytes_delta: Some(9000),
-                packets_delta: Some(60),
-                bytes_total: None,
-                packets_total: None,
-            })
-        );
-    }
-
-    #[test]
-    fn a_uniflow_record_has_no_reverse_counters() {
-        let record = decode(&[(ie::OCTET_DELTA_COUNT, 8)], &1500u64.to_be_bytes());
-        assert_eq!(record.bytes_delta, Some(1500));
-        assert_eq!(record.reverse, None, "not a biflow");
-    }
-
-    #[test]
-    fn variable_length_short_and_long_forms() {
-        // Short form: 1-byte length = 3, then 3 bytes
-        let short: Vec<u8> = vec![0x03, b'a', b'b', b'c', 0xAA];
-        let (rest, bytes) = read_field_bytes(&short, VARIABLE_LENGTH).unwrap();
-        assert_eq!(bytes, b"abc");
-        assert_eq!(rest, &[0xAAu8][..]);
-
-        // Long form: sentinel 0xFF, then 2-byte length = 4, then 4 bytes
-        let long: Vec<u8> = vec![0xFF, 0x00, 0x04, b'w', b'x', b'y', b'z', 0xBB];
-        let (rest, bytes) = read_field_bytes(&long, VARIABLE_LENGTH).unwrap();
-        assert_eq!(bytes, b"wxyz");
-        assert_eq!(rest, &[0xBBu8][..]);
-    }
-
-    #[test]
-    fn truncated_datagram_returns_error_not_panic() {
-        // Header claims length 200 but only the 16-byte header is present
-        let bytes: Vec<u8> = vec![0x00, 0x0A, 0x00, 0xC8, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0];
-        let result = parse_message(&bytes);
-        assert!(result.is_err());
-    }
-
-    /// Decode `payload` against a template built from `(ie, length)` pairs.
-    fn decode(fields: &[(u16, u16)], payload: &[u8]) -> FlowRecord {
-        let template: Vec<FieldSpec> = fields
+    /// Build a template of plain IANA fields from `(ie_id, length)` pairs
+    fn template(fields: &[(u16, u16)]) -> Vec<FieldSpec> {
+        fields
             .iter()
             .map(|(ie_id, length)| FieldSpec {
                 ie_id: *ie_id,
                 length: *length,
                 enterprise: None,
             })
-            .collect();
-        decode_data_record(&template, payload).expect("decode").1
+            .collect()
+    }
+
+    /// Decode `payload` against a template built from `(ie_id, length)` pairs
+    fn decode(fields: &[(u16, u16)], payload: &[u8]) -> FlowRecord {
+        decode_data_record(&template(fields), payload).unwrap().1
+    }
+
+    /// Wrap `body` in a set header carrying `set_id`
+    fn set(set_id: u16, body: &[u8]) -> Vec<u8> {
+        let length = u16::try_from(body.len() + 4).unwrap();
+        [&set_id.to_be_bytes()[..], &length.to_be_bytes(), body].concat()
+    }
+
+    /// Wrap `sets` in an IPFIX message header (export time, sequence and odid all zero)
+    fn datagram(sets: &[Vec<u8>]) -> Vec<u8> {
+        let body = sets.concat();
+        let length = u16::try_from(body.len() + 16).unwrap();
+        [
+            &IPFIX_VERSION.to_be_bytes()[..],
+            &length.to_be_bytes(),
+            &[0; 12],
+            &body,
+        ]
+        .concat()
+    }
+
+    /// An 8-byte NTP timestamp: `unix_secs` past the UNIX epoch plus `fraction`
+    fn ntp_bytes(unix_secs: u64, fraction: u32) -> [u8; 8] {
+        let secs = u32::try_from(NTP_UNIX_OFFSET + unix_secs).unwrap();
+        let mut bytes = [0u8; 8];
+        bytes[..4].copy_from_slice(&secs.to_be_bytes());
+        bytes[4..].copy_from_slice(&fraction.to_be_bytes());
+        bytes
+    }
+
+    /// Assert that `winner` fills its record slot even when the template lists `loser` first
+    fn assert_wins<T: PartialEq + std::fmt::Debug>(
+        winner: (u16, &[u8]),
+        loser: (u16, &[u8]),
+        slot: fn(&FlowRecord) -> Option<T>,
+        expected: &T,
+    ) {
+        for order in [[winner, loser], [loser, winner]] {
+            let fields: Vec<(u16, u16)> = order
+                .iter()
+                .map(|(ie_id, raw)| (*ie_id, u16::try_from(raw.len()).unwrap()))
+                .collect();
+            let payload: Vec<u8> = order.iter().flat_map(|(_, raw)| *raw).copied().collect();
+            let actual = slot(&decode(&fields, &payload));
+            assert_eq!(actual.as_ref(), Some(expected), "template {fields:?}");
+        }
     }
 
     #[test]
-    fn layer2_octets_win_over_ip_octets_in_either_order() {
-        // 1500 as layer2OctetDeltaCount, 1000 as octetDeltaCount
-        let l2 = [0, 0, 0, 0, 0, 0, 0x05, 0xDC];
-        let ip = [0, 0, 0, 0, 0, 0, 0x03, 0xE8];
+    fn test_parse_message_header() {
+        // version, length=16, export_time=0xDEADBEEF, seq=0x01020304, odid=7
+        let header = |version: u16| {
+            [
+                &version.to_be_bytes()[..],
+                &16u16.to_be_bytes(),
+                &0xDEAD_BEEFu32.to_be_bytes(),
+                &0x0102_0304u32.to_be_bytes(),
+                &7u32.to_be_bytes(),
+            ]
+            .concat()
+        };
 
-        let mut l2_first = Vec::new();
-        l2_first.extend_from_slice(&l2);
-        l2_first.extend_from_slice(&ip);
+        let valid = header(IPFIX_VERSION);
+        let (rest, hdr) = parse_message_header(&valid).unwrap();
+        assert!(rest.is_empty());
+        assert_eq!(hdr.version, IPFIX_VERSION);
+        assert_eq!(hdr.length, 16);
+        assert_eq!(hdr.export_time, 0xDEAD_BEEF);
+        assert_eq!(hdr.sequence_number, 0x0102_0304);
+        assert_eq!(hdr.observation_domain_id, 7);
+
+        // a NetFlow v9 header is rejected
+        assert!(parse_message_header(&header(9)).is_err());
+        // so is a header cut short
+        assert!(parse_message_header(&valid[..15]).is_err());
+    }
+
+    #[test]
+    fn test_parse_message() {
+        // a template (id 256: srcIPv4, dstIPv4, octetDelta, packetDelta) followed
+        // by a data set carrying one record against it
+        let template_body = [
+            &256u16.to_be_bytes()[..],
+            &4u16.to_be_bytes(),
+            &[0, 8, 0, 4],
+            &[0, 12, 0, 4],
+            &[0, 1, 0, 8],
+            &[0, 2, 0, 8],
+        ]
+        .concat();
+        let record_body = [
+            &[10, 0, 0, 1][..],
+            &[192, 168, 1, 5],
+            &C1500,
+            &10u64.to_be_bytes(),
+        ]
+        .concat();
+        let bytes = datagram(&[set(SET_ID_TEMPLATE, &template_body), set(256, &record_body)]);
+
+        let (rest, message) = parse_message(&bytes).unwrap();
+        assert!(rest.is_empty());
+        assert_eq!(message.header.version, IPFIX_VERSION);
+        assert_eq!(message.sets.len(), 2);
+
+        let Set::Template(templates) = &message.sets[0] else {
+            panic!("expected a template set, got {:?}", message.sets[0]);
+        };
+        let Set::Data {
+            template_id,
+            payload,
+        } = &message.sets[1]
+        else {
+            panic!("expected a data set, got {:?}", message.sets[1]);
+        };
+        assert_eq!(*template_id, 256);
+
+        let (rest, flow) = decode_data_record(&templates[0].fields, payload).unwrap();
+        assert!(rest.is_empty());
+        assert_eq!(flow.src_ip, Some(IpAddr::V4(Ipv4Addr::new(10, 0, 0, 1))));
+        assert_eq!(flow.dst_ip, Some(IpAddr::V4(Ipv4Addr::new(192, 168, 1, 5))));
         assert_eq!(
-            decode(
-                &[
-                    (ie::LAYER2_OCTET_DELTA_COUNT, 8),
-                    (ie::OCTET_DELTA_COUNT, 8)
-                ],
-                &l2_first,
-            )
-            .bytes_delta,
-            Some(1500),
+            (flow.bytes_delta, flow.packets_delta),
+            (Some(1500), Some(10))
         );
 
-        let mut ip_first = Vec::new();
-        ip_first.extend_from_slice(&ip);
-        ip_first.extend_from_slice(&l2);
+        // bytes past the declared length belong to the caller, not to this message
+        let padded = [bytes.clone(), vec![0xAA]].concat();
+        let (rest, _) = parse_message(&padded).unwrap();
+        assert_eq!(rest, &[0xAA][..]);
+
+        // a datagram shorter than its header claims is an error, not a panic
+        assert!(parse_message(&bytes[..bytes.len() - 1]).is_err());
+    }
+
+    #[test]
+    fn test_parse_set() {
+        // a template set is parsed into its records
+        let body = [
+            &256u16.to_be_bytes()[..],
+            &1u16.to_be_bytes(),
+            &[0, 8, 0, 4],
+        ]
+        .concat();
+        let bytes = set(SET_ID_TEMPLATE, &body);
+        let (rest, parsed) = parse_set(&bytes).unwrap();
+        assert!(rest.is_empty());
         assert_eq!(
-            decode(
-                &[
-                    (ie::OCTET_DELTA_COUNT, 8),
-                    (ie::LAYER2_OCTET_DELTA_COUNT, 8)
-                ],
-                &ip_first,
-            )
-            .bytes_delta,
-            Some(1500),
+            parsed,
+            Set::Template(vec![TemplateRecord {
+                template_id: 256,
+                fields: vec![FieldSpec {
+                    ie_id: ie::SOURCE_IPV4_ADDRESS,
+                    length: 4,
+                    enterprise: None,
+                }],
+            }])
+        );
+
+        // a data set keeps its payload for the caller to decode against a template
+        let bytes = set(MIN_DATA_SET_ID, &[0xDE, 0xAD]);
+        let (_, parsed) = parse_set(&bytes).unwrap();
+        assert_eq!(
+            parsed,
+            Set::Data {
+                template_id: MIN_DATA_SET_ID,
+                payload: &[0xDE, 0xAD],
+            }
+        );
+
+        // ids below the data range other than 2 are skipped
+        for set_id in [0, 1, 3, MIN_DATA_SET_ID - 1] {
+            let bytes = set(set_id, &[0xDE, 0xAD]);
+            let (rest, parsed) = parse_set(&bytes).unwrap();
+            assert_eq!(parsed, Set::Ignored, "set id {set_id}");
+            assert!(rest.is_empty(), "set id {set_id} left its body unconsumed");
+        }
+
+        // a set claiming less than its own 4-byte header doesn't underflow
+        let (rest, parsed) = parse_set(&[0x00, 0x02, 0x00, 0x00, 0xAA]).unwrap();
+        assert_eq!(parsed, Set::Template(vec![]));
+        assert_eq!(rest, &[0xAA][..]);
+    }
+
+    #[test]
+    fn test_parse_template_record() {
+        // two records back to back in the same template set
+        let bytes = [
+            &256u16.to_be_bytes()[..],
+            &1u16.to_be_bytes(),
+            &[0, 8, 0, 4],
+            &257u16.to_be_bytes(),
+            &2u16.to_be_bytes(),
+            &[0, 1, 0, 8],
+            &[0, 2, 0, 8],
+        ]
+        .concat();
+
+        let (rest, first) = parse_template_record(&bytes).unwrap();
+        assert_eq!(first.template_id, 256);
+        assert_eq!(
+            first.fields,
+            vec![FieldSpec {
+                ie_id: ie::SOURCE_IPV4_ADDRESS,
+                length: 4,
+                enterprise: None,
+            }]
+        );
+
+        let (rest, second) = parse_template_record(rest).unwrap();
+        assert!(rest.is_empty());
+        assert_eq!(second.template_id, 257);
+        assert_eq!(second.fields.len(), 2);
+
+        // a record announcing more fields than it carries is an error, not a panic
+        let truncated = [
+            &257u16.to_be_bytes()[..],
+            &2u16.to_be_bytes(),
+            &[0, 1, 0, 8],
+        ]
+        .concat();
+        assert!(parse_template_record(&truncated).is_err());
+    }
+
+    #[test]
+    fn test_parse_field_spec() {
+        // a plain IANA field spec is 4 bytes
+        let (rest, spec) = parse_field_spec(&[0x00, 0x08, 0x00, 0x04, 0xAA]).unwrap();
+        assert_eq!(
+            spec,
+            FieldSpec {
+                ie_id: ie::SOURCE_IPV4_ADDRESS,
+                length: 4,
+                enterprise: None,
+            }
+        );
+        assert_eq!(rest, &[0xAA][..]);
+
+        // the top bit of the IE id marks 4 further bytes of enterprise number
+        let (rest, spec) =
+            parse_field_spec(&[0x80, 0x01, 0x00, 0x04, 0x00, 0x00, 0x00, 0x2A]).unwrap();
+        assert_eq!(
+            spec,
+            FieldSpec {
+                ie_id: ie::OCTET_DELTA_COUNT,
+                length: 4,
+                enterprise: Some(42),
+            }
+        );
+        assert!(rest.is_empty());
+
+        // the variable-length sentinel is carried through as the declared length
+        let (_, spec) = parse_field_spec(&[0x00, 0x08, 0xFF, 0xFF]).unwrap();
+        assert_eq!(spec.length, VARIABLE_LENGTH);
+    }
+
+    #[test]
+    fn test_read_field_bytes() {
+        // a fixed-length field takes exactly its declared length
+        let (rest, bytes) = read_field_bytes(&[0xDE, 0xAD, 0xBE, 0xEF, 0xAA], 4).unwrap();
+        assert_eq!(bytes, &[0xDE, 0xAD, 0xBE, 0xEF][..]);
+        assert_eq!(rest, &[0xAA][..]);
+
+        // variable length, short form: a 1-byte length prefix
+        let (rest, bytes) =
+            read_field_bytes(&[0x03, b'a', b'b', b'c', 0xAA], VARIABLE_LENGTH).unwrap();
+        assert_eq!(bytes, b"abc");
+        assert_eq!(rest, &[0xAA][..]);
+
+        // variable length, long form: 0xFF switches to a 2-byte length prefix
+        let long = [0xFF, 0x00, 0x04, b'w', b'x', b'y', b'z', 0xBB];
+        let (rest, bytes) = read_field_bytes(&long, VARIABLE_LENGTH).unwrap();
+        assert_eq!(bytes, b"wxyz");
+        assert_eq!(rest, &[0xBB][..]);
+
+        // a field longer than what's left is an error, not a panic
+        assert!(read_field_bytes(&[0xDE, 0xAD], 4).is_err());
+        assert!(read_field_bytes(&[0x04, 0xDE], VARIABLE_LENGTH).is_err());
+    }
+
+    #[test]
+    fn test_decode_data_record() {
+        let fields = [
+            (ie::SOURCE_IPV4_ADDRESS, 4),
+            (ie::DESTINATION_IPV4_ADDRESS, 4),
+            (ie::SOURCE_TRANSPORT_PORT, 2),
+            (ie::DESTINATION_TRANSPORT_PORT, 2),
+            (ie::PROTOCOL_IDENTIFIER, 1),
+            (ie::FLOW_DIRECTION, 1),
+            (ie::SOURCE_MAC_ADDRESS, 6),
+            (ie::DESTINATION_MAC_ADDRESS, 6),
+            (ie::OCTET_DELTA_COUNT, 8),
+            (ie::PACKET_DELTA_COUNT, 8),
+            (ie::OCTET_TOTAL_COUNT, 8),
+            (ie::PACKET_TOTAL_COUNT, 8),
+            (ie::FLOW_START_SECONDS, 4),
+            (ie::FLOW_END_SECONDS, 4),
+        ];
+        let payload = [
+            &[10, 0, 0, 1][..],
+            &[192, 168, 1, 5],
+            &[0x01, 0xBB],
+            &[0xC8, 0x22],
+            &[6],
+            &[0x01],
+            &MAC_A,
+            &MAC_B,
+            &C1500,
+            &10u64.to_be_bytes(),
+            &9000u64.to_be_bytes(),
+            &60u64.to_be_bytes(),
+            &10u32.to_be_bytes(),
+            &20u32.to_be_bytes(),
+            // a data set holds its records back to back, so what follows is the next one
+            &[0xAA],
+        ]
+        .concat();
+
+        let (rest, record) = decode_data_record(&template(&fields), &payload).unwrap();
+        assert_eq!(rest, &[0xAA][..]);
+        assert_eq!(
+            record,
+            FlowRecord {
+                src_ip: Some(IpAddr::V4(Ipv4Addr::new(10, 0, 0, 1))),
+                dst_ip: Some(IpAddr::V4(Ipv4Addr::new(192, 168, 1, 5))),
+                src_port: Some(443),
+                dst_port: Some(51234),
+                protocol: Some(Protocol::TCP),
+                bytes_delta: Some(1500),
+                packets_delta: Some(10),
+                bytes_total: Some(9000),
+                packets_total: Some(60),
+                src_mac: Some(MAC_A),
+                dst_mac: Some(MAC_B),
+                direction: Some(TrafficDirection::Outgoing),
+                flow_start: Some(Timestamp::new(10, 0)),
+                flow_end: Some(Timestamp::new(20, 0)),
+                reverse: None,
+            }
         );
     }
 
     #[test]
-    fn cumulative_totals_are_kept_apart_from_deltas() {
-        // Totals are cumulative, so they must not land in the delta slots the
-        // collector adds straight onto its running tally.
-        let payload = [0, 0, 0, 0, 0, 0, 0x05, 0xDC, 0, 0, 0, 0, 0, 0, 0, 10];
+    fn test_decode_data_record_enterprise_ies() {
+        let spec = |ie_id: u16, enterprise: Option<u32>| FieldSpec {
+            ie_id,
+            length: 8,
+            enterprise,
+        };
+
+        // a vendor IE is skipped, but still consumes its bytes
+        let fields = [
+            spec(ie::OCTET_DELTA_COUNT, Some(42)),
+            spec(ie::OCTET_DELTA_COUNT, None),
+        ];
+        let payload = [C1000, C1500].concat();
+        let (rest, record) = decode_data_record(&fields, &payload).unwrap();
+        assert!(rest.is_empty());
+        assert_eq!(record.bytes_delta, Some(1500));
+        assert_eq!(record.reverse, None, "a vendor PEN is not a biflow");
+
+        // RFC 5103 reverse IEs fill the reverse counters, leaving the forward ones alone
+        let fields = [
+            spec(ie::OCTET_DELTA_COUNT, None),
+            spec(ie::OCTET_DELTA_COUNT, Some(REVERSE_PEN)),
+            spec(ie::PACKET_DELTA_COUNT, Some(REVERSE_PEN)),
+        ];
+        let payload = [&C1500[..], &C1000, &60u64.to_be_bytes()].concat();
+        let (_, record) = decode_data_record(&fields, &payload).unwrap();
+        assert_eq!(record.bytes_delta, Some(1500));
+        assert_eq!(record.packets_delta, None);
+        assert_eq!(
+            record.reverse,
+            Some(ReverseCounters {
+                bytes_delta: Some(1000),
+                packets_delta: Some(60),
+                bytes_total: None,
+                packets_total: None,
+            })
+        );
+
+        // a uniflow has no reverse half at all
+        assert_eq!(decode(&[(ie::OCTET_DELTA_COUNT, 8)], &C1500).reverse, None);
+    }
+
+    #[test]
+    fn test_decode_data_record_malformed_field() {
+        // srcIPv4 declared as 3 bytes can't be read, but the field still consumes
+        // its declared length, so every field after it stays aligned
+        let payload = [10, 0, 0, 192, 168, 1, 5, 0x01, 0xBB];
         let record = decode(
-            &[(ie::OCTET_TOTAL_COUNT, 8), (ie::PACKET_TOTAL_COUNT, 8)],
+            &[
+                (ie::SOURCE_IPV4_ADDRESS, 3),
+                (ie::DESTINATION_IPV4_ADDRESS, 4),
+                (ie::SOURCE_TRANSPORT_PORT, 2),
+            ],
             &payload,
         );
-        assert_eq!(record.bytes_delta, None);
-        assert_eq!(record.packets_delta, None);
-        assert_eq!(record.bytes_total, Some(1500));
-        assert_eq!(record.packets_total, Some(10));
+        assert_eq!(record.src_ip, None);
+        assert_eq!(
+            record.dst_ip,
+            Some(IpAddr::V4(Ipv4Addr::new(192, 168, 1, 5)))
+        );
+        assert_eq!(record.src_port, Some(443));
     }
 
     #[test]
-    fn layer2_totals_win_over_ip_totals_in_either_order() {
-        let l2 = [0, 0, 0, 0, 0, 0, 0x05, 0xDC]; // 1500
-        let ip = [0, 0, 0, 0, 0, 0, 0x03, 0xE8]; // 1000
+    fn test_apply_ie() {
+        // ICMPv6 (58) folds into ICMP; a protocol Sniffnet doesn't chart is left unset
+        for (raw, expected) in [
+            (6, Some(Protocol::TCP)),
+            (17, Some(Protocol::UDP)),
+            (1, Some(Protocol::ICMP)),
+            (58, Some(Protocol::ICMP)),
+            (47, None),
+        ] {
+            let record = decode(&[(ie::PROTOCOL_IDENTIFIER, 1)], &[raw]);
+            assert_eq!(record.protocol, expected, "protocolIdentifier {raw}");
+        }
 
-        let mut l2_first = Vec::new();
-        l2_first.extend_from_slice(&l2);
-        l2_first.extend_from_slice(&ip);
+        // 0x00 is ingress, 0x01 is egress, anything else is undefined
+        for (raw, expected) in [
+            (0x00, Some(TrafficDirection::Incoming)),
+            (0x01, Some(TrafficDirection::Outgoing)),
+            (0xFF, None),
+        ] {
+            let record = decode(&[(ie::FLOW_DIRECTION, 1)], &[raw]);
+            assert_eq!(record.direction, expected, "flowDirection {raw:#04x}");
+        }
+
+        let record = decode(
+            &[
+                (ie::SOURCE_TRANSPORT_PORT, 2),
+                (ie::DESTINATION_TRANSPORT_PORT, 2),
+            ],
+            &[0x01, 0xBB, 0xC8, 0x22],
+        );
+        assert_eq!((record.src_port, record.dst_port), (Some(443), Some(51234)));
+
+        let src = Ipv6Addr::new(0x2001, 0xdb8, 0, 0, 0, 0, 0, 1);
+        let dst = Ipv6Addr::LOCALHOST;
+        let record = decode(
+            &[
+                (ie::SOURCE_IPV6_ADDRESS, 16),
+                (ie::DESTINATION_IPV6_ADDRESS, 16),
+            ],
+            &[src.octets(), dst.octets()].concat(),
+        );
         assert_eq!(
-            decode(
-                &[
-                    (ie::LAYER2_OCTET_TOTAL_COUNT, 8),
-                    (ie::OCTET_TOTAL_COUNT, 8)
-                ],
-                &l2_first,
-            )
-            .bytes_total,
-            Some(1500),
+            (record.src_ip, record.dst_ip),
+            (Some(IpAddr::V6(src)), Some(IpAddr::V6(dst)))
         );
 
-        let mut ip_first = Vec::new();
-        ip_first.extend_from_slice(&ip);
-        ip_first.extend_from_slice(&l2);
-        assert_eq!(
-            decode(
-                &[
-                    (ie::OCTET_TOTAL_COUNT, 8),
-                    (ie::LAYER2_OCTET_TOTAL_COUNT, 8)
-                ],
-                &ip_first,
-            )
-            .bytes_total,
-            Some(1500),
-        );
+        // an IE Sniffnet doesn't decode leaves the record untouched
+        let record = decode(&[(999, 4)], &[0xDE, 0xAD, 0xBE, 0xEF]);
+        assert_eq!(record, FlowRecord::default());
     }
 
     #[test]
-    fn post_counters_are_used_when_no_others_are_exported() {
-        // An exporter observing the flow after a middlebox may carry only the
-        // post counters; without them the record would decode to zero bytes and
-        // the collector would drop it outright.
-        let payload = [0, 0, 0, 0, 0, 0, 0x05, 0xDC, 0, 0, 0, 0, 0, 0, 0, 10];
+    fn test_apply_delta_counter_ie() {
+        let bytes_delta: fn(&FlowRecord) -> Option<u128> = |r| r.bytes_delta;
+        assert_wins(
+            (ie::LAYER2_OCTET_DELTA_COUNT, &C1500),
+            (ie::POST_LAYER2_OCTET_DELTA_COUNT, &C1000),
+            bytes_delta,
+            &1500,
+        );
+        assert_wins(
+            (ie::POST_LAYER2_OCTET_DELTA_COUNT, &C1500),
+            (ie::OCTET_DELTA_COUNT, &C1000),
+            bytes_delta,
+            &1500,
+        );
+        assert_wins(
+            (ie::OCTET_DELTA_COUNT, &C1500),
+            (ie::POST_OCTET_DELTA_COUNT, &C1000),
+            bytes_delta,
+            &1500,
+        );
+        assert_wins(
+            (ie::PACKET_DELTA_COUNT, &C1500),
+            (ie::POST_PACKET_DELTA_COUNT, &C1000),
+            |r| r.packets_delta,
+            &1500,
+        );
+
         let record = decode(
             &[
                 (ie::POST_OCTET_DELTA_COUNT, 8),
                 (ie::POST_PACKET_DELTA_COUNT, 8),
             ],
-            &payload,
+            &[C1500, C1000].concat(),
         );
+        assert_eq!(
+            (record.bytes_delta, record.packets_delta),
+            (Some(1500), Some(1000))
+        );
+        assert_eq!((record.bytes_total, record.packets_total), (None, None));
+
+        // RFC 7011 reduced-size encoding: a counter may be narrowed to fewer bytes
+        let record = decode(&[(ie::OCTET_DELTA_COUNT, 4)], &[0x00, 0x00, 0x05, 0xDC]);
         assert_eq!(record.bytes_delta, Some(1500));
-        assert_eq!(record.packets_delta, Some(10));
+    }
+
+    #[test]
+    fn test_apply_total_counter_ie() {
+        let bytes_total: fn(&FlowRecord) -> Option<u128> = |r| r.bytes_total;
+        assert_wins(
+            (ie::LAYER2_OCTET_TOTAL_COUNT, &C1500),
+            (ie::POST_LAYER2_OCTET_TOTAL_COUNT, &C1000),
+            bytes_total,
+            &1500,
+        );
+        assert_wins(
+            (ie::POST_LAYER2_OCTET_TOTAL_COUNT, &C1500),
+            (ie::OCTET_TOTAL_COUNT, &C1000),
+            bytes_total,
+            &1500,
+        );
+        assert_wins(
+            (ie::OCTET_TOTAL_COUNT, &C1500),
+            (ie::POST_OCTET_TOTAL_COUNT, &C1000),
+            bytes_total,
+            &1500,
+        );
+        assert_wins(
+            (ie::PACKET_TOTAL_COUNT, &C1500),
+            (ie::POST_PACKET_TOTAL_COUNT, &C1000),
+            |r| r.packets_total,
+            &1500,
+        );
 
         let record = decode(
             &[
                 (ie::POST_OCTET_TOTAL_COUNT, 8),
                 (ie::POST_PACKET_TOTAL_COUNT, 8),
             ],
-            &payload,
+            &[C1500, C1000].concat(),
         );
-        assert_eq!(record.bytes_total, Some(1500));
-        assert_eq!(record.packets_total, Some(10));
+        assert_eq!(
+            (record.bytes_total, record.packets_total),
+            (Some(1500), Some(1000))
+        );
+        assert_eq!((record.bytes_delta, record.packets_delta), (None, None));
     }
 
     #[test]
-    fn layer2_post_octets_win_over_ip_octets_in_either_order() {
-        // The layer-2 preference outranks the pre/post one: a post-middlebox
-        // frame count still includes the link header, an IP-layer count never
-        // does.
-        let l2_post = [0, 0, 0, 0, 0, 0, 0x05, 0xDC]; // 1500
-        let ip = [0, 0, 0, 0, 0, 0, 0x03, 0xE8]; // 1000
+    fn test_apply_timestamp_ie() {
+        let secs = 10u32.to_be_bytes();
+        let millis = 20_000u64.to_be_bytes();
+        let micros = ntp_bytes(30, 0);
+        let nanos = ntp_bytes(40, 0);
 
-        let mut l2_first = Vec::new();
-        l2_first.extend_from_slice(&l2_post);
-        l2_first.extend_from_slice(&ip);
-        assert_eq!(
-            decode(
-                &[
-                    (ie::POST_LAYER2_OCTET_DELTA_COUNT, 8),
-                    (ie::OCTET_DELTA_COUNT, 8)
-                ],
-                &l2_first,
-            )
-            .bytes_delta,
-            Some(1500),
+        let flow_start: fn(&FlowRecord) -> Option<Timestamp> = |r| r.flow_start;
+        assert_wins(
+            (ie::FLOW_START_MICROSECONDS, &micros),
+            (ie::FLOW_START_MILLISECONDS, &millis),
+            flow_start,
+            &Timestamp::new(30, 0),
+        );
+        assert_wins(
+            (ie::FLOW_START_MILLISECONDS, &millis),
+            (ie::FLOW_START_SECONDS, &secs),
+            flow_start,
+            &Timestamp::new(20, 0),
+        );
+        assert_wins(
+            (ie::FLOW_END_NANOSECONDS, &nanos),
+            (ie::FLOW_END_MICROSECONDS, &micros),
+            |r| r.flow_end,
+            &Timestamp::new(40, 0),
         );
 
-        let mut ip_first = Vec::new();
-        ip_first.extend_from_slice(&ip);
-        ip_first.extend_from_slice(&l2_post);
-        assert_eq!(
-            decode(
-                &[
-                    (ie::OCTET_TOTAL_COUNT, 8),
-                    (ie::POST_LAYER2_OCTET_TOTAL_COUNT, 8)
-                ],
-                &ip_first,
-            )
-            .bytes_total,
-            Some(1500),
-        );
-    }
-
-    #[test]
-    fn plain_layer2_octets_win_over_their_post_counterparts() {
-        let plain = [0, 0, 0, 0, 0, 0, 0x05, 0xDC]; // 1500
-        let post = [0, 0, 0, 0, 0, 0, 0x03, 0xE8]; // 1000
-
-        let mut payload = Vec::new();
-        payload.extend_from_slice(&post);
-        payload.extend_from_slice(&plain);
-        let record = decode(
-            &[
-                (ie::POST_LAYER2_OCTET_DELTA_COUNT, 8),
-                (ie::LAYER2_OCTET_DELTA_COUNT, 8),
-            ],
-            &payload,
-        );
-        assert_eq!(record.bytes_delta, Some(1500));
-
-        let record = decode(
-            &[
-                (ie::POST_LAYER2_OCTET_TOTAL_COUNT, 8),
-                (ie::LAYER2_OCTET_TOTAL_COUNT, 8),
-            ],
-            &payload,
-        );
-        assert_eq!(record.bytes_total, Some(1500));
-    }
-
-    #[test]
-    fn plain_deltas_win_over_post_deltas_in_either_order() {
-        let plain = [0, 0, 0, 0, 0, 0, 0x05, 0xDC]; // 1500
-        let post = [0, 0, 0, 0, 0, 0, 0x03, 0xE8]; // 1000
-
-        let mut plain_first = Vec::new();
-        plain_first.extend_from_slice(&plain);
-        plain_first.extend_from_slice(&post);
-        assert_eq!(
-            decode(
-                &[(ie::OCTET_DELTA_COUNT, 8), (ie::POST_OCTET_DELTA_COUNT, 8)],
-                &plain_first,
-            )
-            .bytes_delta,
-            Some(1500),
-        );
-
-        let mut post_first = Vec::new();
-        post_first.extend_from_slice(&post);
-        post_first.extend_from_slice(&plain);
-        assert_eq!(
-            decode(
-                &[(ie::POST_OCTET_DELTA_COUNT, 8), (ie::OCTET_DELTA_COUNT, 8)],
-                &post_first,
-            )
-            .bytes_delta,
-            Some(1500),
-        );
-    }
-
-    #[test]
-    fn plain_macs_win_over_post_macs_in_either_order() {
-        let plain = [0xAA, 0xBB, 0xCC, 0xDD, 0xEE, 0xFF];
-        let post = [0x11, 0x22, 0x33, 0x44, 0x55, 0x66];
-
-        let mut plain_first = Vec::new();
-        plain_first.extend_from_slice(&plain);
-        plain_first.extend_from_slice(&post);
-        assert_eq!(
-            decode(
-                &[
-                    (ie::SOURCE_MAC_ADDRESS, 6),
-                    (ie::POST_SOURCE_MAC_ADDRESS, 6)
-                ],
-                &plain_first,
-            )
-            .src_mac,
-            Some(plain),
-        );
-
-        let mut post_first = Vec::new();
-        post_first.extend_from_slice(&post);
-        post_first.extend_from_slice(&plain);
-        assert_eq!(
-            decode(
-                &[
-                    (ie::POST_DESTINATION_MAC_ADDRESS, 6),
-                    (ie::DESTINATION_MAC_ADDRESS, 6),
-                ],
-                &post_first,
-            )
-            .dst_mac,
-            Some(plain),
-        );
-    }
-
-    #[test]
-    fn post_macs_are_used_when_no_others_are_exported() {
-        let post = [0x11, 0x22, 0x33, 0x44, 0x55, 0x66];
-        let record = decode(&[(ie::POST_SOURCE_MAC_ADDRESS, 6)], &post);
-        assert_eq!(record.src_mac, Some(post));
-    }
-
-    #[test]
-    fn plain_totals_win_over_post_totals_in_either_order() {
-        let plain = [0, 0, 0, 0, 0, 0, 0x05, 0xDC]; // 1500
-        let post = [0, 0, 0, 0, 0, 0, 0x03, 0xE8]; // 1000
-
-        let mut plain_first = Vec::new();
-        plain_first.extend_from_slice(&plain);
-        plain_first.extend_from_slice(&post);
-        assert_eq!(
-            decode(
-                &[
-                    (ie::PACKET_TOTAL_COUNT, 8),
-                    (ie::POST_PACKET_TOTAL_COUNT, 8)
-                ],
-                &plain_first,
-            )
-            .packets_total,
-            Some(1500),
-        );
-
-        let mut post_first = Vec::new();
-        post_first.extend_from_slice(&post);
-        post_first.extend_from_slice(&plain);
-        assert_eq!(
-            decode(
-                &[
-                    (ie::POST_PACKET_TOTAL_COUNT, 8),
-                    (ie::PACKET_TOTAL_COUNT, 8)
-                ],
-                &post_first,
-            )
-            .packets_total,
-            Some(1500),
-        );
-    }
-
-    #[test]
-    fn ntp_timestamps_decode_against_the_unix_epoch() {
-        // 1900-01-01 + NTP_UNIX_OFFSET seconds == the UNIX epoch, so this is 20s
-        // past the UNIX epoch with a half-second fraction.
-        let ntp_secs = u32::try_from(NTP_UNIX_OFFSET + 20).unwrap();
-        let mut payload = ntp_secs.to_be_bytes().to_vec();
-        payload.extend_from_slice(&0x8000_0000u32.to_be_bytes()); // 0.5s
-
-        let record = decode(&[(ie::FLOW_START_MICROSECONDS, 8)], &payload);
-        assert_eq!(record.flow_start, Some(Timestamp::new(20, 500_000)));
-
-        // The nanosecond IEs use the very same encoding.
-        let record = decode(&[(ie::FLOW_END_NANOSECONDS, 8)], &payload);
-        assert_eq!(record.flow_end, Some(Timestamp::new(20, 500_000)));
-    }
-
-    #[test]
-    fn ntp_timestamps_before_the_unix_epoch_are_rejected() {
-        // Era-0 NTP seconds below the offset would otherwise decode to a
-        // negative UNIX instant.
-        let payload = 1_000u64.to_be_bytes();
-        let record = decode(&[(ie::FLOW_START_MICROSECONDS, 8)], &payload);
-        assert_eq!(record.flow_start, None);
-    }
-
-    #[test]
-    fn finest_timestamp_granularity_wins_regardless_of_order() {
-        let secs = [0x00, 0x00, 0x00, 0x0A]; // 10s
-        let millis = 20_000u64.to_be_bytes(); // 20s
-        let micros = {
-            let mut v = u32::try_from(NTP_UNIX_OFFSET + 30)
-                .unwrap()
-                .to_be_bytes()
-                .to_vec();
-            v.extend_from_slice(&0u32.to_be_bytes()); // 30s
-            v
-        };
-        let expected = Some(Timestamp::new(30, 0));
-
-        let mut coarse_first = secs.to_vec();
-        coarse_first.extend_from_slice(&millis);
-        coarse_first.extend_from_slice(&micros);
-        assert_eq!(
-            decode(
-                &[
-                    (ie::FLOW_START_SECONDS, 4),
-                    (ie::FLOW_START_MILLISECONDS, 8),
-                    (ie::FLOW_START_MICROSECONDS, 8),
-                ],
-                &coarse_first,
-            )
-            .flow_start,
-            expected,
-        );
-
-        let mut fine_first = micros.clone();
-        fine_first.extend_from_slice(&millis);
-        fine_first.extend_from_slice(&secs);
-        assert_eq!(
-            decode(
-                &[
-                    (ie::FLOW_START_MICROSECONDS, 8),
-                    (ie::FLOW_START_MILLISECONDS, 8),
-                    (ie::FLOW_START_SECONDS, 4),
-                ],
-                &fine_first,
-            )
-            .flow_start,
-            expected,
-        );
-    }
-
-    #[test]
-    fn milliseconds_win_over_seconds_in_either_order() {
-        let secs = [0x00, 0x00, 0x00, 0x0A]; // 10s
-        let millis = [0, 0, 0, 0, 0, 0, 0x4E, 0x20]; // 20_000ms == 20s
-        let expected = Timestamp::new(20, 0);
-
-        let mut secs_first = Vec::new();
-        secs_first.extend_from_slice(&secs);
-        secs_first.extend_from_slice(&millis);
-        assert_eq!(
-            decode(
-                &[
-                    (ie::FLOW_START_SECONDS, 4),
-                    (ie::FLOW_START_MILLISECONDS, 8)
-                ],
-                &secs_first,
-            )
-            .flow_start,
-            Some(expected),
-        );
-
-        let mut millis_first = Vec::new();
-        millis_first.extend_from_slice(&millis);
-        millis_first.extend_from_slice(&secs);
-        assert_eq!(
-            decode(
-                &[
-                    (ie::FLOW_START_MILLISECONDS, 8),
-                    (ie::FLOW_START_SECONDS, 4)
-                ],
-                &millis_first,
-            )
-            .flow_start,
-            Some(expected),
-        );
-    }
-
-    #[test]
-    fn second_granularity_timestamps_decode_on_their_own() {
-        let payload = [0x00, 0x00, 0x00, 0x0A, 0x00, 0x00, 0x00, 0x14];
         let record = decode(
             &[(ie::FLOW_START_SECONDS, 4), (ie::FLOW_END_SECONDS, 4)],
-            &payload,
+            &[0, 0, 0, 10, 0, 0, 0, 20],
         );
         assert_eq!(record.flow_start, Some(Timestamp::new(10, 0)));
         assert_eq!(record.flow_end, Some(Timestamp::new(20, 0)));
     }
 
     #[test]
-    fn all_zero_mac_decodes_to_none() {
-        // `sniffnet-agent` writes all-zero when a flow carries no link header.
-        let payload = [0, 0, 0, 0, 0, 0, 0xAA, 0xBB, 0xCC, 0xDD, 0xEE, 0xFF];
+    fn test_apply_mac_ie() {
+        assert_wins(
+            (ie::SOURCE_MAC_ADDRESS, &MAC_A),
+            (ie::POST_SOURCE_MAC_ADDRESS, &MAC_B),
+            |r| r.src_mac,
+            &MAC_A,
+        );
+        assert_wins(
+            (ie::DESTINATION_MAC_ADDRESS, &MAC_A),
+            (ie::POST_DESTINATION_MAC_ADDRESS, &MAC_B),
+            |r| r.dst_mac,
+            &MAC_A,
+        );
+
+        assert_eq!(
+            decode(&[(ie::POST_SOURCE_MAC_ADDRESS, 6)], &MAC_B).src_mac,
+            Some(MAC_B)
+        );
+
         let record = decode(
             &[
+                (ie::POST_SOURCE_MAC_ADDRESS, 6),
                 (ie::SOURCE_MAC_ADDRESS, 6),
-                (ie::DESTINATION_MAC_ADDRESS, 6),
             ],
-            &payload,
+            &[&MAC_B[..], &[0; 6]].concat(),
         );
-        assert_eq!(record.src_mac, None);
-        assert_eq!(record.dst_mac, Some([0xAA, 0xBB, 0xCC, 0xDD, 0xEE, 0xFF]));
+        assert_eq!(record.src_mac, Some(MAC_B));
     }
 
     #[test]
-    fn flow_direction_maps_ingress_egress_and_undefined() {
-        let cases = [
-            (0x00, Some(TrafficDirection::Incoming)),
-            (0x01, Some(TrafficDirection::Outgoing)),
-            (0xFF, None),
-        ];
-        for (raw, expected) in cases {
-            let record = decode(&[(ie::FLOW_DIRECTION, 1)], &[raw]);
-            assert_eq!(record.direction, expected, "flowDirection {raw:#04x}");
+    fn test_read_timestamp() {
+        let secs = 10u32.to_be_bytes();
+        let millis = 20_500u64.to_be_bytes();
+        let ntp = ntp_bytes(30, 0x8000_0000);
+
+        for ie_id in [ie::FLOW_START_SECONDS, ie::FLOW_END_SECONDS] {
+            assert_eq!(read_timestamp(ie_id, &secs), Some(Timestamp::new(10, 0)));
         }
+        for ie_id in [ie::FLOW_START_MILLISECONDS, ie::FLOW_END_MILLISECONDS] {
+            assert_eq!(
+                read_timestamp(ie_id, &millis),
+                Some(Timestamp::new(20, 500_000))
+            );
+        }
+        for ie_id in [
+            ie::FLOW_START_MICROSECONDS,
+            ie::FLOW_END_MICROSECONDS,
+            ie::FLOW_START_NANOSECONDS,
+            ie::FLOW_END_NANOSECONDS,
+        ] {
+            assert_eq!(
+                read_timestamp(ie_id, &ntp),
+                Some(Timestamp::new(30, 500_000))
+            );
+        }
+
+        assert_eq!(read_timestamp(ie::OCTET_DELTA_COUNT, &millis), None);
+    }
+
+    #[test]
+    fn test_read_timestamp_secs() {
+        assert_eq!(
+            read_timestamp_secs(&10u32.to_be_bytes()),
+            Some(Timestamp::new(10, 0))
+        );
+        assert_eq!(
+            read_timestamp_secs(&u32::MAX.to_be_bytes()),
+            Some(Timestamp::new(i64::from(u32::MAX), 0))
+        );
+        assert_eq!(read_timestamp_secs(&[0, 0, 10]), None);
+        assert_eq!(read_timestamp_secs(&10u64.to_be_bytes()), None);
+    }
+
+    #[test]
+    fn test_read_timestamp_ms() {
+        assert_eq!(
+            read_timestamp_ms(&20_500u64.to_be_bytes()),
+            Some(Timestamp::new(20, 500_000))
+        );
+        assert_eq!(
+            read_timestamp_ms(&0u64.to_be_bytes()),
+            Some(Timestamp::new(0, 0))
+        );
+        assert_eq!(read_timestamp_ms(&20u32.to_be_bytes()), None);
+    }
+
+    #[test]
+    fn test_read_timestamp_ntp() {
+        assert_eq!(
+            read_timestamp_ntp(&ntp_bytes(20, 0x8000_0000)),
+            Some(Timestamp::new(20, 500_000))
+        );
+        assert_eq!(
+            read_timestamp_ntp(&ntp_bytes(0, 0)),
+            Some(Timestamp::new(0, 0))
+        );
+        assert_eq!(
+            read_timestamp_ntp(&ntp_bytes(0, u32::MAX)),
+            Some(Timestamp::new(0, 999_999))
+        );
+        assert_eq!(read_timestamp_ntp(&1_000u64.to_be_bytes()), None);
+        assert_eq!(read_timestamp_ntp(&[0; 4]), None);
+    }
+
+    #[test]
+    fn test_read_unsigned() {
+        assert_eq!(read_unsigned(&C1500), Some(1500));
+        // RFC 7011 reduced-size encoding: any width from 1 to 8 bytes
+        assert_eq!(read_unsigned(&[0x05, 0xDC]), Some(1500));
+        assert_eq!(read_unsigned(&[0x00, 0x00, 0x05, 0xDC]), Some(1500));
+        assert_eq!(read_unsigned(&[0xFF]), Some(255));
+        assert_eq!(read_unsigned(&[0xFF; 8]), Some(u128::from(u64::MAX)));
+        assert_eq!(read_unsigned(&[]), None);
+        assert_eq!(read_unsigned(&[0; 9]), None);
+    }
+
+    #[test]
+    fn test_read_u16() {
+        assert_eq!(read_u16(&[0x01, 0xBB]), Some(443));
+        // a port narrowed to a single byte by reduced-size encoding
+        assert_eq!(read_u16(&[0xFF]), Some(255));
+        assert_eq!(read_u16(&[]), None);
+        assert_eq!(read_u16(&[0, 0, 1]), None);
+    }
+
+    #[test]
+    fn test_read_ipv4() {
+        assert_eq!(
+            read_ipv4(&[10, 0, 0, 1]),
+            Some(IpAddr::V4(Ipv4Addr::new(10, 0, 0, 1)))
+        );
+        assert_eq!(read_ipv4(&[10, 0, 0]), None);
+        assert_eq!(read_ipv4(&[10, 0, 0, 1, 0]), None);
+    }
+
+    #[test]
+    fn test_read_ipv6() {
+        let addr = Ipv6Addr::new(0x2001, 0xdb8, 0, 0, 0, 0, 0, 1);
+        assert_eq!(read_ipv6(&addr.octets()), Some(IpAddr::V6(addr)));
+        assert_eq!(read_ipv6(&addr.octets()[..15]), None);
+        // an IPv4 address is never widened into this slot
+        assert_eq!(read_ipv6(&[10, 0, 0, 1]), None);
+    }
+
+    #[test]
+    fn test_read_mac() {
+        assert_eq!(read_mac(&MAC_A), Some(MAC_A));
+        // `sniffnet-agent` writes all-zero when a flow carries no link header
+        assert_eq!(read_mac(&[0; 6]), None);
+        assert_eq!(read_mac(&MAC_A[..5]), None);
     }
 }
