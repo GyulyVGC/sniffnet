@@ -12,7 +12,7 @@ use crate::networking::capture::{
 };
 use crate::networking::ipfix::baseline_cache::BaselineCache;
 use crate::networking::ipfix::template_cache::TemplateCache;
-use crate::networking::ipfix::wire::{self, FlowRecord, Set, decode_data_record, parse_message};
+use crate::networking::ipfix::wire::{FlowRecord, Set, decode_data_record, parse_message};
 use crate::networking::manage_packets::{modify_or_insert_in_map, update_connection_stats};
 use crate::networking::types::address_port_pair::AddressPortPair;
 use crate::networking::types::arp_type::ArpType;
@@ -147,60 +147,47 @@ fn process_datagram(
     };
 
     let now = Instant::now();
+    let od_id = message.header.observation_domain_id;
 
-    // First pass: register all templates so later data sets in the same
-    // datagram can reference them.
+    // first pass: parse templates so that later data sets in this datagram can reference them
     for set in &message.sets {
         if let Set::Template(records) = set {
             for record in records {
-                state.templates.insert(
-                    peer,
-                    message.header.observation_domain_id,
-                    record.template_id,
-                    record.fields.clone(),
-                    now,
-                );
+                state
+                    .templates
+                    .insert(peer, od_id, record.template_id, record.fields.clone(), now);
             }
         }
     }
 
-    // Second pass: decode data sets and project records into InfoTraffic.
+    // second pass: parse data sets and populate InfoTraffic
     for set in &message.sets {
         if let Set::Data {
             template_id,
             payload,
         } = *set
         {
-            let Some(template) =
-                state
-                    .templates
-                    .get(peer, message.header.observation_domain_id, template_id, now)
-            else {
-                // Data record references a template we haven't seen — skip
-                // silently per RFC 7011 §8.
+            let Some(template) = state.templates.get(peer, od_id, template_id, now) else {
+                // no such template seen
                 continue;
             };
             let mut remaining = payload;
-            // Decode records until the remaining bytes can no longer fit a
-            // record, treating any trailing bytes as padding (RFC 7011 §3.3.1).
-            while record_fits(template, remaining) {
+            while !remaining.is_empty() {
                 let Ok((rest, record)) = decode_data_record(template, remaining) else {
                     break;
                 };
-                if rest.len() == remaining.len() {
-                    // No progress — guard against infinite loops on templates
-                    // with all-zero-length fields.
+                if rest.len() >= remaining.len() {
+                    // no progress: guard against infinite loops
                     break;
                 }
                 remaining = rest;
-                // A biflow is accounted as the two records the pcap pipeline
-                // would have produced for the same conversation.
-                let reverse = reverse_record(&record);
+                // a biflow is accounted as two records
+                let reverse = get_reverse_record(&record);
                 for flow in [Some(record), reverse].into_iter().flatten() {
                     ingest_flow_record(
                         &flow,
                         peer,
-                        message.header.observation_domain_id,
+                        od_id,
                         &mut state.baselines,
                         now,
                         info_traffic_msg,
@@ -215,28 +202,8 @@ fn process_datagram(
     true
 }
 
-fn record_fits(template: &[wire::FieldSpec], remaining: &[u8]) -> bool {
-    // A template with at least one fixed-length field can be sized
-    // statically; variable-length fields can never satisfy a strict
-    // "remaining >= min_size" check below their 1-byte length prefix so we
-    // fall back to "at least the variable-length prefix is present."
-    let mut needed = 0usize;
-    for field in template {
-        if field.length == wire::VARIABLE_LENGTH {
-            needed += 1; // at minimum the 1-byte length prefix
-        } else {
-            needed += field.length as usize;
-        }
-    }
-    remaining.len() >= needed && needed > 0
-}
-
-/// The other half of an RFC 5103 biflow, as a record in its own right: the
-/// 5-tuple and the MAC addresses swapped, and the reverse counters moved into
-/// the slots the forward ones occupy. Everything downstream — the totals
-/// baseline, the direction, the zero-counter guard — then applies to it exactly
-/// as it does to any other record.
-fn reverse_record(record: &FlowRecord) -> Option<FlowRecord> {
+/// The other half of an RFC 5103 biflow, as a full-fledged record
+fn get_reverse_record(record: &FlowRecord) -> Option<FlowRecord> {
     let reverse = record.reverse?;
     Some(FlowRecord {
         src_ip: record.dst_ip,
@@ -250,8 +217,6 @@ fn reverse_record(record: &FlowRecord) -> Option<FlowRecord> {
         packets_total: reverse.packets_total,
         src_mac: record.dst_mac,
         dst_mac: record.src_mac,
-        // IE 61 describes the forward direction at the observation point, so
-        // the reverse half travels the other way
         direction: record.direction.map(TrafficDirection::opposite),
         flow_start: record.flow_start,
         flow_end: record.flow_end,
@@ -383,7 +348,7 @@ const NO_INTERFACE_ADDRESSES: &[Address] = &[];
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::networking::ipfix::wire::{IPFIX_VERSION, ReverseCounters};
+    use crate::networking::ipfix::wire::{self, IPFIX_VERSION, ReverseCounters};
     use crate::networking::types::data_representation::DataRepr;
     use std::net::{IpAddr, Ipv4Addr, Ipv6Addr};
 
@@ -438,17 +403,6 @@ mod tests {
 
     fn agent_fields(addr_fields: [(u16, u16); 2]) -> Vec<(u16, u16)> {
         addr_fields.into_iter().chain(AGENT_COMMON_FIELDS).collect()
-    }
-
-    fn field_specs(fields: &[(u16, u16)]) -> Vec<wire::FieldSpec> {
-        fields
-            .iter()
-            .map(|(ie_id, length)| wire::FieldSpec {
-                ie_id: *ie_id,
-                length: *length,
-                enterprise: None,
-            })
-            .collect()
     }
 
     fn set(set_id: u16, body: &[u8]) -> Vec<u8> {
@@ -811,28 +765,46 @@ mod tests {
     }
 
     #[test]
-    fn test_record_fits() {
-        let fixed = field_specs(&[(8, 4), (12, 4)]);
-        assert!(record_fits(&fixed, &[0; 8]));
-        assert!(record_fits(&fixed, &[0; 9]), "another record may follow");
-        // anything short of a whole record is padding, not a record
-        assert!(!record_fits(&fixed, &[0; 7]));
-        assert!(!record_fits(&fixed, &[]));
+    fn test_data_set_record_loop_terminates() {
+        // a variable-length field (RFC 7011 §7) makes the record size readable
+        // only from the record itself, so the padding after it is whatever is
+        // left below the smallest record the template admits
+        let mut fields: Vec<(u16, u16)> = TOTALS_FIELDS.to_vec();
+        fields.push((82, wire::VARIABLE_LENGTH)); // interfaceName
+        let mut body = totals_record(1500, 10);
+        body.push(0x00); // the variable-length field, empty
+        body.extend_from_slice(&[0; 2]); // pad to a 4-byte boundary
+        let bytes = datagram(&[template_set(256, &fields), set(256, &body)]);
+        let (info, _, succeeded) = run_all(&[&bytes]);
+        assert!(succeeded);
+        assert_eq!(info.map.len(), 1, "the padding is not a second record");
+        assert_eq!(info.tot_data_info.tot_data(DataRepr::Packets), 10);
 
-        // a variable-length field can only be sized down to its length prefix
-        let variable = field_specs(&[(8, 4), (82, wire::VARIABLE_LENGTH)]);
-        assert!(record_fits(&variable, &[0; 5]));
-        assert!(!record_fits(&variable, &[0; 4]));
+        // a record cut short mid-field is dropped, not partially accounted
+        let bytes = datagram(&[
+            template_set(257, &TOTALS_FIELDS),
+            set(257, &totals_record(1500, 10)[..20]),
+        ]);
+        let (info, _, succeeded) = run_all(&[&bytes]);
+        assert!(succeeded);
+        assert!(info.map.is_empty());
 
-        // a template that needs no bytes would otherwise be decoded forever
-        assert!(!record_fits(&field_specs(&[(8, 0)]), &[0; 8]));
-        assert!(!record_fits(&[], &[0; 8]));
+        // templates that consume no bytes would otherwise be decoded forever
+        for degenerate in [&[(8, 0)][..], &[]] {
+            let bytes = datagram(&[
+                template_set(258, degenerate),
+                set(258, &totals_record(1500, 10)),
+            ]);
+            let (info, _, succeeded) = run_all(&[&bytes]);
+            assert!(succeeded);
+            assert!(info.map.is_empty());
+        }
     }
 
     #[test]
     fn test_reverse_record() {
         // a uniflow has no other half
-        assert_eq!(reverse_record(&flow_record(Some(1500), Some(10))), None);
+        assert_eq!(get_reverse_record(&flow_record(Some(1500), Some(10))), None);
 
         let mut record = flow_record(Some(1500), Some(10));
         record.bytes_total = Some(4000);
@@ -849,7 +821,7 @@ mod tests {
             packets_total: Some(80),
         });
 
-        let reverse = reverse_record(&record).expect("a biflow has a reverse half");
+        let reverse = get_reverse_record(&record).expect("a biflow has a reverse half");
         assert_eq!(
             reverse,
             FlowRecord {
@@ -880,7 +852,7 @@ mod tests {
 
         // a direction the exporter never sent can't be flipped into one
         record.direction = None;
-        assert_eq!(reverse_record(&record).unwrap().direction, None);
+        assert_eq!(get_reverse_record(&record).unwrap().direction, None);
     }
 
     #[test]
