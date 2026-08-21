@@ -1,7 +1,6 @@
 //! IPFIX collector runtime
 
 use async_channel::Sender;
-use pcap::Address;
 use std::net::{SocketAddr, UdpSocket};
 use std::time::Instant;
 use tokio::sync::broadcast::Receiver;
@@ -255,7 +254,7 @@ fn ingest_flow_record(
     let (traffic_direction, service) = modify_or_insert_in_map(
         info_traffic_msg,
         &key,
-        NO_INTERFACE_ADDRESSES,
+        &[],
         mac_addresses,
         None,
         ArpType::default(),
@@ -270,12 +269,33 @@ fn ingest_flow_record(
         info_traffic_msg,
         resolutions_state,
         &key,
-        NO_INTERFACE_ADDRESSES,
+        &[],
         exchanged_packets,
         exchanged_bytes,
         traffic_direction,
         service,
     );
+}
+
+fn build_key(record: &FlowRecord) -> Option<AddressPortPair> {
+    let source = record.src_ip?;
+    let dest = record.dst_ip?;
+    let protocol = record.protocol?;
+    let sport = match protocol {
+        Protocol::TCP | Protocol::UDP => record.src_port,
+        _ => None,
+    };
+    let dport = match protocol {
+        Protocol::TCP | Protocol::UDP => record.dst_port,
+        _ => None,
+    };
+    Some(AddressPortPair {
+        source,
+        sport,
+        dest,
+        dport,
+        protocol,
+    })
 }
 
 /// Work out how much traffic this record actually adds.
@@ -314,36 +334,6 @@ fn resolve_counters(
 
     (bytes, packets)
 }
-
-fn build_key(record: &FlowRecord) -> Option<AddressPortPair> {
-    let source = record.src_ip?;
-    let dest = record.dst_ip?;
-    let protocol = record.protocol?;
-    let sport = match protocol {
-        Protocol::TCP | Protocol::UDP => record.src_port,
-        _ => None,
-    };
-    let dport = match protocol {
-        Protocol::TCP | Protocol::UDP => record.dst_port,
-        _ => None,
-    };
-    Some(AddressPortPair {
-        source,
-        sport,
-        dest,
-        dport,
-        protocol,
-    })
-}
-
-/// Flows are observed somewhere else entirely, so there is no local interface
-/// to classify them against — the exporter's own IP is no help either, since a
-/// router exports flows between hosts that are both remote to it.
-///
-/// Passing no addresses is what PCAP import does, and it makes the downstream
-/// classifiers fall back to their bogon heuristic. Flow direction proper comes
-/// from IE 61 whenever the exporter sends it, which overrides the heuristic.
-const NO_INTERFACE_ADDRESSES: &[Address] = &[];
 
 #[cfg(test)]
 mod tests {
