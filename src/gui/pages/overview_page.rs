@@ -326,6 +326,19 @@ pub(crate) fn col_device<'a>(
     #[cfg(target_os = "windows")]
     let cs_info = cs.get_desc().unwrap_or(cs.get_name());
 
+    let tooltip_content: Option<Element<Message, StyleType>> = if cs.supports_link_type() {
+        Some(
+            Column::new()
+                .spacing(10)
+                .push(Text::new(link_type.full_print_on_one_line(language)))
+                .push(get_addresses_row(link_type, cs.get_addresses()))
+                .into(),
+        )
+    } else {
+        // show bind addresses for IPFIX collector listening on unspecified IP
+        get_addresses_row(link_type, cs.get_ipfix_unspecified_bound_addresses()).map(Element::from)
+    };
+
     let filters_desc: Element<Message, StyleType> = if filters.is_some_filter_active() {
         Row::new()
             .spacing(10)
@@ -346,17 +359,7 @@ pub(crate) fn col_device<'a>(
                     Row::new()
                         .spacing(10)
                         .push(Text::new(format!("   {cs_info}")))
-                        .push(if cs.supports_link_type() {
-                            Some(get_info_tooltip(
-                                Column::new()
-                                    .spacing(10)
-                                    .push(Text::new(link_type.full_print_on_one_line(language)))
-                                    .push(get_addresses_row(link_type, cs.get_addresses()))
-                                    .into(),
-                            ))
-                        } else {
-                            None
-                        }),
+                        .push(tooltip_content.map(get_info_tooltip)),
                 ),
         )
         .push(if cs.supports_filters() {

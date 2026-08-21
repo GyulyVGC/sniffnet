@@ -32,6 +32,16 @@ impl MyIpfixSocket {
         self.port = port;
     }
 
+    pub fn unspecified_addr(&self) -> Option<IpAddr> {
+        if self.addr.is_empty() {
+            return Some(DEFAULT_IPFIX_ADDR);
+        }
+        self.addr
+            .parse::<IpAddr>()
+            .ok()
+            .filter(IpAddr::is_unspecified)
+    }
+
     pub fn display_name(&self) -> String {
         let addr = if self.addr.is_empty() {
             &DEFAULT_IPFIX_ADDR.to_string()
@@ -44,7 +54,9 @@ impl MyIpfixSocket {
             &self.port
         };
 
-        if addr.parse::<Ipv6Addr>().is_ok() {
+        if self.unspecified_addr().is_some() {
+            format!("*:{port}")
+        } else if addr.parse::<Ipv6Addr>().is_ok() {
             format!("[{addr}]:{port}")
         } else {
             format!("{addr}:{port}")
@@ -57,9 +69,7 @@ impl MyIpfixSocket {
         } else {
             self.port
                 .parse::<u16>()
-                .ok()
-                .filter(|port| *port != 0)
-                .ok_or_else(|| format!("Invalid port number: {}", self.port))?
+                .map_err(|_| format!("Invalid port number: {}", self.port))?
         };
         let addr = if self.addr.is_empty() {
             DEFAULT_IPFIX_ADDR
@@ -122,9 +132,6 @@ mod tests {
             "Invalid port number: invalid"
         );
 
-        socket.set_port("0".to_string());
-        assert_eq!(socket.socket_addr().unwrap_err(), "Invalid port number: 0");
-
         // empty
         socket.set_addr("".to_string());
         socket.set_port("".to_string());
@@ -137,10 +144,7 @@ mod tests {
     #[test]
     fn test_display_name() {
         let mut socket = MyIpfixSocket::default();
-        assert_eq!(
-            socket.display_name(),
-            format!("{DEFAULT_IPFIX_ADDR}:{DEFAULT_IPFIX_PORT}")
-        );
+        assert_eq!(socket.display_name(), format!("*:{DEFAULT_IPFIX_PORT}"));
 
         socket.set_addr("10.0.0.1".to_string());
         socket.set_port("1234".to_string());
@@ -150,6 +154,9 @@ mod tests {
         socket.set_port("5678".to_string());
         assert_eq!(socket.display_name(), "[::1]:5678");
 
+        socket.set_addr("::".to_string());
+        assert_eq!(socket.display_name(), "*:5678");
+
         // invalid is also accepted by display_name
         socket.set_addr("invalid".to_string());
         socket.set_port("invalid".to_string());
@@ -158,9 +165,6 @@ mod tests {
         // empty
         socket.set_addr("".to_string());
         socket.set_port("".to_string());
-        assert_eq!(
-            socket.display_name(),
-            format!("{DEFAULT_IPFIX_ADDR}:{DEFAULT_IPFIX_PORT}")
-        );
+        assert_eq!(socket.display_name(), format!("*:{DEFAULT_IPFIX_PORT}"));
     }
 }

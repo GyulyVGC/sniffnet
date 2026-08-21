@@ -33,7 +33,8 @@ use crate::networking::capture::BackendTrafficMessage;
 use crate::networking::capture::spawn_capture_thread;
 use crate::networking::traffic_preview::{TrafficPreview, traffic_preview};
 use crate::networking::types::capture_context::{
-    CaptureContext, CaptureError, CaptureSource, CaptureSourcePicklist, MyPcapImport,
+    CaptureContext, CaptureError, CaptureSource, CaptureSourcePicklist, MyIpfixCollector,
+    MyPcapImport,
 };
 use crate::networking::types::combobox_data_states::ComboboxDataStates;
 use crate::networking::types::data_representation::DataRepr;
@@ -512,7 +513,8 @@ impl Sniffer {
                 self.set_pcap_import(self.conf.import_pcap_path.clone());
             }
             CaptureSourcePicklist::Ipfix => {
-                self.capture_source = CaptureSource::Ipfix(self.conf.ipfix_socket.clone());
+                self.capture_source =
+                    CaptureSource::Ipfix(MyIpfixCollector::new(self.conf.ipfix_socket.clone()));
             }
             CaptureSourcePicklist::Device => {
                 self.device_selection(&self.conf.device.device_name.clone());
@@ -837,12 +839,14 @@ impl Sniffer {
 
     fn set_ipfix_addr(&mut self, addr: String) {
         self.conf.ipfix_socket.set_addr(addr);
-        self.capture_source = CaptureSource::Ipfix(self.conf.ipfix_socket.clone());
+        self.capture_source =
+            CaptureSource::Ipfix(MyIpfixCollector::new(self.conf.ipfix_socket.clone()));
     }
 
     fn set_ipfix_port(&mut self, port: String) {
         self.conf.ipfix_socket.set_port(port);
-        self.capture_source = CaptureSource::Ipfix(self.conf.ipfix_socket.clone());
+        self.capture_source =
+            CaptureSource::Ipfix(MyIpfixCollector::new(self.conf.ipfix_socket.clone()));
     }
 
     fn pending_hosts(&mut self, cap_id: usize, host_msgs: Vec<HostMessage>) {
@@ -1019,6 +1023,13 @@ impl Sniffer {
                 .map(|e| CaptureError::Fatal(e.to_string()));
             self.running_page = Some(self.conf.last_opened_page);
 
+            if let CaptureContext::Ipfix(udp_socket) = &capture_context
+                && let CaptureSource::Ipfix(collector) = &mut self.capture_source
+                && let Ok(local) = udp_socket.local_addr()
+            {
+                collector.set_actually_bind_addr(local);
+            }
+
             if capture_context.error().is_none() {
                 // no fatal pcap error
                 let curr_cap_id = self.current_capture_rx.0;
@@ -1120,6 +1131,14 @@ impl Sniffer {
         self.frozen = false;
         self.freeze_tx = None;
         self.program_lookup = None;
+        // reset IPFIX collector's socket to match configuration
+        // (particularly relevant for port = 0 that was rewritten with the actual UDP bind)
+        if matches!(self.capture_source, CaptureSource::Ipfix(_))
+            && self.conf.capture_source_picklist == CaptureSourcePicklist::Ipfix
+        {
+            self.capture_source =
+                CaptureSource::Ipfix(MyIpfixCollector::new(self.conf.ipfix_socket.clone()));
+        }
         self.start_traffic_previews()
     }
 

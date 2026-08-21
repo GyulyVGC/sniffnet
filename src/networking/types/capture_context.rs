@@ -11,7 +11,8 @@ use crate::translations::types::language::Language;
 use crate::utils::error_logger::{ErrorLogger, Location};
 use pcap::{Active, Address, Capture, Device, Error, Packet, Savefile, Stat};
 use serde::{Deserialize, Serialize};
-use std::net::{SocketAddr, UdpSocket};
+use std::collections::HashSet;
+use std::net::{IpAddr, SocketAddr, UdpSocket};
 use std::time::{Duration, Instant};
 
 pub enum CaptureContext {
@@ -44,7 +45,7 @@ impl CaptureContext {
                 Err(e) => return Self::Error(e),
             },
             CaptureSource::Ipfix(ipfix) => {
-                return Self::new_ipfix(ipfix).unwrap_or_else(Self::Error);
+                return Self::new_ipfix(&ipfix.socket).unwrap_or_else(Self::Error);
             }
         };
 
@@ -227,7 +228,7 @@ impl CaptureType {
 pub enum CaptureSource {
     Device(MyDevice),
     File(MyPcapImport),
-    Ipfix(MyIpfixSocket),
+    Ipfix(MyIpfixCollector),
 }
 
 impl CaptureSource {
@@ -243,7 +244,7 @@ impl CaptureSource {
             }
             CaptureSourcePicklist::Ipfix => {
                 let socket = conf.ipfix_socket.clone();
-                Self::Ipfix(socket)
+                Self::Ipfix(MyIpfixCollector::new(socket))
             }
         }
     }
@@ -256,6 +257,15 @@ impl CaptureSource {
         }
     }
 
+    /// Addresses the collector listens on when bound to the unspecified address
+    /// (only used for display purposes)
+    pub fn get_ipfix_unspecified_bound_addresses(&self) -> &[Address] {
+        match self {
+            Self::Ipfix(collector) => &collector.unspecified_bound_addresses,
+            Self::Device(_) | Self::File(_) => &[],
+        }
+    }
+
     pub fn get_addresses(&self) -> &[Address] {
         match self {
             Self::Device(device) => device.get_addresses(),
@@ -264,20 +274,24 @@ impl CaptureSource {
     }
 
     pub fn set_addresses(&mut self) {
-        if let Self::Device(my_device) = self {
-            let mut addresses = Vec::new();
-            for dev in Device::list().log_err(location!()).unwrap_or_default() {
-                if matches!(
-                    my_device.get_link_type(),
-                    MyLinkType::LinuxSll(_) | MyLinkType::LinuxSll2(_)
-                ) {
-                    addresses.extend(dev.addresses);
-                } else if dev.name.eq(my_device.get_name()) {
-                    addresses.extend(dev.addresses);
-                    break;
+        match self {
+            Self::Device(my_device) => {
+                let mut addresses = Vec::new();
+                for dev in Device::list().log_err(location!()).unwrap_or_default() {
+                    if matches!(
+                        my_device.get_link_type(),
+                        MyLinkType::LinuxSll(_) | MyLinkType::LinuxSll2(_)
+                    ) {
+                        addresses.extend(dev.addresses);
+                    } else if dev.name.eq(my_device.get_name()) {
+                        addresses.extend(dev.addresses);
+                        break;
+                    }
                 }
+                my_device.set_addresses(addresses);
             }
-            my_device.set_addresses(addresses);
+            Self::Ipfix(collector) => collector.set_unspecified_bound_addresses(),
+            Self::File(_) => {}
         }
     }
 
@@ -301,7 +315,7 @@ impl CaptureSource {
         match self {
             Self::Device(device) => device.get_name().clone(),
             Self::File(file) => file.path.clone(),
-            Self::Ipfix(c) => c.display_name(),
+            Self::Ipfix(collector) => collector.socket.display_name(),
         }
     }
 
@@ -353,6 +367,65 @@ impl CaptureSource {
             Self::Device(_) | Self::Ipfix(_) => true,
             Self::File(_) => false,
         }
+    }
+}
+
+#[derive(Clone)]
+pub struct MyIpfixCollector {
+    socket: MyIpfixSocket,
+    /// Addresses the collector listens on when bound to the unspecified address
+    /// (only used for display purposes)
+    unspecified_bound_addresses: Vec<Address>,
+}
+
+impl MyIpfixCollector {
+    pub fn new(socket: MyIpfixSocket) -> Self {
+        Self {
+            socket,
+            unspecified_bound_addresses: Vec::new(),
+        }
+    }
+
+    fn set_unspecified_bound_addresses(&mut self) {
+        let Some(bound_to) = self.socket.unspecified_addr() else {
+            self.unspecified_bound_addresses.clear();
+            return;
+        };
+
+        let mut seen = HashSet::new();
+        self.unspecified_bound_addresses = Device::list()
+            .log_err(location!())
+            .unwrap_or_default()
+            .into_iter()
+            .flat_map(|dev| dev.addresses)
+            // a socket bound to an unspecified IP only receives datagrams of the same family
+            .filter(|addr| addr.addr.is_ipv4() == bound_to.is_ipv4())
+            // exporters can't reach loopback, multicast, broadcast, and link-local addresses
+            .filter(|addr| match addr.addr {
+                IpAddr::V4(v4) => {
+                    !v4.is_loopback()
+                        && !v4.is_link_local()
+                        && !v4.is_unspecified()
+                        && !v4.is_broadcast()
+                        && !v4.is_multicast()
+                }
+                IpAddr::V6(v6) => {
+                    !v6.is_loopback()
+                        && !v6.is_unicast_link_local()
+                        && !v6.is_unspecified()
+                        && !v6.is_multicast()
+                }
+            })
+            // remove duplicates
+            .filter(|addr| seen.insert(addr.addr))
+            .collect();
+    }
+
+    /// Update the collector's bind address and port to the actual ones used by the socket
+    /// (particularly relevant for port = 0, which lets the OS pick a free port)
+    pub(crate) fn set_actually_bind_addr(&mut self, local_addr: SocketAddr) {
+        self.socket.set_addr(local_addr.ip().to_string());
+        self.socket.set_port(local_addr.port().to_string());
     }
 }
 
