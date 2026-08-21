@@ -150,10 +150,16 @@ pub enum Message {
     SetNewerReleaseStatus(Option<bool>),
     /// Set the pcap import path
     SetPcapImport(String),
+    /// Set the IPFIX collector bind address
+    SetIpfixAddr(String),
+    /// Set the IPFIX collector bind port
+    SetIpfixPort(String),
     /// Sent by the backend parsing packets at the end of an offline capture; includes all the pending hosts
     PendingHosts(usize, Vec<HostMessage>),
     /// Sent by offline captures: ticks without packets
     OfflineGap(usize, u32),
+    /// Sent by the IPFIX collector: incoming datagrams aren't decodable as IPFIX
+    IpfixUndecodable(usize),
     /// Emitted every second to repeat certain tasks (such as fetching the network devices)
     Periodic,
     /// Expand or collapse the given logged notification

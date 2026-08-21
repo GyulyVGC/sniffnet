@@ -12,17 +12,21 @@ use crate::gui::styles::text::TextType;
 use crate::gui::styles::types::gradient_type::GradientType;
 use crate::gui::types::export_pcap::ExportPcap;
 use crate::gui::types::filters::Filters;
+use crate::gui::types::ipfix_socket::{DEFAULT_IPFIX_ADDR, DEFAULT_IPFIX_PORT, MyIpfixSocket};
 use crate::gui::types::message::Message;
 use crate::gui::types::settings::Settings;
 use crate::networking::types::capture_context::{CaptureSource, CaptureSourcePicklist};
 use crate::networking::types::my_device::MyDevice;
 use crate::networking::types::my_link_type::MyLinkType;
-use crate::translations::translations::{network_adapter_translation, start_translation};
+use crate::translations::translations::{
+    address_translation, network_adapter_translation, start_translation,
+};
 use crate::translations::translations_3::{
-    directory_translation, export_capture_translation, file_name_translation,
+    directory_translation, export_capture_translation, file_name_translation, port_translation,
 };
 use crate::translations::translations_4::capture_file_translation;
 use crate::translations::translations_5::{filter_traffic_translation, traffic_source_translation};
+use crate::translations::translations_6::ipfix_collector_translation;
 use crate::utils::formatted_strings::get_path_termination_string;
 use crate::utils::types::file_info::FileInfo;
 use crate::utils::types::icon::Icon;
@@ -46,14 +50,15 @@ pub fn initial_page(sniffer: &Sniffer) -> Container<'_, Message, StyleType> {
 
     let col_data_source = get_col_data_source(sniffer, language);
 
-    let col_checkboxes = Column::new()
-        .spacing(10)
-        .push(get_filters_group(&sniffer.conf.filters, language))
-        .push(get_export_pcap_group_maybe(
-            sniffer.conf.capture_source_picklist,
-            &sniffer.conf.export_pcap,
-            language,
-        ));
+    let mut col_checkboxes = Column::new().spacing(10);
+    if sniffer.conf.capture_source_picklist.supports_filters() {
+        col_checkboxes = col_checkboxes.push(get_filters_group(&sniffer.conf.filters, language));
+    }
+    col_checkboxes = col_checkboxes.push(get_export_pcap_group_maybe(
+        sniffer.conf.capture_source_picklist,
+        &sniffer.conf.export_pcap,
+        language,
+    ));
 
     let is_capture_source_consistent = sniffer.is_capture_source_consistent();
     let right_col = Column::new()
@@ -102,22 +107,25 @@ fn button_start<'a>(
 }
 
 fn get_col_data_source(sniffer: &Sniffer, language: Language) -> Column<'_, Message, StyleType> {
-    let current_option = if sniffer.conf.capture_source_picklist == CaptureSourcePicklist::Device {
-        network_adapter_translation(language)
-    } else {
-        capture_file_translation(language)
+    let current_option = match sniffer.conf.capture_source_picklist {
+        CaptureSourcePicklist::Device => network_adapter_translation(language),
+        CaptureSourcePicklist::File => capture_file_translation(language),
+        CaptureSourcePicklist::Ipfix => ipfix_collector_translation(language),
     };
     let picklist = PickList::new(
         [
             network_adapter_translation(language),
             capture_file_translation(language),
+            ipfix_collector_translation(language),
         ],
         Some(current_option),
         move |option| {
             if option == network_adapter_translation(language) {
                 Message::SetCaptureSource(CaptureSourcePicklist::Device)
-            } else {
+            } else if option == capture_file_translation(language) {
                 Message::SetCaptureSource(CaptureSourcePicklist::File)
+            } else {
+                Message::SetCaptureSource(CaptureSourcePicklist::Ipfix)
             }
         },
     )
@@ -149,6 +157,12 @@ fn get_col_data_source(sniffer: &Sniffer, language: Language) -> Column<'_, Mess
                 language,
                 &sniffer.capture_source,
                 &sniffer.conf.import_pcap_path,
+            ));
+        }
+        CaptureSourcePicklist::Ipfix => {
+            col = col.push(get_col_ipfix_collector(
+                language,
+                &sniffer.conf.ipfix_socket,
             ));
         }
     }
@@ -217,7 +231,7 @@ fn get_col_adapter(sniffer: &Sniffer) -> Column<'_, Message, StyleType> {
 
 pub(crate) fn get_addresses_row(
     link_type: MyLinkType,
-    addresses: &Vec<Address>,
+    addresses: &[Address],
 ) -> Option<row::Wrapping<'_, Message, StyleType>> {
     if addresses.is_empty()
         || matches!(
@@ -302,6 +316,42 @@ fn get_col_import_pcap<'a>(
     Column::new().spacing(5).push(button)
 }
 
+fn get_col_ipfix_collector<'a>(
+    language: Language,
+    ipfix_socket: &MyIpfixSocket,
+) -> Column<'a, Message, StyleType> {
+    let addr_row = Row::new()
+        .align_y(Alignment::Center)
+        .spacing(5)
+        .push(Text::new(format!("{}:", address_translation(language))))
+        .push(
+            TextInput::new(&DEFAULT_IPFIX_ADDR.to_string(), ipfix_socket.addr())
+                .on_input(Message::SetIpfixAddr)
+                .padding([2, 5]),
+        );
+    let port_row = Row::new()
+        .align_y(Alignment::Center)
+        .spacing(5)
+        .push(Text::new(format!("{}:", port_translation(language))))
+        .push(
+            TextInput::new(&DEFAULT_IPFIX_PORT.to_string(), ipfix_socket.port())
+                .on_input(Message::SetIpfixPort)
+                .padding([2, 5]),
+        );
+    let content = Column::new()
+        .width(Length::Fill)
+        .padding(15)
+        .spacing(10)
+        .push(addr_row)
+        .push(port_row);
+
+    Column::new().spacing(5).push(
+        Container::new(content)
+            .width(Length::Fill)
+            .class(ContainerType::BorderedRound),
+    )
+}
+
 fn get_filters_group<'a>(
     filters: &Filters,
     language: Language,
@@ -345,7 +395,7 @@ fn get_export_pcap_group_maybe<'a>(
     export_pcap: &ExportPcap,
     language: Language,
 ) -> Option<Container<'a, Message, StyleType>> {
-    if cs_pick == CaptureSourcePicklist::File {
+    if !cs_pick.supports_export_pcap() {
         return None;
     }
 

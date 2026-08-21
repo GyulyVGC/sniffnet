@@ -29,11 +29,12 @@ use crate::gui::types::timing_events::TimingEvents;
 use crate::mmdb::asn::ASN_MMDB;
 use crate::mmdb::country::COUNTRY_MMDB;
 use crate::mmdb::types::mmdb_reader::{MmdbReader, MmdbReaders};
-use crate::networking::parse_packets::BackendTrafficMessage;
-use crate::networking::parse_packets::parse_packets;
+use crate::networking::capture::BackendTrafficMessage;
+use crate::networking::capture::spawn_capture_thread;
 use crate::networking::traffic_preview::{TrafficPreview, traffic_preview};
 use crate::networking::types::capture_context::{
-    CaptureContext, CaptureSource, CaptureSourcePicklist, MyPcapImport,
+    CaptureContext, CaptureError, CaptureSource, CaptureSourcePicklist, MyIpfixCollector,
+    MyPcapImport,
 };
 use crate::networking::types::combobox_data_states::ComboboxDataStates;
 use crate::networking::types::data_representation::DataRepr;
@@ -105,8 +106,8 @@ pub struct Sniffer {
     pub newer_release_available: Option<bool>,
     /// Network device to be analyzed, or PCAP file to be imported
     pub capture_source: CaptureSource,
-    /// Signals if a pcap error occurred
-    pub pcap_error: Option<String>,
+    /// Signals if the capture backend reported a problem
+    pub capture_error: Option<CaptureError>,
     /// Messages status
     pub dots_pulse: (String, u8),
     /// Traffic chart displayed in the Overview page
@@ -170,7 +171,7 @@ impl Sniffer {
             logged_notifications: LoggedNotifications::default(),
             newer_release_available: None,
             capture_source,
-            pcap_error: None,
+            capture_error: None,
             dots_pulse: (".".to_string(), 0),
             traffic_chart: TrafficChart::new(style, language, data_repr),
             preview_charts,
@@ -359,8 +360,11 @@ impl Sniffer {
             Message::ScaleFactorShortcut(increase) => self.scale_factor_shortcut(increase),
             Message::SetNewerReleaseStatus(status) => self.set_newer_release_status(status),
             Message::SetPcapImport(path) => self.set_pcap_import(path),
+            Message::SetIpfixAddr(addr) => self.set_ipfix_addr(addr),
+            Message::SetIpfixPort(port) => self.set_ipfix_port(port),
             Message::PendingHosts(cap_id, host_msgs) => self.pending_hosts(cap_id, host_msgs),
             Message::OfflineGap(cap_id, gap) => self.offline_gap(cap_id, gap),
+            Message::IpfixUndecodable(cap_id) => self.ipfix_undecodable(cap_id),
             Message::Periodic => self.periodic(),
             Message::ExpandNotification(id, expand) => self.expand_notification(id, expand),
             Message::ToggleRemoteNotifications => self.toggle_remote_notifications(),
@@ -504,10 +508,17 @@ impl Sniffer {
 
     fn set_capture_source(&mut self, cs_pick: CaptureSourcePicklist) {
         self.conf.capture_source_picklist = cs_pick;
-        if cs_pick == CaptureSourcePicklist::File {
-            self.set_pcap_import(self.conf.import_pcap_path.clone());
-        } else {
-            self.device_selection(&self.conf.device.device_name.clone());
+        match cs_pick {
+            CaptureSourcePicklist::File => {
+                self.set_pcap_import(self.conf.import_pcap_path.clone());
+            }
+            CaptureSourcePicklist::Ipfix => {
+                self.capture_source =
+                    CaptureSource::Ipfix(MyIpfixCollector::new(self.conf.ipfix_socket.clone()));
+            }
+            CaptureSourcePicklist::Device => {
+                self.device_selection(&self.conf.device.device_name.clone());
+            }
         }
     }
 
@@ -826,6 +837,18 @@ impl Sniffer {
         }
     }
 
+    fn set_ipfix_addr(&mut self, addr: String) {
+        self.conf.ipfix_socket.set_addr(addr);
+        self.capture_source =
+            CaptureSource::Ipfix(MyIpfixCollector::new(self.conf.ipfix_socket.clone()));
+    }
+
+    fn set_ipfix_port(&mut self, port: String) {
+        self.conf.ipfix_socket.set_port(port);
+        self.capture_source =
+            CaptureSource::Ipfix(MyIpfixCollector::new(self.conf.ipfix_socket.clone()));
+    }
+
     fn pending_hosts(&mut self, cap_id: usize, host_msgs: Vec<HostMessage>) {
         if cap_id == self.current_capture_rx.0 {
             for host_msg in host_msgs {
@@ -837,6 +860,12 @@ impl Sniffer {
     fn offline_gap(&mut self, cap_id: usize, gap: u32) {
         if cap_id == self.current_capture_rx.0 {
             self.traffic_chart.push_offline_gap_to_splines(gap);
+        }
+    }
+
+    fn ipfix_undecodable(&mut self, cap_id: usize) {
+        if cap_id == self.current_capture_rx.0 {
+            self.capture_error = Some(CaptureError::IpfixUndecodable);
         }
     }
 
@@ -989,11 +1018,20 @@ impl Sniffer {
             let pcap_path = self.conf.export_pcap.full_path();
             let capture_context =
                 CaptureContext::new(&self.capture_source, pcap_path.as_ref(), &self.conf.filters);
-            self.pcap_error = capture_context.error().map(ToString::to_string);
+            self.capture_error = capture_context
+                .error()
+                .map(|e| CaptureError::Fatal(e.to_string()));
             self.running_page = Some(self.conf.last_opened_page);
 
+            if let CaptureContext::Ipfix(udp_socket) = &capture_context
+                && let CaptureSource::Ipfix(collector) = &mut self.capture_source
+                && let Ok(local) = udp_socket.local_addr()
+            {
+                collector.set_actually_bind_addr(local);
+            }
+
             if capture_context.error().is_none() {
-                // no pcap error
+                // no fatal pcap error
                 let curr_cap_id = self.current_capture_rx.0;
                 let mmdb_readers = self.mmdb_readers.clone();
                 let ip_blacklist = self.ip_blacklist.clone();
@@ -1002,30 +1040,25 @@ impl Sniffer {
                 self.capture_source.set_addresses();
                 let capture_source = self.capture_source.clone();
                 self.traffic_chart
-                    .change_capture_source(matches!(capture_source, CaptureSource::Device(_)));
+                    .change_capture_source(capture_source.supports_live_chart());
                 let (tx, rx) = async_channel::unbounded();
                 let (freeze_tx, freeze_rx) = tokio::sync::broadcast::channel(1_048_575);
                 let freeze_rx2 = freeze_tx.subscribe();
                 let filters = self.conf.filters.clone();
-                let _ = thread::Builder::new()
-                    .name("thread_parse_packets".to_string())
-                    .spawn(move || {
-                        parse_packets(
-                            curr_cap_id,
-                            capture_source,
-                            &mmdb_readers,
-                            &ip_blacklist,
-                            capture_context,
-                            filters,
-                            &tx,
-                            (freeze_rx, freeze_rx2),
-                        );
-                    })
-                    .log_err(location!());
+                spawn_capture_thread(
+                    curr_cap_id,
+                    capture_source,
+                    capture_context,
+                    mmdb_readers,
+                    ip_blacklist,
+                    filters,
+                    tx,
+                    (freeze_rx, freeze_rx2),
+                );
                 self.current_capture_rx.1 = Some(rx.clone());
                 self.freeze_tx = Some(freeze_tx);
 
-                if matches!(self.capture_source, CaptureSource::Device(_)) {
+                if self.capture_source.supports_programs() {
                     let (port_tx, port_rx) = std::sync::mpsc::channel();
                     let (program_tx, program_rx) = std::sync::mpsc::channel();
                     let _ = thread::Builder::new()
@@ -1062,6 +1095,9 @@ impl Sniffer {
                     BackendTrafficMessage::OfflineGap(cap_id, gap) => {
                         Message::OfflineGap(cap_id, gap)
                     }
+                    BackendTrafficMessage::IpfixUndecodable(cap_id) => {
+                        Message::IpfixUndecodable(cap_id)
+                    }
                 });
             }
         }
@@ -1082,7 +1118,7 @@ impl Sniffer {
         self.addresses_resolved = HashMap::new();
         self.latency_statuses = HashMap::new();
         self.logged_notifications = LoggedNotifications::default();
-        self.pcap_error = None;
+        self.capture_error = None;
         self.traffic_chart = TrafficChart::new(style, language, self.conf.data_repr);
         self.modal = None;
         self.settings_page = None;
@@ -1095,6 +1131,14 @@ impl Sniffer {
         self.frozen = false;
         self.freeze_tx = None;
         self.program_lookup = None;
+        // reset IPFIX collector's socket to match configuration
+        // (particularly relevant for port = 0 that was rewritten with the actual UDP bind)
+        if matches!(self.capture_source, CaptureSource::Ipfix(_))
+            && self.conf.capture_source_picklist == CaptureSourcePicklist::Ipfix
+        {
+            self.capture_source =
+                CaptureSource::Ipfix(MyIpfixCollector::new(self.conf.ipfix_socket.clone()));
+        }
         self.start_traffic_previews()
     }
 
@@ -1421,10 +1465,12 @@ impl Sniffer {
     }
 
     pub fn is_capture_source_consistent(&self) -> bool {
-        self.conf.capture_source_picklist == CaptureSourcePicklist::Device
-            && matches!(self.capture_source, CaptureSource::Device(_))
-            || self.conf.capture_source_picklist == CaptureSourcePicklist::File
-                && matches!(self.capture_source, CaptureSource::File(_))
+        matches!(
+            (self.conf.capture_source_picklist, &self.capture_source),
+            (CaptureSourcePicklist::Device, CaptureSource::Device(_))
+                | (CaptureSourcePicklist::File, CaptureSource::File(_))
+                | (CaptureSourcePicklist::Ipfix, CaptureSource::Ipfix(_))
+        )
     }
 
     fn change_charts_style(&mut self) {
@@ -1446,7 +1492,7 @@ mod tests {
     use std::fs::remove_file;
     use std::net::{IpAddr, Ipv4Addr};
     use std::path::Path;
-    use std::time::Duration;
+    use std::time::{Duration, Instant};
 
     use crate::countries::types::country::Country;
     use crate::gui::components::types::my_modal::MyModal;
@@ -1824,10 +1870,12 @@ mod tests {
             ));
             // Threshold adjustments won't be updated if `info_traffic.tot_in_packets`
             // and `info_traffic.tot_out_packets` are both `0`.
-            sniffer
-                .info_traffic
-                .tot_data_info
-                .add_packet(0, TrafficDirection::Outgoing);
+            sniffer.info_traffic.tot_data_info.add_packets(
+                1,
+                0,
+                TrafficDirection::Outgoing,
+                Instant::now(),
+            );
 
             // Simulate an update to apply the settings
             sniffer.update(Message::Periodic);
@@ -2090,10 +2138,12 @@ mod tests {
         assert_eq!(sniffer.running_page, Some(RunningPage::Overview));
         assert_eq!(sniffer.settings_page, None);
         // switch with closed setting and some packets received => change running page
-        sniffer
-            .info_traffic
-            .tot_data_info
-            .add_packet(0, TrafficDirection::Outgoing);
+        sniffer.info_traffic.tot_data_info.add_packets(
+            1,
+            0,
+            TrafficDirection::Outgoing,
+            Instant::now(),
+        );
         sniffer.update(Message::SwitchPage(true));
         assert_eq!(sniffer.running_page, Some(RunningPage::Inspect));
         assert_eq!(sniffer.settings_page, None);
@@ -2159,8 +2209,8 @@ mod tests {
         sniffer.update(Message::ProgramFavoritesFilterToggle);
         sniffer.update(Message::OpenSettings(SettingsPage::Appearance));
         sniffer.update(Message::ToggleExportPcap);
-        sniffer.update(Message::OutputPcapFile("test.cap".to_string()));
-        sniffer.update(Message::OutputPcapDir("/".to_string()));
+        sniffer.update(Message::OutputPcapFile("test.pcap".to_string()));
+        sniffer.update(Message::OutputPcapDir("/test".to_string()));
         sniffer.update(Message::SetPcapImport("/test.pcap".to_string()));
         sniffer.update(Message::ChangeRunningPage(RunningPage::Notifications));
         sniffer.update(Message::DataReprSelection(DataRepr::Bits));
@@ -2175,6 +2225,11 @@ mod tests {
         sniffer.update(Message::Quit);
 
         assert!(path.exists());
+
+        let mut export_pcap = ExportPcap::default();
+        export_pcap.set_file_name("test.pcap");
+        export_pcap.set_directory("/test".to_string());
+        export_pcap.toggle();
 
         // check that updated configs are inherited by a new sniffer instance
         let conf_end = Sniffer::new(Conf::load()).conf.clone();
@@ -2215,12 +2270,9 @@ mod tests {
                 program_sort_type: SortType::Neutral,
                 last_opened_setting: SettingsPage::Appearance,
                 last_opened_page: RunningPage::Notifications,
-                export_pcap: ExportPcap {
-                    enabled: true,
-                    file_name: "test.cap".to_string(),
-                    directory: "/".to_string()
-                },
+                export_pcap,
                 import_pcap_path: "/test.pcap".to_string(),
+                ipfix_socket: Default::default(),
                 data_repr: DataRepr::Bits,
             }
         );
