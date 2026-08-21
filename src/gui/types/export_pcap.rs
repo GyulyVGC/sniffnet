@@ -7,11 +7,11 @@ use crate::gui::types::conf::deserialize_or_default;
 #[serde(default)]
 pub struct ExportPcap {
     #[serde(deserialize_with = "deserialize_or_default")]
-    pub(crate) enabled: bool,
+    enabled: bool,
     #[serde(deserialize_with = "deserialize_or_default")]
-    pub(crate) file_name: String,
+    file_name: String,
     #[serde(deserialize_with = "deserialize_or_default")]
-    pub(crate) directory: String,
+    directory: String,
 }
 
 impl ExportPcap {

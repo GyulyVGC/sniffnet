@@ -2190,8 +2190,8 @@ mod tests {
         sniffer.update(Message::ProgramFavoritesFilterToggle);
         sniffer.update(Message::OpenSettings(SettingsPage::Appearance));
         sniffer.update(Message::ToggleExportPcap);
-        sniffer.update(Message::OutputPcapFile("test.cap".to_string()));
-        sniffer.update(Message::OutputPcapDir("/".to_string()));
+        sniffer.update(Message::OutputPcapFile("test.pcap".to_string()));
+        sniffer.update(Message::OutputPcapDir("/test".to_string()));
         sniffer.update(Message::SetPcapImport("/test.pcap".to_string()));
         sniffer.update(Message::ChangeRunningPage(RunningPage::Notifications));
         sniffer.update(Message::DataReprSelection(DataRepr::Bits));
@@ -2206,6 +2206,11 @@ mod tests {
         sniffer.update(Message::Quit);
 
         assert!(path.exists());
+
+        let mut export_pcap = ExportPcap::default();
+        export_pcap.set_file_name("test.pcap");
+        export_pcap.set_directory("/test".to_string());
+        export_pcap.toggle();
 
         // check that updated configs are inherited by a new sniffer instance
         let conf_end = Sniffer::new(Conf::load()).conf.clone();
@@ -2246,11 +2251,7 @@ mod tests {
                 program_sort_type: SortType::Neutral,
                 last_opened_setting: SettingsPage::Appearance,
                 last_opened_page: RunningPage::Notifications,
-                export_pcap: ExportPcap {
-                    enabled: true,
-                    file_name: "test.cap".to_string(),
-                    directory: "/".to_string()
-                },
+                export_pcap,
                 import_pcap_path: "/test.pcap".to_string(),
                 ipfix_socket: Default::default(),
                 data_repr: DataRepr::Bits,
