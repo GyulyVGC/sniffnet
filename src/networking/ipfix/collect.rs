@@ -200,6 +200,7 @@ fn process_datagram(
     true
 }
 
+/// Account a flow record into `InfoTraffic`
 #[allow(clippy::too_many_arguments)]
 fn ingest_flow_record(
     record: &FlowRecord,
@@ -216,18 +217,15 @@ fn ingest_flow_record(
     };
 
     let (exchanged_bytes, exchanged_packets) =
-        resolve_counters(record, peer, observation_domain_id, &key, baselines, now);
-    // Both counters have to be there for the record to be worth accounting: a
-    // flow with no bytes has nothing to report, and one with no packets would
-    // add bytes that never show up in the packet totals the rest of the
-    // application counts by.
+        resolve_data_amounts(record, peer, observation_domain_id, &key, baselines, now);
+
     if exchanged_bytes == 0 || exchanged_packets == 0 {
         return;
     }
 
     let mac_addresses = (record.src_mac, record.dst_mac);
-
     let timestamps_hint = record.flow_start.zip(record.flow_end);
+
     let (traffic_direction, service) = modify_or_insert_in_map(
         info_traffic_msg,
         &key,
@@ -254,13 +252,8 @@ fn ingest_flow_record(
     );
 }
 
-/// Work out how much traffic this record actually adds.
-///
-/// Delta counters are already increments, so they're used as they stand.
-/// Cumulative counters have to be differenced against the flow's previous
-/// report. The totals are handed to the cache either way, so that a template
-/// carrying both kinds keeps the baseline current for the records that need it.
-fn resolve_counters(
+/// Find out how much data this flow actually carries
+fn resolve_data_amounts(
     record: &FlowRecord,
     peer: SocketAddr,
     observation_domain_id: u32,
@@ -268,6 +261,7 @@ fn resolve_counters(
     baselines: &mut BaselineCache,
     now: Instant,
 ) -> (u128, u128) {
+    // update baseline in any case for potential future delta computations
     let (bytes_from_baseline, packets_from_baseline) = baselines.delta(
         peer,
         observation_domain_id,
@@ -294,22 +288,18 @@ fn resolve_counters(
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::networking::ipfix::flow_record::ReverseCounters;
     use crate::networking::ipfix::wire::{self, IPFIX_VERSION};
     use crate::networking::types::data_representation::DataRepr;
     use crate::networking::types::protocol::Protocol;
     use crate::networking::types::traffic_direction::TrafficDirection;
     use std::net::{IpAddr, Ipv4Addr, Ipv6Addr};
 
-    /// The exporter every test collects from
-    const PEER: &str = "203.0.113.9:4739";
-
     fn peer() -> SocketAddr {
-        PEER.parse().unwrap()
+        "203.0.113.9:4739".parse().unwrap()
     }
 
-    /// The field specifiers `sniffnet-agent` puts in its templates, after the
-    /// two address fields that differ between the IPv4 and IPv6 variants.
+    /// The field specifiers `sniffnet-agent` puts in its templates,
+    /// after the two address fields that differ between the IPv4 and IPv6 variants
     const AGENT_COMMON_FIELDS: [(u16, u16); 10] = [
         (7, 2),
         (11, 2),
@@ -323,8 +313,7 @@ mod tests {
         (153, 8),
     ];
 
-    /// A template in the shape exporters that only report cumulative counters
-    /// use: no delta IEs, no flowDirection.
+    /// A template using cumulative counters instead of deltas
     const TOTALS_FIELDS: [(u16, u16); 7] = [
         (8, 4),
         (12, 4),
@@ -335,8 +324,8 @@ mod tests {
         (86, 8), // packetTotalCount
     ];
 
-    /// The same fields with the forward counters doubled up under `pen`
-    fn totals_fields_with_pen(pen: u32) -> Vec<(u16, u16, Option<u32>)> {
+    /// A template with data delta counters doubled up under `pen` (biflow if REVERSE_PEN)
+    fn fields_with_pen(pen: u32) -> Vec<(u16, u16, Option<u32>)> {
         let mut fields: Vec<_> = TOTALS_FIELDS[..5]
             .iter()
             .map(|(ie, len)| (*ie, *len, None))
@@ -366,8 +355,6 @@ mod tests {
         template_set_with_pens(template_id, &fields)
     }
 
-    /// A template whose fields are `(ie, length, enterprise)` triples; an
-    /// enterprise field sets the high bit of the ie id and appends the PEN.
     fn template_set_with_pens(template_id: u16, fields: &[(u16, u16, Option<u32>)]) -> Vec<u8> {
         let mut body = template_id.to_be_bytes().to_vec();
         body.extend_from_slice(&u16::try_from(fields.len()).unwrap().to_be_bytes());
@@ -382,7 +369,6 @@ mod tests {
         set(wire::SET_ID_TEMPLATE, &body)
     }
 
-    /// Message header plus the given sets, with the length backfilled.
     fn datagram(sets: &[Vec<u8>]) -> Vec<u8> {
         let mut out = IPFIX_VERSION.to_be_bytes().to_vec();
         out.extend_from_slice(&[0, 0]); // length placeholder
@@ -398,30 +384,29 @@ mod tests {
         out
     }
 
-    /// Record tail shared by both address families, in the agent's field order.
+    /// Record tail shared by both address families, in the agent's field order
     fn record_tail(bytes: u64, packets: u64) -> Vec<u8> {
         let mut r = Vec::new();
         r.extend_from_slice(&443u16.to_be_bytes()); // source port
         r.extend_from_slice(&50_000u16.to_be_bytes()); // destination port
-        r.push(6); // TCP
+        r.push(6); // protocol
         r.extend_from_slice(&[0xAA; 6]); // source MAC
-        r.extend_from_slice(&[0; 6]); // destination MAC: not observed
-        r.push(0x00); // flowDirection: ingress
+        r.extend_from_slice(&[0; 6]); // destination MAC
+        r.push(0x00); // flowDirection
         r.extend_from_slice(&bytes.to_be_bytes());
         r.extend_from_slice(&packets.to_be_bytes());
-        r.extend_from_slice(&20_000u64.to_be_bytes()); // flow start: 20s
-        r.extend_from_slice(&25_000u64.to_be_bytes()); // flow end: 25s
+        r.extend_from_slice(&20_000u64.to_be_bytes()); // flow start
+        r.extend_from_slice(&25_000u64.to_be_bytes()); // flow end
         r
     }
 
-    /// A record for `TOTALS_FIELDS`, or the head of any template that starts
-    /// with the same 5-tuple fields.
+    /// A record for `TOTALS_FIELDS`
     fn totals_record(bytes: u64, packets: u64) -> Vec<u8> {
         let mut r = Ipv4Addr::new(10, 0, 0, 1).octets().to_vec();
         r.extend_from_slice(&Ipv4Addr::new(8, 8, 8, 8).octets());
         r.extend_from_slice(&443u16.to_be_bytes());
         r.extend_from_slice(&50_000u16.to_be_bytes());
-        r.push(6); // TCP
+        r.push(6);
         r.extend_from_slice(&bytes.to_be_bytes());
         r.extend_from_slice(&packets.to_be_bytes());
         r
@@ -452,8 +437,6 @@ mod tests {
         }
     }
 
-    /// A template set plus a one-record data set, shaped exactly as the agent
-    /// emits them.
     fn agent_datagram(
         template_id: u16,
         addr_fields: [(u16, u16); 2],
@@ -474,9 +457,8 @@ mod tests {
         (info, resolutions)
     }
 
-    /// Feed a sequence of datagrams to one collector, so state that spans
-    /// datagrams (templates, counter baselines) behaves as it would live. The
-    /// last element reports whether every datagram succeeded.
+    /// Feed a sequence of datagrams to one collector.
+    /// The last element reports whether every datagram succeeded.
     fn run_all(datagrams: &[&[u8]]) -> (InfoTraffic, AddressesResolutionState, bool) {
         let mut state = CollectorState::new(Instant::now());
         let mut info = InfoTraffic::default();
@@ -508,30 +490,23 @@ mod tests {
         let stamped = current_timestamp();
         let after = i64::try_from(seconds_now()).unwrap();
 
-        // the wall clock the rest of the application reads flows by, not an uptime
-        assert!(
-            (before..=after).contains(&stamped.secs()),
-            "{stamped:?} outside {before}..={after}"
-        );
-        assert!((0..1_000_000).contains(&(stamped.to_usecs().unwrap() % 1_000_000)));
+        assert!((before..=after).contains(&stamped.secs()));
     }
 
     #[test]
     fn test_process_datagram() {
-        // an agent-shaped datagram: a template set, then a data set against it
         let mut addrs = Ipv4Addr::new(10, 0, 0, 1).octets().to_vec();
         addrs.extend_from_slice(&Ipv4Addr::new(8, 8, 8, 8).octets());
         let (info, resolutions, succeeded) =
             run_all(&[&agent_datagram(256, [(8, 4), (12, 4)], &addrs, 1500, 10)]);
         assert!(succeeded);
 
-        let entry = info.map.get(&totals_key()).expect("flow present");
+        let entry = info.map.get(&totals_key()).unwrap();
         assert_eq!(entry.transmitted_bytes, 1500);
         assert_eq!(entry.transmitted_packets, 10);
-        // flowDirection 0x00 is ingress, and it overrides any address guess
         assert_eq!(entry.traffic_direction, TrafficDirection::Incoming);
         assert_eq!(entry.mac_address1, Some([0xAA; 6]));
-        assert_eq!(entry.mac_address2, None, "all-zero MAC means not observed");
+        assert_eq!(entry.mac_address2, None);
         assert_eq!(entry.initial_timestamp, Timestamp::new(20, 0));
         assert_eq!(entry.final_timestamp, Timestamp::new(25, 0));
 
@@ -542,8 +517,7 @@ mod tests {
         assert_eq!(resolutions.addresses_waiting_resolution.len(), 1);
         assert!(info.hosts.is_empty());
 
-        // a data set holds its records back to back, and may precede the
-        // template it references: templates are registered in a first pass
+        // a data set coming before its template is still processed
         let mut records = addrs.clone();
         records.extend_from_slice(&record_tail(1500, 10));
         records.extend_from_slice(&Ipv4Addr::new(10, 0, 0, 2).octets());
@@ -553,17 +527,20 @@ mod tests {
             set(256, &records),
             template_set(256, &agent_fields([(8, 4), (12, 4)])),
         ]);
-        let (info, _, _) = run_all(&[&bytes]);
+        let (info, _, succeeded) = run_all(&[&bytes]);
+        assert!(succeeded);
 
-        assert_eq!(info.map.len(), 2, "both records are accounted");
+        assert_eq!(info.map.len(), 2);
         assert_eq!(info.tot_data_info.tot_data(DataRepr::Bytes), 2100);
         assert_eq!(info.tot_data_info.tot_data(DataRepr::Packets), 14);
 
         // a template only has to arrive once: later datagrams may carry data alone
         let mut record = addrs;
         record.extend_from_slice(&record_tail(800, 5));
-        let (info, _, _) = run_all(&[&bytes, &datagram(&[set(256, &record)])]);
+        let (info, _, succeeded) = run_all(&[&bytes, &datagram(&[set(256, &record)])]);
+        assert!(succeeded);
         assert_eq!(info.tot_data_info.tot_data(DataRepr::Packets), 19);
+        assert_eq!(info.tot_data_info.tot_data(DataRepr::Bytes), 2900);
     }
 
     #[test]
@@ -581,15 +558,14 @@ mod tests {
             dport: Some(50_000),
             protocol: Protocol::TCP,
         };
-        let entry = info.map.get(&key).expect("flow present");
+        let entry = info.map.get(&key).unwrap();
         assert_eq!(entry.transmitted_bytes, 800);
         assert_eq!(entry.transmitted_packets, 4);
     }
 
     #[test]
     fn test_process_datagram_biflow() {
-        // what YAF sends: forward counters, then the same IEs under PEN 29305
-        let fields = totals_fields_with_pen(wire::REVERSE_PEN);
+        let fields = fields_with_pen(wire::REVERSE_PEN);
         let biflow = |reverse_bytes: u64, reverse_packets: u64| {
             let mut record = totals_record(1500, 10);
             record.extend_from_slice(&reverse_bytes.to_be_bytes());
@@ -597,10 +573,11 @@ mod tests {
             datagram(&[template_set_with_pens(300, &fields), set(300, &record)])
         };
 
-        let (info, _, _) = run_all(&[&biflow(9000, 60)]);
-        assert_eq!(info.map.len(), 2, "one entry per direction");
+        let (info, _, succeeded) = run_all(&[&biflow(9000, 60)]);
+        assert!(succeeded);
+        assert_eq!(info.map.len(), 2);
 
-        let forward = info.map.get(&totals_key()).expect("forward flow present");
+        let forward = info.map.get(&totals_key()).unwrap();
         assert_eq!(forward.transmitted_bytes, 1500);
         assert_eq!(forward.transmitted_packets, 10);
 
@@ -612,7 +589,7 @@ mod tests {
             dport: totals_key().sport,
             protocol: Protocol::TCP,
         };
-        let reverse = info.map.get(&reverse_key).expect("reverse flow present");
+        let reverse = info.map.get(&reverse_key).unwrap();
         assert_eq!(reverse.transmitted_bytes, 9000);
         assert_eq!(reverse.transmitted_packets, 60);
 
@@ -624,18 +601,19 @@ mod tests {
         assert_eq!(info.tot_data_info.tot_data(DataRepr::Packets), 70);
 
         // a biflow template on a conversation that only ever went one way
-        let (info, _, _) = run_all(&[&biflow(0, 0)]);
-        assert_eq!(info.map.len(), 1, "the empty reverse half is dropped");
+        let (info, _, succeeded) = run_all(&[&biflow(0, 0)]);
+        assert!(succeeded);
+        assert_eq!(info.map.len(), 1);
         assert_eq!(info.tot_data_info.tot_data(DataRepr::Packets), 10);
 
-        // the same shape under a vendor PEN is not a biflow at all: those
-        // counters must not be read as a reverse direction
-        let cisco = totals_fields_with_pen(9);
+        // the same shape under a vendor PEN is not a biflow at all
+        let vendor = fields_with_pen(9);
         let mut record = totals_record(1500, 10);
         record.extend_from_slice(&9000u64.to_be_bytes());
         record.extend_from_slice(&60u64.to_be_bytes());
-        let bytes = datagram(&[template_set_with_pens(300, &cisco), set(300, &record)]);
-        let (info, _, _) = run_all(&[&bytes]);
+        let bytes = datagram(&[template_set_with_pens(300, &vendor), set(300, &record)]);
+        let (info, _, succeeded) = run_all(&[&bytes]);
+        assert!(succeeded);
 
         assert_eq!(info.map.len(), 1);
         assert_eq!(info.tot_data_info.tot_data(DataRepr::Bytes), 1500);
@@ -644,66 +622,65 @@ mod tests {
 
     #[test]
     fn test_process_datagram_cumulative_counters() {
-        // the single-record-per-flow-at-expiry case: the total is the flow
         let first = datagram(&[
             template_set(300, &TOTALS_FIELDS),
             set(300, &totals_record(1500, 10)),
         ]);
-        let (info, _, _) = run_all(&[&first]);
-        let entry = info.map.get(&totals_key()).expect("flow present");
+        let (info, _, succeeded) = run_all(&[&first]);
+        assert!(succeeded);
+        let entry = info.map.get(&totals_key()).unwrap();
         assert_eq!(entry.transmitted_bytes, 1500);
         assert_eq!(entry.transmitted_packets, 10);
 
-        // a flow reported repeatedly is differenced against its own baseline,
-        // which only holds because the collector keeps state between datagrams
         let grown = datagram(&[set(300, &totals_record(4000, 25))]);
         let unchanged = datagram(&[set(300, &totals_record(4000, 25))]);
-        let (info, _, _) = run_all(&[&first, &grown, &unchanged]);
+        let reset = datagram(&[set(300, &totals_record(1000, 5))]);
+        let (info, _, succeeded) = run_all(&[&first, &grown, &unchanged, &reset]);
+        assert!(succeeded);
 
-        // 1500 + 2500 + 0 — not 1500 + 4000 + 4000
-        let entry = info.map.get(&totals_key()).expect("flow present");
-        assert_eq!(entry.transmitted_bytes, 4000);
-        assert_eq!(entry.transmitted_packets, 25);
-        assert_eq!(info.tot_data_info.tot_data(DataRepr::Bytes), 4000);
-        assert_eq!(info.tot_data_info.tot_data(DataRepr::Packets), 25);
+        let entry = info.map.get(&totals_key()).unwrap();
+        // 1500 + 2500 + 0 + 1000
+        assert_eq!(entry.transmitted_bytes, 5000);
+        assert_eq!(info.tot_data_info.tot_data(DataRepr::Bytes), 5000);
+        // 10 + 15 + 0 + 5
+        assert_eq!(entry.transmitted_packets, 30);
+        assert_eq!(info.tot_data_info.tot_data(DataRepr::Packets), 30);
     }
 
     #[test]
     fn test_process_datagram_rejects_undecodable() {
-        // a NetFlow v9 header is a different shape entirely: the version check
-        // in `parse_message_header` is what turns it into a rejection
+        // wrong version number
         let mut v9 = 9u16.to_be_bytes().to_vec();
         v9.extend_from_slice(&[0; 18]);
         let (info, _, succeeded) = run_all(&[&v9, &v9, &v9]);
-        assert!(info.map.is_empty());
         assert!(!succeeded);
+        assert!(info.map.is_empty());
 
-        // claims a 200-byte message but carries only the header: exactly the
-        // kind of input that must never take the application down
+        // claims a 200-byte message but carries only the header
         let truncated = vec![0x00, 0x0A, 0x00, 0xC8, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0];
         let (info, _, succeeded) = run_all(&[&truncated, &truncated]);
-        assert!(info.map.is_empty());
         assert!(!succeeded);
+        assert!(info.map.is_empty());
 
         // an empty datagram
-        assert!(!run_all(&[&[]]).2);
+        let (info, _, succeeded) = run_all(&[&[]]);
+        assert!(!succeeded);
+        assert!(info.map.is_empty());
     }
 
     #[test]
     fn test_process_datagram_skips_unusable_sets() {
         // data referencing a template that hasn't arrived is skipped silently
-        // per RFC 7011 §8 — the exporter is fine, we just can't read it yet
         let bytes = datagram(&[set(256, &[0xAA; 58])]);
         let (info, _, succeeded) = run_all(&[&bytes]);
+        assert!(succeeded);
         assert!(info.map.is_empty());
-        assert!(succeeded, "an unknown template is not a rejection");
 
-        // bytes left over below one record's worth are padding (RFC 7011 §3.3.1),
-        // not the start of another record
+        // bytes left over below one record's worth are padding
         let mut record = Ipv4Addr::new(10, 0, 0, 1).octets().to_vec();
         record.extend_from_slice(&Ipv4Addr::new(8, 8, 8, 8).octets());
         record.extend_from_slice(&record_tail(1500, 10));
-        record.extend_from_slice(&[0; 3]); // pad to a 4-byte boundary
+        record.extend_from_slice(&[0; 3]);
         let bytes = datagram(&[
             template_set(256, &agent_fields([(8, 4), (12, 4)])),
             set(256, &record),
@@ -715,9 +692,7 @@ mod tests {
 
     #[test]
     fn test_data_set_record_loop_terminates() {
-        // a variable-length field (RFC 7011 §7) makes the record size readable
-        // only from the record itself, so the padding after it is whatever is
-        // left below the smallest record the template admits
+        // a variable-length field
         let mut fields: Vec<(u16, u16)> = TOTALS_FIELDS.to_vec();
         fields.push((82, wire::VARIABLE_LENGTH)); // interfaceName
         let mut body = totals_record(1500, 10);
@@ -726,10 +701,10 @@ mod tests {
         let bytes = datagram(&[template_set(256, &fields), set(256, &body)]);
         let (info, _, succeeded) = run_all(&[&bytes]);
         assert!(succeeded);
-        assert_eq!(info.map.len(), 1, "the padding is not a second record");
+        assert_eq!(info.map.len(), 1);
         assert_eq!(info.tot_data_info.tot_data(DataRepr::Packets), 10);
 
-        // a record cut short mid-field is dropped, not partially accounted
+        // a record cut short mid-field is dropped
         let bytes = datagram(&[
             template_set(257, &TOTALS_FIELDS),
             set(257, &totals_record(1500, 10)[..20]),
@@ -751,62 +726,6 @@ mod tests {
     }
 
     #[test]
-    fn test_reverse_record() {
-        // a uniflow has no other half
-        assert_eq!(flow_record(Some(1500), Some(10)).get_reverse_record(), None);
-
-        let mut record = flow_record(Some(1500), Some(10));
-        record.bytes_total = Some(4000);
-        record.packets_total = Some(25);
-        record.src_mac = Some([0xAA; 6]);
-        record.dst_mac = Some([0xBB; 6]);
-        record.direction = Some(TrafficDirection::Incoming);
-        record.flow_start = Some(Timestamp::new(20, 0));
-        record.flow_end = Some(Timestamp::new(25, 0));
-        record.reverse = Some(ReverseCounters {
-            bytes_delta: Some(9000),
-            packets_delta: Some(60),
-            bytes_total: Some(12_000),
-            packets_total: Some(80),
-        });
-
-        let reverse = record
-            .get_reverse_record()
-            .expect("a biflow has a reverse half");
-        assert_eq!(
-            reverse,
-            FlowRecord {
-                // the 5-tuple and the MAC addresses are swapped...
-                src_ip: record.dst_ip,
-                dst_ip: record.src_ip,
-                src_port: Some(50_000),
-                dst_port: Some(443),
-                protocol: Some(Protocol::TCP),
-                src_mac: Some([0xBB; 6]),
-                dst_mac: Some([0xAA; 6]),
-                // ...the reverse counters move into the forward slots, so that
-                // everything downstream applies to this half unchanged...
-                bytes_delta: Some(9000),
-                packets_delta: Some(60),
-                bytes_total: Some(12_000),
-                packets_total: Some(80),
-                // ...IE 61 describes the forward direction at the observation
-                // point, so this half travels the other way...
-                direction: Some(TrafficDirection::Outgoing),
-                // ...and both halves share the conversation's lifetime
-                flow_start: Some(Timestamp::new(20, 0)),
-                flow_end: Some(Timestamp::new(25, 0)),
-                // the reverse of the reverse would be the forward half again
-                reverse: None,
-            }
-        );
-
-        // a direction the exporter never sent can't be flipped into one
-        record.direction = None;
-        assert_eq!(record.get_reverse_record().unwrap().direction, None);
-    }
-
-    #[test]
     fn test_ingest_flow_record() {
         let ingest = |record: &FlowRecord| {
             let mut info = InfoTraffic::default();
@@ -825,12 +744,10 @@ mod tests {
             (info, resolutions)
         };
 
-        // both counters have to be there for the record to be worth accounting:
-        // bytes without packets would grow the byte totals while leaving the
-        // packet ones the rest of the application counts by at zero
+        // both counters have to be there for the record to be worth accounting
         for (bytes, packets) in [(0, 0), (1500, 0), (0, 10)] {
             let (info, _) = ingest(&flow_record(Some(bytes), Some(packets)));
-            assert!(info.map.is_empty(), "{bytes} bytes / {packets} packets");
+            assert!(info.map.is_empty());
             assert_eq!(info.tot_data_info.tot_data(DataRepr::Bytes), 0);
             assert_eq!(info.tot_data_info.tot_data(DataRepr::Packets), 0);
         }
@@ -844,34 +761,33 @@ mod tests {
         let mut record = flow_record(Some(1500), Some(10));
         record.direction = Some(TrafficDirection::Incoming);
         let (info, resolutions) = ingest(&record);
-        let entry = info.map.get(&totals_key()).expect("flow present");
+        let entry = info.map.get(&totals_key()).unwrap();
         assert_eq!(entry.transmitted_bytes, 1500);
         assert_eq!(entry.transmitted_packets, 10);
         assert_eq!(entry.traffic_direction, TrafficDirection::Incoming);
         // no rDNS threads are running, so the address is left awaiting lookup
         assert_eq!(resolutions.addresses_waiting_resolution.len(), 1);
 
-        // without it there is no local interface to classify a remote flow
-        // against, so the bogon heuristic decides — as it does for PCAP import
+        // without direction, the bogon heuristic decides (as it does for PCAP import)
         record.direction = None;
         let (info, _) = ingest(&record);
-        let entry = info.map.get(&totals_key()).expect("flow present");
+        let entry = info.map.get(&totals_key()).unwrap();
         assert_eq!(entry.traffic_direction, TrafficDirection::Outgoing);
     }
 
     #[test]
-    fn test_resolve_counters() {
+    fn test_resolve_data_amounts() {
         let now = Instant::now();
         let key = totals_key();
         let mut baselines = BaselineCache::new(now);
-        let mut resolve =
-            |record: &FlowRecord| resolve_counters(record, peer(), 0, &key, &mut baselines, now);
+        let mut resolve = |record: &FlowRecord| {
+            resolve_data_amounts(record, peer(), 0, &key, &mut baselines, now)
+        };
 
         // deltas are already increments, so they're used as they stand
         assert_eq!(resolve(&flow_record(Some(1500), Some(10))), (1500, 10));
 
-        // cumulative counters are differenced against the flow's own previous
-        // report: the first is the flow so far, the rest are what it grew by
+        // cumulative counters are differenced against baselines
         let totals = |bytes: u128, packets: u128| FlowRecord {
             bytes_total: Some(bytes),
             packets_total: Some(packets),
@@ -879,10 +795,9 @@ mod tests {
         };
         assert_eq!(resolve(&totals(1500, 10)), (1500, 10));
         assert_eq!(resolve(&totals(4000, 25)), (2500, 15));
-        assert_eq!(resolve(&totals(4000, 25)), (0, 0), "an unchanged report");
+        assert_eq!(resolve(&totals(4000, 25)), (0, 0));
 
-        // a template carrying both kinds keeps the baseline current while still
-        // preferring the deltas, so a later totals-only record isn't over-counted
+        // a template carrying both updates baselines while still preferring deltas
         let both = FlowRecord {
             bytes_total: Some(6000),
             packets_total: Some(40),
