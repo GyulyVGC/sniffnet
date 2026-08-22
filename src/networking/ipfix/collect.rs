@@ -10,15 +10,14 @@ use crate::networking::capture::{
     AddressesResolutionState, BackendTrafficMessage, maybe_send_tick, spawn_reverse_dns_pool,
 };
 use crate::networking::ipfix::baseline_cache::BaselineCache;
+use crate::networking::ipfix::flow_record::FlowRecord;
 use crate::networking::ipfix::template_cache::TemplateCache;
-use crate::networking::ipfix::wire::{FlowRecord, Set, decode_data_record, parse_message};
+use crate::networking::ipfix::wire::{Set, decode_data_record, parse_message};
 use crate::networking::manage_packets::{modify_or_insert_in_map, update_connection_stats};
 use crate::networking::types::address_port_pair::AddressPortPair;
 use crate::networking::types::arp_type::ArpType;
 use crate::networking::types::info_traffic::InfoTraffic;
 use crate::networking::types::ip_blacklist::IpBlacklist;
-use crate::networking::types::protocol::Protocol;
-use crate::networking::types::traffic_direction::TrafficDirection;
 use crate::utils::types::timestamp::Timestamp;
 
 /// Buffer size for a single UDP datagram
@@ -181,7 +180,7 @@ fn process_datagram(
                 }
                 remaining = rest;
                 // a biflow is accounted as two records
-                let reverse = get_reverse_record(&record);
+                let reverse = record.get_reverse_record();
                 for flow in [Some(record), reverse].into_iter().flatten() {
                     ingest_flow_record(
                         &flow,
@@ -201,28 +200,6 @@ fn process_datagram(
     true
 }
 
-/// The other half of an RFC 5103 biflow, as a full-fledged record
-fn get_reverse_record(record: &FlowRecord) -> Option<FlowRecord> {
-    let reverse = record.reverse?;
-    Some(FlowRecord {
-        src_ip: record.dst_ip,
-        dst_ip: record.src_ip,
-        src_port: record.dst_port,
-        dst_port: record.src_port,
-        protocol: record.protocol,
-        bytes_delta: reverse.bytes_delta,
-        packets_delta: reverse.packets_delta,
-        bytes_total: reverse.bytes_total,
-        packets_total: reverse.packets_total,
-        src_mac: record.dst_mac,
-        dst_mac: record.src_mac,
-        direction: record.direction.map(TrafficDirection::opposite),
-        flow_start: record.flow_start,
-        flow_end: record.flow_end,
-        reverse: None,
-    })
-}
-
 #[allow(clippy::too_many_arguments)]
 fn ingest_flow_record(
     record: &FlowRecord,
@@ -234,7 +211,7 @@ fn ingest_flow_record(
     ip_blacklist: &IpBlacklist,
     resolutions_state: &mut AddressesResolutionState,
 ) {
-    let Some(key) = build_key(record) else {
+    let Some(key) = record.get_key() else {
         return;
     };
 
@@ -277,27 +254,6 @@ fn ingest_flow_record(
     );
 }
 
-fn build_key(record: &FlowRecord) -> Option<AddressPortPair> {
-    let source = record.src_ip?;
-    let dest = record.dst_ip?;
-    let protocol = record.protocol?;
-    let sport = match protocol {
-        Protocol::TCP | Protocol::UDP => record.src_port,
-        _ => None,
-    };
-    let dport = match protocol {
-        Protocol::TCP | Protocol::UDP => record.dst_port,
-        _ => None,
-    };
-    Some(AddressPortPair {
-        source,
-        sport,
-        dest,
-        dport,
-        protocol,
-    })
-}
-
 /// Work out how much traffic this record actually adds.
 ///
 /// Delta counters are already increments, so they're used as they stand.
@@ -338,8 +294,11 @@ fn resolve_counters(
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::networking::ipfix::wire::{self, IPFIX_VERSION, ReverseCounters};
+    use crate::networking::ipfix::flow_record::ReverseCounters;
+    use crate::networking::ipfix::wire::{self, IPFIX_VERSION};
     use crate::networking::types::data_representation::DataRepr;
+    use crate::networking::types::protocol::Protocol;
+    use crate::networking::types::traffic_direction::TrafficDirection;
     use std::net::{IpAddr, Ipv4Addr, Ipv6Addr};
 
     /// The exporter every test collects from
@@ -794,7 +753,7 @@ mod tests {
     #[test]
     fn test_reverse_record() {
         // a uniflow has no other half
-        assert_eq!(get_reverse_record(&flow_record(Some(1500), Some(10))), None);
+        assert_eq!(flow_record(Some(1500), Some(10)).get_reverse_record(), None);
 
         let mut record = flow_record(Some(1500), Some(10));
         record.bytes_total = Some(4000);
@@ -811,7 +770,9 @@ mod tests {
             packets_total: Some(80),
         });
 
-        let reverse = get_reverse_record(&record).expect("a biflow has a reverse half");
+        let reverse = record
+            .get_reverse_record()
+            .expect("a biflow has a reverse half");
         assert_eq!(
             reverse,
             FlowRecord {
@@ -842,7 +803,7 @@ mod tests {
 
         // a direction the exporter never sent can't be flipped into one
         record.direction = None;
-        assert_eq!(get_reverse_record(&record).unwrap().direction, None);
+        assert_eq!(record.get_reverse_record().unwrap().direction, None);
     }
 
     #[test]
@@ -932,42 +893,5 @@ mod tests {
 
         // a record with no counters at all adds nothing
         assert_eq!(resolve(&flow_record(None, None)), (0, 0));
-    }
-
-    #[test]
-    fn test_build_key() {
-        assert_eq!(
-            build_key(&flow_record(Some(1500), Some(10))),
-            Some(totals_key())
-        );
-
-        // only TCP and UDP have ports: whatever an exporter puts in the port
-        // fields of another protocol would be a different flow every time
-        for protocol in [Protocol::ICMP, Protocol::ARP] {
-            let mut record = flow_record(Some(1500), Some(10));
-            record.protocol = Some(protocol);
-            let key = build_key(&record).expect("addresses and protocol are enough");
-            assert_eq!((key.sport, key.dport), (None, None), "{protocol}");
-            assert_eq!(key.protocol, protocol);
-        }
-
-        // a TCP flow whose ports the exporter didn't send is still a flow
-        let mut portless = flow_record(Some(1500), Some(10));
-        portless.src_port = None;
-        portless.dst_port = None;
-        let key = build_key(&portless).expect("ports are optional");
-        assert_eq!((key.sport, key.dport), (None, None));
-
-        // ...but there is no flow to name without both addresses and a protocol
-        let blanks: [fn(&mut FlowRecord); 3] = [
-            |r| r.src_ip = None,
-            |r| r.dst_ip = None,
-            |r| r.protocol = None,
-        ];
-        for blank in blanks {
-            let mut record = flow_record(Some(1500), Some(10));
-            blank(&mut record);
-            assert_eq!(build_key(&record), None);
-        }
     }
 }

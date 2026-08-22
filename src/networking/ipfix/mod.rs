@@ -1,6 +1,8 @@
-pub mod baseline_cache;
+mod baseline_cache;
 pub mod collect;
-pub mod field_priority;
-pub mod template_cache;
-pub mod ttl_map;
-pub mod wire;
+mod field_priority;
+mod flow_record;
+mod ie;
+mod template_cache;
+mod ttl_map;
+mod wire;

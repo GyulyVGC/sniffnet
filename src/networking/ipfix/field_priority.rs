@@ -1,4 +1,4 @@
-use crate::networking::ipfix::wire::ie;
+use crate::networking::ipfix::ie;
 
 /// Rank of the IE that supplied the value currently held in each record slot.
 /// Used for slots that can be filled by multiple IEs, to ensure that the most preferred one is kept.

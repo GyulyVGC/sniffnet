@@ -4,6 +4,8 @@ use crate::networking::ipfix::field_priority::{
     FieldPriority, bytes_delta_rank, bytes_total_rank, mac_rank, packets_delta_rank,
     packets_total_rank, timestamp_rank,
 };
+use crate::networking::ipfix::flow_record::{FlowRecord, ReverseCounters};
+use crate::networking::ipfix::ie;
 use crate::networking::types::protocol::Protocol;
 use crate::networking::types::traffic_direction::TrafficDirection;
 use crate::utils::types::timestamp::Timestamp;
@@ -25,42 +27,6 @@ pub(super) const VARIABLE_LENGTH: u16 = 0xFFFF;
 pub(super) const REVERSE_PEN: u32 = 29305;
 /// The minimum set id for a data set
 const MIN_DATA_SET_ID: u16 = 256;
-
-/// IANA-assigned IPFIX Information Element identifiers used by Sniffnet
-pub(super) mod ie {
-    pub(in crate::networking::ipfix) const OCTET_DELTA_COUNT: u16 = 1;
-    pub(in crate::networking::ipfix) const PACKET_DELTA_COUNT: u16 = 2;
-    pub(in crate::networking::ipfix) const PROTOCOL_IDENTIFIER: u16 = 4;
-    pub(in crate::networking::ipfix) const SOURCE_TRANSPORT_PORT: u16 = 7;
-    pub(in crate::networking::ipfix) const SOURCE_IPV4_ADDRESS: u16 = 8;
-    pub(in crate::networking::ipfix) const DESTINATION_TRANSPORT_PORT: u16 = 11;
-    pub(in crate::networking::ipfix) const DESTINATION_IPV4_ADDRESS: u16 = 12;
-    pub(in crate::networking::ipfix) const POST_OCTET_DELTA_COUNT: u16 = 23;
-    pub(in crate::networking::ipfix) const POST_PACKET_DELTA_COUNT: u16 = 24;
-    pub(in crate::networking::ipfix) const SOURCE_IPV6_ADDRESS: u16 = 27;
-    pub(in crate::networking::ipfix) const DESTINATION_IPV6_ADDRESS: u16 = 28;
-    pub(in crate::networking::ipfix) const SOURCE_MAC_ADDRESS: u16 = 56;
-    pub(in crate::networking::ipfix) const POST_DESTINATION_MAC_ADDRESS: u16 = 57;
-    pub(in crate::networking::ipfix) const FLOW_DIRECTION: u16 = 61;
-    pub(in crate::networking::ipfix) const DESTINATION_MAC_ADDRESS: u16 = 80;
-    pub(in crate::networking::ipfix) const POST_SOURCE_MAC_ADDRESS: u16 = 81;
-    pub(in crate::networking::ipfix) const OCTET_TOTAL_COUNT: u16 = 85;
-    pub(in crate::networking::ipfix) const PACKET_TOTAL_COUNT: u16 = 86;
-    pub(in crate::networking::ipfix) const FLOW_START_SECONDS: u16 = 150;
-    pub(in crate::networking::ipfix) const FLOW_END_SECONDS: u16 = 151;
-    pub(in crate::networking::ipfix) const FLOW_START_MILLISECONDS: u16 = 152;
-    pub(in crate::networking::ipfix) const FLOW_END_MILLISECONDS: u16 = 153;
-    pub(in crate::networking::ipfix) const FLOW_START_MICROSECONDS: u16 = 154;
-    pub(in crate::networking::ipfix) const FLOW_END_MICROSECONDS: u16 = 155;
-    pub(in crate::networking::ipfix) const FLOW_START_NANOSECONDS: u16 = 156;
-    pub(in crate::networking::ipfix) const FLOW_END_NANOSECONDS: u16 = 157;
-    pub(in crate::networking::ipfix) const POST_OCTET_TOTAL_COUNT: u16 = 171;
-    pub(in crate::networking::ipfix) const POST_PACKET_TOTAL_COUNT: u16 = 172;
-    pub(in crate::networking::ipfix) const LAYER2_OCTET_DELTA_COUNT: u16 = 352;
-    pub(in crate::networking::ipfix) const LAYER2_OCTET_TOTAL_COUNT: u16 = 353;
-    pub(in crate::networking::ipfix) const POST_LAYER2_OCTET_DELTA_COUNT: u16 = 417;
-    pub(in crate::networking::ipfix) const POST_LAYER2_OCTET_TOTAL_COUNT: u16 = 420;
-}
 
 /// IPFIX complete message
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -100,36 +66,6 @@ pub(super) struct FieldSpec {
     pub(super) ie_id: u16,
     pub(super) length: u16,
     pub(super) enterprise: Option<u32>,
-}
-
-/// Decoded fields from a single data record
-#[derive(Debug, Clone, Default, PartialEq, Eq)]
-pub(super) struct FlowRecord {
-    pub(super) src_ip: Option<IpAddr>,
-    pub(super) dst_ip: Option<IpAddr>,
-    pub(super) src_port: Option<u16>,
-    pub(super) dst_port: Option<u16>,
-    pub(super) protocol: Option<Protocol>,
-    pub(super) bytes_delta: Option<u128>,
-    pub(super) packets_delta: Option<u128>,
-    pub(super) bytes_total: Option<u128>,
-    pub(super) packets_total: Option<u128>,
-    pub(super) src_mac: Option<[u8; 6]>,
-    pub(super) dst_mac: Option<[u8; 6]>,
-    pub(super) direction: Option<TrafficDirection>,
-    pub(super) flow_start: Option<Timestamp>,
-    pub(super) flow_end: Option<Timestamp>,
-    /// Set only when the exporter sends a biflow (same flow in the opposite direction)
-    pub(super) reverse: Option<ReverseCounters>,
-}
-
-/// The counters of an RFC 5103 biflow's reverse direction
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq)]
-pub(super) struct ReverseCounters {
-    pub(super) bytes_delta: Option<u128>,
-    pub(super) packets_delta: Option<u128>,
-    pub(super) bytes_total: Option<u128>,
-    pub(super) packets_total: Option<u128>,
 }
 
 /// Parse a complete IPFIX message (header + sets)
