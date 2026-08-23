@@ -83,6 +83,7 @@ mod tests {
             dest: IpAddr::V4(Ipv4Addr::new(8, 8, 8, 8)),
             dport: Some(443),
             protocol: Protocol::TCP,
+            exporter: None,
         }
     }
 

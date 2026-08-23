@@ -18,6 +18,7 @@ use crate::networking::types::address_port_pair::AddressPortPair;
 use crate::networking::types::arp_type::ArpType;
 use crate::networking::types::info_traffic::InfoTraffic;
 use crate::networking::types::ip_blacklist::IpBlacklist;
+use crate::networking::types::ipfix_exporter::IpfixExporter;
 use crate::utils::types::timestamp::Timestamp;
 
 /// Buffer size for a single UDP datagram
@@ -212,7 +213,12 @@ fn ingest_flow_record(
     ip_blacklist: &IpBlacklist,
     resolutions_state: &mut AddressesResolutionState,
 ) {
-    let Some(key) = record.get_key() else {
+    let exporter = IpfixExporter {
+        addr: peer.ip(),
+        observation_domain_id,
+    };
+
+    let Some(key) = record.get_key(exporter) else {
         return;
     };
 
@@ -296,6 +302,14 @@ mod tests {
 
     fn peer() -> SocketAddr {
         "203.0.113.9:4739".parse().unwrap()
+    }
+
+    /// `peer`'s identity: the test datagrams all declare observation domain 0
+    fn exporter() -> IpfixExporter {
+        IpfixExporter {
+            addr: peer().ip(),
+            observation_domain_id: 0,
+        }
     }
 
     /// The field specifiers `sniffnet-agent` puts in its templates,
@@ -420,6 +434,7 @@ mod tests {
             dest: IpAddr::V4(Ipv4Addr::new(8, 8, 8, 8)),
             dport: Some(50_000),
             protocol: Protocol::TCP,
+            exporter: Some(exporter()),
         }
     }
 
@@ -557,6 +572,7 @@ mod tests {
             dest: IpAddr::V6(dst),
             dport: Some(50_000),
             protocol: Protocol::TCP,
+            exporter: Some(exporter()),
         };
         let entry = info.map.get(&key).unwrap();
         assert_eq!(entry.transmitted_bytes, 800);
@@ -588,6 +604,7 @@ mod tests {
             dest: totals_key().source,
             dport: totals_key().sport,
             protocol: Protocol::TCP,
+            exporter: Some(exporter()),
         };
         let reverse = info.map.get(&reverse_key).unwrap();
         assert_eq!(reverse.transmitted_bytes, 9000);
