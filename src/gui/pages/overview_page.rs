@@ -22,6 +22,7 @@ use crate::gui::types::settings::Settings;
 use crate::networking::types::capture_context::CaptureSource;
 use crate::networking::types::data_info::DataInfo;
 use crate::networking::types::data_representation::DataRepr;
+use crate::networking::types::ipfix_exporter::IpfixExporter;
 use crate::report::types::sort_type::SortType;
 use crate::translations::translations::{
     active_filters_translation, incoming_translation, none_translation, outgoing_translation,
@@ -31,6 +32,7 @@ use crate::translations::translations_2::{
     data_representation_translation, dropped_translation, only_top_30_items_translation,
 };
 use crate::translations::translations_5::no_favorites_saved_translation;
+use crate::translations::translations_6::ipfix_exporters_translation;
 use crate::utils::types::icon::Icon;
 use crate::{Language, RunningPage, StyleType};
 use iced::Length::Fill;
@@ -38,8 +40,9 @@ use iced::alignment::{Horizontal, Vertical};
 use iced::widget::scrollable::Direction;
 use iced::widget::text::{LineHeight, Wrapping};
 use iced::widget::tooltip::Position;
-use iced::widget::{Button, Column, Container, Row, Scrollable, Space, Text, Tooltip, button};
+use iced::widget::{Button, Column, Container, Row, Scrollable, Space, Text, Tooltip, button, row};
 use iced::{Alignment, Element, Length, Padding};
+use std::collections::BTreeSet;
 
 /// Computes the body of gui overview page
 pub fn overview_page(sniffer: &Sniffer) -> Container<'_, Message, StyleType> {
@@ -261,7 +264,12 @@ pub fn item_bar<'a>(
 fn col_info(sniffer: &Sniffer) -> Container<'_, Message, StyleType> {
     let Settings { language, .. } = sniffer.conf.settings;
 
-    let col_device = col_device(language, &sniffer.capture_source, &sniffer.conf.filters);
+    let col_device = col_device(
+        language,
+        &sniffer.capture_source,
+        &sniffer.conf.filters,
+        &sniffer.combobox_data_states.data.exporters.0,
+    );
 
     let col_data_representation = col_data_representation(language, sniffer.conf.data_repr);
 
@@ -319,6 +327,7 @@ pub(crate) fn col_device<'a>(
     language: Language,
     cs: &'a CaptureSource,
     filters: &'a Filters,
+    exporters: &'a BTreeSet<IpfixExporter>,
 ) -> Column<'a, Message, StyleType> {
     let link_type = cs.get_link_type();
     #[cfg(not(target_os = "windows"))]
@@ -349,6 +358,12 @@ pub(crate) fn col_device<'a>(
         Text::new(none_translation(language)).into()
     };
 
+    let exporters_desc: Element<Message, StyleType> = if exporters.is_empty() {
+        Text::new(none_translation(language)).into()
+    } else {
+        get_exporters_row(exporters).into()
+    };
+
     Column::new()
         .height(Length::Fill)
         .spacing(10)
@@ -362,6 +377,18 @@ pub(crate) fn col_device<'a>(
                         .push(tooltip_content.map(get_info_tooltip)),
                 ),
         )
+        .push(if cs.supports_exporters() {
+            Some(
+                Column::new()
+                    .push(
+                        Text::new(format!("{}:", ipfix_exporters_translation(language)))
+                            .class(TextType::Subtitle),
+                    )
+                    .push(Row::new().push(Text::new("   ")).push(exporters_desc)),
+            )
+        } else {
+            None
+        })
         .push(if cs.supports_filters() {
             Some(
                 Column::new()
@@ -374,6 +401,21 @@ pub(crate) fn col_device<'a>(
         } else {
             None
         })
+}
+
+/// The exporters flow records have been received from, in the same style as the adapter addresses
+fn get_exporters_row<'a>(
+    exporters: &BTreeSet<IpfixExporter>,
+) -> row::Wrapping<'a, Message, StyleType> {
+    let mut row = Row::new().spacing(5);
+    for exporter in exporters {
+        row = row.push(
+            Container::new(Text::new(exporter.to_string()).size(FONT_SIZE_FOOTER))
+                .padding(Padding::new(5.0).left(10).right(10))
+                .class(ContainerType::AdapterAddress),
+        );
+    }
+    row.wrap()
 }
 
 fn col_data_representation<'a>(

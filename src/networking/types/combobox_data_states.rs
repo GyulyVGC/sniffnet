@@ -3,6 +3,7 @@ use std::net::IpAddr;
 
 use crate::countries::types::country::Country;
 use crate::networking::types::host::Host;
+use crate::networking::types::ipfix_exporter::IpfixExporter;
 use crate::report::types::search_parameters::SearchParameters;
 use crate::utils::types::case_insensitive_string::CaseInsensitiveString;
 use iced::widget::combo_box;
@@ -53,6 +54,14 @@ impl ComboboxDataStates {
             );
             data.programs.1 = false;
         }
+
+        if data.exporters.1 {
+            states.exporters = combo_box::State::with_selection(
+                data.exporters.0.iter().map(ToString::to_string).collect(),
+                Some(&search.exporter),
+            );
+            data.exporters.1 = false;
+        }
     }
 }
 
@@ -62,6 +71,9 @@ pub struct ComboboxData {
     pub asns: (BTreeSet<CaseInsensitiveString>, bool),
     pub countries: (BTreeSet<CaseInsensitiveString>, bool),
     pub programs: (BTreeSet<CaseInsensitiveString>, bool),
+    /// Exporters are stored as structs, and not as strings like the other sets,
+    /// so that their addresses are sorted numerically instead of lexicographically
+    pub exporters: (BTreeSet<IpfixExporter>, bool),
 }
 
 impl ComboboxData {
@@ -91,6 +103,12 @@ impl ComboboxData {
         }
     }
 
+    pub fn update_exporters(&mut self, exporters: impl Iterator<Item = IpfixExporter>) {
+        for exporter in exporters {
+            self.exporters.1 = self.exporters.0.insert(exporter) || self.exporters.1;
+        }
+    }
+
     pub fn update_program(&mut self, program: Option<&Process>) {
         if let Some(program) = program
             && !program.name.is_empty()
@@ -110,4 +128,5 @@ pub struct ComboboxStates {
     pub asns: combo_box::State<String>,
     pub countries: combo_box::State<String>,
     pub programs: combo_box::State<String>,
+    pub exporters: combo_box::State<String>,
 }

@@ -36,6 +36,7 @@ use crate::translations::translations_2::{
     only_show_favorites_translation, showing_results_translation,
 };
 use crate::translations::translations_5::{only_show_blacklisted_translation, program_translation};
+use crate::translations::translations_6::exporter_translation;
 use crate::utils::formatted_strings::clip_text;
 use crate::utils::types::icon::Icon;
 use crate::{Language, RunningPage, Sniffer, StyleType};
@@ -78,6 +79,7 @@ pub fn inspect_page(sniffer: &Sniffer) -> Container<'_, Message, StyleType> {
             &sniffer.combobox_data_states.states,
             language,
             sniffer.program_lookup.as_ref(),
+            sniffer.capture_source.supports_exporters(),
         ))
         .push(
             Container::new(col_report)
@@ -278,6 +280,7 @@ fn additional_filters_row<'a>(
     combobox_states: &'a ComboboxStates,
     language: Language,
     program_lookup: Option<&'a ProgramLookup>,
+    supports_exporters: bool,
 ) -> Row<'a, Message, StyleType> {
     let clear_all_filters: Element<'a, Message, StyleType> =
         if SearchParameters::default().eq(search_params) {
@@ -329,6 +332,15 @@ fn additional_filters_row<'a>(
         .width(160)
     });
 
+    let combobox_exporter = supports_exporters.then(|| {
+        filter_combobox(
+            FilterInputType::Exporter,
+            &combobox_states.exporters,
+            search_params.clone(),
+        )
+        .width(200)
+    });
+
     let container_country = Row::new()
         .spacing(5)
         .align_y(Alignment::Center)
@@ -353,6 +365,14 @@ fn additional_filters_row<'a>(
             .align_y(Alignment::Center)
             .push(Text::new(format!("{}:", program_translation(language))))
             .push(combobox_program)
+    });
+
+    let container_exporter = combobox_exporter.map(|combobox_exporter| {
+        Row::new()
+            .spacing(5)
+            .align_y(Alignment::Center)
+            .push(Text::new(format!("{}:", exporter_translation(language))))
+            .push(combobox_exporter)
     });
 
     let favorites_only = toggler_filter(
@@ -389,6 +409,7 @@ fn additional_filters_row<'a>(
             .push(container_domain)
             .push(container_as_name)
             .push(container_program)
+            .push(container_exporter)
             .wrap()
             .vertical_spacing(5),
     )

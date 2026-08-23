@@ -10,6 +10,23 @@ pub fn latency_translation(language: Language) -> &'static str {
     }
 }
 
+pub fn ipfix_exporters_translation(language: Language) -> &'static str {
+    match language {
+        Language::EN => "IPFIX exporters",
+        Language::IT => "Esportatori IPFIX",
+        _ => "IPFIX exporters",
+    }
+}
+
+/// Label of the exporter filter, in the inspect page
+pub fn exporter_translation(language: Language) -> &'static str {
+    match language {
+        Language::EN => "Exporter",
+        Language::IT => "Esportatore",
+        _ => "Exporter",
+    }
+}
+
 pub fn ipfix_collector_translation(language: Language) -> &'static str {
     match language {
         Language::EN => "IPFIX collector",

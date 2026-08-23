@@ -607,6 +607,7 @@ impl Sniffer {
         combobox_data.asns.1 = self.search.as_name != parameters.as_name;
         combobox_data.domains.1 = self.search.domain != parameters.domain;
         combobox_data.programs.1 = self.search.program != parameters.program;
+        combobox_data.exporters.1 = self.search.exporter != parameters.exporter;
         self.combobox_data_states.update_states(&parameters);
 
         self.page_number = 1;
@@ -975,6 +976,9 @@ impl Sniffer {
         }
         self.traffic_chart.update_charts_data(&msg, no_more_packets);
 
+        self.combobox_data_states
+            .data
+            .update_exporters(msg.map.keys().filter_map(|k| k.exporter));
         // update combobox dropdowns
         self.combobox_data_states.update_states(&self.search);
     }
