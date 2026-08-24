@@ -222,8 +222,7 @@ fn ingest_flow_record(
         return;
     };
 
-    let (exchanged_bytes, exchanged_packets) =
-        resolve_data_amounts(record, peer, observation_domain_id, &key, baselines, now);
+    let (exchanged_bytes, exchanged_packets) = resolve_data_amounts(record, &key, baselines, now);
 
     if exchanged_bytes == 0 || exchanged_packets == 0 {
         return;
@@ -261,21 +260,13 @@ fn ingest_flow_record(
 /// Find out how much data this flow actually carries
 fn resolve_data_amounts(
     record: &FlowRecord,
-    peer: SocketAddr,
-    observation_domain_id: u32,
     key: &AddressPortPair,
     baselines: &mut BaselineCache,
     now: Instant,
 ) -> (u128, u128) {
     // update baseline in any case for potential future delta computations
-    let (bytes_from_baseline, packets_from_baseline) = baselines.delta(
-        peer,
-        observation_domain_id,
-        key,
-        record.bytes_total,
-        record.packets_total,
-        now,
-    );
+    let (bytes_from_baseline, packets_from_baseline) =
+        baselines.delta(key, record.bytes_total, record.packets_total, now);
 
     let bytes = if let Some(bytes_delta) = record.bytes_delta {
         bytes_delta
@@ -797,9 +788,8 @@ mod tests {
         let now = Instant::now();
         let key = totals_key();
         let mut baselines = BaselineCache::new(now);
-        let mut resolve = |record: &FlowRecord| {
-            resolve_data_amounts(record, peer(), 0, &key, &mut baselines, now)
-        };
+        let mut resolve =
+            |record: &FlowRecord| resolve_data_amounts(record, &key, &mut baselines, now);
 
         // deltas are already increments, so they're used as they stand
         assert_eq!(resolve(&flow_record(Some(1500), Some(10))), (1500, 10));
