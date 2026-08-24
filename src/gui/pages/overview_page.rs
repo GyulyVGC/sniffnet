@@ -32,7 +32,7 @@ use crate::translations::translations_2::{
     data_representation_translation, dropped_translation, only_top_30_items_translation,
 };
 use crate::translations::translations_5::no_favorites_saved_translation;
-use crate::translations::translations_6::ipfix_exporters_translation;
+use crate::translations::translations_6::ipfix_exporter_translation;
 use crate::utils::types::icon::Icon;
 use crate::{Language, RunningPage, StyleType};
 use iced::Length::Fill;
@@ -421,7 +421,7 @@ fn get_exporters_col<'a>(
 
     Column::new()
         .push(
-            Text::new(format!("{}:", ipfix_exporters_translation(language)))
+            Text::new(format!("{}:", ipfix_exporter_translation(language)))
                 .class(TextType::Subtitle),
         )
         .push(info)

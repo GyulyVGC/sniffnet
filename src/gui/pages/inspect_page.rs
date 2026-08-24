@@ -36,7 +36,7 @@ use crate::translations::translations_2::{
     only_show_favorites_translation, showing_results_translation,
 };
 use crate::translations::translations_5::{only_show_blacklisted_translation, program_translation};
-use crate::translations::translations_6::exporter_translation;
+use crate::translations::translations_6::ipfix_exporter_translation;
 use crate::utils::formatted_strings::clip_text;
 use crate::utils::types::icon::Icon;
 use crate::{Language, RunningPage, Sniffer, StyleType};
@@ -338,7 +338,7 @@ fn additional_filters_row<'a>(
             &combobox_states.exporters,
             search_params.clone(),
         )
-        .width(200)
+        .width(240)
     });
 
     let container_country = Row::new()
@@ -371,7 +371,10 @@ fn additional_filters_row<'a>(
         Row::new()
             .spacing(5)
             .align_y(Alignment::Center)
-            .push(Text::new(format!("{}:", exporter_translation(language))))
+            .push(Text::new(format!(
+                "{}:",
+                ipfix_exporter_translation(language)
+            )))
             .push(combobox_exporter)
     });
 
@@ -400,18 +403,19 @@ fn additional_filters_row<'a>(
     );
 
     let container = Container::new(
-        Row::new()
-            .align_y(Alignment::Center)
-            .spacing(25)
-            .push(blacklisted_only)
-            .push(favorites_only)
-            .push(container_country)
-            .push(container_domain)
-            .push(container_as_name)
-            .push(container_program)
-            .push(container_exporter)
-            .wrap()
-            .vertical_spacing(5),
+        Column::new().spacing(5).push(container_exporter).push(
+            Row::new()
+                .align_y(Alignment::Center)
+                .spacing(25)
+                .push(blacklisted_only)
+                .push(favorites_only)
+                .push(container_country)
+                .push(container_domain)
+                .push(container_as_name)
+                .push(container_program)
+                .wrap()
+                .vertical_spacing(5),
+        ),
     )
     .padding(10)
     .class(ContainerType::BorderedRound);

@@ -37,7 +37,7 @@ use crate::translations::translations_3::{
     copy_translation, messages_translation, service_translation,
 };
 use crate::translations::translations_5::program_translation;
-use crate::translations::translations_6::{exporter_translation, latency_translation};
+use crate::translations::translations_6::{ipfix_exporter_translation, latency_translation};
 use crate::utils::formatted_strings::{
     get_formatted_timestamp, get_socket_address, mac_from_dec_to_hex,
 };
@@ -196,11 +196,20 @@ fn col_info<'a>(
                     get_formatted_timestamp(val.initial_timestamp),
                     get_formatted_timestamp(val.final_timestamp)
                 ))),
-        )
-        .push(TextType::highlighted_subtitle_with_desc(
-            protocol_translation(language),
-            &key.protocol.to_string(),
+        );
+
+    // only IPFIX flows are reported by an exporter
+    if let Some(exporter) = key.exporter {
+        ret_val = ret_val.push(TextType::highlighted_subtitle_with_desc(
+            ipfix_exporter_translation(language),
+            &exporter.to_string(),
         ));
+    }
+
+    ret_val = ret_val.push(TextType::highlighted_subtitle_with_desc(
+        protocol_translation(language),
+        &key.protocol.to_string(),
+    ));
 
     if !is_icmp && !is_arp {
         ret_val = ret_val.push(TextType::highlighted_subtitle_with_desc(
@@ -213,14 +222,6 @@ fn col_info<'a>(
                 &val.program.to_string(),
             ));
         }
-    }
-
-    // only IPFIX flows are reported by an exporter
-    if let Some(exporter) = key.exporter {
-        ret_val = ret_val.push(TextType::highlighted_subtitle_with_desc(
-            exporter_translation(language),
-            &exporter.to_string(),
-        ));
     }
 
     ret_val = ret_val.push(TextType::highlighted_subtitle_with_desc(
