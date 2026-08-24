@@ -5,7 +5,9 @@ use crate::networking::ipfix::ttl_map::TtlMap;
 use crate::networking::ipfix::wire::FieldSpec;
 
 /// Per-exporter IPFIX template cache.
-/// The cache is keyed by `(peer, observation_domain, template_id)`.
+/// The cache is keyed by `(peer, observation_domain, template_id)`:
+/// the spec requires scoping templates by transport session + ODID,
+/// so we can't use `IpfixExporter` because also the port number is needed.
 pub(super) struct TemplateCache {
     map: TtlMap<(SocketAddr, u32, u16), Vec<FieldSpec>>,
 }

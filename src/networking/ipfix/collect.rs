@@ -146,7 +146,7 @@ fn process_datagram(
     };
 
     let now = Instant::now();
-    let od_id = message.header.observation_domain_id;
+    let odid = message.header.observation_domain_id;
 
     // first pass: parse templates so that later data sets in this datagram can reference them
     for set in &message.sets {
@@ -154,7 +154,7 @@ fn process_datagram(
             for record in records {
                 state
                     .templates
-                    .insert(peer, od_id, record.template_id, record.fields.clone(), now);
+                    .insert(peer, odid, record.template_id, record.fields.clone(), now);
             }
         }
     }
@@ -166,7 +166,7 @@ fn process_datagram(
             payload,
         } = *set
         {
-            let Some(template) = state.templates.get(peer, od_id, template_id, now) else {
+            let Some(template) = state.templates.get(peer, odid, template_id, now) else {
                 // no such template seen
                 continue;
             };
@@ -186,7 +186,7 @@ fn process_datagram(
                     ingest_flow_record(
                         &flow,
                         peer,
-                        od_id,
+                        odid,
                         &mut state.baselines,
                         now,
                         info_traffic_msg,
@@ -297,9 +297,14 @@ mod tests {
 
     /// `peer`'s identity: the test datagrams all declare observation domain 0
     fn exporter() -> IpfixExporter {
+        exporter_from(peer(), 0)
+    }
+
+    /// The identity of an exporter sending from `peer` and declaring `observation_domain_id`
+    fn exporter_from(peer: SocketAddr, observation_domain_id: u32) -> IpfixExporter {
         IpfixExporter {
-            addr: peer().ip(),
-            observation_domain_id: 0,
+            addr: peer.ip(),
+            observation_domain_id,
         }
     }
 
@@ -375,11 +380,16 @@ mod tests {
     }
 
     fn datagram(sets: &[Vec<u8>]) -> Vec<u8> {
+        datagram_from_domain(0, sets)
+    }
+
+    /// A datagram declaring a specific observation domain in its header
+    fn datagram_from_domain(observation_domain_id: u32, sets: &[Vec<u8>]) -> Vec<u8> {
         let mut out = IPFIX_VERSION.to_be_bytes().to_vec();
         out.extend_from_slice(&[0, 0]); // length placeholder
         out.extend_from_slice(&[0; 4]); // export time
         out.extend_from_slice(&[0; 4]); // sequence number
-        out.extend_from_slice(&[0; 4]); // observation domain
+        out.extend_from_slice(&observation_domain_id.to_be_bytes()); // observation domain
         for s in sets {
             out.extend_from_slice(s);
         }
@@ -429,6 +439,14 @@ mod tests {
         }
     }
 
+    /// `totals_key`'s same flow, as reported by another exporter
+    fn totals_key_from(exporter: IpfixExporter) -> AddressPortPair {
+        AddressPortPair {
+            exporter: Some(exporter),
+            ..totals_key()
+        }
+    }
+
     /// `totals_key`'s flow as an already-decoded record
     fn flow_record(bytes_delta: Option<u128>, packets_delta: Option<u128>) -> FlowRecord {
         FlowRecord {
@@ -466,14 +484,23 @@ mod tests {
     /// Feed a sequence of datagrams to one collector.
     /// The last element reports whether every datagram succeeded.
     fn run_all(datagrams: &[&[u8]]) -> (InfoTraffic, AddressesResolutionState, bool) {
+        let from_peer: Vec<_> = datagrams.iter().map(|bytes| (peer(), *bytes)).collect();
+        run_all_from(&from_peer)
+    }
+
+    /// Feed a sequence of datagrams, each sent by its own peer, to one collector.
+    /// The last element reports whether every datagram succeeded.
+    fn run_all_from(
+        datagrams: &[(SocketAddr, &[u8])],
+    ) -> (InfoTraffic, AddressesResolutionState, bool) {
         let mut state = CollectorState::new(Instant::now());
         let mut info = InfoTraffic::default();
         let mut resolutions = AddressesResolutionState::new_for_tests();
         let mut all_succeeded = true;
-        for bytes in datagrams {
+        for (peer, bytes) in datagrams {
             all_succeeded &= process_datagram(
                 bytes,
-                peer(),
+                *peer,
                 &mut state,
                 &mut info,
                 &IpBlacklist::default(),
@@ -653,6 +680,74 @@ mod tests {
         // 10 + 15 + 0 + 5
         assert_eq!(entry.transmitted_packets, 30);
         assert_eq!(info.tot_data_info.tot_data(DataRepr::Packets), 30);
+    }
+
+    #[test]
+    fn test_process_datagram_separates_exporters() {
+        let totals = |observation_domain_id, bytes, packets| {
+            datagram_from_domain(
+                observation_domain_id,
+                &[
+                    template_set(300, &TOTALS_FIELDS),
+                    set(300, &totals_record(bytes, packets)),
+                ],
+            )
+        };
+        let other_peer: SocketAddr = "198.51.100.7:4739".parse().unwrap();
+
+        let (info, _, succeeded) = run_all_from(&[
+            (peer(), &totals(0, 1500, 10)),
+            (other_peer, &totals(0, 4000, 25)),
+            (peer(), &totals(7, 800, 4)),
+        ]);
+        assert!(succeeded);
+
+        assert_eq!(info.map.len(), 3);
+
+        let entry = info.map.get(&totals_key()).unwrap();
+        assert_eq!(entry.transmitted_bytes, 1500);
+        assert_eq!(entry.transmitted_packets, 10);
+
+        let entry = info
+            .map
+            .get(&totals_key_from(exporter_from(other_peer, 0)))
+            .unwrap();
+        assert_eq!(entry.transmitted_bytes, 4000);
+        assert_eq!(entry.transmitted_packets, 25);
+
+        let entry = info
+            .map
+            .get(&totals_key_from(exporter_from(peer(), 7)))
+            .unwrap();
+        assert_eq!(entry.transmitted_bytes, 800);
+        assert_eq!(entry.transmitted_packets, 4);
+
+        assert_eq!(info.tot_data_info.tot_data(DataRepr::Bytes), 6300);
+        assert_eq!(info.tot_data_info.tot_data(DataRepr::Packets), 39);
+    }
+
+    #[test]
+    fn test_process_datagram_ignores_exporter_source_port() {
+        let totals = |bytes, packets| {
+            datagram(&[
+                template_set(300, &TOTALS_FIELDS),
+                set(300, &totals_record(bytes, packets)),
+            ])
+        };
+        // the same device coming back after a restart: same address, new ephemeral port
+        let restarted = SocketAddr::new(peer().ip(), 55_000);
+
+        let (info, _, succeeded) =
+            run_all_from(&[(peer(), &totals(1500, 10)), (restarted, &totals(4000, 25))]);
+        assert!(succeeded);
+
+        assert_eq!(info.map.len(), 1);
+
+        let entry = info.map.get(&totals_key()).unwrap();
+        assert_eq!(entry.transmitted_bytes, 4000);
+        assert_eq!(entry.transmitted_packets, 25);
+        assert_eq!(info.tot_data_info.tot_data(DataRepr::Bytes), 4000);
+        assert_eq!(info.tot_data_info.tot_data(DataRepr::Packets), 25);
     }
 
     #[test]
