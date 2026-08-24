@@ -40,7 +40,7 @@ use iced::alignment::{Horizontal, Vertical};
 use iced::widget::scrollable::Direction;
 use iced::widget::text::{LineHeight, Wrapping};
 use iced::widget::tooltip::Position;
-use iced::widget::{Button, Column, Container, Row, Scrollable, Space, Text, Tooltip, button, row};
+use iced::widget::{Button, Column, Container, Row, Scrollable, Space, Text, Tooltip, button};
 use iced::{Alignment, Element, Length, Padding};
 use std::collections::BTreeSet;
 
@@ -339,7 +339,7 @@ pub(crate) fn col_device<'a>(
         Some(
             Column::new()
                 .spacing(10)
-                .push(Text::new(link_type.full_print_on_one_line(language)))
+                .push(Text::new(link_type.full_print_on_one_line(language)).size(FONT_SIZE_FOOTER))
                 .push(get_addresses_row(link_type, cs.get_addresses()))
                 .into(),
         )
@@ -352,16 +352,12 @@ pub(crate) fn col_device<'a>(
         Row::new()
             .spacing(10)
             .push(Text::new("BPF"))
-            .push(get_info_tooltip(Text::new(filters.bpf()).into()))
+            .push(get_info_tooltip(
+                Text::new(filters.bpf()).size(FONT_SIZE_FOOTER).into(),
+            ))
             .into()
     } else {
         Text::new(none_translation(language)).into()
-    };
-
-    let exporters_desc: Element<Message, StyleType> = if exporters.is_empty() {
-        Text::new(none_translation(language)).into()
-    } else {
-        get_exporters_row(exporters).into()
     };
 
     Column::new()
@@ -377,15 +373,8 @@ pub(crate) fn col_device<'a>(
                         .push(tooltip_content.map(get_info_tooltip)),
                 ),
         )
-        .push(if cs.supports_exporters() {
-            Some(
-                Column::new()
-                    .push(
-                        Text::new(format!("{}:", ipfix_exporters_translation(language)))
-                            .class(TextType::Subtitle),
-                    )
-                    .push(Row::new().push(Text::new("   ")).push(exporters_desc)),
-            )
+        .push(if cs.supports_exporters() && !exporters.is_empty() {
+            Some(get_exporters_col(language, exporters))
         } else {
             None
         })
@@ -403,19 +392,39 @@ pub(crate) fn col_device<'a>(
         })
 }
 
-/// The exporters flow records have been received from, in the same style as the adapter addresses
-fn get_exporters_row<'a>(
+fn get_exporters_col<'a>(
+    language: Language,
     exporters: &BTreeSet<IpfixExporter>,
-) -> row::Wrapping<'a, Message, StyleType> {
-    let mut row = Row::new().spacing(5);
-    for exporter in exporters {
-        row = row.push(
-            Container::new(Text::new(exporter.to_string()).size(FONT_SIZE_FOOTER))
-                .padding(Padding::new(5.0).left(10).right(10))
-                .class(ContainerType::AdapterAddress),
-        );
-    }
-    row.wrap()
+) -> Column<'a, Message, StyleType> {
+    let info: Element<Message, StyleType> = if exporters.len() == 1 {
+        Text::new(format!(
+            "   {}",
+            exporters
+                .iter()
+                .next()
+                .map(ToString::to_string)
+                .unwrap_or_default()
+        ))
+        .into()
+    } else {
+        let mut exporters_info = Column::new().spacing(5);
+        for exporter in exporters {
+            exporters_info =
+                exporters_info.push(Text::new(exporter.to_string()).size(FONT_SIZE_FOOTER));
+        }
+        Row::new()
+            .spacing(10)
+            .push(Text::new(format!("   ({})", exporters.len())))
+            .push(get_info_tooltip(exporters_info.into()))
+            .into()
+    };
+
+    Column::new()
+        .push(
+            Text::new(format!("{}:", ipfix_exporters_translation(language)))
+                .class(TextType::Subtitle),
+        )
+        .push(info)
 }
 
 fn col_data_representation<'a>(
