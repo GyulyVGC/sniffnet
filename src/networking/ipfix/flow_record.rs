@@ -1,4 +1,5 @@
 use crate::networking::types::address_port_pair::AddressPortPair;
+use crate::networking::types::ipfix_exporter::IpfixExporter;
 use crate::networking::types::protocol::Protocol;
 use crate::networking::types::traffic_direction::TrafficDirection;
 use crate::utils::types::timestamp::Timestamp;
@@ -27,7 +28,7 @@ pub(super) struct FlowRecord {
 
 impl FlowRecord {
     /// Return the key for this record, if the record is valid
-    pub(super) fn get_key(&self) -> Option<AddressPortPair> {
+    pub(super) fn get_key(&self, exporter: IpfixExporter) -> Option<AddressPortPair> {
         let source = self.src_ip?;
         let dest = self.dst_ip?;
         let protocol = self.protocol?;
@@ -53,6 +54,7 @@ impl FlowRecord {
             dest,
             dport,
             protocol,
+            exporter: Some(exporter),
         })
     }
 
@@ -91,6 +93,14 @@ pub(super) struct ReverseCounters {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use std::net::Ipv4Addr;
+
+    fn exporter() -> IpfixExporter {
+        IpfixExporter {
+            addr: IpAddr::V4(Ipv4Addr::new(203, 0, 113, 9)),
+            observation_domain_id: 0,
+        }
+    }
 
     #[test]
     fn test_get_key() {
@@ -103,7 +113,7 @@ mod tests {
             ..Default::default()
         };
 
-        let key = record.get_key();
+        let key = record.get_key(exporter());
         assert_eq!(
             key,
             Some(AddressPortPair {
@@ -112,6 +122,7 @@ mod tests {
                 dest: "2.2.2.2".parse().unwrap(),
                 dport: Some(5678),
                 protocol: Protocol::TCP,
+                exporter: Some(exporter()),
             })
         );
 
@@ -119,42 +130,42 @@ mod tests {
             protocol: Some(Protocol::ICMP),
             ..record
         };
-        let key = record_2.get_key();
+        let key = record_2.get_key(exporter());
         assert!(key.is_none());
 
         let record_3 = FlowRecord {
             protocol: Some(Protocol::ARP),
             ..record
         };
-        let key = record_3.get_key();
+        let key = record_3.get_key(exporter());
         assert!(key.is_none());
 
         let record_4 = FlowRecord {
             src_port: None,
             ..record
         };
-        let key = record_4.get_key();
+        let key = record_4.get_key(exporter());
         assert!(key.is_none());
 
         let record_5 = FlowRecord {
             protocol: Some(Protocol::UDP),
             ..record
         };
-        let key = record_5.get_key();
+        let key = record_5.get_key(exporter());
         assert!(key.is_some());
 
         let record_6 = FlowRecord {
             protocol: None,
             ..record
         };
-        let key = record_6.get_key();
+        let key = record_6.get_key(exporter());
         assert!(key.is_none());
 
         let record_7 = FlowRecord {
             dst_ip: None,
             ..record
         };
-        let key = record_7.get_key();
+        let key = record_7.get_key(exporter());
         assert!(key.is_none());
 
         let record_8 = FlowRecord {
@@ -163,7 +174,7 @@ mod tests {
             dst_port: None,
             ..record
         };
-        let key = record_8.get_key();
+        let key = record_8.get_key(exporter());
         assert_eq!(
             key,
             Some(AddressPortPair {
@@ -172,6 +183,7 @@ mod tests {
                 dest: "2.2.2.2".parse().unwrap(),
                 dport: None,
                 protocol: Protocol::ICMP,
+                exporter: Some(exporter()),
             })
         );
     }

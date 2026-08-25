@@ -18,6 +18,7 @@ use crate::networking::types::address_port_pair::AddressPortPair;
 use crate::networking::types::arp_type::ArpType;
 use crate::networking::types::info_traffic::InfoTraffic;
 use crate::networking::types::ip_blacklist::IpBlacklist;
+use crate::networking::types::ipfix_exporter::IpfixExporter;
 use crate::utils::types::timestamp::Timestamp;
 
 /// Buffer size for a single UDP datagram
@@ -145,7 +146,7 @@ fn process_datagram(
     };
 
     let now = Instant::now();
-    let od_id = message.header.observation_domain_id;
+    let odid = message.header.observation_domain_id;
 
     // first pass: parse templates so that later data sets in this datagram can reference them
     for set in &message.sets {
@@ -153,7 +154,7 @@ fn process_datagram(
             for record in records {
                 state
                     .templates
-                    .insert(peer, od_id, record.template_id, record.fields.clone(), now);
+                    .insert(peer, odid, record.template_id, record.fields.clone(), now);
             }
         }
     }
@@ -165,7 +166,7 @@ fn process_datagram(
             payload,
         } = *set
         {
-            let Some(template) = state.templates.get(peer, od_id, template_id, now) else {
+            let Some(template) = state.templates.get(peer, odid, template_id, now) else {
                 // no such template seen
                 continue;
             };
@@ -185,7 +186,7 @@ fn process_datagram(
                     ingest_flow_record(
                         &flow,
                         peer,
-                        od_id,
+                        odid,
                         &mut state.baselines,
                         now,
                         info_traffic_msg,
@@ -212,12 +213,16 @@ fn ingest_flow_record(
     ip_blacklist: &IpBlacklist,
     resolutions_state: &mut AddressesResolutionState,
 ) {
-    let Some(key) = record.get_key() else {
+    let exporter = IpfixExporter {
+        addr: peer.ip(),
+        observation_domain_id,
+    };
+
+    let Some(key) = record.get_key(exporter) else {
         return;
     };
 
-    let (exchanged_bytes, exchanged_packets) =
-        resolve_data_amounts(record, peer, observation_domain_id, &key, baselines, now);
+    let (exchanged_bytes, exchanged_packets) = resolve_data_amounts(record, &key, baselines, now);
 
     if exchanged_bytes == 0 || exchanged_packets == 0 {
         return;
@@ -255,21 +260,13 @@ fn ingest_flow_record(
 /// Find out how much data this flow actually carries
 fn resolve_data_amounts(
     record: &FlowRecord,
-    peer: SocketAddr,
-    observation_domain_id: u32,
     key: &AddressPortPair,
     baselines: &mut BaselineCache,
     now: Instant,
 ) -> (u128, u128) {
     // update baseline in any case for potential future delta computations
-    let (bytes_from_baseline, packets_from_baseline) = baselines.delta(
-        peer,
-        observation_domain_id,
-        key,
-        record.bytes_total,
-        record.packets_total,
-        now,
-    );
+    let (bytes_from_baseline, packets_from_baseline) =
+        baselines.delta(key, record.bytes_total, record.packets_total, now);
 
     let bytes = if let Some(bytes_delta) = record.bytes_delta {
         bytes_delta
@@ -296,6 +293,19 @@ mod tests {
 
     fn peer() -> SocketAddr {
         "203.0.113.9:4739".parse().unwrap()
+    }
+
+    /// `peer`'s identity: the test datagrams all declare observation domain 0
+    fn exporter() -> IpfixExporter {
+        exporter_from(peer(), 0)
+    }
+
+    /// The identity of an exporter sending from `peer` and declaring `observation_domain_id`
+    fn exporter_from(peer: SocketAddr, observation_domain_id: u32) -> IpfixExporter {
+        IpfixExporter {
+            addr: peer.ip(),
+            observation_domain_id,
+        }
     }
 
     /// The field specifiers `sniffnet-agent` puts in its templates,
@@ -370,11 +380,16 @@ mod tests {
     }
 
     fn datagram(sets: &[Vec<u8>]) -> Vec<u8> {
+        datagram_from_domain(0, sets)
+    }
+
+    /// A datagram declaring a specific observation domain in its header
+    fn datagram_from_domain(observation_domain_id: u32, sets: &[Vec<u8>]) -> Vec<u8> {
         let mut out = IPFIX_VERSION.to_be_bytes().to_vec();
         out.extend_from_slice(&[0, 0]); // length placeholder
         out.extend_from_slice(&[0; 4]); // export time
         out.extend_from_slice(&[0; 4]); // sequence number
-        out.extend_from_slice(&[0; 4]); // observation domain
+        out.extend_from_slice(&observation_domain_id.to_be_bytes()); // observation domain
         for s in sets {
             out.extend_from_slice(s);
         }
@@ -420,6 +435,15 @@ mod tests {
             dest: IpAddr::V4(Ipv4Addr::new(8, 8, 8, 8)),
             dport: Some(50_000),
             protocol: Protocol::TCP,
+            exporter: Some(exporter()),
+        }
+    }
+
+    /// `totals_key`'s same flow, as reported by another exporter
+    fn totals_key_from(exporter: IpfixExporter) -> AddressPortPair {
+        AddressPortPair {
+            exporter: Some(exporter),
+            ..totals_key()
         }
     }
 
@@ -460,14 +484,23 @@ mod tests {
     /// Feed a sequence of datagrams to one collector.
     /// The last element reports whether every datagram succeeded.
     fn run_all(datagrams: &[&[u8]]) -> (InfoTraffic, AddressesResolutionState, bool) {
+        let from_peer: Vec<_> = datagrams.iter().map(|bytes| (peer(), *bytes)).collect();
+        run_all_from(&from_peer)
+    }
+
+    /// Feed a sequence of datagrams, each sent by its own peer, to one collector.
+    /// The last element reports whether every datagram succeeded.
+    fn run_all_from(
+        datagrams: &[(SocketAddr, &[u8])],
+    ) -> (InfoTraffic, AddressesResolutionState, bool) {
         let mut state = CollectorState::new(Instant::now());
         let mut info = InfoTraffic::default();
         let mut resolutions = AddressesResolutionState::new_for_tests();
         let mut all_succeeded = true;
-        for bytes in datagrams {
+        for (peer, bytes) in datagrams {
             all_succeeded &= process_datagram(
                 bytes,
-                peer(),
+                *peer,
                 &mut state,
                 &mut info,
                 &IpBlacklist::default(),
@@ -557,6 +590,7 @@ mod tests {
             dest: IpAddr::V6(dst),
             dport: Some(50_000),
             protocol: Protocol::TCP,
+            exporter: Some(exporter()),
         };
         let entry = info.map.get(&key).unwrap();
         assert_eq!(entry.transmitted_bytes, 800);
@@ -588,6 +622,7 @@ mod tests {
             dest: totals_key().source,
             dport: totals_key().sport,
             protocol: Protocol::TCP,
+            exporter: Some(exporter()),
         };
         let reverse = info.map.get(&reverse_key).unwrap();
         assert_eq!(reverse.transmitted_bytes, 9000);
@@ -645,6 +680,74 @@ mod tests {
         // 10 + 15 + 0 + 5
         assert_eq!(entry.transmitted_packets, 30);
         assert_eq!(info.tot_data_info.tot_data(DataRepr::Packets), 30);
+    }
+
+    #[test]
+    fn test_process_datagram_separates_exporters() {
+        let totals = |observation_domain_id, bytes, packets| {
+            datagram_from_domain(
+                observation_domain_id,
+                &[
+                    template_set(300, &TOTALS_FIELDS),
+                    set(300, &totals_record(bytes, packets)),
+                ],
+            )
+        };
+        let other_peer: SocketAddr = "198.51.100.7:4739".parse().unwrap();
+
+        let (info, _, succeeded) = run_all_from(&[
+            (peer(), &totals(0, 1500, 10)),
+            (other_peer, &totals(0, 4000, 25)),
+            (peer(), &totals(7, 800, 4)),
+        ]);
+        assert!(succeeded);
+
+        assert_eq!(info.map.len(), 3);
+
+        let entry = info.map.get(&totals_key()).unwrap();
+        assert_eq!(entry.transmitted_bytes, 1500);
+        assert_eq!(entry.transmitted_packets, 10);
+
+        let entry = info
+            .map
+            .get(&totals_key_from(exporter_from(other_peer, 0)))
+            .unwrap();
+        assert_eq!(entry.transmitted_bytes, 4000);
+        assert_eq!(entry.transmitted_packets, 25);
+
+        let entry = info
+            .map
+            .get(&totals_key_from(exporter_from(peer(), 7)))
+            .unwrap();
+        assert_eq!(entry.transmitted_bytes, 800);
+        assert_eq!(entry.transmitted_packets, 4);
+
+        assert_eq!(info.tot_data_info.tot_data(DataRepr::Bytes), 6300);
+        assert_eq!(info.tot_data_info.tot_data(DataRepr::Packets), 39);
+    }
+
+    #[test]
+    fn test_process_datagram_ignores_exporter_source_port() {
+        let totals = |bytes, packets| {
+            datagram(&[
+                template_set(300, &TOTALS_FIELDS),
+                set(300, &totals_record(bytes, packets)),
+            ])
+        };
+        // the same device coming back after a restart: same address, new ephemeral port
+        let restarted = SocketAddr::new(peer().ip(), 55_000);
+
+        let (info, _, succeeded) =
+            run_all_from(&[(peer(), &totals(1500, 10)), (restarted, &totals(4000, 25))]);
+        assert!(succeeded);
+
+        assert_eq!(info.map.len(), 1);
+
+        let entry = info.map.get(&totals_key()).unwrap();
+        assert_eq!(entry.transmitted_bytes, 4000);
+        assert_eq!(entry.transmitted_packets, 25);
+        assert_eq!(info.tot_data_info.tot_data(DataRepr::Bytes), 4000);
+        assert_eq!(info.tot_data_info.tot_data(DataRepr::Packets), 25);
     }
 
     #[test]
@@ -780,9 +883,8 @@ mod tests {
         let now = Instant::now();
         let key = totals_key();
         let mut baselines = BaselineCache::new(now);
-        let mut resolve = |record: &FlowRecord| {
-            resolve_data_amounts(record, peer(), 0, &key, &mut baselines, now)
-        };
+        let mut resolve =
+            |record: &FlowRecord| resolve_data_amounts(record, &key, &mut baselines, now);
 
         // deltas are already increments, so they're used as they stand
         assert_eq!(resolve(&flow_record(Some(1500), Some(10))), (1500, 10));

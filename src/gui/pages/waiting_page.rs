@@ -96,7 +96,13 @@ pub fn waiting_page(sniffer: &Sniffer) -> Option<Container<'_, Message, StyleTyp
             .push(Space::new().height(Length::Fill))
             .push(
                 Container::new(
-                    col_device(language, cs, &sniffer.conf.filters).height(Length::Shrink),
+                    col_device(
+                        language,
+                        cs,
+                        &sniffer.conf.filters,
+                        &sniffer.combobox_data_states.data.exporters.0,
+                    )
+                    .height(Length::Shrink),
                 )
                 .padding([15, 30])
                 .class(ContainerType::BorderedRound),

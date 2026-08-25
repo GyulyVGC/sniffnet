@@ -355,6 +355,13 @@ impl CaptureSource {
         }
     }
 
+    pub fn supports_exporters(&self) -> bool {
+        match self {
+            Self::Ipfix(_) => true,
+            Self::Device(_) | Self::File(_) => false,
+        }
+    }
+
     pub fn supports_programs(&self) -> bool {
         match self {
             Self::Device(_) => true,

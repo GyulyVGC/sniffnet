@@ -1,6 +1,7 @@
 //! Module defining the `AddressPortPair` struct, which represents a network address:port pair.
 
 use crate::Protocol;
+use crate::networking::types::ipfix_exporter::IpfixExporter;
 use std::net::{IpAddr, Ipv4Addr};
 
 /// Struct representing a network address:port pair.
@@ -16,6 +17,8 @@ pub struct AddressPortPair {
     pub dport: Option<u16>,
     ///  Transport layer protocol carried through the associate address:port pair (TCP or UPD).
     pub protocol: Protocol,
+    /// Exporter the flow was reported by; `None` non-IPFIX captures.
+    pub exporter: Option<IpfixExporter>,
 }
 
 #[cfg(test)]
@@ -33,6 +36,7 @@ impl AddressPortPair {
             dest,
             dport,
             protocol,
+            exporter: None,
         }
     }
 }
@@ -45,6 +49,7 @@ impl Default for AddressPortPair {
             sport: None,
             dport: None,
             protocol: Protocol::ARP,
+            exporter: None,
         }
     }
 }
