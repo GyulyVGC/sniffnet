@@ -177,7 +177,7 @@ impl FilterInputType {
         }
     }
 
-    pub fn entry_value(
+    fn entry_value(
         self,
         key: &AddressPortPair,
         value: &InfoAddressPortPair,

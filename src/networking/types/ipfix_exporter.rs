@@ -3,12 +3,7 @@
 use std::fmt;
 use std::net::IpAddr;
 
-/// Struct representing the identity of an IPFIX exporter, as observed by the collector.
-///
-/// An exporter is identified by the address it sends from and by the observation domain it
-/// declares in the message header: a single device can export several observation domains,
-/// which are distinct sources as far as the collector is concerned.
-///
+/// Struct representing the identity of an IPFIX exporter.
 /// The transport source port is deliberately not part of the identity: it's ephemeral for most
 /// exporters, so including it would make the same device appear as a new one after every restart.
 #[derive(Clone, Copy, Debug, Hash, PartialEq, Eq, PartialOrd, Ord)]
@@ -67,7 +62,6 @@ mod tests {
         exporters.sort_unstable();
 
         // addresses are ordered numerically (not lexicographically: 9.x would come last)
-        // and the domains of a same address are kept together
         assert_eq!(
             exporters,
             [

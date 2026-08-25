@@ -17,7 +17,7 @@ pub struct AddressPortPair {
     pub dport: Option<u16>,
     ///  Transport layer protocol carried through the associate address:port pair (TCP or UPD).
     pub protocol: Protocol,
-    /// Exporter the flow was reported by; `None` for packets sniffed locally (non-IPFIX captures).
+    /// Exporter the flow was reported by; `None` non-IPFIX captures.
     pub exporter: Option<IpfixExporter>,
 }
 

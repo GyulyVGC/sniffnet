@@ -9,7 +9,7 @@ use crate::utils::types::case_insensitive_string::CaseInsensitiveString;
 use iced::widget::combo_box;
 use listeners::Process;
 
-/// Struct to contain all the sets of data related to network hosts and programs
+/// Struct to contain all the sets of data related to network hosts, programs, and exporters
 ///
 /// It also stores combobox states for the host-related filters
 #[derive(Default)]
@@ -71,8 +71,7 @@ pub struct ComboboxData {
     pub asns: (BTreeSet<CaseInsensitiveString>, bool),
     pub countries: (BTreeSet<CaseInsensitiveString>, bool),
     pub programs: (BTreeSet<CaseInsensitiveString>, bool),
-    /// Exporters are stored as structs, and not as strings like the other sets,
-    /// so that their addresses are sorted numerically instead of lexicographically
+    /// Exporters are stored as structs so that they're sorted numerically instead of lexicographically
     pub exporters: (BTreeSet<IpfixExporter>, bool),
 }
 

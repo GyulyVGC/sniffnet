@@ -355,7 +355,6 @@ impl CaptureSource {
         }
     }
 
-    /// Whether the traffic is reported by IPFIX exporters, instead of being sniffed locally
     pub fn supports_exporters(&self) -> bool {
         match self {
             Self::Ipfix(_) => true,
