@@ -22,6 +22,7 @@ use crate::gui::types::settings::Settings;
 use crate::networking::types::capture_context::CaptureSource;
 use crate::networking::types::data_info::DataInfo;
 use crate::networking::types::data_representation::DataRepr;
+use crate::networking::types::ipfix_exporter::IpfixExporter;
 use crate::report::types::sort_type::SortType;
 use crate::translations::translations::{
     active_filters_translation, incoming_translation, none_translation, outgoing_translation,
@@ -31,6 +32,7 @@ use crate::translations::translations_2::{
     data_representation_translation, dropped_translation, only_top_30_items_translation,
 };
 use crate::translations::translations_5::no_favorites_saved_translation;
+use crate::translations::translations_6::ipfix_exporter_translation;
 use crate::utils::types::icon::Icon;
 use crate::{Language, RunningPage, StyleType};
 use iced::Length::Fill;
@@ -40,6 +42,7 @@ use iced::widget::text::{LineHeight, Wrapping};
 use iced::widget::tooltip::Position;
 use iced::widget::{Button, Column, Container, Row, Scrollable, Space, Text, Tooltip, button};
 use iced::{Alignment, Element, Length, Padding};
+use std::collections::BTreeSet;
 
 /// Computes the body of gui overview page
 pub fn overview_page(sniffer: &Sniffer) -> Container<'_, Message, StyleType> {
@@ -261,7 +264,12 @@ pub fn item_bar<'a>(
 fn col_info(sniffer: &Sniffer) -> Container<'_, Message, StyleType> {
     let Settings { language, .. } = sniffer.conf.settings;
 
-    let col_device = col_device(language, &sniffer.capture_source, &sniffer.conf.filters);
+    let col_device = col_device(
+        language,
+        &sniffer.capture_source,
+        &sniffer.conf.filters,
+        &sniffer.combobox_data_states.data.exporters.0,
+    );
 
     let col_data_representation = col_data_representation(language, sniffer.conf.data_repr);
 
@@ -319,6 +327,7 @@ pub(crate) fn col_device<'a>(
     language: Language,
     cs: &'a CaptureSource,
     filters: &'a Filters,
+    exporters: &'a BTreeSet<IpfixExporter>,
 ) -> Column<'a, Message, StyleType> {
     let link_type = cs.get_link_type();
     #[cfg(not(target_os = "windows"))]
@@ -326,11 +335,26 @@ pub(crate) fn col_device<'a>(
     #[cfg(target_os = "windows")]
     let cs_info = cs.get_desc().unwrap_or(cs.get_name());
 
+    let tooltip_content: Option<Element<Message, StyleType>> = if cs.supports_link_type() {
+        Some(
+            Column::new()
+                .spacing(10)
+                .push(Text::new(link_type.full_print_on_one_line(language)).size(FONT_SIZE_FOOTER))
+                .push(get_addresses_row(link_type, cs.get_addresses()))
+                .into(),
+        )
+    } else {
+        // show bind addresses for IPFIX collector listening on unspecified IP
+        get_addresses_row(link_type, cs.get_ipfix_unspecified_bound_addresses()).map(Element::from)
+    };
+
     let filters_desc: Element<Message, StyleType> = if filters.is_some_filter_active() {
         Row::new()
             .spacing(10)
             .push(Text::new("BPF"))
-            .push(get_info_tooltip(Text::new(filters.bpf()).into()))
+            .push(get_info_tooltip(
+                Text::new(filters.bpf()).size(FONT_SIZE_FOOTER).into(),
+            ))
             .into()
     } else {
         Text::new(none_translation(language)).into()
@@ -346,23 +370,61 @@ pub(crate) fn col_device<'a>(
                     Row::new()
                         .spacing(10)
                         .push(Text::new(format!("   {cs_info}")))
-                        .push(get_info_tooltip(
-                            Column::new()
-                                .spacing(10)
-                                .push(Text::new(link_type.full_print_on_one_line(language)))
-                                .push(get_addresses_row(link_type, cs.get_addresses()))
-                                .into(),
-                        )),
+                        .push(tooltip_content.map(get_info_tooltip)),
                 ),
         )
+        .push(if cs.supports_exporters() && !exporters.is_empty() {
+            Some(get_exporters_col(language, exporters))
+        } else {
+            None
+        })
+        .push(if cs.supports_filters() {
+            Some(
+                Column::new()
+                    .push(
+                        Text::new(format!("{}:", active_filters_translation(language)))
+                            .class(TextType::Subtitle),
+                    )
+                    .push(Row::new().push(Text::new("   ")).push(filters_desc)),
+            )
+        } else {
+            None
+        })
+}
+
+fn get_exporters_col<'a>(
+    language: Language,
+    exporters: &BTreeSet<IpfixExporter>,
+) -> Column<'a, Message, StyleType> {
+    let info: Element<Message, StyleType> = if exporters.len() == 1 {
+        Text::new(format!(
+            "   {}",
+            exporters
+                .iter()
+                .next()
+                .map(ToString::to_string)
+                .unwrap_or_default()
+        ))
+        .into()
+    } else {
+        let mut exporters_info = Column::new().spacing(5);
+        for exporter in exporters {
+            exporters_info =
+                exporters_info.push(Text::new(exporter.to_string()).size(FONT_SIZE_FOOTER));
+        }
+        Row::new()
+            .spacing(10)
+            .push(Text::new(format!("   ({})", exporters.len())))
+            .push(get_info_tooltip(exporters_info.into()))
+            .into()
+    };
+
+    Column::new()
         .push(
-            Column::new()
-                .push(
-                    Text::new(format!("{}:", active_filters_translation(language)))
-                        .class(TextType::Subtitle),
-                )
-                .push(Row::new().push(Text::new("   ")).push(filters_desc)),
+            Text::new(format!("{}:", ipfix_exporter_translation(language)))
+                .class(TextType::Subtitle),
         )
+        .push(info)
 }
 
 fn col_data_representation<'a>(
@@ -418,12 +480,7 @@ fn donut_row(language: Language, sniffer: &Sniffer) -> Container<'_, Message, St
             RuleType::Outgoing(true),
             language,
         ))
-        .push(donut_legend_entry(
-            dropped,
-            data_repr,
-            RuleType::Dropped,
-            language,
-        ));
+        .push(dropped.map(|d| donut_legend_entry(d, data_repr, RuleType::Dropped, language)));
 
     let donut_row = Row::new()
         .align_y(Vertical::Center)

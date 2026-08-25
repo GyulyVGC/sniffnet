@@ -7,3 +7,13 @@ pub enum TrafficDirection {
     /// Outgoing traffic (from local interface to remote address)
     Outgoing,
 }
+
+impl TrafficDirection {
+    /// The direction the other half of the same conversation travels in.
+    pub fn opposite(self) -> Self {
+        match self {
+            Self::Incoming => Self::Outgoing,
+            Self::Outgoing => Self::Incoming,
+        }
+    }
+}

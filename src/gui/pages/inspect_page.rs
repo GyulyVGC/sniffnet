@@ -25,6 +25,7 @@ use crate::networking::types::combobox_data_states::ComboboxStates;
 use crate::networking::types::data_info::DataInfo;
 use crate::networking::types::data_representation::DataRepr;
 use crate::networking::types::info_address_port_pair::InfoAddressPortPair;
+use crate::networking::types::program_lookup::ProgramLookup;
 use crate::networking::types::traffic_direction::TrafficDirection;
 use crate::report::get_report_entries::get_searched_entries;
 use crate::report::types::report_col::ReportCol;
@@ -35,6 +36,7 @@ use crate::translations::translations_2::{
     only_show_favorites_translation, showing_results_translation,
 };
 use crate::translations::translations_5::{only_show_blacklisted_translation, program_translation};
+use crate::translations::translations_6::ipfix_exporter_translation;
 use crate::utils::formatted_strings::clip_text;
 use crate::utils::types::icon::Icon;
 use crate::{Language, RunningPage, Sniffer, StyleType};
@@ -76,6 +78,8 @@ pub fn inspect_page(sniffer: &Sniffer) -> Container<'_, Message, StyleType> {
             &sniffer.search,
             &sniffer.combobox_data_states.states,
             language,
+            sniffer.program_lookup.as_ref(),
+            sniffer.capture_source.supports_exporters(),
         ))
         .push(
             Container::new(col_report)
@@ -275,6 +279,8 @@ fn additional_filters_row<'a>(
     search_params: &'a SearchParameters,
     combobox_states: &'a ComboboxStates,
     language: Language,
+    program_lookup: Option<&'a ProgramLookup>,
+    supports_exporters: bool,
 ) -> Row<'a, Message, StyleType> {
     let clear_all_filters: Element<'a, Message, StyleType> =
         if SearchParameters::default().eq(search_params) {
@@ -317,12 +323,23 @@ fn additional_filters_row<'a>(
     )
     .width(160);
 
-    let combobox_program = filter_combobox(
-        FilterInputType::Program,
-        &combobox_states.programs,
-        search_params.clone(),
-    )
-    .width(160);
+    let combobox_program = program_lookup.is_some().then(|| {
+        filter_combobox(
+            FilterInputType::Program,
+            &combobox_states.programs,
+            search_params.clone(),
+        )
+        .width(160)
+    });
+
+    let combobox_exporter = supports_exporters.then(|| {
+        filter_combobox(
+            FilterInputType::Exporter,
+            &combobox_states.exporters,
+            search_params.clone(),
+        )
+        .width(240)
+    });
 
     let container_country = Row::new()
         .spacing(5)
@@ -342,11 +359,24 @@ fn additional_filters_row<'a>(
         .push(Text::new("ASN:"))
         .push(combobox_as_name);
 
-    let container_program = Row::new()
-        .spacing(5)
-        .align_y(Alignment::Center)
-        .push(Text::new(format!("{}:", program_translation(language))))
-        .push(combobox_program);
+    let container_program = combobox_program.map(|combobox_program| {
+        Row::new()
+            .spacing(5)
+            .align_y(Alignment::Center)
+            .push(Text::new(format!("{}:", program_translation(language))))
+            .push(combobox_program)
+    });
+
+    let container_exporter = combobox_exporter.map(|combobox_exporter| {
+        Row::new()
+            .spacing(5)
+            .align_y(Alignment::Center)
+            .push(Text::new(format!(
+                "{}:",
+                ipfix_exporter_translation(language)
+            )))
+            .push(combobox_exporter)
+    });
 
     let favorites_only = toggler_filter(
         search_params.only_favorites,
@@ -373,17 +403,19 @@ fn additional_filters_row<'a>(
     );
 
     let container = Container::new(
-        Row::new()
-            .align_y(Alignment::Center)
-            .spacing(25)
-            .push(blacklisted_only)
-            .push(favorites_only)
-            .push(container_country)
-            .push(container_domain)
-            .push(container_as_name)
-            .push(container_program)
-            .wrap()
-            .vertical_spacing(5),
+        Column::new().spacing(5).push(container_exporter).push(
+            Row::new()
+                .align_y(Alignment::Center)
+                .spacing(25)
+                .push(blacklisted_only)
+                .push(favorites_only)
+                .push(container_country)
+                .push(container_domain)
+                .push(container_as_name)
+                .push(container_program)
+                .wrap()
+                .vertical_spacing(5),
+        ),
     )
     .padding(10)
     .class(ContainerType::BorderedRound);

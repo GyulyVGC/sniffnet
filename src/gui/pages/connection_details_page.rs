@@ -17,7 +17,6 @@ use crate::networking::manage_packets::{
 use crate::networking::types::address_port_pair::AddressPortPair;
 use crate::networking::types::arp_type::ArpType;
 use crate::networking::types::bogon::is_bogon;
-use crate::networking::types::capture_context::CaptureSource;
 use crate::networking::types::data_representation::DataRepr;
 use crate::networking::types::host::Host;
 use crate::networking::types::icmp_type::IcmpType;
@@ -38,8 +37,10 @@ use crate::translations::translations_3::{
     copy_translation, messages_translation, service_translation,
 };
 use crate::translations::translations_5::program_translation;
-use crate::translations::translations_6::latency_translation;
-use crate::utils::formatted_strings::{get_formatted_timestamp, get_socket_address};
+use crate::translations::translations_6::{ipfix_exporter_translation, latency_translation};
+use crate::utils::formatted_strings::{
+    get_formatted_timestamp, get_socket_address, mac_from_dec_to_hex,
+};
 use crate::utils::types::icon::Icon;
 use crate::{Language, Protocol, Sniffer, StyleType};
 use iced::alignment::Vertical;
@@ -107,7 +108,7 @@ fn page_content<'a>(sniffer: &Sniffer, key: &AddressPortPair) -> Container<'a, M
         source_caption,
         &key.source,
         key.sport,
-        val.mac_address1.as_ref(),
+        val.mac_address1,
         language,
         &sniffer.timing_events,
     );
@@ -115,7 +116,7 @@ fn page_content<'a>(sniffer: &Sniffer, key: &AddressPortPair) -> Container<'a, M
         dest_caption,
         &key.dest,
         key.dport,
-        val.mac_address2.as_ref(),
+        val.mac_address2,
         language,
         &sniffer.timing_events,
     );
@@ -162,6 +163,7 @@ fn page_header<'a>(
     .class(ContainerType::Gradient(color_gradient))
 }
 
+#[allow(clippy::too_many_lines)]
 fn col_info<'a>(
     sniffer: &Sniffer,
     key: &AddressPortPair,
@@ -175,7 +177,7 @@ fn col_info<'a>(
         sniffer.capture_source.get_addresses(),
         val.traffic_direction,
     ) == TrafficType::Unicast;
-    let measure_latency = matches!(sniffer.capture_source, CaptureSource::Device(_)) && is_unicast;
+    let measure_latency = sniffer.capture_source.supports_latency() && is_unicast;
     let is_icmp = key.protocol.eq(&Protocol::ICMP);
     let is_arp = key.protocol.eq(&Protocol::ARP);
 
@@ -194,22 +196,32 @@ fn col_info<'a>(
                     get_formatted_timestamp(val.initial_timestamp),
                     get_formatted_timestamp(val.final_timestamp)
                 ))),
-        )
-        .push(TextType::highlighted_subtitle_with_desc(
-            protocol_translation(language),
-            &key.protocol.to_string(),
+        );
+
+    // only IPFIX flows are reported by an exporter
+    if let Some(exporter) = key.exporter {
+        ret_val = ret_val.push(TextType::highlighted_subtitle_with_desc(
+            ipfix_exporter_translation(language),
+            &exporter.to_string(),
         ));
+    }
+
+    ret_val = ret_val.push(TextType::highlighted_subtitle_with_desc(
+        protocol_translation(language),
+        &key.protocol.to_string(),
+    ));
 
     if !is_icmp && !is_arp {
-        ret_val = ret_val
-            .push(TextType::highlighted_subtitle_with_desc(
-                service_translation(language),
-                &val.service.to_string(),
-            ))
-            .push(TextType::highlighted_subtitle_with_desc(
+        ret_val = ret_val.push(TextType::highlighted_subtitle_with_desc(
+            service_translation(language),
+            &val.service.to_string(),
+        ));
+        if sniffer.program_lookup.is_some() {
+            ret_val = ret_val.push(TextType::highlighted_subtitle_with_desc(
                 program_translation(language),
                 &val.program.to_string(),
             ));
+        }
     }
 
     ret_val = ret_val.push(TextType::highlighted_subtitle_with_desc(
@@ -242,7 +254,15 @@ fn col_info<'a>(
         ));
     }
 
-    if is_icmp || is_arp {
+    let messages = if is_icmp {
+        IcmpType::pretty_print_types(&val.icmp_types)
+    } else if is_arp {
+        ArpType::pretty_print_types(&val.arp_types)
+    } else {
+        String::new()
+    };
+
+    if !messages.is_empty() {
         ret_val = ret_val.push(
             Column::new()
                 .push(
@@ -252,11 +272,7 @@ fn col_info<'a>(
                 .push(Scrollable::with_direction(
                     Column::new()
                         .padding(Padding::ZERO.right(10).bottom(10))
-                        .push(Text::new(if is_icmp {
-                            IcmpType::pretty_print_types(&val.icmp_types)
-                        } else {
-                            ArpType::pretty_print_types(&val.arp_types)
-                        })),
+                        .push(Text::new(messages)),
                     Direction::Both {
                         vertical: ScrollbarType::properties(),
                         horizontal: ScrollbarType::properties(),
@@ -370,7 +386,7 @@ fn get_src_or_dest_col<'a>(
     caption: Row<'a, Message, StyleType>,
     ip: &IpAddr,
     port: Option<u16>,
-    mac: Option<&String>,
+    mac: Option<[u8; 6]>,
     language: Language,
     timing_events: &TimingEvents,
 ) -> Column<'a, Message, StyleType> {
@@ -380,7 +396,11 @@ fn get_src_or_dest_col<'a>(
         address_translation(language)
     };
 
-    let mac_str = if let Some(val) = mac { val } else { "-" };
+    let mac_str = if let Some(val) = mac {
+        &mac_from_dec_to_hex(val)
+    } else {
+        "-"
+    };
 
     Column::new()
         .spacing(4)

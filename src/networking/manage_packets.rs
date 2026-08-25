@@ -7,10 +7,12 @@ use etherparse::{
 use pcap::Address;
 
 use crate::Protocol;
+use crate::networking::capture::AddressesResolutionState;
 use crate::networking::types::address_port_pair::AddressPortPair;
 use crate::networking::types::arp_type::ArpType;
 use crate::networking::types::bogon::is_bogon;
-use crate::networking::types::capture_context::CaptureSource;
+use crate::networking::types::data_info::DataInfo;
+use crate::networking::types::data_info_host::DataInfoHost;
 use crate::networking::types::icmp_type::{IcmpType, IcmpTypeV4, IcmpTypeV6};
 use crate::networking::types::info_address_port_pair::InfoAddressPortPair;
 use crate::networking::types::info_traffic::InfoTraffic;
@@ -20,7 +22,7 @@ use crate::networking::types::service::Service;
 use crate::networking::types::service_query::ServiceQuery;
 use crate::networking::types::traffic_direction::TrafficDirection;
 use crate::networking::types::traffic_type::TrafficType;
-use std::fmt::Write;
+use crate::utils::types::timestamp::Timestamp;
 use std::time::Instant;
 
 include!(concat!(env!("OUT_DIR"), "/services.rs"));
@@ -29,7 +31,7 @@ include!(concat!(env!("OUT_DIR"), "/services.rs"));
 /// Returns the relevant collected information.
 pub fn analyze_headers(
     headers: LaxPacketHeaders,
-    mac_addresses: &mut (Option<String>, Option<String>),
+    mac_addresses: &mut (Option<[u8; 6]>, Option<[u8; 6]>),
     exchanged_bytes: &mut u128,
     icmp_type: &mut IcmpType,
     arp_type: &mut ArpType,
@@ -75,15 +77,15 @@ pub fn analyze_headers(
 /// Returns false if packet has to be skipped.
 fn analyze_link_header(
     link_header: Option<LinkHeader>,
-    mac_address1: &mut Option<String>,
-    mac_address2: &mut Option<String>,
+    mac_address1: &mut Option<[u8; 6]>,
+    mac_address2: &mut Option<[u8; 6]>,
     exchanged_bytes: &mut u128,
 ) {
     match link_header {
         Some(LinkHeader::Ethernet2(header)) => {
             *exchanged_bytes += 14;
-            *mac_address1 = Some(mac_from_dec_to_hex(header.source));
-            *mac_address2 = Some(mac_from_dec_to_hex(header.destination));
+            *mac_address1 = Some(header.source);
+            *mac_address2 = Some(header.destination);
         }
         Some(LinkHeader::LinuxSll(header)) => {
             *exchanged_bytes += 16;
@@ -91,7 +93,7 @@ fn analyze_link_header(
                 && header.arp_hrd_type == ArpHardwareId::ETHERNET
                 && let Ok(sender) = header.sender_address[0..6].try_into()
             {
-                Some(mac_from_dec_to_hex(sender))
+                Some(sender)
             } else {
                 None
             };
@@ -265,12 +267,15 @@ pub fn get_service(
 pub fn modify_or_insert_in_map(
     info_traffic_msg: &mut InfoTraffic,
     key: &AddressPortPair,
-    cs: &CaptureSource,
-    mac_addresses: (Option<String>, Option<String>),
-    icmp_type: IcmpType,
+    my_interface_addresses: &[Address],
+    mac_addresses: (Option<[u8; 6]>, Option<[u8; 6]>),
+    icmp_type: Option<IcmpType>,
     arp_type: ArpType,
+    exchanged_packets: u128,
     exchanged_bytes: u128,
     ip_blacklist: &IpBlacklist,
+    direction_hint: Option<TrafficDirection>,
+    timestamps_hint: Option<(Timestamp, Timestamp)>,
 ) -> (TrafficDirection, Service) {
     let mut traffic_direction = TrafficDirection::default();
     let mut service = Service::Unknown;
@@ -279,17 +284,18 @@ pub fn modify_or_insert_in_map(
     if !info_traffic_msg.map.contains_key(key) {
         // first occurrence of key (in this time interval)
 
-        let my_interface_addresses = cs.get_addresses();
-        // determine traffic direction
+        // determine traffic direction (IPFIX hint wins when present)
         let source_ip = &key.source;
         let destination_ip = &key.dest;
-        traffic_direction = get_traffic_direction(
-            source_ip,
-            destination_ip,
-            key.sport,
-            key.dport,
-            my_interface_addresses,
-        );
+        traffic_direction = direction_hint.unwrap_or_else(|| {
+            get_traffic_direction(
+                source_ip,
+                destination_ip,
+                key.sport,
+                key.dport,
+                my_interface_addresses,
+            )
+        });
         // determine upper layer service
         service = get_service(key, traffic_direction, my_interface_addresses);
         // check if the remote address is blacklisted
@@ -297,16 +303,24 @@ pub fn modify_or_insert_in_map(
         is_blacklisted = ip_blacklist.contains(&address_to_lookup);
     }
 
-    let timestamp = info_traffic_msg.last_packet_timestamp;
+    let receipt_ts = info_traffic_msg.last_packet_timestamp;
+    let (initial_ts, final_ts) = timestamps_hint.unwrap_or((receipt_ts, receipt_ts));
     let new_info = info_traffic_msg
         .map
         .entry(*key)
         .and_modify(|info| {
             info.transmitted_bytes += exchanged_bytes;
-            info.transmitted_packets += 1;
-            info.final_timestamp = timestamp;
+            info.transmitted_packets += exchanged_packets;
+            if initial_ts < info.initial_timestamp {
+                info.initial_timestamp = initial_ts;
+            }
+            if final_ts > info.final_timestamp {
+                info.final_timestamp = final_ts;
+            }
             info.final_instant = Instant::now();
-            if key.protocol.eq(&Protocol::ICMP) {
+            if key.protocol.eq(&Protocol::ICMP)
+                && let Some(icmp_type) = icmp_type
+            {
                 info.icmp_types
                     .entry(icmp_type)
                     .and_modify(|n| *n += 1)
@@ -323,13 +337,15 @@ pub fn modify_or_insert_in_map(
             mac_address1: mac_addresses.0,
             mac_address2: mac_addresses.1,
             transmitted_bytes: exchanged_bytes,
-            transmitted_packets: 1,
-            initial_timestamp: timestamp,
-            final_timestamp: timestamp,
+            transmitted_packets: exchanged_packets,
+            initial_timestamp: initial_ts,
+            final_timestamp: final_ts,
             final_instant: Instant::now(),
             service,
             traffic_direction,
-            icmp_types: if key.protocol.eq(&Protocol::ICMP) {
+            icmp_types: if key.protocol.eq(&Protocol::ICMP)
+                && let Some(icmp_type) = icmp_type
+            {
                 HashMap::from([(icmp_type, 1)])
             } else {
                 HashMap::new()
@@ -344,6 +360,119 @@ pub fn modify_or_insert_in_map(
         });
 
     (new_info.traffic_direction, new_info.service)
+}
+
+/// Updates stats for a known connection (already present in map):
+/// totals, rDNS resolution state, per-host map, per-service map.
+///
+/// Shared by both capture backends:
+/// - the pcap pipeline calls it once per packet (`packets` = 1)
+/// - the IPFIX collector once per flow record (`packets` = the record's packet count).
+#[allow(clippy::too_many_arguments)]
+pub fn update_connection_stats(
+    info_traffic_msg: &mut InfoTraffic,
+    resolutions_state: &mut AddressesResolutionState,
+    key: &AddressPortPair,
+    my_interface_addresses: &[Address],
+    packets: u128,
+    bytes: u128,
+    direction: TrafficDirection,
+    service: Service,
+) {
+    let now = Instant::now();
+
+    info_traffic_msg
+        .tot_data_info
+        .add_packets(packets, bytes, direction, now);
+
+    // check the rDNS status of this address and act accordingly
+    let address_to_lookup = get_address_to_lookup(key, direction);
+    let mut r_dns_waiting_resolution = false;
+    let r_dns_already_resolved = resolutions_state
+        .addresses_resolved
+        .contains_key(&address_to_lookup);
+    if !r_dns_already_resolved {
+        r_dns_waiting_resolution = resolutions_state
+            .addresses_waiting_resolution
+            .contains_key(&address_to_lookup);
+    }
+
+    match (r_dns_waiting_resolution, r_dns_already_resolved) {
+        (false, false) => {
+            // rDNS not requested yet (first occurrence of this address to lookup)
+
+            // Add this address to the map of addresses waiting for a resolution
+            // Useful to NOT perform again a rDNS lookup for this entry
+            let mut data_info = DataInfo::default();
+            data_info.add_packets(packets, bytes, direction, now);
+            resolutions_state
+                .addresses_waiting_resolution
+                .insert(address_to_lookup, data_info);
+
+            // send the rDNS lookup request to the thread pool
+            let _ = resolutions_state.lookup_request_tx.try_send((
+                *key,
+                direction,
+                my_interface_addresses.to_vec(),
+            ));
+        }
+        (true, false) => {
+            // waiting for a previously requested rDNS resolution
+            // update the corresponding waiting address data
+            resolutions_state
+                .addresses_waiting_resolution
+                .entry(address_to_lookup)
+                .and_modify(|data_info| {
+                    data_info.add_packets(packets, bytes, direction, now);
+                });
+        }
+        (_, true) => {
+            // rDNS already resolved
+            // update the corresponding host's data info
+            let host = resolutions_state
+                .addresses_resolved
+                .get(&address_to_lookup)
+                .cloned()
+                .unwrap_or_default();
+            info_traffic_msg
+                .hosts
+                .entry(host)
+                .and_modify(|data_info_host| {
+                    data_info_host
+                        .data_info
+                        .add_packets(packets, bytes, direction, now);
+                })
+                .or_insert_with(|| {
+                    let traffic_type =
+                        get_traffic_type(&address_to_lookup, my_interface_addresses, direction);
+                    let is_loopback = address_to_lookup.is_loopback();
+                    let is_local = is_local_connection(&address_to_lookup, my_interface_addresses);
+                    let is_bogon = is_bogon(&address_to_lookup);
+                    let mut data_info = DataInfo::default();
+                    data_info.add_packets(packets, bytes, direction, now);
+                    DataInfoHost {
+                        data_info,
+                        is_loopback,
+                        is_local,
+                        is_bogon,
+                        traffic_type,
+                    }
+                });
+        }
+    }
+
+    //increment the packet count for the sniffed service
+    info_traffic_msg
+        .services
+        .entry(service)
+        .and_modify(|data_info| {
+            data_info.add_packets(packets, bytes, direction, now);
+        })
+        .or_insert_with(|| {
+            let mut data_info = DataInfo::default();
+            data_info.add_packets(packets, bytes, direction, now);
+            data_info
+        });
 }
 
 /// Returns the traffic direction observed (incoming or outgoing)
@@ -429,10 +558,7 @@ fn is_broadcast_address(address: &IpAddr, my_interface_addresses: &[Address]) ->
 }
 
 /// Determines if the connection is local
-pub fn is_local_connection(
-    address_to_lookup: &IpAddr,
-    my_interface_addresses: &Vec<Address>,
-) -> bool {
+pub fn is_local_connection(address_to_lookup: &IpAddr, my_interface_addresses: &[Address]) -> bool {
     let mut ret_val = false;
 
     for address in my_interface_addresses {
@@ -486,23 +612,13 @@ pub fn is_local_connection(
 }
 
 /// Determines if the address passed as parameter belong to the chosen adapter
-pub fn is_my_address(local_address: &IpAddr, my_interface_addresses: &Vec<Address>) -> bool {
+pub fn is_my_address(local_address: &IpAddr, my_interface_addresses: &[Address]) -> bool {
     for address in my_interface_addresses {
         if address.addr.eq(local_address) {
             return true;
         }
     }
     local_address.is_loopback()
-}
-
-/// Converts a MAC address in its hexadecimal form
-fn mac_from_dec_to_hex(mac_dec: [u8; 6]) -> String {
-    let mut mac_hex = String::with_capacity(17);
-    for n in &mac_dec {
-        let _ = write!(mac_hex, "{n:02x}:");
-    }
-    mac_hex.pop();
-    mac_hex
 }
 
 pub fn get_address_to_lookup(key: &AddressPortPair, traffic_direction: TrafficDirection) -> IpAddr {
@@ -539,7 +655,6 @@ mod tests {
     use crate::Service;
     use crate::networking::manage_packets::{
         get_service, get_traffic_direction, get_traffic_type, is_local_connection,
-        mac_from_dec_to_hex,
     };
     use crate::networking::types::address_port_pair::AddressPortPair;
     use crate::networking::types::service_query::ServiceQuery;
@@ -547,18 +662,6 @@ mod tests {
     use crate::networking::types::traffic_type::TrafficType;
 
     include!(concat!(env!("OUT_DIR"), "/services.rs"));
-
-    #[test]
-    fn mac_simple_test() {
-        let result = mac_from_dec_to_hex([255, 255, 10, 177, 9, 15]);
-        assert_eq!(result, "ff:ff:0a:b1:09:0f".to_string());
-    }
-
-    #[test]
-    fn mac_all_zero_test() {
-        let result = mac_from_dec_to_hex([0, 0, 0, 0, 0, 0]);
-        assert_eq!(result, "00:00:00:00:00:00".to_string());
-    }
 
     #[test]
     fn ipv6_simple_test() {
