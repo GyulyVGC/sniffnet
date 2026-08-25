@@ -3,6 +3,7 @@
 All Sniffnet releases with the relative changes are documented in this file.
 
 ## [UNRELEASED]
+- Size the domain/ASN/country/program filter dropdown menu based on the number of currently filtered options rather than the total option count (fixes [#1037](https://github.com/GyulyVGC/sniffnet/issues/1037))
 - Correctly filter by favorites-only before rDNS completes ([#1275](https://github.com/GyulyVGC/sniffnet/pull/1275))
 - Set `Content-Type: application/json` header on remote notifications ([#1266](https://github.com/GyulyVGC/sniffnet/pull/1266))
 

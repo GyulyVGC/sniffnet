@@ -446,6 +446,40 @@ fn filter_input<'a>(
         })
 }
 
+/// Counts how many `options` actually match `filter_value`, using the same
+/// matching rule as `iced`'s internal `combo_box` filtering (case-insensitive,
+/// alphanumeric-only comparison, every whitespace/punctuation-separated term
+/// of the query must be contained in the option).
+///
+/// `iced::widget::combo_box::State` only exposes the full, unfiltered list of
+/// options via `options()`; the actually-displayed (filtered) options are
+/// tracked in private widget state and aren't reachable from application
+/// code. Recomputing the match here lets Sniffnet size the dropdown menu
+/// according to how many entries will really be shown, instead of the total
+/// number of entries before filtering.
+fn count_matching_options(options: &[String], filter_value: &str) -> usize {
+    let query_parts: Vec<String> = filter_value
+        .to_lowercase()
+        .split(|c: char| !c.is_ascii_alphanumeric())
+        .filter(|part| !part.is_empty())
+        .map(String::from)
+        .collect();
+
+    if query_parts.is_empty() {
+        return options.len();
+    }
+
+    options
+        .iter()
+        .filter(|option| {
+            let mut matcher = (*option).clone();
+            matcher.retain(|c| c.is_ascii_alphanumeric());
+            let matcher = matcher.to_lowercase();
+            query_parts.iter().all(|part| matcher.contains(part))
+        })
+        .count()
+}
+
 fn filter_combobox(
     filter_input_type: FilterInputType,
     combo_box_state: &combo_box::State<String>,
@@ -471,7 +505,7 @@ fn filter_combobox(
             TextInputType::Standard
         });
 
-    if combo_box_state.options().len() >= 9 {
+    if count_matching_options(combo_box_state.options(), &filter_value) >= 9 {
         combobox = combobox.menu_height(200);
     }
 
@@ -616,10 +650,47 @@ fn button_clear_filter<'a>(
 
 #[cfg(test)]
 mod tests {
-    use crate::gui::pages::inspect_page::title_report_col_display;
+    use crate::gui::pages::inspect_page::{count_matching_options, title_report_col_display};
     use crate::networking::types::data_representation::DataRepr;
     use crate::report::types::report_col::ReportCol;
     use crate::translations::types::language::Language;
+
+    #[test]
+    fn test_count_matching_options_empty_filter_returns_all_options() {
+        let options = vec![
+            "example.com".to_string(),
+            "sniffnet.net".to_string(),
+            "github.com".to_string(),
+        ];
+        assert_eq!(count_matching_options(&options, ""), options.len());
+    }
+
+    #[test]
+    fn test_count_matching_options_filters_case_insensitively() {
+        let options = vec![
+            "example.com".to_string(),
+            "sniffnet.net".to_string(),
+            "GitHub.com".to_string(),
+            "gitlab.com".to_string(),
+        ];
+        // "git" matches both "GitHub.com" and "gitlab.com", regardless of case
+        assert_eq!(count_matching_options(&options, "git"), 2);
+        assert_eq!(count_matching_options(&options, "GIT"), 2);
+    }
+
+    #[test]
+    fn test_count_matching_options_ignores_non_alphanumeric_separators() {
+        let options = vec!["192.168.1.1".to_string(), "10.0.0.1".to_string()];
+        // matches by concatenated alphanumeric content, mirroring iced's own matcher
+        assert_eq!(count_matching_options(&options, "168 1 1"), 1);
+        assert_eq!(count_matching_options(&options, "10.0"), 1);
+    }
+
+    #[test]
+    fn test_count_matching_options_no_match() {
+        let options = vec!["example.com".to_string(), "sniffnet.net".to_string()];
+        assert_eq!(count_matching_options(&options, "nonexistent"), 0);
+    }
 
     #[test]
     fn test_table_titles_display_and_tooltip_values_for_each_language() {
