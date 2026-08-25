@@ -20,9 +20,9 @@ use std::time::Instant;
 #[derive(Clone, Debug)]
 pub struct InfoAddressPortPair {
     /// Source MAC address
-    pub mac_address1: Option<String>,
+    pub mac_address1: Option<[u8; 6]>,
     /// Destination MAC address
-    pub mac_address2: Option<String>,
+    pub mac_address2: Option<[u8; 6]>,
     /// Amount of bytes transmitted between the pair.
     pub transmitted_bytes: u128,
     /// Amount of packets transmitted between the pair.
@@ -52,8 +52,15 @@ impl InfoAddressPortPair {
         // self.program MUST NOT be refreshed here
         self.transmitted_bytes += other.transmitted_bytes;
         self.transmitted_packets += other.transmitted_packets;
-        self.final_timestamp = other.final_timestamp;
-        self.final_instant = other.final_instant;
+        if other.initial_timestamp < self.initial_timestamp {
+            self.initial_timestamp = other.initial_timestamp;
+        }
+        if other.final_timestamp > self.final_timestamp {
+            self.final_timestamp = other.final_timestamp;
+        }
+        if other.final_instant > self.final_instant {
+            self.final_instant = other.final_instant;
+        }
         self.service = other.service;
         self.is_blacklisted = other.is_blacklisted;
         self.traffic_direction = other.traffic_direction;
@@ -128,6 +135,33 @@ mod tests {
     use super::*;
     use crate::networking::types::data_representation::DataRepr;
     use crate::report::types::sort_type::SortType;
+
+    #[test]
+    fn test_refresh_only_widens_the_timestamp_window() {
+        let mut pair = InfoAddressPortPair {
+            initial_timestamp: Timestamp::new(10, 0),
+            final_timestamp: Timestamp::new(20, 0),
+            ..Default::default()
+        };
+
+        // inside the window does not change anything
+        pair.refresh(&InfoAddressPortPair {
+            initial_timestamp: Timestamp::new(12, 0),
+            final_timestamp: Timestamp::new(18, 0),
+            ..Default::default()
+        });
+        assert_eq!(pair.initial_timestamp, Timestamp::new(10, 0));
+        assert_eq!(pair.final_timestamp, Timestamp::new(20, 0));
+
+        // outside the window extends
+        pair.refresh(&InfoAddressPortPair {
+            initial_timestamp: Timestamp::new(5, 0),
+            final_timestamp: Timestamp::new(25, 0),
+            ..Default::default()
+        });
+        assert_eq!(pair.initial_timestamp, Timestamp::new(5, 0));
+        assert_eq!(pair.final_timestamp, Timestamp::new(25, 0));
+    }
 
     #[test]
     fn test_info_address_port_pair_data() {

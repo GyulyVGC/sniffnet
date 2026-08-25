@@ -56,17 +56,18 @@ print_stderr = "warn"
 
 [dependencies]
 async-channel = "2.5.0"
-clap = { version = "4.6.5", features = ["derive"] }
+clap = { version = "4.6.6", features = ["derive"] }
 confy = "2.0.0"
 ctrlc = { version = "3.5.2", features = ["termination"] }
 dns-lookup = "3.0.1"
 etherparse = "0.21.0"
 iced = { version = "0.14.0", features = ["tokio", "svg", "advanced", "lazy", "image"] }
-ipnet = "2.12.0"
+ipnet = "2.12.1"
 jiff = "0.2.35"
-listeners = "0.6.0"
+listeners = "0.6.1"
 maxminddb = "0.30.0"
-pcap = "2.4.0"
+nom = "8.0.0"
+pcap = "2.5.0"
 phf = "0.14.0"
 phf_shared = "0.14.0"
 picon = "0.1.0"
@@ -82,7 +83,7 @@ serde_json = { version = "1.0.150", features = ["preserve_order"] }
 splines = "5.0.0"
 surge-ping = "0.9.0"
 tokio = { version = "1.53.0", features = ["macros", "fs"] }
-toml = "1.1.3"
+toml = "1.1.4"
 
 [target.'cfg(windows)'.dependencies]
 gag = "1.0.0"
@@ -99,7 +100,7 @@ serial_test = { version = "4.0.1", default-features = false }
 [build-dependencies]
 phf_codegen = "0.14.0"
 phf_shared = "0.14.0"
-rustrict = { version = "0.7.38", default-features = false, features = ["censor"] }
+rustrict = { version = "0.7.39", default-features = false, features = ["censor"] }
 
 [target."cfg(windows)".build-dependencies]
 winresource = "0.1.31"

@@ -1,0 +1,34 @@
+//! IANA-assigned IPFIX Information Element identifiers used by Sniffnet
+
+pub(in crate::networking::ipfix) const OCTET_DELTA_COUNT: u16 = 1;
+pub(in crate::networking::ipfix) const PACKET_DELTA_COUNT: u16 = 2;
+pub(in crate::networking::ipfix) const PROTOCOL_IDENTIFIER: u16 = 4;
+pub(in crate::networking::ipfix) const SOURCE_TRANSPORT_PORT: u16 = 7;
+pub(in crate::networking::ipfix) const SOURCE_IPV4_ADDRESS: u16 = 8;
+pub(in crate::networking::ipfix) const DESTINATION_TRANSPORT_PORT: u16 = 11;
+pub(in crate::networking::ipfix) const DESTINATION_IPV4_ADDRESS: u16 = 12;
+pub(in crate::networking::ipfix) const POST_OCTET_DELTA_COUNT: u16 = 23;
+pub(in crate::networking::ipfix) const POST_PACKET_DELTA_COUNT: u16 = 24;
+pub(in crate::networking::ipfix) const SOURCE_IPV6_ADDRESS: u16 = 27;
+pub(in crate::networking::ipfix) const DESTINATION_IPV6_ADDRESS: u16 = 28;
+pub(in crate::networking::ipfix) const SOURCE_MAC_ADDRESS: u16 = 56;
+pub(in crate::networking::ipfix) const POST_DESTINATION_MAC_ADDRESS: u16 = 57;
+pub(in crate::networking::ipfix) const FLOW_DIRECTION: u16 = 61;
+pub(in crate::networking::ipfix) const DESTINATION_MAC_ADDRESS: u16 = 80;
+pub(in crate::networking::ipfix) const POST_SOURCE_MAC_ADDRESS: u16 = 81;
+pub(in crate::networking::ipfix) const OCTET_TOTAL_COUNT: u16 = 85;
+pub(in crate::networking::ipfix) const PACKET_TOTAL_COUNT: u16 = 86;
+pub(in crate::networking::ipfix) const FLOW_START_SECONDS: u16 = 150;
+pub(in crate::networking::ipfix) const FLOW_END_SECONDS: u16 = 151;
+pub(in crate::networking::ipfix) const FLOW_START_MILLISECONDS: u16 = 152;
+pub(in crate::networking::ipfix) const FLOW_END_MILLISECONDS: u16 = 153;
+pub(in crate::networking::ipfix) const FLOW_START_MICROSECONDS: u16 = 154;
+pub(in crate::networking::ipfix) const FLOW_END_MICROSECONDS: u16 = 155;
+pub(in crate::networking::ipfix) const FLOW_START_NANOSECONDS: u16 = 156;
+pub(in crate::networking::ipfix) const FLOW_END_NANOSECONDS: u16 = 157;
+pub(in crate::networking::ipfix) const POST_OCTET_TOTAL_COUNT: u16 = 171;
+pub(in crate::networking::ipfix) const POST_PACKET_TOTAL_COUNT: u16 = 172;
+pub(in crate::networking::ipfix) const LAYER2_OCTET_DELTA_COUNT: u16 = 352;
+pub(in crate::networking::ipfix) const LAYER2_OCTET_TOTAL_COUNT: u16 = 353;
+pub(in crate::networking::ipfix) const POST_LAYER2_OCTET_DELTA_COUNT: u16 = 417;
+pub(in crate::networking::ipfix) const POST_LAYER2_OCTET_TOTAL_COUNT: u16 = 420;

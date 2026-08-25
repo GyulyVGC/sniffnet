@@ -163,11 +163,8 @@ mod tests {
                 expanded: true,
             },
             import_pcap_path: "whole_day.pcapng".to_string(),
-            export_pcap: ExportPcap {
-                enabled: true,
-                file_name: "sniffnet.pcap".to_string(),
-                directory: "home".to_string(),
-            },
+            ipfix_socket: Default::default(),
+            export_pcap: ExportPcap::default(),
             last_opened_setting: SettingsPage::General,
             last_opened_page: RunningPage::Inspect,
             data_repr: DataRepr::Packets,
