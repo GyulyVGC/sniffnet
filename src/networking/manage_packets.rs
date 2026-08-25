@@ -2,7 +2,8 @@ use std::collections::HashMap;
 use std::net::{IpAddr, Ipv4Addr, Ipv6Addr};
 
 use etherparse::{
-    ArpHardwareId, EtherType, LaxPacketHeaders, LinkHeader, NetHeaders, TransportHeader,
+    ArpHardwareId, EtherType, LaxPacketHeaders, LinkExtHeader, LinkHeader, NetHeaders,
+    TransportHeader,
 };
 use pcap::Address;
 
@@ -33,6 +34,7 @@ pub fn analyze_headers(
     exchanged_bytes: &mut u128,
     icmp_type: &mut IcmpType,
     arp_type: &mut ArpType,
+    vlan_id: &mut Option<u16>,
 ) -> Option<AddressPortPair> {
     let mut retval = AddressPortPair::default();
 
@@ -42,6 +44,8 @@ pub fn analyze_headers(
         &mut mac_addresses.1,
         exchanged_bytes,
     );
+
+    *vlan_id = get_vlan_id(&headers.link_exts);
 
     let is_arp = matches!(&headers.net, Some(NetHeaders::Arp(_)));
 
@@ -102,6 +106,17 @@ fn analyze_link_header(
             *mac_address2 = None;
         }
     }
+}
+
+/// Returns the VLAN identifier carried by the outermost IEEE 802.1Q VLAN tag, if present.
+///
+/// Frames with double (`QinQ`) VLAN tagging only report the identifier of the
+/// outer tag, which is the one relevant for traffic segmentation.
+fn get_vlan_id(link_exts: &[LinkExtHeader]) -> Option<u16> {
+    link_exts.iter().find_map(|link_ext| match link_ext {
+        LinkExtHeader::Vlan(vlan_header) => Some(vlan_header.vlan_id.value()),
+        LinkExtHeader::Macsec(_) => None,
+    })
 }
 
 /// This function analyzes the network layer header passed as parameter and updates variables
@@ -269,6 +284,7 @@ pub fn modify_or_insert_in_map(
     mac_addresses: (Option<String>, Option<String>),
     icmp_type: IcmpType,
     arp_type: ArpType,
+    vlan_id: Option<u16>,
     exchanged_bytes: u128,
     ip_blacklist: &IpBlacklist,
 ) -> (TrafficDirection, Service) {
@@ -322,6 +338,7 @@ pub fn modify_or_insert_in_map(
         .or_insert_with(|| InfoAddressPortPair {
             mac_address1: mac_addresses.0,
             mac_address2: mac_addresses.1,
+            vlan_id,
             transmitted_bytes: exchanged_bytes,
             transmitted_packets: 1,
             initial_timestamp: timestamp,
@@ -530,6 +547,7 @@ pub fn get_local_port(
 
 #[cfg(test)]
 mod tests {
+    use etherparse::{LaxPacketHeaders, LinkExtHeader, PacketBuilder, SingleVlanHeader, VlanId};
     use pcap::Address;
     use std::collections::HashSet;
     use std::net::{IpAddr, Ipv4Addr, Ipv6Addr};
@@ -538,10 +556,12 @@ mod tests {
     use crate::Protocol;
     use crate::Service;
     use crate::networking::manage_packets::{
-        get_service, get_traffic_direction, get_traffic_type, is_local_connection,
-        mac_from_dec_to_hex,
+        analyze_headers, get_service, get_traffic_direction, get_traffic_type, get_vlan_id,
+        is_local_connection, mac_from_dec_to_hex,
     };
     use crate::networking::types::address_port_pair::AddressPortPair;
+    use crate::networking::types::arp_type::ArpType;
+    use crate::networking::types::icmp_type::IcmpType;
     use crate::networking::types::service_query::ServiceQuery;
     use crate::networking::types::traffic_direction::TrafficDirection;
     use crate::networking::types::traffic_type::TrafficType;
@@ -552,6 +572,100 @@ mod tests {
     fn mac_simple_test() {
         let result = mac_from_dec_to_hex([255, 255, 10, 177, 9, 15]);
         assert_eq!(result, "ff:ff:0a:b1:09:0f".to_string());
+    }
+
+    #[test]
+    fn get_vlan_id_returns_none_when_no_link_extensions() {
+        assert_eq!(get_vlan_id(&[]), None);
+    }
+
+    #[test]
+    fn get_vlan_id_returns_outer_tag_identifier() {
+        let vlan_id = VlanId::try_new(42).unwrap();
+        let link_exts = [LinkExtHeader::Vlan(SingleVlanHeader {
+            vlan_id,
+            ..Default::default()
+        })];
+        assert_eq!(get_vlan_id(&link_exts), Some(42));
+    }
+
+    #[test]
+    fn get_vlan_id_returns_first_tag_for_double_vlan_tagging() {
+        let outer_vlan_id = VlanId::try_new(100).unwrap();
+        let inner_vlan_id = VlanId::try_new(200).unwrap();
+        let link_exts = [
+            LinkExtHeader::Vlan(SingleVlanHeader {
+                vlan_id: outer_vlan_id,
+                ..Default::default()
+            }),
+            LinkExtHeader::Vlan(SingleVlanHeader {
+                vlan_id: inner_vlan_id,
+                ..Default::default()
+            }),
+        ];
+        assert_eq!(get_vlan_id(&link_exts), Some(100));
+    }
+
+    #[test]
+    fn analyze_headers_parses_vlan_tagged_ethernet_frame() {
+        // build a synthetic VLAN-tagged (IEEE 802.1Q) ethernet frame carrying a UDP/IPv4 packet
+        let builder = PacketBuilder::ethernet2([1, 2, 3, 4, 5, 6], [7, 8, 9, 10, 11, 12])
+            .single_vlan(VlanId::try_new(123).unwrap())
+            .ipv4([192, 168, 1, 1], [192, 168, 1, 2], 20)
+            .udp(21, 1234);
+        let payload = [1, 2, 3, 4, 5, 6, 7, 8];
+        let mut packet = Vec::with_capacity(builder.size(payload.len()));
+        builder.write(&mut packet, &payload).unwrap();
+
+        let headers = LaxPacketHeaders::from_ethernet(&packet).unwrap();
+
+        let mut mac_addresses = (None, None);
+        let mut exchanged_bytes = 0;
+        let mut icmp_type = IcmpType::default();
+        let mut arp_type = ArpType::default();
+        let mut vlan_id = None;
+
+        let key = analyze_headers(
+            headers,
+            &mut mac_addresses,
+            &mut exchanged_bytes,
+            &mut icmp_type,
+            &mut arp_type,
+            &mut vlan_id,
+        );
+
+        assert!(key.is_some());
+        assert_eq!(vlan_id, Some(123));
+    }
+
+    #[test]
+    fn analyze_headers_returns_no_vlan_id_for_untagged_frame() {
+        let builder = PacketBuilder::ethernet2([1, 2, 3, 4, 5, 6], [7, 8, 9, 10, 11, 12])
+            .ipv4([192, 168, 1, 1], [192, 168, 1, 2], 20)
+            .udp(21, 1234);
+        let payload = [1, 2, 3, 4, 5, 6, 7, 8];
+        let mut packet = Vec::with_capacity(builder.size(payload.len()));
+        builder.write(&mut packet, &payload).unwrap();
+
+        let headers = LaxPacketHeaders::from_ethernet(&packet).unwrap();
+
+        let mut mac_addresses = (None, None);
+        let mut exchanged_bytes = 0;
+        let mut icmp_type = IcmpType::default();
+        let mut arp_type = ArpType::default();
+        let mut vlan_id = None;
+
+        let key = analyze_headers(
+            headers,
+            &mut mac_addresses,
+            &mut exchanged_bytes,
+            &mut icmp_type,
+            &mut arp_type,
+            &mut vlan_id,
+        );
+
+        assert!(key.is_some());
+        assert_eq!(vlan_id, None);
     }
 
     #[test]

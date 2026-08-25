@@ -38,7 +38,7 @@ use crate::translations::translations_3::{
     copy_translation, messages_translation, service_translation,
 };
 use crate::translations::translations_5::program_translation;
-use crate::translations::translations_6::latency_translation;
+use crate::translations::translations_6::{latency_translation, vlan_id_translation};
 use crate::utils::formatted_strings::{get_formatted_timestamp, get_socket_address};
 use crate::utils::types::icon::Icon;
 use crate::{Language, Protocol, Sniffer, StyleType};
@@ -199,6 +199,13 @@ fn col_info<'a>(
             protocol_translation(language),
             &key.protocol.to_string(),
         ));
+
+    if let Some(vlan_id) = val.vlan_id {
+        ret_val = ret_val.push(TextType::highlighted_subtitle_with_desc(
+            vlan_id_translation(language),
+            &vlan_id.to_string(),
+        ));
+    }
 
     if !is_icmp && !is_arp {
         ret_val = ret_val

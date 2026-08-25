@@ -162,6 +162,7 @@ pub fn parse_packets(
                     let mut mac_addresses = (None, None);
                     let mut icmp_type = IcmpType::default();
                     let mut arp_type = ArpType::default();
+                    let mut vlan_id = None;
 
                     let key_option = analyze_headers(
                         headers,
@@ -169,6 +170,7 @@ pub fn parse_packets(
                         &mut exchanged_bytes,
                         &mut icmp_type,
                         &mut arp_type,
+                        &mut vlan_id,
                     );
 
                     let Some(key) = key_option else {
@@ -190,6 +192,7 @@ pub fn parse_packets(
                         mac_addresses,
                         icmp_type,
                         arp_type,
+                        vlan_id,
                         exchanged_bytes,
                         ip_blacklist,
                     );
