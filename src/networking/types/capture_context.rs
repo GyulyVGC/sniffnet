@@ -163,6 +163,7 @@ pub enum CaptureType {
 }
 
 impl CaptureType {
+    // TODO: consider calling PCAP's dispatch() instead of next_packet() (needs benchmarking first)
     pub fn next_packet(&mut self) -> Result<Packet<'_>, Error> {
         match self {
             Self::Live(on) => on.next_packet(),

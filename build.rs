@@ -206,6 +206,7 @@ static SAFE_WORDS_FOR_SERVICE_NAME: std::sync::LazyLock<rustrict::Trie> =
             "3gpp-monp",
             "emc-pp-mgmtsvc",
             "3gpp-cbsp",
+            "bitcoin",
         ] {
             safe_words.set(word, rustrict::Type::SAFE);
         }
