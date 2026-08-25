@@ -9,3 +9,10 @@ pub fn latency_translation(language: Language) -> &'static str {
         _ => "Latency",
     }
 }
+
+pub fn vlan_id_translation(language: Language) -> &'static str {
+    match language {
+        Language::EN => "VLAN ID",
+        _ => "VLAN ID",
+    }
+}

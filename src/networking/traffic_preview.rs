@@ -52,6 +52,7 @@ pub fn traffic_preview(tx: &Sender<TrafficPreview>) {
                     &mut 0,
                     &mut IcmpType::default(),
                     &mut ArpType::default(),
+                    &mut None,
                 )
                 .is_some()
             {

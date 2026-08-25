@@ -23,6 +23,8 @@ pub struct InfoAddressPortPair {
     pub mac_address1: Option<String>,
     /// Destination MAC address
     pub mac_address2: Option<String>,
+    /// VLAN identifier carried by the IEEE 802.1Q tag of the exchanged frames, if any.
+    pub vlan_id: Option<u16>,
     /// Amount of bytes transmitted between the pair.
     pub transmitted_bytes: u128,
     /// Amount of packets transmitted between the pair.
@@ -108,6 +110,7 @@ impl Default for InfoAddressPortPair {
         Self {
             mac_address1: None,
             mac_address2: None,
+            vlan_id: None,
             transmitted_bytes: 0,
             transmitted_packets: 0,
             initial_timestamp: Timestamp::default(),
