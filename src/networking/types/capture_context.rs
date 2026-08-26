@@ -178,6 +178,14 @@ impl CaptureType {
         }
     }
 
+    /// Whether a `next_packet` error means the capture has become permanently unusable
+    /// (e.g. the network interface went down) and must stop being polled, as opposed to
+    /// a benign/expected condition such as a read timeout on a live capture or reaching
+    /// the end of an offline file.
+    pub fn is_fatal_error(e: &Error) -> bool {
+        !matches!(e, Error::TimeoutExpired | Error::NoMorePackets)
+    }
+
     fn from_device(device: &MyDevice, pcap_out_path: Option<&String>) -> Result<Self, String> {
         let inactive = Capture::from_device(device.to_pcap_device()).map_err(|e| e.to_string())?;
         let cap = inactive
@@ -473,5 +481,43 @@ impl CaptureSourcePicklist {
             Self::Device => true,
             Self::Ipfix | Self::File => false,
         }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    // `pcap::Error::PcapError` is the variant `next_packet` returns for a wide range of
+    // OS-level libpcap failures, including the interface disappearing while a live
+    // capture is running (see https://github.com/GyulyVGC/sniffnet/issues/1028 and
+    // https://github.com/rust-pcap/pcap/issues/393). It must be treated as fatal so the
+    // capture loop stops instead of spinning on the same error forever.
+    #[test]
+    fn test_interface_disappeared_is_a_fatal_error() {
+        let interface_disappeared = Error::PcapError("The interface disappeared".to_string());
+        assert!(CaptureType::is_fatal_error(&interface_disappeared));
+    }
+
+    #[test]
+    fn test_other_pcap_errors_are_fatal() {
+        assert!(CaptureType::is_fatal_error(&Error::InvalidLinktype));
+        assert!(CaptureType::is_fatal_error(&Error::InsufficientMemory));
+        assert!(CaptureType::is_fatal_error(&Error::NonNonBlock));
+        assert!(CaptureType::is_fatal_error(&Error::PcapError(
+            "any other libpcap failure".to_string()
+        )));
+    }
+
+    #[test]
+    fn test_timeout_expired_is_not_fatal() {
+        // a benign, expected condition on a live capture with no traffic in the last read window
+        assert!(!CaptureType::is_fatal_error(&Error::TimeoutExpired));
+    }
+
+    #[test]
+    fn test_no_more_packets_is_not_fatal() {
+        // the expected end-of-file condition when importing an offline capture
+        assert!(!CaptureType::is_fatal_error(&Error::NoMorePackets));
     }
 }

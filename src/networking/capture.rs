@@ -237,4 +237,7 @@ pub enum BackendTrafficMessage {
     PendingHosts(usize, Vec<HostMessage>),
     OfflineGap(usize, u32),
     IpfixUndecodable(usize),
+    /// The capture backend hit an unrecoverable error while running (e.g. the network
+    /// interface being captured on went down) and had to stop.
+    CaptureError(usize, String),
 }

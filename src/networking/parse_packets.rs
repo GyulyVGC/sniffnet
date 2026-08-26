@@ -110,6 +110,12 @@ pub fn parse_packets(
                     let _ = tx
                         .send_blocking(BackendTrafficMessage::PendingHosts(cap_id, pending_hosts));
                     return;
+                } else if CaptureType::is_fatal_error(&e) {
+                    // the capture became unusable (e.g. the network interface went down):
+                    // report the failure and stop, instead of spinning on the same error forever
+                    let _ = tx
+                        .send_blocking(BackendTrafficMessage::CaptureError(cap_id, e.to_string()));
+                    return;
                 }
             }
             Ok(packet) => {
@@ -309,11 +315,14 @@ fn packet_stream(
         }
 
         let packet_res = cap.next_packet();
+        let is_fatal = matches!(&packet_res, Err(e) if CaptureType::is_fatal_error(e));
         let packet_owned = packet_res.map(|p| PacketOwned {
             header: *p.header,
             data: p.data.into(),
         });
-        if tx.send((packet_owned, cap.stats().ok())).is_err() {
+        if tx.send((packet_owned, cap.stats().ok())).is_err() || is_fatal {
+            // stop polling a capture that has become unusable (e.g. interface down),
+            // instead of spinning on the same error forever
             return;
         }
     }

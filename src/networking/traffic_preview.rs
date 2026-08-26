@@ -113,11 +113,14 @@ fn packet_stream(
 ) {
     loop {
         let packet_res = cap.next_packet();
+        let is_fatal = matches!(&packet_res, Err(e) if CaptureType::is_fatal_error(e));
         let packet_owned = packet_res.map(|p| PacketOwned {
             data: p.data.into(),
             dev_info: dev_info.clone(),
         });
-        if tx.send((packet_owned, cap.stats().ok())).is_err() {
+        if tx.send((packet_owned, cap.stats().ok())).is_err() || is_fatal {
+            // stop polling a capture that has become unusable (e.g. interface down),
+            // instead of spinning on the same error forever
             return;
         }
     }

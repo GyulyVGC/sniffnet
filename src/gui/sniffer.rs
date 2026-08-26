@@ -365,6 +365,7 @@ impl Sniffer {
             Message::PendingHosts(cap_id, host_msgs) => self.pending_hosts(cap_id, host_msgs),
             Message::OfflineGap(cap_id, gap) => self.offline_gap(cap_id, gap),
             Message::IpfixUndecodable(cap_id) => self.ipfix_undecodable(cap_id),
+            Message::CaptureError(cap_id, err) => self.handle_capture_error(cap_id, err),
             Message::Periodic => self.periodic(),
             Message::ExpandNotification(id, expand) => self.expand_notification(id, expand),
             Message::ToggleRemoteNotifications => self.toggle_remote_notifications(),
@@ -870,6 +871,12 @@ impl Sniffer {
         }
     }
 
+    fn handle_capture_error(&mut self, cap_id: usize, err: String) {
+        if cap_id == self.current_capture_rx.0 {
+            self.capture_error = Some(CaptureError::Fatal(err));
+        }
+    }
+
     fn periodic(&mut self) {
         self.update_waiting_dots();
         self.capture_source.set_addresses();
@@ -1101,6 +1108,9 @@ impl Sniffer {
                     }
                     BackendTrafficMessage::IpfixUndecodable(cap_id) => {
                         Message::IpfixUndecodable(cap_id)
+                    }
+                    BackendTrafficMessage::CaptureError(cap_id, err) => {
+                        Message::CaptureError(cap_id, err)
                     }
                 });
             }

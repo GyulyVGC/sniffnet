@@ -31,7 +31,9 @@ pub fn waiting_page(sniffer: &Sniffer) -> Option<Container<'_, Message, StyleTyp
         .tot_data_info
         .tot_data(DataRepr::Packets);
 
-    if tot_packets > 0 {
+    // a fatal capture error must be shown even if traffic was already flowing
+    // (e.g. the interface being captured on went down mid-capture)
+    if tot_packets > 0 && !matches!(capture_error, Some(CaptureError::Fatal(_))) {
         return None;
     }
 
