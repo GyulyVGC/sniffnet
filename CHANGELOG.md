@@ -4,7 +4,7 @@ All Sniffnet releases with the relative changes are documented in this file.
 
 ## [UNRELEASED]
 - IPFIX collector capabilities: receive and analyze network traffic from remote devices ([#1270](https://github.com/GyulyVGC/sniffnet/pull/1270) — fixes [#303](https://github.com/GyulyVGC/sniffnet/issues/303))
-- Fix infinite spinning loop when the captured network interface goes down (fixes [#1028](https://github.com/GyulyVGC/sniffnet/issues/1028))
+- Fix infinite spinning loop when the captured network interface goes down ([#1287](https://github.com/GyulyVGC/sniffnet/pull/1287) — fixes [#1028](https://github.com/GyulyVGC/sniffnet/issues/1028))
 - Correctly filter by favorites-only before rDNS completes ([#1275](https://github.com/GyulyVGC/sniffnet/pull/1275))
 - Set `Content-Type: application/json` header on remote notifications ([#1266](https://github.com/GyulyVGC/sniffnet/pull/1266))
 
