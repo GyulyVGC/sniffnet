@@ -342,6 +342,13 @@ impl CaptureSource {
         }
     }
 
+    pub fn supports_export_pcap(&self) -> bool {
+        match self {
+            Self::Device(_) => true,
+            Self::Ipfix(_) | Self::File(_) => false,
+        }
+    }
+
     pub fn supports_latency(&self) -> bool {
         match self {
             Self::Device(_) => true,

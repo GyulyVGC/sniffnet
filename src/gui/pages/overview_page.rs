@@ -31,6 +31,7 @@ use crate::translations::translations::{
 use crate::translations::translations_2::{
     data_representation_translation, dropped_translation, only_top_30_items_translation,
 };
+use crate::translations::translations_3::export_capture_translation;
 use crate::translations::translations_5::no_favorites_saved_translation;
 use crate::translations::translations_6::ipfix_exporter_translation;
 use crate::utils::types::icon::Icon;
@@ -269,6 +270,7 @@ fn col_info(sniffer: &Sniffer) -> Container<'_, Message, StyleType> {
         &sniffer.capture_source,
         &sniffer.conf.filters,
         &sniffer.combobox_data_states.data.exporters.0,
+        sniffer.conf.export_pcap.full_path(),
     );
 
     let col_data_representation = col_data_representation(language, sniffer.conf.data_repr);
@@ -284,14 +286,19 @@ fn col_info(sniffer: &Sniffer) -> Container<'_, Message, StyleType> {
                 .push(
                     Scrollable::with_direction(
                         col_device,
-                        Direction::Horizontal(ScrollbarType::properties()),
+                        Direction::Both {
+                            horizontal: ScrollbarType::properties(),
+                            vertical: ScrollbarType::properties(),
+                        },
                     )
+                    .height(Length::Fill)
                     .width(Length::Fill),
                 )
-                .push(RuleType::Standard.vertical(25))
+                .push(RuleType::Standard.vertical(5))
+                .push(Space::new().width(10))
                 .push(col_data_representation.width(Length::Fill)),
         )
-        .push(RuleType::Standard.horizontal(15))
+        .push(RuleType::Standard.horizontal(5))
         .push(donut_row.height(Length::Fill));
 
     Container::new(content)
@@ -328,6 +335,7 @@ pub(crate) fn col_device<'a>(
     cs: &'a CaptureSource,
     filters: &'a Filters,
     exporters: &'a BTreeSet<IpfixExporter>,
+    export_pcap: Option<String>,
 ) -> Column<'a, Message, StyleType> {
     let link_type = cs.get_link_type();
     #[cfg(not(target_os = "windows"))]
@@ -390,6 +398,24 @@ pub(crate) fn col_device<'a>(
         } else {
             None
         })
+        .push(
+            if cs.supports_export_pcap()
+                && let Some(path) = export_pcap
+            {
+                Some(
+                    Column::new()
+                        // add some bottom padding to avoid horizontal scroller overlapping the text
+                        .padding(Padding::ZERO.bottom(10))
+                        .push(
+                            Text::new(format!("{}:", export_capture_translation(language)))
+                                .class(TextType::Subtitle),
+                        )
+                        .push(Row::new().push(Text::new("   ")).push(Text::new(path))),
+                )
+            } else {
+                None
+            },
+        )
 }
 
 fn get_exporters_col<'a>(

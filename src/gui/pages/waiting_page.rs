@@ -101,6 +101,7 @@ pub fn waiting_page(sniffer: &Sniffer) -> Option<Container<'_, Message, StyleTyp
                         cs,
                         &sniffer.conf.filters,
                         &sniffer.combobox_data_states.data.exporters.0,
+                        sniffer.conf.export_pcap.full_path(),
                     )
                     .height(Length::Shrink),
                 )
