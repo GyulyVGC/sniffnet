@@ -3,6 +3,9 @@ use std::time::Instant;
 use crate::networking::ipfix::ttl_map::TtlMap;
 use crate::networking::types::address_port_pair::AddressPortPair;
 
+/// Maximum number of baselines cached
+const MAX_BASELINES: usize = 100_000;
+
 /// Per-exporter flow cumulative counter tracking.
 /// Useful because some exporters report `octetTotalCount` / `packetTotalCount` instead of the delta counters,
 /// and we need to convert them to deltas for our own processing.
@@ -20,7 +23,7 @@ struct Baseline {
 impl BaselineCache {
     pub(super) fn new(now: Instant) -> Self {
         Self {
-            map: TtlMap::new(now),
+            map: TtlMap::new(now, MAX_BASELINES),
         }
     }
 
