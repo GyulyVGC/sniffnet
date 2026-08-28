@@ -4,6 +4,9 @@ All Sniffnet releases with the relative changes are documented in this file.
 
 ## [UNRELEASED]
 - IPFIX collector capabilities: receive and analyze network traffic from remote devices ([#1270](https://github.com/GyulyVGC/sniffnet/pull/1270) — fixes [#303](https://github.com/GyulyVGC/sniffnet/issues/303))
+- Show output file path in Overview page when exporting a PCAP file ([`3f2c42c`](https://github.com/GyulyVGC/sniffnet/pull/1290/commits/3f2c42c70f06d5d29ddad80dde956281c6705511))
+- Fix the app freezing and exhausting memory when importing a PCAP file containing a large time gap between consecutive packets ([`4605ec7`](https://github.com/GyulyVGC/sniffnet/pull/1290/commits/4605ec717bbaf8fa34268805814d5585f084201e))
+- Restrict the PCAP export file to have a valid PCAP extension, so that files of other types can't be overwritten ([`5b4801b`](https://github.com/GyulyVGC/sniffnet/pull/1290/commits/5b4801b438ff1c7968cfac423a8e8585778309a8))
 - Correctly filter by favorites-only before rDNS completes ([#1275](https://github.com/GyulyVGC/sniffnet/pull/1275))
 - Set `Content-Type: application/json` header on remote notifications ([#1266](https://github.com/GyulyVGC/sniffnet/pull/1266))
 
