@@ -5,7 +5,7 @@ use crate::gui::components::button::button_hide;
 use crate::gui::styles::container::ContainerType;
 use crate::gui::styles::rule::RuleType;
 use crate::gui::styles::scrollbar::ScrollbarType;
-use crate::gui::styles::style_constants::{FONT_SIZE_TITLE, TOOLTIP_DELAY};
+use crate::gui::styles::style_constants::{FONT_SIZE_FOOTER, FONT_SIZE_TITLE, TOOLTIP_DELAY};
 use crate::gui::styles::text::TextType;
 use crate::gui::styles::types::gradient_type::GradientType;
 use crate::gui::types::message::Message;
@@ -320,7 +320,7 @@ fn latency_row<'a>(
 fn get_error_tooltip<'a>(error: &str) -> Tooltip<'a, Message, StyleType> {
     Tooltip::new(
         Icon::Error.to_text(),
-        Text::new(error.to_string()),
+        Text::new(error.to_string()).size(FONT_SIZE_FOOTER),
         Position::FollowCursor,
     )
     .class(ContainerType::Tooltip)
@@ -476,7 +476,7 @@ fn get_button_copy<'a>(
 
     Tooltip::new(
         content,
-        Text::new(format!("{} (IP)", copy_translation(language))),
+        Text::new(format!("{} (IP)", copy_translation(language))).size(FONT_SIZE_FOOTER),
         Position::Right,
     )
     .gap(5)
@@ -504,8 +504,12 @@ fn get_button_ping(
         button = button.on_press(Message::MeasureLatency(ip));
     }
 
-    Tooltip::new(button, "Ping", Position::Right)
-        .gap(5)
-        .class(ContainerType::Tooltip)
-        .delay(TOOLTIP_DELAY)
+    Tooltip::new(
+        button,
+        Text::new("Ping").size(FONT_SIZE_FOOTER),
+        Position::Right,
+    )
+    .gap(5)
+    .class(ContainerType::Tooltip)
+    .delay(TOOLTIP_DELAY)
 }

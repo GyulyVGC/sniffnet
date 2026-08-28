@@ -306,7 +306,7 @@ fn get_button_clear_all<'a>(language: Language) -> Tooltip<'a, Message, StyleTyp
 
     Tooltip::new(
         content,
-        Text::new(clear_all_translation(language)),
+        Text::new(clear_all_translation(language)).size(FONT_SIZE_FOOTER),
         Position::Top,
     )
     .gap(5)

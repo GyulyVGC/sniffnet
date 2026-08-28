@@ -172,9 +172,13 @@ fn report_header_row(
         } else {
             ContainerType::Tooltip
         };
-        let title_tooltip = Tooltip::new(title_row, Text::new(tooltip_val), Position::FollowCursor)
-            .class(tooltip_style)
-            .delay(TOOLTIP_DELAY);
+        let title_tooltip = Tooltip::new(
+            title_row,
+            Text::new(tooltip_val).size(FONT_SIZE_FOOTER),
+            Position::FollowCursor,
+        )
+        .class(tooltip_style)
+        .delay(TOOLTIP_DELAY);
 
         let mut col_header = Column::new()
             .align_x(Alignment::Center)
@@ -556,7 +560,7 @@ fn toggler_filter<'a>(
                 .size(23),
         )
         .padding([5, 0]),
-        tooltip,
+        Text::new(tooltip).size(FONT_SIZE_FOOTER),
         Position::FollowCursor,
     )
     .class(ContainerType::Tooltip)
