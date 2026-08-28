@@ -1519,36 +1519,36 @@ pub fn active_filters_translation(language: Language) -> &'static str {
     }
 }
 
-pub fn none_translation(language: Language) -> &'static str {
-    match language {
-        Language::EN => "none",
-        Language::CS => "žádný",
-        Language::IT => "nessuno",
-        Language::FR => "aucun",
-        Language::ES => "ninguno",
-        Language::PL => "brak",
-        Language::DE => "Keine",
-        Language::UK => "бракує",
-        Language::ZH_TW => "無",
-        Language::ZH => "无",
-        Language::RO => "niciunul",
-        Language::KO => "없음",
-        Language::TR => "hiç biri",
-        Language::RU => "ничего",
-        Language::PT => "nenhum",
-        Language::EL => "κανένα",
-        // Language::FA => "هیچ کدام",
-        Language::SV => "inga",
-        Language::FI => "ei mitään",
-        Language::JA => "なし",
-        Language::UZ => "hech biri",
-        Language::VI => "không có",
-        Language::ID => "Tidak ada",
-        Language::NL => "geen",
-        Language::HU => "semmi",
-        Language::SI => "කිසිවක් නැත",
-    }
-}
+// pub fn none_translation(language: Language) -> &'static str {
+//     match language {
+//         Language::EN => "none",
+//         Language::CS => "žádný",
+//         Language::IT => "nessuno",
+//         Language::FR => "aucun",
+//         Language::ES => "ninguno",
+//         Language::PL => "brak",
+//         Language::DE => "Keine",
+//         Language::UK => "бракує",
+//         Language::ZH_TW => "無",
+//         Language::ZH => "无",
+//         Language::RO => "niciunul",
+//         Language::KO => "없음",
+//         Language::TR => "hiç biri",
+//         Language::RU => "ничего",
+//         Language::PT => "nenhum",
+//         Language::EL => "κανένα",
+//         // Language::FA => "هیچ کدام",
+//         Language::SV => "inga",
+//         Language::FI => "ei mitään",
+//         Language::JA => "なし",
+//         Language::UZ => "hech biri",
+//         Language::VI => "không có",
+//         Language::ID => "Tidak ada",
+//         Language::NL => "geen",
+//         Language::HU => "semmi",
+//         Language::SI => "කිසිවක් නැත",
+//     }
+// }
 
 // pub fn yeti_night_translation(language: Language) -> &'static str {
 //     match language {

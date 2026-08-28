@@ -25,7 +25,7 @@ use crate::networking::types::data_representation::DataRepr;
 use crate::networking::types::ipfix_exporter::IpfixExporter;
 use crate::report::types::sort_type::SortType;
 use crate::translations::translations::{
-    active_filters_translation, incoming_translation, none_translation, outgoing_translation,
+    active_filters_translation, incoming_translation, outgoing_translation,
     traffic_rate_translation,
 };
 use crate::translations::translations_2::{
@@ -286,19 +286,14 @@ fn col_info(sniffer: &Sniffer) -> Container<'_, Message, StyleType> {
                 .push(
                     Scrollable::with_direction(
                         col_device,
-                        Direction::Both {
-                            horizontal: ScrollbarType::properties(),
-                            vertical: ScrollbarType::properties(),
-                        },
+                        Direction::Horizontal(ScrollbarType::properties()),
                     )
-                    .height(Length::Fill)
                     .width(Length::Fill),
                 )
-                .push(RuleType::Standard.vertical(5))
-                .push(Space::new().width(10))
+                .push(RuleType::Standard.vertical(25))
                 .push(col_data_representation.width(Length::Fill)),
         )
-        .push(RuleType::Standard.horizontal(5))
+        .push(RuleType::Standard.horizontal(15))
         .push(donut_row.height(Length::Fill));
 
     Container::new(content)
@@ -356,18 +351,6 @@ pub(crate) fn col_device<'a>(
         get_addresses_row(link_type, cs.get_ipfix_unspecified_bound_addresses()).map(Element::from)
     };
 
-    let filters_desc: Element<Message, StyleType> = if filters.is_some_filter_active() {
-        Row::new()
-            .spacing(10)
-            .push(Text::new("BPF"))
-            .push(get_info_tooltip(
-                Text::new(filters.bpf()).size(FONT_SIZE_FOOTER).into(),
-            ))
-            .into()
-    } else {
-        Text::new(none_translation(language)).into()
-    };
-
     Column::new()
         .height(Length::Fill)
         .spacing(10)
@@ -387,14 +370,14 @@ pub(crate) fn col_device<'a>(
             None
         })
         .push(if cs.supports_filters() {
-            Some(
-                Column::new()
-                    .push(
-                        Text::new(format!("{}:", active_filters_translation(language)))
-                            .class(TextType::Subtitle),
-                    )
-                    .push(Row::new().push(Text::new("   ")).push(filters_desc)),
-            )
+            filters.is_some_filter_active().then(|| {
+                Row::new()
+                    .spacing(10)
+                    .push(Text::new(active_filters_translation(language)).class(TextType::Subtitle))
+                    .push(get_info_tooltip(
+                        Text::new(filters.bpf()).size(FONT_SIZE_FOOTER).into(),
+                    ))
+            })
         } else {
             None
         })
@@ -403,14 +386,15 @@ pub(crate) fn col_device<'a>(
                 && let Some(path) = export_pcap
             {
                 Some(
-                    Column::new()
-                        // add some bottom padding to avoid horizontal scroller overlapping the text
-                        .padding(Padding::ZERO.bottom(10))
+                    Row::new()
+                        .spacing(10)
                         .push(
-                            Text::new(format!("{}:", export_capture_translation(language)))
+                            Text::new(export_capture_translation(language))
                                 .class(TextType::Subtitle),
                         )
-                        .push(Row::new().push(Text::new("   ")).push(Text::new(path))),
+                        .push(get_info_tooltip(
+                            Text::new(path).size(FONT_SIZE_FOOTER).into(),
+                        )),
                 )
             } else {
                 None
