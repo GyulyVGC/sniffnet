@@ -155,10 +155,6 @@ impl Conf {
         // Program::NotApplicable is not allowed in favorites
         self.favorites
             .remove(&FavoriteKey::Program(Program::NotApplicable));
-
-        // PCAP export file name should not contain slashes
-        let export_pcap_file_name_conf = self.export_pcap.file_name().to_string();
-        self.export_pcap.set_file_name(&export_pcap_file_name_conf);
     }
 }
 

@@ -2,6 +2,8 @@ use crate::translations::translations_3::select_dest_directory_translation;
 use crate::translations::translations_4::select_file_translation;
 use crate::translations::types::language::Language;
 
+pub const ALLOWED_PCAP_EXTENSIONS: [&str; 4] = ["pcap", "pcapng", "cap", "dmp"];
+
 #[derive(Debug, Clone, PartialEq)]
 pub enum FileInfo {
     Style,
@@ -16,7 +18,7 @@ impl FileInfo {
         match self {
             FileInfo::Style => vec!["toml"],
             FileInfo::Database => vec!["mmdb"],
-            FileInfo::PcapImport => vec!["pcap", "pcapng", "cap"],
+            FileInfo::PcapImport => ALLOWED_PCAP_EXTENSIONS.to_vec(),
             FileInfo::Directory | FileInfo::Blacklist => vec![],
         }
     }

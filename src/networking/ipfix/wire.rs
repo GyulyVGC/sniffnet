@@ -241,12 +241,12 @@ fn apply_ie(ie_id: u16, raw: &[u8], record: &mut FlowRecord, priority: &mut Fiel
             }
         }
         ie::SOURCE_TRANSPORT_PORT => {
-            if let Some(v) = read_u16(raw) {
+            if let Some(v) = read_port(raw) {
                 record.src_port = Some(v);
             }
         }
         ie::DESTINATION_TRANSPORT_PORT => {
-            if let Some(v) = read_u16(raw) {
+            if let Some(v) = read_port(raw) {
                 record.dst_port = Some(v);
             }
         }
@@ -467,8 +467,11 @@ fn read_unsigned(raw: &[u8]) -> Option<u128> {
     Some(u128::from(u64::from_be_bytes(buf)))
 }
 
-/// Read a big-endian unsigned integer of 1 or 2 bytes into a `u16`
-fn read_u16(raw: &[u8]) -> Option<u16> {
+/// Read a big-endian unsigned integer of 1 or 2 bytes into a `u16`, returning `None` for port 0
+fn read_port(raw: &[u8]) -> Option<u16> {
+    if raw.iter().all(|b| *b == 0) {
+        return None;
+    }
     match raw.len() {
         1 => Some(u16::from(raw[0])),
         2 => Some(u16::from_be_bytes([raw[0], raw[1]])),
@@ -1228,12 +1231,15 @@ mod tests {
     }
 
     #[test]
-    fn test_read_u16() {
-        assert_eq!(read_u16(&[0x01, 0xBB]), Some(443));
+    fn test_read_port() {
+        assert_eq!(read_port(&[0x01, 0xBB]), Some(443));
         // a port narrowed to a single byte by reduced-size encoding
-        assert_eq!(read_u16(&[0xFF]), Some(255));
-        assert_eq!(read_u16(&[]), None);
-        assert_eq!(read_u16(&[0, 0, 1]), None);
+        assert_eq!(read_port(&[0xFF]), Some(255));
+        assert_eq!(read_port(&[]), None);
+        assert_eq!(read_port(&[0, 0, 1]), None);
+        // port 0 is invalid
+        assert_eq!(read_port(&[0, 0]), None);
+        assert_eq!(read_port(&[0]), None);
     }
 
     #[test]

@@ -25,12 +25,13 @@ use crate::networking::types::data_representation::DataRepr;
 use crate::networking::types::ipfix_exporter::IpfixExporter;
 use crate::report::types::sort_type::SortType;
 use crate::translations::translations::{
-    active_filters_translation, incoming_translation, none_translation, outgoing_translation,
+    active_filters_translation, incoming_translation, outgoing_translation,
     traffic_rate_translation,
 };
 use crate::translations::translations_2::{
     data_representation_translation, dropped_translation, only_top_30_items_translation,
 };
+use crate::translations::translations_3::export_capture_translation;
 use crate::translations::translations_5::no_favorites_saved_translation;
 use crate::translations::translations_6::ipfix_exporter_translation;
 use crate::utils::types::icon::Icon;
@@ -269,6 +270,7 @@ fn col_info(sniffer: &Sniffer) -> Container<'_, Message, StyleType> {
         &sniffer.capture_source,
         &sniffer.conf.filters,
         &sniffer.combobox_data_states.data.exporters.0,
+        sniffer.conf.export_pcap.full_path(),
     );
 
     let col_data_representation = col_data_representation(language, sniffer.conf.data_repr);
@@ -328,6 +330,7 @@ pub(crate) fn col_device<'a>(
     cs: &'a CaptureSource,
     filters: &'a Filters,
     exporters: &'a BTreeSet<IpfixExporter>,
+    export_pcap: Option<String>,
 ) -> Column<'a, Message, StyleType> {
     let link_type = cs.get_link_type();
     #[cfg(not(target_os = "windows"))]
@@ -346,18 +349,6 @@ pub(crate) fn col_device<'a>(
     } else {
         // show bind addresses for IPFIX collector listening on unspecified IP
         get_addresses_row(link_type, cs.get_ipfix_unspecified_bound_addresses()).map(Element::from)
-    };
-
-    let filters_desc: Element<Message, StyleType> = if filters.is_some_filter_active() {
-        Row::new()
-            .spacing(10)
-            .push(Text::new("BPF"))
-            .push(get_info_tooltip(
-                Text::new(filters.bpf()).size(FONT_SIZE_FOOTER).into(),
-            ))
-            .into()
-    } else {
-        Text::new(none_translation(language)).into()
     };
 
     Column::new()
@@ -379,17 +370,36 @@ pub(crate) fn col_device<'a>(
             None
         })
         .push(if cs.supports_filters() {
-            Some(
-                Column::new()
-                    .push(
-                        Text::new(format!("{}:", active_filters_translation(language)))
-                            .class(TextType::Subtitle),
-                    )
-                    .push(Row::new().push(Text::new("   ")).push(filters_desc)),
-            )
+            filters.is_some_filter_active().then(|| {
+                Row::new()
+                    .spacing(10)
+                    .push(Text::new(active_filters_translation(language)).class(TextType::Subtitle))
+                    .push(get_info_tooltip(
+                        Text::new(filters.bpf()).size(FONT_SIZE_FOOTER).into(),
+                    ))
+            })
         } else {
             None
         })
+        .push(
+            if cs.supports_export_pcap()
+                && let Some(path) = export_pcap
+            {
+                Some(
+                    Row::new()
+                        .spacing(10)
+                        .push(
+                            Text::new(export_capture_translation(language))
+                                .class(TextType::Subtitle),
+                        )
+                        .push(get_info_tooltip(
+                            Text::new(path).size(FONT_SIZE_FOOTER).into(),
+                        )),
+                )
+            } else {
+                None
+            },
+        )
 }
 
 fn get_exporters_col<'a>(

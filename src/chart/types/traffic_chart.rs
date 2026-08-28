@@ -24,6 +24,9 @@ use crate::utils::formatted_strings::{get_formatted_num_seconds, get_formatted_t
 use crate::utils::types::timestamp::Timestamp;
 use crate::{Language, StyleType, location};
 
+/// Maximum number of zero-traffic points pushed to represent a gap between two offline packets
+const MAX_OFFLINE_GAP_POINTS: u32 = 86_400; // one day
+
 /// Struct defining the chart to be displayed in gui run page
 pub struct TrafficChart {
     /// Current time interval number
@@ -137,7 +140,11 @@ impl TrafficChart {
     }
 
     pub fn push_offline_gap_to_splines(&mut self, gap: u32) {
-        for i in 0..gap {
+        // an idle period is a flat line: drawing it doesn't need a point per second
+        // a capture containing a huge time jump would stall the GUI and exhaust memory
+        let step = gap.div_ceil(MAX_OFFLINE_GAP_POINTS).max(1);
+
+        for i in (0..gap).step_by(step as usize) {
             #[allow(clippy::cast_precision_loss)]
             let point = ((self.ticks + i) as f32, 0.0);
             self.in_bytes.update_series(point, false, false);
@@ -451,7 +458,28 @@ impl Chart<Message> for TrafficChart {
 mod tests {
     use splines::{Interpolation, Key, Spline};
 
-    use crate::chart::types::traffic_chart::sample_spline;
+    use crate::chart::types::traffic_chart::{MAX_OFFLINE_GAP_POINTS, sample_spline};
+    use crate::networking::types::data_representation::DataRepr;
+    use crate::{Language, StyleType, TrafficChart};
+
+    #[test]
+    fn test_offline_gap_points_are_capped() {
+        let mut chart = TrafficChart::new(StyleType::default(), Language::EN, DataRepr::Bytes);
+
+        // a gap shorter than the cap is represented one point per second
+        chart.push_offline_gap_to_splines(10);
+        assert_eq!(chart.ticks, 10);
+        assert_eq!(chart.in_bytes.all_time.len(), 10);
+        chart.push_offline_gap_to_splines(28_800);
+        assert_eq!(chart.ticks, 10 + 28_800);
+        assert_eq!(chart.in_bytes.all_time.len(), 10 + 28_800);
+
+        // the points stored stay bounded, so the GUI is not stalled
+        chart.push_offline_gap_to_splines(1_000_000_000);
+        let max_len = 10 + 28_800 + MAX_OFFLINE_GAP_POINTS as usize;
+        assert_eq!(chart.ticks, 10 + 28_800 + 1_000_000_000);
+        assert!(chart.in_bytes.all_time.len() <= max_len);
+    }
 
     #[test]
     fn test_spline_samples() {

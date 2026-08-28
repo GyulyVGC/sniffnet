@@ -4,6 +4,9 @@ use std::time::Instant;
 use crate::networking::ipfix::ttl_map::TtlMap;
 use crate::networking::ipfix::wire::FieldSpec;
 
+/// Maximum number of templates cached
+const MAX_TEMPLATES: usize = 10_000;
+
 /// Per-exporter IPFIX template cache.
 /// The cache is keyed by `(peer, observation_domain, template_id)`:
 /// the spec requires scoping templates by transport session + ODID,
@@ -15,7 +18,7 @@ pub(super) struct TemplateCache {
 impl TemplateCache {
     pub(super) fn new(now: Instant) -> Self {
         Self {
-            map: TtlMap::new(now),
+            map: TtlMap::new(now, MAX_TEMPLATES),
         }
     }
 

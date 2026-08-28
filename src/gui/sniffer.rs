@@ -350,7 +350,7 @@ impl Sniffer {
             Message::ProgramFavoritesFilterToggle => self.program_favorites_filter_toggle(),
             Message::ToggleExportPcap => self.toggle_export_pcap(),
             Message::OutputPcapDir(path) => self.output_pcap_dir(path),
-            Message::OutputPcapFile(name) => self.output_pcap_file(&name),
+            Message::OutputPcapFile(name) => self.output_pcap_file(name),
             Message::ToggleThumbnail(triggered_by_resize) => {
                 return self.toggle_thumbnail(triggered_by_resize);
             }
@@ -750,7 +750,7 @@ impl Sniffer {
         self.conf.export_pcap.set_directory(path);
     }
 
-    fn output_pcap_file(&mut self, name: &str) {
+    fn output_pcap_file(&mut self, name: String) {
         self.conf.export_pcap.set_file_name(name);
     }
 
@@ -1019,6 +1019,7 @@ impl Sniffer {
                 let current_device_name = &self.capture_source.get_name();
                 self.device_selection(current_device_name);
             }
+            self.conf.export_pcap.sanitize_file_name();
             let pcap_path = self.conf.export_pcap.full_path();
             let capture_context =
                 CaptureContext::new(&self.capture_source, pcap_path.as_ref(), &self.conf.filters);
@@ -2231,7 +2232,7 @@ mod tests {
         assert!(path.exists());
 
         let mut export_pcap = ExportPcap::default();
-        export_pcap.set_file_name("test.pcap");
+        export_pcap.set_file_name("test.pcap".to_string());
         export_pcap.set_directory("/test".to_string());
         export_pcap.toggle();
 
