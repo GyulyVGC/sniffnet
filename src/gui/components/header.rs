@@ -10,7 +10,7 @@ use crate::gui::pages::types::settings_page::SettingsPage;
 use crate::gui::sniffer::Sniffer;
 use crate::gui::styles::button::ButtonType;
 use crate::gui::styles::container::ContainerType;
-use crate::gui::styles::style_constants::TOOLTIP_DELAY;
+use crate::gui::styles::style_constants::{FONT_SIZE_FOOTER, TOOLTIP_DELAY};
 use crate::gui::styles::types::gradient_type::GradientType;
 use crate::gui::types::message::Message;
 use crate::gui::types::settings::Settings;
@@ -96,7 +96,7 @@ fn get_button_reset<'a>(language: Language) -> Tooltip<'a, Message, StyleType> {
 
     Tooltip::new(
         content,
-        Text::new(quit_analysis_translation(language)),
+        Text::new(quit_analysis_translation(language)).size(FONT_SIZE_FOOTER),
         Position::Right,
     )
     .gap(5)
@@ -122,7 +122,7 @@ pub fn get_button_settings<'a>(
 
     Tooltip::new(
         content,
-        Text::new(settings_translation(language)),
+        Text::new(settings_translation(language)).size(FONT_SIZE_FOOTER),
         Position::Left,
     )
     .gap(5)
@@ -164,10 +164,14 @@ pub fn get_button_minimize<'a>(
     .class(ButtonType::Thumbnail)
     .on_press(Message::ToggleThumbnail(false));
 
-    Tooltip::new(content, Text::new(tooltip), Position::FollowCursor)
-        .gap(0)
-        .class(tooltip_style)
-        .delay(TOOLTIP_DELAY)
+    Tooltip::new(
+        content,
+        Text::new(tooltip).size(FONT_SIZE_FOOTER),
+        Position::FollowCursor,
+    )
+    .gap(0)
+    .class(tooltip_style)
+    .delay(TOOLTIP_DELAY)
 }
 
 pub fn get_button_freeze<'a>(
@@ -203,10 +207,14 @@ pub fn get_button_freeze<'a>(
     .class(ButtonType::Thumbnail)
     .on_press(Message::Freeze);
 
-    Tooltip::new(content, Text::new(tooltip), Position::FollowCursor)
-        .gap(0)
-        .class(tooltip_style)
-        .delay(TOOLTIP_DELAY)
+    Tooltip::new(
+        content,
+        Text::new(tooltip).size(FONT_SIZE_FOOTER),
+        Position::FollowCursor,
+    )
+    .gap(0)
+    .class(tooltip_style)
+    .delay(TOOLTIP_DELAY)
 }
 
 fn thumbnail_header<'a>(

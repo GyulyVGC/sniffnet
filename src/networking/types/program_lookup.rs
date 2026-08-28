@@ -1,6 +1,6 @@
 use crate::countries::flags_pictures::ICONS_SIZE_BIG;
 use crate::gui::styles::container::ContainerType;
-use crate::gui::styles::style_constants::TOOLTIP_DELAY;
+use crate::gui::styles::style_constants::{FONT_SIZE_FOOTER, TOOLTIP_DELAY};
 use crate::gui::styles::types::style_type::StyleType;
 use crate::gui::types::message::Message;
 use crate::networking::manage_packets::get_local_port;
@@ -220,10 +220,14 @@ impl ProgramLookup {
                 .into(),
         };
 
-        Tooltip::new(content, Text::new(program_path), Position::FollowCursor)
-            .snap_within_viewport(true)
-            .class(tooltip_class)
-            .delay(TOOLTIP_DELAY)
+        Tooltip::new(
+            content,
+            Text::new(program_path).size(FONT_SIZE_FOOTER),
+            Position::FollowCursor,
+        )
+        .snap_within_viewport(true)
+        .class(tooltip_class)
+        .delay(TOOLTIP_DELAY)
     }
 }
 
