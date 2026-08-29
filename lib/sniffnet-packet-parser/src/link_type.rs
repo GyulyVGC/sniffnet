@@ -1,5 +1,3 @@
-use std::fmt::{Display, Formatter};
-
 use pcap::Linktype;
 
 /// `DLT_RAW`; `pcap::Linktype` exposes no associated constant for it.
@@ -43,37 +41,6 @@ impl LinkType {
     pub fn is_supported(self) -> bool {
         !matches!(self, LinkType::Unsupported(_))
     }
-
-    /// The `pcap` link type this was built from.
-    #[must_use]
-    pub fn as_pcap(self) -> Linktype {
-        match self {
-            LinkType::Null(l)
-            | LinkType::Ethernet(l)
-            | LinkType::RawIp(l)
-            | LinkType::Loop(l)
-            | LinkType::IPv4(l)
-            | LinkType::IPv6(l)
-            | LinkType::LinuxSll(l)
-            | LinkType::LinuxSll2(l)
-            | LinkType::Unsupported(l) => l,
-        }
-    }
-}
-
-/// `libpcap`'s name for the link type, with its description in parentheses
-/// when it has one, falling back to the raw DLT number.
-impl Display for LinkType {
-    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
-        let link_type = self.as_pcap();
-        let name = link_type
-            .get_name()
-            .unwrap_or_else(|_| link_type.0.to_string());
-        match link_type.get_description() {
-            Ok(description) => write!(f, "{name} ({description})"),
-            Err(_) => write!(f, "{name}"),
-        }
-    }
 }
 
 #[cfg(test)]
@@ -94,7 +61,6 @@ mod tests {
         ] {
             let parsed = LinkType::from_pcap(link_type);
             assert!(parsed.is_supported(), "{link_type:?} should be supported");
-            assert_eq!(parsed.as_pcap(), link_type);
         }
     }
 
@@ -103,13 +69,5 @@ mod tests {
         let parsed = LinkType::from_pcap(Linktype(0x7fff));
         assert_eq!(parsed, LinkType::Unsupported(Linktype(0x7fff)));
         assert!(!parsed.is_supported());
-    }
-
-    #[test]
-    fn display_includes_name_and_description() {
-        assert_eq!(
-            LinkType::from_pcap(Linktype::ETHERNET).to_string(),
-            "EN10MB (Ethernet)"
-        );
     }
 }

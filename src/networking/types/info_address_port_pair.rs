@@ -2,14 +2,14 @@
 //! to keep track of statistics about the sniffed traffic.
 
 use crate::Service;
-use crate::networking::types::arp_type::ArpType;
 use crate::networking::types::data_info::DataInfo;
 use crate::networking::types::data_representation::DataRepr;
-use crate::networking::types::icmp_type::IcmpType;
 use crate::networking::types::program::Program;
 use crate::networking::types::traffic_direction::TrafficDirection;
 use crate::report::types::sort_type::SortType;
 use crate::utils::types::timestamp::Timestamp;
+use sniffnet_packet_parser::ArpType;
+use sniffnet_packet_parser::IcmpType;
 use std::cmp::Ordering;
 use std::collections::HashMap;
 use std::time::Instant;

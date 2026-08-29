@@ -8,6 +8,12 @@ pub enum IcmpType {
     V6(IcmpTypeV6),
 }
 
+impl Default for IcmpType {
+    fn default() -> Self {
+        Self::V4(IcmpTypeV4::default())
+    }
+}
+
 impl Display for IcmpType {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
         write!(

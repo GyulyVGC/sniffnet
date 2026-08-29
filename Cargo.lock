@@ -5198,6 +5198,7 @@ dependencies = [
  "serde_json",
  "serde_test",
  "serial_test",
+ "sniffnet-packet-parser",
  "splines",
  "surge-ping",
  "tokio",

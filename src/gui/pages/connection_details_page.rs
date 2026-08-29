@@ -15,11 +15,9 @@ use crate::networking::manage_packets::{
     get_address_to_lookup, get_traffic_type, is_local_connection, is_my_address,
 };
 use crate::networking::types::address_port_pair::AddressPortPair;
-use crate::networking::types::arp_type::ArpType;
 use crate::networking::types::bogon::is_bogon;
 use crate::networking::types::data_representation::DataRepr;
 use crate::networking::types::host::Host;
-use crate::networking::types::icmp_type::IcmpType;
 use crate::networking::types::info_address_port_pair::InfoAddressPortPair;
 use crate::networking::types::latency::LatencyStatus;
 use crate::networking::types::traffic_direction::TrafficDirection;
@@ -39,7 +37,7 @@ use crate::translations::translations_3::{
 use crate::translations::translations_5::program_translation;
 use crate::translations::translations_6::{ipfix_exporter_translation, latency_translation};
 use crate::utils::formatted_strings::{
-    get_formatted_timestamp, get_socket_address, mac_from_dec_to_hex,
+    get_formatted_timestamp, get_socket_address, mac_from_dec_to_hex, pretty_print_message_types,
 };
 use crate::utils::types::icon::Icon;
 use crate::{Language, Protocol, Sniffer, StyleType};
@@ -255,9 +253,9 @@ fn col_info<'a>(
     }
 
     let messages = if is_icmp {
-        IcmpType::pretty_print_types(&val.icmp_types)
+        pretty_print_message_types(&val.icmp_types)
     } else if is_arp {
-        ArpType::pretty_print_types(&val.arp_types)
+        pretty_print_message_types(&val.arp_types)
     } else {
         String::new()
     };

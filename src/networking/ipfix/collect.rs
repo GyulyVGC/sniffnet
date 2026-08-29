@@ -15,11 +15,11 @@ use crate::networking::ipfix::template_cache::TemplateCache;
 use crate::networking::ipfix::wire::{Set, decode_data_record, parse_message};
 use crate::networking::manage_packets::{modify_or_insert_in_map, update_connection_stats};
 use crate::networking::types::address_port_pair::AddressPortPair;
-use crate::networking::types::arp_type::ArpType;
 use crate::networking::types::info_traffic::InfoTraffic;
 use crate::networking::types::ip_blacklist::IpBlacklist;
 use crate::networking::types::ipfix_exporter::IpfixExporter;
 use crate::utils::types::timestamp::Timestamp;
+use sniffnet_packet_parser::ArpType;
 
 /// Buffer size for a single UDP datagram
 const RECV_BUF_LEN: usize = 65_535;

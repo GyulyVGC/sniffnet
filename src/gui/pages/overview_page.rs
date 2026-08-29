@@ -34,6 +34,7 @@ use crate::translations::translations_2::{
 use crate::translations::translations_3::export_capture_translation;
 use crate::translations::translations_5::no_favorites_saved_translation;
 use crate::translations::translations_6::ipfix_exporter_translation;
+use crate::utils::formatted_strings::full_print_link_type;
 use crate::utils::types::icon::Icon;
 use crate::{Language, RunningPage, StyleType};
 use iced::Length::Fill;
@@ -342,7 +343,7 @@ pub(crate) fn col_device<'a>(
         Some(
             Column::new()
                 .spacing(10)
-                .push(Text::new(link_type.full_print_on_one_line(language)).size(FONT_SIZE_FOOTER))
+                .push(Text::new(full_print_link_type(link_type, language)).size(FONT_SIZE_FOOTER))
                 .push(get_addresses_row(link_type, cs.get_addresses()))
                 .into(),
         )

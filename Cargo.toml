@@ -43,6 +43,8 @@ workspace = true
 #═══════════════════════════════════════════════════════════════════════════════════════════════════════════════════════
 
 [dependencies]
+sniffnet-packet-parser = { path = "lib/sniffnet-packet-parser", version = "0.1.0" }
+
 etherparse.workspace = true
 pcap.workspace = true
 

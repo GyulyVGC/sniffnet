@@ -1,9 +1,13 @@
 use std::cmp::min;
-use std::fmt::Write;
+use std::collections::HashMap;
+use std::fmt::{Display, Write};
 use std::net::IpAddr;
 
+use crate::translations::translations_3::link_type_translation;
+use crate::translations::types::language::Language;
 use crate::utils::types::timestamp::Timestamp;
 use jiff::tz::TimeZone;
+use sniffnet_packet_parser::LinkType;
 
 /// Application version number (to be displayed in gui footer)
 pub const APP_VERSION: &str = env!("CARGO_PKG_VERSION");
@@ -166,6 +170,49 @@ pub fn mac_from_dec_to_hex(mac_dec: [u8; 6]) -> String {
     }
     mac_hex.pop();
     mac_hex
+}
+
+/// Used to print ICMP and ARP message types
+pub fn pretty_print_message_types<T: Display>(map: &HashMap<T, usize>) -> String {
+    let mut ret_val = String::new();
+
+    let mut vec: Vec<(&T, &usize)> = map.iter().collect();
+    vec.sort_by(|(_, a), (_, b)| b.cmp(a));
+
+    for (msg_type, n) in vec {
+        let _ = writeln!(ret_val, "   {msg_type} ({n})");
+    }
+    ret_val
+}
+
+/// Pretty print the link type with its description
+pub fn full_print_link_type(link_type: Option<LinkType>, language: Language) -> String {
+    let Some(link_type) = link_type else {
+        return format!("{}: -", link_type_translation(language));
+    };
+
+    match link_type {
+        LinkType::Null(l)
+        | LinkType::Ethernet(l)
+        | LinkType::RawIp(l)
+        | LinkType::Loop(l)
+        | LinkType::IPv4(l)
+        | LinkType::IPv6(l)
+        | LinkType::LinuxSll(l)
+        | LinkType::LinuxSll2(l)
+        | LinkType::Unsupported(l) => {
+            format!(
+                "{}: {}{}",
+                link_type_translation(language),
+                l.get_name().unwrap_or_else(|_| l.0.to_string()),
+                if let Ok(desc) = l.get_description() {
+                    format!(" ({desc})")
+                } else {
+                    String::new()
+                }
+            )
+        }
+    }
 }
 
 #[cfg(test)]

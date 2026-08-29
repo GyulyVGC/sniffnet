@@ -9,17 +9,17 @@ use crate::networking::capture::{
 use crate::networking::manage_packets::{
     analyze_headers, modify_or_insert_in_map, update_connection_stats,
 };
-use crate::networking::types::arp_type::ArpType;
 use crate::networking::types::capture_context::{CaptureContext, CaptureSource, CaptureType};
-use crate::networking::types::icmp_type::IcmpType;
 use crate::networking::types::info_traffic::InfoTraffic;
 use crate::networking::types::ip_blacklist::IpBlacklist;
-use crate::networking::types::my_link_type::MyLinkType;
 use crate::utils::error_logger::{ErrorLogger, Location};
 use crate::utils::types::timestamp::Timestamp;
 use async_channel::Sender;
 use etherparse::{EtherType, LaxPacketHeaders};
 use pcap::{Packet, PacketHeader};
+use sniffnet_packet_parser::ArpType;
+use sniffnet_packet_parser::IcmpType;
+use sniffnet_packet_parser::LinkType;
 use std::thread;
 use std::time::{Duration, Instant};
 use tokio::sync::broadcast::Receiver;
@@ -38,8 +38,10 @@ pub fn parse_packets(
 ) {
     let (mut freeze_rx, mut freeze_rx_2) = freeze_rxs;
 
-    let my_link_type = capture_context.my_link_type();
-    if !my_link_type.is_supported() {
+    let Some(link_type) = capture_context.link_type() else {
+        return;
+    };
+    if !link_type.is_supported() {
         return;
     }
 
@@ -113,7 +115,7 @@ pub fn parse_packets(
                 }
             }
             Ok(packet) => {
-                if let Some(headers) = get_sniffable_headers(&packet.data, my_link_type) {
+                if let Some(headers) = get_sniffable_headers(&packet.data, link_type) {
                     #[allow(clippy::useless_conversion)]
                     let secs = i64::from(packet.header.ts.tv_sec);
                     #[allow(clippy::useless_conversion)]
@@ -197,18 +199,18 @@ pub fn parse_packets(
 
 pub(super) fn get_sniffable_headers(
     packet: &[u8],
-    my_link_type: MyLinkType,
+    link_type: LinkType,
 ) -> Option<LaxPacketHeaders<'_>> {
-    match my_link_type {
-        MyLinkType::Ethernet(_) | MyLinkType::Unsupported(_) | MyLinkType::NotYetAssigned => {
+    match link_type {
+        LinkType::Ethernet(_) | LinkType::Unsupported(_) => {
             LaxPacketHeaders::from_ethernet(packet).ok()
         }
-        MyLinkType::RawIp(_) | MyLinkType::IPv4(_) | MyLinkType::IPv6(_) => {
+        LinkType::RawIp(_) | LinkType::IPv4(_) | LinkType::IPv6(_) => {
             LaxPacketHeaders::from_ip(packet).ok()
         }
-        MyLinkType::LinuxSll(_) => from_linux_sll(packet, true),
-        MyLinkType::LinuxSll2(_) => from_linux_sll(packet, false),
-        MyLinkType::Null(_) | MyLinkType::Loop(_) => from_null(packet),
+        LinkType::LinuxSll(_) => from_linux_sll(packet, true),
+        LinkType::LinuxSll2(_) => from_linux_sll(packet, false),
+        LinkType::Null(_) | LinkType::Loop(_) => from_null(packet),
     }
 }
 

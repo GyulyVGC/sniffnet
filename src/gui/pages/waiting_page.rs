@@ -18,6 +18,7 @@ use crate::translations::translations_6::{
 use crate::utils::types::icon::Icon;
 use iced::widget::{Column, Container, Space, Text};
 use iced::{Alignment, Length};
+use sniffnet_packet_parser::LinkType;
 
 pub fn waiting_page(sniffer: &Sniffer) -> Option<Container<'_, Message, StyleType>> {
     let Settings { language, .. } = sniffer.conf.settings;
@@ -59,7 +60,7 @@ pub fn waiting_page(sniffer: &Sniffer) -> Option<Container<'_, Message, StyleTyp
                 make_sure_valid_ipfix_translation(language)
             ),
         )
-    } else if !link_type.is_supported() {
+    } else if !link_type.is_some_and(LinkType::is_supported) {
         (
             Icon::Forbidden.to_text().size(60),
             unsupported_link_type_translation(language).to_string(),

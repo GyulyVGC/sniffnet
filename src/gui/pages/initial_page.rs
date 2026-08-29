@@ -17,7 +17,6 @@ use crate::gui::types::message::Message;
 use crate::gui::types::settings::Settings;
 use crate::networking::types::capture_context::{CaptureSource, CaptureSourcePicklist};
 use crate::networking::types::my_device::MyDevice;
-use crate::networking::types::my_link_type::MyLinkType;
 use crate::translations::translations::{
     address_translation, network_adapter_translation, start_translation,
 };
@@ -39,6 +38,7 @@ use iced::widget::{
 };
 use iced::{Alignment, Length, Padding, alignment};
 use pcap::Address;
+use sniffnet_packet_parser::LinkType;
 
 /// Computes the body of gui initial page
 pub fn initial_page(sniffer: &Sniffer) -> Container<'_, Message, StyleType> {
@@ -230,13 +230,13 @@ fn get_col_adapter(sniffer: &Sniffer) -> Column<'_, Message, StyleType> {
 }
 
 pub(crate) fn get_addresses_row(
-    link_type: MyLinkType,
+    link_type: Option<LinkType>,
     addresses: &[Address],
 ) -> Option<row::Wrapping<'_, Message, StyleType>> {
     if addresses.is_empty()
         || matches!(
             link_type,
-            MyLinkType::LinuxSll(_) | MyLinkType::LinuxSll2(_)
+            Some(LinkType::LinuxSll(_) | LinkType::LinuxSll2(_))
         )
     {
         return None;
