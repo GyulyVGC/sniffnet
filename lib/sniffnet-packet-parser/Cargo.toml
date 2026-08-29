@@ -1,0 +1,23 @@
+[package]
+name = "sniffnet-packet-parser"
+version = "0.1.0"
+description = "Network packet parser for Sniffnet"
+readme = "README.md"
+keywords = ["network", "packet", "sniffer", "parser", "pcap"]
+categories = ["parser-implementations", "network-programming"]
+authors.workspace = true
+edition.workspace = true
+homepage.workspace = true
+repository.workspace = true
+documentation.workspace = true
+license.workspace = true
+
+[dependencies]
+etherparse.workspace = true
+pcap.workspace = true
+
+[lints]
+workspace = true
+
+[badges]
+maintenance = { status = "actively-developed" }
