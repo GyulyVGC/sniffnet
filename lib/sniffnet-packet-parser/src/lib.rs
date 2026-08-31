@@ -1,4 +1,4 @@
-//! Network packet parser for Sniffnet.
+#![doc = include_str!("../README.md")]
 
 mod arp_type;
 mod headers;

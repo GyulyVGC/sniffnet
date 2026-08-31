@@ -3,6 +3,7 @@ use std::fmt::{Display, Formatter};
 use etherparse::{Icmpv4Type, Icmpv6Type};
 
 #[derive(Copy, Clone, PartialEq, Eq, Hash, Debug)]
+/// The ICMP message type.
 pub enum IcmpType {
     V4(IcmpTypeV4),
     V6(IcmpTypeV6),

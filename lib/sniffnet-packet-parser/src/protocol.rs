@@ -1,6 +1,7 @@
 use std::fmt::{Display, Formatter};
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+/// The protocol of the network packet.
 pub enum Protocol {
     Tcp,
     Udp,
@@ -11,7 +12,7 @@ pub enum Protocol {
 }
 
 impl Protocol {
-    /// IANA IP protocol number, or `None` for ARP, which is not carried over IP.
+    /// IANA IP protocol number, or `None` for ARP (which is not carried over IP).
     #[must_use]
     pub fn number(self) -> Option<u8> {
         match self {

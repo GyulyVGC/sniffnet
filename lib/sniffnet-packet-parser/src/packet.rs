@@ -9,15 +9,19 @@ use crate::link_type::LinkType;
 use crate::protocol::Protocol;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+/// Parsed network packet with info extracted from its headers.
 pub struct ParsedPacket {
+    /// Info extracted from the data link layer header.
     pub link_info: LinkInfo,
+    /// Info extracted from the network layer header.
     pub net_info: NetInfo,
+    /// Info extracted from the transport layer header.
     pub transport_info: TransportInfo,
 }
 
 impl ParsedPacket {
-    /// Parse one raw network packet.
     #[must_use]
+    /// Parse one raw network packet from its link type and wire bytes.
     pub fn from_bytes(bytes: &[u8], link_type: LinkType) -> Option<ParsedPacket> {
         let headers = get_sniffable_headers(bytes, link_type)?;
 
@@ -46,6 +50,7 @@ impl ParsedPacket {
     }
 
     #[must_use]
+    /// Returns the total number of bytes in the packet.
     pub fn bytes_count(&self) -> usize {
         self.link_info.bytes.saturating_add(self.net_info.bytes)
     }

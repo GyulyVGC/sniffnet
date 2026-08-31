@@ -6,8 +6,7 @@ const DLT_RAW: Linktype = Linktype(12);
 /// Link types this crate can parse.
 ///
 /// [`LinkType::Unsupported`] is still parsed, as Ethernet, on the assumption
-/// that an unknown DLT is more often Ethernet-shaped than not; callers that
-/// would rather skip such captures check [`LinkType::is_supported`] first.
+/// that an unknown DLT is more often Ethernet-shaped than not.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum LinkType {
     Null(Linktype),
@@ -23,6 +22,7 @@ pub enum LinkType {
 
 impl LinkType {
     #[must_use]
+    /// Convert a `pcap::Linktype` to a `LinkType`.
     pub fn from_pcap(link_type: Linktype) -> Self {
         match link_type {
             Linktype::NULL => LinkType::Null(link_type),
@@ -38,6 +38,7 @@ impl LinkType {
     }
 
     #[must_use]
+    /// Whether the link type is supported by this crate.
     pub fn is_supported(self) -> bool {
         !matches!(self, LinkType::Unsupported(_))
     }
