@@ -45,6 +45,7 @@ impl ParsedPacket {
         })
     }
 
+    #[must_use]
     pub fn bytes_count(&self) -> usize {
         self.link_info.bytes.saturating_add(self.net_info.bytes)
     }

@@ -151,8 +151,8 @@ pub fn modify_or_insert_in_map(
         .or_insert_with(|| InfoAddressPortPair {
             mac_address1: mac_addresses.0,
             mac_address2: mac_addresses.1,
-            bytes: bytes,
-            packets: packets,
+            bytes,
+            packets,
             initial_timestamp: initial_ts,
             final_timestamp: final_ts,
             final_instant: Instant::now(),

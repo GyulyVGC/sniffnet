@@ -221,9 +221,9 @@ fn ingest_flow_record(
         return;
     };
 
-    let (exchanged_bytes, exchanged_packets) = resolve_data_amounts(record, &key, baselines, now);
+    let (bytes, packets) = resolve_data_amounts(record, &key, baselines, now);
 
-    if exchanged_bytes == 0 || exchanged_packets == 0 {
+    if bytes == 0 || packets == 0 {
         return;
     }
 
@@ -237,8 +237,8 @@ fn ingest_flow_record(
         mac_addresses,
         None,
         None,
-        exchanged_packets,
-        exchanged_bytes,
+        packets,
+        bytes,
         ip_blacklist,
         record.direction,
         timestamps_hint,
@@ -249,8 +249,8 @@ fn ingest_flow_record(
         resolutions_state,
         &key,
         &[],
-        exchanged_packets,
-        exchanged_bytes,
+        packets,
+        bytes,
         traffic_direction,
         service,
     );
