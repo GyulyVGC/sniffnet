@@ -226,6 +226,11 @@ impl Sniffer {
                         Key::Character(",") => Some(Message::OpenLastSettings),
                         Key::Named(Named::Backspace) => Some(Message::ResetButtonPressed),
                         Key::Character("d") => Some(Message::CtrlDPressed),
+                        Key::Character("1") => Some(Message::SwitchToPage(RunningPage::Overview)),
+                        Key::Character("2") => Some(Message::SwitchToPage(RunningPage::Inspect)),
+                        Key::Character("3") => {
+                            Some(Message::SwitchToPage(RunningPage::Notifications))
+                        }
                         Key::Named(Named::ArrowLeft) => Some(Message::ArrowPressed(false)),
                         Key::Named(Named::ArrowRight) => Some(Message::ArrowPressed(true)),
                         Key::Character("-") => Some(Message::ScaleFactorShortcut(false)),
@@ -317,6 +322,7 @@ impl Sniffer {
             Message::ChangeVolume(volume) => self.change_volume(volume),
             Message::ClearAllNotifications => self.clear_all_notifications(),
             Message::SwitchPage(next) => self.switch_page(next),
+            Message::SwitchToPage(running_page) => self.switch_to_page(running_page),
             Message::ReturnKeyPressed => return self.return_key_pressed(),
             Message::EscKeyPressed => self.esc_key_pressed(),
             Message::ResetButtonPressed => return self.reset_button_pressed(),
@@ -1300,6 +1306,16 @@ impl Sniffer {
         }
     }
 
+    fn switch_to_page(&mut self, running_page: RunningPage) {
+        if self.running_page.is_some()
+            && self.settings_page.is_none()
+            && self.modal.is_none()
+            && self.info_traffic.tot_data_info.tot_data(DataRepr::Packets) > 0
+        {
+            self.change_running_page(running_page);
+        }
+    }
+
     fn return_key_pressed(&mut self) -> Task<Message> {
         if self.running_page.is_none() && self.settings_page.is_none() && self.modal.is_none() {
             return self.start();
@@ -2170,6 +2186,47 @@ mod tests {
         sniffer.update(Message::SwitchPage(true));
         assert_eq!(sniffer.running_page, Some(RunningPage::Inspect));
         assert_eq!(sniffer.settings_page, Some(SettingsPage::Appearance));
+    }
+
+    #[test]
+    #[parallel] // needed to not collide with other tests generating configs files
+    fn test_direct_running_page_shortcuts() {
+        let mut sniffer = Sniffer::new(Conf::default());
+
+        sniffer.update(Message::SwitchToPage(RunningPage::Notifications));
+        assert_eq!(sniffer.running_page, None);
+
+        sniffer.running_page = Some(RunningPage::Overview);
+        sniffer.update(Message::SwitchToPage(RunningPage::Inspect));
+        assert_eq!(sniffer.running_page, Some(RunningPage::Overview));
+
+        sniffer.info_traffic.tot_data_info.add_packets(
+            1,
+            0,
+            TrafficDirection::Outgoing,
+            Instant::now(),
+        );
+        sniffer.unread_notifications = 3;
+
+        sniffer.update(Message::SwitchToPage(RunningPage::Inspect));
+        assert_eq!(sniffer.running_page, Some(RunningPage::Inspect));
+        assert_eq!(sniffer.conf.last_opened_page, RunningPage::Inspect);
+        assert_eq!(sniffer.unread_notifications, 3);
+
+        sniffer.update(Message::SwitchToPage(RunningPage::Notifications));
+        assert_eq!(sniffer.running_page, Some(RunningPage::Notifications));
+        assert_eq!(sniffer.conf.last_opened_page, RunningPage::Notifications);
+        assert_eq!(sniffer.unread_notifications, 0);
+
+        sniffer.update(Message::OpenLastSettings);
+        sniffer.update(Message::SwitchToPage(RunningPage::Overview));
+        assert_eq!(sniffer.running_page, Some(RunningPage::Notifications));
+        assert_eq!(sniffer.settings_page, Some(SettingsPage::Notifications));
+
+        sniffer.update(Message::CloseSettings);
+        sniffer.update(Message::ShowModal(MyModal::ClearAll));
+        sniffer.update(Message::SwitchToPage(RunningPage::Overview));
+        assert_eq!(sniffer.running_page, Some(RunningPage::Notifications));
     }
 
     #[test]

@@ -86,6 +86,8 @@ pub enum Message {
     ChangeVolume(u8),
     /// Switch from a page to the next (previous) one if true (false), when the tab (shift+tab) key is pressed.
     SwitchPage(bool),
+    /// Switch to the given running page via keyboard shortcut
+    SwitchToPage(RunningPage),
     /// The enter (return) key has been pressed
     ReturnKeyPressed,
     /// The esc key has been pressed
