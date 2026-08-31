@@ -42,6 +42,32 @@ impl LinkType {
     pub fn is_supported(self) -> bool {
         !matches!(self, LinkType::Unsupported(_))
     }
+
+    #[must_use]
+    /// Returns a human-readable description of the link type.
+    pub fn description(self) -> String {
+        match self {
+            LinkType::Null(l)
+            | LinkType::Ethernet(l)
+            | LinkType::RawIp(l)
+            | LinkType::Loop(l)
+            | LinkType::IPv4(l)
+            | LinkType::IPv6(l)
+            | LinkType::LinuxSll(l)
+            | LinkType::LinuxSll2(l)
+            | LinkType::Unsupported(l) => {
+                format!(
+                    "{}{}",
+                    l.get_name().unwrap_or_else(|_| l.0.to_string()),
+                    if let Ok(desc) = l.get_description() {
+                        format!(" ({desc})")
+                    } else {
+                        String::new()
+                    }
+                )
+            }
+        }
+    }
 }
 
 #[cfg(test)]

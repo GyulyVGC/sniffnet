@@ -12,8 +12,8 @@ pub enum Protocol {
 }
 
 impl Protocol {
-    /// IANA IP protocol number, or `None` for ARP (which is not carried over IP).
     #[must_use]
+    /// IANA IP protocol number, or `None` for ARP (which is not carried over IP).
     pub fn number(self) -> Option<u8> {
         match self {
             Protocol::Tcp => Some(6),

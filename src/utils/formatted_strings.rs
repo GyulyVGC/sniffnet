@@ -191,28 +191,11 @@ pub fn full_print_link_type(link_type: Option<LinkType>, language: Language) -> 
         return format!("{}: -", link_type_translation(language));
     };
 
-    match link_type {
-        LinkType::Null(l)
-        | LinkType::Ethernet(l)
-        | LinkType::RawIp(l)
-        | LinkType::Loop(l)
-        | LinkType::IPv4(l)
-        | LinkType::IPv6(l)
-        | LinkType::LinuxSll(l)
-        | LinkType::LinuxSll2(l)
-        | LinkType::Unsupported(l) => {
-            format!(
-                "{}: {}{}",
-                link_type_translation(language),
-                l.get_name().unwrap_or_else(|_| l.0.to_string()),
-                if let Ok(desc) = l.get_description() {
-                    format!(" ({desc})")
-                } else {
-                    String::new()
-                }
-            )
-        }
-    }
+    format!(
+        "{}: {}",
+        link_type_translation(language),
+        link_type.description()
+    )
 }
 
 #[cfg(test)]
