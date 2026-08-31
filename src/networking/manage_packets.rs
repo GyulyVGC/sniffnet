@@ -29,7 +29,7 @@ pub fn get_service(
     traffic_direction: TrafficDirection,
     my_interface_addresses: &[Address],
 ) -> Service {
-    if key.protocol == Protocol::ICMP || key.protocol == Protocol::ARP {
+    if key.protocol.is_portless() {
         return Service::NotApplicable;
     }
 
@@ -131,7 +131,7 @@ pub fn modify_or_insert_in_map(
                 info.final_timestamp = final_ts;
             }
             info.final_instant = Instant::now();
-            if key.protocol.eq(&Protocol::ICMP)
+            if key.protocol.is_icmp()
                 && let Some(icmp_type) = icmp_type
             {
                 info.icmp_types
@@ -139,7 +139,7 @@ pub fn modify_or_insert_in_map(
                     .and_modify(|n| *n += 1)
                     .or_insert(1);
             }
-            if key.protocol.eq(&Protocol::ARP)
+            if key.protocol.eq(&Protocol::Arp)
                 && let Some(arp_type) = arp_type
             {
                 info.arp_types
@@ -158,14 +158,14 @@ pub fn modify_or_insert_in_map(
             final_instant: Instant::now(),
             service,
             traffic_direction,
-            icmp_types: if key.protocol.eq(&Protocol::ICMP)
+            icmp_types: if key.protocol.is_icmp()
                 && let Some(icmp_type) = icmp_type
             {
                 HashMap::from([(icmp_type, 1)])
             } else {
                 HashMap::new()
             },
-            arp_types: if key.protocol.eq(&Protocol::ARP)
+            arp_types: if key.protocol.eq(&Protocol::Arp)
                 && let Some(arp_type) = arp_type
             {
                 HashMap::from([(arp_type, 1)])
@@ -454,8 +454,8 @@ pub fn get_local_port(
         TrafficDirection::Incoming => key.dport,
     };
     let protocol = match key.protocol {
-        Protocol::TCP => Some(listeners::Protocol::TCP),
-        Protocol::UDP => Some(listeners::Protocol::UDP),
+        Protocol::Tcp => Some(listeners::Protocol::TCP),
+        Protocol::Udp => Some(listeners::Protocol::UDP),
         _ => None,
     };
     port.zip(protocol)
@@ -1059,7 +1059,7 @@ mod tests {
     #[test]
     fn test_get_service_simple_only_one_valid() {
         let unknown_port = Some(65000);
-        for p in [Protocol::TCP, Protocol::UDP] {
+        for p in [Protocol::Tcp, Protocol::Udp] {
             assert!(
                 SERVICES
                     .get(&ServiceQuery(unknown_port.unwrap(), p))
@@ -1141,7 +1141,7 @@ mod tests {
     #[test]
     fn test_get_service_well_known_ports_always_win() {
         let valid_but_not_well_known = Some(1030);
-        for p in [Protocol::TCP, Protocol::UDP] {
+        for p in [Protocol::Tcp, Protocol::Udp] {
             assert_eq!(
                 SERVICES
                     .get(&ServiceQuery(valid_but_not_well_known.unwrap(), p))
@@ -1228,7 +1228,7 @@ mod tests {
         let netmagic = Some(1196);
         let tgp = Some(1223);
 
-        for p in [Protocol::TCP, Protocol::UDP] {
+        for p in [Protocol::Tcp, Protocol::Udp] {
             for d in [TrafficDirection::Incoming, TrafficDirection::Outgoing] {
                 for (p1, p2) in [(smtp, tacacs), (tacacs, smtp)] {
                     let key = AddressPortPair::new(
@@ -1281,7 +1281,7 @@ mod tests {
         let cvc = Some(1495);
         let upnp = Some(1900);
 
-        for p in [Protocol::TCP, Protocol::UDP] {
+        for p in [Protocol::Tcp, Protocol::Udp] {
             for (p1, p2) in [(finger, xfer), (xfer, finger)] {
                 let key = AddressPortPair::new(
                     IpAddr::V6(Ipv6Addr::UNSPECIFIED),
@@ -1327,7 +1327,7 @@ mod tests {
         let transact = Some(1869);
         let radio = Some(1595);
 
-        for p in [Protocol::TCP, Protocol::UDP] {
+        for p in [Protocol::Tcp, Protocol::Udp] {
             for (p1, p2) in [(echo, rje), (rje, echo)] {
                 let key = AddressPortPair::new(
                     IpAddr::V4(Ipv4Addr::UNSPECIFIED),
@@ -1377,7 +1377,7 @@ mod tests {
 
     #[test]
     fn test_get_service_different_tcp_udp() {
-        for p in [Protocol::TCP, Protocol::UDP] {
+        for p in [Protocol::Tcp, Protocol::Udp] {
             for d in [TrafficDirection::Incoming, TrafficDirection::Outgoing] {
                 let key = AddressPortPair::new(
                     IpAddr::V4(Ipv4Addr::UNSPECIFIED),
@@ -1389,8 +1389,8 @@ mod tests {
                 assert_eq!(
                     get_service(&key, d, &[]),
                     Service::Name(match p {
-                        Protocol::TCP => "mdns",
-                        Protocol::UDP => "zeroconf",
+                        Protocol::Tcp => "mdns",
+                        Protocol::Udp => "zeroconf",
                         _ => panic!(),
                     })
                 );
@@ -1405,8 +1405,8 @@ mod tests {
                 assert_eq!(
                     get_service(&key, d, &[]),
                     match p {
-                        Protocol::TCP => Service::Name("netstat"),
-                        Protocol::UDP => Service::Unknown,
+                        Protocol::Tcp => Service::Name("netstat"),
+                        Protocol::Udp => Service::Unknown,
                         _ => panic!(),
                     }
                 );
@@ -1421,8 +1421,8 @@ mod tests {
                 assert_eq!(
                     get_service(&key, d, &[]),
                     match p {
-                        Protocol::TCP => Service::Unknown,
-                        Protocol::UDP => Service::Name("murmur"),
+                        Protocol::Tcp => Service::Unknown,
+                        Protocol::Udp => Service::Name("murmur"),
                         _ => panic!(),
                     }
                 );
@@ -1443,7 +1443,14 @@ mod tests {
 
     #[test]
     fn test_get_service_not_applicable() {
-        for p in [Protocol::TCP, Protocol::UDP, Protocol::ICMP, Protocol::ARP] {
+        for p in [
+            Protocol::Tcp,
+            Protocol::Udp,
+            Protocol::Icmpv4,
+            Protocol::Icmpv6,
+            Protocol::Arp,
+            Protocol::Igmp,
+        ] {
             for d in [TrafficDirection::Incoming, TrafficDirection::Outgoing] {
                 for (p1, p2) in [(None, Some(443)), (None, None), (Some(443), None)] {
                     let key = AddressPortPair::new(
@@ -1463,7 +1470,7 @@ mod tests {
     fn test_get_service_unknown() {
         let unknown_port_1 = Some(39332);
         let unknown_port_2 = Some(23679);
-        for p in [Protocol::TCP, Protocol::UDP] {
+        for p in [Protocol::Tcp, Protocol::Udp] {
             assert!(
                 SERVICES
                     .get(&ServiceQuery(unknown_port_1.unwrap(), p))
@@ -1500,7 +1507,7 @@ mod tests {
         let mut distinct_services = HashSet::new();
         for (sq, s) in &SERVICES {
             // only tcp or udp
-            assert!(sq.1 == Protocol::TCP || sq.1 == Protocol::UDP);
+            assert!(sq.1 == Protocol::Tcp || sq.1 == Protocol::Udp);
             // no unknown or not applicable services
             let name = match *s {
                 Service::Name(name) => name,
@@ -1522,7 +1529,7 @@ mod tests {
 
     #[test]
     fn test_service_names_of_old_application_protocols() {
-        for p in [Protocol::TCP, Protocol::UDP] {
+        for p in [Protocol::Tcp, Protocol::Udp] {
             // FTP
             assert_eq!(
                 SERVICES.get(&ServiceQuery(20, p)).unwrap(),
@@ -1694,38 +1701,38 @@ mod tests {
 
         // HTTP
         assert_eq!(
-            SERVICES.get(&ServiceQuery(8080, Protocol::TCP)).unwrap(),
+            SERVICES.get(&ServiceQuery(8080, Protocol::Tcp)).unwrap(),
             &Service::Name("http-proxy")
         );
         assert_eq!(
-            SERVICES.get(&ServiceQuery(8080, Protocol::UDP)).unwrap(),
+            SERVICES.get(&ServiceQuery(8080, Protocol::Udp)).unwrap(),
             &Service::Name("http-alt")
         );
 
         // LDAPS
         assert_eq!(
-            SERVICES.get(&ServiceQuery(636, Protocol::TCP)).unwrap(),
+            SERVICES.get(&ServiceQuery(636, Protocol::Tcp)).unwrap(),
             &Service::Name("ldapssl")
         );
         assert_eq!(
-            SERVICES.get(&ServiceQuery(636, Protocol::UDP)).unwrap(),
+            SERVICES.get(&ServiceQuery(636, Protocol::Udp)).unwrap(),
             &Service::Name("ldaps")
         );
 
         // mDNS
         assert_eq!(
-            SERVICES.get(&ServiceQuery(5353, Protocol::TCP)).unwrap(),
+            SERVICES.get(&ServiceQuery(5353, Protocol::Tcp)).unwrap(),
             &Service::Name("mdns")
         );
         assert_eq!(
-            SERVICES.get(&ServiceQuery(5353, Protocol::UDP)).unwrap(),
+            SERVICES.get(&ServiceQuery(5353, Protocol::Udp)).unwrap(),
             &Service::Name("zeroconf")
         );
     }
 
     #[test]
     fn test_other_service_names() {
-        for p in [Protocol::TCP, Protocol::UDP] {
+        for p in [Protocol::Tcp, Protocol::Udp] {
             assert!(SERVICES.get(&ServiceQuery(4, p)).is_none());
             assert!(SERVICES.get(&ServiceQuery(6, p)).is_none());
             assert_eq!(
@@ -1745,98 +1752,98 @@ mod tests {
         }
 
         assert_eq!(
-            SERVICES.get(&ServiceQuery(15, Protocol::TCP)).unwrap(),
+            SERVICES.get(&ServiceQuery(15, Protocol::Tcp)).unwrap(),
             &Service::Name("netstat")
         );
-        assert!(SERVICES.get(&ServiceQuery(15, Protocol::UDP)).is_none());
+        assert!(SERVICES.get(&ServiceQuery(15, Protocol::Udp)).is_none());
 
         assert_eq!(
-            SERVICES.get(&ServiceQuery(26, Protocol::TCP)).unwrap(),
+            SERVICES.get(&ServiceQuery(26, Protocol::Tcp)).unwrap(),
             &Service::Name("rsftp")
         );
-        assert!(SERVICES.get(&ServiceQuery(26, Protocol::UDP)).is_none());
+        assert!(SERVICES.get(&ServiceQuery(26, Protocol::Udp)).is_none());
 
         assert_eq!(
-            SERVICES.get(&ServiceQuery(87, Protocol::TCP)).unwrap(),
+            SERVICES.get(&ServiceQuery(87, Protocol::Tcp)).unwrap(),
             &Service::Name("priv-term-l")
         );
-        assert!(SERVICES.get(&ServiceQuery(87, Protocol::UDP)).is_none());
+        assert!(SERVICES.get(&ServiceQuery(87, Protocol::Udp)).is_none());
 
         assert_eq!(
-            SERVICES.get(&ServiceQuery(106, Protocol::TCP)).unwrap(),
+            SERVICES.get(&ServiceQuery(106, Protocol::Tcp)).unwrap(),
             &Service::Name("pop3pw")
         );
         assert_eq!(
-            SERVICES.get(&ServiceQuery(106, Protocol::UDP)).unwrap(),
+            SERVICES.get(&ServiceQuery(106, Protocol::Udp)).unwrap(),
             &Service::Name("3com-tsmux")
         );
 
-        assert!(SERVICES.get(&ServiceQuery(1028, Protocol::TCP)).is_none());
+        assert!(SERVICES.get(&ServiceQuery(1028, Protocol::Tcp)).is_none());
         assert_eq!(
-            SERVICES.get(&ServiceQuery(1028, Protocol::UDP)).unwrap(),
+            SERVICES.get(&ServiceQuery(1028, Protocol::Udp)).unwrap(),
             &Service::Name("ms-lsa")
         );
 
         assert_eq!(
-            SERVICES.get(&ServiceQuery(1029, Protocol::TCP)).unwrap(),
+            SERVICES.get(&ServiceQuery(1029, Protocol::Tcp)).unwrap(),
             &Service::Name("ms-lsa")
         );
         assert_eq!(
-            SERVICES.get(&ServiceQuery(1029, Protocol::UDP)).unwrap(),
+            SERVICES.get(&ServiceQuery(1029, Protocol::Udp)).unwrap(),
             &Service::Name("solid-mux")
         );
 
         assert_eq!(
-            SERVICES.get(&ServiceQuery(5820, Protocol::TCP)).unwrap(),
+            SERVICES.get(&ServiceQuery(5820, Protocol::Tcp)).unwrap(),
             &Service::Name("autopassdaemon")
         );
-        assert!(SERVICES.get(&ServiceQuery(5820, Protocol::UDP)).is_none());
+        assert!(SERVICES.get(&ServiceQuery(5820, Protocol::Udp)).is_none());
 
         assert_eq!(
-            SERVICES.get(&ServiceQuery(5900, Protocol::TCP)).unwrap(),
+            SERVICES.get(&ServiceQuery(5900, Protocol::Tcp)).unwrap(),
             &Service::Name("vnc")
         );
         assert_eq!(
-            SERVICES.get(&ServiceQuery(5900, Protocol::UDP)).unwrap(),
+            SERVICES.get(&ServiceQuery(5900, Protocol::Udp)).unwrap(),
             &Service::Name("rfb")
         );
 
         assert_eq!(
-            SERVICES.get(&ServiceQuery(5938, Protocol::TCP)).unwrap(),
+            SERVICES.get(&ServiceQuery(5938, Protocol::Tcp)).unwrap(),
             &Service::Name("teamviewer")
         );
-        assert!(SERVICES.get(&ServiceQuery(5938, Protocol::UDP)).is_none());
+        assert!(SERVICES.get(&ServiceQuery(5938, Protocol::Udp)).is_none());
 
         assert_eq!(
-            SERVICES.get(&ServiceQuery(8888, Protocol::TCP)).unwrap(),
+            SERVICES.get(&ServiceQuery(8888, Protocol::Tcp)).unwrap(),
             &Service::Name("sun-answerbook")
         );
         assert_eq!(
-            SERVICES.get(&ServiceQuery(8888, Protocol::UDP)).unwrap(),
+            SERVICES.get(&ServiceQuery(8888, Protocol::Udp)).unwrap(),
             &Service::Name("ddi-udp-1")
         );
 
         assert_eq!(
-            SERVICES.get(&ServiceQuery(23294, Protocol::TCP)).unwrap(),
+            SERVICES.get(&ServiceQuery(23294, Protocol::Tcp)).unwrap(),
             &Service::Name("5afe-dir")
         );
-        assert!(SERVICES.get(&ServiceQuery(23294, Protocol::UDP)).is_none());
+        assert!(SERVICES.get(&ServiceQuery(23294, Protocol::Udp)).is_none());
 
-        assert!(SERVICES.get(&ServiceQuery(48899, Protocol::TCP)).is_none());
+        assert!(SERVICES.get(&ServiceQuery(48899, Protocol::Tcp)).is_none());
         assert_eq!(
-            SERVICES.get(&ServiceQuery(48899, Protocol::UDP)).unwrap(),
+            SERVICES.get(&ServiceQuery(48899, Protocol::Udp)).unwrap(),
             &Service::Name("tc_ads_discovery")
         );
 
         assert_eq!(
-            SERVICES.get(&ServiceQuery(62078, Protocol::TCP)).unwrap(),
+            SERVICES.get(&ServiceQuery(62078, Protocol::Tcp)).unwrap(),
             &Service::Name("iphone-sync")
         );
-        assert!(SERVICES.get(&ServiceQuery(62078, Protocol::UDP)).is_none());
+        assert!(SERVICES.get(&ServiceQuery(62078, Protocol::Udp)).is_none());
 
-        assert!(SERVICES.get(&ServiceQuery(64738, Protocol::TCP)).is_none());
+        assert!(SERVICES.get(&ServiceQuery(64738, Protocol::Tcp)).is_none());
         assert_eq!(
-            SERVICES.get(&ServiceQuery(64738, Protocol::UDP)).unwrap(),
+            SERVICES.get(&ServiceQuery(64738, Protocol::Udp)).unwrap(),
             &Service::Name("murmur")
         );
     }

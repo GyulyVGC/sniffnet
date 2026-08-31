@@ -28,15 +28,7 @@ impl AddressPortPair {
         let sport = parsed.transport_info.src_port;
         let dest = parsed.net_info.dst_ip;
         let dport = parsed.transport_info.dst_port;
-        let protocol = match parsed.transport_info.protocol {
-            sniffnet_packet_parser::Protocol::Tcp => Protocol::TCP,
-            sniffnet_packet_parser::Protocol::Udp => Protocol::UDP,
-            sniffnet_packet_parser::Protocol::Icmpv4
-            | sniffnet_packet_parser::Protocol::Icmpv6
-            // TODO IGMP!
-            | sniffnet_packet_parser::Protocol::Igmp => Protocol::ICMP,
-            sniffnet_packet_parser::Protocol::Arp => Protocol::ARP,
-        };
+        let protocol = parsed.transport_info.protocol;
 
         Self {
             source,

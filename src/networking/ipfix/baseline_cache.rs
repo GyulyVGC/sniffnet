@@ -63,9 +63,9 @@ impl BaselineCache {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::Protocol;
     use crate::networking::ipfix::ttl_map::{ENTRY_TTL, PRUNE_INTERVAL};
     use crate::networking::types::ipfix_exporter::IpfixExporter;
-    use crate::networking::types::protocol::Protocol;
     use std::net::{IpAddr, Ipv4Addr};
     use std::time::Duration;
 
@@ -75,7 +75,7 @@ mod tests {
             sport: Some(sport),
             dest: IpAddr::V4(Ipv4Addr::new(8, 8, 8, 8)),
             dport: Some(443),
-            protocol: Protocol::TCP,
+            protocol: Protocol::Tcp,
             exporter: Some(IpfixExporter {
                 addr: IpAddr::V4(Ipv4Addr::new(203, 0, 113, exporter_addr)),
                 observation_domain_id: odid,

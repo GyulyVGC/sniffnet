@@ -176,8 +176,8 @@ fn col_info<'a>(
         val.traffic_direction,
     ) == TrafficType::Unicast;
     let measure_latency = sniffer.capture_source.supports_latency() && is_unicast;
-    let is_icmp = key.protocol.eq(&Protocol::ICMP);
-    let is_arp = key.protocol.eq(&Protocol::ARP);
+    let is_icmp = key.protocol.is_icmp();
+    let is_arp = key.protocol.eq(&Protocol::Arp);
 
     let mut ret_val = Column::new()
         .spacing(10)

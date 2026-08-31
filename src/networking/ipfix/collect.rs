@@ -284,9 +284,9 @@ fn resolve_data_amounts(
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::Protocol;
     use crate::networking::ipfix::wire::{self, IPFIX_VERSION};
     use crate::networking::types::data_representation::DataRepr;
-    use crate::networking::types::protocol::Protocol;
     use crate::networking::types::traffic_direction::TrafficDirection;
     use std::net::{IpAddr, Ipv4Addr, Ipv6Addr};
 
@@ -433,7 +433,7 @@ mod tests {
             sport: Some(443),
             dest: IpAddr::V4(Ipv4Addr::new(8, 8, 8, 8)),
             dport: Some(50_000),
-            protocol: Protocol::TCP,
+            protocol: Protocol::Tcp,
             exporter: Some(exporter()),
         }
     }
@@ -453,7 +453,7 @@ mod tests {
             dst_ip: Some(IpAddr::V4(Ipv4Addr::new(8, 8, 8, 8))),
             src_port: Some(443),
             dst_port: Some(50_000),
-            protocol: Some(Protocol::TCP),
+            protocol: Some(Protocol::Tcp),
             bytes_delta,
             packets_delta,
             ..FlowRecord::default()
@@ -588,7 +588,7 @@ mod tests {
             sport: Some(443),
             dest: IpAddr::V6(dst),
             dport: Some(50_000),
-            protocol: Protocol::TCP,
+            protocol: Protocol::Tcp,
             exporter: Some(exporter()),
         };
         let entry = info.map.get(&key).unwrap();
@@ -620,7 +620,7 @@ mod tests {
             sport: totals_key().dport,
             dest: totals_key().source,
             dport: totals_key().sport,
-            protocol: Protocol::TCP,
+            protocol: Protocol::Tcp,
             exporter: Some(exporter()),
         };
         let reverse = info.map.get(&reverse_key).unwrap();

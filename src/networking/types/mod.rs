@@ -16,7 +16,6 @@ pub mod latency;
 pub mod my_device;
 pub mod program;
 pub mod program_lookup;
-pub mod protocol;
 pub mod service;
 pub mod service_query;
 pub mod traffic_direction;

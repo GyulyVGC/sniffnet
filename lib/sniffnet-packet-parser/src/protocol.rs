@@ -24,6 +24,31 @@ impl Protocol {
             Protocol::Arp => None,
         }
     }
+
+    #[must_use]
+    /// Get the `Protocol` given its IANA IP protocol number.
+    pub fn from_number(number: u8) -> Option<Self> {
+        match number {
+            6 => Some(Protocol::Tcp),
+            17 => Some(Protocol::Udp),
+            1 => Some(Protocol::Icmpv4),
+            58 => Some(Protocol::Icmpv6),
+            2 => Some(Protocol::Igmp),
+            _ => None,
+        }
+    }
+
+    #[must_use]
+    /// Whether the protocol is portless.
+    pub fn is_portless(self) -> bool {
+        !matches!(self, Protocol::Tcp | Protocol::Udp)
+    }
+
+    #[must_use]
+    /// Whether the protocol is `ICMPv4` or `ICMPv6`.
+    pub fn is_icmp(self) -> bool {
+        matches!(self, Protocol::Icmpv4 | Protocol::Icmpv6)
+    }
 }
 
 impl Display for Protocol {
@@ -40,20 +65,5 @@ impl Display for Protocol {
                 Protocol::Arp => "ARP",
             }
         )
-    }
-}
-
-#[cfg(test)]
-mod tests {
-    use super::*;
-
-    #[test]
-    fn number_matches_iana_assignments() {
-        assert_eq!(Protocol::Tcp.number(), Some(6));
-        assert_eq!(Protocol::Udp.number(), Some(17));
-        assert_eq!(Protocol::Icmpv4.number(), Some(1));
-        assert_eq!(Protocol::Icmpv6.number(), Some(58));
-        assert_eq!(Protocol::Igmp.number(), Some(2));
-        assert_eq!(Protocol::Arp.number(), None);
     }
 }

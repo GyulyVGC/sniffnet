@@ -10,7 +10,7 @@ use std::io::{BufRead, BufReader, BufWriter, Write};
 use std::path::Path;
 
 include!("./src/networking/types/service_query.rs");
-include!("./src/networking/types/protocol.rs");
+include!("./lib/sniffnet-packet-parser/src/protocol.rs");
 
 const WINDOWS_ICON_PATH: &str = "./resources/packaging/windows/graphics/sniffnet.ico";
 const SERVICES_LIST_PATH: &str = "./services.txt";
@@ -96,8 +96,8 @@ fn get_valid_service_query(s: &str) -> ServiceQuery {
     let port = parts.next().unwrap().parse::<u16>().unwrap();
     let protocol_str = parts.next().unwrap();
     let protocol = match protocol_str {
-        "tcp" => Protocol::TCP,
-        "udp" => Protocol::UDP,
+        "tcp" => Protocol::Tcp,
+        "udp" => Protocol::Udp,
         invalid => panic!("Invalid protocol found: {invalid}"),
     };
     assert!(parts.next().is_none());

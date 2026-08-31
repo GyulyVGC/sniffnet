@@ -1,6 +1,6 @@
+use crate::Protocol;
 use crate::networking::types::address_port_pair::AddressPortPair;
 use crate::networking::types::ipfix_exporter::IpfixExporter;
-use crate::networking::types::protocol::Protocol;
 use crate::networking::types::traffic_direction::TrafficDirection;
 use crate::utils::types::timestamp::Timestamp;
 use std::net::IpAddr;
@@ -31,17 +31,14 @@ impl FlowRecord {
     pub(super) fn get_key(&self, exporter: IpfixExporter) -> Option<AddressPortPair> {
         let source = self.src_ip?;
         let dest = self.dst_ip?;
+        // TODO: ARP not supported yet
         let protocol = self.protocol?;
 
-        if matches!(protocol, Protocol::TCP | Protocol::UDP)
-            && (self.src_port.is_none() || self.dst_port.is_none())
-        {
+        if !protocol.is_portless() && (self.src_port.is_none() || self.dst_port.is_none()) {
             return None;
         }
 
-        if matches!(protocol, Protocol::ICMP | Protocol::ARP)
-            && (self.src_port.is_some() || self.dst_port.is_some())
-        {
+        if protocol.is_portless() && (self.src_port.is_some() || self.dst_port.is_some()) {
             return None;
         }
 
@@ -109,7 +106,7 @@ mod tests {
             dst_ip: Some("2.2.2.2".parse().unwrap()),
             src_port: Some(1234),
             dst_port: Some(5678),
-            protocol: Some(Protocol::TCP),
+            protocol: Some(Protocol::Tcp),
             ..Default::default()
         };
 
@@ -121,20 +118,20 @@ mod tests {
                 sport: Some(1234),
                 dest: "2.2.2.2".parse().unwrap(),
                 dport: Some(5678),
-                protocol: Protocol::TCP,
+                protocol: Protocol::Tcp,
                 exporter: Some(exporter()),
             })
         );
 
         let record_2 = FlowRecord {
-            protocol: Some(Protocol::ICMP),
+            protocol: Some(Protocol::Icmpv4),
             ..record
         };
         let key = record_2.get_key(exporter());
         assert!(key.is_none());
 
         let record_3 = FlowRecord {
-            protocol: Some(Protocol::ARP),
+            protocol: Some(Protocol::Arp),
             ..record
         };
         let key = record_3.get_key(exporter());
@@ -148,7 +145,7 @@ mod tests {
         assert!(key.is_none());
 
         let record_5 = FlowRecord {
-            protocol: Some(Protocol::UDP),
+            protocol: Some(Protocol::Udp),
             ..record
         };
         let key = record_5.get_key(exporter());
@@ -169,7 +166,7 @@ mod tests {
         assert!(key.is_none());
 
         let record_8 = FlowRecord {
-            protocol: Some(Protocol::ICMP),
+            protocol: Some(Protocol::Icmpv6),
             src_port: None,
             dst_port: None,
             ..record
@@ -182,7 +179,7 @@ mod tests {
                 sport: None,
                 dest: "2.2.2.2".parse().unwrap(),
                 dport: None,
-                protocol: Protocol::ICMP,
+                protocol: Protocol::Icmpv6,
                 exporter: Some(exporter()),
             })
         );
@@ -195,7 +192,7 @@ mod tests {
             dst_ip: Some("2.2.2.2".parse().unwrap()),
             src_port: Some(1234),
             dst_port: Some(5678),
-            protocol: Some(Protocol::TCP),
+            protocol: Some(Protocol::Tcp),
             bytes_delta: Some(100),
             packets_delta: Some(10),
             bytes_total: Some(1000),
@@ -221,7 +218,7 @@ mod tests {
                 dst_ip: Some("1.1.1.1".parse().unwrap()),
                 src_port: Some(5678),
                 dst_port: Some(1234),
-                protocol: Some(Protocol::TCP),
+                protocol: Some(Protocol::Tcp),
                 bytes_delta: Some(200),
                 packets_delta: Some(20),
                 bytes_total: Some(2000),
