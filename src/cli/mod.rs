@@ -5,6 +5,7 @@ use crate::networking::types::capture_context::CaptureSourcePicklist;
 use crate::utils::formatted_strings::APP_VERSION;
 use clap::Parser;
 use iced::{Task, window};
+use std::path::PathBuf;
 
 #[derive(Parser, Debug)]
 #[command(
@@ -17,6 +18,9 @@ pub(crate) struct Args {
     /// Start sniffing packets from the supplied network adapter
     #[arg(short, long, value_name = "NAME", default_missing_value = CONF.device.device_name.as_str(), num_args = 0..=1)]
     adapter: Option<String>,
+    /// Import packets from the supplied PCAP file
+    #[arg(value_name = "PCAP_FILE", conflicts_with = "adapter")]
+    pcap_file: Option<PathBuf>,
     /// Print the path to the configuration file
     #[arg(short, long, exclusive = true)]
     config_path: bool,
@@ -85,7 +89,17 @@ impl Args {
 
     pub fn get_boot_task_chain(&self) -> Task<Message> {
         let mut boot_task_chain = window::latest().map(Message::StartApp);
-        if let Some(adapter) = self.adapter.clone() {
+
+        if let Some(pcap_file) = self.pcap_file.clone() {
+            boot_task_chain = boot_task_chain
+                .chain(Task::done(Message::SetCaptureSource(
+                    CaptureSourcePicklist::File,
+                )))
+                .chain(Task::done(Message::SetPcapImport(
+                    pcap_file.to_string_lossy().to_string(),
+                )))
+                .chain(Task::done(Message::Start));
+        } else if let Some(adapter) = self.adapter.clone() {
             boot_task_chain = boot_task_chain
                 .chain(Task::done(Message::SetCaptureSource(
                     CaptureSourcePicklist::Device,
@@ -100,7 +114,9 @@ impl Args {
 
 #[cfg(test)]
 mod tests {
+    use super::Args;
     use serial_test::serial;
+    use std::path::PathBuf;
 
     use crate::gui::pages::types::running_page::RunningPage;
     use crate::gui::pages::types::settings_page::SettingsPage;
@@ -118,6 +134,22 @@ mod tests {
     use crate::notifications::types::notifications::Notifications;
     use crate::report::types::sort_type::SortType;
     use crate::{Language, Sniffer, StyleType};
+    use clap::Parser;
+
+    #[test]
+    fn test_parse_pcap_file_argument() {
+        let args = Args::parse_from(["sniffnet", "sample.pcap"]);
+
+        assert_eq!(args.pcap_file, Some(PathBuf::from("sample.pcap")));
+        assert_eq!(args.adapter, None);
+    }
+
+    #[test]
+    fn test_pcap_file_conflicts_with_adapter() {
+        let args = Args::try_parse_from(["sniffnet", "--adapter", "eth0", "sample.pcap"]);
+
+        assert!(args.is_err());
+    }
 
     #[test]
     #[serial]
