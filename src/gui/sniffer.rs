@@ -228,6 +228,15 @@ impl Sniffer {
                         Key::Character("d") => Some(Message::CtrlDPressed),
                         Key::Named(Named::ArrowLeft) => Some(Message::ArrowPressed(false)),
                         Key::Named(Named::ArrowRight) => Some(Message::ArrowPressed(true)),
+                        Key::Character("1") => {
+                            Some(Message::RunningPageShortcut(RunningPage::Overview))
+                        }
+                        Key::Character("2") => {
+                            Some(Message::RunningPageShortcut(RunningPage::Inspect))
+                        }
+                        Key::Character("3") => {
+                            Some(Message::RunningPageShortcut(RunningPage::Notifications))
+                        }
                         Key::Character("-") => Some(Message::ScaleFactorShortcut(false)),
                         Key::Character("+") => Some(Message::ScaleFactorShortcut(true)),
                         _ => None,
@@ -317,6 +326,7 @@ impl Sniffer {
             Message::ChangeVolume(volume) => self.change_volume(volume),
             Message::ClearAllNotifications => self.clear_all_notifications(),
             Message::SwitchPage(next) => self.switch_page(next),
+            Message::RunningPageShortcut(running_page) => self.running_page_shortcut(running_page),
             Message::ReturnKeyPressed => return self.return_key_pressed(),
             Message::EscKeyPressed => self.esc_key_pressed(),
             Message::ResetButtonPressed => return self.reset_button_pressed(),
@@ -1300,6 +1310,12 @@ impl Sniffer {
         }
     }
 
+    fn running_page_shortcut(&mut self, running_page: RunningPage) {
+        if self.running_page.is_some() && self.settings_page.is_none() && self.modal.is_none() {
+            self.change_running_page(running_page);
+        }
+    }
+
     fn return_key_pressed(&mut self) -> Task<Message> {
         if self.running_page.is_none() && self.settings_page.is_none() && self.modal.is_none() {
             return self.start();
@@ -2170,6 +2186,44 @@ mod tests {
         sniffer.update(Message::SwitchPage(true));
         assert_eq!(sniffer.running_page, Some(RunningPage::Inspect));
         assert_eq!(sniffer.settings_page, Some(SettingsPage::Appearance));
+    }
+
+    #[test]
+    #[parallel] // needed to not collide with other tests generating configs files
+    fn test_correctly_switch_running_page_with_shortcut() {
+        let mut sniffer = Sniffer::new(Conf::default());
+
+        sniffer.update(Message::RunningPageShortcut(RunningPage::Inspect));
+        assert!(sniffer.running_page.is_none());
+        assert_eq!(sniffer.conf.last_opened_page, RunningPage::Overview);
+
+        sniffer.running_page = Some(RunningPage::Overview);
+        sniffer.update(Message::RunningPageShortcut(RunningPage::Inspect));
+        assert_eq!(sniffer.running_page, Some(RunningPage::Inspect));
+        assert_eq!(sniffer.conf.last_opened_page, RunningPage::Inspect);
+
+        sniffer.update(Message::RunningPageShortcut(RunningPage::Notifications));
+        assert_eq!(sniffer.running_page, Some(RunningPage::Notifications));
+        assert_eq!(sniffer.conf.last_opened_page, RunningPage::Notifications);
+
+        sniffer.unread_notifications = 2;
+        sniffer.update(Message::RunningPageShortcut(RunningPage::Overview));
+        assert_eq!(sniffer.running_page, Some(RunningPage::Overview));
+        assert_eq!(sniffer.unread_notifications, 2);
+        sniffer.update(Message::RunningPageShortcut(RunningPage::Notifications));
+        assert_eq!(sniffer.running_page, Some(RunningPage::Notifications));
+        assert_eq!(sniffer.unread_notifications, 0);
+
+        sniffer.update(Message::OpenLastSettings);
+        sniffer.update(Message::RunningPageShortcut(RunningPage::Inspect));
+        assert_eq!(sniffer.running_page, Some(RunningPage::Notifications));
+        assert_eq!(sniffer.settings_page, Some(SettingsPage::Notifications));
+
+        sniffer.update(Message::CloseSettings);
+        sniffer.update(Message::ShowModal(MyModal::Reset));
+        sniffer.update(Message::RunningPageShortcut(RunningPage::Inspect));
+        assert_eq!(sniffer.running_page, Some(RunningPage::Notifications));
+        assert_eq!(sniffer.modal, Some(MyModal::Reset));
     }
 
     #[test]
