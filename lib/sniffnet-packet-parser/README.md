@@ -1,6 +1,6 @@
 # sniffnet-packet-parser
 
-Network packets parsing library for Sniffnet.
+Network packet parser for Sniffnet.
 
 Powered by [`etherparse`](https://github.com/JulianSchmid/etherparse).
 

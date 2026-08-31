@@ -63,7 +63,7 @@ pub enum IcmpTypeV4 {
 
 impl IcmpTypeV4 {
     #[must_use]
-    pub fn from_etherparse(icmpv4type: &Icmpv4Type) -> IcmpType {
+    pub(crate) fn from_etherparse(icmpv4type: &Icmpv4Type) -> IcmpType {
         IcmpType::V4(match icmpv4type {
             Icmpv4Type::EchoReply(_) => Self::EchoReply,
             Icmpv4Type::DestinationUnreachable(_) => Self::DestinationUnreachable,
@@ -188,7 +188,7 @@ pub enum IcmpTypeV6 {
 
 impl IcmpTypeV6 {
     #[must_use]
-    pub fn from_etherparse(icmpv6type: &Icmpv6Type) -> IcmpType {
+    pub(crate) fn from_etherparse(icmpv6type: &Icmpv6Type) -> IcmpType {
         IcmpType::V6(match icmpv6type {
             Icmpv6Type::DestinationUnreachable(_) => Self::DestinationUnreachable,
             Icmpv6Type::PacketTooBig { .. } => Self::PacketTooBig,

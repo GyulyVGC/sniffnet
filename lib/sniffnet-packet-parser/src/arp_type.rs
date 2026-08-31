@@ -12,7 +12,7 @@ pub enum ArpType {
 
 impl ArpType {
     #[must_use]
-    pub fn from_etherparse(arp_operation: ArpOperation) -> ArpType {
+    pub(crate) fn from_etherparse(arp_operation: ArpOperation) -> ArpType {
         match arp_operation {
             ArpOperation(1) => Self::Request,
             ArpOperation(2) => Self::Reply,

@@ -7,7 +7,7 @@ use std::net::IpAddr;
 pub struct LinkInfo {
     pub src_mac: Option<[u8; 6]>,
     pub dst_mac: Option<[u8; 6]>,
-    pub bytes: usize,
+    pub(crate) bytes: usize,
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
@@ -15,7 +15,7 @@ pub struct NetInfo {
     pub src_ip: IpAddr,
     pub dst_ip: IpAddr,
     pub arp_type: Option<ArpType>,
-    pub bytes: usize,
+    pub(crate) bytes: usize,
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
@@ -27,7 +27,7 @@ pub struct TransportInfo {
 }
 
 #[must_use]
-pub(super) fn get_sniffable_headers(
+pub(crate) fn get_sniffable_headers(
     packet: &[u8],
     link_type: LinkType,
 ) -> Option<LaxPacketHeaders<'_>> {
