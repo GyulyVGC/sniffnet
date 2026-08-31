@@ -2,12 +2,11 @@ use std::fmt::{Display, Formatter};
 
 use etherparse::ArpOperation;
 
-#[derive(Copy, Clone, PartialEq, Eq, Hash, Default, Debug)]
+#[derive(Copy, Clone, PartialEq, Eq, Hash, Debug)]
 /// The ARP message type.
 pub enum ArpType {
     Request,
     Reply,
-    #[default]
     Unknown,
 }
 

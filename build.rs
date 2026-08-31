@@ -9,8 +9,9 @@ use std::fs::File;
 use std::io::{BufRead, BufReader, BufWriter, Write};
 use std::path::Path;
 
+use sniffnet_packet_parser::Protocol;
+
 include!("./src/networking/types/service_query.rs");
-include!("./lib/sniffnet-packet-parser/src/protocol.rs");
 
 const WINDOWS_ICON_PATH: &str = "./resources/packaging/windows/graphics/sniffnet.ico";
 const SERVICES_LIST_PATH: &str = "./services.txt";

@@ -4,7 +4,7 @@ use crate::networking::types::capture_context::{CaptureContext, CaptureSource, C
 use crate::networking::types::my_device::MyDevice;
 use crate::utils::error_logger::{ErrorLogger, Location};
 use async_channel::Sender;
-use pcap::{Device, Linktype, Stat};
+use pcap::{Device, Stat};
 use sniffnet_packet_parser::LinkType;
 use sniffnet_packet_parser::ParsedPacket;
 use std::collections::HashMap;
@@ -41,10 +41,7 @@ pub fn traffic_preview(tx: &Sender<TrafficPreview>) {
 
         if let Ok(packet) = packet_res {
             let dev_info = packet.dev_info;
-            let link_type = dev_info
-                .link_type
-                .unwrap_or(LinkType::Ethernet(Linktype::ETHERNET));
-            if ParsedPacket::from_bytes(&packet.data, link_type).is_some() {
+            if ParsedPacket::from_bytes(&packet.data, dev_info.link_type).is_some() {
                 data.entry(dev_info.name)
                     .and_modify(|p| *p += 1)
                     .or_insert(1);
@@ -70,8 +67,10 @@ fn handle_devices_and_previews(
         traffic_preview.data.push((my_dev.clone(), 0));
         let capture_source = CaptureSource::Device(my_dev);
         let capture_context = CaptureContext::new(&capture_source, None, &Filters::default());
-        let link_type = capture_context.link_type();
-        if !link_type.is_some_and(LinkType::is_supported) {
+        let Some(link_type) = capture_context.link_type() else {
+            continue;
+        };
+        if !link_type.is_supported() {
             continue;
         }
         let pcap_tx = pcap_tx.clone();
@@ -116,7 +115,7 @@ fn packet_stream(
 #[derive(Clone)]
 struct DevInfo {
     name: String,
-    link_type: Option<LinkType>,
+    link_type: LinkType,
 }
 
 struct PacketOwned {

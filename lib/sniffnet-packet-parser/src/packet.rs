@@ -112,7 +112,7 @@ fn analyze_net_header(network_header: Option<NetHeaders>) -> Option<NetInfo> {
         Some(NetHeaders::Ipv6(ipv6header, _)) => {
             let src_ip = IpAddr::from(ipv6header.source);
             let dst_ip = IpAddr::from(ipv6header.destination);
-            let bytes = usize::from(ipv6header.payload_length.saturating_add(40));
+            let bytes = usize::from(ipv6header.payload_length) + 40;
             Some(NetInfo {
                 src_ip,
                 dst_ip,

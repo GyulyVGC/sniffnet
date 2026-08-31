@@ -9,12 +9,17 @@ authors.workspace = true
 edition.workspace = true
 homepage.workspace = true
 repository.workspace = true
-documentation.workspace = true
 license.workspace = true
 
+[features]
+default = ["full"]
+# without this only `Protocol` is available
+# (needed in sniffnet's build.rs for cross-compilation without pcap)
+full = ["dep:etherparse", "dep:pcap"]
+
 [dependencies]
-etherparse.workspace = true
-pcap.workspace = true
+etherparse = { workspace = true, optional = true }
+pcap = { workspace = true, optional = true }
 
 [lints]
 workspace = true

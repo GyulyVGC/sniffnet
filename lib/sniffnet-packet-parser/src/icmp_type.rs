@@ -26,7 +26,7 @@ impl Display for IcmpType {
     }
 }
 
-#[derive(Copy, Clone, PartialEq, Eq, Hash, Default, Debug)]
+#[derive(Copy, Clone, PartialEq, Eq, Hash, Debug)]
 #[allow(clippy::module_name_repetitions)]
 pub enum IcmpTypeV4 {
     EchoReply,
@@ -58,7 +58,6 @@ pub enum IcmpTypeV4 {
     Photuris,
     ExtendedEchoRequest,
     ExtendedEchoReply,
-    #[default]
     Unknown,
 }
 
@@ -143,7 +142,7 @@ impl Display for IcmpTypeV4 {
     }
 }
 
-#[derive(Copy, Clone, PartialEq, Eq, Hash, Default, Debug)]
+#[derive(Copy, Clone, PartialEq, Eq, Hash, Debug)]
 #[allow(clippy::module_name_repetitions)]
 pub enum IcmpTypeV6 {
     DestinationUnreachable,
@@ -183,7 +182,6 @@ pub enum IcmpTypeV6 {
     MPLControlMessage,
     ExtendedEchoRequest,
     ExtendedEchoReply,
-    #[default]
     Unknown,
 }
 

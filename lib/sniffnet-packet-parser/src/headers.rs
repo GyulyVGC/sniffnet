@@ -3,7 +3,7 @@ use crate::{ArpType, IcmpType, Protocol};
 use etherparse::{EtherType, LaxPacketHeaders};
 use std::net::IpAddr;
 
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, Hash)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 pub struct LinkInfo {
     pub src_mac: Option<[u8; 6]>,
     pub dst_mac: Option<[u8; 6]>,
