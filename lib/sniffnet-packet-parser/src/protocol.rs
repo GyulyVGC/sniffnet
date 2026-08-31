@@ -1,10 +1,5 @@
 use std::fmt::{Display, Formatter};
 
-/// Transport protocol observed in a packet.
-///
-/// ICMP is kept split by IP version: the two carry different message type
-/// registries and different IANA protocol numbers. Callers that treat them as
-/// one protocol collapse the two variants at their own boundary.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 pub enum Protocol {
     Tcp,

@@ -5172,7 +5172,6 @@ dependencies = [
  "confy",
  "ctrlc",
  "dns-lookup",
- "etherparse",
  "gag",
  "iced",
  "ipnet",

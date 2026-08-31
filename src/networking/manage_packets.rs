@@ -1,9 +1,6 @@
 use std::collections::HashMap;
 use std::net::{IpAddr, Ipv4Addr, Ipv6Addr};
 
-use etherparse::{
-    ArpHardwareId, EtherType, LaxPacketHeaders, LinkHeader, NetHeaders, TransportHeader,
-};
 use pcap::Address;
 
 use crate::Protocol;
@@ -22,194 +19,10 @@ use crate::networking::types::traffic_direction::TrafficDirection;
 use crate::networking::types::traffic_type::TrafficType;
 use crate::utils::types::timestamp::Timestamp;
 use sniffnet_packet_parser::ArpType;
-use sniffnet_packet_parser::{IcmpType, IcmpTypeV4, IcmpTypeV6};
+use sniffnet_packet_parser::IcmpType;
 use std::time::Instant;
 
 include!(concat!(env!("OUT_DIR"), "/services.rs"));
-
-/// Calls methods to analyze link, network, and transport headers.
-/// Returns the relevant collected information.
-pub fn analyze_headers(
-    headers: LaxPacketHeaders,
-    mac_addresses: &mut (Option<[u8; 6]>, Option<[u8; 6]>),
-    exchanged_bytes: &mut u128,
-    icmp_type: &mut IcmpType,
-    arp_type: &mut ArpType,
-) -> Option<AddressPortPair> {
-    let mut retval = AddressPortPair::default();
-
-    analyze_link_header(
-        headers.link,
-        &mut mac_addresses.0,
-        &mut mac_addresses.1,
-        exchanged_bytes,
-    );
-
-    let is_arp = matches!(&headers.net, Some(NetHeaders::Arp(_)));
-
-    if !analyze_network_header(
-        headers.net,
-        exchanged_bytes,
-        &mut retval.source,
-        &mut retval.dest,
-        arp_type,
-    ) {
-        return None;
-    }
-
-    if !is_arp
-        && !analyze_transport_header(
-            headers.transport,
-            &mut retval.sport,
-            &mut retval.dport,
-            &mut retval.protocol,
-            icmp_type,
-        )
-    {
-        return None;
-    }
-
-    Some(retval)
-}
-
-/// This function analyzes the data link layer header passed as parameter and updates variables
-/// passed by reference on the basis of the packet header content.
-/// Returns false if packet has to be skipped.
-fn analyze_link_header(
-    link_header: Option<LinkHeader>,
-    mac_address1: &mut Option<[u8; 6]>,
-    mac_address2: &mut Option<[u8; 6]>,
-    exchanged_bytes: &mut u128,
-) {
-    match link_header {
-        Some(LinkHeader::Ethernet2(header)) => {
-            *exchanged_bytes += 14;
-            *mac_address1 = Some(header.source);
-            *mac_address2 = Some(header.destination);
-        }
-        Some(LinkHeader::LinuxSll(header)) => {
-            *exchanged_bytes += 16;
-            *mac_address1 = if header.sender_address_valid_length == 6
-                && header.arp_hrd_type == ArpHardwareId::ETHERNET
-                && let Ok(sender) = header.sender_address[0..6].try_into()
-            {
-                Some(sender)
-            } else {
-                None
-            };
-            *mac_address2 = None;
-        }
-        None => {
-            *mac_address1 = None;
-            *mac_address2 = None;
-        }
-    }
-}
-
-/// This function analyzes the network layer header passed as parameter and updates variables
-/// passed by reference on the basis of the packet header content.
-/// Returns false if packet has to be skipped.
-fn analyze_network_header(
-    network_header: Option<NetHeaders>,
-    exchanged_bytes: &mut u128,
-    address1: &mut IpAddr,
-    address2: &mut IpAddr,
-    arp_type: &mut ArpType,
-) -> bool {
-    match network_header {
-        Some(NetHeaders::Ipv4(ipv4header, _)) => {
-            *address1 = IpAddr::from(ipv4header.source);
-            *address2 = IpAddr::from(ipv4header.destination);
-            *exchanged_bytes += u128::from(ipv4header.total_len);
-            true
-        }
-        Some(NetHeaders::Ipv6(ipv6header, _)) => {
-            *address1 = IpAddr::from(ipv6header.source);
-            *address2 = IpAddr::from(ipv6header.destination);
-            *exchanged_bytes += u128::from(ipv6header.payload_length) + 40;
-            true
-        }
-        Some(NetHeaders::Arp(arp_packet)) => {
-            match arp_packet.proto_addr_type {
-                EtherType::IPV4 => {
-                    *address1 =
-                        match TryInto::<[u8; 4]>::try_into(arp_packet.sender_protocol_addr()) {
-                            Ok(source) => IpAddr::from(source),
-                            Err(_) => return false,
-                        };
-                    *address2 =
-                        match TryInto::<[u8; 4]>::try_into(arp_packet.target_protocol_addr()) {
-                            Ok(destination) => IpAddr::from(destination),
-                            Err(_) => return false,
-                        };
-                }
-                EtherType::IPV6 => {
-                    *address1 =
-                        match TryInto::<[u8; 16]>::try_into(arp_packet.sender_protocol_addr()) {
-                            Ok(source) => IpAddr::from(source),
-                            Err(_) => return false,
-                        };
-                    *address2 =
-                        match TryInto::<[u8; 16]>::try_into(arp_packet.target_protocol_addr()) {
-                            Ok(destination) => IpAddr::from(destination),
-                            Err(_) => return false,
-                        };
-                }
-                _ => return false,
-            }
-            *exchanged_bytes += arp_packet.packet_len() as u128;
-            *arp_type = ArpType::from_etherparse(arp_packet.operation);
-            true
-        }
-        None => false,
-    }
-}
-
-/// This function analyzes the transport layer header passed as parameter and updates variables
-/// passed by reference on the basis of the packet header content.
-/// Returns false if packet has to be skipped.
-fn analyze_transport_header(
-    transport_header: Option<TransportHeader>,
-    port1: &mut Option<u16>,
-    port2: &mut Option<u16>,
-    protocol: &mut Protocol,
-    icmp_type: &mut IcmpType,
-) -> bool {
-    match transport_header {
-        Some(TransportHeader::Udp(udp_header)) => {
-            *port1 = Some(udp_header.source_port);
-            *port2 = Some(udp_header.destination_port);
-            *protocol = Protocol::UDP;
-            true
-        }
-        Some(TransportHeader::Tcp(tcp_header)) => {
-            *port1 = Some(tcp_header.source_port);
-            *port2 = Some(tcp_header.destination_port);
-            *protocol = Protocol::TCP;
-            true
-        }
-        Some(TransportHeader::Icmpv4(icmpv4_header)) => {
-            *port1 = None;
-            *port2 = None;
-            *protocol = Protocol::ICMP;
-            *icmp_type = IcmpTypeV4::from_etherparse(&icmpv4_header.icmp_type);
-            true
-        }
-        Some(TransportHeader::Icmpv6(icmpv6_header)) => {
-            *port1 = None;
-            *port2 = None;
-            *protocol = Protocol::ICMP;
-            *icmp_type = IcmpTypeV6::from_etherparse(&icmpv6_header.icmp_type);
-            true
-        }
-        Some(TransportHeader::Igmp(_)) => {
-            #[allow(clippy::match_same_arms)]
-            // TODO!
-            false
-        }
-        None => false,
-    }
-}
 
 pub fn get_service(
     key: &AddressPortPair,
@@ -270,9 +83,9 @@ pub fn modify_or_insert_in_map(
     my_interface_addresses: &[Address],
     mac_addresses: (Option<[u8; 6]>, Option<[u8; 6]>),
     icmp_type: Option<IcmpType>,
-    arp_type: ArpType,
-    exchanged_packets: u128,
-    exchanged_bytes: u128,
+    arp_type: Option<ArpType>,
+    packets: u128,
+    bytes: u128,
     ip_blacklist: &IpBlacklist,
     direction_hint: Option<TrafficDirection>,
     timestamps_hint: Option<(Timestamp, Timestamp)>,
@@ -309,8 +122,8 @@ pub fn modify_or_insert_in_map(
         .map
         .entry(*key)
         .and_modify(|info| {
-            info.transmitted_bytes += exchanged_bytes;
-            info.transmitted_packets += exchanged_packets;
+            info.bytes += bytes;
+            info.packets += packets;
             if initial_ts < info.initial_timestamp {
                 info.initial_timestamp = initial_ts;
             }
@@ -326,7 +139,9 @@ pub fn modify_or_insert_in_map(
                     .and_modify(|n| *n += 1)
                     .or_insert(1);
             }
-            if key.protocol.eq(&Protocol::ARP) {
+            if key.protocol.eq(&Protocol::ARP)
+                && let Some(arp_type) = arp_type
+            {
                 info.arp_types
                     .entry(arp_type)
                     .and_modify(|n| *n += 1)
@@ -336,8 +151,8 @@ pub fn modify_or_insert_in_map(
         .or_insert_with(|| InfoAddressPortPair {
             mac_address1: mac_addresses.0,
             mac_address2: mac_addresses.1,
-            transmitted_bytes: exchanged_bytes,
-            transmitted_packets: exchanged_packets,
+            bytes: bytes,
+            packets: packets,
             initial_timestamp: initial_ts,
             final_timestamp: final_ts,
             final_instant: Instant::now(),
@@ -350,7 +165,9 @@ pub fn modify_or_insert_in_map(
             } else {
                 HashMap::new()
             },
-            arp_types: if key.protocol.eq(&Protocol::ARP) {
+            arp_types: if key.protocol.eq(&Protocol::ARP)
+                && let Some(arp_type) = arp_type
+            {
                 HashMap::from([(arp_type, 1)])
             } else {
                 HashMap::new()

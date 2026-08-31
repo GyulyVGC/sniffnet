@@ -19,7 +19,6 @@ use crate::networking::types::info_traffic::InfoTraffic;
 use crate::networking::types::ip_blacklist::IpBlacklist;
 use crate::networking::types::ipfix_exporter::IpfixExporter;
 use crate::utils::types::timestamp::Timestamp;
-use sniffnet_packet_parser::ArpType;
 
 /// Buffer size for a single UDP datagram
 const RECV_BUF_LEN: usize = 65_535;
@@ -237,7 +236,7 @@ fn ingest_flow_record(
         &[],
         mac_addresses,
         None,
-        ArpType::default(),
+        None,
         exchanged_packets,
         exchanged_bytes,
         ip_blacklist,
@@ -535,8 +534,8 @@ mod tests {
         assert!(succeeded);
 
         let entry = info.map.get(&totals_key()).unwrap();
-        assert_eq!(entry.transmitted_bytes, 1500);
-        assert_eq!(entry.transmitted_packets, 10);
+        assert_eq!(entry.bytes, 1500);
+        assert_eq!(entry.packets, 10);
         assert_eq!(entry.traffic_direction, TrafficDirection::Incoming);
         assert_eq!(entry.mac_address1, Some([0xAA; 6]));
         assert_eq!(entry.mac_address2, None);
@@ -593,8 +592,8 @@ mod tests {
             exporter: Some(exporter()),
         };
         let entry = info.map.get(&key).unwrap();
-        assert_eq!(entry.transmitted_bytes, 800);
-        assert_eq!(entry.transmitted_packets, 4);
+        assert_eq!(entry.bytes, 800);
+        assert_eq!(entry.packets, 4);
     }
 
     #[test]
@@ -612,8 +611,8 @@ mod tests {
         assert_eq!(info.map.len(), 2);
 
         let forward = info.map.get(&totals_key()).unwrap();
-        assert_eq!(forward.transmitted_bytes, 1500);
-        assert_eq!(forward.transmitted_packets, 10);
+        assert_eq!(forward.bytes, 1500);
+        assert_eq!(forward.packets, 10);
 
         // the reverse half is the same conversation with the tuple swapped
         let reverse_key = AddressPortPair {
@@ -625,8 +624,8 @@ mod tests {
             exporter: Some(exporter()),
         };
         let reverse = info.map.get(&reverse_key).unwrap();
-        assert_eq!(reverse.transmitted_bytes, 9000);
-        assert_eq!(reverse.transmitted_packets, 60);
+        assert_eq!(reverse.bytes, 9000);
+        assert_eq!(reverse.packets, 60);
 
         // ...and it travels the other way
         assert_eq!(forward.traffic_direction, TrafficDirection::Outgoing);
@@ -664,8 +663,8 @@ mod tests {
         let (info, _, succeeded) = run_all(&[&first]);
         assert!(succeeded);
         let entry = info.map.get(&totals_key()).unwrap();
-        assert_eq!(entry.transmitted_bytes, 1500);
-        assert_eq!(entry.transmitted_packets, 10);
+        assert_eq!(entry.bytes, 1500);
+        assert_eq!(entry.packets, 10);
 
         let grown = datagram(&[set(300, &totals_record(4000, 25))]);
         let unchanged = datagram(&[set(300, &totals_record(4000, 25))]);
@@ -675,10 +674,10 @@ mod tests {
 
         let entry = info.map.get(&totals_key()).unwrap();
         // 1500 + 2500 + 0 + 1000
-        assert_eq!(entry.transmitted_bytes, 5000);
+        assert_eq!(entry.bytes, 5000);
         assert_eq!(info.tot_data_info.tot_data(DataRepr::Bytes), 5000);
         // 10 + 15 + 0 + 5
-        assert_eq!(entry.transmitted_packets, 30);
+        assert_eq!(entry.packets, 30);
         assert_eq!(info.tot_data_info.tot_data(DataRepr::Packets), 30);
     }
 
@@ -705,22 +704,22 @@ mod tests {
         assert_eq!(info.map.len(), 3);
 
         let entry = info.map.get(&totals_key()).unwrap();
-        assert_eq!(entry.transmitted_bytes, 1500);
-        assert_eq!(entry.transmitted_packets, 10);
+        assert_eq!(entry.bytes, 1500);
+        assert_eq!(entry.packets, 10);
 
         let entry = info
             .map
             .get(&totals_key_from(exporter_from(other_peer, 0)))
             .unwrap();
-        assert_eq!(entry.transmitted_bytes, 4000);
-        assert_eq!(entry.transmitted_packets, 25);
+        assert_eq!(entry.bytes, 4000);
+        assert_eq!(entry.packets, 25);
 
         let entry = info
             .map
             .get(&totals_key_from(exporter_from(peer(), 7)))
             .unwrap();
-        assert_eq!(entry.transmitted_bytes, 800);
-        assert_eq!(entry.transmitted_packets, 4);
+        assert_eq!(entry.bytes, 800);
+        assert_eq!(entry.packets, 4);
 
         assert_eq!(info.tot_data_info.tot_data(DataRepr::Bytes), 6300);
         assert_eq!(info.tot_data_info.tot_data(DataRepr::Packets), 39);
@@ -744,8 +743,8 @@ mod tests {
         assert_eq!(info.map.len(), 1);
 
         let entry = info.map.get(&totals_key()).unwrap();
-        assert_eq!(entry.transmitted_bytes, 4000);
-        assert_eq!(entry.transmitted_packets, 25);
+        assert_eq!(entry.bytes, 4000);
+        assert_eq!(entry.packets, 25);
         assert_eq!(info.tot_data_info.tot_data(DataRepr::Bytes), 4000);
         assert_eq!(info.tot_data_info.tot_data(DataRepr::Packets), 25);
     }
@@ -865,8 +864,8 @@ mod tests {
         record.direction = Some(TrafficDirection::Incoming);
         let (info, resolutions) = ingest(&record);
         let entry = info.map.get(&totals_key()).unwrap();
-        assert_eq!(entry.transmitted_bytes, 1500);
-        assert_eq!(entry.transmitted_packets, 10);
+        assert_eq!(entry.bytes, 1500);
+        assert_eq!(entry.packets, 10);
         assert_eq!(entry.traffic_direction, TrafficDirection::Incoming);
         // no rDNS threads are running, so the address is left awaiting lookup
         assert_eq!(resolutions.addresses_waiting_resolution.len(), 1);

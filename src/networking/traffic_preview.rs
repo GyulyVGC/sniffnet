@@ -1,15 +1,12 @@
 use crate::gui::types::filters::Filters;
 use crate::location;
-use crate::networking::manage_packets::analyze_headers;
-use crate::networking::parse_packets::get_sniffable_headers;
 use crate::networking::types::capture_context::{CaptureContext, CaptureSource, CaptureType};
 use crate::networking::types::my_device::MyDevice;
 use crate::utils::error_logger::{ErrorLogger, Location};
 use async_channel::Sender;
 use pcap::{Device, Linktype, Stat};
-use sniffnet_packet_parser::ArpType;
-use sniffnet_packet_parser::IcmpType;
 use sniffnet_packet_parser::LinkType;
+use sniffnet_packet_parser::ParsedPacket;
 use std::collections::HashMap;
 use std::thread;
 use std::time::{Duration, Instant};
@@ -47,16 +44,7 @@ pub fn traffic_preview(tx: &Sender<TrafficPreview>) {
             let link_type = dev_info
                 .link_type
                 .unwrap_or(LinkType::Ethernet(Linktype::ETHERNET));
-            if let Some(headers) = get_sniffable_headers(&packet.data, link_type)
-                && analyze_headers(
-                    headers,
-                    &mut (None, None),
-                    &mut 0,
-                    &mut IcmpType::default(),
-                    &mut ArpType::default(),
-                )
-                .is_some()
-            {
+            if ParsedPacket::from_bytes(&packet.data, link_type).is_some() {
                 data.entry(dev_info.name)
                     .and_modify(|p| *p += 1)
                     .or_insert(1);
