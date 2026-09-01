@@ -1,6 +1,9 @@
 use std::fmt::{Display, Formatter};
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+// `repr` makes the derived `Hash` write a fixed-width discriminant:
+// `SERVICES` is built by the host in build.rs, but looked up by the target at runtime
+#[repr(u8)]
 /// The protocol of the network packet.
 pub enum Protocol {
     Tcp,

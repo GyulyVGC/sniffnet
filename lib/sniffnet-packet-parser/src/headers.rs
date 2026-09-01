@@ -4,25 +4,37 @@ use etherparse::{EtherType, LaxPacketHeaders};
 use std::net::IpAddr;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+/// Info extracted from the data link layer header.
 pub struct LinkInfo {
+    /// Source MAC address, if available.
     pub src_mac: Option<[u8; 6]>,
+    /// Destination MAC address, if available.
     pub dst_mac: Option<[u8; 6]>,
     pub(crate) bytes: usize,
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+/// Info extracted from the network layer header.
 pub struct NetInfo {
+    /// Source IP address.
     pub src_ip: IpAddr,
+    /// Destination IP address.
     pub dst_ip: IpAddr,
+    /// ARP message type, if the packet is an ARP packet.
     pub arp_type: Option<ArpType>,
     pub(crate) bytes: usize,
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+/// Info extracted from the transport layer header.
 pub struct TransportInfo {
+    /// Source port, if the packet is a TCP or UDP packet.
     pub src_port: Option<u16>,
+    /// Destination port, if the packet is a TCP or UDP packet.
     pub dst_port: Option<u16>,
+    /// Protocol carried by the packet.
     pub protocol: Protocol,
+    /// ICMP message type, if the packet is an ICMP packet.
     pub icmp_type: Option<IcmpType>,
 }
 

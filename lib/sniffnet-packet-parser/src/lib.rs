@@ -15,7 +15,9 @@ mod protocol;
 #[cfg(feature = "full")]
 pub use arp_type::ArpType;
 #[cfg(feature = "full")]
-pub use icmp_type::IcmpType;
+pub use headers::{LinkInfo, NetInfo, TransportInfo};
+#[cfg(feature = "full")]
+pub use icmp_type::{IcmpType, IcmpTypeV4, IcmpTypeV6};
 #[cfg(feature = "full")]
 pub use link_type::LinkType;
 #[cfg(feature = "full")]

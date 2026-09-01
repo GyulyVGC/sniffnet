@@ -28,6 +28,7 @@ impl Display for IcmpType {
 
 #[derive(Copy, Clone, PartialEq, Eq, Hash, Debug)]
 #[allow(clippy::module_name_repetitions)]
+/// The `ICMPv4` message type.
 pub enum IcmpTypeV4 {
     EchoReply,
     DestinationUnreachable,
@@ -144,6 +145,7 @@ impl Display for IcmpTypeV4 {
 
 #[derive(Copy, Clone, PartialEq, Eq, Hash, Debug)]
 #[allow(clippy::module_name_repetitions)]
+/// The `ICMPv6` message type.
 pub enum IcmpTypeV6 {
     DestinationUnreachable,
     PacketTooBig,
