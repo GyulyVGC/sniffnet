@@ -1,6 +1,6 @@
 [package]
 name = "sniffnet-packet-parser"
-version = "0.1.0"
+version = "0.2.0"
 description = "Network packet parser for Sniffnet"
 readme = "README.md"
 keywords = ["network", "packet", "sniffer", "parser", "pcap"]
