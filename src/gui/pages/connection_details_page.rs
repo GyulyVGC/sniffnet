@@ -40,7 +40,7 @@ use crate::utils::formatted_strings::{
     get_formatted_timestamp, get_socket_address, mac_from_dec_to_hex, pretty_print_message_types,
 };
 use crate::utils::types::icon::Icon;
-use crate::{Language, Protocol, Sniffer, StyleType};
+use crate::{Language, Sniffer, StyleType};
 use iced::alignment::Vertical;
 use iced::widget::scrollable::Direction;
 use iced::widget::tooltip::Position;
@@ -250,12 +250,7 @@ fn col_info<'a>(
         ));
     }
 
-    let messages = match key.protocol {
-        Protocol::Icmpv4 | Protocol::Icmpv6 => pretty_print_message_types(&val.icmp_types),
-        Protocol::Arp => pretty_print_message_types(&val.arp_types),
-        Protocol::Igmp => pretty_print_message_types(&val.igmp_types),
-        _ => String::new(),
-    };
+    let messages = pretty_print_message_types(&val.message_types);
 
     if !messages.is_empty() {
         ret_val = ret_val.push(
