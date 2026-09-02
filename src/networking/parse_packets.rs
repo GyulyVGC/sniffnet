@@ -6,20 +6,16 @@ use crate::mmdb::types::mmdb_reader::MmdbReaders;
 use crate::networking::capture::{
     AddressesResolutionState, BackendTrafficMessage, maybe_send_tick, spawn_reverse_dns_pool,
 };
-use crate::networking::manage_packets::{
-    analyze_headers, modify_or_insert_in_map, update_connection_stats,
-};
-use crate::networking::types::arp_type::ArpType;
+use crate::networking::manage_packets::{modify_or_insert_in_map, update_connection_stats};
+use crate::networking::types::address_port_pair::AddressPortPair;
 use crate::networking::types::capture_context::{CaptureContext, CaptureSource, CaptureType};
-use crate::networking::types::icmp_type::IcmpType;
 use crate::networking::types::info_traffic::InfoTraffic;
 use crate::networking::types::ip_blacklist::IpBlacklist;
-use crate::networking::types::my_link_type::MyLinkType;
 use crate::utils::error_logger::{ErrorLogger, Location};
 use crate::utils::types::timestamp::Timestamp;
 use async_channel::Sender;
-use etherparse::{EtherType, LaxPacketHeaders};
 use pcap::{Packet, PacketHeader};
+use sniffnet_packet_parser::ParsedPacket;
 use std::thread;
 use std::time::{Duration, Instant};
 use tokio::sync::broadcast::Receiver;
@@ -38,8 +34,10 @@ pub fn parse_packets(
 ) {
     let (mut freeze_rx, mut freeze_rx_2) = freeze_rxs;
 
-    let my_link_type = capture_context.my_link_type();
-    if !my_link_type.is_supported() {
+    let Some(link_type) = capture_context.link_type() else {
+        return;
+    };
+    if !link_type.is_supported() {
         return;
     }
 
@@ -113,7 +111,7 @@ pub fn parse_packets(
                 }
             }
             Ok(packet) => {
-                if let Some(headers) = get_sniffable_headers(&packet.data, my_link_type) {
+                if let Some(parsed) = ParsedPacket::from_bytes(&packet.data, link_type) {
                     #[allow(clippy::useless_conversion)]
                     let secs = i64::from(packet.header.ts.tv_sec);
                     #[allow(clippy::useless_conversion)]
@@ -134,22 +132,12 @@ pub fn parse_packets(
 
                     info_traffic_msg.last_packet_timestamp = next_packet_timestamp;
 
-                    let mut exchanged_bytes = 0;
-                    let mut mac_addresses = (None, None);
-                    let mut icmp_type = IcmpType::default();
-                    let mut arp_type = ArpType::default();
+                    let bytes = parsed.bytes_count() as u128;
+                    let mac_addresses = (parsed.link_info.src_mac, parsed.link_info.dst_mac);
+                    let icmp_type = parsed.transport_info.icmp_type;
+                    let arp_type = parsed.net_info.arp_type;
 
-                    let key_option = analyze_headers(
-                        headers,
-                        &mut mac_addresses,
-                        &mut exchanged_bytes,
-                        &mut icmp_type,
-                        &mut arp_type,
-                    );
-
-                    let Some(key) = key_option else {
-                        continue;
-                    };
+                    let key = AddressPortPair::from_parsed_packet(&parsed);
 
                     // save this packet to PCAP file
                     if let Some(file) = savefile.as_mut() {
@@ -165,10 +153,10 @@ pub fn parse_packets(
                         &key,
                         cs.get_addresses(),
                         mac_addresses,
-                        Some(icmp_type),
+                        icmp_type,
                         arp_type,
                         1,
-                        exchanged_bytes,
+                        bytes,
                         ip_blacklist,
                         None,
                         None,
@@ -180,7 +168,7 @@ pub fn parse_packets(
                         &key,
                         cs.get_addresses(),
                         1,
-                        exchanged_bytes,
+                        bytes,
                         traffic_direction,
                         service,
                     );
@@ -193,72 +181,6 @@ pub fn parse_packets(
             }
         }
     }
-}
-
-pub(super) fn get_sniffable_headers(
-    packet: &[u8],
-    my_link_type: MyLinkType,
-) -> Option<LaxPacketHeaders<'_>> {
-    match my_link_type {
-        MyLinkType::Ethernet(_) | MyLinkType::Unsupported(_) | MyLinkType::NotYetAssigned => {
-            LaxPacketHeaders::from_ethernet(packet).ok()
-        }
-        MyLinkType::RawIp(_) | MyLinkType::IPv4(_) | MyLinkType::IPv6(_) => {
-            LaxPacketHeaders::from_ip(packet).ok()
-        }
-        MyLinkType::LinuxSll(_) => from_linux_sll(packet, true),
-        MyLinkType::LinuxSll2(_) => from_linux_sll(packet, false),
-        MyLinkType::Null(_) | MyLinkType::Loop(_) => from_null(packet),
-    }
-}
-
-fn from_null(packet: &[u8]) -> Option<LaxPacketHeaders<'_>> {
-    if packet.len() <= 4 {
-        return None;
-    }
-
-    let is_valid_af_inet = {
-        // based on https://wiki.wireshark.org/NullLoopback.md (2023-12-31)
-        fn matches(value: u32) -> bool {
-            match value {
-                // 2 = IPv4 on all platforms
-                // 24, 28, or 30 = IPv6 depending on platform
-                2 | 24 | 28 | 30 => true,
-                _ => false,
-            }
-        }
-        let h = &packet[..4];
-        let b = [h[0], h[1], h[2], h[3]];
-        // check both big endian and little endian representations
-        // as some OS'es use native endianness and others use big endian
-        matches(u32::from_le_bytes(b)) || matches(u32::from_be_bytes(b))
-    };
-
-    if is_valid_af_inet {
-        LaxPacketHeaders::from_ip(&packet[4..]).ok()
-    } else {
-        None
-    }
-}
-
-// TODO: do this with etherparse once they support Linux SLL2
-fn from_linux_sll(packet: &[u8], is_v1: bool) -> Option<LaxPacketHeaders<'_>> {
-    let header_len = if is_v1 { 16 } else { 20 };
-    if packet.len() <= header_len {
-        return None;
-    }
-
-    let protocol_type = u16::from_be_bytes(if is_v1 {
-        [packet[14], packet[15]]
-    } else {
-        [packet[0], packet[1]]
-    });
-    let payload = &packet[header_len..];
-
-    Some(LaxPacketHeaders::from_ether_type(
-        EtherType(protocol_type),
-        payload,
-    ))
 }
 
 /// Used only by PCAP import

@@ -1,16 +1,16 @@
 [package]
 name = "sniffnet"
 version = "1.5.1"
-authors = ["Giuliano Bellini <gyulyvgc99@gmail.com>"]
-edition = "2024"
 description = "Application to comfortably monitor your network traffic"
 readme = "README.md"
-homepage = "https://sniffnet.app"
-repository = "https://github.com/GyulyVGC/sniffnet"
 documentation = "https://github.com/GyulyVGC/sniffnet/wiki"
-license = "MIT OR Apache-2.0"
 keywords = ["filter", "network", "packet", "sniffer", "gui"]
 categories = ["visualization", "gui", "network-programming"]
+authors.workspace = true
+edition.workspace = true
+homepage.workspace = true
+repository.workspace = true
+license.workspace = true
 include = [
     "/src/**/*.rs",
     "/LICENSE-MIT",
@@ -37,37 +37,28 @@ codegen-units = 1
 
 #═══════════════════════════════════════════════════════════════════════════════════════════════════════════════════════
 
-[lints.rust]
-unsafe_code = "forbid"
-
-[lints.clippy]
-pedantic = { level = "warn", priority = -1 }
-unwrap_used = "warn"
-expect_used = "warn"
-panic = "warn"
-todo = "warn"
-unimplemented = "warn"
-unreachable = "warn"
-dbg_macro = "warn"
-print_stdout = "warn"
-print_stderr = "warn"
+[lints]
+workspace = true
 
 #═══════════════════════════════════════════════════════════════════════════════════════════════════════════════════════
 
 [dependencies]
+
+sniffnet-packet-parser = { path = "lib/sniffnet-packet-parser", version = "0.1.0" }
+
+pcap.workspace = true
+
 async-channel = "2.5.0"
 clap = { version = "4.6.6", features = ["derive"] }
 confy = "2.0.0"
 ctrlc = { version = "3.5.2", features = ["termination"] }
 dns-lookup = "3.0.1"
-etherparse = "0.21.0"
 iced = { version = "0.14.0", features = ["tokio", "svg", "advanced", "lazy", "image"] }
 ipnet = "2.12.1"
 jiff = "0.2.35"
 listeners = "0.6.1"
 maxminddb = "0.30.0"
 nom = "8.0.0"
-pcap = "2.5.0"
 phf = "0.14.0"
 phf_shared = "0.14.0"
 picon = "0.1.0"
@@ -98,6 +89,9 @@ serial_test = { version = "4.0.1", default-features = false }
 #───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
 
 [build-dependencies]
+
+sniffnet-packet-parser = { path = "lib/sniffnet-packet-parser", version = "0.1.0", default-features = false }
+
 phf_codegen = "0.14.0"
 phf_shared = "0.14.0"
 rustrict = { version = "0.7.39", default-features = false, features = ["censor"] }
@@ -177,3 +171,41 @@ fontconfig = "*"
 
 [package.metadata.wix]
 include = [".\\resources\\packaging\\windows\\setup.wxs"]
+
+#═══════════════════════════════════════════════════════════════════════════════════════════════════════════════════════
+
+[workspace]
+members = [".", "lib/sniffnet-packet-parser"]
+default-members = [".", "lib/sniffnet-packet-parser"]
+
+#───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+
+[workspace.package]
+authors = ["Giuliano Bellini <gyulyvgc99@gmail.com>"]
+edition = "2024"
+homepage = "https://sniffnet.app"
+repository = "https://github.com/GyulyVGC/sniffnet"
+license = "MIT OR Apache-2.0"
+
+#───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+
+[workspace.dependencies]
+etherparse = "0.21.0"
+pcap = "2.5.0"
+
+#───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+
+[workspace.lints.rust]
+unsafe_code = "forbid"
+
+[workspace.lints.clippy]
+pedantic = { level = "warn", priority = -1 }
+unwrap_used = "warn"
+expect_used = "warn"
+panic = "warn"
+todo = "warn"
+unimplemented = "warn"
+unreachable = "warn"
+dbg_macro = "warn"
+print_stdout = "warn"
+print_stderr = "warn"
