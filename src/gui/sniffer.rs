@@ -1041,7 +1041,7 @@ impl Sniffer {
                 let mmdb_readers = self.mmdb_readers.clone();
                 let ip_blacklist = self.ip_blacklist.clone();
                 self.capture_source
-                    .set_link_type(capture_context.my_link_type());
+                    .set_link_type(capture_context.link_type());
                 self.capture_source.set_addresses();
                 let capture_source = self.capture_source.clone();
                 self.traffic_chart

@@ -1,12 +1,12 @@
 //! RFC 7011 IPFIX wire format decoding
 
+use crate::Protocol;
 use crate::networking::ipfix::field_priority::{
     FieldPriority, bytes_delta_rank, bytes_total_rank, mac_rank, packets_delta_rank,
     packets_total_rank, timestamp_rank,
 };
 use crate::networking::ipfix::flow_record::{FlowRecord, ReverseCounters};
 use crate::networking::ipfix::ie;
-use crate::networking::types::protocol::Protocol;
 use crate::networking::types::traffic_direction::TrafficDirection;
 use crate::utils::types::timestamp::Timestamp;
 use nom::IResult;
@@ -231,12 +231,9 @@ fn apply_ie(ie_id: u16, raw: &[u8], record: &mut FlowRecord, priority: &mut Fiel
 
     match ie_id {
         ie::PROTOCOL_IDENTIFIER => {
-            if let Some(proto) = match raw.first() {
-                Some(6) => Some(Protocol::TCP),
-                Some(17) => Some(Protocol::UDP),
-                Some(1 | 58) => Some(Protocol::ICMP),
-                _ => None,
-            } {
+            if let Some(n) = raw.first()
+                && let Some(proto) = Protocol::from_number(*n)
+            {
                 record.protocol = Some(proto);
             }
         }
@@ -859,7 +856,7 @@ mod tests {
                 dst_ip: Some(IpAddr::V4(Ipv4Addr::new(192, 168, 1, 5))),
                 src_port: Some(443),
                 dst_port: Some(51234),
-                protocol: Some(Protocol::TCP),
+                protocol: Some(Protocol::Tcp),
                 bytes_delta: Some(1500),
                 packets_delta: Some(10),
                 bytes_total: Some(9000),
@@ -940,12 +937,11 @@ mod tests {
 
     #[test]
     fn test_apply_ie() {
-        // ICMPv6 (58) folds into ICMP; a protocol Sniffnet doesn't chart is left unset
         for (raw, expected) in [
-            (6, Some(Protocol::TCP)),
-            (17, Some(Protocol::UDP)),
-            (1, Some(Protocol::ICMP)),
-            (58, Some(Protocol::ICMP)),
+            (6, Some(Protocol::Tcp)),
+            (17, Some(Protocol::Udp)),
+            (1, Some(Protocol::Icmpv4)),
+            (58, Some(Protocol::Icmpv6)),
             (47, None),
         ] {
             let record = decode(&[(ie::PROTOCOL_IDENTIFIER, 1)], &[raw]);

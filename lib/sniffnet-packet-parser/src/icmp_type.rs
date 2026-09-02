@@ -1,33 +1,12 @@
-use std::collections::HashMap;
 use std::fmt::{Display, Formatter};
 
 use etherparse::{Icmpv4Type, Icmpv6Type};
-use std::fmt::Write;
 
 #[derive(Copy, Clone, PartialEq, Eq, Hash, Debug)]
+/// The ICMP message type.
 pub enum IcmpType {
     V4(IcmpTypeV4),
     V6(IcmpTypeV6),
-}
-
-impl IcmpType {
-    pub fn pretty_print_types(map: &HashMap<IcmpType, usize>) -> String {
-        let mut ret_val = String::new();
-
-        let mut vec: Vec<(&IcmpType, &usize)> = map.iter().collect();
-        vec.sort_by(|(_, a), (_, b)| b.cmp(a));
-
-        for (icmp_type, n) in vec {
-            let _ = writeln!(ret_val, "   {icmp_type} ({n})");
-        }
-        ret_val
-    }
-}
-
-impl Default for IcmpType {
-    fn default() -> Self {
-        Self::V4(IcmpTypeV4::default())
-    }
 }
 
 impl Display for IcmpType {
@@ -47,8 +26,9 @@ impl Display for IcmpType {
     }
 }
 
-#[derive(Copy, Clone, PartialEq, Eq, Hash, Default, Debug)]
+#[derive(Copy, Clone, PartialEq, Eq, Hash, Debug)]
 #[allow(clippy::module_name_repetitions)]
+/// The `ICMPv4` message type.
 pub enum IcmpTypeV4 {
     EchoReply,
     DestinationUnreachable,
@@ -79,12 +59,12 @@ pub enum IcmpTypeV4 {
     Photuris,
     ExtendedEchoRequest,
     ExtendedEchoReply,
-    #[default]
     Unknown,
 }
 
 impl IcmpTypeV4 {
-    pub fn from_etherparse(icmpv4type: &Icmpv4Type) -> IcmpType {
+    #[must_use]
+    pub(crate) fn from_etherparse(icmpv4type: &Icmpv4Type) -> IcmpType {
         IcmpType::V4(match icmpv4type {
             Icmpv4Type::EchoReply(_) => Self::EchoReply,
             Icmpv4Type::DestinationUnreachable(_) => Self::DestinationUnreachable,
@@ -163,8 +143,9 @@ impl Display for IcmpTypeV4 {
     }
 }
 
-#[derive(Copy, Clone, PartialEq, Eq, Hash, Default, Debug)]
+#[derive(Copy, Clone, PartialEq, Eq, Hash, Debug)]
 #[allow(clippy::module_name_repetitions)]
+/// The `ICMPv6` message type.
 pub enum IcmpTypeV6 {
     DestinationUnreachable,
     PacketTooBig,
@@ -203,12 +184,12 @@ pub enum IcmpTypeV6 {
     MPLControlMessage,
     ExtendedEchoRequest,
     ExtendedEchoReply,
-    #[default]
     Unknown,
 }
 
 impl IcmpTypeV6 {
-    pub fn from_etherparse(icmpv6type: &Icmpv6Type) -> IcmpType {
+    #[must_use]
+    pub(crate) fn from_etherparse(icmpv6type: &Icmpv6Type) -> IcmpType {
         IcmpType::V6(match icmpv6type {
             Icmpv6Type::DestinationUnreachable(_) => Self::DestinationUnreachable,
             Icmpv6Type::PacketTooBig { .. } => Self::PacketTooBig,

@@ -3,7 +3,6 @@ use crate::gui::types::filters::Filters;
 use crate::gui::types::ipfix_socket::MyIpfixSocket;
 use crate::location;
 use crate::networking::types::my_device::MyDevice;
-use crate::networking::types::my_link_type::MyLinkType;
 use crate::translations::translations::network_adapter_translation;
 use crate::translations::translations_4::capture_file_translation;
 use crate::translations::translations_6::ipfix_collector_translation;
@@ -11,6 +10,7 @@ use crate::translations::types::language::Language;
 use crate::utils::error_logger::{ErrorLogger, Location};
 use pcap::{Active, Address, Capture, Device, Error, Packet, Savefile, Stat};
 use serde::{Deserialize, Serialize};
+use sniffnet_packet_parser::LinkType;
 use std::collections::HashSet;
 use std::net::{IpAddr, SocketAddr, UdpSocket};
 use std::time::{Duration, Instant};
@@ -105,14 +105,12 @@ impl CaptureContext {
         }
     }
 
-    pub fn my_link_type(&self) -> MyLinkType {
+    pub fn link_type(&self) -> Option<LinkType> {
         match self {
-            Self::Live(on) => MyLinkType::from_pcap_link_type(on.cap.get_datalink()),
-            Self::LiveWithSavefile(onws) => {
-                MyLinkType::from_pcap_link_type(onws.live.cap.get_datalink())
-            }
-            Self::Offline(off) => MyLinkType::from_pcap_link_type(off.cap.get_datalink()),
-            Self::Ipfix(_) | Self::Error(_) => MyLinkType::default(),
+            Self::Live(on) => Some(LinkType::from_pcap(on.cap.get_datalink())),
+            Self::LiveWithSavefile(onws) => Some(LinkType::from_pcap(onws.live.cap.get_datalink())),
+            Self::Offline(off) => Some(LinkType::from_pcap(off.cap.get_datalink())),
+            Self::Ipfix(_) | Self::Error(_) => None,
         }
     }
 
@@ -281,7 +279,7 @@ impl CaptureSource {
                 for dev in Device::list().log_err(location!()).unwrap_or_default() {
                     if matches!(
                         my_device.get_link_type(),
-                        MyLinkType::LinuxSll(_) | MyLinkType::LinuxSll2(_)
+                        Some(LinkType::LinuxSll(_) | LinkType::LinuxSll2(_))
                     ) {
                         addresses.extend(dev.addresses);
                     } else if dev.name.eq(my_device.get_name()) {
@@ -296,15 +294,15 @@ impl CaptureSource {
         }
     }
 
-    pub fn get_link_type(&self) -> MyLinkType {
+    pub fn get_link_type(&self) -> Option<LinkType> {
         match self {
             Self::Device(device) => device.get_link_type(),
             Self::File(file) => file.link_type,
-            Self::Ipfix(_) => MyLinkType::default(),
+            Self::Ipfix(_) => None,
         }
     }
 
-    pub fn set_link_type(&mut self, link_type: MyLinkType) {
+    pub fn set_link_type(&mut self, link_type: Option<LinkType>) {
         match self {
             Self::Device(device) => device.set_link_type(link_type),
             Self::File(file) => file.link_type = link_type,
@@ -447,14 +445,14 @@ impl MyIpfixCollector {
 #[derive(Clone)]
 pub struct MyPcapImport {
     path: String,
-    link_type: MyLinkType,
+    link_type: Option<LinkType>,
 }
 
 impl MyPcapImport {
     pub fn new(path: String) -> Self {
         Self {
             path,
-            link_type: MyLinkType::default(),
+            link_type: None,
         }
     }
 }

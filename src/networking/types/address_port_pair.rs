@@ -2,7 +2,8 @@
 
 use crate::Protocol;
 use crate::networking::types::ipfix_exporter::IpfixExporter;
-use std::net::{IpAddr, Ipv4Addr};
+use sniffnet_packet_parser::ParsedPacket;
+use std::net::IpAddr;
 
 /// Struct representing a network address:port pair.
 #[derive(PartialEq, Eq, Hash, Clone, Copy, Debug)]
@@ -21,6 +22,25 @@ pub struct AddressPortPair {
     pub exporter: Option<IpfixExporter>,
 }
 
+impl AddressPortPair {
+    pub fn from_parsed_packet(parsed: &ParsedPacket) -> Self {
+        let source = parsed.net_info.src_ip;
+        let sport = parsed.transport_info.src_port;
+        let dest = parsed.net_info.dst_ip;
+        let dport = parsed.transport_info.dst_port;
+        let protocol = parsed.transport_info.protocol;
+
+        Self {
+            source,
+            sport,
+            dest,
+            dport,
+            protocol,
+            exporter: None,
+        }
+    }
+}
+
 #[cfg(test)]
 impl AddressPortPair {
     pub fn new(
@@ -36,19 +56,6 @@ impl AddressPortPair {
             dest,
             dport,
             protocol,
-            exporter: None,
-        }
-    }
-}
-
-impl Default for AddressPortPair {
-    fn default() -> Self {
-        AddressPortPair {
-            source: IpAddr::V4(Ipv4Addr::UNSPECIFIED),
-            dest: IpAddr::V4(Ipv4Addr::UNSPECIFIED),
-            sport: None,
-            dport: None,
-            protocol: Protocol::ARP,
             exporter: None,
         }
     }

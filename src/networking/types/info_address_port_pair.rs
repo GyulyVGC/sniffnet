@@ -2,14 +2,14 @@
 //! to keep track of statistics about the sniffed traffic.
 
 use crate::Service;
-use crate::networking::types::arp_type::ArpType;
 use crate::networking::types::data_info::DataInfo;
 use crate::networking::types::data_representation::DataRepr;
-use crate::networking::types::icmp_type::IcmpType;
 use crate::networking::types::program::Program;
 use crate::networking::types::traffic_direction::TrafficDirection;
 use crate::report::types::sort_type::SortType;
 use crate::utils::types::timestamp::Timestamp;
+use sniffnet_packet_parser::ArpType;
+use sniffnet_packet_parser::IcmpType;
 use std::cmp::Ordering;
 use std::collections::HashMap;
 use std::time::Instant;
@@ -24,9 +24,9 @@ pub struct InfoAddressPortPair {
     /// Destination MAC address
     pub mac_address2: Option<[u8; 6]>,
     /// Amount of bytes transmitted between the pair.
-    pub transmitted_bytes: u128,
+    pub bytes: u128,
     /// Amount of packets transmitted between the pair.
-    pub transmitted_packets: u128,
+    pub packets: u128,
     /// First occurrence of information exchange featuring the associate address:port pair as a source or destination.
     pub initial_timestamp: Timestamp,
     /// Last occurrence of information exchange featuring the associate address:port pair as a source or destination.
@@ -50,8 +50,8 @@ pub struct InfoAddressPortPair {
 impl InfoAddressPortPair {
     pub fn refresh(&mut self, other: &Self) {
         // self.program MUST NOT be refreshed here
-        self.transmitted_bytes += other.transmitted_bytes;
-        self.transmitted_packets += other.transmitted_packets;
+        self.bytes += other.bytes;
+        self.packets += other.packets;
         if other.initial_timestamp < self.initial_timestamp {
             self.initial_timestamp = other.initial_timestamp;
         }
@@ -80,9 +80,9 @@ impl InfoAddressPortPair {
 
     pub fn transmitted_data(&self, data_repr: DataRepr) -> u128 {
         match data_repr {
-            DataRepr::Packets => self.transmitted_packets,
-            DataRepr::Bytes => self.transmitted_bytes,
-            DataRepr::Bits => self.transmitted_bytes * 8,
+            DataRepr::Packets => self.packets,
+            DataRepr::Bytes => self.bytes,
+            DataRepr::Bits => self.bytes * 8,
         }
     }
 
@@ -101,8 +101,8 @@ impl InfoAddressPortPair {
     pub fn data_info(&self) -> DataInfo {
         let mut data_info = DataInfo::default();
         data_info.add_packets(
-            self.transmitted_packets,
-            self.transmitted_bytes,
+            self.packets,
+            self.bytes,
             self.traffic_direction,
             self.final_instant,
         );
@@ -115,8 +115,8 @@ impl Default for InfoAddressPortPair {
         Self {
             mac_address1: None,
             mac_address2: None,
-            transmitted_bytes: 0,
-            transmitted_packets: 0,
+            bytes: 0,
+            packets: 0,
             initial_timestamp: Timestamp::default(),
             final_timestamp: Timestamp::default(),
             final_instant: Instant::now(),
@@ -166,14 +166,14 @@ mod tests {
     #[test]
     fn test_info_address_port_pair_data() {
         let pair1 = InfoAddressPortPair {
-            transmitted_bytes: 1000,
-            transmitted_packets: 10,
+            bytes: 1000,
+            packets: 10,
             final_timestamp: Timestamp::new(8, 1300),
             ..Default::default()
         };
         let pair2 = InfoAddressPortPair {
-            transmitted_bytes: 1100,
-            transmitted_packets: 8,
+            bytes: 1100,
+            packets: 8,
             final_timestamp: Timestamp::new(15, 0),
             ..Default::default()
         };

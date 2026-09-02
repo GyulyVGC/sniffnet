@@ -3,6 +3,9 @@
 
 # Explicitly allow files
 !src/**/*.rs
+!lib/**/*.rs
+!lib/**/Cargo.toml
+!lib/**/README.md
 !build.rs
 !Cargo.toml
 !Cargo.lock

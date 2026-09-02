@@ -15,7 +15,6 @@ use crate::networking::ipfix::template_cache::TemplateCache;
 use crate::networking::ipfix::wire::{Set, decode_data_record, parse_message};
 use crate::networking::manage_packets::{modify_or_insert_in_map, update_connection_stats};
 use crate::networking::types::address_port_pair::AddressPortPair;
-use crate::networking::types::arp_type::ArpType;
 use crate::networking::types::info_traffic::InfoTraffic;
 use crate::networking::types::ip_blacklist::IpBlacklist;
 use crate::networking::types::ipfix_exporter::IpfixExporter;
@@ -222,9 +221,9 @@ fn ingest_flow_record(
         return;
     };
 
-    let (exchanged_bytes, exchanged_packets) = resolve_data_amounts(record, &key, baselines, now);
+    let (bytes, packets) = resolve_data_amounts(record, &key, baselines, now);
 
-    if exchanged_bytes == 0 || exchanged_packets == 0 {
+    if bytes == 0 || packets == 0 {
         return;
     }
 
@@ -237,9 +236,9 @@ fn ingest_flow_record(
         &[],
         mac_addresses,
         None,
-        ArpType::default(),
-        exchanged_packets,
-        exchanged_bytes,
+        None,
+        packets,
+        bytes,
         ip_blacklist,
         record.direction,
         timestamps_hint,
@@ -250,8 +249,8 @@ fn ingest_flow_record(
         resolutions_state,
         &key,
         &[],
-        exchanged_packets,
-        exchanged_bytes,
+        packets,
+        bytes,
         traffic_direction,
         service,
     );
@@ -285,9 +284,9 @@ fn resolve_data_amounts(
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::Protocol;
     use crate::networking::ipfix::wire::{self, IPFIX_VERSION};
     use crate::networking::types::data_representation::DataRepr;
-    use crate::networking::types::protocol::Protocol;
     use crate::networking::types::traffic_direction::TrafficDirection;
     use std::net::{IpAddr, Ipv4Addr, Ipv6Addr};
 
@@ -434,7 +433,7 @@ mod tests {
             sport: Some(443),
             dest: IpAddr::V4(Ipv4Addr::new(8, 8, 8, 8)),
             dport: Some(50_000),
-            protocol: Protocol::TCP,
+            protocol: Protocol::Tcp,
             exporter: Some(exporter()),
         }
     }
@@ -454,7 +453,7 @@ mod tests {
             dst_ip: Some(IpAddr::V4(Ipv4Addr::new(8, 8, 8, 8))),
             src_port: Some(443),
             dst_port: Some(50_000),
-            protocol: Some(Protocol::TCP),
+            protocol: Some(Protocol::Tcp),
             bytes_delta,
             packets_delta,
             ..FlowRecord::default()
@@ -535,8 +534,8 @@ mod tests {
         assert!(succeeded);
 
         let entry = info.map.get(&totals_key()).unwrap();
-        assert_eq!(entry.transmitted_bytes, 1500);
-        assert_eq!(entry.transmitted_packets, 10);
+        assert_eq!(entry.bytes, 1500);
+        assert_eq!(entry.packets, 10);
         assert_eq!(entry.traffic_direction, TrafficDirection::Incoming);
         assert_eq!(entry.mac_address1, Some([0xAA; 6]));
         assert_eq!(entry.mac_address2, None);
@@ -589,12 +588,12 @@ mod tests {
             sport: Some(443),
             dest: IpAddr::V6(dst),
             dport: Some(50_000),
-            protocol: Protocol::TCP,
+            protocol: Protocol::Tcp,
             exporter: Some(exporter()),
         };
         let entry = info.map.get(&key).unwrap();
-        assert_eq!(entry.transmitted_bytes, 800);
-        assert_eq!(entry.transmitted_packets, 4);
+        assert_eq!(entry.bytes, 800);
+        assert_eq!(entry.packets, 4);
     }
 
     #[test]
@@ -612,8 +611,8 @@ mod tests {
         assert_eq!(info.map.len(), 2);
 
         let forward = info.map.get(&totals_key()).unwrap();
-        assert_eq!(forward.transmitted_bytes, 1500);
-        assert_eq!(forward.transmitted_packets, 10);
+        assert_eq!(forward.bytes, 1500);
+        assert_eq!(forward.packets, 10);
 
         // the reverse half is the same conversation with the tuple swapped
         let reverse_key = AddressPortPair {
@@ -621,12 +620,12 @@ mod tests {
             sport: totals_key().dport,
             dest: totals_key().source,
             dport: totals_key().sport,
-            protocol: Protocol::TCP,
+            protocol: Protocol::Tcp,
             exporter: Some(exporter()),
         };
         let reverse = info.map.get(&reverse_key).unwrap();
-        assert_eq!(reverse.transmitted_bytes, 9000);
-        assert_eq!(reverse.transmitted_packets, 60);
+        assert_eq!(reverse.bytes, 9000);
+        assert_eq!(reverse.packets, 60);
 
         // ...and it travels the other way
         assert_eq!(forward.traffic_direction, TrafficDirection::Outgoing);
@@ -664,8 +663,8 @@ mod tests {
         let (info, _, succeeded) = run_all(&[&first]);
         assert!(succeeded);
         let entry = info.map.get(&totals_key()).unwrap();
-        assert_eq!(entry.transmitted_bytes, 1500);
-        assert_eq!(entry.transmitted_packets, 10);
+        assert_eq!(entry.bytes, 1500);
+        assert_eq!(entry.packets, 10);
 
         let grown = datagram(&[set(300, &totals_record(4000, 25))]);
         let unchanged = datagram(&[set(300, &totals_record(4000, 25))]);
@@ -675,10 +674,10 @@ mod tests {
 
         let entry = info.map.get(&totals_key()).unwrap();
         // 1500 + 2500 + 0 + 1000
-        assert_eq!(entry.transmitted_bytes, 5000);
+        assert_eq!(entry.bytes, 5000);
         assert_eq!(info.tot_data_info.tot_data(DataRepr::Bytes), 5000);
         // 10 + 15 + 0 + 5
-        assert_eq!(entry.transmitted_packets, 30);
+        assert_eq!(entry.packets, 30);
         assert_eq!(info.tot_data_info.tot_data(DataRepr::Packets), 30);
     }
 
@@ -705,22 +704,22 @@ mod tests {
         assert_eq!(info.map.len(), 3);
 
         let entry = info.map.get(&totals_key()).unwrap();
-        assert_eq!(entry.transmitted_bytes, 1500);
-        assert_eq!(entry.transmitted_packets, 10);
+        assert_eq!(entry.bytes, 1500);
+        assert_eq!(entry.packets, 10);
 
         let entry = info
             .map
             .get(&totals_key_from(exporter_from(other_peer, 0)))
             .unwrap();
-        assert_eq!(entry.transmitted_bytes, 4000);
-        assert_eq!(entry.transmitted_packets, 25);
+        assert_eq!(entry.bytes, 4000);
+        assert_eq!(entry.packets, 25);
 
         let entry = info
             .map
             .get(&totals_key_from(exporter_from(peer(), 7)))
             .unwrap();
-        assert_eq!(entry.transmitted_bytes, 800);
-        assert_eq!(entry.transmitted_packets, 4);
+        assert_eq!(entry.bytes, 800);
+        assert_eq!(entry.packets, 4);
 
         assert_eq!(info.tot_data_info.tot_data(DataRepr::Bytes), 6300);
         assert_eq!(info.tot_data_info.tot_data(DataRepr::Packets), 39);
@@ -744,8 +743,8 @@ mod tests {
         assert_eq!(info.map.len(), 1);
 
         let entry = info.map.get(&totals_key()).unwrap();
-        assert_eq!(entry.transmitted_bytes, 4000);
-        assert_eq!(entry.transmitted_packets, 25);
+        assert_eq!(entry.bytes, 4000);
+        assert_eq!(entry.packets, 25);
         assert_eq!(info.tot_data_info.tot_data(DataRepr::Bytes), 4000);
         assert_eq!(info.tot_data_info.tot_data(DataRepr::Packets), 25);
     }
@@ -865,8 +864,8 @@ mod tests {
         record.direction = Some(TrafficDirection::Incoming);
         let (info, resolutions) = ingest(&record);
         let entry = info.map.get(&totals_key()).unwrap();
-        assert_eq!(entry.transmitted_bytes, 1500);
-        assert_eq!(entry.transmitted_packets, 10);
+        assert_eq!(entry.bytes, 1500);
+        assert_eq!(entry.packets, 10);
         assert_eq!(entry.traffic_direction, TrafficDirection::Incoming);
         // no rDNS threads are running, so the address is left awaiting lookup
         assert_eq!(resolutions.addresses_waiting_resolution.len(), 1);

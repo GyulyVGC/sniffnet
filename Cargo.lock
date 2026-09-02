@@ -5172,7 +5172,6 @@ dependencies = [
  "confy",
  "ctrlc",
  "dns-lookup",
- "etherparse",
  "gag",
  "iced",
  "ipnet",
@@ -5198,11 +5197,20 @@ dependencies = [
  "serde_json",
  "serde_test",
  "serial_test",
+ "sniffnet-packet-parser",
  "splines",
  "surge-ping",
  "tokio",
  "toml 1.1.4+spec-1.1.0",
  "winresource",
+]
+
+[[package]]
+name = "sniffnet-packet-parser"
+version = "0.1.0"
+dependencies = [
+ "etherparse",
+ "pcap",
 ]
 
 [[package]]
