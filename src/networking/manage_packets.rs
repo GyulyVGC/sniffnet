@@ -18,8 +18,8 @@ use crate::networking::types::service_query::ServiceQuery;
 use crate::networking::types::traffic_direction::TrafficDirection;
 use crate::networking::types::traffic_type::TrafficType;
 use crate::utils::types::timestamp::Timestamp;
-use sniffnet_packet_parser::ArpType;
 use sniffnet_packet_parser::IcmpType;
+use sniffnet_packet_parser::{ArpType, IgmpType};
 use std::time::Instant;
 
 include!(concat!(env!("OUT_DIR"), "/services.rs"));
@@ -76,7 +76,7 @@ pub fn get_service(
 }
 
 /// Function to insert the source and destination of a packet into the map containing the analyzed traffic
-#[allow(clippy::too_many_arguments)]
+#[allow(clippy::too_many_arguments, clippy::similar_names)]
 pub fn modify_or_insert_in_map(
     info_traffic_msg: &mut InfoTraffic,
     key: &AddressPortPair,
@@ -84,6 +84,7 @@ pub fn modify_or_insert_in_map(
     mac_addresses: (Option<[u8; 6]>, Option<[u8; 6]>),
     icmp_type: Option<IcmpType>,
     arp_type: Option<ArpType>,
+    igmp_type: Option<IgmpType>,
     packets: u128,
     bytes: u128,
     ip_blacklist: &IpBlacklist,
@@ -147,6 +148,14 @@ pub fn modify_or_insert_in_map(
                     .and_modify(|n| *n += 1)
                     .or_insert(1);
             }
+            if key.protocol.eq(&Protocol::Igmp)
+                && let Some(igmp_type) = igmp_type
+            {
+                info.igmp_types
+                    .entry(igmp_type)
+                    .and_modify(|n| *n += 1)
+                    .or_insert(1);
+            }
         })
         .or_insert_with(|| InfoAddressPortPair {
             mac_address1: mac_addresses.0,
@@ -169,6 +178,13 @@ pub fn modify_or_insert_in_map(
                 && let Some(arp_type) = arp_type
             {
                 HashMap::from([(arp_type, 1)])
+            } else {
+                HashMap::new()
+            },
+            igmp_types: if key.protocol.eq(&Protocol::Igmp)
+                && let Some(igmp_type) = igmp_type
+            {
+                HashMap::from([(igmp_type, 1)])
             } else {
                 HashMap::new()
             },

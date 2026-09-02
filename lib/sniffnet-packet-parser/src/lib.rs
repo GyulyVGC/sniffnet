@@ -7,6 +7,8 @@ mod headers;
 #[cfg(feature = "full")]
 mod icmp_type;
 #[cfg(feature = "full")]
+mod igmp_type;
+#[cfg(feature = "full")]
 mod link_type;
 #[cfg(feature = "full")]
 mod packet;
@@ -18,6 +20,8 @@ pub use arp_type::ArpType;
 pub use headers::{LinkInfo, NetInfo, TransportInfo};
 #[cfg(feature = "full")]
 pub use icmp_type::{IcmpType, IcmpTypeV4, IcmpTypeV6};
+#[cfg(feature = "full")]
+pub use igmp_type::IgmpType;
 #[cfg(feature = "full")]
 pub use link_type::LinkType;
 #[cfg(feature = "full")]

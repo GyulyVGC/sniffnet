@@ -172,7 +172,7 @@ pub fn mac_from_dec_to_hex(mac_dec: [u8; 6]) -> String {
     mac_hex
 }
 
-/// Used to print ICMP and ARP message types
+/// Used to print ICMP, IGMP, and ARP message types
 pub fn pretty_print_message_types<T: Display>(map: &HashMap<T, usize>) -> String {
     let mut ret_val = String::new();
 

@@ -176,8 +176,6 @@ fn col_info<'a>(
         val.traffic_direction,
     ) == TrafficType::Unicast;
     let measure_latency = sniffer.capture_source.supports_latency() && is_unicast;
-    let is_icmp = key.protocol.is_icmp();
-    let is_arp = key.protocol.eq(&Protocol::Arp);
 
     let mut ret_val = Column::new()
         .spacing(10)
@@ -209,7 +207,7 @@ fn col_info<'a>(
         &key.protocol.to_string(),
     ));
 
-    if !is_icmp && !is_arp {
+    if !key.protocol.is_portless() {
         ret_val = ret_val.push(TextType::highlighted_subtitle_with_desc(
             service_translation(language),
             &val.service.to_string(),
@@ -252,12 +250,11 @@ fn col_info<'a>(
         ));
     }
 
-    let messages = if is_icmp {
-        pretty_print_message_types(&val.icmp_types)
-    } else if is_arp {
-        pretty_print_message_types(&val.arp_types)
-    } else {
-        String::new()
+    let messages = match key.protocol {
+        Protocol::Icmpv4 | Protocol::Icmpv6 => pretty_print_message_types(&val.icmp_types),
+        Protocol::Arp => pretty_print_message_types(&val.arp_types),
+        Protocol::Igmp => pretty_print_message_types(&val.igmp_types),
+        _ => String::new(),
     };
 
     if !messages.is_empty() {

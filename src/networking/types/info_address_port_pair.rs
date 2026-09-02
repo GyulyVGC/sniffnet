@@ -8,8 +8,8 @@ use crate::networking::types::program::Program;
 use crate::networking::types::traffic_direction::TrafficDirection;
 use crate::report::types::sort_type::SortType;
 use crate::utils::types::timestamp::Timestamp;
-use sniffnet_packet_parser::ArpType;
 use sniffnet_packet_parser::IcmpType;
+use sniffnet_packet_parser::{ArpType, IgmpType};
 use std::cmp::Ordering;
 use std::collections::HashMap;
 use std::time::Instant;
@@ -41,6 +41,8 @@ pub struct InfoAddressPortPair {
     pub icmp_types: HashMap<IcmpType, usize>,
     /// Types of the ARP operations, with the relative count (this is empty if not ARP)
     pub arp_types: HashMap<ArpType, usize>,
+    /// Types of the IGMP messages exchanged, with the relative count (this is empty if not IGMP)
+    pub igmp_types: HashMap<IgmpType, usize>,
     /// Whether the remote address is blacklisted
     pub is_blacklisted: bool,
     /// The program associated to this pair
@@ -73,6 +75,12 @@ impl InfoAddressPortPair {
         for (arp_type, count) in &other.arp_types {
             self.arp_types
                 .entry(*arp_type)
+                .and_modify(|v| *v += count)
+                .or_insert(*count);
+        }
+        for (igmp_type, count) in &other.igmp_types {
+            self.igmp_types
+                .entry(*igmp_type)
                 .and_modify(|v| *v += count)
                 .or_insert(*count);
         }
@@ -124,6 +132,7 @@ impl Default for InfoAddressPortPair {
             traffic_direction: TrafficDirection::default(),
             icmp_types: HashMap::new(),
             arp_types: HashMap::new(),
+            igmp_types: HashMap::new(),
             is_blacklisted: false,
             program: Program::default(),
         }

@@ -21,7 +21,11 @@ use std::time::{Duration, Instant};
 use tokio::sync::broadcast::Receiver;
 
 /// The calling thread enters a loop in which it waits for network packets
-#[allow(clippy::too_many_lines, clippy::too_many_arguments)]
+#[allow(
+    clippy::too_many_lines,
+    clippy::too_many_arguments,
+    clippy::similar_names
+)]
 pub fn parse_packets(
     cap_id: usize,
     mut cs: CaptureSource,
@@ -136,6 +140,7 @@ pub fn parse_packets(
                     let mac_addresses = (parsed.link_info.src_mac, parsed.link_info.dst_mac);
                     let icmp_type = parsed.transport_info.icmp_type;
                     let arp_type = parsed.net_info.arp_type;
+                    let igmp_type = parsed.transport_info.igmp_type;
 
                     let key = AddressPortPair::from_parsed_packet(&parsed);
 
@@ -155,6 +160,7 @@ pub fn parse_packets(
                         mac_addresses,
                         icmp_type,
                         arp_type,
+                        igmp_type,
                         1,
                         bytes,
                         ip_blacklist,
