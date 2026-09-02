@@ -75,7 +75,7 @@ mod tests {
     use super::*;
 
     #[test]
-    fn from_pcap_recognizes_every_supported_link_type() {
+    fn test_link_type_from_pcap_supported() {
         for link_type in [
             Linktype::NULL,
             Linktype::ETHERNET,
@@ -92,7 +92,7 @@ mod tests {
     }
 
     #[test]
-    fn from_pcap_marks_unknown_link_types_unsupported() {
+    fn test_link_type_from_pcap_unsupported() {
         let parsed = LinkType::from_pcap(Linktype(0x7fff));
         assert_eq!(parsed, LinkType::Unsupported(Linktype(0x7fff)));
         assert!(!parsed.is_supported());
