@@ -12,14 +12,13 @@ use crate::networking::types::data_info_host::DataInfoHost;
 use crate::networking::types::info_address_port_pair::InfoAddressPortPair;
 use crate::networking::types::info_traffic::InfoTraffic;
 use crate::networking::types::ip_blacklist::IpBlacklist;
+use crate::networking::types::message_type::MessageType;
 use crate::networking::types::program::Program;
 use crate::networking::types::service::Service;
 use crate::networking::types::service_query::ServiceQuery;
 use crate::networking::types::traffic_direction::TrafficDirection;
 use crate::networking::types::traffic_type::TrafficType;
 use crate::utils::types::timestamp::Timestamp;
-use sniffnet_packet_parser::ArpType;
-use sniffnet_packet_parser::IcmpType;
 use std::time::Instant;
 
 include!(concat!(env!("OUT_DIR"), "/services.rs"));
@@ -82,8 +81,7 @@ pub fn modify_or_insert_in_map(
     key: &AddressPortPair,
     my_interface_addresses: &[Address],
     mac_addresses: (Option<[u8; 6]>, Option<[u8; 6]>),
-    icmp_type: Option<IcmpType>,
-    arp_type: Option<ArpType>,
+    message_type: Option<MessageType>,
     packets: u128,
     bytes: u128,
     ip_blacklist: &IpBlacklist,
@@ -131,19 +129,9 @@ pub fn modify_or_insert_in_map(
                 info.final_timestamp = final_ts;
             }
             info.final_instant = Instant::now();
-            if key.protocol.is_icmp()
-                && let Some(icmp_type) = icmp_type
-            {
-                info.icmp_types
-                    .entry(icmp_type)
-                    .and_modify(|n| *n += 1)
-                    .or_insert(1);
-            }
-            if key.protocol.eq(&Protocol::Arp)
-                && let Some(arp_type) = arp_type
-            {
-                info.arp_types
-                    .entry(arp_type)
+            if let Some(message_type) = message_type {
+                info.message_types
+                    .entry(message_type)
                     .and_modify(|n| *n += 1)
                     .or_insert(1);
             }
@@ -158,17 +146,8 @@ pub fn modify_or_insert_in_map(
             final_instant: Instant::now(),
             service,
             traffic_direction,
-            icmp_types: if key.protocol.is_icmp()
-                && let Some(icmp_type) = icmp_type
-            {
-                HashMap::from([(icmp_type, 1)])
-            } else {
-                HashMap::new()
-            },
-            arp_types: if key.protocol.eq(&Protocol::Arp)
-                && let Some(arp_type) = arp_type
-            {
-                HashMap::from([(arp_type, 1)])
+            message_types: if let Some(message_type) = message_type {
+                HashMap::from([(message_type, 1)])
             } else {
                 HashMap::new()
             },

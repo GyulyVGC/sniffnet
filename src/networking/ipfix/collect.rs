@@ -236,7 +236,6 @@ fn ingest_flow_record(
         &[],
         mac_addresses,
         None,
-        None,
         packets,
         bytes,
         ip_blacklist,

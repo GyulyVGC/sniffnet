@@ -11,6 +11,7 @@ use crate::networking::types::address_port_pair::AddressPortPair;
 use crate::networking::types::capture_context::{CaptureContext, CaptureSource, CaptureType};
 use crate::networking::types::info_traffic::InfoTraffic;
 use crate::networking::types::ip_blacklist::IpBlacklist;
+use crate::networking::types::message_type::MessageType;
 use crate::utils::error_logger::{ErrorLogger, Location};
 use crate::utils::types::timestamp::Timestamp;
 use async_channel::Sender;
@@ -134,8 +135,7 @@ pub fn parse_packets(
 
                     let bytes = parsed.bytes_count() as u128;
                     let mac_addresses = (parsed.link_info.src_mac, parsed.link_info.dst_mac);
-                    let icmp_type = parsed.transport_info.icmp_type;
-                    let arp_type = parsed.net_info.arp_type;
+                    let message_type = MessageType::from_parsed_packet(&parsed);
 
                     let key = AddressPortPair::from_parsed_packet(&parsed);
 
@@ -153,8 +153,7 @@ pub fn parse_packets(
                         &key,
                         cs.get_addresses(),
                         mac_addresses,
-                        icmp_type,
-                        arp_type,
+                        message_type,
                         1,
                         bytes,
                         ip_blacklist,

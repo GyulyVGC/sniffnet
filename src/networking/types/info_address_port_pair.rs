@@ -4,12 +4,11 @@
 use crate::Service;
 use crate::networking::types::data_info::DataInfo;
 use crate::networking::types::data_representation::DataRepr;
+use crate::networking::types::message_type::MessageType;
 use crate::networking::types::program::Program;
 use crate::networking::types::traffic_direction::TrafficDirection;
 use crate::report::types::sort_type::SortType;
 use crate::utils::types::timestamp::Timestamp;
-use sniffnet_packet_parser::ArpType;
-use sniffnet_packet_parser::IcmpType;
 use std::cmp::Ordering;
 use std::collections::HashMap;
 use std::time::Instant;
@@ -37,10 +36,8 @@ pub struct InfoAddressPortPair {
     pub service: Service,
     /// Determines if the connection is incoming or outgoing
     pub traffic_direction: TrafficDirection,
-    /// Types of the ICMP messages exchanged, with the relative count (this is empty if not ICMP)
-    pub icmp_types: HashMap<IcmpType, usize>,
-    /// Types of the ARP operations, with the relative count (this is empty if not ARP)
-    pub arp_types: HashMap<ArpType, usize>,
+    /// Types of the messages exchanged, with the relative count (this is empty for protocols without message types)
+    pub message_types: HashMap<MessageType, usize>,
     /// Whether the remote address is blacklisted
     pub is_blacklisted: bool,
     /// The program associated to this pair
@@ -64,15 +61,9 @@ impl InfoAddressPortPair {
         self.service = other.service;
         self.is_blacklisted = other.is_blacklisted;
         self.traffic_direction = other.traffic_direction;
-        for (icmp_type, count) in &other.icmp_types {
-            self.icmp_types
-                .entry(*icmp_type)
-                .and_modify(|v| *v += count)
-                .or_insert(*count);
-        }
-        for (arp_type, count) in &other.arp_types {
-            self.arp_types
-                .entry(*arp_type)
+        for (message_type, count) in &other.message_types {
+            self.message_types
+                .entry(*message_type)
                 .and_modify(|v| *v += count)
                 .or_insert(*count);
         }
@@ -122,8 +113,7 @@ impl Default for InfoAddressPortPair {
             final_instant: Instant::now(),
             service: Service::default(),
             traffic_direction: TrafficDirection::default(),
-            icmp_types: HashMap::new(),
-            arp_types: HashMap::new(),
+            message_types: HashMap::new(),
             is_blacklisted: false,
             program: Program::default(),
         }

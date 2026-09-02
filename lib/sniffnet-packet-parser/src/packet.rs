@@ -5,6 +5,7 @@ use etherparse::{ArpHardwareId, EtherType, LinkHeader, NetHeaders, TransportHead
 use crate::arp_type::ArpType;
 use crate::headers::{LinkInfo, NetInfo, TransportInfo, get_sniffable_headers};
 use crate::icmp_type::{IcmpTypeV4, IcmpTypeV6};
+use crate::igmp_type::IgmpType;
 use crate::link_type::LinkType;
 use crate::protocol::Protocol;
 
@@ -37,6 +38,7 @@ impl ParsedPacket {
                 dst_port: None,
                 protocol: Protocol::Arp,
                 icmp_type: None,
+                igmp_type: None,
             })
         } else {
             analyze_transport_header(headers.transport)
@@ -78,11 +80,10 @@ fn analyze_link_header(link_header: Option<LinkHeader>) -> LinkInfo {
             } else {
                 None
             };
-            let dst_mac = None;
             let bytes = 16;
             LinkInfo {
                 src_mac,
-                dst_mac,
+                dst_mac: None,
                 bytes,
             }
         }
@@ -151,11 +152,11 @@ fn analyze_net_header(network_header: Option<NetHeaders>) -> Option<NetInfo> {
                 _ => return None,
             };
             let bytes = arp_packet.packet_len();
-            let arp_type = ArpType::from_etherparse(arp_packet.operation);
+            let arp_type = Some(ArpType::from_etherparse(arp_packet.operation));
             Some(NetInfo {
                 src_ip,
                 dst_ip,
-                arp_type: Some(arp_type),
+                arp_type,
                 bytes,
             })
         }
@@ -176,6 +177,7 @@ fn analyze_transport_header(transport_header: Option<TransportHeader>) -> Option
                 dst_port,
                 protocol,
                 icmp_type: None,
+                igmp_type: None,
             })
         }
         Some(TransportHeader::Tcp(tcp_header)) => {
@@ -187,36 +189,41 @@ fn analyze_transport_header(transport_header: Option<TransportHeader>) -> Option
                 dst_port,
                 protocol,
                 icmp_type: None,
+                igmp_type: None,
             })
         }
         Some(TransportHeader::Icmpv4(icmpv4_header)) => {
-            let src_port = None;
-            let dst_port = None;
             let protocol = Protocol::Icmpv4;
-            let icmp_type = IcmpTypeV4::from_etherparse(&icmpv4_header.icmp_type);
+            let icmp_type = Some(IcmpTypeV4::from_etherparse(&icmpv4_header.icmp_type));
             Some(TransportInfo {
-                src_port,
-                dst_port,
+                src_port: None,
+                dst_port: None,
                 protocol,
-                icmp_type: Some(icmp_type),
+                icmp_type,
+                igmp_type: None,
             })
         }
         Some(TransportHeader::Icmpv6(icmpv6_header)) => {
-            let src_port = None;
-            let dst_port = None;
             let protocol = Protocol::Icmpv6;
-            let icmp_type = IcmpTypeV6::from_etherparse(&icmpv6_header.icmp_type);
+            let icmp_type = Some(IcmpTypeV6::from_etherparse(&icmpv6_header.icmp_type));
             Some(TransportInfo {
-                src_port,
-                dst_port,
+                src_port: None,
+                dst_port: None,
                 protocol,
-                icmp_type: Some(icmp_type),
+                icmp_type,
+                igmp_type: None,
             })
         }
-        Some(TransportHeader::Igmp(_)) => {
-            #[allow(clippy::match_same_arms)]
-            // TODO!
-            None
+        Some(TransportHeader::Igmp(igmp_header)) => {
+            let protocol = Protocol::Igmp;
+            let igmp_type = Some(IgmpType::from_etherparse(&igmp_header.igmp_type));
+            Some(TransportInfo {
+                src_port: None,
+                dst_port: None,
+                protocol,
+                icmp_type: None,
+                igmp_type,
+            })
         }
         None => None,
     }

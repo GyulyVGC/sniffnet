@@ -942,6 +942,7 @@ mod tests {
             (17, Some(Protocol::Udp)),
             (1, Some(Protocol::Icmpv4)),
             (58, Some(Protocol::Icmpv6)),
+            (2, Some(Protocol::Igmp)),
             (47, None),
         ] {
             let record = decode(&[(ie::PROTOCOL_IDENTIFIER, 1)], &[raw]);

@@ -1,3 +1,4 @@
+use crate::igmp_type::IgmpType;
 use crate::link_type::LinkType;
 use crate::{ArpType, IcmpType, Protocol};
 use etherparse::{EtherType, LaxPacketHeaders};
@@ -36,6 +37,8 @@ pub struct TransportInfo {
     pub protocol: Protocol,
     /// ICMP message type, if the packet is an ICMP packet.
     pub icmp_type: Option<IcmpType>,
+    /// IGMP message type, if the packet is an IGMP packet.
+    pub igmp_type: Option<IgmpType>,
 }
 
 #[must_use]

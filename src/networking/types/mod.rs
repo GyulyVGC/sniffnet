@@ -13,6 +13,7 @@ pub mod info_traffic;
 pub mod ip_blacklist;
 pub mod ipfix_exporter;
 pub mod latency;
+pub mod message_type;
 pub mod my_device;
 pub mod program;
 pub mod program_lookup;

@@ -10,6 +10,7 @@ Powered by [`etherparse`](https://github.com/JulianSchmid/etherparse).
 - `UDP`
 - `ICMPv4`
 - `ICMPv6`
+- `IGMP`
 - `ARP`
 
 ## Supported link types
