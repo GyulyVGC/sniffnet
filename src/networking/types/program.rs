@@ -8,7 +8,7 @@ pub enum Program {
     NamePath((String, String)),
     /// Not identified
     Unknown,
-    /// Not applicable (ARP and ICMP)
+    /// Not applicable (ARP, ICMP, and IGMP)
     #[default]
     NotApplicable,
 }
