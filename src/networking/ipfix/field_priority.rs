@@ -12,6 +12,7 @@ pub(super) struct FieldPriority {
     pub(super) flow_end: u8,
     pub(super) src_mac: u8,
     pub(super) dst_mac: u8,
+    pub(super) vlan_id: u8,
 }
 
 pub(super) fn bytes_delta_rank(ie_id: u16) -> u8 {
@@ -64,6 +65,18 @@ pub(super) fn mac_rank(ie_id: u16) -> u8 {
     match ie_id {
         ie::SOURCE_MAC_ADDRESS | ie::DESTINATION_MAC_ADDRESS => 2,
         ie::POST_SOURCE_MAC_ADDRESS | ie::POST_DESTINATION_MAC_ADDRESS => 1,
+        _ => 0,
+    }
+}
+
+pub(super) fn vlan_rank(ie_id: u16) -> u8 {
+    match ie_id {
+        ie::DOT1Q_VLAN_ID => 6,
+        ie::POST_DOT1Q_VLAN_ID => 5,
+        ie::VLAN_ID => 4,
+        ie::POST_VLAN_ID => 3,
+        ie::DOT1Q_CUSTOMER_VLAN_ID => 2,
+        ie::POST_DOT1Q_CUSTOMER_VLAN_ID => 1,
         _ => 0,
     }
 }

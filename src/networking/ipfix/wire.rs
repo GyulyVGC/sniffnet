@@ -3,7 +3,7 @@
 use crate::Protocol;
 use crate::networking::ipfix::field_priority::{
     FieldPriority, bytes_delta_rank, bytes_total_rank, mac_rank, packets_delta_rank,
-    packets_total_rank, timestamp_rank,
+    packets_total_rank, timestamp_rank, vlan_rank,
 };
 use crate::networking::ipfix::flow_record::{FlowRecord, ReverseCounters};
 use crate::networking::ipfix::ie;
@@ -225,6 +225,7 @@ fn apply_ie(ie_id: u16, raw: &[u8], record: &mut FlowRecord, priority: &mut Fiel
         || apply_total_counter_ie(ie_id, raw, record, priority)
         || apply_timestamp_ie(ie_id, raw, record, priority)
         || apply_mac_ie(ie_id, raw, record, priority)
+        || apply_vlan_ie(ie_id, raw, record, priority)
     {
         return;
     }
@@ -403,6 +404,27 @@ fn apply_mac_ie(
     true
 }
 
+/// Apply a VLAN identifier IE, returning whether `ie_id` was one
+fn apply_vlan_ie(
+    ie_id: u16,
+    raw: &[u8],
+    record: &mut FlowRecord,
+    priority: &mut FieldPriority,
+) -> bool {
+    let rank = vlan_rank(ie_id);
+    if rank == 0 {
+        return false;
+    }
+
+    if rank >= priority.vlan_id
+        && let Some(v) = read_vlan_id(raw)
+    {
+        record.vlan_id = Some(v);
+        priority.vlan_id = rank;
+    }
+    true
+}
+
 /// Read a timestamp field using the encoding its IE prescribes
 fn read_timestamp(ie_id: u16, raw: &[u8]) -> Option<Timestamp> {
     match ie_id {
@@ -462,6 +484,15 @@ fn read_unsigned(raw: &[u8]) -> Option<u128> {
     let mut buf = [0u8; 8];
     buf[8 - raw.len()..].copy_from_slice(raw);
     Some(u128::from(u64::from_be_bytes(buf)))
+}
+
+/// Read a VLAN identifier ensuring it's in the valid range
+fn read_vlan_id(raw: &[u8]) -> Option<u16> {
+    if raw.len() > 2 {
+        return None;
+    }
+    let vlan_id = u16::try_from(read_unsigned(raw)?).ok()?;
+    (1..4095).contains(&vlan_id).then_some(vlan_id)
 }
 
 /// Read a big-endian unsigned integer of 1 or 2 bytes into a `u16`, returning `None` for port 0
@@ -820,6 +851,7 @@ mod tests {
             (ie::FLOW_DIRECTION, 1),
             (ie::SOURCE_MAC_ADDRESS, 6),
             (ie::DESTINATION_MAC_ADDRESS, 6),
+            (ie::DOT1Q_VLAN_ID, 2),
             (ie::OCTET_DELTA_COUNT, 8),
             (ie::PACKET_DELTA_COUNT, 8),
             (ie::OCTET_TOTAL_COUNT, 8),
@@ -836,6 +868,7 @@ mod tests {
             &[0x01],
             &MAC_A,
             &MAC_B,
+            &42u16.to_be_bytes(),
             &C1500,
             &10u64.to_be_bytes(),
             &9000u64.to_be_bytes(),
@@ -863,6 +896,7 @@ mod tests {
                 packets_total: Some(60),
                 src_mac: Some(MAC_A),
                 dst_mac: Some(MAC_B),
+                vlan_id: Some(42),
                 direction: Some(TrafficDirection::Outgoing),
                 flow_start: Some(Timestamp::new(10, 0)),
                 flow_end: Some(Timestamp::new(20, 0)),
@@ -1138,6 +1172,72 @@ mod tests {
             &[&MAC_B[..], &[0; 6]].concat(),
         );
         assert_eq!(record.src_mac, Some(MAC_B));
+    }
+
+    #[test]
+    fn test_apply_vlan_ie() {
+        let outer = 42u16.to_be_bytes();
+        let other = 100u16.to_be_bytes();
+
+        for loser in [
+            ie::POST_DOT1Q_VLAN_ID,
+            ie::VLAN_ID,
+            ie::POST_VLAN_ID,
+            ie::DOT1Q_CUSTOMER_VLAN_ID,
+            ie::POST_DOT1Q_CUSTOMER_VLAN_ID,
+        ] {
+            assert_wins(
+                (ie::DOT1Q_VLAN_ID, &outer),
+                (loser, &other),
+                |r| r.vlan_id,
+                &42,
+            );
+        }
+
+        assert_wins(
+            (ie::VLAN_ID, &outer),
+            (ie::DOT1Q_CUSTOMER_VLAN_ID, &other),
+            |r| r.vlan_id,
+            &42,
+        );
+        assert_wins(
+            (ie::VLAN_ID, &outer),
+            (ie::POST_VLAN_ID, &other),
+            |r| r.vlan_id,
+            &42,
+        );
+        assert_wins(
+            (ie::DOT1Q_CUSTOMER_VLAN_ID, &outer),
+            (ie::POST_DOT1Q_CUSTOMER_VLAN_ID, &other),
+            |r| r.vlan_id,
+            &42,
+        );
+
+        assert_eq!(
+            decode(&[(ie::POST_DOT1Q_CUSTOMER_VLAN_ID, 2)], &outer).vlan_id,
+            Some(42)
+        );
+        assert_eq!(decode(&[(ie::DOT1Q_VLAN_ID, 1)], &[42]).vlan_id, Some(42));
+
+        let record = decode(
+            &[(ie::DOT1Q_VLAN_ID, 2), (ie::VLAN_ID, 2)],
+            &[&[0, 0][..], &outer].concat(),
+        );
+        assert_eq!(record.vlan_id, Some(42));
+    }
+
+    #[test]
+    fn test_read_vlan_id() {
+        assert_eq!(read_vlan_id(&42u16.to_be_bytes()), Some(42));
+        assert_eq!(read_vlan_id(&[42]), Some(42));
+        assert_eq!(read_vlan_id(&4094u16.to_be_bytes()), Some(4094));
+
+        assert_eq!(read_vlan_id(&[0, 0]), None);
+        assert_eq!(read_vlan_id(&4095u16.to_be_bytes()), None);
+        assert_eq!(read_vlan_id(&[0xFF, 0xFF]), None);
+
+        assert_eq!(read_vlan_id(&[]), None);
+        assert_eq!(read_vlan_id(&42u32.to_be_bytes()), None);
     }
 
     #[test]

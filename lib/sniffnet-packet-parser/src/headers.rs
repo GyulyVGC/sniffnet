@@ -11,7 +11,7 @@ pub struct LinkInfo {
     pub src_mac: Option<[u8; 6]>,
     /// Destination MAC address, if available.
     pub dst_mac: Option<[u8; 6]>,
-    /// VLAN ID, if the packet is VLAN-tagged.
+    /// Outermost VLAN ID, if the packet is VLAN-tagged.
     pub vlan_id: Option<u16>,
     pub(crate) bytes: usize,
 }

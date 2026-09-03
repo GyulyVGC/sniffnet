@@ -236,8 +236,7 @@ fn ingest_flow_record(
         &[],
         mac_addresses,
         None,
-        // TODO: VLAN ID
-        None,
+        record.vlan_id,
         packets,
         bytes,
         ip_blacklist,
@@ -310,12 +309,13 @@ mod tests {
 
     /// The field specifiers `sniffnet-agent` puts in its templates,
     /// after the two address fields that differ between the IPv4 and IPv6 variants
-    const AGENT_COMMON_FIELDS: [(u16, u16); 10] = [
+    const AGENT_COMMON_FIELDS: [(u16, u16); 11] = [
         (7, 2),
         (11, 2),
         (4, 1),
         (56, 6),
         (80, 6),
+        (243, 2),
         (61, 1),
         (352, 8),
         (2, 8),
@@ -407,6 +407,7 @@ mod tests {
         r.push(6); // protocol
         r.extend_from_slice(&[0xAA; 6]); // source MAC
         r.extend_from_slice(&[0; 6]); // destination MAC
+        r.extend_from_slice(&42u16.to_be_bytes()); // dot1qVlanId
         r.push(0x00); // flowDirection
         r.extend_from_slice(&bytes.to_be_bytes());
         r.extend_from_slice(&packets.to_be_bytes());
@@ -540,6 +541,7 @@ mod tests {
         assert_eq!(entry.traffic_direction, TrafficDirection::Incoming);
         assert_eq!(entry.src_mac, Some([0xAA; 6]));
         assert_eq!(entry.dst_mac, None);
+        assert_eq!(entry.vlan_id, Some(42));
         assert_eq!(entry.initial_timestamp, Timestamp::new(20, 0));
         assert_eq!(entry.final_timestamp, Timestamp::new(25, 0));
 
