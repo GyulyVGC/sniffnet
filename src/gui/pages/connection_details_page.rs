@@ -106,7 +106,7 @@ fn page_content<'a>(sniffer: &Sniffer, key: &AddressPortPair) -> Container<'a, M
         source_caption,
         &key.source,
         key.sport,
-        val.mac_address1,
+        val.src_mac,
         language,
         &sniffer.timing_events,
     );
@@ -114,7 +114,7 @@ fn page_content<'a>(sniffer: &Sniffer, key: &AddressPortPair) -> Container<'a, M
         dest_caption,
         &key.dest,
         key.dport,
-        val.mac_address2,
+        val.dst_mac,
         language,
         &sniffer.timing_events,
     );
@@ -199,6 +199,13 @@ fn col_info<'a>(
         ret_val = ret_val.push(TextType::highlighted_subtitle_with_desc(
             ipfix_exporter_translation(language),
             &exporter.to_string(),
+        ));
+    }
+
+    if let Some(vlan_id) = val.vlan_id {
+        ret_val = ret_val.push(TextType::highlighted_subtitle_with_desc(
+            "VLAN ID",
+            &vlan_id.to_string(),
         ));
     }
 

@@ -82,6 +82,7 @@ pub fn modify_or_insert_in_map(
     my_interface_addresses: &[Address],
     mac_addresses: (Option<[u8; 6]>, Option<[u8; 6]>),
     message_type: Option<MessageType>,
+    vlan_id: Option<u16>,
     packets: u128,
     bytes: u128,
     ip_blacklist: &IpBlacklist,
@@ -122,6 +123,9 @@ pub fn modify_or_insert_in_map(
         .and_modify(|info| {
             info.bytes += bytes;
             info.packets += packets;
+            info.src_mac = mac_addresses.0;
+            info.dst_mac = mac_addresses.1;
+            info.vlan_id = vlan_id;
             if initial_ts < info.initial_timestamp {
                 info.initial_timestamp = initial_ts;
             }
@@ -137,8 +141,8 @@ pub fn modify_or_insert_in_map(
             }
         })
         .or_insert_with(|| InfoAddressPortPair {
-            mac_address1: mac_addresses.0,
-            mac_address2: mac_addresses.1,
+            src_mac: mac_addresses.0,
+            dst_mac: mac_addresses.1,
             bytes,
             packets,
             initial_timestamp: initial_ts,
@@ -151,6 +155,7 @@ pub fn modify_or_insert_in_map(
             } else {
                 HashMap::new()
             },
+            vlan_id,
             is_blacklisted,
             program: Program::NotApplicable,
         });

@@ -236,6 +236,8 @@ fn ingest_flow_record(
         &[],
         mac_addresses,
         None,
+        // TODO: VLAN ID
+        None,
         packets,
         bytes,
         ip_blacklist,
@@ -536,8 +538,8 @@ mod tests {
         assert_eq!(entry.bytes, 1500);
         assert_eq!(entry.packets, 10);
         assert_eq!(entry.traffic_direction, TrafficDirection::Incoming);
-        assert_eq!(entry.mac_address1, Some([0xAA; 6]));
-        assert_eq!(entry.mac_address2, None);
+        assert_eq!(entry.src_mac, Some([0xAA; 6]));
+        assert_eq!(entry.dst_mac, None);
         assert_eq!(entry.initial_timestamp, Timestamp::new(20, 0));
         assert_eq!(entry.final_timestamp, Timestamp::new(25, 0));
 

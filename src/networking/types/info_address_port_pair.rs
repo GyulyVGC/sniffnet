@@ -18,10 +18,11 @@ use std::time::Instant;
 /// Each `InfoAddressPortPair` struct is associated to a single address:port pair.
 #[derive(Clone, Debug)]
 pub struct InfoAddressPortPair {
-    /// Source MAC address
-    pub mac_address1: Option<[u8; 6]>,
-    /// Destination MAC address
-    pub mac_address2: Option<[u8; 6]>,
+    // TODO: overridden with the latest values, should be a list of all MAC addresses with their counts?
+    /// Source MAC address (last seen), if available
+    pub src_mac: Option<[u8; 6]>,
+    /// Destination MAC address (last seen), if available
+    pub dst_mac: Option<[u8; 6]>,
     /// Amount of bytes transmitted between the pair.
     pub bytes: u128,
     /// Amount of packets transmitted between the pair.
@@ -38,6 +39,9 @@ pub struct InfoAddressPortPair {
     pub traffic_direction: TrafficDirection,
     /// Types of the messages exchanged, with the relative count (this is empty for protocols without message types)
     pub message_types: HashMap<MessageType, usize>,
+    // TODO: vlan_id is overridden with the latest value, maybe should be moved in AddressPortPair
+    /// Latest VLAN ID of the associated address:port pair, if any
+    pub vlan_id: Option<u16>,
     /// Whether the remote address is blacklisted
     pub is_blacklisted: bool,
     /// The program associated to this pair
@@ -49,6 +53,9 @@ impl InfoAddressPortPair {
         // self.program MUST NOT be refreshed here
         self.bytes += other.bytes;
         self.packets += other.packets;
+        self.src_mac = other.src_mac;
+        self.dst_mac = other.dst_mac;
+        self.vlan_id = other.vlan_id;
         if other.initial_timestamp < self.initial_timestamp {
             self.initial_timestamp = other.initial_timestamp;
         }
@@ -104,8 +111,8 @@ impl InfoAddressPortPair {
 impl Default for InfoAddressPortPair {
     fn default() -> Self {
         Self {
-            mac_address1: None,
-            mac_address2: None,
+            src_mac: None,
+            dst_mac: None,
             bytes: 0,
             packets: 0,
             initial_timestamp: Timestamp::default(),
@@ -114,6 +121,7 @@ impl Default for InfoAddressPortPair {
             service: Service::default(),
             traffic_direction: TrafficDirection::default(),
             message_types: HashMap::new(),
+            vlan_id: None,
             is_blacklisted: false,
             program: Program::default(),
         }

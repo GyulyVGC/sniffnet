@@ -1,6 +1,6 @@
 use std::net::IpAddr;
 
-use etherparse::{ArpHardwareId, EtherType, LinkHeader, NetHeaders, TransportHeader};
+use etherparse::{ArpHardwareId, EtherType, LinkHeader, NetHeaders, TransportHeader, VlanHeader};
 
 use crate::arp_type::ArpType;
 use crate::headers::{LinkInfo, NetInfo, TransportInfo, get_sniffable_headers};
@@ -26,7 +26,8 @@ impl ParsedPacket {
     pub fn from_bytes(bytes: &[u8], link_type: LinkType) -> Option<ParsedPacket> {
         let headers = get_sniffable_headers(bytes, link_type)?;
 
-        let link_info = analyze_link_header(headers.link);
+        let vlan_header = headers.vlan();
+        let link_info = analyze_link_header(headers.link, vlan_header);
 
         let is_arp = matches!(&headers.net, Some(NetHeaders::Arp(_)));
 
@@ -59,15 +60,25 @@ impl ParsedPacket {
 }
 
 /// This function extracts info from the data link layer header passed as parameter.
-fn analyze_link_header(link_header: Option<LinkHeader>) -> LinkInfo {
+fn analyze_link_header(
+    link_header: Option<LinkHeader>,
+    vlan_header: Option<VlanHeader>,
+) -> LinkInfo {
+    let (vlan_id, vlan_bytes) = match vlan_header {
+        Some(VlanHeader::Single(single)) => (Some(single.vlan_id.value()), 4),
+        Some(VlanHeader::Double(double)) => (Some(double.outer.vlan_id.value()), 8),
+        None => (None, 0),
+    };
+
     match link_header {
         Some(LinkHeader::Ethernet2(header)) => {
             let src_mac = Some(header.source);
             let dst_mac = Some(header.destination);
-            let bytes = 14;
+            let bytes = vlan_bytes + 14;
             LinkInfo {
                 src_mac,
                 dst_mac,
+                vlan_id,
                 bytes,
             }
         }
@@ -80,17 +91,19 @@ fn analyze_link_header(link_header: Option<LinkHeader>) -> LinkInfo {
             } else {
                 None
             };
-            let bytes = 16;
+            let bytes = vlan_bytes + 16;
             LinkInfo {
                 src_mac,
                 dst_mac: None,
+                vlan_id,
                 bytes,
             }
         }
         None => LinkInfo {
             src_mac: None,
             dst_mac: None,
-            bytes: 0,
+            vlan_id,
+            bytes: vlan_bytes,
         },
     }
 }
