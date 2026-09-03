@@ -75,17 +75,17 @@ impl ReportCol {
         data_repr: DataRepr,
     ) -> String {
         match self {
-            ReportCol::SrcIp => key.source.to_string(),
+            ReportCol::SrcIp => key.src_ip.to_string(),
             ReportCol::SrcPort => {
-                if let Some(port) = key.sport {
+                if let Some(port) = key.src_port {
                     port.to_string()
                 } else {
                     "-".to_string()
                 }
             }
-            ReportCol::DstIp => key.dest.to_string(),
+            ReportCol::DstIp => key.dst_ip.to_string(),
             ReportCol::DstPort => {
-                if let Some(port) = key.dport {
+                if let Some(port) = key.dst_port {
                     port.to_string()
                 } else {
                     "-".to_string()

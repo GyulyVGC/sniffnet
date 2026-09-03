@@ -30,8 +30,8 @@ pub(super) struct FlowRecord {
 impl FlowRecord {
     /// Return the key for this record, if the record is valid
     pub(super) fn get_key(&self, exporter: IpfixExporter) -> Option<AddressPortPair> {
-        let source = self.src_ip?;
-        let dest = self.dst_ip?;
+        let src_ip = self.src_ip?;
+        let dst_ip = self.dst_ip?;
         // TODO: ARP not supported yet
         let protocol = self.protocol?;
 
@@ -43,14 +43,14 @@ impl FlowRecord {
             return None;
         }
 
-        let sport = self.src_port;
-        let dport = self.dst_port;
+        let src_port = self.src_port;
+        let dst_port = self.dst_port;
 
         Some(AddressPortPair {
-            source,
-            sport,
-            dest,
-            dport,
+            src_ip,
+            src_port,
+            dst_ip,
+            dst_port,
             protocol,
             exporter: Some(exporter),
         })
@@ -116,10 +116,10 @@ mod tests {
         assert_eq!(
             key,
             Some(AddressPortPair {
-                source: "1.1.1.1".parse().unwrap(),
-                sport: Some(1234),
-                dest: "2.2.2.2".parse().unwrap(),
-                dport: Some(5678),
+                src_ip: "1.1.1.1".parse().unwrap(),
+                src_port: Some(1234),
+                dst_ip: "2.2.2.2".parse().unwrap(),
+                dst_port: Some(5678),
                 protocol: Protocol::Tcp,
                 exporter: Some(exporter()),
             })
@@ -177,10 +177,10 @@ mod tests {
         assert_eq!(
             key,
             Some(AddressPortPair {
-                source: "1.1.1.1".parse().unwrap(),
-                sport: None,
-                dest: "2.2.2.2".parse().unwrap(),
-                dport: None,
+                src_ip: "1.1.1.1".parse().unwrap(),
+                src_port: None,
+                dst_ip: "2.2.2.2".parse().unwrap(),
+                dst_port: None,
                 protocol: Protocol::Icmpv6,
                 exporter: Some(exporter()),
             })

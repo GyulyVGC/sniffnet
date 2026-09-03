@@ -431,10 +431,10 @@ mod tests {
     /// The flow every record built here belongs to
     fn totals_key() -> AddressPortPair {
         AddressPortPair {
-            source: IpAddr::V4(Ipv4Addr::new(10, 0, 0, 1)),
-            sport: Some(443),
-            dest: IpAddr::V4(Ipv4Addr::new(8, 8, 8, 8)),
-            dport: Some(50_000),
+            src_ip: IpAddr::V4(Ipv4Addr::new(10, 0, 0, 1)),
+            src_port: Some(443),
+            dst_ip: IpAddr::V4(Ipv4Addr::new(8, 8, 8, 8)),
+            dst_port: Some(50_000),
             protocol: Protocol::Tcp,
             exporter: Some(exporter()),
         }
@@ -587,10 +587,10 @@ mod tests {
         let (info, _) = run(&agent_datagram(257, [(27, 16), (28, 16)], &addrs, 800, 4));
 
         let key = AddressPortPair {
-            source: IpAddr::V6(src),
-            sport: Some(443),
-            dest: IpAddr::V6(dst),
-            dport: Some(50_000),
+            src_ip: IpAddr::V6(src),
+            src_port: Some(443),
+            dst_ip: IpAddr::V6(dst),
+            dst_port: Some(50_000),
             protocol: Protocol::Tcp,
             exporter: Some(exporter()),
         };
@@ -619,10 +619,10 @@ mod tests {
 
         // the reverse half is the same conversation with the tuple swapped
         let reverse_key = AddressPortPair {
-            source: totals_key().dest,
-            sport: totals_key().dport,
-            dest: totals_key().source,
-            dport: totals_key().sport,
+            src_ip: totals_key().dst_ip,
+            src_port: totals_key().dst_port,
+            dst_ip: totals_key().src_ip,
+            dst_port: totals_key().src_port,
             protocol: Protocol::Tcp,
             exporter: Some(exporter()),
         };

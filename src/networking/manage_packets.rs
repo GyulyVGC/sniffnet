@@ -32,10 +32,10 @@ pub fn get_service(
         return Service::NotApplicable;
     }
 
-    let Some(port1) = key.sport else {
+    let Some(port1) = key.src_port else {
         return Service::NotApplicable;
     };
-    let Some(port2) = key.dport else {
+    let Some(port2) = key.dst_port else {
         return Service::NotApplicable;
     };
 
@@ -59,7 +59,7 @@ pub fn get_service(
         .get(&ServiceQuery(port2, key.protocol))
         .unwrap_or(&unknown);
 
-    let dest_ip = key.dest;
+    let dest_ip = key.dst_ip;
     let bonus_dest = traffic_direction.eq(&TrafficDirection::Outgoing)
         || dest_ip.is_multicast()
         || is_broadcast_address(&dest_ip, my_interface_addresses);
@@ -97,14 +97,14 @@ pub fn modify_or_insert_in_map(
         // first occurrence of key (in this time interval)
 
         // determine traffic direction (IPFIX hint wins when present)
-        let source_ip = &key.source;
-        let destination_ip = &key.dest;
+        let source_ip = &key.src_ip;
+        let destination_ip = &key.dst_ip;
         traffic_direction = direction_hint.unwrap_or_else(|| {
             get_traffic_direction(
                 source_ip,
                 destination_ip,
-                key.sport,
-                key.dport,
+                key.src_port,
+                key.dst_port,
                 my_interface_addresses,
             )
         });
@@ -305,9 +305,9 @@ fn get_traffic_direction(
     // first let's handle TCP and UDP loopback
     if source_ip.is_loopback()
         && destination_ip.is_loopback()
-        && let (Some(sport), Some(dport)) = (source_port, dest_port)
+        && let (Some(src_port), Some(dst_port)) = (source_port, dest_port)
     {
-        return if sport > dport {
+        return if src_port > dst_port {
             TrafficDirection::Outgoing
         } else {
             TrafficDirection::Incoming
@@ -442,8 +442,8 @@ pub fn is_my_address(local_address: &IpAddr, my_interface_addresses: &[Address])
 
 pub fn get_address_to_lookup(key: &AddressPortPair, traffic_direction: TrafficDirection) -> IpAddr {
     match traffic_direction {
-        TrafficDirection::Outgoing => key.dest,
-        TrafficDirection::Incoming => key.source,
+        TrafficDirection::Outgoing => key.dst_ip,
+        TrafficDirection::Incoming => key.src_ip,
     }
 }
 
@@ -452,8 +452,8 @@ pub fn get_local_port(
     traffic_direction: TrafficDirection,
 ) -> Option<(u16, listeners::Protocol)> {
     let port = match traffic_direction {
-        TrafficDirection::Outgoing => key.sport,
-        TrafficDirection::Incoming => key.dport,
+        TrafficDirection::Outgoing => key.src_port,
+        TrafficDirection::Incoming => key.dst_port,
     };
     let protocol = match key.protocol {
         Protocol::Tcp => Some(listeners::Protocol::TCP),
