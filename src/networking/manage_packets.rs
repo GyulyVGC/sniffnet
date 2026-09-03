@@ -121,20 +121,38 @@ pub fn modify_or_insert_in_map(
         .map
         .entry(*key)
         .and_modify(|info| {
-            info.bytes += bytes;
-            info.packets += packets;
-            info.src_mac = mac_addresses.0;
-            info.dst_mac = mac_addresses.1;
-            info.vlan_id = vlan_id;
-            if initial_ts < info.initial_timestamp {
-                info.initial_timestamp = initial_ts;
+            let InfoAddressPortPair {
+                src_mac,
+                dst_mac,
+                bytes: tot_bytes,
+                packets: tot_packets,
+                initial_timestamp,
+                final_timestamp,
+                final_instant,
+                message_types,
+                vlan_id: latest_vlan_id,
+                // only determined at the first occurrence of the key
+                service: _,
+                traffic_direction: _,
+                is_blacklisted: _,
+                // determined later
+                program: _,
+            } = info;
+
+            *tot_bytes += bytes;
+            *tot_packets += packets;
+            *src_mac = mac_addresses.0;
+            *dst_mac = mac_addresses.1;
+            *latest_vlan_id = vlan_id;
+            if initial_ts < *initial_timestamp {
+                *initial_timestamp = initial_ts;
             }
-            if final_ts > info.final_timestamp {
-                info.final_timestamp = final_ts;
+            if final_ts > *final_timestamp {
+                *final_timestamp = final_ts;
             }
-            info.final_instant = Instant::now();
+            *final_instant = Instant::now();
             if let Some(message_type) = message_type {
-                info.message_types
+                message_types
                     .entry(message_type)
                     .and_modify(|n| *n += 1)
                     .or_insert(1);

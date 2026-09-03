@@ -50,25 +50,41 @@ pub struct InfoAddressPortPair {
 
 impl InfoAddressPortPair {
     pub fn refresh(&mut self, other: &Self) {
-        // self.program MUST NOT be refreshed here
-        self.bytes += other.bytes;
-        self.packets += other.packets;
-        self.src_mac = other.src_mac;
-        self.dst_mac = other.dst_mac;
-        self.vlan_id = other.vlan_id;
-        if other.initial_timestamp < self.initial_timestamp {
-            self.initial_timestamp = other.initial_timestamp;
+        let Self {
+            src_mac,
+            dst_mac,
+            bytes,
+            packets,
+            initial_timestamp,
+            final_timestamp,
+            final_instant,
+            service,
+            traffic_direction,
+            message_types,
+            vlan_id,
+            is_blacklisted,
+            // self.program MUST NOT be refreshed here
+            program: _,
+        } = other;
+
+        self.bytes += bytes;
+        self.packets += packets;
+        self.src_mac = *src_mac;
+        self.dst_mac = *dst_mac;
+        self.vlan_id = *vlan_id;
+        if *initial_timestamp < self.initial_timestamp {
+            self.initial_timestamp = *initial_timestamp;
         }
-        if other.final_timestamp > self.final_timestamp {
-            self.final_timestamp = other.final_timestamp;
+        if *final_timestamp > self.final_timestamp {
+            self.final_timestamp = *final_timestamp;
         }
-        if other.final_instant > self.final_instant {
-            self.final_instant = other.final_instant;
+        if *final_instant > self.final_instant {
+            self.final_instant = *final_instant;
         }
-        self.service = other.service;
-        self.is_blacklisted = other.is_blacklisted;
-        self.traffic_direction = other.traffic_direction;
-        for (message_type, count) in &other.message_types {
+        self.service = *service;
+        self.is_blacklisted = *is_blacklisted;
+        self.traffic_direction = *traffic_direction;
+        for (message_type, count) in message_types {
             self.message_types
                 .entry(*message_type)
                 .and_modify(|v| *v += count)
