@@ -236,6 +236,7 @@ fn ingest_flow_record(
         &[],
         mac_addresses,
         None,
+        record.vlan_id,
         packets,
         bytes,
         ip_blacklist,
@@ -308,12 +309,13 @@ mod tests {
 
     /// The field specifiers `sniffnet-agent` puts in its templates,
     /// after the two address fields that differ between the IPv4 and IPv6 variants
-    const AGENT_COMMON_FIELDS: [(u16, u16); 10] = [
+    const AGENT_COMMON_FIELDS: [(u16, u16); 11] = [
         (7, 2),
         (11, 2),
         (4, 1),
         (56, 6),
         (80, 6),
+        (243, 2),
         (61, 1),
         (352, 8),
         (2, 8),
@@ -405,6 +407,7 @@ mod tests {
         r.push(6); // protocol
         r.extend_from_slice(&[0xAA; 6]); // source MAC
         r.extend_from_slice(&[0; 6]); // destination MAC
+        r.extend_from_slice(&42u16.to_be_bytes()); // dot1qVlanId
         r.push(0x00); // flowDirection
         r.extend_from_slice(&bytes.to_be_bytes());
         r.extend_from_slice(&packets.to_be_bytes());
@@ -428,10 +431,10 @@ mod tests {
     /// The flow every record built here belongs to
     fn totals_key() -> AddressPortPair {
         AddressPortPair {
-            source: IpAddr::V4(Ipv4Addr::new(10, 0, 0, 1)),
-            sport: Some(443),
-            dest: IpAddr::V4(Ipv4Addr::new(8, 8, 8, 8)),
-            dport: Some(50_000),
+            src_ip: IpAddr::V4(Ipv4Addr::new(10, 0, 0, 1)),
+            src_port: Some(443),
+            dst_ip: IpAddr::V4(Ipv4Addr::new(8, 8, 8, 8)),
+            dst_port: Some(50_000),
             protocol: Protocol::Tcp,
             exporter: Some(exporter()),
         }
@@ -536,8 +539,9 @@ mod tests {
         assert_eq!(entry.bytes, 1500);
         assert_eq!(entry.packets, 10);
         assert_eq!(entry.traffic_direction, TrafficDirection::Incoming);
-        assert_eq!(entry.mac_address1, Some([0xAA; 6]));
-        assert_eq!(entry.mac_address2, None);
+        assert_eq!(entry.src_mac, Some([0xAA; 6]));
+        assert_eq!(entry.dst_mac, None);
+        assert_eq!(entry.vlan_id, Some(42));
         assert_eq!(entry.initial_timestamp, Timestamp::new(20, 0));
         assert_eq!(entry.final_timestamp, Timestamp::new(25, 0));
 
@@ -583,10 +587,10 @@ mod tests {
         let (info, _) = run(&agent_datagram(257, [(27, 16), (28, 16)], &addrs, 800, 4));
 
         let key = AddressPortPair {
-            source: IpAddr::V6(src),
-            sport: Some(443),
-            dest: IpAddr::V6(dst),
-            dport: Some(50_000),
+            src_ip: IpAddr::V6(src),
+            src_port: Some(443),
+            dst_ip: IpAddr::V6(dst),
+            dst_port: Some(50_000),
             protocol: Protocol::Tcp,
             exporter: Some(exporter()),
         };
@@ -615,10 +619,10 @@ mod tests {
 
         // the reverse half is the same conversation with the tuple swapped
         let reverse_key = AddressPortPair {
-            source: totals_key().dest,
-            sport: totals_key().dport,
-            dest: totals_key().source,
-            dport: totals_key().sport,
+            src_ip: totals_key().dst_ip,
+            src_port: totals_key().dst_port,
+            dst_ip: totals_key().src_ip,
+            dst_port: totals_key().src_port,
             protocol: Protocol::Tcp,
             exporter: Some(exporter()),
         };

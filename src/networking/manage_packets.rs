@@ -32,10 +32,10 @@ pub fn get_service(
         return Service::NotApplicable;
     }
 
-    let Some(port1) = key.sport else {
+    let Some(port1) = key.src_port else {
         return Service::NotApplicable;
     };
-    let Some(port2) = key.dport else {
+    let Some(port2) = key.dst_port else {
         return Service::NotApplicable;
     };
 
@@ -59,7 +59,7 @@ pub fn get_service(
         .get(&ServiceQuery(port2, key.protocol))
         .unwrap_or(&unknown);
 
-    let dest_ip = key.dest;
+    let dest_ip = key.dst_ip;
     let bonus_dest = traffic_direction.eq(&TrafficDirection::Outgoing)
         || dest_ip.is_multicast()
         || is_broadcast_address(&dest_ip, my_interface_addresses);
@@ -82,6 +82,7 @@ pub fn modify_or_insert_in_map(
     my_interface_addresses: &[Address],
     mac_addresses: (Option<[u8; 6]>, Option<[u8; 6]>),
     message_type: Option<MessageType>,
+    vlan_id: Option<u16>,
     packets: u128,
     bytes: u128,
     ip_blacklist: &IpBlacklist,
@@ -96,14 +97,14 @@ pub fn modify_or_insert_in_map(
         // first occurrence of key (in this time interval)
 
         // determine traffic direction (IPFIX hint wins when present)
-        let source_ip = &key.source;
-        let destination_ip = &key.dest;
+        let source_ip = &key.src_ip;
+        let destination_ip = &key.dst_ip;
         traffic_direction = direction_hint.unwrap_or_else(|| {
             get_traffic_direction(
                 source_ip,
                 destination_ip,
-                key.sport,
-                key.dport,
+                key.src_port,
+                key.dst_port,
                 my_interface_addresses,
             )
         });
@@ -120,25 +121,46 @@ pub fn modify_or_insert_in_map(
         .map
         .entry(*key)
         .and_modify(|info| {
-            info.bytes += bytes;
-            info.packets += packets;
-            if initial_ts < info.initial_timestamp {
-                info.initial_timestamp = initial_ts;
+            let InfoAddressPortPair {
+                src_mac,
+                dst_mac,
+                bytes: tot_bytes,
+                packets: tot_packets,
+                initial_timestamp,
+                final_timestamp,
+                final_instant,
+                message_types,
+                vlan_id: latest_vlan_id,
+                // only determined at the first occurrence of the key
+                service: _,
+                traffic_direction: _,
+                is_blacklisted: _,
+                // determined later
+                program: _,
+            } = info;
+
+            *tot_bytes += bytes;
+            *tot_packets += packets;
+            *src_mac = mac_addresses.0;
+            *dst_mac = mac_addresses.1;
+            *latest_vlan_id = vlan_id;
+            if initial_ts < *initial_timestamp {
+                *initial_timestamp = initial_ts;
             }
-            if final_ts > info.final_timestamp {
-                info.final_timestamp = final_ts;
+            if final_ts > *final_timestamp {
+                *final_timestamp = final_ts;
             }
-            info.final_instant = Instant::now();
+            *final_instant = Instant::now();
             if let Some(message_type) = message_type {
-                info.message_types
+                message_types
                     .entry(message_type)
                     .and_modify(|n| *n += 1)
                     .or_insert(1);
             }
         })
         .or_insert_with(|| InfoAddressPortPair {
-            mac_address1: mac_addresses.0,
-            mac_address2: mac_addresses.1,
+            src_mac: mac_addresses.0,
+            dst_mac: mac_addresses.1,
             bytes,
             packets,
             initial_timestamp: initial_ts,
@@ -151,6 +173,7 @@ pub fn modify_or_insert_in_map(
             } else {
                 HashMap::new()
             },
+            vlan_id,
             is_blacklisted,
             program: Program::NotApplicable,
         });
@@ -282,9 +305,9 @@ fn get_traffic_direction(
     // first let's handle TCP and UDP loopback
     if source_ip.is_loopback()
         && destination_ip.is_loopback()
-        && let (Some(sport), Some(dport)) = (source_port, dest_port)
+        && let (Some(src_port), Some(dst_port)) = (source_port, dest_port)
     {
-        return if sport > dport {
+        return if src_port > dst_port {
             TrafficDirection::Outgoing
         } else {
             TrafficDirection::Incoming
@@ -419,8 +442,8 @@ pub fn is_my_address(local_address: &IpAddr, my_interface_addresses: &[Address])
 
 pub fn get_address_to_lookup(key: &AddressPortPair, traffic_direction: TrafficDirection) -> IpAddr {
     match traffic_direction {
-        TrafficDirection::Outgoing => key.dest,
-        TrafficDirection::Incoming => key.source,
+        TrafficDirection::Outgoing => key.dst_ip,
+        TrafficDirection::Incoming => key.src_ip,
     }
 }
 
@@ -429,8 +452,8 @@ pub fn get_local_port(
     traffic_direction: TrafficDirection,
 ) -> Option<(u16, listeners::Protocol)> {
     let port = match traffic_direction {
-        TrafficDirection::Outgoing => key.sport,
-        TrafficDirection::Incoming => key.dport,
+        TrafficDirection::Outgoing => key.src_port,
+        TrafficDirection::Incoming => key.dst_port,
     };
     let protocol = match key.protocol {
         Protocol::Tcp => Some(listeners::Protocol::TCP),

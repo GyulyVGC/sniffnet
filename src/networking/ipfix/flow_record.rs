@@ -19,6 +19,7 @@ pub(super) struct FlowRecord {
     pub(super) packets_total: Option<u128>,
     pub(super) src_mac: Option<[u8; 6]>,
     pub(super) dst_mac: Option<[u8; 6]>,
+    pub(super) vlan_id: Option<u16>,
     pub(super) direction: Option<TrafficDirection>,
     pub(super) flow_start: Option<Timestamp>,
     pub(super) flow_end: Option<Timestamp>,
@@ -29,8 +30,8 @@ pub(super) struct FlowRecord {
 impl FlowRecord {
     /// Return the key for this record, if the record is valid
     pub(super) fn get_key(&self, exporter: IpfixExporter) -> Option<AddressPortPair> {
-        let source = self.src_ip?;
-        let dest = self.dst_ip?;
+        let src_ip = self.src_ip?;
+        let dst_ip = self.dst_ip?;
         // TODO: ARP not supported yet
         let protocol = self.protocol?;
 
@@ -42,14 +43,14 @@ impl FlowRecord {
             return None;
         }
 
-        let sport = self.src_port;
-        let dport = self.dst_port;
+        let src_port = self.src_port;
+        let dst_port = self.dst_port;
 
         Some(AddressPortPair {
-            source,
-            sport,
-            dest,
-            dport,
+            src_ip,
+            src_port,
+            dst_ip,
+            dst_port,
             protocol,
             exporter: Some(exporter),
         })
@@ -70,6 +71,7 @@ impl FlowRecord {
             packets_total: reverse.packets_total,
             src_mac: self.dst_mac,
             dst_mac: self.src_mac,
+            vlan_id: self.vlan_id,
             direction: self.direction.map(TrafficDirection::opposite),
             flow_start: self.flow_start,
             flow_end: self.flow_end,
@@ -114,10 +116,10 @@ mod tests {
         assert_eq!(
             key,
             Some(AddressPortPair {
-                source: "1.1.1.1".parse().unwrap(),
-                sport: Some(1234),
-                dest: "2.2.2.2".parse().unwrap(),
-                dport: Some(5678),
+                src_ip: "1.1.1.1".parse().unwrap(),
+                src_port: Some(1234),
+                dst_ip: "2.2.2.2".parse().unwrap(),
+                dst_port: Some(5678),
                 protocol: Protocol::Tcp,
                 exporter: Some(exporter()),
             })
@@ -175,10 +177,10 @@ mod tests {
         assert_eq!(
             key,
             Some(AddressPortPair {
-                source: "1.1.1.1".parse().unwrap(),
-                sport: None,
-                dest: "2.2.2.2".parse().unwrap(),
-                dport: None,
+                src_ip: "1.1.1.1".parse().unwrap(),
+                src_port: None,
+                dst_ip: "2.2.2.2".parse().unwrap(),
+                dst_port: None,
                 protocol: Protocol::Icmpv6,
                 exporter: Some(exporter()),
             })
@@ -199,6 +201,7 @@ mod tests {
             packets_total: Some(100),
             src_mac: Some([0, 1, 2, 3, 4, 5]),
             dst_mac: Some([5, 4, 3, 2, 1, 0]),
+            vlan_id: Some(42),
             direction: Some(TrafficDirection::Incoming),
             flow_start: Some(Timestamp::new(10, 0)),
             flow_end: Some(Timestamp::new(20, 0)),
@@ -225,6 +228,7 @@ mod tests {
                 packets_total: Some(200),
                 src_mac: Some([5, 4, 3, 2, 1, 0]),
                 dst_mac: Some([0, 1, 2, 3, 4, 5]),
+                vlan_id: Some(42),
                 direction: Some(TrafficDirection::Outgoing),
                 flow_start: Some(Timestamp::new(10, 0)),
                 flow_end: Some(Timestamp::new(20, 0)),

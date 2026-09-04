@@ -93,7 +93,7 @@ fn page_content<'a>(sniffer: &Sniffer, key: &AddressPortPair) -> Container<'a, M
         let host_info = host_info_option.unwrap_or_default();
         let flag = get_flag_tooltip(host.country, &host_info, language, false, 1.0);
         let computer = get_local_tooltip(sniffer, &address_to_lookup, key);
-        if address_to_lookup.eq(&key.source) {
+        if address_to_lookup.eq(&key.src_ip) {
             source_caption = source_caption.push(flag);
             dest_caption = dest_caption.push(computer);
         } else {
@@ -104,22 +104,22 @@ fn page_content<'a>(sniffer: &Sniffer, key: &AddressPortPair) -> Container<'a, M
 
     let mut source_col = get_src_or_dest_col(
         source_caption,
-        &key.source,
-        key.sport,
-        val.mac_address1,
+        &key.src_ip,
+        key.src_port,
+        val.src_mac,
         language,
         &sniffer.timing_events,
     );
     let mut dest_col = get_src_or_dest_col(
         dest_caption,
-        &key.dest,
-        key.dport,
-        val.mac_address2,
+        &key.dst_ip,
+        key.dst_port,
+        val.dst_mac,
         language,
         &sniffer.timing_events,
     );
 
-    if address_to_lookup.eq(&key.source) {
+    if address_to_lookup.eq(&key.src_ip) {
         source_col = source_col.push(host_info_col);
     } else {
         dest_col = dest_col.push(host_info_col);
@@ -199,6 +199,13 @@ fn col_info<'a>(
         ret_val = ret_val.push(TextType::highlighted_subtitle_with_desc(
             ipfix_exporter_translation(language),
             &exporter.to_string(),
+        ));
+    }
+
+    if let Some(vlan_id) = val.vlan_id {
+        ret_val = ret_val.push(TextType::highlighted_subtitle_with_desc(
+            "VLAN ID",
+            &vlan_id.to_string(),
         ));
     }
 
@@ -349,10 +356,10 @@ fn get_local_tooltip<'a>(
 ) -> Tooltip<'a, Message, StyleType> {
     let Settings { language, .. } = sniffer.conf.settings;
 
-    let local_address = if address_to_lookup.eq(&key.source) {
-        &key.dest
+    let local_address = if address_to_lookup.eq(&key.src_ip) {
+        &key.dst_ip
     } else {
-        &key.source
+        &key.src_ip
     };
     let my_interface_addresses = sniffer.capture_source.get_addresses();
     get_computer_tooltip(
@@ -360,10 +367,10 @@ fn get_local_tooltip<'a>(
         is_local_connection(local_address, my_interface_addresses),
         is_bogon(local_address),
         get_traffic_type(
-            if address_to_lookup.eq(&key.source) {
-                &key.dest
+            if address_to_lookup.eq(&key.src_ip) {
+                &key.dst_ip
             } else {
-                &key.source
+                &key.src_ip
             },
             my_interface_addresses,
             TrafficDirection::Outgoing,
@@ -386,12 +393,6 @@ fn get_src_or_dest_col<'a>(
         address_translation(language)
     };
 
-    let mac_str = if let Some(val) = mac {
-        &mac_from_dec_to_hex(val)
-    } else {
-        "-"
-    };
-
     Column::new()
         .spacing(4)
         .push(
@@ -410,10 +411,10 @@ fn get_src_or_dest_col<'a>(
                 ))
                 .push(get_button_copy(language, ip, timing_events)),
         )
-        .push(TextType::highlighted_subtitle_with_desc(
-            mac_address_translation(language),
-            mac_str,
-        ))
+        .push(mac.map(|m| {
+            let mac_str = mac_from_dec_to_hex(m);
+            TextType::highlighted_subtitle_with_desc(mac_address_translation(language), &mac_str)
+        }))
 }
 
 fn assemble_widgets<'a>(

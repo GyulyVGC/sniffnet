@@ -30,17 +30,26 @@ pub struct InfoTraffic {
 
 impl InfoTraffic {
     pub fn refresh(&mut self, msg: &mut Self, program_lookup_opt: &mut Option<ProgramLookup>) {
-        self.tot_data_info.refresh(msg.tot_data_info);
+        let Self {
+            tot_data_info,
+            dropped_packets,
+            last_packet_timestamp,
+            map,
+            services,
+            hosts,
+        } = msg;
 
-        self.dropped_packets = msg.dropped_packets;
+        self.tot_data_info.refresh(*tot_data_info);
+
+        self.dropped_packets = *dropped_packets;
 
         // it can happen they're equal due to dis-alignments in the PCAP timestamp
-        if self.last_packet_timestamp.secs() == msg.last_packet_timestamp.secs() {
-            msg.last_packet_timestamp.add_secs(1);
+        if self.last_packet_timestamp.secs() == last_packet_timestamp.secs() {
+            last_packet_timestamp.add_secs(1);
         }
-        self.last_packet_timestamp = msg.last_packet_timestamp;
+        self.last_packet_timestamp = *last_packet_timestamp;
 
-        for (key, value) in &mut msg.map {
+        for (key, value) in &mut *map {
             let local_port = get_local_port(key, value.traffic_direction);
             let entry = self.map.entry(*key);
             match entry {
@@ -74,14 +83,14 @@ impl InfoTraffic {
             }
         }
 
-        for (key, value) in &msg.services {
+        for (key, value) in &*services {
             self.services
                 .entry(*key)
                 .and_modify(|x| x.refresh(*value))
                 .or_insert(*value);
         }
 
-        for (key, value) in &msg.hosts {
+        for (key, value) in &*hosts {
             self.hosts
                 .entry(key.clone())
                 .and_modify(|x| x.refresh(value))

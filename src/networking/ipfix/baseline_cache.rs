@@ -71,10 +71,10 @@ mod tests {
 
     fn key(sport: u16, exporter_addr: u8, odid: u32) -> AddressPortPair {
         AddressPortPair {
-            source: IpAddr::V4(Ipv4Addr::new(10, 0, 0, 1)),
-            sport: Some(sport),
-            dest: IpAddr::V4(Ipv4Addr::new(8, 8, 8, 8)),
-            dport: Some(443),
+            src_ip: IpAddr::V4(Ipv4Addr::new(10, 0, 0, 1)),
+            src_port: Some(sport),
+            dst_ip: IpAddr::V4(Ipv4Addr::new(8, 8, 8, 8)),
+            dst_port: Some(443),
             protocol: Protocol::Tcp,
             exporter: Some(IpfixExporter {
                 addr: IpAddr::V4(Ipv4Addr::new(203, 0, 113, exporter_addr)),

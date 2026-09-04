@@ -136,6 +136,7 @@ pub fn parse_packets(
                     let bytes = parsed.bytes_count() as u128;
                     let mac_addresses = (parsed.link_info.src_mac, parsed.link_info.dst_mac);
                     let message_type = MessageType::from_parsed_packet(&parsed);
+                    let vlan_id = parsed.link_info.vlan_id;
 
                     let key = AddressPortPair::from_parsed_packet(&parsed);
 
@@ -154,6 +155,7 @@ pub fn parse_packets(
                         cs.get_addresses(),
                         mac_addresses,
                         message_type,
+                        vlan_id,
                         1,
                         bytes,
                         ip_blacklist,
