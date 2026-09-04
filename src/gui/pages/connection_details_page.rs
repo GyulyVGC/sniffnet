@@ -393,12 +393,6 @@ fn get_src_or_dest_col<'a>(
         address_translation(language)
     };
 
-    let mac_str = if let Some(val) = mac {
-        &mac_from_dec_to_hex(val)
-    } else {
-        "-"
-    };
-
     Column::new()
         .spacing(4)
         .push(
@@ -417,10 +411,10 @@ fn get_src_or_dest_col<'a>(
                 ))
                 .push(get_button_copy(language, ip, timing_events)),
         )
-        .push(TextType::highlighted_subtitle_with_desc(
-            mac_address_translation(language),
-            mac_str,
-        ))
+        .push(mac.map(|m| {
+            let mac_str = mac_from_dec_to_hex(m);
+            TextType::highlighted_subtitle_with_desc(mac_address_translation(language), &mac_str)
+        }))
 }
 
 fn assemble_widgets<'a>(
