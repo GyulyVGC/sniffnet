@@ -5,6 +5,7 @@ use crate::networking::types::capture_context::CaptureSourcePicklist;
 use crate::utils::formatted_strings::APP_VERSION;
 use clap::Parser;
 use iced::{Task, window};
+use std::path::PathBuf;
 
 #[derive(Parser, Debug)]
 #[command(
@@ -14,6 +15,9 @@ use iced::{Task, window};
     about = "Application to comfortably monitor your network traffic"
 )]
 pub(crate) struct Args {
+    /// Start by importing packets from the supplied PCAP file
+    #[arg(value_name = "PCAP_FILE", value_hint = clap::ValueHint::FilePath, conflicts_with = "adapter")]
+    pcap_file: Option<PathBuf>,
     /// Start sniffing packets from the supplied network adapter
     #[arg(short, long, value_name = "NAME", default_missing_value = CONF.device.device_name.as_str(), num_args = 0..=1)]
     adapter: Option<String>,
@@ -84,24 +88,38 @@ impl Args {
     }
 
     pub fn get_boot_task_chain(&self) -> Task<Message> {
-        let mut boot_task_chain = window::latest().map(Message::StartApp);
-        if let Some(adapter) = self.adapter.clone() {
-            boot_task_chain = boot_task_chain
-                .chain(Task::done(Message::SetCaptureSource(
-                    CaptureSourcePicklist::Device,
-                )))
-                .chain(Task::done(Message::DeviceSelection(adapter)))
-                .chain(Task::done(Message::Start));
-        }
+        self.get_capture_boot_messages()
+            .into_iter()
+            .fold(window::latest().map(Message::StartApp), |task, message| {
+                task.chain(Task::done(message))
+            })
+    }
 
-        boot_task_chain
+    fn get_capture_boot_messages(&self) -> Vec<Message> {
+        if let Some(pcap_file) = &self.pcap_file {
+            vec![
+                Message::SetCaptureSource(CaptureSourcePicklist::File),
+                Message::SetPcapImport(pcap_file.to_string_lossy().into_owned()),
+                Message::Start,
+            ]
+        } else if let Some(adapter) = self.adapter.clone() {
+            vec![
+                Message::SetCaptureSource(CaptureSourcePicklist::Device),
+                Message::DeviceSelection(adapter),
+                Message::Start,
+            ]
+        } else {
+            vec![]
+        }
     }
 }
 
 #[cfg(test)]
 mod tests {
+    use clap::Parser;
     use serial_test::serial;
 
+    use super::Args;
     use crate::gui::pages::types::running_page::RunningPage;
     use crate::gui::pages::types::settings_page::SettingsPage;
     use crate::gui::styles::types::gradient_type::GradientType;
@@ -110,6 +128,7 @@ mod tests {
     use crate::gui::types::export_pcap::ExportPcap;
     use crate::gui::types::favorite::{FavoriteKey, Favorites};
     use crate::gui::types::filters::Filters;
+    use crate::gui::types::message::Message;
     use crate::gui::types::settings::Settings;
     use crate::networking::types::capture_context::CaptureSourcePicklist;
     use crate::networking::types::config_device::ConfigDevice;
@@ -118,6 +137,43 @@ mod tests {
     use crate::notifications::types::notifications::Notifications;
     use crate::report::types::sort_type::SortType;
     use crate::{Language, Sniffer, StyleType};
+
+    #[test]
+    fn test_pcap_file_argument() {
+        let args = Args::try_parse_from(["sniffnet", "/tmp/capture file.pcapng"]).unwrap();
+        let messages = args.get_capture_boot_messages();
+
+        assert!(matches!(
+            messages.as_slice(),
+            [
+                Message::SetCaptureSource(CaptureSourcePicklist::File),
+                Message::SetPcapImport(path),
+                Message::Start,
+            ] if path == "/tmp/capture file.pcapng"
+        ));
+    }
+
+    #[test]
+    fn test_pcap_file_conflicts_with_adapter() {
+        let result = Args::try_parse_from(["sniffnet", "capture.pcap", "--adapter", "eth0"]);
+
+        assert!(result.is_err());
+    }
+
+    #[test]
+    fn test_adapter_argument_keeps_device_startup() {
+        let args = Args::try_parse_from(["sniffnet", "--adapter", "eth0"]).unwrap();
+        let messages = args.get_capture_boot_messages();
+
+        assert!(matches!(
+            messages.as_slice(),
+            [
+                Message::SetCaptureSource(CaptureSourcePicklist::Device),
+                Message::DeviceSelection(adapter),
+                Message::Start,
+            ] if adapter == "eth0"
+        ));
+    }
 
     #[test]
     #[serial]
