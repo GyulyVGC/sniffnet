@@ -9,6 +9,7 @@ use crate::networking::capture::{
 use crate::networking::manage_packets::{modify_or_insert_in_map, update_connection_stats};
 use crate::networking::types::address_port_pair::AddressPortPair;
 use crate::networking::types::capture_context::{CaptureContext, CaptureSource, CaptureType};
+use crate::networking::types::dropped_packets::DroppedPackets;
 use crate::networking::types::info_traffic::InfoTraffic;
 use crate::networking::types::ip_blacklist::IpBlacklist;
 use crate::networking::types::message_type::MessageType;
@@ -176,7 +177,8 @@ pub fn parse_packets(
 
                     // update dropped packets number
                     if let Some(stats) = cap_stats {
-                        info_traffic_msg.dropped_packets = Some(stats.dropped);
+                        info_traffic_msg.dropped_packets =
+                            Some(DroppedPackets::from_pcap_stats(&stats));
                     }
                 }
             }
