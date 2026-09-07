@@ -25,8 +25,8 @@ use crate::networking::types::data_representation::DataRepr;
 use crate::networking::types::ipfix_exporter::IpfixExporter;
 use crate::report::types::sort_type::SortType;
 use crate::translations::translations::{
-    active_filters_translation, incoming_translation, outgoing_translation,
-    traffic_rate_translation,
+    active_filters_translation, incoming_translation, network_adapter_translation,
+    outgoing_translation, traffic_rate_translation,
 };
 use crate::translations::translations_2::{
     data_representation_translation, dropped_translation, only_top_30_items_translation,
@@ -36,7 +36,7 @@ use crate::translations::translations_5::no_favorites_saved_translation;
 use crate::translations::translations_6::ipfix_exporter_translation;
 use crate::utils::formatted_strings::full_print_link_type;
 use crate::utils::types::icon::Icon;
-use crate::{Language, RunningPage, StyleType};
+use crate::{Language, RunningPage, SNIFFNET_TITLECASE, StyleType};
 use iced::Length::Fill;
 use iced::alignment::{Horizontal, Vertical};
 use iced::widget::scrollable::Direction;
@@ -474,8 +474,11 @@ fn col_data_representation<'a>(
 
 fn donut_row(language: Language, sniffer: &Sniffer) -> Container<'_, Message, StyleType> {
     let data_repr = sniffer.conf.data_repr;
+    let tot_data_info = sniffer.info_traffic.tot_data_info;
 
-    let (in_data, out_data, dropped) = sniffer.info_traffic.get_thumbnail_data(data_repr);
+    let in_data = tot_data_info.incoming_data(data_repr);
+    let out_data = tot_data_info.outgoing_data(data_repr);
+    let dropped = sniffer.info_traffic.dropped_packets;
 
     let legend_col = Column::new()
         .spacing(5)
@@ -491,7 +494,37 @@ fn donut_row(language: Language, sniffer: &Sniffer) -> Container<'_, Message, St
             RuleType::Outgoing(true),
             language,
         ))
-        .push(dropped.map(|d| donut_legend_entry(d, data_repr, RuleType::Dropped, language)));
+        .push(dropped.map(|d| {
+            let drop_tot = d.total(data_repr, tot_data_info);
+            donut_legend_entry(drop_tot, data_repr, RuleType::Dropped, language).push(
+                if drop_tot > 0 {
+                    Some(get_info_tooltip(
+                        Column::new()
+                            .spacing(5)
+                            .push(
+                                Text::new(format!(
+                                    "{SNIFFNET_TITLECASE}: {}",
+                                    data_repr
+                                        .formatted_string(d.by_sniffnet(data_repr, tot_data_info))
+                                ))
+                                .size(FONT_SIZE_FOOTER),
+                            )
+                            .push(
+                                Text::new(format!(
+                                    "{}: {}",
+                                    network_adapter_translation(language),
+                                    data_repr
+                                        .formatted_string(d.by_adapter(data_repr, tot_data_info))
+                                ))
+                                .size(FONT_SIZE_FOOTER),
+                            )
+                            .into(),
+                    ))
+                } else {
+                    None
+                },
+            )
+        }));
 
     let donut_row = Row::new()
         .align_y(Vertical::Center)
@@ -500,7 +533,7 @@ fn donut_row(language: Language, sniffer: &Sniffer) -> Container<'_, Message, St
             data_repr,
             in_data,
             out_data,
-            dropped,
+            dropped.map(|d| d.total(data_repr, tot_data_info)),
             sniffer.thumbnail,
         ))
         .push(legend_col);

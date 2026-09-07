@@ -7,6 +7,7 @@ pub mod config_device;
 pub mod data_info;
 pub mod data_info_host;
 pub mod data_representation;
+pub mod dropped_packets;
 pub mod host;
 pub mod info_address_port_pair;
 pub mod info_traffic;

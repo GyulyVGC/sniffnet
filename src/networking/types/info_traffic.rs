@@ -3,7 +3,7 @@ use crate::networking::manage_packets::get_local_port;
 use crate::networking::types::address_port_pair::AddressPortPair;
 use crate::networking::types::data_info::DataInfo;
 use crate::networking::types::data_info_host::DataInfoHost;
-use crate::networking::types::data_representation::DataRepr;
+use crate::networking::types::dropped_packets::DroppedPackets;
 use crate::networking::types::host::Host;
 use crate::networking::types::info_address_port_pair::InfoAddressPortPair;
 use crate::networking::types::program_lookup::ProgramLookup;
@@ -17,7 +17,7 @@ pub struct InfoTraffic {
     /// Total amount of exchanged data
     pub tot_data_info: DataInfo,
     /// Number of dropped packets, if applicable
-    pub dropped_packets: Option<u32>,
+    pub dropped_packets: Option<DroppedPackets>,
     /// Timestamp of the latest parsed packet
     pub last_packet_timestamp: Timestamp,
     /// Map of the traffic
@@ -96,25 +96,6 @@ impl InfoTraffic {
                 .and_modify(|x| x.refresh(value))
                 .or_insert(*value);
         }
-    }
-
-    pub fn get_thumbnail_data(&self, data_repr: DataRepr) -> (u128, u128, Option<u128>) {
-        let incoming = self.tot_data_info.incoming_data(data_repr);
-        let outgoing = self.tot_data_info.outgoing_data(data_repr);
-        let all = incoming + outgoing;
-        let all_packets = self.tot_data_info.tot_data(DataRepr::Packets);
-        let dropped = self.dropped_packets.map(|dp| match data_repr {
-            DataRepr::Packets => u128::from(dp),
-            DataRepr::Bytes | DataRepr::Bits => {
-                // assume that the dropped packets have the same size as the average packet
-                u128::from(dp)
-                    .saturating_mul(all)
-                    .checked_div(all_packets)
-                    .unwrap_or_default()
-            }
-        });
-
-        (incoming, outgoing, dropped)
     }
 
     pub fn take_but_leave_something(&mut self) -> Self {
