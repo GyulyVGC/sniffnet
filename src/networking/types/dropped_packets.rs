@@ -23,7 +23,7 @@ impl DroppedPackets {
     /// assuming that dropped packets have the same size as the average packet
     pub fn total(self, data_repr: DataRepr, tot_data_info: DataInfo) -> u128 {
         averaged_data(
-            u128::from(self.by_adapter + self.by_sniffnet),
+            u128::from(self.by_adapter) + u128::from(self.by_sniffnet),
             data_repr,
             tot_data_info,
         )
@@ -53,4 +53,51 @@ fn averaged_data(dropped_packets: u128, data_repr: DataRepr, tot_data_info: Data
         .saturating_mul(all)
         .checked_div(all_packets)
         .unwrap_or_default()
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_averaged_data() {
+        // 6 packets carrying 100 bytes in total
+        let data_info = DataInfo::new_for_tests(2, 4, 30, 70);
+
+        assert_eq!(averaged_data(3, DataRepr::Packets, data_info), 3);
+        // multiply before dividing to avoid truncating the average packet size.
+        assert_eq!(averaged_data(3, DataRepr::Bytes, data_info), 50);
+        assert_eq!(averaged_data(3, DataRepr::Bits, data_info), 400);
+
+        // fractional results are truncated only after scaling by dropped packets.
+        assert_eq!(averaged_data(1, DataRepr::Bytes, data_info), 16);
+        assert_eq!(averaged_data(1, DataRepr::Bits, data_info), 133);
+        assert_eq!(averaged_data(9, DataRepr::Bytes, data_info), 150);
+
+        assert_eq!(averaged_data(0, DataRepr::Packets, data_info), 0);
+        assert_eq!(averaged_data(0, DataRepr::Bytes, data_info), 0);
+        assert_eq!(averaged_data(0, DataRepr::Bits, data_info), 0);
+    }
+
+    #[test]
+    fn test_averaged_data_no_observed_packets() {
+        let data_info = DataInfo::default();
+
+        assert_eq!(averaged_data(3, DataRepr::Packets, data_info), 3);
+        assert_eq!(averaged_data(3, DataRepr::Bytes, data_info), 0);
+        assert_eq!(averaged_data(3, DataRepr::Bits, data_info), 0);
+    }
+
+    #[test]
+    fn test_dropped_packets_total_overflow() {
+        let dropped = DroppedPackets {
+            by_adapter: u32::MAX,
+            by_sniffnet: u32::MAX,
+        };
+        let data_info = DataInfo::new_for_tests(1, 1, 100, 100);
+
+        assert_eq!(dropped.total(DataRepr::Packets, data_info), 8_589_934_590);
+        assert_eq!(dropped.total(DataRepr::Bytes, data_info), 858_993_459_000);
+        assert_eq!(dropped.total(DataRepr::Bits, data_info), 6_871_947_672_000);
+    }
 }
