@@ -146,6 +146,8 @@ pub enum Message {
     CtrlSpacePressed,
     /// Edit scale factor via keyboard shortcut
     ScaleFactorShortcut(bool),
+    /// Check for a newer release
+    CheckNewerRelease,
     /// Set new release status
     SetNewerReleaseStatus(Option<bool>),
     /// Set the pcap import path

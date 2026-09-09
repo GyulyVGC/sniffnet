@@ -53,7 +53,7 @@ use crate::report::get_report_entries::get_searched_entries;
 use crate::report::types::search_parameters::SearchParameters;
 use crate::report::types::sort_type::SortType;
 use crate::translations::types::language::Language;
-use crate::utils::check_updates::set_newer_release_status;
+use crate::utils::check_updates::is_newer_release_available;
 use crate::utils::error_logger::{ErrorLogger, Location};
 use crate::utils::types::file_info::FileInfo;
 use crate::utils::types::icon::Icon;
@@ -261,7 +261,7 @@ impl Sniffer {
     }
 
     fn time_subscription(&self) -> Subscription<Message> {
-        if let Some((w, _)) = self.welcome {
+        let welcome_sub = if let Some((w, _)) = self.welcome {
             let sub = iced::time::every(Duration::from_millis(100));
             if w {
                 sub.map(|_| Message::Welcome)
@@ -269,8 +269,14 @@ impl Sniffer {
                 sub.map(|_| Message::Quit)
             }
         } else {
-            iced::time::every(Duration::from_secs(1)).map(|_| Message::Periodic)
-        }
+            Subscription::none()
+        };
+
+        Subscription::batch([
+            iced::time::every(Duration::from_secs(1)).map(|_| Message::Periodic),
+            welcome_sub,
+            iced::time::every(Duration::from_hours(24)).map(|_| Message::CheckNewerRelease),
+        ])
     }
 
     fn window_subscription() -> Subscription<Message> {
@@ -358,6 +364,7 @@ impl Sniffer {
             Message::CtrlTPressed => return self.ctrl_t_pressed(),
             Message::CtrlSpacePressed => self.ctrl_space_pressed(),
             Message::ScaleFactorShortcut(increase) => self.scale_factor_shortcut(increase),
+            Message::CheckNewerRelease => return Sniffer::check_newer_release(),
             Message::SetNewerReleaseStatus(status) => self.set_newer_release_status(status),
             Message::SetPcapImport(path) => self.set_pcap_import(path),
             Message::SetIpfixAddr(addr) => self.set_ipfix_addr(addr),
@@ -479,7 +486,7 @@ impl Sniffer {
         let previews_task = self.start_traffic_previews();
         Task::batch([
             Sniffer::register_sigint_handler(),
-            Task::perform(set_newer_release_status(), Message::SetNewerReleaseStatus),
+            Sniffer::check_newer_release(),
             previews_task,
             self.load_ip_blacklist(self.conf.settings.ip_blacklist.clone()),
         ])
@@ -825,6 +832,10 @@ impl Sniffer {
             let new = scale_factor + delta;
             self.change_scale_factor(new);
         }
+    }
+
+    fn check_newer_release() -> Task<Message> {
+        Task::perform(is_newer_release_available(), Message::SetNewerReleaseStatus)
     }
 
     fn set_newer_release_status(&mut self, status: Option<bool>) {

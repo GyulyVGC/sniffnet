@@ -10,14 +10,15 @@ struct AppVersion {
     name: String,
 }
 
-/// Calls a method to check if a newer release of Sniffnet is available on GitHub
-/// and updates application status accordingly
-pub async fn set_newer_release_status() -> Option<bool> {
-    is_newer_release_available(6, 30).await
+/// Checks whether a newer release of Sniffnet is available on GitHub
+pub async fn is_newer_release_available() -> Option<bool> {
+    is_newer_release_available_inner(6, 30).await
 }
 
-/// Checks if a newer release of Sniffnet is available on GitHub
-async fn is_newer_release_available(max_retries: u8, seconds_between_retries: u8) -> Option<bool> {
+async fn is_newer_release_available_inner(
+    max_retries: u8,
+    seconds_between_retries: u8,
+) -> Option<bool> {
     let client = reqwest::Client::builder()
         .user_agent(format!("{SNIFFNET_LOWERCASE}-{APP_VERSION}"))
         .build()
@@ -65,7 +66,7 @@ async fn is_newer_release_available(max_retries: u8, seconds_between_retries: u8
     if retries_left > 0 {
         // sleep seconds_between_retries and retries the request
         tokio::time::sleep(Duration::from_secs(u64::from(seconds_between_retries))).await;
-        Box::pin(is_newer_release_available(
+        Box::pin(is_newer_release_available_inner(
             retries_left,
             seconds_between_retries,
         ))
@@ -81,7 +82,7 @@ mod tests {
 
     #[tokio::test]
     async fn fetch_latest_release_from_github() {
-        let result = is_newer_release_available(6, 2).await;
+        let result = is_newer_release_available_inner(6, 2).await;
         result.expect("Latest release request from GitHub error");
     }
 }
