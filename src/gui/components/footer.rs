@@ -14,6 +14,7 @@ use crate::gui::styles::text::TextType;
 use crate::gui::styles::types::gradient_type::GradientType;
 use crate::gui::styles::types::style_type::StyleType;
 use crate::gui::types::message::Message;
+use crate::gui::types::updates_status::UpdatesStatus;
 use crate::translations::translations_2::new_version_available_translation;
 use crate::utils::formatted_strings::APP_VERSION;
 use crate::utils::types::icon::Icon;
@@ -24,14 +25,14 @@ pub fn footer<'a>(
     thumbnail: bool,
     language: Language,
     color_gradient: GradientType,
-    newer_release_available: Option<bool>,
+    updates_status: UpdatesStatus,
     dots_pulse: &(String, u8),
 ) -> Container<'a, Message, StyleType> {
     if thumbnail {
         return thumbnail_footer();
     }
 
-    let release_details_row = get_release_details(language, newer_release_available);
+    let release_details_row = get_release_details(language, updates_status);
 
     let heart_size = match dots_pulse.1 {
         1 => 17.0,
@@ -186,43 +187,43 @@ fn get_button_sponsor<'a>() -> Tooltip<'a, Message, StyleType> {
 
 fn get_release_details<'a>(
     language: Language,
-    newer_release_available: Option<bool>,
+    updates_status: UpdatesStatus,
 ) -> Row<'a, Message, StyleType> {
     let mut ret_val = Row::new()
         .align_y(Alignment::Center)
         .height(Length::Fill)
         .width(Length::Fill)
         .push(Text::new(format!("{SNIFFNET_TITLECASE} {APP_VERSION}")).size(FONT_SIZE_FOOTER));
-    if let Some(boolean_response) = newer_release_available {
-        if boolean_response {
-            // a newer release is available on GitHub
-            let button = button(
-                Icon::NewerVersion
-                    .to_text()
-                    .size(23)
-                    .align_x(Alignment::Center)
-                    .align_y(Alignment::Center)
-                    .line_height(LineHeight::Relative(0.8)),
-            )
-            .padding(0)
-            .height(35)
-            .width(35)
-            .class(ButtonType::Alert)
-            .on_press(Message::OpenWebPage(WebPage::WebsiteDownload));
-            let tooltip = Tooltip::new(
-                button,
-                row_open_link_tooltip(new_version_available_translation(language)),
-                Position::Top,
-            )
-            .gap(7.5)
-            .class(ContainerType::Tooltip)
-            .delay(TOOLTIP_DELAY);
-            ret_val = ret_val.push(Space::new().width(10)).push(tooltip);
-        } else {
-            // this is the latest release
-            ret_val = ret_val.push(Text::new(" ✔").size(FONT_SIZE_SUBTITLE));
-        }
+
+    if updates_status == UpdatesStatus::UpdateAvailable {
+        // a newer release is available on GitHub
+        let button = button(
+            Icon::NewerVersion
+                .to_text()
+                .size(23)
+                .align_x(Alignment::Center)
+                .align_y(Alignment::Center)
+                .line_height(LineHeight::Relative(0.8)),
+        )
+        .padding(0)
+        .height(35)
+        .width(35)
+        .class(ButtonType::Alert)
+        .on_press(Message::OpenWebPage(WebPage::WebsiteDownload));
+        let tooltip = Tooltip::new(
+            button,
+            row_open_link_tooltip(new_version_available_translation(language)),
+            Position::Top,
+        )
+        .gap(7.5)
+        .class(ContainerType::Tooltip)
+        .delay(TOOLTIP_DELAY);
+        ret_val = ret_val.push(Space::new().width(10)).push(tooltip);
+    } else if updates_status == UpdatesStatus::UpToDate {
+        // this is the latest release
+        ret_val = ret_val.push(Text::new(" ✔").size(FONT_SIZE_SUBTITLE));
     }
+
     ret_val
 }
 

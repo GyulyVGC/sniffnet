@@ -1,3 +1,4 @@
+use crate::gui::types::updates_status::UpdatesStatus;
 use crate::utils::error_logger::{ErrorLogger, Location};
 use crate::utils::formatted_strings::APP_VERSION;
 use crate::{SNIFFNET_LOWERCASE, location};
@@ -11,8 +12,13 @@ struct AppVersion {
 }
 
 /// Checks whether a newer release of Sniffnet is available on GitHub
-pub async fn is_newer_release_available() -> Option<bool> {
-    is_newer_release_available_inner(6, 30).await
+pub async fn is_newer_release_available() -> UpdatesStatus {
+    let res = is_newer_release_available_inner(6, 30).await;
+    match res {
+        Some(true) => UpdatesStatus::UpdateAvailable,
+        Some(false) => UpdatesStatus::UpToDate,
+        None => UpdatesStatus::Unknown,
+    }
 }
 
 async fn is_newer_release_available_inner(

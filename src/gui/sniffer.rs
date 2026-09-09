@@ -26,6 +26,7 @@ use crate::gui::types::favorite::FavoriteKey;
 use crate::gui::types::message::Message;
 use crate::gui::types::settings::Settings;
 use crate::gui::types::timing_events::TimingEvents;
+use crate::gui::types::updates_status::UpdatesStatus;
 use crate::mmdb::asn::ASN_MMDB;
 use crate::mmdb::country::COUNTRY_MMDB;
 use crate::mmdb::types::mmdb_reader::{MmdbReader, MmdbReaders};
@@ -103,7 +104,7 @@ pub struct Sniffer {
     /// Log of the displayed notifications, with the total number of notifications for this capture
     pub logged_notifications: LoggedNotifications,
     /// Reports if a newer release of the software is available on GitHub
-    pub newer_release_available: Option<bool>,
+    pub updates_status: UpdatesStatus,
     /// Network device to be analyzed, or PCAP file to be imported
     pub capture_source: CaptureSource,
     /// Signals if the capture backend reported a problem
@@ -169,7 +170,7 @@ impl Sniffer {
             info_traffic: InfoTraffic::default(),
             addresses_resolved: HashMap::new(),
             logged_notifications: LoggedNotifications::default(),
-            newer_release_available: None,
+            updates_status: UpdatesStatus::default(),
             capture_source,
             capture_error: None,
             dots_pulse: (".".to_string(), 0),
@@ -364,8 +365,10 @@ impl Sniffer {
             Message::CtrlTPressed => return self.ctrl_t_pressed(),
             Message::CtrlSpacePressed => self.ctrl_space_pressed(),
             Message::ScaleFactorShortcut(increase) => self.scale_factor_shortcut(increase),
-            Message::CheckNewerRelease => return Sniffer::check_newer_release(),
-            Message::SetNewerReleaseStatus(status) => self.set_newer_release_status(status),
+            Message::CheckNewerRelease => return self.check_newer_release(),
+            Message::SetUpdatesStatus(status) => self.set_updates_status(status),
+            Message::ToggleNotifyUpdates => self.toggle_notify_updates(),
+            Message::ToggleDisableUpdatesCheck => return self.toggle_disable_updates_check(),
             Message::SetPcapImport(path) => self.set_pcap_import(path),
             Message::SetIpfixAddr(addr) => self.set_ipfix_addr(addr),
             Message::SetIpfixPort(port) => self.set_ipfix_port(port),
@@ -418,7 +421,7 @@ impl Sniffer {
             self.thumbnail,
             language,
             color_gradient,
-            self.newer_release_available,
+            self.updates_status,
             &self.dots_pulse,
         );
 
@@ -486,7 +489,7 @@ impl Sniffer {
         let previews_task = self.start_traffic_previews();
         Task::batch([
             Sniffer::register_sigint_handler(),
-            Sniffer::check_newer_release(),
+            self.check_newer_release(),
             previews_task,
             self.load_ip_blacklist(self.conf.settings.ip_blacklist.clone()),
         ])
@@ -834,12 +837,30 @@ impl Sniffer {
         }
     }
 
-    fn check_newer_release() -> Task<Message> {
-        Task::perform(is_newer_release_available(), Message::SetNewerReleaseStatus)
+    fn check_newer_release(&mut self) -> Task<Message> {
+        if self.conf.updates.disable_checks() {
+            Task::none()
+        } else {
+            self.updates_status = UpdatesStatus::InProgress;
+            Task::perform(is_newer_release_available(), Message::SetUpdatesStatus)
+        }
     }
 
-    fn set_newer_release_status(&mut self, status: Option<bool>) {
-        self.newer_release_available = status;
+    fn set_updates_status(&mut self, status: UpdatesStatus) {
+        self.updates_status = status;
+    }
+
+    fn toggle_notify_updates(&mut self) {
+        self.conf.updates.toggle_notify_updates();
+    }
+
+    fn toggle_disable_updates_check(&mut self) -> Task<Message> {
+        self.conf.updates.toggle_disable_checks();
+        if !self.conf.updates.disable_checks() && self.updates_status == UpdatesStatus::Unknown {
+            self.check_newer_release()
+        } else {
+            Task::none()
+        }
     }
 
     fn set_pcap_import(&mut self, path: String) {
@@ -1515,6 +1536,7 @@ mod tests {
     use crate::gui::pages::types::settings_page::SettingsPage;
     use crate::gui::styles::types::gradient_type::GradientType;
     use crate::gui::types::conf::Conf;
+    use crate::gui::types::config_updates::ConfigUpdates;
     use crate::gui::types::config_window::ConfigWindow;
     use crate::gui::types::export_pcap::ExportPcap;
     use crate::gui::types::favorite::{FavoriteKey, Favorites};
@@ -2275,6 +2297,7 @@ mod tests {
                 program_favorites_filter: true,
                 window: ConfigWindow::new((1000.0, 999.0), (-5.0, 277.5), (20.0, 20.0)),
                 device: ConfigDevice::default(),
+                updates: ConfigUpdates::default(),
                 capture_source_picklist: CaptureSourcePicklist::File,
                 filters: Filters {
                     expanded: true,
