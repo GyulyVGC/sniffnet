@@ -423,7 +423,7 @@ impl Sniffer {
             self.thumbnail,
             language,
             color_gradient,
-            self.updates_status,
+            &self.updates_status,
             &self.dots_pulse,
         );
 
@@ -466,7 +466,7 @@ impl Sniffer {
                             color_gradient,
                             language,
                             self.conf.updates,
-                            self.updates_status,
+                            &self.updates_status,
                         )
                         .into(),
                         *close_on_blur,
@@ -868,6 +868,15 @@ impl Sniffer {
     }
 
     fn set_updates_status(&mut self, status: UpdatesStatus) {
+        if self.conf.updates.notify_updates()
+            && matches!(status, UpdatesStatus::UpdateAvailable(_))
+            && self.updates_status != status
+        {
+            self.hide_modal();
+            self.close_settings();
+            self.show_modal(MyModal::UpdatesStatus(false));
+        }
+
         self.updates_status = status;
     }
 

@@ -75,7 +75,7 @@ pub fn get_updates_status_overlay<'a>(
     color_gradient: GradientType,
     language: Language,
     config_updates: ConfigUpdates,
-    updates_status: UpdatesStatus,
+    updates_status: &UpdatesStatus,
 ) -> Container<'a, Message, StyleType> {
     let notify_updates_checkbox = if config_updates.disable_checks() {
         Checkbox::new(false)

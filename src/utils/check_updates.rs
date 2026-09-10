@@ -13,23 +13,20 @@ struct AppVersion {
 
 /// Checks whether a newer release of Sniffnet is available on GitHub
 pub async fn is_newer_release_available() -> UpdatesStatus {
-    let res = is_newer_release_available_inner(6, 30).await;
-    match res {
-        Some(true) => UpdatesStatus::UpdateAvailable,
-        Some(false) => UpdatesStatus::UpToDate,
-        None => UpdatesStatus::Unknown,
-    }
+    is_newer_release_available_inner(6, 30).await
 }
 
 async fn is_newer_release_available_inner(
     max_retries: u8,
     seconds_between_retries: u8,
-) -> Option<bool> {
-    let client = reqwest::Client::builder()
+) -> UpdatesStatus {
+    let Ok(client) = reqwest::Client::builder()
         .user_agent(format!("{SNIFFNET_LOWERCASE}-{APP_VERSION}"))
         .build()
         .log_err(location!())
-        .ok()?;
+    else {
+        return UpdatesStatus::Unknown;
+    };
     let response = client
         .get("https://api.github.com/repos/GyulyVGC/sniffnet/releases/latest")
         .header("Accept", "application/vnd.github+json")
@@ -65,7 +62,11 @@ async fn is_newer_release_available_inner(
         if let (Ok(latest_semver), Ok(current_semver)) =
             (Version::parse(stripped), Version::parse(APP_VERSION))
         {
-            return Some(latest_semver > current_semver);
+            return if latest_semver > current_semver {
+                UpdatesStatus::UpdateAvailable(stripped.to_string())
+            } else {
+                UpdatesStatus::UpToDate
+            };
         }
     }
     let retries_left = max_retries.saturating_sub(1);
@@ -78,17 +79,21 @@ async fn is_newer_release_available_inner(
         ))
         .await
     } else {
-        None
+        UpdatesStatus::Unknown
     }
 }
 
 #[cfg(all(test, not(target_os = "macos")))]
 mod tests {
     use super::*;
+    use std::assert_matches;
 
     #[tokio::test]
-    async fn fetch_latest_release_from_github() {
+    async fn test_fetch_latest_release_from_github() {
         let result = is_newer_release_available_inner(6, 2).await;
-        result.expect("Latest release request from GitHub error");
+        assert_matches!(
+            result,
+            UpdatesStatus::UpToDate | UpdatesStatus::UpdateAvailable(_)
+        );
     }
 }

@@ -26,7 +26,7 @@ pub fn footer<'a>(
     thumbnail: bool,
     language: Language,
     color_gradient: GradientType,
-    updates_status: UpdatesStatus,
+    updates_status: &UpdatesStatus,
     dots_pulse: &(String, u8),
 ) -> Container<'a, Message, StyleType> {
     if thumbnail {
@@ -188,7 +188,7 @@ fn get_button_sponsor<'a>() -> Tooltip<'a, Message, StyleType> {
 
 fn get_release_details<'a>(
     language: Language,
-    updates_status: UpdatesStatus,
+    updates_status: &UpdatesStatus,
 ) -> Row<'a, Message, StyleType> {
     let mut ret_val = Row::new()
         .align_y(Alignment::Center)
@@ -208,7 +208,7 @@ fn get_release_details<'a>(
     .width(35)
     .on_press(Message::ShowModal(MyModal::UpdatesStatus(true)));
 
-    if updates_status == UpdatesStatus::UpdateAvailable {
+    if matches!(updates_status, UpdatesStatus::UpdateAvailable(_)) {
         button = button.class(ButtonType::Alert);
     }
 
