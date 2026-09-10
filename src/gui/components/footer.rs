@@ -7,15 +7,16 @@ use iced::widget::{Column, Container, Row, Text, Tooltip, button, rich_text, spa
 use iced::{Alignment, Length, Padding};
 
 use crate::gui::components::button::row_open_link_tooltip;
+use crate::gui::components::types::my_modal::MyModal;
 use crate::gui::styles::button::ButtonType;
 use crate::gui::styles::container::ContainerType;
-use crate::gui::styles::style_constants::{FONT_SIZE_FOOTER, FONT_SIZE_SUBTITLE, TOOLTIP_DELAY};
+use crate::gui::styles::style_constants::{FONT_SIZE_FOOTER, TOOLTIP_DELAY};
 use crate::gui::styles::text::TextType;
 use crate::gui::styles::types::gradient_type::GradientType;
 use crate::gui::styles::types::style_type::StyleType;
 use crate::gui::types::message::Message;
 use crate::gui::types::updates_status::UpdatesStatus;
-use crate::translations::translations_2::new_version_available_translation;
+use crate::translations::translations_6::updates_status_translation;
 use crate::utils::formatted_strings::APP_VERSION;
 use crate::utils::types::icon::Icon;
 use crate::utils::types::web_page::WebPage;
@@ -195,34 +196,31 @@ fn get_release_details<'a>(
         .width(Length::Fill)
         .push(Text::new(format!("{SNIFFNET_TITLECASE} {APP_VERSION}")).size(FONT_SIZE_FOOTER));
 
+    let mut button = button(
+        updates_status
+            .icon()
+            .align_x(Alignment::Center)
+            .align_y(Alignment::Center)
+            .line_height(LineHeight::Relative(1.0)),
+    )
+    .padding(0)
+    .height(35)
+    .width(35)
+    .on_press(Message::ShowModal(MyModal::UpdatesStatus(true)));
+
     if updates_status == UpdatesStatus::UpdateAvailable {
-        // a newer release is available on GitHub
-        let button = button(
-            Icon::NewerVersion
-                .to_text()
-                .size(23)
-                .align_x(Alignment::Center)
-                .align_y(Alignment::Center)
-                .line_height(LineHeight::Relative(0.8)),
-        )
-        .padding(0)
-        .height(35)
-        .width(35)
-        .class(ButtonType::Alert)
-        .on_press(Message::OpenWebPage(WebPage::WebsiteDownload));
-        let tooltip = Tooltip::new(
-            button,
-            row_open_link_tooltip(new_version_available_translation(language)),
-            Position::Top,
-        )
-        .gap(7.5)
-        .class(ContainerType::Tooltip)
-        .delay(TOOLTIP_DELAY);
-        ret_val = ret_val.push(Space::new().width(10)).push(tooltip);
-    } else if updates_status == UpdatesStatus::UpToDate {
-        // this is the latest release
-        ret_val = ret_val.push(Text::new(" ✔").size(FONT_SIZE_SUBTITLE));
+        button = button.class(ButtonType::Alert);
     }
+
+    let tooltip = Tooltip::new(
+        button,
+        updates_status_translation(language),
+        Position::Right,
+    )
+    .gap(5)
+    .class(ContainerType::Tooltip)
+    .delay(TOOLTIP_DELAY);
+    ret_val = ret_val.push(Space::new().width(10)).push(tooltip);
 
     ret_val
 }

@@ -3,7 +3,9 @@
 use crate::chart::types::preview_chart::PreviewChart;
 use crate::gui::components::footer::footer;
 use crate::gui::components::header::header;
-use crate::gui::components::modal::{get_clear_all_overlay, get_exit_overlay, modal};
+use crate::gui::components::modal::{
+    get_clear_all_overlay, get_exit_overlay, get_updates_status_overlay, modal,
+};
 use crate::gui::components::types::my_modal::MyModal;
 use crate::gui::pages::connection_details_page::connection_details_page;
 use crate::gui::pages::initial_page::initial_page;
@@ -444,15 +446,34 @@ impl Sniffer {
                 }
             }
             Some(m) => {
-                let overlay: Element<Message, StyleType> = match m {
-                    MyModal::Reset => get_exit_overlay(Message::Reset, color_gradient, language),
-                    MyModal::Quit => get_exit_overlay(Message::Quit, color_gradient, language),
-                    MyModal::ClearAll => get_clear_all_overlay(color_gradient, language),
-                    MyModal::ConnectionDetails(key) => connection_details_page(self, *key),
-                }
-                .into();
+                let (overlay, close_on_blur): (Element<Message, StyleType>, bool) = match m {
+                    MyModal::Reset => (
+                        get_exit_overlay(Message::Reset, color_gradient, language).into(),
+                        true,
+                    ),
+                    MyModal::Quit => (
+                        get_exit_overlay(Message::Quit, color_gradient, language).into(),
+                        true,
+                    ),
+                    MyModal::ClearAll => {
+                        (get_clear_all_overlay(color_gradient, language).into(), true)
+                    }
+                    MyModal::ConnectionDetails(key) => {
+                        (connection_details_page(self, *key).into(), true)
+                    }
+                    MyModal::UpdatesStatus(close_on_blur) => (
+                        get_updates_status_overlay(
+                            color_gradient,
+                            language,
+                            self.conf.updates,
+                            self.updates_status,
+                        )
+                        .into(),
+                        *close_on_blur,
+                    ),
+                };
 
-                modal(content, overlay, Message::HideModal)
+                modal(content, overlay, close_on_blur.then(|| Message::HideModal))
             }
         };
 
