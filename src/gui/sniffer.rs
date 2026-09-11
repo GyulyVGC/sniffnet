@@ -368,7 +368,7 @@ impl Sniffer {
             Message::CtrlSpacePressed => self.ctrl_space_pressed(),
             Message::ScaleFactorShortcut(increase) => self.scale_factor_shortcut(increase),
             Message::CheckNewerRelease => return self.check_newer_release(),
-            Message::SetUpdateStatus(status) => self.set_update_status(status),
+            Message::SetUpdateStatus(status) => return self.set_update_status(status),
             Message::ToggleNotifyUpdates => self.toggle_notify_updates(),
             Message::ToggleDisableUpdateChecks => return self.toggle_disable_update_checks(),
             Message::SetPcapImport(path) => self.set_pcap_import(path),
@@ -868,17 +868,24 @@ impl Sniffer {
         }
     }
 
-    fn set_update_status(&mut self, status: UpdateStatus) {
+    fn set_update_status(&mut self, status: UpdateStatus) -> Task<Message> {
+        self.update_status = status;
+
         if self.conf.updates.notify_updates()
             && !self.conf.updates.disable_checks()
-            && matches!(status, UpdateStatus::UpdateAvailable(_))
+            && matches!(self.update_status, UpdateStatus::UpdateAvailable(_))
         {
+            if self.thumbnail {
+                return self
+                    .toggle_thumbnail(false)
+                    .chain(Task::done(Message::ShowModal(MyModal::UpdateStatus(false))));
+            }
+
             self.hide_modal();
             self.close_settings();
             self.show_modal(MyModal::UpdateStatus(false));
         }
-
-        self.update_status = status;
+        Task::none()
     }
 
     fn toggle_notify_updates(&mut self) {

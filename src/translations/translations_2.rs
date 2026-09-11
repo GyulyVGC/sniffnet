@@ -14,7 +14,7 @@ pub fn new_version_available_translation(language: Language) -> &'static str {
         Language::TR => "Daha yeni bir versiyon mevcut!",
         Language::ES => "Hay una nueva versión disponible!",
         Language::KO => "새로운 버전이 출시되었습니다!",
-        Language::ZH => "新版本已在发布!",
+        Language::ZH => "新版本已发布！",
         Language::ZH_TW => "有可用的新版本！",
         Language::UK => "Нова версія доступна!",
         Language::RO => "O versiune nouă este disponibilă!",
