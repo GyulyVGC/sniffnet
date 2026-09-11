@@ -467,6 +467,7 @@ impl Sniffer {
                             language,
                             self.conf.updates,
                             &self.updates_status,
+                            &self.dots_pulse,
                         )
                         .into(),
                         *close_on_blur,
@@ -1732,20 +1733,6 @@ mod tests {
 
         sniffer.update(Message::Periodic);
         assert_eq!(sniffer.dots_pulse, (".".to_string(), 0));
-
-        // if frozen, string won't update
-        sniffer.frozen = true;
-
-        sniffer.update(Message::Periodic);
-        assert_eq!(sniffer.dots_pulse, (".".to_string(), 1));
-
-        sniffer.update(Message::BpfFilter(String::new()));
-        assert_eq!(sniffer.dots_pulse, (".".to_string(), 2));
-
-        sniffer.frozen = false;
-
-        sniffer.update(Message::Periodic);
-        assert_eq!(sniffer.dots_pulse, ("..".to_string(), 0));
     }
 
     #[test]

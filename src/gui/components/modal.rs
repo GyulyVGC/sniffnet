@@ -76,6 +76,7 @@ pub fn get_updates_status_overlay<'a>(
     language: Language,
     config_updates: ConfigUpdates,
     updates_status: &UpdatesStatus,
+    dots_pulse: &(String, u8),
 ) -> Container<'a, Message, StyleType> {
     let notify_updates_checkbox = if config_updates.disable_checks() {
         Checkbox::new(false)
@@ -93,14 +94,20 @@ pub fn get_updates_status_overlay<'a>(
         .on_toggle(move |_| Message::ToggleDisableUpdatesCheck)
         .size(18);
 
+    let checkboxes = center(
+        Column::new()
+            .spacing(10)
+            .align_x(Alignment::Start)
+            .push(notify_updates_checkbox)
+            .push(disable_checks_checkbox),
+    );
+
     let content = Column::new()
         .padding(10)
-        .spacing(10)
-        .align_x(Alignment::Start)
         .width(Length::Fill)
+        .push(updates_status.desc(language, dots_pulse.0.len()))
         .push(RuleType::Standard.horizontal(10))
-        .push(notify_updates_checkbox)
-        .push(disable_checks_checkbox);
+        .push(checkboxes);
 
     Container::new(
         Column::new()
@@ -109,11 +116,10 @@ pub fn get_updates_status_overlay<'a>(
                 language,
                 updates_status_translation(language),
             ))
-            .push(Space::new().height(20))
             .push(content),
     )
-    .width(450)
-    .height(160)
+    .width(700)
+    .height(300)
     .class(ContainerType::Modal)
 }
 

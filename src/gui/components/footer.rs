@@ -215,7 +215,7 @@ fn get_release_details<'a>(
 
     let tooltip = Tooltip::new(
         button,
-        updates_status_translation(language),
+        Text::new(updates_status_translation(language)).size(FONT_SIZE_FOOTER),
         Position::Right,
     )
     .gap(5)

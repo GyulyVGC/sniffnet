@@ -75,3 +75,11 @@ pub fn updates_status_translation(language: Language) -> &'static str {
         _ => "Updates status",
     }
 }
+
+pub fn up_to_date_translation(language: Language) -> &'static str {
+    match language {
+        Language::EN => "You are up to date!",
+        Language::IT => "Sei aggiornato!",
+        _ => "You are up to date!",
+    }
+}
