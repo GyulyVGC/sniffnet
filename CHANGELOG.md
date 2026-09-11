@@ -6,6 +6,7 @@ All Sniffnet releases with the relative changes are documented in this file.
 - IPFIX collector capabilities: receive and analyze network traffic from remote devices ([#1270](https://github.com/GyulyVGC/sniffnet/pull/1270) — fixes [#303](https://github.com/GyulyVGC/sniffnet/issues/303))
 - Added support for IGMP connections and messages ([#1301](https://github.com/GyulyVGC/sniffnet/pull/1301) — fixes [#1269](https://github.com/GyulyVGC/sniffnet/issues/1269))
 - Added support for VLAN-tagged connections ([#1302](https://github.com/GyulyVGC/sniffnet/pull/1302) — fixes [#1070](https://github.com/GyulyVGC/sniffnet/issues/1070))
+- Enhance update checks ([#1307](https://github.com/GyulyVGC/sniffnet/pull/1307) — fixes [#1027](https://github.com/GyulyVGC/sniffnet/issues/1027))
 - Show output file path in Overview page when exporting a PCAP file ([`3f2c42c`](https://github.com/GyulyVGC/sniffnet/pull/1290/commits/3f2c42c70f06d5d29ddad80dde956281c6705511))
 - Show more details about dropped packets ([#1306](https://github.com/GyulyVGC/sniffnet/pull/1306) — fixes [#1079](https://github.com/GyulyVGC/sniffnet/issues/1079))
 - Fix the app freezing and exhausting memory when importing a PCAP file containing a large time gap between consecutive packets ([`4605ec7`](https://github.com/GyulyVGC/sniffnet/pull/1290/commits/4605ec717bbaf8fa34268805814d5585f084201e))
