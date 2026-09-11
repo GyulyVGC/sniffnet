@@ -12,12 +12,12 @@ pub enum UpdatesStatus {
 }
 
 impl UpdatesStatus {
-    pub fn icon<'a>(&self) -> Text<'a, StyleType> {
+    pub fn icon<'a>(&self, dots: usize) -> Text<'a, StyleType> {
         match self {
-            UpdatesStatus::Unknown => Icon::FunnelStar.to_text().size(23),
-            UpdatesStatus::InProgress => Icon::get_hourglass(1).size(23),
-            UpdatesStatus::UpToDate => Icon::File.to_text().size(23),
-            UpdatesStatus::UpdateAvailable(_) => Icon::NewerVersion.to_text().size(23),
+            UpdatesStatus::Unknown => Text::new("?"),
+            UpdatesStatus::InProgress => Icon::get_hourglass(dots),
+            UpdatesStatus::UpToDate => Text::new("✔"),
+            UpdatesStatus::UpdateAvailable(_) => Icon::NewerVersion.to_text().size(22),
         }
     }
 }

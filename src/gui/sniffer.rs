@@ -1234,12 +1234,10 @@ impl Sniffer {
     }
 
     fn update_waiting_dots(&mut self) {
-        if !self.frozen {
-            if self.dots_pulse.0.len() > 2 {
-                self.dots_pulse.0 = String::new();
-            }
-            self.dots_pulse.0 = ".".repeat(self.dots_pulse.0.len() + 1);
+        if self.dots_pulse.0.len() > 2 {
+            self.dots_pulse.0 = String::new();
         }
+        self.dots_pulse.0 = ".".repeat(self.dots_pulse.0.len() + 1);
     }
 
     fn add_or_remove_favorite(&mut self, fav: &FavoriteKey, add: bool) {
