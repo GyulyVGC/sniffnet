@@ -8,4 +8,4 @@ pub mod ipfix_socket;
 pub mod message;
 pub mod settings;
 pub mod timing_events;
-pub mod updates_status;
+pub mod update_status;

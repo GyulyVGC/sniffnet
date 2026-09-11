@@ -92,7 +92,7 @@ pub struct Conf {
     /// Last selected network device name
     #[serde(deserialize_with = "deserialize_or_default")]
     pub device: ConfigDevice,
-    /// Updates check configuration
+    /// Update checks configuration
     #[serde(deserialize_with = "deserialize_or_default")]
     pub updates: ConfigUpdates,
     /// IPFIX collector configuration (bind address and port)

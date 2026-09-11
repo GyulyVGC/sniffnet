@@ -12,13 +12,13 @@ use crate::gui::styles::style_constants::FONT_SIZE_TITLE;
 use crate::gui::styles::types::gradient_type::GradientType;
 use crate::gui::types::config_updates::ConfigUpdates;
 use crate::gui::types::message::Message;
-use crate::gui::types::updates_status::UpdatesStatus;
+use crate::gui::types::update_status::UpdateStatus;
 use crate::translations::translations::{
     ask_clear_all_translation, ask_quit_translation, clear_all_translation,
     quit_analysis_translation, yes_translation,
 };
 use crate::translations::translations_6::{
-    disable_updates_check_translation, notify_on_updates_translation, updates_status_translation,
+    disable_update_checks_translation, notify_on_updates_translation, update_status_translation,
 };
 use crate::{Language, StyleType};
 
@@ -71,11 +71,11 @@ pub fn get_clear_all_overlay<'a>(
         .class(ContainerType::Modal)
 }
 
-pub fn get_updates_status_overlay<'a>(
+pub fn get_update_status_overlay<'a>(
     color_gradient: GradientType,
     language: Language,
     config_updates: ConfigUpdates,
-    updates_status: &UpdatesStatus,
+    update_status: &UpdateStatus,
     dots_pulse: &(String, u8),
 ) -> Container<'a, Message, StyleType> {
     let notify_updates_checkbox = if config_updates.disable_checks() {
@@ -90,8 +90,8 @@ pub fn get_updates_status_overlay<'a>(
     };
 
     let disable_checks_checkbox = Checkbox::new(config_updates.disable_checks())
-        .label(disable_updates_check_translation(language))
-        .on_toggle(move |_| Message::ToggleDisableUpdatesCheck)
+        .label(disable_update_checks_translation(language))
+        .on_toggle(move |_| Message::ToggleDisableUpdateChecks)
         .size(18);
 
     let checkboxes = center(
@@ -105,7 +105,7 @@ pub fn get_updates_status_overlay<'a>(
     let content = Column::new()
         .padding(10)
         .width(Length::Fill)
-        .push(updates_status.desc(language, dots_pulse.0.len()))
+        .push(update_status.desc(language, dots_pulse.0.len()))
         .push(RuleType::Standard.horizontal(10))
         .push(checkboxes);
 
@@ -114,7 +114,7 @@ pub fn get_updates_status_overlay<'a>(
             .push(get_modal_header(
                 color_gradient,
                 language,
-                updates_status_translation(language),
+                update_status_translation(language),
             ))
             .push(content),
     )

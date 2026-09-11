@@ -17,7 +17,7 @@ use iced::widget::{Column, Container, Text, Tooltip, button, center};
 use iced::{Length, alignment};
 
 #[derive(Debug, Clone, PartialEq, Eq, Default)]
-pub enum UpdatesStatus {
+pub enum UpdateStatus {
     #[default]
     Unknown,
     InProgress,
@@ -25,13 +25,13 @@ pub enum UpdatesStatus {
     UpdateAvailable(String),
 }
 
-impl UpdatesStatus {
+impl UpdateStatus {
     pub fn icon<'a>(&self, dots: usize) -> Text<'a, StyleType> {
         match self {
-            UpdatesStatus::Unknown => Text::new("?"),
-            UpdatesStatus::InProgress => Icon::get_hourglass(dots),
-            UpdatesStatus::UpToDate => Text::new("✔"),
-            UpdatesStatus::UpdateAvailable(_) => Icon::NewerVersion.to_text().size(22),
+            UpdateStatus::Unknown => Text::new("?"),
+            UpdateStatus::InProgress => Icon::get_hourglass(dots),
+            UpdateStatus::UpToDate => Text::new("✔"),
+            UpdateStatus::UpdateAvailable(_) => Icon::NewerVersion.to_text().size(22),
         }
     }
 
@@ -39,18 +39,18 @@ impl UpdatesStatus {
         let mut content = Column::new().spacing(10).align_x(Horizontal::Center);
 
         match self {
-            UpdatesStatus::Unknown => {
+            UpdateStatus::Unknown => {
                 content = content.push(Text::new("?").size(50));
             }
-            UpdatesStatus::InProgress => {
+            UpdateStatus::InProgress => {
                 content = content.push(Icon::get_hourglass(dots).size(50));
             }
-            UpdatesStatus::UpToDate => {
+            UpdateStatus::UpToDate => {
                 content = content
                     .push(Text::new(format!("{SNIFFNET_TITLECASE} {APP_VERSION} ✔")))
                     .push(up_to_date_translation(language));
             }
-            UpdatesStatus::UpdateAvailable(version) => {
+            UpdateStatus::UpdateAvailable(version) => {
                 let button = button(
                     Text::new(format!("{SNIFFNET_TITLECASE} {version}"))
                         .width(Length::Fill)

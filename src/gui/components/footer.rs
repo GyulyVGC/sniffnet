@@ -15,8 +15,8 @@ use crate::gui::styles::text::TextType;
 use crate::gui::styles::types::gradient_type::GradientType;
 use crate::gui::styles::types::style_type::StyleType;
 use crate::gui::types::message::Message;
-use crate::gui::types::updates_status::UpdatesStatus;
-use crate::translations::translations_6::updates_status_translation;
+use crate::gui::types::update_status::UpdateStatus;
+use crate::translations::translations_6::update_status_translation;
 use crate::utils::formatted_strings::APP_VERSION;
 use crate::utils::types::icon::Icon;
 use crate::utils::types::web_page::WebPage;
@@ -26,14 +26,14 @@ pub fn footer<'a>(
     thumbnail: bool,
     language: Language,
     color_gradient: GradientType,
-    updates_status: &UpdatesStatus,
+    update_status: &UpdateStatus,
     dots_pulse: &(String, u8),
 ) -> Container<'a, Message, StyleType> {
     if thumbnail {
         return thumbnail_footer();
     }
 
-    let release_details_row = get_release_details(language, updates_status, dots_pulse);
+    let release_details_row = get_release_details(language, update_status, dots_pulse);
 
     let heart_size = match dots_pulse.1 {
         1 => 17.0,
@@ -188,7 +188,7 @@ fn get_button_sponsor<'a>() -> Tooltip<'a, Message, StyleType> {
 
 fn get_release_details<'a>(
     language: Language,
-    updates_status: &UpdatesStatus,
+    update_status: &UpdateStatus,
     dots_pulse: &(String, u8),
 ) -> Row<'a, Message, StyleType> {
     let mut ret_val = Row::new()
@@ -198,7 +198,7 @@ fn get_release_details<'a>(
         .push(Text::new(format!("{SNIFFNET_TITLECASE} {APP_VERSION}")).size(FONT_SIZE_FOOTER));
 
     let mut button = button(
-        updates_status
+        update_status
             .icon(dots_pulse.0.len())
             .align_x(Alignment::Center)
             .align_y(Alignment::Center)
@@ -207,15 +207,15 @@ fn get_release_details<'a>(
     .padding(0)
     .height(35)
     .width(35)
-    .on_press(Message::ShowModal(MyModal::UpdatesStatus(true)));
+    .on_press(Message::ShowModal(MyModal::UpdateStatus(true)));
 
-    if matches!(updates_status, UpdatesStatus::UpdateAvailable(_)) {
+    if matches!(update_status, UpdateStatus::UpdateAvailable(_)) {
         button = button.class(ButtonType::Alert);
     }
 
     let tooltip = Tooltip::new(
         button,
-        Text::new(updates_status_translation(language)).size(FONT_SIZE_FOOTER),
+        Text::new(update_status_translation(language)).size(FONT_SIZE_FOOTER),
         Position::Right,
     )
     .gap(5)

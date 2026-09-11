@@ -4,7 +4,7 @@ use crate::chart::types::preview_chart::PreviewChart;
 use crate::gui::components::footer::footer;
 use crate::gui::components::header::header;
 use crate::gui::components::modal::{
-    get_clear_all_overlay, get_exit_overlay, get_updates_status_overlay, modal,
+    get_clear_all_overlay, get_exit_overlay, get_update_status_overlay, modal,
 };
 use crate::gui::components::types::my_modal::MyModal;
 use crate::gui::pages::connection_details_page::connection_details_page;
@@ -28,7 +28,7 @@ use crate::gui::types::favorite::FavoriteKey;
 use crate::gui::types::message::Message;
 use crate::gui::types::settings::Settings;
 use crate::gui::types::timing_events::TimingEvents;
-use crate::gui::types::updates_status::UpdatesStatus;
+use crate::gui::types::update_status::UpdateStatus;
 use crate::mmdb::asn::ASN_MMDB;
 use crate::mmdb::country::COUNTRY_MMDB;
 use crate::mmdb::types::mmdb_reader::{MmdbReader, MmdbReaders};
@@ -106,7 +106,7 @@ pub struct Sniffer {
     /// Log of the displayed notifications, with the total number of notifications for this capture
     pub logged_notifications: LoggedNotifications,
     /// Reports if a newer release of the software is available on GitHub
-    pub updates_status: UpdatesStatus,
+    pub update_status: UpdateStatus,
     /// Network device to be analyzed, or PCAP file to be imported
     pub capture_source: CaptureSource,
     /// Signals if the capture backend reported a problem
@@ -172,7 +172,7 @@ impl Sniffer {
             info_traffic: InfoTraffic::default(),
             addresses_resolved: HashMap::new(),
             logged_notifications: LoggedNotifications::default(),
-            updates_status: UpdatesStatus::default(),
+            update_status: UpdateStatus::default(),
             capture_source,
             capture_error: None,
             dots_pulse: (".".to_string(), 0),
@@ -368,9 +368,9 @@ impl Sniffer {
             Message::CtrlSpacePressed => self.ctrl_space_pressed(),
             Message::ScaleFactorShortcut(increase) => self.scale_factor_shortcut(increase),
             Message::CheckNewerRelease => return self.check_newer_release(),
-            Message::SetUpdatesStatus(status) => self.set_updates_status(status),
+            Message::SetUpdateStatus(status) => self.set_update_status(status),
             Message::ToggleNotifyUpdates => self.toggle_notify_updates(),
-            Message::ToggleDisableUpdatesCheck => return self.toggle_disable_updates_check(),
+            Message::ToggleDisableUpdateChecks => return self.toggle_disable_update_checks(),
             Message::SetPcapImport(path) => self.set_pcap_import(path),
             Message::SetIpfixAddr(addr) => self.set_ipfix_addr(addr),
             Message::SetIpfixPort(port) => self.set_ipfix_port(port),
@@ -423,7 +423,7 @@ impl Sniffer {
             self.thumbnail,
             language,
             color_gradient,
-            &self.updates_status,
+            &self.update_status,
             &self.dots_pulse,
         );
 
@@ -461,12 +461,12 @@ impl Sniffer {
                     MyModal::ConnectionDetails(key) => {
                         (connection_details_page(self, *key).into(), true)
                     }
-                    MyModal::UpdatesStatus(close_on_blur) => (
-                        get_updates_status_overlay(
+                    MyModal::UpdateStatus(close_on_blur) => (
+                        get_update_status_overlay(
                             color_gradient,
                             language,
                             self.conf.updates,
-                            &self.updates_status,
+                            &self.update_status,
                             &self.dots_pulse,
                         )
                         .into(),
@@ -863,31 +863,31 @@ impl Sniffer {
         if self.conf.updates.disable_checks() {
             Task::none()
         } else {
-            self.updates_status = UpdatesStatus::InProgress;
-            Task::perform(is_newer_release_available(), Message::SetUpdatesStatus)
+            self.update_status = UpdateStatus::InProgress;
+            Task::perform(is_newer_release_available(), Message::SetUpdateStatus)
         }
     }
 
-    fn set_updates_status(&mut self, status: UpdatesStatus) {
+    fn set_update_status(&mut self, status: UpdateStatus) {
         if self.conf.updates.notify_updates()
-            && matches!(status, UpdatesStatus::UpdateAvailable(_))
-            && self.updates_status != status
+            && !self.conf.updates.disable_checks()
+            && matches!(status, UpdateStatus::UpdateAvailable(_))
         {
             self.hide_modal();
             self.close_settings();
-            self.show_modal(MyModal::UpdatesStatus(false));
+            self.show_modal(MyModal::UpdateStatus(false));
         }
 
-        self.updates_status = status;
+        self.update_status = status;
     }
 
     fn toggle_notify_updates(&mut self) {
         self.conf.updates.toggle_notify_updates();
     }
 
-    fn toggle_disable_updates_check(&mut self) -> Task<Message> {
+    fn toggle_disable_update_checks(&mut self) -> Task<Message> {
         self.conf.updates.toggle_disable_checks();
-        if !self.conf.updates.disable_checks() && self.updates_status == UpdatesStatus::Unknown {
+        if !self.conf.updates.disable_checks() && self.update_status == UpdateStatus::Unknown {
             self.check_newer_release()
         } else {
             Task::none()

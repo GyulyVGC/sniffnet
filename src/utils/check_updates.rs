@@ -1,4 +1,4 @@
-use crate::gui::types::updates_status::UpdatesStatus;
+use crate::gui::types::update_status::UpdateStatus;
 use crate::utils::error_logger::{ErrorLogger, Location};
 use crate::utils::formatted_strings::APP_VERSION;
 use crate::{SNIFFNET_LOWERCASE, location};
@@ -12,20 +12,20 @@ struct AppVersion {
 }
 
 /// Checks whether a newer release of Sniffnet is available on GitHub
-pub async fn is_newer_release_available() -> UpdatesStatus {
+pub async fn is_newer_release_available() -> UpdateStatus {
     is_newer_release_available_inner(6, 30).await
 }
 
 async fn is_newer_release_available_inner(
     max_retries: u8,
     seconds_between_retries: u8,
-) -> UpdatesStatus {
+) -> UpdateStatus {
     let Ok(client) = reqwest::Client::builder()
         .user_agent(format!("{SNIFFNET_LOWERCASE}-{APP_VERSION}"))
         .build()
         .log_err(location!())
     else {
-        return UpdatesStatus::Unknown;
+        return UpdateStatus::Unknown;
     };
     let response = client
         .get("https://api.github.com/repos/GyulyVGC/sniffnet/releases/latest")
@@ -63,9 +63,9 @@ async fn is_newer_release_available_inner(
             (Version::parse(stripped), Version::parse(APP_VERSION))
         {
             return if latest_semver > current_semver {
-                UpdatesStatus::UpdateAvailable(stripped.to_string())
+                UpdateStatus::UpdateAvailable(stripped.to_string())
             } else {
-                UpdatesStatus::UpToDate
+                UpdateStatus::UpToDate
             };
         }
     }
@@ -79,7 +79,7 @@ async fn is_newer_release_available_inner(
         ))
         .await
     } else {
-        UpdatesStatus::Unknown
+        UpdateStatus::Unknown
     }
 }
 
@@ -93,7 +93,7 @@ mod tests {
         let result = is_newer_release_available_inner(6, 2).await;
         assert_matches!(
             result,
-            UpdatesStatus::UpToDate | UpdatesStatus::UpdateAvailable(_)
+            UpdateStatus::UpToDate | UpdateStatus::UpdateAvailable(_)
         );
     }
 }
