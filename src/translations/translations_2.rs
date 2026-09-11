@@ -244,7 +244,7 @@ pub fn only_top_30_items_translation(language: Language) -> &'static str {
 //     }
 // }
 
-pub fn local_translation(language: Language) -> &'static str {
+pub fn local_network_translation(language: Language) -> &'static str {
     match language {
         Language::EN => "Local network",
         Language::CS => "Místní síť",
@@ -275,7 +275,7 @@ pub fn local_translation(language: Language) -> &'static str {
     }
 }
 
-pub fn unknown_translation(language: Language) -> &'static str {
+pub fn unknown_location_translation(language: Language) -> &'static str {
     match language {
         Language::EN => "Unknown location",
         Language::CS => "Neznámá lokalita",
