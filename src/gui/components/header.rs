@@ -3,8 +3,9 @@
 use iced::widget::text::LineHeight;
 use iced::widget::tooltip::Position;
 use iced::widget::{Container, Row, Space, Text, Tooltip, button};
-use iced::{Alignment, Length};
+use iced::{Alignment, Element, Length};
 
+use crate::gui::components::footer::get_release_details;
 use crate::gui::components::tab::notifications_badge;
 use crate::gui::pages::types::settings_page::SettingsPage;
 use crate::gui::sniffer::Sniffer;
@@ -25,6 +26,7 @@ pub fn header(sniffer: &Sniffer) -> Container<'_, Message, StyleType> {
     let Settings {
         language,
         color_gradient,
+        expanded_view,
         ..
     } = sniffer.conf.settings;
 
@@ -41,12 +43,23 @@ pub fn header(sniffer: &Sniffer) -> Container<'_, Message, StyleType> {
     let last_opened_setting = sniffer.conf.last_opened_setting;
     let is_running = sniffer.running_page.is_some();
 
-    let logo = Icon::Sniffnet
-        .to_text()
-        .align_y(Alignment::Center)
-        .height(Length::Fill)
-        .line_height(LineHeight::Relative(0.7))
-        .size(80);
+    let logo: Element<Message, StyleType> = if expanded_view {
+        get_release_details(
+            language,
+            &sniffer.update_status,
+            &sniffer.dots_pulse,
+            expanded_view,
+        )
+        .into()
+    } else {
+        Icon::Sniffnet
+            .to_text()
+            .align_y(Alignment::Center)
+            .height(Length::Fill)
+            .line_height(LineHeight::Relative(0.7))
+            .size(80)
+            .into()
+    };
 
     Container::new(
         Row::new()
@@ -75,7 +88,7 @@ pub fn header(sniffer: &Sniffer) -> Container<'_, Message, StyleType> {
             .push(Space::new().width(Length::Fill))
             .push(get_button_settings(language, last_opened_setting)),
     )
-    .height(70)
+    .height(if expanded_view { 45 } else { 70 })
     .align_y(Alignment::Center)
     .class(ContainerType::Gradient(color_gradient))
 }
@@ -90,7 +103,7 @@ fn get_button_reset<'a>(language: Language) -> Tooltip<'a, Message, StyleType> {
             .line_height(LineHeight::Relative(1.0)),
     )
     .padding(10)
-    .height(40)
+    .height(35)
     .width(60)
     .on_press(Message::ResetButtonPressed);
 
@@ -111,12 +124,12 @@ pub fn get_button_settings<'a>(
     let content = button(
         Icon::Settings
             .to_text()
-            .size(20)
+            .size(18)
             .align_x(Alignment::Center)
             .align_y(Alignment::Center),
     )
     .padding(0)
-    .height(40)
+    .height(35)
     .width(60)
     .on_press(Message::OpenSettings(open_overlay));
 

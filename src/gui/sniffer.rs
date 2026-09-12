@@ -392,6 +392,7 @@ impl Sniffer {
         let Settings {
             language,
             color_gradient,
+            expanded_view,
             ..
         } = self.conf.settings;
 
@@ -426,6 +427,7 @@ impl Sniffer {
             color_gradient,
             &self.update_status,
             &self.dots_pulse,
+            expanded_view,
         );
 
         let content: Element<Message, StyleType> =
