@@ -1,3 +1,4 @@
+use crate::gui::types::update_status::UpdateStatus;
 use crate::utils::error_logger::{ErrorLogger, Location};
 use crate::utils::formatted_strings::APP_VERSION;
 use crate::{SNIFFNET_LOWERCASE, location};
@@ -10,19 +11,22 @@ struct AppVersion {
     name: String,
 }
 
-/// Calls a method to check if a newer release of Sniffnet is available on GitHub
-/// and updates application status accordingly
-pub async fn set_newer_release_status() -> Option<bool> {
-    is_newer_release_available(6, 30).await
+/// Checks whether a newer release of Sniffnet is available on GitHub
+pub async fn is_newer_release_available() -> UpdateStatus {
+    is_newer_release_available_inner(6, 30).await
 }
 
-/// Checks if a newer release of Sniffnet is available on GitHub
-async fn is_newer_release_available(max_retries: u8, seconds_between_retries: u8) -> Option<bool> {
-    let client = reqwest::Client::builder()
+async fn is_newer_release_available_inner(
+    max_retries: u8,
+    seconds_between_retries: u8,
+) -> UpdateStatus {
+    let Ok(client) = reqwest::Client::builder()
         .user_agent(format!("{SNIFFNET_LOWERCASE}-{APP_VERSION}"))
         .build()
         .log_err(location!())
-        .ok()?;
+    else {
+        return UpdateStatus::Unknown;
+    };
     let response = client
         .get("https://api.github.com/repos/GyulyVGC/sniffnet/releases/latest")
         .header("Accept", "application/vnd.github+json")
@@ -58,30 +62,38 @@ async fn is_newer_release_available(max_retries: u8, seconds_between_retries: u8
         if let (Ok(latest_semver), Ok(current_semver)) =
             (Version::parse(stripped), Version::parse(APP_VERSION))
         {
-            return Some(latest_semver > current_semver);
+            return if latest_semver > current_semver {
+                UpdateStatus::UpdateAvailable(stripped.to_string())
+            } else {
+                UpdateStatus::UpToDate
+            };
         }
     }
     let retries_left = max_retries.saturating_sub(1);
     if retries_left > 0 {
         // sleep seconds_between_retries and retries the request
         tokio::time::sleep(Duration::from_secs(u64::from(seconds_between_retries))).await;
-        Box::pin(is_newer_release_available(
+        Box::pin(is_newer_release_available_inner(
             retries_left,
             seconds_between_retries,
         ))
         .await
     } else {
-        None
+        UpdateStatus::Unknown
     }
 }
 
 #[cfg(all(test, not(target_os = "macos")))]
 mod tests {
     use super::*;
+    use std::assert_matches;
 
     #[tokio::test]
-    async fn fetch_latest_release_from_github() {
-        let result = is_newer_release_available(6, 2).await;
-        result.expect("Latest release request from GitHub error");
+    async fn test_fetch_latest_release_from_github() {
+        let result = is_newer_release_available_inner(6, 2).await;
+        assert_matches!(
+            result,
+            UpdateStatus::UpToDate | UpdateStatus::UpdateAvailable(_)
+        );
     }
 }

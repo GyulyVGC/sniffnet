@@ -51,3 +51,35 @@ pub fn make_sure_valid_ipfix_translation(language: Language) -> &'static str {
         _ => "Make sure the exporter is sending valid IPFIX flows to this collector.",
     }
 }
+
+pub fn disable_update_checks_translation(language: Language) -> &'static str {
+    match language {
+        Language::EN => "Disable update checks",
+        Language::IT => "Disattiva il controllo degli aggiornamenti",
+        _ => "Disable update checks",
+    }
+}
+
+pub fn notify_on_updates_translation(language: Language) -> &'static str {
+    match language {
+        Language::EN => "Notify when updates are available",
+        Language::IT => "Avvisami quando sono disponibili aggiornamenti",
+        _ => "Notify when updates are available",
+    }
+}
+
+pub fn update_status_translation(language: Language) -> &'static str {
+    match language {
+        Language::EN => "Update status",
+        Language::IT => "Stato degli aggiornamenti",
+        _ => "Update status",
+    }
+}
+
+pub fn up_to_date_translation(language: Language) -> &'static str {
+    match language {
+        Language::EN => "You are up to date!",
+        Language::IT => "Sei aggiornato!",
+        _ => "You are up to date!",
+    }
+}

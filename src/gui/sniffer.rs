@@ -3,7 +3,9 @@
 use crate::chart::types::preview_chart::PreviewChart;
 use crate::gui::components::footer::footer;
 use crate::gui::components::header::header;
-use crate::gui::components::modal::{get_clear_all_overlay, get_exit_overlay, modal};
+use crate::gui::components::modal::{
+    get_clear_all_overlay, get_exit_overlay, get_update_status_overlay, modal,
+};
 use crate::gui::components::types::my_modal::MyModal;
 use crate::gui::pages::connection_details_page::connection_details_page;
 use crate::gui::pages::initial_page::initial_page;
@@ -26,6 +28,7 @@ use crate::gui::types::favorite::FavoriteKey;
 use crate::gui::types::message::Message;
 use crate::gui::types::settings::Settings;
 use crate::gui::types::timing_events::TimingEvents;
+use crate::gui::types::update_status::UpdateStatus;
 use crate::mmdb::asn::ASN_MMDB;
 use crate::mmdb::country::COUNTRY_MMDB;
 use crate::mmdb::types::mmdb_reader::{MmdbReader, MmdbReaders};
@@ -53,7 +56,7 @@ use crate::report::get_report_entries::get_searched_entries;
 use crate::report::types::search_parameters::SearchParameters;
 use crate::report::types::sort_type::SortType;
 use crate::translations::types::language::Language;
-use crate::utils::check_updates::set_newer_release_status;
+use crate::utils::check_updates::is_newer_release_available;
 use crate::utils::error_logger::{ErrorLogger, Location};
 use crate::utils::types::file_info::FileInfo;
 use crate::utils::types::icon::Icon;
@@ -103,7 +106,7 @@ pub struct Sniffer {
     /// Log of the displayed notifications, with the total number of notifications for this capture
     pub logged_notifications: LoggedNotifications,
     /// Reports if a newer release of the software is available on GitHub
-    pub newer_release_available: Option<bool>,
+    pub update_status: UpdateStatus,
     /// Network device to be analyzed, or PCAP file to be imported
     pub capture_source: CaptureSource,
     /// Signals if the capture backend reported a problem
@@ -169,7 +172,7 @@ impl Sniffer {
             info_traffic: InfoTraffic::default(),
             addresses_resolved: HashMap::new(),
             logged_notifications: LoggedNotifications::default(),
-            newer_release_available: None,
+            update_status: UpdateStatus::default(),
             capture_source,
             capture_error: None,
             dots_pulse: (".".to_string(), 0),
@@ -261,7 +264,7 @@ impl Sniffer {
     }
 
     fn time_subscription(&self) -> Subscription<Message> {
-        if let Some((w, _)) = self.welcome {
+        let welcome_sub = if let Some((w, _)) = self.welcome {
             let sub = iced::time::every(Duration::from_millis(100));
             if w {
                 sub.map(|_| Message::Welcome)
@@ -269,8 +272,14 @@ impl Sniffer {
                 sub.map(|_| Message::Quit)
             }
         } else {
-            iced::time::every(Duration::from_secs(1)).map(|_| Message::Periodic)
-        }
+            Subscription::none()
+        };
+
+        Subscription::batch([
+            iced::time::every(Duration::from_secs(1)).map(|_| Message::Periodic),
+            welcome_sub,
+            iced::time::every(Duration::from_hours(24)).map(|_| Message::CheckNewerRelease),
+        ])
     }
 
     fn window_subscription() -> Subscription<Message> {
@@ -358,7 +367,10 @@ impl Sniffer {
             Message::CtrlTPressed => return self.ctrl_t_pressed(),
             Message::CtrlSpacePressed => self.ctrl_space_pressed(),
             Message::ScaleFactorShortcut(increase) => self.scale_factor_shortcut(increase),
-            Message::SetNewerReleaseStatus(status) => self.set_newer_release_status(status),
+            Message::CheckNewerRelease => return self.check_newer_release(),
+            Message::SetUpdateStatus(status) => return self.set_update_status(status),
+            Message::ToggleNotifyUpdates => self.toggle_notify_updates(),
+            Message::ToggleDisableUpdateChecks => return self.toggle_disable_update_checks(),
             Message::SetPcapImport(path) => self.set_pcap_import(path),
             Message::SetIpfixAddr(addr) => self.set_ipfix_addr(addr),
             Message::SetIpfixPort(port) => self.set_ipfix_port(port),
@@ -411,7 +423,7 @@ impl Sniffer {
             self.thumbnail,
             language,
             color_gradient,
-            self.newer_release_available,
+            &self.update_status,
             &self.dots_pulse,
         );
 
@@ -434,15 +446,35 @@ impl Sniffer {
                 }
             }
             Some(m) => {
-                let overlay: Element<Message, StyleType> = match m {
-                    MyModal::Reset => get_exit_overlay(Message::Reset, color_gradient, language),
-                    MyModal::Quit => get_exit_overlay(Message::Quit, color_gradient, language),
-                    MyModal::ClearAll => get_clear_all_overlay(color_gradient, language),
-                    MyModal::ConnectionDetails(key) => connection_details_page(self, *key),
-                }
-                .into();
+                let (overlay, close_on_blur): (Element<Message, StyleType>, bool) = match m {
+                    MyModal::Reset => (
+                        get_exit_overlay(Message::Reset, color_gradient, language).into(),
+                        true,
+                    ),
+                    MyModal::Quit => (
+                        get_exit_overlay(Message::Quit, color_gradient, language).into(),
+                        true,
+                    ),
+                    MyModal::ClearAll => {
+                        (get_clear_all_overlay(color_gradient, language).into(), true)
+                    }
+                    MyModal::ConnectionDetails(key) => {
+                        (connection_details_page(self, *key).into(), true)
+                    }
+                    MyModal::UpdateStatus(close_on_blur) => (
+                        get_update_status_overlay(
+                            color_gradient,
+                            language,
+                            self.conf.updates,
+                            &self.update_status,
+                            &self.dots_pulse,
+                        )
+                        .into(),
+                        *close_on_blur,
+                    ),
+                };
 
-                modal(content, overlay, Message::HideModal)
+                modal(content, overlay, close_on_blur.then(|| Message::HideModal))
             }
         };
 
@@ -479,7 +511,7 @@ impl Sniffer {
         let previews_task = self.start_traffic_previews();
         Task::batch([
             Sniffer::register_sigint_handler(),
-            Task::perform(set_newer_release_status(), Message::SetNewerReleaseStatus),
+            self.check_newer_release(),
             previews_task,
             self.load_ip_blacklist(self.conf.settings.ip_blacklist.clone()),
         ])
@@ -827,8 +859,46 @@ impl Sniffer {
         }
     }
 
-    fn set_newer_release_status(&mut self, status: Option<bool>) {
-        self.newer_release_available = status;
+    fn check_newer_release(&mut self) -> Task<Message> {
+        if self.conf.updates.disable_checks() {
+            Task::none()
+        } else {
+            self.update_status = UpdateStatus::InProgress;
+            Task::perform(is_newer_release_available(), Message::SetUpdateStatus)
+        }
+    }
+
+    fn set_update_status(&mut self, status: UpdateStatus) -> Task<Message> {
+        self.update_status = status;
+
+        if self.conf.updates.notify_updates()
+            && !self.conf.updates.disable_checks()
+            && matches!(self.update_status, UpdateStatus::UpdateAvailable(_))
+        {
+            if self.thumbnail {
+                return self
+                    .toggle_thumbnail(false)
+                    .chain(Task::done(Message::ShowModal(MyModal::UpdateStatus(false))));
+            }
+
+            self.hide_modal();
+            self.close_settings();
+            self.show_modal(MyModal::UpdateStatus(false));
+        }
+        Task::none()
+    }
+
+    fn toggle_notify_updates(&mut self) {
+        self.conf.updates.toggle_notify_updates();
+    }
+
+    fn toggle_disable_update_checks(&mut self) -> Task<Message> {
+        self.conf.updates.toggle_disable_checks();
+        if !self.conf.updates.disable_checks() && self.update_status == UpdateStatus::Unknown {
+            self.check_newer_release()
+        } else {
+            Task::none()
+        }
     }
 
     fn set_pcap_import(&mut self, path: String) {
@@ -1172,12 +1242,10 @@ impl Sniffer {
     }
 
     fn update_waiting_dots(&mut self) {
-        if !self.frozen {
-            if self.dots_pulse.0.len() > 2 {
-                self.dots_pulse.0 = String::new();
-            }
-            self.dots_pulse.0 = ".".repeat(self.dots_pulse.0.len() + 1);
+        if self.dots_pulse.0.len() > 2 {
+            self.dots_pulse.0 = String::new();
         }
+        self.dots_pulse.0 = ".".repeat(self.dots_pulse.0.len() + 1);
     }
 
     fn add_or_remove_favorite(&mut self, fav: &FavoriteKey, add: bool) {
@@ -1504,6 +1572,7 @@ mod tests {
     use crate::gui::pages::types::settings_page::SettingsPage;
     use crate::gui::styles::types::gradient_type::GradientType;
     use crate::gui::types::conf::Conf;
+    use crate::gui::types::config_updates::ConfigUpdates;
     use crate::gui::types::config_window::ConfigWindow;
     use crate::gui::types::export_pcap::ExportPcap;
     use crate::gui::types::favorite::{FavoriteKey, Favorites};
@@ -1671,20 +1740,6 @@ mod tests {
 
         sniffer.update(Message::Periodic);
         assert_eq!(sniffer.dots_pulse, (".".to_string(), 0));
-
-        // if frozen, string won't update
-        sniffer.frozen = true;
-
-        sniffer.update(Message::Periodic);
-        assert_eq!(sniffer.dots_pulse, (".".to_string(), 1));
-
-        sniffer.update(Message::BpfFilter(String::new()));
-        assert_eq!(sniffer.dots_pulse, (".".to_string(), 2));
-
-        sniffer.frozen = false;
-
-        sniffer.update(Message::Periodic);
-        assert_eq!(sniffer.dots_pulse, ("..".to_string(), 0));
     }
 
     #[test]
@@ -2264,6 +2319,7 @@ mod tests {
                 program_favorites_filter: true,
                 window: ConfigWindow::new((1000.0, 999.0), (-5.0, 277.5), (20.0, 20.0)),
                 device: ConfigDevice::default(),
+                updates: ConfigUpdates::default(),
                 capture_source_picklist: CaptureSourcePicklist::File,
                 filters: Filters {
                     expanded: true,

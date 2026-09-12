@@ -1,5 +1,6 @@
 use crate::gui::pages::types::running_page::RunningPage;
 use crate::gui::pages::types::settings_page::SettingsPage;
+use crate::gui::types::config_updates::ConfigUpdates;
 use crate::gui::types::config_window::ConfigWindow;
 use crate::gui::types::export_pcap::ExportPcap;
 #[cfg(not(test))]
@@ -91,6 +92,9 @@ pub struct Conf {
     /// Last selected network device name
     #[serde(deserialize_with = "deserialize_or_default")]
     pub device: ConfigDevice,
+    /// Update checks configuration
+    #[serde(deserialize_with = "deserialize_or_default")]
+    pub updates: ConfigUpdates,
     /// IPFIX collector configuration (bind address and port)
     #[serde(deserialize_with = "deserialize_or_default")]
     pub ipfix_socket: MyIpfixSocket,

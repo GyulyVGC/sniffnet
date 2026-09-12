@@ -3,6 +3,7 @@ use crate::gui::pages::types::running_page::RunningPage;
 use crate::gui::pages::types::settings_page::SettingsPage;
 use crate::gui::styles::types::gradient_type::GradientType;
 use crate::gui::types::favorite::FavoriteKey;
+use crate::gui::types::update_status::UpdateStatus;
 use crate::networking::traffic_preview::TrafficPreview;
 use crate::networking::types::capture_context::CaptureSourcePicklist;
 use crate::networking::types::data_representation::DataRepr;
@@ -146,8 +147,14 @@ pub enum Message {
     CtrlSpacePressed,
     /// Edit scale factor via keyboard shortcut
     ScaleFactorShortcut(bool),
+    /// Check for a newer release
+    CheckNewerRelease,
     /// Set new release status
-    SetNewerReleaseStatus(Option<bool>),
+    SetUpdateStatus(UpdateStatus),
+    /// Toggle whether to notify about new releases
+    ToggleNotifyUpdates,
+    /// Toggle whether to check for new releases
+    ToggleDisableUpdateChecks,
     /// Set the pcap import path
     SetPcapImport(String),
     /// Set the IPFIX collector bind address

@@ -11,4 +11,6 @@ pub enum MyModal {
     ClearAll,
     /// Connection details modal.
     ConnectionDetails(AddressPortPair),
+    /// Update status modal (bool tells whether modal can be closed on blur).
+    UpdateStatus(bool),
 }
