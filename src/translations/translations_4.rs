@@ -31,33 +31,33 @@ pub fn reserved_address_translation(language: Language, info: &str) -> String {
     }
 }
 
-pub fn share_feedback_translation(language: Language) -> &'static str {
-    match language {
-        Language::EN => "Share your feedback",
-        Language::CS => "Sdílejte své hodnocení",
-        // Language::FA => "اشتراک‌گذاری بازخورد",
-        Language::IT => "Condividi il tuo feedback",
-        Language::JA => "フィードバックを共有",
-        Language::ZH => "分享您的反馈",
-        Language::ZH_TW => "分享您的意見回饋",
-        Language::FR => "Partagez vos commentaires",
-        Language::NL => "Deel uw feedback",
-        Language::ES => "Comparte tus comentarios",
-        Language::RO => "Împărtășiți feedback-ul dvs",
-        Language::DE => "Feedback geben",
-        Language::UZ => "Fikr-mulohazalaringizni ulashing",
-        Language::ID => "Berikan masukanmu",
-        Language::EL => "Μοιραστείτε τα σχόλιά σας",
-        Language::VI => "Chia sẻ phản hồi của bạn",
-        Language::TR => "Geri bildirimlerinizi paylaşın",
-        Language::UK => "Надіслати відгук",
-        Language::SV => "Dela din feedback",
-        Language::HU => "Visszajelzés megosztása",
-        Language::SI => "ඔබේ අදහස් ලබා දෙන්න",
-        Language::RU => "Оставить отзыв",
-        _ => "Share your feedback",
-    }
-}
+// pub fn share_feedback_translation(language: Language) -> &'static str {
+//     match language {
+//         Language::EN => "Share your feedback",
+//         Language::CS => "Sdílejte své hodnocení",
+//         // Language::FA => "اشتراک‌گذاری بازخورد",
+//         Language::IT => "Condividi il tuo feedback",
+//         Language::JA => "フィードバックを共有",
+//         Language::ZH => "分享您的反馈",
+//         Language::ZH_TW => "分享您的意見回饋",
+//         Language::FR => "Partagez vos commentaires",
+//         Language::NL => "Deel uw feedback",
+//         Language::ES => "Comparte tus comentarios",
+//         Language::RO => "Împărtășiți feedback-ul dvs",
+//         Language::DE => "Feedback geben",
+//         Language::UZ => "Fikr-mulohazalaringizni ulashing",
+//         Language::ID => "Berikan masukanmu",
+//         Language::EL => "Μοιραστείτε τα σχόλιά σας",
+//         Language::VI => "Chia sẻ phản hồi của bạn",
+//         Language::TR => "Geri bildirimlerinizi paylaşın",
+//         Language::UK => "Надіслати відгук",
+//         Language::SV => "Dela din feedback",
+//         Language::HU => "Visszajelzés megosztása",
+//         Language::SI => "ඔබේ අදහස් ලබා දෙන්න",
+//         Language::RU => "Оставить отзыв",
+//         _ => "Share your feedback",
+//     }
+// }
 
 // refers to bytes or packets excluded because of the filters
 // pub fn excluded_translation(language: Language) -> &'static str {

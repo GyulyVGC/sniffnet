@@ -1,7 +1,9 @@
 use iced::widget::text::LineHeight;
 use iced::widget::tooltip::Position;
-use iced::widget::{Column, Container, PickList, Row, Slider, Space, Text, Tooltip, button};
-use iced::{Alignment, Length, Padding};
+use iced::widget::{
+    Column, Container, PickList, Row, Slider, Space, Text, Toggler, Tooltip, button,
+};
+use iced::{Alignment, Length};
 
 use crate::gui::components::button::{button_open_file, row_open_link_tooltip};
 use crate::gui::components::tab::get_settings_tabs;
@@ -10,7 +12,9 @@ use crate::gui::pages::types::settings_page::SettingsPage;
 use crate::gui::styles::button::ButtonType;
 use crate::gui::styles::container::ContainerType;
 use crate::gui::styles::rule::RuleType;
-use crate::gui::styles::style_constants::{FONT_SIZE_FOOTER, FONT_SIZE_SUBTITLE, TOOLTIP_DELAY};
+use crate::gui::styles::style_constants::{
+    FONT_SIZE_FOOTER, FONT_SIZE_SUBTITLE, ICONS, TOOLTIP_DELAY,
+};
 use crate::gui::styles::text::TextType;
 use crate::gui::types::message::Message;
 use crate::gui::types::settings::Settings;
@@ -21,8 +25,8 @@ use crate::translations::translations_2::country_translation;
 use crate::translations::translations_3::{
     mmdb_files_translation, params_not_editable_translation, zoom_translation,
 };
-use crate::translations::translations_4::share_feedback_translation;
 use crate::translations::translations_5::ip_blacklist_translation;
+use crate::translations::translations_6::expanded_view_translation;
 use crate::utils::formatted_strings::get_path_termination_string;
 use crate::utils::types::file_info::FileInfo;
 use crate::utils::types::icon::Icon;
@@ -54,6 +58,7 @@ fn column_all_general_setting(sniffer: &Sniffer) -> Column<'_, Message, StyleTyp
     let Settings {
         language,
         scale_factor,
+        expanded_view,
         ref mmdb_country,
         ref mmdb_asn,
         ip_blacklist: ref ip_blacklist_str,
@@ -66,7 +71,11 @@ fn column_all_general_setting(sniffer: &Sniffer) -> Column<'_, Message, StyleTyp
     let mut column = Column::new()
         .align_x(Alignment::Center)
         .padding([5, 10])
-        .push(row_language_scale_factor(language, scale_factor))
+        .push(row_language_scale_factor(
+            language,
+            scale_factor,
+            expanded_view,
+        ))
         .push(RuleType::Standard.horizontal(25))
         .push(Space::new().height(10));
 
@@ -106,6 +115,7 @@ fn column_all_general_setting(sniffer: &Sniffer) -> Column<'_, Message, StyleTyp
 fn row_language_scale_factor<'a>(
     language: Language,
     scale_factor: f32,
+    expanded_view: bool,
 ) -> Row<'a, Message, StyleType> {
     Row::new()
         .align_y(Alignment::Start)
@@ -114,7 +124,7 @@ fn row_language_scale_factor<'a>(
         .push(RuleType::Standard.vertical(25))
         .push(scale_factor_slider(language, scale_factor))
         .push(RuleType::Standard.vertical(25))
-        .push(need_help(language))
+        .push(expanded_view_toggler(language, expanded_view))
 }
 
 fn language_picklist<'a>(language: Language) -> Container<'a, Message, StyleType> {
@@ -206,35 +216,26 @@ fn scale_factor_slider<'a>(
     .align_y(Alignment::Center)
 }
 
-fn need_help<'a>(language: Language) -> Container<'a, Message, StyleType> {
+fn expanded_view_toggler<'a>(
+    language: Language,
+    expanded_view: bool,
+) -> Container<'a, Message, StyleType> {
     let content = Column::new()
         .align_x(Alignment::Center)
         .push(
-            Text::new(share_feedback_translation(language))
+            Text::new(expanded_view_translation(language))
                 .class(TextType::Subtitle)
                 .size(FONT_SIZE_SUBTITLE),
         )
         .push(Space::new().height(Length::Fill))
         .push(
-            Tooltip::new(
-                button(
-                    Icon::Feedback
-                        .to_text()
-                        .align_y(Alignment::Center)
-                        .align_x(Alignment::Center)
-                        .size(20)
-                        .line_height(LineHeight::Relative(1.0)),
-                )
-                .on_press(Message::OpenWebPage(WebPage::Issues))
-                .padding(Padding::new(2.0).top(5))
-                .height(40)
-                .width(60),
-                row_open_link_tooltip("GitHub Issues"),
-                Position::Right,
-            )
-            .gap(5)
-            .class(ContainerType::Tooltip)
-            .delay(TOOLTIP_DELAY),
+            Toggler::new(expanded_view)
+                .label(Icon::ExpandedView.codepoint())
+                .font(ICONS)
+                .on_toggle(|_| Message::ToggleExpandedView)
+                .width(Length::Shrink)
+                .spacing(5)
+                .size(23),
         )
         .push(Space::new().height(Length::Fill));
 

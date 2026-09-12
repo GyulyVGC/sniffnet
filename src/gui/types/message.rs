@@ -179,4 +179,6 @@ pub enum Message {
     Freeze,
     /// Traffic preview
     TrafficPreview(TrafficPreview),
+    /// Toggle expanded view
+    ToggleExpandedView,
 }
