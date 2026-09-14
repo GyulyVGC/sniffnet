@@ -15,7 +15,6 @@ use crate::utils::formatted_strings::APP_VERSION;
 use crate::utils::types::icon::Icon;
 use crate::utils::types::web_page::WebPage;
 use crate::{Language, SNIFFNET_TITLECASE};
-use iced::widget::Space;
 use iced::widget::text::LineHeight;
 use iced::widget::tooltip::Position;
 use iced::widget::{Column, Container, Row, Text, Tooltip, button, rich_text, span};
@@ -28,9 +27,9 @@ pub fn footer<'a>(
     update_status: &UpdateStatus,
     dots_pulse: &(String, u8),
     expanded_view: bool,
-) -> Container<'a, Message, StyleType> {
+) -> Option<Container<'a, Message, StyleType>> {
     if thumbnail || expanded_view {
-        return Container::new(Space::new().width(Length::Fill)).height(0);
+        return None;
     }
 
     let release_details_row =
@@ -83,10 +82,12 @@ pub fn footer<'a>(
                 ),
         );
 
-    Container::new(footer_row)
-        .height(45)
-        .align_y(Alignment::Center)
-        .class(ContainerType::Gradient(color_gradient))
+    Some(
+        Container::new(footer_row)
+            .height(45)
+            .align_y(Alignment::Center)
+            .class(ContainerType::Gradient(color_gradient)),
+    )
 }
 
 fn get_button_roadmap<'a>() -> Tooltip<'a, Message, StyleType> {
