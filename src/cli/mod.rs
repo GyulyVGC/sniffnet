@@ -130,6 +130,7 @@ mod tests {
                 color_gradient: GradientType::Wild,
                 language: Language::ZH,
                 scale_factor: 0.65,
+                expanded_view: true,
                 mmdb_country: "countrymmdb".to_string(),
                 mmdb_asn: "asnmmdb".to_string(),
                 style_path: format!(

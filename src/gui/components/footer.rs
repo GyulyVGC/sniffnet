@@ -1,16 +1,10 @@
 //! GUI bottom footer
 
-use iced::widget::Space;
-use iced::widget::text::LineHeight;
-use iced::widget::tooltip::Position;
-use iced::widget::{Column, Container, Row, Text, Tooltip, button, rich_text, span};
-use iced::{Alignment, Length, Padding};
-
 use crate::gui::components::button::row_open_link_tooltip;
 use crate::gui::components::types::my_modal::MyModal;
 use crate::gui::styles::button::ButtonType;
 use crate::gui::styles::container::ContainerType;
-use crate::gui::styles::style_constants::{FONT_SIZE_FOOTER, TOOLTIP_DELAY};
+use crate::gui::styles::style_constants::{FONT_SIZE_BODY, FONT_SIZE_FOOTER, TOOLTIP_DELAY};
 use crate::gui::styles::text::TextType;
 use crate::gui::styles::types::gradient_type::GradientType;
 use crate::gui::styles::types::style_type::StyleType;
@@ -21,6 +15,10 @@ use crate::utils::formatted_strings::APP_VERSION;
 use crate::utils::types::icon::Icon;
 use crate::utils::types::web_page::WebPage;
 use crate::{Language, SNIFFNET_TITLECASE};
+use iced::widget::text::LineHeight;
+use iced::widget::tooltip::Position;
+use iced::widget::{Column, Container, Row, Text, Tooltip, button, rich_text, span};
+use iced::{Alignment, Length, Padding};
 
 pub fn footer<'a>(
     thumbnail: bool,
@@ -28,12 +26,14 @@ pub fn footer<'a>(
     color_gradient: GradientType,
     update_status: &UpdateStatus,
     dots_pulse: &(String, u8),
-) -> Container<'a, Message, StyleType> {
-    if thumbnail {
-        return thumbnail_footer();
+    expanded_view: bool,
+) -> Option<Container<'a, Message, StyleType>> {
+    if thumbnail || expanded_view {
+        return None;
     }
 
-    let release_details_row = get_release_details(language, update_status, dots_pulse);
+    let release_details_row =
+        get_release_details(language, update_status, dots_pulse, expanded_view);
 
     let heart_size = match dots_pulse.1 {
         1 => 17.0,
@@ -82,10 +82,12 @@ pub fn footer<'a>(
                 ),
         );
 
-    Container::new(footer_row)
-        .height(45)
-        .align_y(Alignment::Center)
-        .class(ContainerType::Gradient(color_gradient))
+    Some(
+        Container::new(footer_row)
+            .height(45)
+            .align_y(Alignment::Center)
+            .class(ContainerType::Gradient(color_gradient)),
+    )
 }
 
 fn get_button_roadmap<'a>() -> Tooltip<'a, Message, StyleType> {
@@ -186,16 +188,28 @@ fn get_button_sponsor<'a>() -> Tooltip<'a, Message, StyleType> {
         .delay(TOOLTIP_DELAY)
 }
 
-fn get_release_details<'a>(
+pub(super) fn get_release_details<'a>(
     language: Language,
     update_status: &UpdateStatus,
     dots_pulse: &(String, u8),
+    expanded_view: bool,
 ) -> Row<'a, Message, StyleType> {
     let mut ret_val = Row::new()
+        .spacing(5)
         .align_y(Alignment::Center)
         .height(Length::Fill)
-        .width(Length::Fill)
-        .push(Text::new(format!("{SNIFFNET_TITLECASE} {APP_VERSION}")).size(FONT_SIZE_FOOTER));
+        .width(if expanded_view {
+            Length::Shrink
+        } else {
+            Length::Fill
+        })
+        .push(
+            Text::new(format!("{SNIFFNET_TITLECASE} {APP_VERSION}")).size(if expanded_view {
+                FONT_SIZE_BODY
+            } else {
+                FONT_SIZE_FOOTER
+            }),
+        );
 
     let mut button = button(
         update_status
@@ -216,16 +230,16 @@ fn get_release_details<'a>(
     let tooltip = Tooltip::new(
         button,
         Text::new(update_status_translation(language)).size(FONT_SIZE_FOOTER),
-        Position::Right,
+        if expanded_view {
+            Position::FollowCursor
+        } else {
+            Position::Right
+        },
     )
     .gap(5)
     .class(ContainerType::Tooltip)
     .delay(TOOLTIP_DELAY);
-    ret_val = ret_val.push(Space::new().width(10)).push(tooltip);
+    ret_val = ret_val.push(tooltip);
 
     ret_val
-}
-
-fn thumbnail_footer<'a>() -> Container<'a, Message, StyleType> {
-    Container::new(Space::new().width(Length::Fill)).height(0)
 }

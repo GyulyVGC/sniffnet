@@ -83,3 +83,11 @@ pub fn up_to_date_translation(language: Language) -> &'static str {
         _ => "You are up to date!",
     }
 }
+
+pub fn expanded_view_translation(language: Language) -> &'static str {
+    match language {
+        Language::EN => "Expanded view",
+        Language::IT => "Vista espansa",
+        _ => "Expanded view",
+    }
+}

@@ -383,6 +383,7 @@ impl Sniffer {
             Message::RemoteNotificationsUrl(url) => self.remote_notifications_url(&url),
             Message::Freeze => self.freeze(),
             Message::TrafficPreview(msg) => self.traffic_preview(msg),
+            Message::ToggleExpandedView => self.toggle_expanded_view(),
         }
         Task::none()
     }
@@ -391,6 +392,7 @@ impl Sniffer {
         let Settings {
             language,
             color_gradient,
+            expanded_view,
             ..
         } = self.conf.settings;
 
@@ -425,6 +427,7 @@ impl Sniffer {
             color_gradient,
             &self.update_status,
             &self.dots_pulse,
+            expanded_view,
         );
 
         let content: Element<Message, StyleType> =
@@ -1002,6 +1005,10 @@ impl Sniffer {
         }
         self.preview_charts
             .sort_by(|(_, c1), (_, c2)| c2.tot_packets.total_cmp(&c1.tot_packets));
+    }
+
+    fn toggle_expanded_view(&mut self) {
+        self.conf.settings.expanded_view = !self.conf.settings.expanded_view;
     }
 
     /// Updates threshold if it hasn't been edited for a while
@@ -2272,6 +2279,7 @@ mod tests {
         sniffer.update(Message::OutputPcapFile("test.pcap".to_string()));
         sniffer.update(Message::OutputPcapDir("/test".to_string()));
         sniffer.update(Message::SetPcapImport("/test.pcap".to_string()));
+        sniffer.update(Message::ToggleExpandedView);
         sniffer.update(Message::ChangeRunningPage(RunningPage::Notifications));
         sniffer.update(Message::DataReprSelection(DataRepr::Bits));
         sniffer.update(Message::LoadIpBlacklist("blacklist_file.csv".to_string()));
@@ -2302,6 +2310,7 @@ mod tests {
                     scale_factor: 0.5,
                     mmdb_country: "countrymmdb".to_string(),
                     mmdb_asn: "asnmmdb".to_string(),
+                    expanded_view: true,
                     style_path: format!(
                         "{}/resources/themes/catppuccin.toml",
                         env!("CARGO_MANIFEST_DIR")
