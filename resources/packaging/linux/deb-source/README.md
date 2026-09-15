@@ -20,6 +20,10 @@ after uploading: a successful transfer does not confirm acceptance or a successf
 
 ## Release inputs
 
+Packaging templates live in this directory’s `debian/` subdirectory. Preparation
+copies them to `debian/` at the generated source root, as required by Debian tools.
+The paths below refer to these templates or their generated copies.
+
 `debian/changelog` selects the Ubuntu series, package version and upstream tag
 (`1.5.1-1~resolute1` uses `v1.5.1`). Preparation extracts that tag, vendors its
 locked Cargo dependencies, verifies offline resolution, and adds the current

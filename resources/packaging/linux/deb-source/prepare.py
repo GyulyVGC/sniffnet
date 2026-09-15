@@ -16,6 +16,7 @@ import tomllib
 
 
 ROOT = Path(__file__).resolve().parents[4]
+DEBIAN = Path(__file__).resolve().parent / "debian"
 
 
 def run(*args, cwd=ROOT, **kwargs):
@@ -36,7 +37,7 @@ def prepare(output):
 
 
 def prepare_staged(output):
-    changelog = (ROOT / "debian/changelog").read_text()
+    changelog = (DEBIAN / "changelog").read_text()
     match = re.match(r"sniffnet \(([^)]+)\) ([\w-]+);", changelog)
     if not match:
         raise SystemExit("Cannot parse debian/changelog")
@@ -118,7 +119,7 @@ def prepare_staged(output):
                 tar.add(source, arcname=source.name, filter=normalize)
 
     packaging_ignore = shutil.ignore_patterns(".DS_Store", "__pycache__", "*.pyc")
-    shutil.copytree(ROOT / "debian", source / "debian", ignore=packaging_ignore)
+    shutil.copytree(DEBIAN, source / "debian", ignore=packaging_ignore)
     (source / "debian/upstream-source.json").write_text(
         json.dumps({"tag": tag, "commit": commit}, indent=2) + "\n")
     (source / "debian/vendor-inventory.json").write_text(json.dumps(inventory, indent=2) + "\n")
