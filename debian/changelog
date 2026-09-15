@@ -1,0 +1,5 @@
+sniffnet (1.5.1-1~resolute1) resolute; urgency=medium
+
+  * Initial source package with vendored Rust dependencies.
+
+ -- Giuliano Bellini <gyulyvgc99@gmail.com>  Mon, 14 Sep 2026 12:00:00 +0200

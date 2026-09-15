@@ -1,0 +1,41 @@
+.TH SNIFFNET 1 "September 2026" "Sniffnet 1.5.1" "User Commands"
+.SH NAME
+sniffnet \- comfortably monitor network traffic
+.SH SYNOPSIS
+.B sniffnet
+.RI [ options ]
+.SH DESCRIPTION
+Sniffnet provides a graphical overview of network traffic, including bandwidth usage, connections, protocols, remote hosts and programs.
+.SH OPTIONS
+.TP
+.BR \-a ", " \-\-adapter " [NAME]"
+Start capturing packets from the supplied network adapter. If NAME is omitted, use the configured adapter.
+.TP
+.BR \-c ", " \-\-config-path
+Print the path to the configuration file and exit.
+.TP
+.BR \-r ", " \-\-restore-default
+Restore default settings and exit.
+.TP
+.BR \-h ", " \-\-help
+Print help and exit.
+.TP
+.BR \-V ", " \-\-version
+Print the version and exit.
+.SH EXAMPLES
+.TP
+.B sniffnet
+Open the graphical interface.
+.TP
+.B sniffnet \-\-adapter eth0
+Start capturing on eth0.
+.SH FILES
+Run
+.B sniffnet \-\-config-path
+to find the current user's configuration file.
+.SH NOTES
+The Debian package configures network capabilities on the executable so ordinary users can capture traffic.
+.SH SEE ALSO
+.UR https://sniffnet.app
+Sniffnet website
+.UE
