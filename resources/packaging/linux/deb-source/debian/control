@@ -1,0 +1,30 @@
+Source: sniffnet
+Section: net
+Priority: optional
+Maintainer: Giuliano Bellini <gyulyvgc99@gmail.com>
+Build-Depends: debhelper-compat (= 13),
+ cargo-1.97 (>= 1.97.1),
+ rustc-1.97 (>= 1.97.1),
+ pkgconf,
+ libpcap-dev,
+ libasound2-dev,
+ libfontconfig-dev,
+ cmake,
+ clang
+Standards-Version: 4.7.3
+Rules-Requires-Root: no
+Homepage: https://sniffnet.app
+Vcs-Git: https://github.com/GyulyVGC/sniffnet.git
+Vcs-Browser: https://github.com/GyulyVGC/sniffnet/tree/main
+
+Package: sniffnet
+Architecture: amd64
+Depends: ${shlibs:Depends}, ${misc:Depends}, libcap2-bin, ca-certificates,
+ libfontconfig1, libxkbcommon0, libxkbcommon-x11-0, libwayland-client0,
+ libx11-6, libx11-xcb1,
+ libxcursor1, libxi6, libxrandr2
+Recommends: xdg-desktop-portal, libvulkan1, libgl1, libegl1
+Description: comfortably monitor your network traffic
+ Sniffnet provides a graphical overview of network traffic, including
+ bandwidth usage, connections, protocols, remote hosts and programs.
+ It supports packet capture, filtering, notifications and traffic export.

@@ -1,0 +1,42 @@
+#!/usr/bin/make -f
+
+export CARGO_HOME = $(CURDIR)/debian/cargo-home
+export CARGO_TARGET_DIR = $(CURDIR)/target
+export CARGO_NET_OFFLINE = true
+export RUSTC = /usr/bin/rustc-1.97
+export RUSTDOC = /usr/bin/rustdoc-1.97
+CARGO = /usr/bin/cargo-1.97
+# Let debhelper handle stripping and debug symbols.
+export CARGO_PROFILE_RELEASE_STRIP = false
+export CARGO_PROFILE_RELEASE_DEBUG = 2
+
+%:
+	dh $@ --buildsystem=none
+
+override_dh_auto_build:
+	+$(CARGO) build --frozen --release --package sniffnet --bin sniffnet
+
+override_dh_auto_test:
+ifeq (,$(filter nocheck,$(DEB_BUILD_OPTIONS)))
+# These integration tests need Internet access or raw-socket privileges.
+	+$(CARGO) test --frozen --release --workspace -- \
+		--skip utils::check_updates::tests::fetch_latest_release_from_github \
+		--skip networking::types::latency::tests::test_measures_ipv4_loopback_latency \
+		--skip networking::types::latency::tests::test_measures_ipv6_loopback_latency
+endif
+
+override_dh_auto_install:
+	install -Dm755 target/release/sniffnet debian/sniffnet/usr/bin/sniffnet
+	install -Dm644 resources/packaging/linux/sniffnet.desktop debian/sniffnet/usr/share/applications/sniffnet.desktop
+	set -e; for icon in resources/packaging/linux/graphics/sniffnet_*x*.png; do \
+		size=$${icon##*/sniffnet_}; size=$${size%.png}; \
+		install -Dm644 "$$icon" "debian/sniffnet/usr/share/icons/hicolor/$$size/apps/sniffnet.png"; \
+	done
+
+override_dh_auto_clean:
+	rm -rf target debian/cargo-home
+
+override_dh_clean:
+# Cargo checksums include Cargo.toml.orig and other upstream .orig files.
+# Debhelper's default cleanup would delete them and corrupt the vendor tree.
+	dh_clean --exclude=vendor/
