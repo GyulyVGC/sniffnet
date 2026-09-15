@@ -11,7 +11,7 @@ Comment:
 
 Files: src/* build.rs Cargo.toml Cargo.lock
  debian/changelog debian/control debian/rules debian/copyright
- debian/README.source debian/sniffnet.* debian/source/* debian/clean
+ debian/sniffnet.* debian/source/* debian/clean
 Copyright: 2022-2026 Giuliano Bellini <gyulyvgc99@gmail.com>
 License: MIT or Apache-2.0
 

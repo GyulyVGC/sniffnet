@@ -145,7 +145,7 @@ def main():
                         help="also run dpkg-buildpackage to create an unsigned source upload (Linux)")
     args = parser.parse_args()
     if args.build_source and not shutil.which("dpkg-buildpackage"):
-        parser.error("--build-source requires dpkg-buildpackage and debhelper; see README.md")
+        parser.error("--build-source requires dpkg-buildpackage and debhelper")
     source = prepare(args.output.resolve())
     if args.build_source:
         # Build-Depends are needed for the binary build, not source assembly.
