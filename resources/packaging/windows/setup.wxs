@@ -51,6 +51,17 @@
                             Source="$(var.CargoTargetBinDir)/sniffnet.exe"
                             KeyPath="yes"
                         />
+                        <ProgId Id="Sniffnet.PacketCapture" Description="Packet capture">
+                            <Extension Id="pcap" ContentType="application/vnd.tcpdump.pcap">
+                                <Verb Id="open" Command="Open" TargetFile="exe0" Argument="&quot;%1&quot;"/>
+                            </Extension>
+                            <Extension Id="pcapng" ContentType="application/vnd.tcpdump.pcap">
+                                <Verb Id="open" Command="Open" TargetFile="exe0" Argument="&quot;%1&quot;"/>
+                            </Extension>
+                            <Extension Id="cap" ContentType="application/vnd.tcpdump.pcap">
+                                <Verb Id="open" Command="Open" TargetFile="exe0" Argument="&quot;%1&quot;"/>
+                            </Extension>
+                        </ProgId>
                     </Component>
                     <Component Id="Path" Guid="E235E4DE-745C-4B50-BA17-593BEE5641D3" KeyPath="yes">
                         <Environment
