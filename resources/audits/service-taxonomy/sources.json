@@ -1,0 +1,235 @@
+{
+  "date": "2026-09-16",
+  "repository_commit": "592a62a5ad2fb2e9f8470a6174ab9f18dc86997a",
+  "service_names": 6465,
+  "port_protocol_mappings": 12093,
+  "with_iana_name_match": 5921,
+  "with_any_description": 6376,
+  "specific_category_assignments": 3270,
+  "fallback_assignments": 3195,
+  "category_counts": {
+    "management": 853,
+    "other": 3195,
+    "printing": 49,
+    "files": 131,
+    "network": 268,
+    "media": 229,
+    "licensing": 173,
+    "storage": 125,
+    "discovery": 158,
+    "remote": 125,
+    "security": 86,
+    "industrial": 137,
+    "web": 68,
+    "vpn": 81,
+    "middleware": 245,
+    "identity": 152,
+    "database": 134,
+    "chat": 90,
+    "gaming": 65,
+    "development": 48,
+    "email": 53
+  },
+  "scope": "Research taxonomy and candidate name-level mapping. Registry descriptions and named-protocol interpretations are not independent vendor verification of every identity. No runtime behavior is changed.",
+  "sources": [
+    {
+      "name": "repository services.txt",
+      "url": "local:services.txt",
+      "sha256": "727d91b8d69e81adfff821356d0d75125bed15c78c960c69b64561399272b6d6"
+    },
+    {
+      "name": "Nmap services",
+      "url": "https://raw.githubusercontent.com/nmap/nmap/master/nmap-services",
+      "sha256": "6017b72e5e4194b0904ac9a0bd8a1bbfe790a6ee9953da08ed1bf1eaf8307176"
+    },
+    {
+      "name": "IANA registry",
+      "url": "https://www.iana.org/assignments/service-names-port-numbers/service-names-port-numbers.csv",
+      "sha256": "34328ed0940d889207de6da29bf0e6e1438d604483c8e1ffb03dceab8f7ec26f"
+    },
+    {
+      "name": "Cisco protocol reference a",
+      "url": "https://www.cisco.com/c/en/us/td/docs/ios-xml/ios/qos_nbar/prot_lib/protocol-reference/nbar-protocol-reference/a.html",
+      "sha256": "c3262c88de027eed701824c44a6da95929c180e00de4f4fee1569505b5aac958"
+    },
+    {
+      "name": "Cisco protocol reference b",
+      "url": "https://www.cisco.com/c/en/us/td/docs/ios-xml/ios/qos_nbar/prot_lib/protocol-reference/nbar-protocol-reference/b.html",
+      "sha256": "32ce5666f6999cf71c9937e68d06231546cb234e8f5cbdedcf3ce3290338b7d0"
+    },
+    {
+      "name": "Cisco protocol reference c",
+      "url": "https://www.cisco.com/c/en/us/td/docs/ios-xml/ios/qos_nbar/prot_lib/protocol-reference/nbar-protocol-reference/c.html",
+      "sha256": "3fbcc44bcda3da76ab4fff887d021296575c43959bcc30b22080d27b666933b8"
+    },
+    {
+      "name": "Cisco protocol reference d",
+      "url": "https://www.cisco.com/c/en/us/td/docs/ios-xml/ios/qos_nbar/prot_lib/protocol-reference/nbar-protocol-reference/d.html",
+      "sha256": "c7d20ea305b9b5edd0059efcae05f5bf441b22aa7cca004d6129ba3bea0a7d6d"
+    },
+    {
+      "name": "Cisco protocol reference e",
+      "url": "https://www.cisco.com/c/en/us/td/docs/ios-xml/ios/qos_nbar/prot_lib/protocol-reference/nbar-protocol-reference/e.html",
+      "sha256": "5a697aa9511979a2884ea550fda31414f84d81065dd5863501b5a4fd37c936ca"
+    },
+    {
+      "name": "Cisco protocol reference f",
+      "url": "https://www.cisco.com/c/en/us/td/docs/ios-xml/ios/qos_nbar/prot_lib/protocol-reference/nbar-protocol-reference/f.html",
+      "sha256": "b211485136d9211bbfe6250fd6865d946589b781a0e1f5e8de94d18f3f91fa0a"
+    },
+    {
+      "name": "Cisco protocol reference g",
+      "url": "https://www.cisco.com/c/en/us/td/docs/ios-xml/ios/qos_nbar/prot_lib/protocol-reference/nbar-protocol-reference/g.html",
+      "sha256": "e1519eb128eb0386e28be29d4aca17f6a27f69a274267885eccd0ffbf866c6ce"
+    },
+    {
+      "name": "Cisco protocol reference h",
+      "url": "https://www.cisco.com/c/en/us/td/docs/ios-xml/ios/qos_nbar/prot_lib/protocol-reference/nbar-protocol-reference/h.html",
+      "sha256": "a6cb54860eaa6cc1387d617c836b25a39743a627228a6b678dfdedbd3e90e6aa"
+    },
+    {
+      "name": "Cisco protocol reference i",
+      "url": "https://www.cisco.com/c/en/us/td/docs/ios-xml/ios/qos_nbar/prot_lib/protocol-reference/nbar-protocol-reference/i.html",
+      "sha256": "d44fb795b0ee243ed5ff821d8d35975b6b0d7d252a7f2d08370b33539b888c1e"
+    },
+    {
+      "name": "Cisco protocol reference j",
+      "url": "https://www.cisco.com/c/en/us/td/docs/ios-xml/ios/qos_nbar/prot_lib/protocol-reference/nbar-protocol-reference/j.html",
+      "sha256": "8a719ac9d7a690768bbd811ac22fd430ab3d2aa621cf4738716ffd361a88f9ac"
+    },
+    {
+      "name": "Cisco protocol reference k",
+      "url": "https://www.cisco.com/c/en/us/td/docs/ios-xml/ios/qos_nbar/prot_lib/protocol-reference/nbar-protocol-reference/k.html",
+      "sha256": "a39892a3d570309dd3adff97b7cc85ba98b437991abc056e0a698719df4c1648"
+    },
+    {
+      "name": "Cisco protocol reference l",
+      "url": "https://www.cisco.com/c/en/us/td/docs/ios-xml/ios/qos_nbar/prot_lib/protocol-reference/nbar-protocol-reference/l.html",
+      "sha256": "9737a7cdc53c41947ccc947fe9ad04a1eb08af02cf7b4649d831ad9b2e58e45d"
+    },
+    {
+      "name": "Cisco protocol reference m",
+      "url": "https://www.cisco.com/c/en/us/td/docs/ios-xml/ios/qos_nbar/prot_lib/protocol-reference/nbar-protocol-reference/m.html",
+      "sha256": "d19490c55dd1c59aea642f33adc599f05a220ff30246c4d0d1042585de088814"
+    },
+    {
+      "name": "Cisco protocol reference n",
+      "url": "https://www.cisco.com/c/en/us/td/docs/ios-xml/ios/qos_nbar/prot_lib/protocol-reference/nbar-protocol-reference/n.html",
+      "sha256": "eecc13db43893b0076e635512cc6142f5d20e488360c508fc06734cdf9b593e1"
+    },
+    {
+      "name": "Cisco protocol reference o",
+      "url": "https://www.cisco.com/c/en/us/td/docs/ios-xml/ios/qos_nbar/prot_lib/protocol-reference/nbar-protocol-reference/o.html",
+      "sha256": "44c470b607964d25dddd5fd4d8ac0062612d9693aa885b817c44aa326b37f0b9"
+    },
+    {
+      "name": "Cisco protocol reference p",
+      "url": "https://www.cisco.com/c/en/us/td/docs/ios-xml/ios/qos_nbar/prot_lib/protocol-reference/nbar-protocol-reference/p.html",
+      "sha256": "c8e74b181b31002e4ac104639b3b8bcf351d28bc1d317934fb7ec8e1da7cda92"
+    },
+    {
+      "name": "Cisco protocol reference q",
+      "url": "https://www.cisco.com/c/en/us/td/docs/ios-xml/ios/qos_nbar/prot_lib/protocol-reference/nbar-protocol-reference/q.html",
+      "sha256": "a2e650aded7edded19588697e4163401be921f115511b3daa5eee135f4391043"
+    },
+    {
+      "name": "Cisco protocol reference r",
+      "url": "https://www.cisco.com/c/en/us/td/docs/ios-xml/ios/qos_nbar/prot_lib/protocol-reference/nbar-protocol-reference/r.html",
+      "sha256": "e0a0c58efa24e6a4dc3b0ca0899142d96d8470431e90a043db42b80360890c4e"
+    },
+    {
+      "name": "Cisco protocol reference s",
+      "url": "https://www.cisco.com/c/en/us/td/docs/ios-xml/ios/qos_nbar/prot_lib/protocol-reference/nbar-protocol-reference/s.html",
+      "sha256": "f2459879c99b9033ce1c087e8531c58ea1b6b29c71a1c70ea0c2273ba2e57b14"
+    },
+    {
+      "name": "Cisco protocol reference t",
+      "url": "https://www.cisco.com/c/en/us/td/docs/ios-xml/ios/qos_nbar/prot_lib/protocol-reference/nbar-protocol-reference/t.html",
+      "sha256": "0506201ff93d00ddb49e829cbf661eeae373b4ddbff79fb18eeac89d732098b2"
+    },
+    {
+      "name": "Cisco protocol reference u",
+      "url": "https://www.cisco.com/c/en/us/td/docs/ios-xml/ios/qos_nbar/prot_lib/protocol-reference/nbar-protocol-reference/u.html",
+      "sha256": "42d72a152f5d31175c50c3bd98f428cf49272fa7b4a2eef7b0374191d16150e0"
+    },
+    {
+      "name": "Cisco protocol reference v",
+      "url": "https://www.cisco.com/c/en/us/td/docs/ios-xml/ios/qos_nbar/prot_lib/protocol-reference/nbar-protocol-reference/v.html",
+      "sha256": "0c3d595880a73bb6f2998419ea5c3aca27d6cd27c6bfd7779ef9a82f406c5f80"
+    },
+    {
+      "name": "Cisco protocol reference w",
+      "url": "https://www.cisco.com/c/en/us/td/docs/ios-xml/ios/qos_nbar/prot_lib/protocol-reference/nbar-protocol-reference/w.html",
+      "sha256": "2c30eadac063f9ff2940050037beeb428d238b539c7debf29287ec081be100e2"
+    },
+    {
+      "name": "Cisco protocol reference x",
+      "url": "https://www.cisco.com/c/en/us/td/docs/ios-xml/ios/qos_nbar/prot_lib/protocol-reference/nbar-protocol-reference/x.html",
+      "sha256": "a660a03520ce659970f83f9e25def36b09c2805cdcc765dbde3d4a38dc0c0d49"
+    },
+    {
+      "name": "Cisco protocol reference y",
+      "url": "https://www.cisco.com/c/en/us/td/docs/ios-xml/ios/qos_nbar/prot_lib/protocol-reference/nbar-protocol-reference/y.html",
+      "sha256": "e1fc4d2de2796290017467755696b7b3d066a561519a7a5d8f22d84df49be406"
+    },
+    {
+      "name": "Cisco protocol reference z",
+      "url": "https://www.cisco.com/c/en/us/td/docs/ios-xml/ios/qos_nbar/prot_lib/protocol-reference/nbar-protocol-reference/z.html",
+      "sha256": "561aa3f8582f131c0478ca63b637a4baf992171c10dac01ab76a4cbc35e952f5"
+    }
+  ],
+  "additional_documentation_sources": [
+    "https://cdn.wibu.com/fileadmin/wibu_downloads/KEYnote_Magazine/KEYnote_23/WibuSystems-KEYnote-23_en.pdf",
+    "https://cdn.wibu.com/fileadmin/wibu_downloads/Manuals_Guides/Manuals_for_Developers/WibuKey_Developer_Guide/wibukey-developerguide-6.00b-02-2011-wibu-systems.pdf",
+    "https://docs.actian.com/zen/v17/advops/smartcomp.htm",
+    "https://docs.bmc.com/xwiki/bin/view/IT-Operations-Management/Operations-Management/BMC-PATROL-Agent/PA2002/Key-concepts/",
+    "https://docs.cfengine.com/docs/lts/overview/what-is-cfengine-and-why/",
+    "https://docs.intersystems.com/latest/csp/docbook/DocBook.UI.Page.cls?KEY=TJAV_ConnectUsingCacheDatabase",
+    "https://docs.oracle.com/middleware/12213/coherence/docs.htm",
+    "https://docs.tenable.com/Nessus.htm",
+    "https://help.claris.com/archive/help/13/fms/en/fms/fmsh_nontoc.22.31.html",
+    "https://hpss-collaboration.org/hpss-disk-storage/",
+    "https://ij.manual.canon/ij/webmanual/NetworkTool/W/1.1/EN/NWT/NWT_Ijinst05.html",
+    "https://knowledge.broadcom.com/external/article/9640/best-practices-for-monitoring-dx-uim-se.html",
+    "https://learn.microsoft.com/en-us/troubleshoot/windows-server/networking/service-overview-and-network-port-requirements",
+    "https://logcabin.github.io/",
+    "https://public.dhe.ibm.com/software/data/soliddb/info/6.5/man/GettingStartedGuide.pdf",
+    "https://support.hp.com/gb-en/document/c00832492",
+    "https://www.cimcor.com/cimtrak/features/file-integrity-monitoring/",
+    "https://www.cisco.com/c/en/us/td/docs/ios-xml/ios/qos_nbar/prot_lib/protocol-reference/nbar-protocol-reference/a.html",
+    "https://www.cisco.com/c/en/us/td/docs/ios-xml/ios/qos_nbar/prot_lib/protocol-reference/nbar-protocol-reference/b.html",
+    "https://www.cisco.com/c/en/us/td/docs/ios-xml/ios/qos_nbar/prot_lib/protocol-reference/nbar-protocol-reference/c.html",
+    "https://www.cisco.com/c/en/us/td/docs/ios-xml/ios/qos_nbar/prot_lib/protocol-reference/nbar-protocol-reference/d.html",
+    "https://www.cisco.com/c/en/us/td/docs/ios-xml/ios/qos_nbar/prot_lib/protocol-reference/nbar-protocol-reference/f.html",
+    "https://www.cisco.com/c/en/us/td/docs/ios-xml/ios/qos_nbar/prot_lib/protocol-reference/nbar-protocol-reference/g.html",
+    "https://www.cisco.com/c/en/us/td/docs/ios-xml/ios/qos_nbar/prot_lib/protocol-reference/nbar-protocol-reference/h.html",
+    "https://www.cisco.com/c/en/us/td/docs/ios-xml/ios/qos_nbar/prot_lib/protocol-reference/nbar-protocol-reference/i.html",
+    "https://www.cisco.com/c/en/us/td/docs/ios-xml/ios/qos_nbar/prot_lib/protocol-reference/nbar-protocol-reference/k.html",
+    "https://www.cisco.com/c/en/us/td/docs/ios-xml/ios/qos_nbar/prot_lib/protocol-reference/nbar-protocol-reference/m.html",
+    "https://www.cisco.com/c/en/us/td/docs/ios-xml/ios/qos_nbar/prot_lib/protocol-reference/nbar-protocol-reference/n.html",
+    "https://www.cisco.com/c/en/us/td/docs/ios-xml/ios/qos_nbar/prot_lib/protocol-reference/nbar-protocol-reference/o.html",
+    "https://www.cisco.com/c/en/us/td/docs/ios-xml/ios/qos_nbar/prot_lib/protocol-reference/nbar-protocol-reference/p.html",
+    "https://www.cisco.com/c/en/us/td/docs/ios-xml/ios/qos_nbar/prot_lib/protocol-reference/nbar-protocol-reference/q.html",
+    "https://www.cisco.com/c/en/us/td/docs/ios-xml/ios/qos_nbar/prot_lib/protocol-reference/nbar-protocol-reference/r.html",
+    "https://www.cisco.com/c/en/us/td/docs/ios-xml/ios/qos_nbar/prot_lib/protocol-reference/nbar-protocol-reference/s.html",
+    "https://www.cisco.com/c/en/us/td/docs/ios-xml/ios/qos_nbar/prot_lib/protocol-reference/nbar-protocol-reference/u.html",
+    "https://www.cisco.com/c/en/us/td/docs/ios-xml/ios/qos_nbar/prot_lib/protocol-reference/nbar-protocol-reference/v.html",
+    "https://www.cisco.com/c/en/us/td/docs/ios-xml/ios/qos_nbar/prot_lib/protocol-reference/nbar-protocol-reference/z.html",
+    "https://www.cs.cmu.edu/~coda/docdir/wwos2.pdf",
+    "https://www.firebirdsql.org/file/documentation/release_notes/html/config-port.html",
+    "https://www.iana.org/assignments/service-names-port-numbers?search=ftp",
+    "https://www.ibm.com/docs/en/ibm-mq/9.3.x?topic=overview-introduction-mq-telemetry",
+    "https://www.mysql.com/products/enterprise/database/",
+    "https://www.oasis-open.org/standard/kmip-spec-2-1/",
+    "https://www.oasis-open.org/standard/mqtt-v5-0-os/",
+    "https://www.omg.org/dds/",
+    "https://www.rfc-editor.org/info/rfc1580/",
+    "https://www.rfc-editor.org/rfc/rfc1249.html",
+    "https://www.rfc-editor.org/rfc/rfc4767.html",
+    "https://www.rfc-editor.org/rfc/rfc6733.html",
+    "https://www.rfc-editor.org/rfc/rfc7252.html",
+    "https://www.sassafras.com/software/release77/current/Documentation/Help/intro.html",
+    "https://www.snia.org/ndmp",
+    "https://www.veritas.com/content/support/en_US/doc/80731497-136702630-0/v124789605-136702630"
+  ]
+}
