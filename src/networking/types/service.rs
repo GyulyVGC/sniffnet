@@ -1,6 +1,10 @@
 use serde::de::{self, Deserializer, VariantAccess};
 use serde::{Deserialize, Serialize};
 
+use crate::networking::types::service_category::ServiceCategory;
+
+include!(concat!(env!("OUT_DIR"), "/service_categories.rs"));
+
 /// Upper layer services.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Default, Serialize)]
 pub enum Service {
@@ -63,6 +67,15 @@ impl<'de> Deserialize<'de> for Service {
 }
 
 impl Service {
+    // Category consumers will be added separately.
+    #[allow(dead_code)]
+    pub fn category(self) -> ServiceCategory {
+        match self {
+            Service::Name(name) => SERVICE_CATEGORIES.get(name).copied().unwrap_or_default(),
+            Service::Unknown | Service::NotApplicable => ServiceCategory::Other,
+        }
+    }
+
     pub fn to_string_with_equal_prefix(self) -> String {
         format!("={self}")
     }
@@ -81,6 +94,34 @@ impl std::fmt::Display for Service {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn test_service_category() {
+        assert_eq!(Service::Name("https").category(), ServiceCategory::Web);
+        assert_eq!(
+            Service::Name("domain").category(),
+            ServiceCategory::Discovery
+        );
+        assert_eq!(Service::Name("ssh").category(), ServiceCategory::Remote);
+        assert_eq!(
+            Service::Name("mqtt").category(),
+            ServiceCategory::Middleware
+        );
+        assert_eq!(Service::Name("dicom").category(), ServiceCategory::Other);
+        assert_eq!(Service::Unknown.category(), ServiceCategory::Other);
+        assert_eq!(Service::NotApplicable.category(), ServiceCategory::Other);
+        assert_eq!(
+            Service::Name("unregistered-service").category(),
+            ServiceCategory::Other
+        );
+    }
+
+    #[test]
+    fn test_deserialized_service_category() {
+        let json = serde_json::to_string(&Service::Name("https")).unwrap();
+        let service: Service = serde_json::from_str(&json).unwrap();
+        assert_eq!(service.category(), ServiceCategory::Web);
+    }
 
     #[test]
     fn test_service_display_unknown() {
