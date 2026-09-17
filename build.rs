@@ -101,7 +101,7 @@ fn build_service_categories_phf(mut service_names: HashSet<String>) {
         service_names.is_empty(),
         "Services without categories: {service_names:?}"
     );
-    assert_eq!(num_entries, 6465);
+    assert_eq!(num_entries, 6466);
 
     writeln!(
         &mut output,
