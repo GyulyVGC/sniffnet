@@ -67,8 +67,6 @@ impl<'de> Deserialize<'de> for Service {
 }
 
 impl Service {
-    // Category consumers will be added separately.
-    #[allow(dead_code)]
     pub fn category(self) -> ServiceCategory {
         match self {
             Service::Name(name) => SERVICE_CATEGORIES.get(name).copied().unwrap_or_default(),

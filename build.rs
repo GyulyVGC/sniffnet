@@ -16,7 +16,7 @@ include!("./src/networking/types/service_query.rs");
 
 const WINDOWS_ICON_PATH: &str = "./resources/packaging/windows/graphics/sniffnet.ico";
 const SERVICES_LIST_PATH: &str = "./services.txt";
-const SERVICE_CATEGORIES_LIST_PATH: &str = "./resources/audits/service-taxonomy/services.csv";
+const SERVICE_CATEGORIES_LIST_PATH: &str = "./resources/audits/service-taxonomy/categories.txt";
 
 fn main() {
     println!("cargo:rerun-if-changed={WINDOWS_ICON_PATH}");
@@ -81,12 +81,14 @@ fn build_service_categories_phf(mut service_names: HashSet<String>) {
     let mut output = BufWriter::new(File::create(out_path).unwrap());
     let mut categories_map = phf_codegen::Map::new();
 
-    let mut input = BufReader::new(File::open(SERVICE_CATEGORIES_LIST_PATH).unwrap()).lines();
-    assert_eq!(input.next().unwrap().unwrap(), "service,category");
+    let input = BufReader::new(File::open(SERVICE_CATEGORIES_LIST_PATH).unwrap()).lines();
     let mut num_entries = 0;
     for line_res in input {
         let line = line_res.unwrap();
-        let mut parts = line.split(',');
+        if line.trim().is_empty() || line.trim().starts_with('#') {
+            continue;
+        }
+        let mut parts = line.split('\t');
         let name = parts.next().unwrap();
         let val = Cow::Owned(get_valid_service_category_fmt_const(parts.next().unwrap()));
         assert!(parts.next().is_none());

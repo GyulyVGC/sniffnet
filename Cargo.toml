@@ -24,7 +24,7 @@ include = [
     "/resources/packaging/windows/graphics/sniffnet.ico",
     "/resources/sounds/*.mp3",
     "/services.txt",
-    "/resources/audits/service-taxonomy/services.csv",
+    "/resources/audits/service-taxonomy/categories.txt",
     "/build.rs",
 ]
 
