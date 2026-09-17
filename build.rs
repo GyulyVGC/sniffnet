@@ -15,8 +15,8 @@ use sniffnet_packet_parser::Protocol;
 include!("./src/networking/types/service_query.rs");
 
 const WINDOWS_ICON_PATH: &str = "./resources/packaging/windows/graphics/sniffnet.ico";
-const SERVICES_LIST_PATH: &str = "./services.txt";
-const SERVICE_CATEGORIES_LIST_PATH: &str = "./resources/audits/service-taxonomy/categories.txt";
+const SERVICES_LIST_PATH: &str = "./resources/services/services.txt";
+const SERVICE_CATEGORIES_LIST_PATH: &str = "./resources/services/categories.txt";
 
 fn main() {
     println!("cargo:rerun-if-changed={WINDOWS_ICON_PATH}");
