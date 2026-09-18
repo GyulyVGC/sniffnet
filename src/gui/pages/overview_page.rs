@@ -130,7 +130,7 @@ fn col_favorite_item(
         } else {
             1.0
         };
-        let icon = fi.icon(language, program_lookup, false, icon_opacity);
+        let icon = fi.icon(language, program_lookup, icon_opacity);
         let item_bar = item_bar(
             icon,
             fi.to_entry_string(),

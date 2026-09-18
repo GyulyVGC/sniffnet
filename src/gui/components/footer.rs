@@ -202,14 +202,25 @@ pub(super) fn get_release_details<'a>(
             Length::Shrink
         } else {
             Length::Fill
-        })
-        .push(
-            Text::new(format!("{SNIFFNET_TITLECASE} {APP_VERSION}")).size(if expanded_view {
-                FONT_SIZE_BODY
-            } else {
-                FONT_SIZE_FOOTER
-            }),
+        });
+
+    if expanded_view {
+        ret_val = ret_val.push(
+            Icon::Sniffnet
+                .to_text()
+                .align_y(Alignment::Center)
+                .height(Length::Fill)
+                .size(45),
         );
+    }
+
+    ret_val = ret_val.push(
+        Text::new(format!("{SNIFFNET_TITLECASE} {APP_VERSION}")).size(if expanded_view {
+            FONT_SIZE_BODY
+        } else {
+            FONT_SIZE_FOOTER
+        }),
+    );
 
     let mut button = button(
         update_status

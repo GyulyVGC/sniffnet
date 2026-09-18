@@ -4,6 +4,7 @@
 extern crate winresource;
 
 use std::borrow::Cow;
+use std::collections::HashSet;
 use std::env;
 use std::fs::File;
 use std::io::{BufRead, BufReader, BufWriter, Write};
@@ -14,14 +15,17 @@ use sniffnet_packet_parser::Protocol;
 include!("./src/networking/types/service_query.rs");
 
 const WINDOWS_ICON_PATH: &str = "./resources/packaging/windows/graphics/sniffnet.ico";
-const SERVICES_LIST_PATH: &str = "./services.txt";
+const SERVICES_LIST_PATH: &str = "./resources/services/services.txt";
+const SERVICE_CATEGORIES_LIST_PATH: &str = "./resources/services/categories.txt";
 
 fn main() {
     println!("cargo:rerun-if-changed={WINDOWS_ICON_PATH}");
     println!("cargo:rerun-if-changed={SERVICES_LIST_PATH}");
+    println!("cargo:rerun-if-changed={SERVICE_CATEGORIES_LIST_PATH}");
 
     set_icon();
-    build_services_phf();
+    let service_names = build_services_phf();
+    build_service_categories_phf(service_names);
 }
 
 fn set_icon() {
@@ -33,11 +37,12 @@ fn set_icon() {
     }
 }
 
-fn build_services_phf() {
+fn build_services_phf() -> HashSet<String> {
     let out_path = Path::new(&env::var("OUT_DIR").unwrap()).join("services.rs");
     let mut output = BufWriter::new(File::create(out_path).unwrap());
 
     let mut services_map = phf_codegen::Map::new();
+    let mut service_names = HashSet::new();
 
     let input = BufReader::new(File::open(SERVICES_LIST_PATH).unwrap());
     let mut num_entries = 0;
@@ -50,7 +55,9 @@ fn build_services_phf() {
         }
         let mut parts = line.split('\t');
         // we want to panic if one of the service names is invalid
-        let val = Cow::Owned(get_valid_service_fmt_const(parts.next().unwrap()));
+        let name = parts.next().unwrap();
+        let val = Cow::Owned(get_valid_service_fmt_const(name));
+        service_names.insert(name.trim().to_owned());
         // we want to panic if port is not a u16, or protocol is not TCP or UDP
         let key = get_valid_service_query(parts.next().unwrap());
         assert!(parts.next().is_none());
@@ -66,6 +73,73 @@ fn build_services_phf() {
         services_map.build()
     )
     .unwrap();
+    service_names
+}
+
+fn build_service_categories_phf(mut service_names: HashSet<String>) {
+    let out_path = Path::new(&env::var("OUT_DIR").unwrap()).join("service_categories.rs");
+    let mut output = BufWriter::new(File::create(out_path).unwrap());
+    let mut categories_map = phf_codegen::Map::new();
+
+    let input = BufReader::new(File::open(SERVICE_CATEGORIES_LIST_PATH).unwrap()).lines();
+    let mut num_entries = 0;
+    for line_res in input {
+        let line = line_res.unwrap();
+        if line.trim().is_empty() || line.trim().starts_with('#') {
+            continue;
+        }
+        let mut parts = line.split('\t');
+        let name = parts.next().unwrap();
+        let val = Cow::Owned(get_valid_service_category_fmt_const(parts.next().unwrap()));
+        assert!(parts.next().is_none());
+        assert!(
+            service_names.remove(name),
+            "Duplicate or unexpected service category entry: {name}"
+        );
+        categories_map.entry(name.to_owned(), val);
+        num_entries += 1;
+    }
+    assert!(
+        service_names.is_empty(),
+        "Services without categories: {service_names:?}"
+    );
+    assert_eq!(num_entries, 6466);
+
+    writeln!(
+        &mut output,
+        "#[allow(clippy::unreadable_literal)]\n\
+        static SERVICE_CATEGORIES: phf::Map<&'static str, ServiceCategory> = {};",
+        categories_map.build()
+    )
+    .unwrap();
+}
+
+fn get_valid_service_category_fmt_const(s: &str) -> String {
+    let category = match s {
+        "web" => "Web",
+        "email" => "Email",
+        "chat" => "Chat",
+        "media" => "Media",
+        "files" => "Files",
+        "storage" => "Storage",
+        "database" => "Database",
+        "remote" => "Remote",
+        "management" => "Management",
+        "discovery" => "Discovery",
+        "network" => "Network",
+        "vpn" => "Vpn",
+        "identity" => "Identity",
+        "printing" => "Printing",
+        "gaming" => "Gaming",
+        "industrial" => "Industrial",
+        "development" => "Development",
+        "middleware" => "Middleware",
+        "security" => "Security",
+        "licensing" => "Licensing",
+        "other" => "Other",
+        invalid => panic!("Invalid service category found: {invalid}"),
+    };
+    format!("ServiceCategory::{category}")
 }
 
 fn get_valid_service_fmt_const(s: &str) -> String {

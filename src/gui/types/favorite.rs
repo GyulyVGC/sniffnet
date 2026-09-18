@@ -1,5 +1,4 @@
 use crate::countries::country_utils::get_flag_tooltip;
-use crate::countries::flags_pictures::ICONS_SIZE_BIG;
 use crate::gui::sniffer::Sniffer;
 use crate::gui::styles::button::ButtonType;
 use crate::gui::styles::types::style_type::StyleType;
@@ -21,8 +20,8 @@ use crate::translations::translations_3::service_translation;
 use crate::translations::translations_5::program_translation;
 use crate::translations::types::language::Language;
 use crate::utils::types::icon::Icon;
-use iced::widget::{Button, Container, Space, button};
-use iced::{Alignment, Element, Padding};
+use iced::widget::{Button, Container, Tooltip, button};
+use iced::{Alignment, Padding};
 use serde::{Deserialize, Serialize};
 use std::cmp::min;
 use std::collections::HashSet;
@@ -273,27 +272,22 @@ impl FavoriteItem {
         &self,
         language: Language,
         program_lookup: Option<&'a ProgramLookup>,
-        fill_empty: bool,
         opacity: f32,
-    ) -> impl Into<Element<'a, Message, StyleType>> {
+    ) -> Option<Tooltip<'a, Message, StyleType>> {
         match self {
-            FavoriteItem::Host((host, data_info_host)) => Some(
-                get_flag_tooltip(host.country, data_info_host, language, false, opacity).into(),
-            ),
-            FavoriteItem::Service(_) => {
-                if fill_empty {
-                    Some(Space::new().width(ICONS_SIZE_BIG).into())
-                } else {
-                    None::<Element<Message, StyleType>>
-                }
+            FavoriteItem::Host((host, data_info_host)) => Some(get_flag_tooltip(
+                host.country,
+                data_info_host,
+                language,
+                false,
+                opacity,
+            )),
+            FavoriteItem::Service((service, _)) => {
+                Some(service.category().get_icon_tooltip(false, opacity))
             }
             FavoriteItem::Program((program, _)) => {
                 let program_lookup = program_lookup?;
-                Some(
-                    program_lookup
-                        .picon_tooltip(program.icon_key(), program.path(), opacity)
-                        .into(),
-                )
+                Some(program_lookup.picon_tooltip(program.icon_key(), program.path(), opacity))
             }
         }
     }

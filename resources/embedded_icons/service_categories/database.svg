@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg
+   id="svg2"
+   width="512"
+   height="511.99994"
+   version="1.1"
+   viewBox="0 0 512 511.99994"
+   xml:space="preserve"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg"><defs
+     id="defs1" /><mask
+     id="a"><circle
+       id="circle1"
+       cx="256"
+       cy="256"
+       r="256"
+       fill="#ffffff" /></mask><circle
+     style="fill:#c0c0c0;fill-opacity:1;stroke:#000000;stroke-width:0;stroke-dasharray:none;stroke-opacity:1;paint-order:markers stroke fill"
+     id="path5-9-4-7-3-5"
+     cx="256"
+     cy="256"
+     r="256" /><path
+     fill="none"
+     stroke="#000000"
+     stroke-width="30"
+     d="m 106.00001,152.15386 c 0,0 24.99999,-46.15385 149.99999,-46.15385 125,0 149.99999,46.15385 149.99999,46.15385 v 207.69229 c 0,0 -24.99999,46.15384 -149.99999,46.15384 -125,0 -149.99999,-46.15384 -149.99999,-46.15384 z m 0,118.84614 c 0,0 50,45 149.99999,45 100,0 149.99999,-45 149.99999,-45 M 106.00001,181 c 0,0 50,45 149.99999,45 100,0 149.99999,-45 149.99999,-45"
+     id="path1-5"
+     style="fill:#440044;fill-opacity:0;stroke:#404040;stroke-opacity:1" /><style
+     type="text/css"
+     id="style1">
+	.st0{fill:#000000;}
+</style></svg>

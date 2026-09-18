@@ -23,7 +23,8 @@ include = [
     "/resources/logos/raw/icon.png",
     "/resources/packaging/windows/graphics/sniffnet.ico",
     "/resources/sounds/*.mp3",
-    "/services.txt",
+    "/resources/services/categories.txt",
+    "/resources/services/services.txt",
     "/build.rs",
 ]
 
