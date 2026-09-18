@@ -45,8 +45,7 @@ const STORAGE: &[u8] =
     include_bytes!("../../../resources/embedded_icons/service_categories/storage.svg");
 const VPN: &[u8] = include_bytes!("../../../resources/embedded_icons/service_categories/vpn.svg");
 const WEB: &[u8] = include_bytes!("../../../resources/embedded_icons/service_categories/web.svg");
-const OTHER: &[u8] =
-    include_bytes!("../../../resources/embedded_icons/service_categories/other.svg");
+const OTHER: &[u8] = include_bytes!("../../../resources/embedded_icons/unknown.svg");
 
 /// General purpose of an upper layer service.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Default)]

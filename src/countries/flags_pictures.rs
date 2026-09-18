@@ -255,8 +255,7 @@ pub const MULTICAST: &[u8] =
     include_bytes!("../../resources/embedded_icons/countries/zz-multicast.svg");
 pub const BROADCAST: &[u8] =
     include_bytes!("../../resources/embedded_icons/countries/zz-broadcast.svg");
-pub const UNKNOWN: &[u8] =
-    include_bytes!("../../resources/embedded_icons/countries/zz-unknown.svg");
+pub const UNKNOWN: &[u8] = include_bytes!("../../resources/embedded_icons/unknown.svg");
 pub const COMPUTER: &[u8] =
     include_bytes!("../../resources/embedded_icons/countries/zz-computer.svg");
 pub const BOGON: &[u8] = include_bytes!("../../resources/embedded_icons/countries/zz-bogon.svg");
