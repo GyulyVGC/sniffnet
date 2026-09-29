@@ -4,7 +4,7 @@ use crate::gui::components::button::row_open_link_tooltip;
 use crate::gui::components::types::my_modal::MyModal;
 use crate::gui::styles::button::ButtonType;
 use crate::gui::styles::container::ContainerType;
-use crate::gui::styles::style_constants::{FONT_SIZE_BODY, FONT_SIZE_FOOTER, TOOLTIP_DELAY};
+use crate::gui::styles::style_constants::{FONT_SIZE_FOOTER, FONT_SIZE_TITLE, TOOLTIP_DELAY};
 use crate::gui::styles::text::TextType;
 use crate::gui::styles::types::gradient_type::GradientType;
 use crate::gui::styles::types::style_type::StyleType;
@@ -214,13 +214,13 @@ pub(super) fn get_release_details<'a>(
         );
     }
 
-    ret_val = ret_val.push(
-        Text::new(format!("{SNIFFNET_TITLECASE} {APP_VERSION}")).size(if expanded_view {
-            FONT_SIZE_BODY
-        } else {
-            FONT_SIZE_FOOTER
-        }),
-    );
+    let text = if expanded_view {
+        Text::new(SNIFFNET_TITLECASE).size(FONT_SIZE_TITLE)
+    } else {
+        Text::new(format!("{SNIFFNET_TITLECASE} {APP_VERSION}")).size(FONT_SIZE_FOOTER)
+    };
+
+    ret_val = ret_val.push(text);
 
     let mut button = button(
         update_status
