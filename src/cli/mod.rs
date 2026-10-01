@@ -62,10 +62,9 @@ impl Args {
             if Conf::default().store().is_ok() {
                 println!("Restored default settings");
                 std::process::exit(0);
-            } else {
-                eprintln!("Could not restore default settings");
-                std::process::exit(1);
             }
+            eprintln!("Could not restore default settings");
+            std::process::exit(1);
         }
 
         if args.config_path {
@@ -74,10 +73,9 @@ impl Args {
             {
                 println!("{}", config_path.display());
                 std::process::exit(0);
-            } else {
-                eprintln!("Could not retrieve configuration file path");
-                std::process::exit(1);
             }
+            eprintln!("Could not retrieve configuration file path");
+            std::process::exit(1);
         }
 
         args

@@ -8958,7 +8958,7 @@ sgi-eventmond	5553/tcp
 sgi-eventmond	5553/udp
 sgi-esphttp	5554/tcp
 sgi-esphttp	5554/udp
-freeciv	5555/tcp
+personal-agent	5555/tcp
 rplay	5555/udp
 freeciv	5556/tcp
 freeciv	5556/udp

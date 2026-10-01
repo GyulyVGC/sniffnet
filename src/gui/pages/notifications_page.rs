@@ -205,7 +205,7 @@ fn favorite_notification_log<'a>(
     program_lookup: Option<&'a ProgramLookup>,
 ) -> Container<'a, Message, StyleType> {
     let favorite = &logged_notification.favorite;
-    let icon = favorite.icon(language, program_lookup, true, 1.0);
+    let icon = favorite.icon(language, program_lookup, 1.0);
     let item_bar = item_bar(
         icon,
         favorite.to_entry_string(),

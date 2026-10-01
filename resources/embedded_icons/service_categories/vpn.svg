@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg
+   id="svg2"
+   width="511.99997"
+   height="511.99994"
+   version="1.1"
+   viewBox="0 0 511.99997 511.99994"
+   xml:space="preserve"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg"><defs
+     id="defs1"><style
+       id="style1-4">.cls-1{fill:none;stroke:#020202;stroke-miterlimit:10;stroke-width:1.91px;}</style><style
+       id="style1-37">
+      .cls-1 {
+        fill: none;
+      }
+    </style></defs><mask
+     id="a"><circle
+       id="circle1"
+       cx="256"
+       cy="256"
+       r="256"
+       fill="#ffffff" /></mask><circle
+     style="fill:#c0c0c0;fill-opacity:1;stroke:#000000;stroke-width:0;stroke-dasharray:none;stroke-opacity:1;paint-order:markers stroke fill"
+     id="path5-9-4-7-3-91-8"
+     cx="256"
+     cy="256"
+     r="256" /><polygon
+     points="22,23 13.83,23 16.41,20.41 15,19 10,24 15,29 16.41,27.59 13.83,25 22,25 "
+     id="polygon1-7"
+     style="fill:#404040;fill-opacity:1;stroke:none;stroke-width:0.28212;stroke-dasharray:none;stroke-opacity:1"
+     transform="matrix(-10,0,0,-10,466.55263,495.59891)" /><style
+     type="text/css"
+     id="style1">
+	.st0{fill:#000000;}
+</style><style
+     type="text/css"
+     id="style1-5">
+	.st0{fill:#000000;}
+</style><style
+     type="text/css"
+     id="style1-3">
+	.st0{fill:#000000;}
+</style><style
+     type="text/css"
+     id="style1-9">
+	.st0{fill:#000000;}
+</style><g
+     fill="none"
+     fill-rule="evenodd"
+     stroke="#000000"
+     stroke-linecap="round"
+     stroke-linejoin="round"
+     transform="matrix(-42.438062,0,0,-39.032094,458.19252,591.91201)"
+     id="g2"
+     style="fill:none;fill-opacity:1;stroke:#404040;stroke-opacity:1"><g
+       id="g1"
+       transform="matrix(0,0.54044118,-0.54044118,0,9.5989794,5.6438965)"
+       style="fill:none;fill-opacity:1;stroke:#404040;stroke-opacity:1"><path
+         d="M 0.5,3.3529412 C 0.5,2.0534477 2.5,0.5 5.5,0.5 c 3,0 5,1.5534476 5,2.8529412 V 13.647059 c 0,1.299493 -2,2.852941 -5,2.852941 -3,0 -5,-1.553448 -5,-2.852941 0,-0.641283 0,-9.6528347 0,-10.2941178 z"
+         id="path1"
+         style="fill:none;fill-opacity:1;stroke:#404040;stroke-opacity:1" /><path
+         d="m 0.5,3.5 c 0,1.3807119 2,3 5,3 3,0 5,-1.6192881 5,-3"
+         id="path2"
+         style="fill:none;fill-opacity:1;stroke:#404040;stroke-opacity:1" /></g></g></svg>

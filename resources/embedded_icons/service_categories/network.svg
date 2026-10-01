@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg
+   id="svg2"
+   width="512"
+   height="512"
+   version="1.1"
+   viewBox="0 0 512 512"
+   xml:space="preserve"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg"><defs
+     id="defs1"><style
+       id="style1-4">.cls-1{fill:none;stroke:#020202;stroke-miterlimit:10;stroke-width:1.91px;}</style></defs><mask
+     id="a"><circle
+       id="circle1"
+       cx="256"
+       cy="256"
+       r="256"
+       fill="#ffffff" /></mask><circle
+     style="fill:#c0c0c0;fill-opacity:1;stroke:#000000;stroke-width:0;stroke-dasharray:none;stroke-opacity:1;paint-order:markers stroke fill"
+     id="path5-9-4-7-3-54"
+     cx="256"
+     cy="256"
+     r="256" /><style
+     type="text/css"
+     id="style1">
+	.st0{fill:#000000;}
+</style><style
+     type="text/css"
+     id="style1-5">
+	.st0{fill:#000000;}
+</style><g
+     style="fill:#404040;fill-opacity:1"
+     id="g8"
+     transform="matrix(21.25,0,0,21.25,86,86)"><path
+       fill="#000000"
+       fill-rule="evenodd"
+       d="M 6.25,0 C 5.56,0 5,0.56 5,1.25 v 3.5 C 5,5.44 5.56,6 6.25,6 H 7 V 7 H 1 A 0.75,0.75 0 0 0 1,8.5 H 3.5 V 10 H 2.25 C 1.56,10 1,10.56 1,11.25 v 3.5 C 1,15.44 1.56,16 2.25,16 h 3.5 C 6.44,16 7,15.44 7,14.75 v -3.5 C 7,10.56 6.44,10 5.75,10 H 5 V 8.5 h 6 V 10 H 10.25 C 9.56,10 9,10.56 9,11.25 v 3.5 C 9,15.44 9.56,16 10.25,16 h 3.5 C 14.44,16 15,15.44 15,14.75 v -3.5 C 15,10.56 14.44,10 13.75,10 H 12.5 V 8.5 H 15 A 0.75,0.75 0 0 0 15,7 H 8.5 V 6 H 9.75 C 10.44,6 11,5.44 11,4.75 V 1.25 C 11,0.56 10.44,0 9.75,0 Z m 4.25,11.5 v 3 h 3 v -3 z m -8,0 v 3 h 3 v -3 z m 7,-7 v -3 h -3 v 3 z"
+       clip-rule="evenodd"
+       id="path1-61"
+       style="fill:#404040;fill-opacity:1" /></g></svg>
