@@ -50,44 +50,47 @@ const OTHER: &[u8] = include_bytes!("../../../resources/embedded_icons/unknown.s
 /// General purpose of an upper layer service.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Default)]
 pub enum ServiceCategory {
+    /// Web content, generic web APIs, and web transfer protocols.
     Web,
+    /// Email delivery, access, notification, and mail-specific routing.
     Email,
-    /// Human chat and messaging.
+    /// Human messaging, chat, discussion/news, SMS and paging.
     Chat,
-    /// Voice and audiovisual media.
+    /// Audio/video delivery, calls, conferencing, and audiovisual sessions.
     Media,
-    /// File transfer and sharing.
+    /// File/object transfer, synchronization, sharing, and network filesystems.
     Files,
-    /// Storage infrastructure and backup.
+    /// Storage infrastructure, block/tape access, backup, restore, and protected replication.
     Storage,
-    /// Databases and caches.
+    /// Database/query engines, data caches, database access and replication.
     Database,
-    /// Remote access and execution.
+    /// Interactive computer/desktop/application access and remote execution.
     Remote,
-    /// Monitoring and administration.
+    /// IT monitoring, logs, diagnostics, configuration, deployment, availability, and resource management.
     Management,
-    /// Naming and service discovery.
+    /// Name resolution and locating network devices/services.
     Discovery,
-    /// Network infrastructure.
+    /// Address assignment, network boot, time synchronization, routing, switching, mobility, and telecom/network control.
     Network,
-    /// VPNs, tunnels and proxies.
+    /// General connection tunneling, network relays, VPN negotiation, and proxies.
     Vpn,
-    /// Identity and directory services.
+    /// Authentication, authorization, directories, identity lookup, and credential/key/certificate services.
     Identity,
-    /// Printing, scanning and fax.
+    /// Printing, document scanning, fax, and their dedicated peripheral protocols.
     Printing,
+    /// Game sessions, multiplayer transports, game lobbies, and game-specific communication.
     Gaming,
-    /// Industrial and device automation.
+    /// Physical process/equipment control, building/home automation, industrial telemetry and metering.
     Industrial,
-    /// Software development.
+    /// Source control, compilation/build/test tools, debugging, and development support.
     Development,
-    /// Application messaging, RPC and coordination.
+    /// General application messaging, RPC, distributed objects, transaction coordination and shared application infrastructure.
     Middleware,
-    /// Dedicated security tools.
+    /// Threat/vulnerability detection, prevention, integrity checking, security policy enforcement and incident exchange.
     Security,
-    /// Software licensing.
+    /// Software license distribution, entitlement verification, activation, and floating-license services.
     Licensing,
-    /// Specialized or insufficiently established purposes.
+    /// Fallback for specialized applications outside this taxonomy, ambiguous identities, or insufficiently documented purposes.
     #[default]
     Other,
 }
