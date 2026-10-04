@@ -31,13 +31,16 @@ use crate::translations::translations_5::blacklisted_transmitted_translation;
 use crate::utils::types::icon::Icon;
 use crate::{Language, RunningPage, Sniffer, StyleType};
 use iced::Length::FillPortion;
+use iced::advanced::svg::Handle;
 use iced::widget::scrollable::Direction;
 use iced::widget::text::LineHeight;
 use iced::widget::tooltip::Position;
-use iced::widget::{Column, Container, Row, Scrollable, Text, Tooltip};
+use iced::widget::{Column, Container, Row, Scrollable, Svg, Text, Tooltip};
 use iced::widget::{Space, button};
-use iced::{Alignment, Element, Length, Padding};
+use iced::{Alignment, Length, Padding};
 use std::cmp::max;
+
+const THRESHOLD: &[u8] = include_bytes!("../../../resources/embedded_icons/threshold.svg");
 
 /// Computes the body of gui notifications page
 pub fn notifications_page(sniffer: &Sniffer) -> Container<'_, Message, StyleType> {
@@ -136,8 +139,9 @@ fn data_notification_log<'a>(
 ) -> Container<'a, Message, StyleType> {
     let data_info = logged_notification.data_info;
     let data_repr = logged_notification.data_repr;
+    let main_info = data_repr.data_exceeded_translation(language).to_string();
     let threshold_bar = item_bar(
-        Space::new().width(ICONS_SIZE_BIG),
+        threshold_tooltip(main_info.clone()),
         String::new(),
         &data_info,
         data_repr,
@@ -172,10 +176,7 @@ fn data_notification_log<'a>(
                         .push(Icon::Clock.to_text())
                         .push(Text::new(logged_notification.timestamp.clone())),
                 )
-                .push(
-                    Text::new(data_repr.data_exceeded_translation(language).to_string())
-                        .class(TextType::Title),
-                )
+                .push(Text::new(main_info).class(TextType::Title))
                 .push(
                     Text::new(threshold_str)
                         .class(TextType::Subtitle)
@@ -205,7 +206,7 @@ fn favorite_notification_log<'a>(
     program_lookup: Option<&'a ProgramLookup>,
 ) -> Container<'a, Message, StyleType> {
     let favorite = &logged_notification.favorite;
-    let icon = favorite.icon(language, program_lookup, true, 1.0);
+    let icon = favorite.icon(language, program_lookup, 1.0);
     let item_bar = item_bar(
         icon,
         favorite.to_entry_string(),
@@ -378,7 +379,7 @@ fn button_expand<'a>(
     .on_press(Message::ExpandNotification(notification_id, !is_expanded));
 
     Container::new(button)
-        .padding(Padding::ZERO.left(427))
+        .padding(Padding::ZERO.left(393))
         .align_y(Alignment::Center)
 }
 
@@ -397,7 +398,7 @@ fn data_notification_extra<'a>(
     #[allow(clippy::cast_precision_loss)]
     let height = (ICONS_SIZE_BIG + spacing) * max_entries as f32;
 
-    let mut hosts_col = Column::new().spacing(spacing).width(Length::FillPortion(5));
+    let mut hosts_col = Column::new().spacing(spacing).width(Length::FillPortion(2));
     let first_data_info = logged_notification
         .hosts
         .first()
@@ -416,15 +417,16 @@ fn data_notification_extra<'a>(
         hosts_col = hosts_col.push(host_bar);
     }
 
-    let mut services_col = Column::new().spacing(spacing).width(Length::FillPortion(2));
+    let mut services_col = Column::new().spacing(spacing).width(Length::Fill);
     let first_data_info_service = logged_notification
         .services
         .first()
         .unwrap_or(&(Service::default(), DataInfo::default()))
         .1;
     for (service, data_info) in &logged_notification.services {
+        let icon = service.category().get_icon_tooltip(false, 1.0);
         let service_bar = item_bar(
-            None::<Element<Message, StyleType>>,
+            icon,
             service.to_string(),
             data_info,
             logged_notification.data_repr,
@@ -439,4 +441,19 @@ fn data_notification_extra<'a>(
             .push(Container::new(RuleType::Standard.vertical(30)).height(height))
             .push(services_col),
     )
+}
+
+fn threshold_tooltip<'a>(tooltip: String) -> Tooltip<'a, Message, StyleType> {
+    let svg = Svg::new(Handle::from_memory(THRESHOLD))
+        .width(ICONS_SIZE_BIG)
+        .height(ICONS_SIZE_BIG);
+
+    Tooltip::new(
+        svg,
+        Text::new(tooltip).size(FONT_SIZE_FOOTER),
+        Position::FollowCursor,
+    )
+    .snap_within_viewport(true)
+    .class(ContainerType::Tooltip)
+    .delay(TOOLTIP_DELAY)
 }

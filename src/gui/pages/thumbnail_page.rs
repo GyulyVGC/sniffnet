@@ -18,8 +18,8 @@ use crate::translations::types::language::Language;
 use crate::utils::formatted_strings::clip_text;
 
 const MAX_ENTRIES: usize = 4;
-const MAX_CHARS_HOST: usize = 26;
-const MAX_CHARS_SERVICE: usize = 13;
+const MAX_CHARS_HOST: usize = 27;
+const MAX_CHARS_SERVICE: usize = 11;
 
 /// Computes the body of the thumbnail view
 pub fn thumbnail_page(sniffer: &Sniffer) -> Container<'_, Message, StyleType> {
@@ -144,17 +144,31 @@ fn service_col<'a>(sniffer: &Sniffer) -> Column<'a, Message, StyleType> {
             continue;
         };
 
-        let is_dimmed = data_info.tot_data(DataRepr::Packets) == 0;
+        let text = clip_text(&service.to_string(), MAX_CHARS_SERVICE);
 
-        service_col = service_col.push(
-            Text::new(clip_text(&service.to_string(), MAX_CHARS_SERVICE))
-                .size(FONT_SIZE_FOOTER)
-                .class(if is_dimmed {
-                    TextType::Dimmed
-                } else {
-                    TextType::Standard
-                }),
-        );
+        let is_dimmed = data_info.tot_data(DataRepr::Packets) == 0;
+        let opacity = if is_dimmed {
+            sniffer
+                .conf
+                .settings
+                .style
+                .get_extension()
+                .alpha_chart_badge
+        } else {
+            1.0
+        };
+
+        let icon = service.category().get_icon_tooltip(true, opacity);
+        let service_row = Row::new()
+            .align_y(Alignment::Center)
+            .spacing(5)
+            .push(icon)
+            .push(Text::new(text).size(FONT_SIZE_FOOTER).class(if is_dimmed {
+                TextType::Dimmed
+            } else {
+                TextType::Standard
+            }));
+        service_col = service_col.push(service_row);
     }
     service_col
 }

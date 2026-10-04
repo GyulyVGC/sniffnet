@@ -1526,7 +1526,7 @@ mod tests {
             // just to count and verify number of distinct services
             distinct_services.insert(name.to_string());
         }
-        assert_eq!(distinct_services.len(), 6465);
+        assert_eq!(distinct_services.len(), 6466);
     }
 
     #[test]
