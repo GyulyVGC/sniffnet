@@ -55,9 +55,9 @@ fn build_services_phf() -> HashSet<String> {
         }
         let mut parts = line.split('\t');
         // we want to panic if one of the service names is invalid
-        let name = parts.next().unwrap();
+        let name = parts.next().unwrap().trim();
         let val = Cow::Owned(get_valid_service_fmt_const(name));
-        service_names.insert(name.trim().to_owned());
+        service_names.insert(name.to_owned());
         // we want to panic if port is not a u16, or protocol is not TCP or UDP
         let key = get_valid_service_query(parts.next().unwrap());
         assert!(parts.next().is_none());
@@ -79,23 +79,30 @@ fn build_services_phf() -> HashSet<String> {
 fn build_service_categories_phf(mut service_names: HashSet<String>) {
     let out_path = Path::new(&env::var("OUT_DIR").unwrap()).join("service_categories.rs");
     let mut output = BufWriter::new(File::create(out_path).unwrap());
+
     let mut categories_map = phf_codegen::Map::new();
 
-    let input = BufReader::new(File::open(SERVICE_CATEGORIES_LIST_PATH).unwrap()).lines();
+    let input = BufReader::new(File::open(SERVICE_CATEGORIES_LIST_PATH).unwrap());
     let mut num_entries = 0;
-    for line_res in input {
+    for line_res in input.lines() {
+        // we want to panic if one of the lines is err...
         let line = line_res.unwrap();
+        // skip comment or blank lines
         if line.trim().is_empty() || line.trim().starts_with('#') {
             continue;
         }
         let mut parts = line.split('\t');
-        let name = parts.next().unwrap();
-        let val = Cow::Owned(get_valid_service_category_fmt_const(parts.next().unwrap()));
-        assert!(parts.next().is_none());
+        // we want to panic if one of the service categories is invalid
+        let name = parts.next().unwrap().trim();
+        let val = Cow::Owned(get_valid_service_category_fmt_const(
+            parts.next().unwrap().trim(),
+        ));
+        // we want to panic if there is a duplicate or unexpected service name
         assert!(
             service_names.remove(name),
-            "Duplicate or unexpected service category entry: {name}"
+            "Duplicate or unexpected service: {name}"
         );
+        assert!(parts.next().is_none());
         categories_map.entry(name.to_owned(), val);
         num_entries += 1;
     }
