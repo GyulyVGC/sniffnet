@@ -4,6 +4,7 @@ All Sniffnet releases with the relative changes are documented in this file.
 
 ## [UNRELEASED]
 - IPFIX collector capabilities: receive and analyze network traffic from remote devices ([#1270](https://github.com/GyulyVGC/sniffnet/pull/1270) — fixes [#303](https://github.com/GyulyVGC/sniffnet/issues/303))
+- Service taxonomy: classify upper layer services into 20 different categories ([#1312](https://github.com/GyulyVGC/sniffnet/pull/1312) — fixes [#1102](https://github.com/GyulyVGC/sniffnet/issues/1102))
 - Added support for IGMP connections and messages ([#1301](https://github.com/GyulyVGC/sniffnet/pull/1301) — fixes [#1269](https://github.com/GyulyVGC/sniffnet/issues/1269))
 - Added support for VLAN-tagged connections ([#1302](https://github.com/GyulyVGC/sniffnet/pull/1302) — fixes [#1070](https://github.com/GyulyVGC/sniffnet/issues/1070))
 - Expanded view setting: slimmer header and hidden footer, allowing users to focus on what matters most ([#1310](https://github.com/GyulyVGC/sniffnet/pull/1310) — fixes [#884](https://github.com/GyulyVGC/sniffnet/issues/884))
