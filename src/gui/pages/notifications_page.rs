@@ -379,7 +379,7 @@ fn button_expand<'a>(
     .on_press(Message::ExpandNotification(notification_id, !is_expanded));
 
     Container::new(button)
-        .padding(Padding::ZERO.left(427))
+        .padding(Padding::ZERO.left(393))
         .align_y(Alignment::Center)
 }
 
