@@ -36,7 +36,7 @@ use iced::widget::text::LineHeight;
 use iced::widget::tooltip::Position;
 use iced::widget::{Column, Container, Row, Scrollable, Text, Tooltip};
 use iced::widget::{Space, button};
-use iced::{Alignment, Element, Length, Padding};
+use iced::{Alignment, Length, Padding};
 use std::cmp::max;
 
 /// Computes the body of gui notifications page
@@ -397,7 +397,7 @@ fn data_notification_extra<'a>(
     #[allow(clippy::cast_precision_loss)]
     let height = (ICONS_SIZE_BIG + spacing) * max_entries as f32;
 
-    let mut hosts_col = Column::new().spacing(spacing).width(Length::FillPortion(5));
+    let mut hosts_col = Column::new().spacing(spacing).width(Length::FillPortion(2));
     let first_data_info = logged_notification
         .hosts
         .first()
@@ -416,15 +416,16 @@ fn data_notification_extra<'a>(
         hosts_col = hosts_col.push(host_bar);
     }
 
-    let mut services_col = Column::new().spacing(spacing).width(Length::FillPortion(2));
+    let mut services_col = Column::new().spacing(spacing).width(Length::Fill);
     let first_data_info_service = logged_notification
         .services
         .first()
         .unwrap_or(&(Service::default(), DataInfo::default()))
         .1;
     for (service, data_info) in &logged_notification.services {
+        let icon = service.category().get_icon_tooltip(false, 1.0);
         let service_bar = item_bar(
-            None::<Element<Message, StyleType>>,
+            icon,
             service.to_string(),
             data_info,
             logged_notification.data_repr,
