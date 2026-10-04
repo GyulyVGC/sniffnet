@@ -31,13 +31,16 @@ use crate::translations::translations_5::blacklisted_transmitted_translation;
 use crate::utils::types::icon::Icon;
 use crate::{Language, RunningPage, Sniffer, StyleType};
 use iced::Length::FillPortion;
+use iced::advanced::svg::Handle;
 use iced::widget::scrollable::Direction;
 use iced::widget::text::LineHeight;
 use iced::widget::tooltip::Position;
-use iced::widget::{Column, Container, Row, Scrollable, Text, Tooltip};
+use iced::widget::{Column, Container, Row, Scrollable, Svg, Text, Tooltip};
 use iced::widget::{Space, button};
 use iced::{Alignment, Length, Padding};
 use std::cmp::max;
+
+const THRESHOLD: &[u8] = include_bytes!("../../../resources/embedded_icons/threshold.svg");
 
 /// Computes the body of gui notifications page
 pub fn notifications_page(sniffer: &Sniffer) -> Container<'_, Message, StyleType> {
@@ -136,8 +139,9 @@ fn data_notification_log<'a>(
 ) -> Container<'a, Message, StyleType> {
     let data_info = logged_notification.data_info;
     let data_repr = logged_notification.data_repr;
+    let main_info = data_repr.data_exceeded_translation(language).to_string();
     let threshold_bar = item_bar(
-        Space::new().width(ICONS_SIZE_BIG),
+        threshold_tooltip(main_info.clone()),
         String::new(),
         &data_info,
         data_repr,
@@ -172,10 +176,7 @@ fn data_notification_log<'a>(
                         .push(Icon::Clock.to_text())
                         .push(Text::new(logged_notification.timestamp.clone())),
                 )
-                .push(
-                    Text::new(data_repr.data_exceeded_translation(language).to_string())
-                        .class(TextType::Title),
-                )
+                .push(Text::new(main_info).class(TextType::Title))
                 .push(
                     Text::new(threshold_str)
                         .class(TextType::Subtitle)
@@ -440,4 +441,19 @@ fn data_notification_extra<'a>(
             .push(Container::new(RuleType::Standard.vertical(30)).height(height))
             .push(services_col),
     )
+}
+
+fn threshold_tooltip<'a>(tooltip: String) -> Tooltip<'a, Message, StyleType> {
+    let svg = Svg::new(Handle::from_memory(THRESHOLD))
+        .width(ICONS_SIZE_BIG)
+        .height(ICONS_SIZE_BIG);
+
+    Tooltip::new(
+        svg,
+        Text::new(tooltip).size(FONT_SIZE_FOOTER),
+        Position::FollowCursor,
+    )
+    .snap_within_viewport(true)
+    .class(ContainerType::Tooltip)
+    .delay(TOOLTIP_DELAY)
 }
