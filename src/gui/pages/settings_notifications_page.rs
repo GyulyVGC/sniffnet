@@ -14,7 +14,7 @@ use crate::gui::styles::style_constants::{FONT_SIZE_FOOTER, FONT_SIZE_SUBTITLE, 
 use crate::gui::styles::text::TextType;
 use crate::gui::styles::types::gradient_type::GradientType;
 use crate::gui::types::message::Message;
-use crate::networking::types::data_representation::DataRepr;
+use crate::networking::types::data_representation::DataUnit;
 use crate::notifications::types::notifications::{
     DataNotification, Notification, RemoteNotifications, SimpleNotification,
 };
@@ -421,7 +421,7 @@ pub fn settings_header<'a>(
 fn row_data_representation<'a>(
     data_notification: DataNotification,
     language: Language,
-    data_repr: DataRepr,
+    data_repr: DataUnit,
 ) -> row::Wrapping<'a, Message, StyleType> {
     let mut ret_val = Row::new()
         .width(Length::Shrink)
@@ -433,7 +433,7 @@ fn row_data_representation<'a>(
             data_representation_translation(language)
         )));
 
-    for option in DataRepr::ALL {
+    for option in DataUnit::ALL {
         let is_active = data_repr.eq(&option);
         ret_val = ret_val.push(
             Button::new(

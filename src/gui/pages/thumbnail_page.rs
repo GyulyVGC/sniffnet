@@ -12,7 +12,7 @@ use crate::gui::styles::text::TextType;
 use crate::gui::styles::types::style_type::StyleType;
 use crate::gui::types::favorite::{Favorite, FavoriteItem};
 use crate::gui::types::message::Message;
-use crate::networking::types::data_representation::DataRepr;
+use crate::networking::types::data_representation::DataUnit;
 use crate::networking::types::host::ThumbnailHost;
 use crate::translations::types::language::Language;
 use crate::utils::formatted_strings::clip_text;
@@ -26,7 +26,7 @@ pub fn thumbnail_page(sniffer: &Sniffer) -> Container<'_, Message, StyleType> {
     let tot_packets = sniffer
         .info_traffic
         .tot_data_info
-        .tot_data(DataRepr::Packets);
+        .tot_data(DataUnit::Packets);
 
     if tot_packets == 0 {
         return Container::new(
@@ -103,7 +103,7 @@ fn host_col<'a>(sniffer: &Sniffer) -> Column<'a, Message, StyleType> {
 
         thumbnail_hosts.push(thumbnail_host);
 
-        let is_dimmed = data_info_host.data_info.tot_data(DataRepr::Packets) == 0;
+        let is_dimmed = data_info_host.data_info.tot_data(DataUnit::Packets) == 0;
         let opacity = if is_dimmed {
             sniffer
                 .conf
@@ -146,7 +146,7 @@ fn service_col<'a>(sniffer: &Sniffer) -> Column<'a, Message, StyleType> {
 
         let text = clip_text(&service.to_string(), MAX_CHARS_SERVICE);
 
-        let is_dimmed = data_info.tot_data(DataRepr::Packets) == 0;
+        let is_dimmed = data_info.tot_data(DataUnit::Packets) == 0;
         let opacity = if is_dimmed {
             sniffer
                 .conf

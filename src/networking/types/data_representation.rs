@@ -7,27 +7,33 @@ use crate::translations::types::language::Language;
 use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize, Default)]
-pub enum DataRepr {
+pub struct DataRepr {
+    pub(crate) data_unit: DataUnit,
+    pub(crate) per_second: bool,
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize, Default)]
+pub enum DataUnit {
     Packets,
     #[default]
     Bytes,
     Bits,
 }
 
-impl DataRepr {
-    pub(crate) const ALL: [DataRepr; 3] = [DataRepr::Bits, DataRepr::Bytes, DataRepr::Packets];
+impl DataUnit {
+    pub(crate) const ALL: [DataUnit; 3] = [DataUnit::Bits, DataUnit::Bytes, DataUnit::Packets];
 
     pub fn get_label(&self, language: Language) -> &str {
         match self {
-            DataRepr::Packets => packets_translation(language),
-            DataRepr::Bytes => bytes_translation(language),
-            DataRepr::Bits => bits_translation(language),
+            DataUnit::Packets => packets_translation(language),
+            DataUnit::Bytes => bytes_translation(language),
+            DataUnit::Bits => bits_translation(language),
         }
     }
 
     /// Returns a String representing a quantity of traffic (packets / bytes / bits) with the proper multiple if applicable
     pub fn formatted_string(self, amount: u128) -> String {
-        if self == DataRepr::Packets {
+        if self == DataUnit::Packets {
             return amount.to_string();
         }
 
@@ -49,9 +55,9 @@ impl DataRepr {
 
     pub fn data_exceeded_translation(&self, language: Language) -> &str {
         match self {
-            DataRepr::Packets => packets_exceeded_translation(language),
-            DataRepr::Bytes => bytes_exceeded_translation(language),
-            DataRepr::Bits => bits_exceeded_translation(language),
+            DataUnit::Packets => packets_exceeded_translation(language),
+            DataUnit::Bytes => bytes_exceeded_translation(language),
+            DataUnit::Bits => bits_exceeded_translation(language),
         }
     }
 }
@@ -141,11 +147,11 @@ impl ByteMultiple {
         }
     }
 
-    fn pretty_print(self, repr: DataRepr) -> String {
+    fn pretty_print(self, repr: DataUnit) -> String {
         match repr {
-            DataRepr::Packets => String::new(),
-            DataRepr::Bytes => format!("{}B", self.get_char()),
-            DataRepr::Bits => format!("{}b", self.get_char()),
+            DataUnit::Packets => String::new(),
+            DataUnit::Bytes => format!("{}B", self.get_char()),
+            DataUnit::Bits => format!("{}b", self.get_char()),
         }
     }
 }
@@ -173,75 +179,75 @@ mod tests {
     #[test]
     fn test_byte_multiple_display() {
         assert_eq!(
-            format!("{}", ByteMultiple::B.pretty_print(DataRepr::Packets)),
+            format!("{}", ByteMultiple::B.pretty_print(DataUnit::Packets)),
             ""
         );
         assert_eq!(
-            format!("{}", ByteMultiple::B.pretty_print(DataRepr::Bytes)),
+            format!("{}", ByteMultiple::B.pretty_print(DataUnit::Bytes)),
             "B"
         );
         assert_eq!(
-            format!("{}", ByteMultiple::B.pretty_print(DataRepr::Bits)),
+            format!("{}", ByteMultiple::B.pretty_print(DataUnit::Bits)),
             "b"
         );
         assert_eq!(
-            format!("{}", ByteMultiple::KB.pretty_print(DataRepr::Packets)),
+            format!("{}", ByteMultiple::KB.pretty_print(DataUnit::Packets)),
             ""
         );
         assert_eq!(
-            format!("{}", ByteMultiple::KB.pretty_print(DataRepr::Bytes)),
+            format!("{}", ByteMultiple::KB.pretty_print(DataUnit::Bytes)),
             "KB"
         );
         assert_eq!(
-            format!("{}", ByteMultiple::KB.pretty_print(DataRepr::Bits)),
+            format!("{}", ByteMultiple::KB.pretty_print(DataUnit::Bits)),
             "Kb"
         );
         assert_eq!(
-            format!("{}", ByteMultiple::MB.pretty_print(DataRepr::Packets)),
+            format!("{}", ByteMultiple::MB.pretty_print(DataUnit::Packets)),
             ""
         );
         assert_eq!(
-            format!("{}", ByteMultiple::MB.pretty_print(DataRepr::Bytes)),
+            format!("{}", ByteMultiple::MB.pretty_print(DataUnit::Bytes)),
             "MB"
         );
         assert_eq!(
-            format!("{}", ByteMultiple::MB.pretty_print(DataRepr::Bits)),
+            format!("{}", ByteMultiple::MB.pretty_print(DataUnit::Bits)),
             "Mb"
         );
         assert_eq!(
-            format!("{}", ByteMultiple::GB.pretty_print(DataRepr::Packets)),
+            format!("{}", ByteMultiple::GB.pretty_print(DataUnit::Packets)),
             ""
         );
         assert_eq!(
-            format!("{}", ByteMultiple::GB.pretty_print(DataRepr::Bytes)),
+            format!("{}", ByteMultiple::GB.pretty_print(DataUnit::Bytes)),
             "GB"
         );
         assert_eq!(
-            format!("{}", ByteMultiple::GB.pretty_print(DataRepr::Bits)),
+            format!("{}", ByteMultiple::GB.pretty_print(DataUnit::Bits)),
             "Gb"
         );
         assert_eq!(
-            format!("{}", ByteMultiple::TB.pretty_print(DataRepr::Packets)),
+            format!("{}", ByteMultiple::TB.pretty_print(DataUnit::Packets)),
             ""
         );
         assert_eq!(
-            format!("{}", ByteMultiple::TB.pretty_print(DataRepr::Bytes)),
+            format!("{}", ByteMultiple::TB.pretty_print(DataUnit::Bytes)),
             "TB"
         );
         assert_eq!(
-            format!("{}", ByteMultiple::TB.pretty_print(DataRepr::Bits)),
+            format!("{}", ByteMultiple::TB.pretty_print(DataUnit::Bits)),
             "Tb"
         );
         assert_eq!(
-            format!("{}", ByteMultiple::PB.pretty_print(DataRepr::Packets)),
+            format!("{}", ByteMultiple::PB.pretty_print(DataUnit::Packets)),
             ""
         );
         assert_eq!(
-            format!("{}", ByteMultiple::PB.pretty_print(DataRepr::Bytes)),
+            format!("{}", ByteMultiple::PB.pretty_print(DataUnit::Bytes)),
             "PB"
         );
         assert_eq!(
-            format!("{}", ByteMultiple::PB.pretty_print(DataRepr::Bits)),
+            format!("{}", ByteMultiple::PB.pretty_print(DataUnit::Bits)),
             "Pb"
         );
     }
@@ -268,256 +274,256 @@ mod tests {
 
     #[test]
     fn test_byte_multiple_formatted_string() {
-        assert_eq!(DataRepr::Packets.formatted_string(u128::MIN), "0");
-        assert_eq!(DataRepr::Bytes.formatted_string(u128::MIN), "0 B");
-        assert_eq!(DataRepr::Bits.formatted_string(u128::MIN), "0 b");
+        assert_eq!(DataUnit::Packets.formatted_string(u128::MIN), "0");
+        assert_eq!(DataUnit::Bytes.formatted_string(u128::MIN), "0 B");
+        assert_eq!(DataUnit::Bits.formatted_string(u128::MIN), "0 b");
 
-        assert_eq!(DataRepr::Packets.formatted_string(1), "1");
-        assert_eq!(DataRepr::Bytes.formatted_string(1), "1 B");
-        assert_eq!(DataRepr::Bits.formatted_string(1), "1 b");
+        assert_eq!(DataUnit::Packets.formatted_string(1), "1");
+        assert_eq!(DataUnit::Bytes.formatted_string(1), "1 B");
+        assert_eq!(DataUnit::Bits.formatted_string(1), "1 b");
 
-        assert_eq!(DataRepr::Packets.formatted_string(82), "82");
-        assert_eq!(DataRepr::Bytes.formatted_string(82), "82 B");
-        assert_eq!(DataRepr::Bits.formatted_string(82), "82 b");
+        assert_eq!(DataUnit::Packets.formatted_string(82), "82");
+        assert_eq!(DataUnit::Bytes.formatted_string(82), "82 B");
+        assert_eq!(DataUnit::Bits.formatted_string(82), "82 b");
 
-        assert_eq!(DataRepr::Packets.formatted_string(999), "999");
-        assert_eq!(DataRepr::Bytes.formatted_string(999), "999 B");
-        assert_eq!(DataRepr::Bits.formatted_string(999), "999 b");
+        assert_eq!(DataUnit::Packets.formatted_string(999), "999");
+        assert_eq!(DataUnit::Bytes.formatted_string(999), "999 B");
+        assert_eq!(DataUnit::Bits.formatted_string(999), "999 b");
 
-        assert_eq!(DataRepr::Packets.formatted_string(1_000), "1000");
-        assert_eq!(DataRepr::Bytes.formatted_string(1_000), "1.0 KB");
-        assert_eq!(DataRepr::Bits.formatted_string(1_000), "1.0 Kb");
+        assert_eq!(DataUnit::Packets.formatted_string(1_000), "1000");
+        assert_eq!(DataUnit::Bytes.formatted_string(1_000), "1.0 KB");
+        assert_eq!(DataUnit::Bits.formatted_string(1_000), "1.0 Kb");
 
-        assert_eq!(DataRepr::Packets.formatted_string(1_090), "1090");
-        assert_eq!(DataRepr::Bytes.formatted_string(1_090), "1.1 KB");
-        assert_eq!(DataRepr::Bits.formatted_string(1_090), "1.1 Kb");
+        assert_eq!(DataUnit::Packets.formatted_string(1_090), "1090");
+        assert_eq!(DataUnit::Bytes.formatted_string(1_090), "1.1 KB");
+        assert_eq!(DataUnit::Bits.formatted_string(1_090), "1.1 Kb");
 
-        assert_eq!(DataRepr::Packets.formatted_string(1_990), "1990");
-        assert_eq!(DataRepr::Bytes.formatted_string(1_990), "2.0 KB");
-        assert_eq!(DataRepr::Bits.formatted_string(1_990), "2.0 Kb");
+        assert_eq!(DataUnit::Packets.formatted_string(1_990), "1990");
+        assert_eq!(DataUnit::Bytes.formatted_string(1_990), "2.0 KB");
+        assert_eq!(DataUnit::Bits.formatted_string(1_990), "2.0 Kb");
 
-        assert_eq!(DataRepr::Packets.formatted_string(9_090), "9090");
-        assert_eq!(DataRepr::Bytes.formatted_string(9_090), "9.1 KB");
-        assert_eq!(DataRepr::Bits.formatted_string(9_090), "9.1 Kb");
+        assert_eq!(DataUnit::Packets.formatted_string(9_090), "9090");
+        assert_eq!(DataUnit::Bytes.formatted_string(9_090), "9.1 KB");
+        assert_eq!(DataUnit::Bits.formatted_string(9_090), "9.1 Kb");
 
-        assert_eq!(DataRepr::Packets.formatted_string(9_950), "9950");
-        assert_eq!(DataRepr::Bytes.formatted_string(9_950), "9.9 KB");
-        assert_eq!(DataRepr::Bits.formatted_string(9_950), "9.9 Kb");
+        assert_eq!(DataUnit::Packets.formatted_string(9_950), "9950");
+        assert_eq!(DataUnit::Bytes.formatted_string(9_950), "9.9 KB");
+        assert_eq!(DataUnit::Bits.formatted_string(9_950), "9.9 Kb");
 
-        assert_eq!(DataRepr::Packets.formatted_string(9_951), "9951");
-        assert_eq!(DataRepr::Bytes.formatted_string(9_951), "10 KB");
-        assert_eq!(DataRepr::Bits.formatted_string(9_951), "10 Kb");
+        assert_eq!(DataUnit::Packets.formatted_string(9_951), "9951");
+        assert_eq!(DataUnit::Bytes.formatted_string(9_951), "10 KB");
+        assert_eq!(DataUnit::Bits.formatted_string(9_951), "10 Kb");
 
-        assert_eq!(DataRepr::Packets.formatted_string(71_324), "71324");
-        assert_eq!(DataRepr::Bytes.formatted_string(71_324), "71 KB");
-        assert_eq!(DataRepr::Bits.formatted_string(71_324), "71 Kb");
+        assert_eq!(DataUnit::Packets.formatted_string(71_324), "71324");
+        assert_eq!(DataUnit::Bytes.formatted_string(71_324), "71 KB");
+        assert_eq!(DataUnit::Bits.formatted_string(71_324), "71 Kb");
 
-        assert_eq!(DataRepr::Packets.formatted_string(821_789), "821789");
-        assert_eq!(DataRepr::Bytes.formatted_string(821_789), "822 KB");
-        assert_eq!(DataRepr::Bits.formatted_string(821_789), "822 Kb");
+        assert_eq!(DataUnit::Packets.formatted_string(821_789), "821789");
+        assert_eq!(DataUnit::Bytes.formatted_string(821_789), "822 KB");
+        assert_eq!(DataUnit::Bits.formatted_string(821_789), "822 Kb");
 
-        assert_eq!(DataRepr::Packets.formatted_string(999_499), "999499");
-        assert_eq!(DataRepr::Bytes.formatted_string(999_499), "999 KB");
-        assert_eq!(DataRepr::Bits.formatted_string(999_499), "999 Kb");
+        assert_eq!(DataUnit::Packets.formatted_string(999_499), "999499");
+        assert_eq!(DataUnit::Bytes.formatted_string(999_499), "999 KB");
+        assert_eq!(DataUnit::Bits.formatted_string(999_499), "999 Kb");
 
-        assert_eq!(DataRepr::Packets.formatted_string(999_999), "999999");
-        assert_eq!(DataRepr::Bytes.formatted_string(999_999), "999 KB");
-        assert_eq!(DataRepr::Bits.formatted_string(999_999), "999 Kb");
+        assert_eq!(DataUnit::Packets.formatted_string(999_999), "999999");
+        assert_eq!(DataUnit::Bytes.formatted_string(999_999), "999 KB");
+        assert_eq!(DataUnit::Bits.formatted_string(999_999), "999 Kb");
 
-        assert_eq!(DataRepr::Packets.formatted_string(1_000_000), "1000000");
-        assert_eq!(DataRepr::Bytes.formatted_string(1_000_000), "1.0 MB");
-        assert_eq!(DataRepr::Bits.formatted_string(1_000_000), "1.0 Mb");
+        assert_eq!(DataUnit::Packets.formatted_string(1_000_000), "1000000");
+        assert_eq!(DataUnit::Bytes.formatted_string(1_000_000), "1.0 MB");
+        assert_eq!(DataUnit::Bits.formatted_string(1_000_000), "1.0 Mb");
 
-        assert_eq!(DataRepr::Packets.formatted_string(3_790_000), "3790000");
-        assert_eq!(DataRepr::Bytes.formatted_string(3_790_000), "3.8 MB");
-        assert_eq!(DataRepr::Bits.formatted_string(3_790_000), "3.8 Mb");
+        assert_eq!(DataUnit::Packets.formatted_string(3_790_000), "3790000");
+        assert_eq!(DataUnit::Bytes.formatted_string(3_790_000), "3.8 MB");
+        assert_eq!(DataUnit::Bits.formatted_string(3_790_000), "3.8 Mb");
 
-        assert_eq!(DataRepr::Packets.formatted_string(9_950_000), "9950000");
-        assert_eq!(DataRepr::Bytes.formatted_string(9_950_000), "9.9 MB");
-        assert_eq!(DataRepr::Bits.formatted_string(9_950_000), "9.9 Mb");
+        assert_eq!(DataUnit::Packets.formatted_string(9_950_000), "9950000");
+        assert_eq!(DataUnit::Bytes.formatted_string(9_950_000), "9.9 MB");
+        assert_eq!(DataUnit::Bits.formatted_string(9_950_000), "9.9 Mb");
 
-        assert_eq!(DataRepr::Packets.formatted_string(9_951_000), "9951000");
-        assert_eq!(DataRepr::Bytes.formatted_string(9_951_000), "10 MB");
-        assert_eq!(DataRepr::Bits.formatted_string(9_951_000), "10 Mb");
+        assert_eq!(DataUnit::Packets.formatted_string(9_951_000), "9951000");
+        assert_eq!(DataUnit::Bytes.formatted_string(9_951_000), "10 MB");
+        assert_eq!(DataUnit::Bits.formatted_string(9_951_000), "10 Mb");
 
-        assert_eq!(DataRepr::Packets.formatted_string(49_499_000), "49499000");
-        assert_eq!(DataRepr::Bytes.formatted_string(49_499_000), "49 MB");
-        assert_eq!(DataRepr::Bits.formatted_string(49_499_000), "49 Mb");
+        assert_eq!(DataUnit::Packets.formatted_string(49_499_000), "49499000");
+        assert_eq!(DataUnit::Bytes.formatted_string(49_499_000), "49 MB");
+        assert_eq!(DataUnit::Bits.formatted_string(49_499_000), "49 Mb");
 
-        assert_eq!(DataRepr::Packets.formatted_string(49_500_000), "49500000");
-        assert_eq!(DataRepr::Bytes.formatted_string(49_500_000), "50 MB");
-        assert_eq!(DataRepr::Bits.formatted_string(49_500_000), "50 Mb");
+        assert_eq!(DataUnit::Packets.formatted_string(49_500_000), "49500000");
+        assert_eq!(DataUnit::Bytes.formatted_string(49_500_000), "50 MB");
+        assert_eq!(DataUnit::Bits.formatted_string(49_500_000), "50 Mb");
 
-        assert_eq!(DataRepr::Packets.formatted_string(670_900_000), "670900000");
-        assert_eq!(DataRepr::Bytes.formatted_string(670_900_000), "671 MB");
-        assert_eq!(DataRepr::Bits.formatted_string(670_900_000), "671 Mb");
+        assert_eq!(DataUnit::Packets.formatted_string(670_900_000), "670900000");
+        assert_eq!(DataUnit::Bytes.formatted_string(670_900_000), "671 MB");
+        assert_eq!(DataUnit::Bits.formatted_string(670_900_000), "671 Mb");
 
-        assert_eq!(DataRepr::Packets.formatted_string(998_199_999), "998199999");
-        assert_eq!(DataRepr::Bytes.formatted_string(998_199_999), "998 MB");
-        assert_eq!(DataRepr::Bits.formatted_string(998_199_999), "998 Mb");
+        assert_eq!(DataUnit::Packets.formatted_string(998_199_999), "998199999");
+        assert_eq!(DataUnit::Bytes.formatted_string(998_199_999), "998 MB");
+        assert_eq!(DataUnit::Bits.formatted_string(998_199_999), "998 Mb");
 
-        assert_eq!(DataRepr::Packets.formatted_string(999_999_999), "999999999");
-        assert_eq!(DataRepr::Bytes.formatted_string(999_999_999), "999 MB");
-        assert_eq!(DataRepr::Bits.formatted_string(999_999_999), "999 Mb");
+        assert_eq!(DataUnit::Packets.formatted_string(999_999_999), "999999999");
+        assert_eq!(DataUnit::Bytes.formatted_string(999_999_999), "999 MB");
+        assert_eq!(DataUnit::Bits.formatted_string(999_999_999), "999 Mb");
 
         assert_eq!(
-            DataRepr::Packets.formatted_string(1_000_000_000),
+            DataUnit::Packets.formatted_string(1_000_000_000),
             "1000000000"
         );
-        assert_eq!(DataRepr::Bytes.formatted_string(1_000_000_000), "1.0 GB");
-        assert_eq!(DataRepr::Bits.formatted_string(1_000_000_000), "1.0 Gb");
+        assert_eq!(DataUnit::Bytes.formatted_string(1_000_000_000), "1.0 GB");
+        assert_eq!(DataUnit::Bits.formatted_string(1_000_000_000), "1.0 Gb");
 
         assert_eq!(
-            DataRepr::Packets.formatted_string(7_770_000_000),
+            DataUnit::Packets.formatted_string(7_770_000_000),
             "7770000000"
         );
-        assert_eq!(DataRepr::Bytes.formatted_string(7_770_000_000), "7.8 GB");
-        assert_eq!(DataRepr::Bits.formatted_string(7_770_000_000), "7.8 Gb");
+        assert_eq!(DataUnit::Bytes.formatted_string(7_770_000_000), "7.8 GB");
+        assert_eq!(DataUnit::Bits.formatted_string(7_770_000_000), "7.8 Gb");
 
         assert_eq!(
-            DataRepr::Packets.formatted_string(9_950_000_000),
+            DataUnit::Packets.formatted_string(9_950_000_000),
             "9950000000"
         );
-        assert_eq!(DataRepr::Bytes.formatted_string(9_950_000_000), "9.9 GB");
-        assert_eq!(DataRepr::Bits.formatted_string(9_950_000_000), "9.9 Gb");
+        assert_eq!(DataUnit::Bytes.formatted_string(9_950_000_000), "9.9 GB");
+        assert_eq!(DataUnit::Bits.formatted_string(9_950_000_000), "9.9 Gb");
 
         assert_eq!(
-            DataRepr::Packets.formatted_string(9_951_000_000),
+            DataUnit::Packets.formatted_string(9_951_000_000),
             "9951000000"
         );
-        assert_eq!(DataRepr::Bytes.formatted_string(9_951_000_000), "10 GB");
-        assert_eq!(DataRepr::Bits.formatted_string(9_951_000_000), "10 Gb");
+        assert_eq!(DataUnit::Bytes.formatted_string(9_951_000_000), "10 GB");
+        assert_eq!(DataUnit::Bits.formatted_string(9_951_000_000), "10 Gb");
 
         assert_eq!(
-            DataRepr::Packets.formatted_string(19_951_000_000),
+            DataUnit::Packets.formatted_string(19_951_000_000),
             "19951000000"
         );
-        assert_eq!(DataRepr::Bytes.formatted_string(19_951_000_000), "20 GB");
-        assert_eq!(DataRepr::Bits.formatted_string(19_951_000_000), "20 Gb");
+        assert_eq!(DataUnit::Bytes.formatted_string(19_951_000_000), "20 GB");
+        assert_eq!(DataUnit::Bits.formatted_string(19_951_000_000), "20 Gb");
 
         assert_eq!(
-            DataRepr::Packets.formatted_string(399_951_000_000),
+            DataUnit::Packets.formatted_string(399_951_000_000),
             "399951000000"
         );
-        assert_eq!(DataRepr::Bytes.formatted_string(399_951_000_000), "400 GB");
-        assert_eq!(DataRepr::Bits.formatted_string(399_951_000_000), "400 Gb");
+        assert_eq!(DataUnit::Bytes.formatted_string(399_951_000_000), "400 GB");
+        assert_eq!(DataUnit::Bits.formatted_string(399_951_000_000), "400 Gb");
 
         assert_eq!(
-            DataRepr::Packets.formatted_string(999_999_999_999),
+            DataUnit::Packets.formatted_string(999_999_999_999),
             "999999999999"
         );
-        assert_eq!(DataRepr::Bytes.formatted_string(999_999_999_999), "999 GB");
-        assert_eq!(DataRepr::Bits.formatted_string(999_999_999_999), "999 Gb");
+        assert_eq!(DataUnit::Bytes.formatted_string(999_999_999_999), "999 GB");
+        assert_eq!(DataUnit::Bits.formatted_string(999_999_999_999), "999 Gb");
 
         assert_eq!(
-            DataRepr::Packets.formatted_string(1_000_000_000_000),
+            DataUnit::Packets.formatted_string(1_000_000_000_000),
             "1000000000000"
         );
         assert_eq!(
-            DataRepr::Bytes.formatted_string(1_000_000_000_000),
+            DataUnit::Bytes.formatted_string(1_000_000_000_000),
             "1.0 TB"
         );
-        assert_eq!(DataRepr::Bits.formatted_string(1_000_000_000_000), "1.0 Tb");
+        assert_eq!(DataUnit::Bits.formatted_string(1_000_000_000_000), "1.0 Tb");
 
         assert_eq!(
-            DataRepr::Packets.formatted_string(9_950_000_000_000),
+            DataUnit::Packets.formatted_string(9_950_000_000_000),
             "9950000000000"
         );
         assert_eq!(
-            DataRepr::Bytes.formatted_string(9_950_000_000_000),
+            DataUnit::Bytes.formatted_string(9_950_000_000_000),
             "9.9 TB"
         );
-        assert_eq!(DataRepr::Bits.formatted_string(9_950_000_000_000), "9.9 Tb");
+        assert_eq!(DataUnit::Bits.formatted_string(9_950_000_000_000), "9.9 Tb");
 
         assert_eq!(
-            DataRepr::Packets.formatted_string(9_951_000_000_000),
+            DataUnit::Packets.formatted_string(9_951_000_000_000),
             "9951000000000"
         );
-        assert_eq!(DataRepr::Bytes.formatted_string(9_951_000_000_000), "10 TB");
-        assert_eq!(DataRepr::Bits.formatted_string(9_951_000_000_000), "10 Tb");
+        assert_eq!(DataUnit::Bytes.formatted_string(9_951_000_000_000), "10 TB");
+        assert_eq!(DataUnit::Bits.formatted_string(9_951_000_000_000), "10 Tb");
 
         assert_eq!(
-            DataRepr::Packets.formatted_string(999_950_000_000_000),
+            DataUnit::Packets.formatted_string(999_950_000_000_000),
             "999950000000000"
         );
         assert_eq!(
-            DataRepr::Bytes.formatted_string(999_950_000_000_000),
+            DataUnit::Bytes.formatted_string(999_950_000_000_000),
             "999 TB"
         );
         assert_eq!(
-            DataRepr::Bits.formatted_string(999_950_000_000_000),
+            DataUnit::Bits.formatted_string(999_950_000_000_000),
             "999 Tb"
         );
 
         assert_eq!(
-            DataRepr::Packets.formatted_string(999_999_999_999_999),
+            DataUnit::Packets.formatted_string(999_999_999_999_999),
             "999999999999999"
         );
         assert_eq!(
-            DataRepr::Bytes.formatted_string(999_999_999_999_999),
+            DataUnit::Bytes.formatted_string(999_999_999_999_999),
             "999 TB"
         );
         assert_eq!(
-            DataRepr::Bits.formatted_string(999_999_999_999_999),
+            DataUnit::Bits.formatted_string(999_999_999_999_999),
             "999 Tb"
         );
 
         assert_eq!(
-            DataRepr::Packets.formatted_string(1_000_000_000_000_000),
+            DataUnit::Packets.formatted_string(1_000_000_000_000_000),
             "1000000000000000"
         );
         assert_eq!(
-            DataRepr::Bytes.formatted_string(1_000_000_000_000_000),
+            DataUnit::Bytes.formatted_string(1_000_000_000_000_000),
             "1.0 PB"
         );
         assert_eq!(
-            DataRepr::Bits.formatted_string(1_000_000_000_000_000),
+            DataUnit::Bits.formatted_string(1_000_000_000_000_000),
             "1.0 Pb"
         );
 
         assert_eq!(
-            DataRepr::Packets.formatted_string(1_000_000_000_000_000_0),
+            DataUnit::Packets.formatted_string(1_000_000_000_000_000_0),
             "10000000000000000"
         );
         assert_eq!(
-            DataRepr::Bytes.formatted_string(1_000_000_000_000_000_0),
+            DataUnit::Bytes.formatted_string(1_000_000_000_000_000_0),
             "10 PB"
         );
         assert_eq!(
-            DataRepr::Bits.formatted_string(1_000_000_000_000_000_0),
+            DataUnit::Bits.formatted_string(1_000_000_000_000_000_0),
             "10 Pb"
         );
         assert_eq!(
-            DataRepr::Packets.formatted_string(999_999_999_000_000_000),
+            DataUnit::Packets.formatted_string(999_999_999_000_000_000),
             "999999999000000000"
         );
         assert_eq!(
-            DataRepr::Bytes.formatted_string(999_999_999_000_000_000),
+            DataUnit::Bytes.formatted_string(999_999_999_000_000_000),
             "1000 PB"
         );
         assert_eq!(
-            DataRepr::Bits.formatted_string(999_999_999_000_000_000),
+            DataUnit::Bits.formatted_string(999_999_999_000_000_000),
             "1000 Pb"
         );
 
         assert_eq!(
-            DataRepr::Packets.formatted_string(u128::MAX / 2),
+            DataUnit::Packets.formatted_string(u128::MAX / 2),
             "170141183460469231731687303715884105727"
         );
         assert_eq!(
-            DataRepr::Bytes.formatted_string(u128::MAX / 2),
+            DataUnit::Bytes.formatted_string(u128::MAX / 2),
             "170141184077655307190272 PB"
         );
         assert_eq!(
-            DataRepr::Bits.formatted_string(u128::MAX / 2),
+            DataUnit::Bits.formatted_string(u128::MAX / 2),
             "170141184077655307190272 Pb"
         );
 
         assert_eq!(
-            DataRepr::Packets.formatted_string(u128::MAX),
+            DataUnit::Packets.formatted_string(u128::MAX),
             "340282366920938463463374607431768211455"
         );
-        assert_eq!(DataRepr::Bytes.formatted_string(u128::MAX), "inf PB");
-        assert_eq!(DataRepr::Bits.formatted_string(u128::MAX), "inf Pb");
+        assert_eq!(DataUnit::Bytes.formatted_string(u128::MAX), "inf PB");
+        assert_eq!(DataUnit::Bits.formatted_string(u128::MAX), "inf Pb");
     }
 }

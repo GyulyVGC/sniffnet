@@ -7,7 +7,7 @@ use crate::gui::types::conf::deserialize_or_default;
 use crate::gui::types::message::Message;
 use crate::networking::types::data_info::DataInfo;
 use crate::networking::types::data_info_host::DataInfoHost;
-use crate::networking::types::data_representation::DataRepr;
+use crate::networking::types::data_representation::DataUnit;
 use crate::networking::types::host::Host;
 use crate::networking::types::info_traffic::InfoTraffic;
 use crate::networking::types::program::Program;
@@ -330,7 +330,7 @@ impl From<FavoriteItem> for FavoriteKey {
 
 fn get_host_entries(
     info_traffic: &InfoTraffic,
-    data_repr: DataRepr,
+    data_repr: DataUnit,
     sort_type: SortType,
     favorites_filter: bool,
     favorites: &HashSet<Host>,
@@ -364,7 +364,7 @@ fn get_host_entries(
 
 fn get_service_entries(
     info_traffic: &InfoTraffic,
-    data_repr: DataRepr,
+    data_repr: DataUnit,
     sort_type: SortType,
     favorites_filter: bool,
     favorites: &HashSet<Service>,
@@ -400,7 +400,7 @@ fn get_service_entries(
 
 fn get_program_entries(
     program_lookup: Option<&ProgramLookup>,
-    data_repr: DataRepr,
+    data_repr: DataUnit,
     sort_type: SortType,
     favorites_filter: bool,
     favorites: &HashSet<Program>,
@@ -426,7 +426,7 @@ fn get_program_entries(
             .programs()
             .iter()
             // Unknown may be inserted, and then all of its data could be reassigned to known programs
-            .filter(|(_, d)| d.tot_data(DataRepr::Packets) > 0)
+            .filter(|(_, d)| d.tot_data(DataUnit::Packets) > 0)
             .collect()
     };
 

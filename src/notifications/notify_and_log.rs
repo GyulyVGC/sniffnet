@@ -3,7 +3,7 @@ use crate::networking::manage_packets::get_address_to_lookup;
 use crate::networking::types::capture_context::CaptureSource;
 use crate::networking::types::data_info::DataInfo;
 use crate::networking::types::data_info_host::DataInfoHost;
-use crate::networking::types::data_representation::DataRepr;
+use crate::networking::types::data_representation::DataUnit;
 use crate::networking::types::host::Host;
 use crate::networking::types::service::Service;
 use crate::notifications::types::logged_notification::{
@@ -163,7 +163,7 @@ pub fn notify_and_log(
 
 fn threshold_hosts(
     info_traffic_msg: &InfoTraffic,
-    data_repr: DataRepr,
+    data_repr: DataUnit,
 ) -> Vec<(Host, DataInfoHost)> {
     let mut hosts: Vec<(Host, DataInfoHost)> = info_traffic_msg
         .hosts
@@ -180,7 +180,7 @@ fn threshold_hosts(
 
 fn threshold_services(
     info_traffic_msg: &InfoTraffic,
-    data_repr: DataRepr,
+    data_repr: DataUnit,
 ) -> Vec<(Service, DataInfo)> {
     let mut services: Vec<(Service, DataInfo)> = info_traffic_msg
         .services
@@ -218,7 +218,7 @@ fn favorites_last_interval(
             .values()
             .filter(|v| v.program.eq(p))
             .for_each(|v| data_info.refresh(v.data_info()));
-        if data_info.tot_data(DataRepr::Packets) > 0 {
+        if data_info.tot_data(DataUnit::Packets) > 0 {
             Some(FavoriteItem::Program((p.clone(), data_info)))
         } else {
             None

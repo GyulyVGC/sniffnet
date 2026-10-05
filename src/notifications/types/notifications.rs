@@ -2,7 +2,7 @@ use serde::{Deserialize, Serialize};
 
 use crate::ByteMultiple;
 use crate::gui::types::conf::deserialize_or_default;
-use crate::networking::types::data_representation::DataRepr;
+use crate::networking::types::data_representation::DataUnit;
 use crate::notifications::types::sound::Sound;
 
 /// Used to contain the notifications configuration set by the user
@@ -60,7 +60,7 @@ pub struct DataNotification {
     pub sound: Sound,
     /// Data representation
     #[serde(deserialize_with = "deserialize_or_default")]
-    pub data_repr: DataRepr,
+    pub data_repr: DataUnit,
     /// Threshold of received + sent bytes; if exceeded a notification is emitted
     #[serde(deserialize_with = "deserialize_or_default")]
     pub threshold: Option<u64>,
@@ -75,7 +75,7 @@ pub struct DataNotification {
 impl Default for DataNotification {
     fn default() -> Self {
         DataNotification {
-            data_repr: DataRepr::default(),
+            data_repr: DataUnit::default(),
             threshold: None,
             byte_multiple: ByteMultiple::KB,
             sound: Sound::Gulp,

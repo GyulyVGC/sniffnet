@@ -16,7 +16,7 @@ use crate::networking::manage_packets::{
 };
 use crate::networking::types::address_port_pair::AddressPortPair;
 use crate::networking::types::bogon::is_bogon;
-use crate::networking::types::data_representation::DataRepr;
+use crate::networking::types::data_representation::DataUnit;
 use crate::networking::types::host::Host;
 use crate::networking::types::info_address_port_pair::InfoAddressPortPair;
 use crate::networking::types::latency::LatencyStatus;
@@ -238,7 +238,7 @@ fn col_info<'a>(
             }
         ),
         &(data_repr.formatted_string(val.transmitted_data(data_repr))
-            + if data_repr == DataRepr::Packets {
+            + if data_repr == DataUnit::Packets {
                 format!(" {}", packets_translation(language))
             } else {
                 String::new()

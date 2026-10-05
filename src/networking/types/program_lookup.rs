@@ -6,7 +6,7 @@ use crate::gui::types::message::Message;
 use crate::networking::manage_packets::get_local_port;
 use crate::networking::types::address_port_pair::AddressPortPair;
 use crate::networking::types::data_info::DataInfo;
-use crate::networking::types::data_representation::DataRepr;
+use crate::networking::types::data_representation::DataUnit;
 use crate::networking::types::info_address_port_pair::InfoAddressPortPair;
 use crate::networking::types::program::Program;
 use iced::Element;
@@ -154,7 +154,7 @@ impl ProgramLookup {
                     reassigned_data.refresh(v.data_info());
                 });
 
-            if reassigned_data.tot_data(DataRepr::Packets) > 0 {
+            if reassigned_data.tot_data(DataUnit::Packets) > 0 {
                 // assign to known
                 self.programs
                     .entry(program)

@@ -14,7 +14,7 @@ use crate::gui::types::message::Message;
 use crate::gui::types::settings::Settings;
 use crate::networking::types::data_info::DataInfo;
 use crate::networking::types::data_info_host::DataInfoHost;
-use crate::networking::types::data_representation::DataRepr;
+use crate::networking::types::data_representation::DataUnit;
 use crate::networking::types::host::Host;
 use crate::networking::types::program_lookup::ProgramLookup;
 use crate::networking::types::service::Service;
@@ -149,7 +149,7 @@ fn data_notification_log<'a>(
     );
 
     let data_string = data_repr.formatted_string(logged_notification.threshold.into());
-    let icon = if data_repr == DataRepr::Packets {
+    let icon = if data_repr == DataUnit::Packets {
         Icon::PacketsThreshold
     } else {
         Icon::BytesThreshold
@@ -201,7 +201,7 @@ fn data_notification_log<'a>(
 fn favorite_notification_log<'a>(
     logged_notification: &'a FavoriteTransmitted,
     first_entry_data_info: DataInfo,
-    data_repr: DataRepr,
+    data_repr: DataUnit,
     language: Language,
     program_lookup: Option<&'a ProgramLookup>,
 ) -> Container<'a, Message, StyleType> {
@@ -247,7 +247,7 @@ fn favorite_notification_log<'a>(
 fn blacklisted_notification_log<'a>(
     logged_notification: &BlacklistedTransmitted,
     first_entry_data_info: DataInfo,
-    data_repr: DataRepr,
+    data_repr: DataUnit,
     language: Language,
 ) -> Container<'a, Message, StyleType> {
     let host = &logged_notification.host;

@@ -15,7 +15,7 @@ use crate::gui::sniffer::FONT_FAMILY_NAME;
 use crate::gui::styles::style_constants::CHARTS_LINE_BORDER;
 use crate::gui::styles::types::palette::to_rgb_color;
 use crate::gui::types::message::Message;
-use crate::networking::types::data_representation::DataRepr;
+use crate::networking::types::data_representation::DataUnit;
 use crate::networking::types::info_traffic::InfoTraffic;
 use crate::networking::types::traffic_direction::TrafficDirection;
 use crate::translations::translations::{incoming_translation, outgoing_translation};
@@ -50,7 +50,7 @@ pub struct TrafficChart {
     /// Language used for the chart legend
     pub language: Language,
     /// Packets or bytes
-    pub data_repr: DataRepr,
+    pub data_repr: DataUnit,
     /// Style of the chart
     pub style: StyleType,
     /// Whether the chart is for the thumbnail page
@@ -64,7 +64,7 @@ pub struct TrafficChart {
 }
 
 impl TrafficChart {
-    pub fn new(style: StyleType, language: Language, data_repr: DataRepr) -> Self {
+    pub fn new(style: StyleType, language: Language, data_repr: DataUnit) -> Self {
         Self {
             ticks: 0,
             out_bytes: ChartSeries::default(),
@@ -99,19 +99,19 @@ impl TrafficChart {
         #[allow(clippy::cast_precision_loss)]
         let out_bytes_entry = -(info_traffic_msg
             .tot_data_info
-            .outgoing_data(DataRepr::Bytes) as f32);
+            .outgoing_data(DataUnit::Bytes) as f32);
         #[allow(clippy::cast_precision_loss)]
         let in_bytes_entry = info_traffic_msg
             .tot_data_info
-            .incoming_data(DataRepr::Bytes) as f32;
+            .incoming_data(DataUnit::Bytes) as f32;
         #[allow(clippy::cast_precision_loss)]
         let out_packets_entry = -(info_traffic_msg
             .tot_data_info
-            .outgoing_data(DataRepr::Packets) as f32);
+            .outgoing_data(DataUnit::Packets) as f32);
         #[allow(clippy::cast_precision_loss)]
         let in_packets_entry = info_traffic_msg
             .tot_data_info
-            .incoming_data(DataRepr::Packets) as f32;
+            .incoming_data(DataUnit::Packets) as f32;
 
         let out_bytes_point = (tot_seconds, out_bytes_entry);
         let in_bytes_point = (tot_seconds, in_bytes_entry);
@@ -181,7 +181,7 @@ impl TrafficChart {
             .into()
     }
 
-    pub fn change_kind(&mut self, kind: DataRepr) {
+    pub fn change_kind(&mut self, kind: DataUnit) {
         self.data_repr = kind;
     }
 
@@ -236,9 +236,9 @@ impl TrafficChart {
 
     fn y_axis_range(&self) -> Range<f32> {
         let (min, max) = match self.data_repr {
-            DataRepr::Packets => (self.min_packets, self.max_packets),
-            DataRepr::Bytes => (self.min_bytes, self.max_bytes),
-            DataRepr::Bits => (self.min_bytes * 8.0, self.max_bytes * 8.0),
+            DataUnit::Packets => (self.min_packets, self.max_packets),
+            DataUnit::Bytes => (self.min_bytes, self.max_bytes),
+            DataUnit::Bits => (self.min_bytes * 8.0, self.max_bytes * 8.0),
         };
         let fs = max - min;
         let gap = fs * 0.05;
@@ -254,11 +254,11 @@ impl TrafficChart {
 
     fn spline_to_plot(&self, direction: TrafficDirection) -> &Spline<f32, f32> {
         match self.data_repr {
-            DataRepr::Packets => match direction {
+            DataUnit::Packets => match direction {
                 TrafficDirection::Incoming => &self.in_packets.spline,
                 TrafficDirection::Outgoing => &self.out_packets.spline,
             },
-            DataRepr::Bytes | DataRepr::Bits => match direction {
+            DataUnit::Bytes | DataUnit::Bits => match direction {
                 TrafficDirection::Incoming => &self.in_bytes.spline,
                 TrafficDirection::Outgoing => &self.out_bytes.spline,
             },
@@ -286,7 +286,7 @@ impl TrafficChart {
         let color = self.series_color(direction);
         let alpha = self.style.get_extension().alpha_chart_badge;
         let spline = self.spline_to_plot(direction);
-        let multiplier = if self.data_repr == DataRepr::Bits {
+        let multiplier = if self.data_repr == DataUnit::Bits {
             8.0
         } else {
             1.0
@@ -459,12 +459,12 @@ mod tests {
     use splines::{Interpolation, Key, Spline};
 
     use crate::chart::types::traffic_chart::{MAX_OFFLINE_GAP_POINTS, sample_spline};
-    use crate::networking::types::data_representation::DataRepr;
+    use crate::networking::types::data_representation::DataUnit;
     use crate::{Language, StyleType, TrafficChart};
 
     #[test]
     fn test_offline_gap_points_are_capped() {
-        let mut chart = TrafficChart::new(StyleType::default(), Language::EN, DataRepr::Bytes);
+        let mut chart = TrafficChart::new(StyleType::default(), Language::EN, DataUnit::Bytes);
 
         // a gap shorter than the cap is represented one point per second
         chart.push_offline_gap_to_splines(10);

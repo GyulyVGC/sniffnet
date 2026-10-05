@@ -23,7 +23,7 @@ use crate::gui::types::settings::Settings;
 use crate::networking::types::address_port_pair::AddressPortPair;
 use crate::networking::types::combobox_data_states::ComboboxStates;
 use crate::networking::types::data_info::DataInfo;
-use crate::networking::types::data_representation::DataRepr;
+use crate::networking::types::data_representation::DataUnit;
 use crate::networking::types::info_address_port_pair::InfoAddressPortPair;
 use crate::networking::types::program_lookup::ProgramLookup;
 use crate::networking::types::traffic_direction::TrafficDirection;
@@ -157,7 +157,7 @@ fn report_header_row(
     language: Language,
     search_params: &SearchParameters,
     sort_type: SortType,
-    data_repr: DataRepr,
+    data_repr: DataUnit,
 ) -> Row<'_, Message, StyleType> {
     let mut ret_val = Row::new().padding([0, 2]).align_y(Alignment::Center);
     for report_col in ReportCol::ALL {
@@ -204,7 +204,7 @@ fn report_header_row(
 
 fn title_report_col_display(
     report_col: &ReportCol,
-    data_repr: DataRepr,
+    data_repr: DataUnit,
     language: Language,
 ) -> (String, String, String) {
     let max_chars = report_col.get_max_chars(Some(language));
@@ -256,7 +256,7 @@ fn sort_arrows<'a>(active_sort_type: SortType) -> Container<'a, Message, StyleTy
 fn row_report_entry<'a>(
     key: &AddressPortPair,
     val: &InfoAddressPortPair,
-    data_repr: DataRepr,
+    data_repr: DataUnit,
 ) -> Row<'a, Message, StyleType> {
     let text_type = if val.traffic_direction == TrafficDirection::Outgoing {
         TextType::Outgoing
@@ -585,7 +585,7 @@ fn get_button_change_page<'a>(increment: bool) -> Button<'a, Message, StyleType>
     .on_press(Message::UpdatePageNumber(increment))
 }
 
-fn get_agglomerates_row<'a>(tot: DataInfo, data_repr: DataRepr) -> Row<'a, Message, StyleType> {
+fn get_agglomerates_row<'a>(tot: DataInfo, data_repr: DataUnit) -> Row<'a, Message, StyleType> {
     let bars = get_bars(data_repr, &tot, &tot).width(ReportCol::FILTER_COLUMNS_WIDTH);
 
     let data_col = Column::new()
@@ -653,7 +653,7 @@ fn button_clear_filter<'a>(
 #[cfg(test)]
 mod tests {
     use crate::gui::pages::inspect_page::title_report_col_display;
-    use crate::networking::types::data_representation::DataRepr;
+    use crate::networking::types::data_representation::DataUnit;
     use crate::report::types::report_col::ReportCol;
     use crate::translations::types::language::Language;
 
@@ -662,7 +662,7 @@ mod tests {
         // check glyph len when adding new language...
         assert_eq!(Language::ALL.len(), 25);
         for report_col in ReportCol::ALL {
-            for data_repr in DataRepr::ALL {
+            for data_repr in DataUnit::ALL {
                 for language in Language::ALL {
                     let (title, title_small, tooltip_val) =
                         title_report_col_display(&report_col, data_repr, language);

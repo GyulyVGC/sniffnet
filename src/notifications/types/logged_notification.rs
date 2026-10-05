@@ -1,7 +1,7 @@
 use crate::gui::types::favorite::FavoriteItem;
 use crate::networking::types::data_info::DataInfo;
 use crate::networking::types::data_info_host::DataInfoHost;
-use crate::networking::types::data_representation::DataRepr;
+use crate::networking::types::data_representation::DataUnit;
 use crate::networking::types::host::Host;
 use crate::networking::types::service::Service;
 use crate::translations::translations::favorite_transmitted_translation;
@@ -106,7 +106,7 @@ impl LoggedNotification {
 #[derive(Clone)]
 pub struct DataThresholdExceeded {
     pub(crate) id: usize,
-    pub(crate) data_repr: DataRepr,
+    pub(crate) data_repr: DataUnit,
     pub(crate) threshold: u64,
     pub(crate) data_info: DataInfo,
     pub(crate) timestamp: String,
@@ -152,7 +152,7 @@ impl FavoriteTransmitted {
                     "program": program.to_string(),
                 }),
             },
-            "data": DataRepr::Bytes.formatted_string(self.favorite.data_info().tot_data(DataRepr::Bytes)),
+            "data": DataUnit::Bytes.formatted_string(self.favorite.data_info().tot_data(DataUnit::Bytes)),
         })
         .to_string()
     }
@@ -178,7 +178,7 @@ impl BlacklistedTransmitted {
                 "domain": self.host.domain,
                 "asn": self.host.asn.name,
             },
-            "data": DataRepr::Bytes.formatted_string(self.data_info_host.data_info.tot_data(DataRepr::Bytes)),
+            "data": DataUnit::Bytes.formatted_string(self.data_info_host.data_info.tot_data(DataUnit::Bytes)),
         })
         .to_string()
     }
@@ -200,7 +200,7 @@ mod tests {
         data_info.add_packets(12, 1500, TrafficDirection::Incoming, Instant::now());
         let notification = DataThresholdExceeded {
             id: 1,
-            data_repr: DataRepr::Packets,
+            data_repr: DataUnit::Packets,
             threshold: 10,
             data_info,
             timestamp: "2024-06-01T12:00:00Z".to_string(),

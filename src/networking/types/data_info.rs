@@ -1,6 +1,6 @@
 //! Module defining the `DataInfo` struct, which represents incoming and outgoing packets and bytes.
 
-use crate::networking::types::data_representation::DataRepr;
+use crate::networking::types::data_representation::DataUnit;
 use crate::networking::types::traffic_direction::TrafficDirection;
 use crate::report::types::sort_type::SortType;
 use std::cmp::Ordering;
@@ -23,23 +23,23 @@ pub struct DataInfo {
 }
 
 impl DataInfo {
-    pub fn incoming_data(&self, data_repr: DataRepr) -> u128 {
+    pub fn incoming_data(&self, data_repr: DataUnit) -> u128 {
         match data_repr {
-            DataRepr::Packets => self.incoming_packets,
-            DataRepr::Bytes => self.incoming_bytes,
-            DataRepr::Bits => self.incoming_bytes * 8,
+            DataUnit::Packets => self.incoming_packets,
+            DataUnit::Bytes => self.incoming_bytes,
+            DataUnit::Bits => self.incoming_bytes * 8,
         }
     }
 
-    pub fn outgoing_data(&self, data_repr: DataRepr) -> u128 {
+    pub fn outgoing_data(&self, data_repr: DataUnit) -> u128 {
         match data_repr {
-            DataRepr::Packets => self.outgoing_packets,
-            DataRepr::Bytes => self.outgoing_bytes,
-            DataRepr::Bits => self.outgoing_bytes * 8,
+            DataUnit::Packets => self.outgoing_packets,
+            DataUnit::Bytes => self.outgoing_bytes,
+            DataUnit::Bits => self.outgoing_bytes * 8,
         }
     }
 
-    pub fn tot_data(&self, data_repr: DataRepr) -> u128 {
+    pub fn tot_data(&self, data_repr: DataUnit) -> u128 {
         self.incoming_data(data_repr) + self.outgoing_data(data_repr)
     }
 
@@ -79,7 +79,7 @@ impl DataInfo {
         }
     }
 
-    pub fn compare(&self, other: &Self, sort_type: SortType, data_repr: DataRepr) -> Ordering {
+    pub fn compare(&self, other: &Self, sort_type: SortType, data_repr: DataUnit) -> Ordering {
         match sort_type {
             SortType::Ascending => self.tot_data(data_repr).cmp(&other.tot_data(data_repr)),
             SortType::Descending => other.tot_data(data_repr).cmp(&self.tot_data(data_repr)),
@@ -142,17 +142,17 @@ mod tests {
         assert_eq!(data_info_1.incoming_bytes, 723);
         assert_eq!(data_info_1.outgoing_bytes, 1400);
 
-        assert_eq!(data_info_1.tot_data(DataRepr::Packets), 19);
-        assert_eq!(data_info_1.tot_data(DataRepr::Bytes), 2123);
-        assert_eq!(data_info_1.tot_data(DataRepr::Bits), 16984);
+        assert_eq!(data_info_1.tot_data(DataUnit::Packets), 19);
+        assert_eq!(data_info_1.tot_data(DataUnit::Bytes), 2123);
+        assert_eq!(data_info_1.tot_data(DataUnit::Bits), 16984);
 
-        assert_eq!(data_info_1.incoming_data(DataRepr::Packets), 7);
-        assert_eq!(data_info_1.incoming_data(DataRepr::Bytes), 723);
-        assert_eq!(data_info_1.incoming_data(DataRepr::Bits), 5784);
+        assert_eq!(data_info_1.incoming_data(DataUnit::Packets), 7);
+        assert_eq!(data_info_1.incoming_data(DataUnit::Bytes), 723);
+        assert_eq!(data_info_1.incoming_data(DataUnit::Bits), 5784);
 
-        assert_eq!(data_info_1.outgoing_data(DataRepr::Packets), 12);
-        assert_eq!(data_info_1.outgoing_data(DataRepr::Bytes), 1400);
-        assert_eq!(data_info_1.outgoing_data(DataRepr::Bits), 11200);
+        assert_eq!(data_info_1.outgoing_data(DataUnit::Packets), 12);
+        assert_eq!(data_info_1.outgoing_data(DataUnit::Bytes), 1400);
+        assert_eq!(data_info_1.outgoing_data(DataUnit::Bits), 11200);
 
         // sleep a little to have a different final_instant
         std::thread::sleep(std::time::Duration::from_millis(10));
@@ -167,56 +167,56 @@ mod tests {
         assert_eq!(data_info_2.incoming_bytes, 0);
         assert_eq!(data_info_2.outgoing_bytes, 400);
 
-        assert_eq!(data_info_2.tot_data(DataRepr::Packets), 20);
-        assert_eq!(data_info_2.tot_data(DataRepr::Bytes), 400);
-        assert_eq!(data_info_2.tot_data(DataRepr::Bits), 3200);
+        assert_eq!(data_info_2.tot_data(DataUnit::Packets), 20);
+        assert_eq!(data_info_2.tot_data(DataUnit::Bytes), 400);
+        assert_eq!(data_info_2.tot_data(DataUnit::Bits), 3200);
 
-        assert_eq!(data_info_2.incoming_data(DataRepr::Packets), 0);
-        assert_eq!(data_info_2.incoming_data(DataRepr::Bytes), 0);
-        assert_eq!(data_info_2.incoming_data(DataRepr::Bits), 0);
+        assert_eq!(data_info_2.incoming_data(DataUnit::Packets), 0);
+        assert_eq!(data_info_2.incoming_data(DataUnit::Bytes), 0);
+        assert_eq!(data_info_2.incoming_data(DataUnit::Bits), 0);
 
-        assert_eq!(data_info_2.outgoing_data(DataRepr::Packets), 20);
-        assert_eq!(data_info_2.outgoing_data(DataRepr::Bytes), 400);
-        assert_eq!(data_info_2.outgoing_data(DataRepr::Bits), 3200);
+        assert_eq!(data_info_2.outgoing_data(DataUnit::Packets), 20);
+        assert_eq!(data_info_2.outgoing_data(DataUnit::Bytes), 400);
+        assert_eq!(data_info_2.outgoing_data(DataUnit::Bits), 3200);
 
         // compare data_info_1 and data_info_2
 
         assert_eq!(
-            data_info_1.compare(&data_info_2, SortType::Ascending, DataRepr::Packets),
+            data_info_1.compare(&data_info_2, SortType::Ascending, DataUnit::Packets),
             Ordering::Less
         );
         assert_eq!(
-            data_info_1.compare(&data_info_2, SortType::Descending, DataRepr::Packets),
+            data_info_1.compare(&data_info_2, SortType::Descending, DataUnit::Packets),
             Ordering::Greater
         );
         assert_eq!(
-            data_info_1.compare(&data_info_2, SortType::Neutral, DataRepr::Packets),
+            data_info_1.compare(&data_info_2, SortType::Neutral, DataUnit::Packets),
             Ordering::Greater
         );
 
         assert_eq!(
-            data_info_1.compare(&data_info_2, SortType::Ascending, DataRepr::Bytes),
+            data_info_1.compare(&data_info_2, SortType::Ascending, DataUnit::Bytes),
             Ordering::Greater
         );
         assert_eq!(
-            data_info_1.compare(&data_info_2, SortType::Descending, DataRepr::Bytes),
+            data_info_1.compare(&data_info_2, SortType::Descending, DataUnit::Bytes),
             Ordering::Less
         );
         assert_eq!(
-            data_info_1.compare(&data_info_2, SortType::Neutral, DataRepr::Bytes),
+            data_info_1.compare(&data_info_2, SortType::Neutral, DataUnit::Bytes),
             Ordering::Greater
         );
 
         assert_eq!(
-            data_info_1.compare(&data_info_2, SortType::Ascending, DataRepr::Bits),
+            data_info_1.compare(&data_info_2, SortType::Ascending, DataUnit::Bits),
             Ordering::Greater
         );
         assert_eq!(
-            data_info_1.compare(&data_info_2, SortType::Descending, DataRepr::Bits),
+            data_info_1.compare(&data_info_2, SortType::Descending, DataUnit::Bits),
             Ordering::Less
         );
         assert_eq!(
-            data_info_1.compare(&data_info_2, SortType::Neutral, DataRepr::Bits),
+            data_info_1.compare(&data_info_2, SortType::Neutral, DataUnit::Bits),
             Ordering::Greater
         );
 

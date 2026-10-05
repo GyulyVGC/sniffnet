@@ -6,7 +6,7 @@ use crate::gui::types::favorite::FavoriteKey;
 use crate::gui::types::update_status::UpdateStatus;
 use crate::networking::traffic_preview::TrafficPreview;
 use crate::networking::types::capture_context::CaptureSourcePicklist;
-use crate::networking::types::data_representation::DataRepr;
+use crate::networking::types::data_representation::DataUnit;
 use crate::networking::types::host::HostMessage;
 use crate::networking::types::info_traffic::InfoTraffic;
 use crate::networking::types::ip_blacklist::IpBlacklist;
@@ -38,7 +38,7 @@ pub enum Message {
     /// Change BPF filter string
     BpfFilter(String),
     /// Select data representation to use
-    DataReprSelection(DataRepr),
+    DataReprSelection(DataUnit),
     /// Select report sort type to be displayed (inspect page)
     ReportSortSelection(SortType),
     /// Select host sort type to be displayed (overview page)
