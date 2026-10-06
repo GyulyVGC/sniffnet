@@ -23,7 +23,7 @@ use crate::gui::types::settings::Settings;
 use crate::networking::types::address_port_pair::AddressPortPair;
 use crate::networking::types::combobox_data_states::ComboboxStates;
 use crate::networking::types::data_info::DataInfo;
-use crate::networking::types::data_representation::DataUnit;
+use crate::networking::types::data_representation::{DataRepr, DataUnit};
 use crate::networking::types::info_address_port_pair::InfoAddressPortPair;
 use crate::networking::types::program_lookup::ProgramLookup;
 use crate::networking::types::traffic_direction::TrafficDirection;
@@ -67,7 +67,7 @@ pub fn inspect_page(sniffer: &Sniffer) -> Container<'_, Message, StyleType> {
             language,
             &sniffer.search,
             sniffer.conf.report_sort_type,
-            sniffer.conf.data_repr,
+            sniffer.conf.data_repr.data_unit,
         ))
         .push(Space::new().height(4))
         .push(RuleType::Standard.horizontal(5))
@@ -157,12 +157,12 @@ fn report_header_row(
     language: Language,
     search_params: &SearchParameters,
     sort_type: SortType,
-    data_repr: DataUnit,
+    data_unit: DataUnit,
 ) -> Row<'_, Message, StyleType> {
     let mut ret_val = Row::new().padding([0, 2]).align_y(Alignment::Center);
     for report_col in ReportCol::ALL {
         let (title_display, title_small_display, tooltip_val) =
-            title_report_col_display(&report_col, data_repr, language);
+            title_report_col_display(&report_col, data_unit, language);
         let title_row = Row::new()
             .align_y(Alignment::End)
             .push(Text::new(title_display))
@@ -256,7 +256,7 @@ fn sort_arrows<'a>(active_sort_type: SortType) -> Container<'a, Message, StyleTy
 fn row_report_entry<'a>(
     key: &AddressPortPair,
     val: &InfoAddressPortPair,
-    data_repr: DataUnit,
+    data_repr: DataRepr,
 ) -> Row<'a, Message, StyleType> {
     let text_type = if val.traffic_direction == TrafficDirection::Outgoing {
         TextType::Outgoing
@@ -585,14 +585,14 @@ fn get_button_change_page<'a>(increment: bool) -> Button<'a, Message, StyleType>
     .on_press(Message::UpdatePageNumber(increment))
 }
 
-fn get_agglomerates_row<'a>(tot: DataInfo, data_repr: DataUnit) -> Row<'a, Message, StyleType> {
-    let bars = get_bars(data_repr, &tot, &tot).width(ReportCol::FILTER_COLUMNS_WIDTH);
+fn get_agglomerates_row<'a>(tot: DataInfo, data_repr: DataRepr) -> Row<'a, Message, StyleType> {
+    let bars = get_bars(data_repr.data_unit, &tot, &tot).width(ReportCol::FILTER_COLUMNS_WIDTH);
 
     let data_col = Column::new()
         .align_x(Alignment::Center)
         .width(ReportCol::Data.get_width())
         .push(Text::new(
-            data_repr.formatted_string(tot.tot_data(data_repr)),
+            data_repr.formatted_string(tot.tot_data(data_repr.data_unit)),
         ));
 
     Row::new()

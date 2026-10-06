@@ -48,17 +48,17 @@ pub fn notify_and_log(
 
     // data threshold
     if let Some(threshold) = notifications.data_notification.threshold {
-        let data_repr = notifications.data_notification.data_repr;
-        if data_info.tot_data(data_repr) > u128::from(threshold) {
+        let data_unit = notifications.data_notification.data_unit;
+        if data_info.tot_data(data_unit) > u128::from(threshold) {
             let notification = LoggedNotification::DataThresholdExceeded(DataThresholdExceeded {
                 id: logged_notifications.tot(),
-                data_repr,
+                data_unit,
                 threshold,
                 data_info,
                 timestamp: get_formatted_timestamp(timestamp),
                 is_expanded: false,
-                hosts: threshold_hosts(info_traffic_msg, data_repr),
-                services: threshold_services(info_traffic_msg, data_repr),
+                hosts: threshold_hosts(info_traffic_msg, data_unit),
+                services: threshold_services(info_traffic_msg, data_unit),
             });
 
             //log this notification
@@ -163,7 +163,7 @@ pub fn notify_and_log(
 
 fn threshold_hosts(
     info_traffic_msg: &InfoTraffic,
-    data_repr: DataUnit,
+    data_unit: DataUnit,
 ) -> Vec<(Host, DataInfoHost)> {
     let mut hosts: Vec<(Host, DataInfoHost)> = info_traffic_msg
         .hosts
@@ -172,7 +172,7 @@ fn threshold_hosts(
         .collect();
     hosts.sort_by(|(_, a), (_, b)| {
         a.data_info
-            .compare(&b.data_info, SortType::Descending, data_repr)
+            .compare(&b.data_info, SortType::Descending, data_unit)
     });
     hosts.truncate(4);
     hosts
@@ -180,7 +180,7 @@ fn threshold_hosts(
 
 fn threshold_services(
     info_traffic_msg: &InfoTraffic,
-    data_repr: DataUnit,
+    data_unit: DataUnit,
 ) -> Vec<(Service, DataInfo)> {
     let mut services: Vec<(Service, DataInfo)> = info_traffic_msg
         .services
@@ -188,7 +188,7 @@ fn threshold_services(
         .filter(|(service, _)| service != &&Service::NotApplicable)
         .map(|(s, data_info)| (*s, *data_info))
         .collect();
-    services.sort_by(|(_, a), (_, b)| a.compare(b, SortType::Descending, data_repr));
+    services.sort_by(|(_, a), (_, b)| a.compare(b, SortType::Descending, data_unit));
     services.truncate(4);
     services
 }

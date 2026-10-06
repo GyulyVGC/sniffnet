@@ -16,15 +16,13 @@ use crate::networking::manage_packets::{
 };
 use crate::networking::types::address_port_pair::AddressPortPair;
 use crate::networking::types::bogon::is_bogon;
-use crate::networking::types::data_representation::DataUnit;
 use crate::networking::types::host::Host;
 use crate::networking::types::info_address_port_pair::InfoAddressPortPair;
 use crate::networking::types::latency::LatencyStatus;
 use crate::networking::types::traffic_direction::TrafficDirection;
 use crate::networking::types::traffic_type::TrafficType;
 use crate::translations::translations::{
-    address_translation, incoming_translation, outgoing_translation, packets_translation,
-    protocol_translation,
+    address_translation, incoming_translation, outgoing_translation, protocol_translation,
 };
 use crate::translations::translations_2::{
     connection_details_translation, destination_translation, fqdn_translation,
@@ -237,13 +235,7 @@ fn col_info<'a>(
                 incoming_translation(language).to_lowercase()
             }
         ),
-        &(data_repr.formatted_string(val.transmitted_data(data_repr))
-            + if data_repr == DataUnit::Packets {
-                format!(" {}", packets_translation(language))
-            } else {
-                String::new()
-            }
-            .as_ref()),
+        &data_repr.formatted_string(val.transmitted_data(data_repr.data_unit)),
     ));
 
     if measure_latency {

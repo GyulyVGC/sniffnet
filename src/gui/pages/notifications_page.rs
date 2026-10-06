@@ -14,14 +14,13 @@ use crate::gui::types::message::Message;
 use crate::gui::types::settings::Settings;
 use crate::networking::types::data_info::DataInfo;
 use crate::networking::types::data_info_host::DataInfoHost;
-use crate::networking::types::data_representation::DataUnit;
+use crate::networking::types::data_representation::{DataRepr, DataUnit};
 use crate::networking::types::host::Host;
 use crate::networking::types::program_lookup::ProgramLookup;
 use crate::networking::types::service::Service;
 use crate::notifications::types::logged_notification::{
     BlacklistedTransmitted, DataThresholdExceeded, FavoriteTransmitted, LoggedNotification,
 };
-use crate::report::types::sort_type::SortType;
 use crate::translations::translations::{
     clear_all_translation, favorite_transmitted_translation, no_notifications_received_translation,
     no_notifications_set_translation, only_last_30_translation, per_second_translation,
@@ -138,18 +137,21 @@ fn data_notification_log<'a>(
     language: Language,
 ) -> Container<'a, Message, StyleType> {
     let data_info = logged_notification.data_info;
-    let data_repr = logged_notification.data_repr;
-    let main_info = data_repr.data_exceeded_translation(language).to_string();
+    let data_unit = logged_notification.data_unit;
+    let main_info = data_unit.data_exceeded_translation(language).to_string();
     let threshold_bar = item_bar(
         threshold_tooltip(main_info.clone()),
         String::new(),
         &data_info,
-        data_repr,
+        DataRepr {
+            data_unit,
+            per_second: true,
+        },
         first_entry_data_info,
     );
 
-    let data_string = data_repr.formatted_string(logged_notification.threshold.into());
-    let icon = if data_repr == DataUnit::Packets {
+    let data_string = data_unit.formatted_string(logged_notification.threshold.into());
+    let icon = if data_unit == DataUnit::Packets {
         Icon::PacketsThreshold
     } else {
         Icon::BytesThreshold
@@ -201,7 +203,7 @@ fn data_notification_log<'a>(
 fn favorite_notification_log<'a>(
     logged_notification: &'a FavoriteTransmitted,
     first_entry_data_info: DataInfo,
-    data_repr: DataUnit,
+    data_repr: DataRepr,
     language: Language,
     program_lookup: Option<&'a ProgramLookup>,
 ) -> Container<'a, Message, StyleType> {
@@ -247,7 +249,7 @@ fn favorite_notification_log<'a>(
 fn blacklisted_notification_log<'a>(
     logged_notification: &BlacklistedTransmitted,
     first_entry_data_info: DataInfo,
-    data_repr: DataUnit,
+    data_repr: DataRepr,
     language: Language,
 ) -> Container<'a, Message, StyleType> {
     let host = &logged_notification.host;
@@ -328,7 +330,7 @@ fn logged_notifications(sniffer: &Sniffer) -> Column<'_, Message, StyleType> {
         .notifications()
         .iter()
         .map(LoggedNotification::data_info)
-        .max_by(|d1, d2| d1.compare(d2, SortType::Ascending, data_repr))
+        .max_by_key(|d| d.tot_data(data_repr.data_unit))
         .unwrap_or_default();
 
     for logged_notification in sniffer.logged_notifications.notifications() {
@@ -398,6 +400,11 @@ fn data_notification_extra<'a>(
     #[allow(clippy::cast_precision_loss)]
     let height = (ICONS_SIZE_BIG + spacing) * max_entries as f32;
 
+    let data_repr = DataRepr {
+        data_unit: logged_notification.data_unit,
+        per_second: false,
+    };
+
     let mut hosts_col = Column::new().spacing(spacing).width(Length::FillPortion(2));
     let first_data_info = logged_notification
         .hosts
@@ -411,7 +418,7 @@ fn data_notification_extra<'a>(
             icon,
             host.to_entry_string(),
             &data_info_host.data_info,
-            logged_notification.data_repr,
+            data_repr,
             first_data_info,
         );
         hosts_col = hosts_col.push(host_bar);
@@ -429,7 +436,7 @@ fn data_notification_extra<'a>(
             icon,
             service.to_string(),
             data_info,
-            logged_notification.data_repr,
+            data_repr,
             first_data_info_service,
         );
         services_col = services_col.push(service_bar);

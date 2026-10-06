@@ -23,8 +23,8 @@ pub struct DataInfo {
 }
 
 impl DataInfo {
-    pub fn incoming_data(&self, data_repr: DataUnit) -> u128 {
-        match data_repr {
+    pub fn incoming_data(&self, data_unit: DataUnit) -> u128 {
+        match data_unit {
             DataUnit::Packets => self.incoming_packets,
             DataUnit::Bytes => self.incoming_bytes,
             DataUnit::Bits => self.incoming_bytes * 8,
@@ -39,8 +39,8 @@ impl DataInfo {
         }
     }
 
-    pub fn tot_data(&self, data_repr: DataUnit) -> u128 {
-        self.incoming_data(data_repr) + self.outgoing_data(data_repr)
+    pub fn tot_data(&self, data_unit: DataUnit) -> u128 {
+        self.incoming_data(data_unit) + self.outgoing_data(data_unit)
     }
 
     pub fn add_packets(
@@ -79,10 +79,22 @@ impl DataInfo {
         }
     }
 
-    pub fn compare(&self, other: &Self, sort_type: SortType, data_repr: DataUnit) -> Ordering {
+    pub fn compare(&self, other: &Self, sort_type: SortType, data_unit: DataUnit) -> Ordering {
+        let self_data = self.tot_data(data_unit);
+        let other_data = other.tot_data(data_unit);
+
+        // handle cases where one or both have no data
+        if self_data == 0 && other_data == 0 {
+            return other.final_instant.cmp(&self.final_instant);
+        } else if self_data == 0 && other_data > 0 {
+            return Ordering::Greater;
+        } else if self_data > 0 && other_data == 0 {
+            return Ordering::Less;
+        }
+
         match sort_type {
-            SortType::Ascending => self.tot_data(data_repr).cmp(&other.tot_data(data_repr)),
-            SortType::Descending => other.tot_data(data_repr).cmp(&self.tot_data(data_repr)),
+            SortType::Ascending => self_data.cmp(&other_data),
+            SortType::Descending => other_data.cmp(&self_data),
             SortType::Neutral => other.final_instant.cmp(&self.final_instant),
         }
     }

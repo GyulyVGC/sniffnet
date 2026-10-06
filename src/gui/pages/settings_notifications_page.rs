@@ -136,7 +136,7 @@ fn get_data_notify<'a>(
             .class(ContainerType::BorderedRound)
     } else {
         let data_representation_row =
-            row_data_representation(data_notification, language, data_notification.data_repr);
+            row_data_representation(data_notification, language, data_notification.data_unit);
         let input_row = input_group_bytes(data_notification, language);
         let sound_row = sound_buttons(Notification::Data(data_notification), language);
         ret_val = ret_val
@@ -451,7 +451,7 @@ fn row_data_representation<'a>(
             })
             .on_press(Message::UpdateNotificationSettings(
                 Notification::Data(DataNotification {
-                    data_repr: option,
+                    data_unit: option,
                     ..data_notification
                 }),
                 false,

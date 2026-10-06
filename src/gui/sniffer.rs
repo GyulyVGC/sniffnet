@@ -176,7 +176,7 @@ impl Sniffer {
             capture_source,
             capture_error: None,
             dots_pulse: (".".to_string(), 0),
-            traffic_chart: TrafficChart::new(style, language, data_repr),
+            traffic_chart: TrafficChart::new(style, language, data_repr.data_unit),
             preview_charts,
             modal: None,
             settings_page: None,
@@ -305,7 +305,7 @@ impl Sniffer {
             Message::SetCaptureSource(cs_pick) => self.set_capture_source(cs_pick),
             Message::ToggleFilters => self.toggle_filters(),
             Message::BpfFilter(value) => self.bpf_filter(value),
-            Message::DataReprSelection(unit) => self.data_repr_selection(unit),
+            Message::DataUnitSelection(unit) => self.data_unit_selection(unit),
             Message::ReportSortSelection(sort) => self.report_sort_selection(sort),
             Message::OpenWebPage(web_page) => Self::open_web_page(&web_page),
             Message::Start => return self.start(),
@@ -565,8 +565,8 @@ impl Sniffer {
         self.conf.filters.set_bpf(value);
     }
 
-    fn data_repr_selection(&mut self, unit: DataUnit) {
-        self.conf.data_repr = unit;
+    fn data_unit_selection(&mut self, unit: DataUnit) {
+        self.conf.data_repr.data_unit = unit;
         self.traffic_chart.change_kind(unit);
     }
 
@@ -1201,7 +1201,7 @@ impl Sniffer {
         self.latency_statuses = HashMap::new();
         self.logged_notifications = LoggedNotifications::default();
         self.capture_error = None;
-        self.traffic_chart = TrafficChart::new(style, language, self.conf.data_repr);
+        self.traffic_chart = TrafficChart::new(style, language, self.conf.data_repr.data_unit);
         self.modal = None;
         self.settings_page = None;
         self.running_page = None;
@@ -1275,7 +1275,7 @@ impl Sniffer {
         let data_notification = self.conf.settings.notifications.data_notification;
         let sound = match notification {
             Notification::Data(DataNotification {
-                data_repr,
+                data_unit: data_repr,
                 threshold,
                 byte_multiple,
                 sound,
@@ -1288,7 +1288,7 @@ impl Sniffer {
                 {
                     temp_threshold = DataNotification {
                         sound,
-                        data_repr,
+                        data_unit: data_repr,
                         threshold,
                         byte_multiple,
                         previous_threshold,
@@ -1309,7 +1309,7 @@ impl Sniffer {
                         .previous_threshold = previous_threshold;
                 }
                 self.conf.settings.notifications.data_notification.sound = sound;
-                self.conf.settings.notifications.data_notification.data_repr = data_repr;
+                self.conf.settings.notifications.data_notification.data_unit = data_repr;
                 sound
             }
             Notification::Favorite(favorite_notification) => {
@@ -1590,7 +1590,7 @@ mod tests {
     use crate::networking::types::capture_context::CaptureSourcePicklist;
     use crate::networking::types::config_device::ConfigDevice;
     use crate::networking::types::data_info::DataInfo;
-    use crate::networking::types::data_representation::DataUnit;
+    use crate::networking::types::data_representation::{DataRepr, DataUnit};
     use crate::networking::types::host::Host;
     use crate::networking::types::latency::LatencyStatus;
     use crate::networking::types::program::Program;
@@ -1623,19 +1623,19 @@ mod tests {
         let mut sniffer = Sniffer::new(Conf::default());
 
         assert_eq!(sniffer.traffic_chart.data_repr, DataUnit::Bytes);
-        assert_eq!(sniffer.conf.data_repr, DataUnit::Bytes);
-        sniffer.update(Message::DataReprSelection(DataUnit::Packets));
+        assert_eq!(sniffer.conf.data_repr, DataRepr::bytes(false));
+        sniffer.update(Message::DataUnitSelection(DataUnit::Packets));
         assert_eq!(sniffer.traffic_chart.data_repr, DataUnit::Packets);
-        assert_eq!(sniffer.conf.data_repr, DataUnit::Packets);
-        sniffer.update(Message::DataReprSelection(DataUnit::Packets));
+        assert_eq!(sniffer.conf.data_repr, DataRepr::packets(false));
+        sniffer.update(Message::DataUnitSelection(DataUnit::Packets));
         assert_eq!(sniffer.traffic_chart.data_repr, DataUnit::Packets);
-        assert_eq!(sniffer.conf.data_repr, DataUnit::Packets);
-        sniffer.update(Message::DataReprSelection(DataUnit::Bytes));
+        assert_eq!(sniffer.conf.data_repr, DataRepr::packets(false));
+        sniffer.update(Message::DataUnitSelection(DataUnit::Bytes));
         assert_eq!(sniffer.traffic_chart.data_repr, DataUnit::Bytes);
-        assert_eq!(sniffer.conf.data_repr, DataUnit::Bytes);
-        sniffer.update(Message::DataReprSelection(DataUnit::Bits));
+        assert_eq!(sniffer.conf.data_repr, DataRepr::bytes(false));
+        sniffer.update(Message::DataUnitSelection(DataUnit::Bits));
         assert_eq!(sniffer.traffic_chart.data_repr, DataUnit::Bits);
-        assert_eq!(sniffer.conf.data_repr, DataUnit::Bits);
+        assert_eq!(sniffer.conf.data_repr, DataRepr::bits(false));
     }
 
     #[test]
@@ -1950,7 +1950,7 @@ mod tests {
         let mut sniffer = Sniffer::new(Conf::default());
 
         let bytes_notification_init = DataNotification {
-            data_repr: DataUnit::Bytes,
+            data_unit: DataUnit::Bytes,
             threshold: None,
             byte_multiple: ByteMultiple::KB,
             sound: Sound::Gulp,
@@ -1958,7 +1958,7 @@ mod tests {
         };
 
         let bytes_notification_toggled_on = DataNotification {
-            data_repr: DataUnit::Bytes,
+            data_unit: DataUnit::Bytes,
             threshold: Some(800_000),
             byte_multiple: ByteMultiple::GB,
             sound: Sound::Gulp,
@@ -1966,7 +1966,7 @@ mod tests {
         };
 
         let bytes_notification_adjusted_threshold_sound_off = DataNotification {
-            data_repr: DataUnit::Bytes,
+            data_unit: DataUnit::Bytes,
             threshold: Some(3),
             byte_multiple: ByteMultiple::KB,
             sound: Sound::None,
@@ -1974,7 +1974,7 @@ mod tests {
         };
 
         let bytes_notification_sound_off_only = DataNotification {
-            data_repr: DataUnit::Bytes,
+            data_unit: DataUnit::Bytes,
             threshold: Some(800_000),
             byte_multiple: ByteMultiple::GB,
             sound: Sound::None,
@@ -2134,7 +2134,7 @@ mod tests {
             .set_notifications(VecDeque::from([LoggedNotification::DataThresholdExceeded(
                 DataThresholdExceeded {
                     id: 1,
-                    data_repr: DataUnit::Packets,
+                    data_unit: DataUnit::Packets,
                     threshold: 0,
                     data_info: DataInfo::default(),
                     timestamp: "".to_string(),
@@ -2281,7 +2281,7 @@ mod tests {
         sniffer.update(Message::SetPcapImport("/test.pcap".to_string()));
         sniffer.update(Message::ToggleExpandedView);
         sniffer.update(Message::ChangeRunningPage(RunningPage::Notifications));
-        sniffer.update(Message::DataReprSelection(DataUnit::Bits));
+        sniffer.update(Message::DataUnitSelection(DataUnit::Bits));
         sniffer.update(Message::LoadIpBlacklist("blacklist_file.csv".to_string()));
         sniffer.update(Message::AddOrRemoveFavorite(
             FavoriteKey::Service(Service::Name("https")),
@@ -2343,7 +2343,7 @@ mod tests {
                 export_pcap,
                 import_pcap_path: "/test.pcap".to_string(),
                 ipfix_socket: Default::default(),
-                data_repr: DataUnit::Bits,
+                data_repr: DataRepr::bits(false),
             }
         );
     }

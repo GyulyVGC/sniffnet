@@ -112,7 +112,7 @@ mod tests {
     use crate::gui::types::settings::Settings;
     use crate::networking::types::capture_context::CaptureSourcePicklist;
     use crate::networking::types::config_device::ConfigDevice;
-    use crate::networking::types::data_representation::DataUnit;
+    use crate::networking::types::data_representation::DataRepr;
     use crate::networking::types::service::Service;
     use crate::notifications::types::notifications::Notifications;
     use crate::report::types::sort_type::SortType;
@@ -168,7 +168,7 @@ mod tests {
             export_pcap: ExportPcap::default(),
             last_opened_setting: SettingsPage::General,
             last_opened_page: RunningPage::Inspect,
-            data_repr: DataUnit::Packets,
+            data_repr: DataRepr::default(),
         };
         // we want to be sure that modified config is different from defaults
         assert_ne!(Conf::default(), modified_conf);

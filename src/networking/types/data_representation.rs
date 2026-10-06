@@ -7,9 +7,41 @@ use crate::translations::types::language::Language;
 use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize, Default)]
+#[serde(default)]
 pub struct DataRepr {
     pub(crate) data_unit: DataUnit,
     pub(crate) per_second: bool,
+}
+
+impl DataRepr {
+    pub fn formatted_string(self, amount: u128) -> String {
+        let suffix = if self.per_second { "/s" } else { "" };
+        format!("{}{}", self.data_unit.formatted_string(amount), suffix)
+    }
+
+    #[cfg(test)]
+    pub fn packets(per_second: bool) -> DataRepr {
+        DataRepr {
+            data_unit: DataUnit::Packets,
+            per_second,
+        }
+    }
+
+    #[cfg(test)]
+    pub fn bytes(per_second: bool) -> DataRepr {
+        DataRepr {
+            data_unit: DataUnit::Bytes,
+            per_second,
+        }
+    }
+
+    #[cfg(test)]
+    pub fn bits(per_second: bool) -> DataRepr {
+        DataRepr {
+            data_unit: DataUnit::Bits,
+            per_second,
+        }
+    }
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize, Default)]
@@ -525,5 +557,35 @@ mod tests {
         );
         assert_eq!(DataUnit::Bytes.formatted_string(u128::MAX), "inf PB");
         assert_eq!(DataUnit::Bits.formatted_string(u128::MAX), "inf Pb");
+    }
+
+    #[test]
+    fn test_data_repr_formatted_string() {
+        let data_repr = DataRepr {
+            data_unit: DataUnit::Bytes,
+            per_second: false,
+        };
+        assert_eq!(data_repr.formatted_string(1_000), "1.0 KB");
+
+        let data_repr_per_second = DataRepr {
+            data_unit: DataUnit::Bits,
+            per_second: true,
+        };
+        assert_eq!(data_repr_per_second.formatted_string(1_000_000), "1.0 Mb/s");
+
+        let data_repr_per_second = DataRepr {
+            data_unit: DataUnit::Packets,
+            per_second: true,
+        };
+        assert_eq!(
+            data_repr_per_second.formatted_string(1_000_000),
+            "1000000/s"
+        );
+
+        let data_repr_per_second = DataRepr {
+            data_unit: DataUnit::Packets,
+            per_second: false,
+        };
+        assert_eq!(data_repr_per_second.formatted_string(1_000_000), "1000000");
     }
 }

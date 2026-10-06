@@ -7,7 +7,7 @@ use crate::gui::types::conf::deserialize_or_default;
 use crate::gui::types::message::Message;
 use crate::networking::types::data_info::DataInfo;
 use crate::networking::types::data_info_host::DataInfoHost;
-use crate::networking::types::data_representation::DataUnit;
+use crate::networking::types::data_representation::{DataRepr, DataUnit};
 use crate::networking::types::host::Host;
 use crate::networking::types::info_traffic::InfoTraffic;
 use crate::networking::types::program::Program;
@@ -330,7 +330,7 @@ impl From<FavoriteItem> for FavoriteKey {
 
 fn get_host_entries(
     info_traffic: &InfoTraffic,
-    data_repr: DataUnit,
+    data_repr: DataRepr,
     sort_type: SortType,
     favorites_filter: bool,
     favorites: &HashSet<Host>,
@@ -351,7 +351,10 @@ fn get_host_entries(
         info_traffic.hosts.iter().collect()
     };
 
-    sorted_vec.sort_by(|&(_, a), &(_, b)| a.data_info.compare(&b.data_info, sort_type, data_repr));
+    sorted_vec.sort_by(|&(_, a), &(_, b)| {
+        a.data_info
+            .compare(&b.data_info, sort_type, data_repr.data_unit)
+    });
 
     let n_entry = min(sorted_vec.len(), 30);
     sorted_vec[0..n_entry]
@@ -364,7 +367,7 @@ fn get_host_entries(
 
 fn get_service_entries(
     info_traffic: &InfoTraffic,
-    data_repr: DataUnit,
+    data_repr: DataRepr,
     sort_type: SortType,
     favorites_filter: bool,
     favorites: &HashSet<Service>,
@@ -389,7 +392,7 @@ fn get_service_entries(
             .collect()
     };
 
-    sorted_vec.sort_by(|&(_, a), &(_, b)| a.compare(b, sort_type, data_repr));
+    sorted_vec.sort_by(|&(_, a), &(_, b)| a.compare(b, sort_type, data_repr.data_unit));
 
     let n_entry = min(sorted_vec.len(), 30);
     sorted_vec[0..n_entry]
@@ -400,7 +403,7 @@ fn get_service_entries(
 
 fn get_program_entries(
     program_lookup: Option<&ProgramLookup>,
-    data_repr: DataUnit,
+    data_repr: DataRepr,
     sort_type: SortType,
     favorites_filter: bool,
     favorites: &HashSet<Program>,
@@ -438,7 +441,7 @@ fn get_program_entries(
                 return std::cmp::Ordering::Less;
             }
         }
-        a.compare(b, sort_type, data_repr)
+        a.compare(b, sort_type, data_repr.data_unit)
     });
 
     let n_entry = min(sorted_vec.len(), 30);

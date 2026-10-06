@@ -21,9 +21,8 @@ use crate::gui::types::message::Message;
 use crate::gui::types::settings::Settings;
 use crate::networking::types::capture_context::CaptureSource;
 use crate::networking::types::data_info::DataInfo;
-use crate::networking::types::data_representation::DataUnit;
+use crate::networking::types::data_representation::{DataRepr, DataUnit};
 use crate::networking::types::ipfix_exporter::IpfixExporter;
-use crate::report::types::sort_type::SortType;
 use crate::translations::translations::{
     active_filters_translation, incoming_translation, network_adapter_translation,
     outgoing_translation, traffic_rate_translation,
@@ -118,7 +117,7 @@ fn col_favorite_item(
     let first_entry_data_info = entries
         .iter()
         .map(FavoriteItem::data_info)
-        .max_by(|d1, d2| d1.compare(d2, SortType::Ascending, data_repr))
+        .max_by_key(|d| d.tot_data(data_repr.data_unit))
         .unwrap_or_default();
 
     for fi in &entries {
@@ -226,7 +225,7 @@ pub fn item_bar<'a>(
     icon: impl Into<Element<'a, Message, StyleType>>,
     item: String,
     data_info: &DataInfo,
-    data_repr: DataUnit,
+    data_repr: DataRepr,
     first_entry_data_info: DataInfo,
 ) -> Row<'a, Message, StyleType> {
     let is_dimmed = data_info.tot_data(DataUnit::Packets) == 0;
@@ -251,15 +250,21 @@ pub fn item_bar<'a>(
                                 }),
                         )
                         .push(
-                            Text::new(data_repr.formatted_string(data_info.tot_data(data_repr)))
-                                .class(if is_dimmed {
-                                    TextType::Dimmed
-                                } else {
-                                    TextType::Standard
-                                }),
+                            Text::new(
+                                data_repr.formatted_string(data_info.tot_data(data_repr.data_unit)),
+                            )
+                            .class(if is_dimmed {
+                                TextType::Dimmed
+                            } else {
+                                TextType::Standard
+                            }),
                         ),
                 )
-                .push(get_bars(data_repr, &first_entry_data_info, data_info)),
+                .push(get_bars(
+                    data_repr.data_unit,
+                    &first_entry_data_info,
+                    data_info,
+                )),
         )
 }
 
@@ -440,7 +445,7 @@ fn get_exporters_col<'a>(
 
 fn col_data_representation<'a>(
     language: Language,
-    data_repr: DataUnit,
+    data_repr: DataRepr,
 ) -> Column<'a, Message, StyleType> {
     let mut ret_val = Column::new().spacing(5).push(
         Text::new(format!("{}:", data_representation_translation(language)))
@@ -448,7 +453,7 @@ fn col_data_representation<'a>(
     );
 
     let [bits, bytes, packets] = DataUnit::ALL.map(|option| {
-        let is_active = data_repr.eq(&option);
+        let is_active = data_repr.data_unit.eq(&option);
         Button::new(
             Text::new(option.get_label(language).to_owned())
                 .width(Length::Fill)
@@ -462,7 +467,7 @@ fn col_data_representation<'a>(
         } else {
             ButtonType::BorderedRound
         })
-        .on_press(Message::DataReprSelection(option))
+        .on_press(Message::DataUnitSelection(option))
     });
 
     ret_val = ret_val
@@ -476,8 +481,8 @@ fn donut_row(language: Language, sniffer: &Sniffer) -> Container<'_, Message, St
     let data_repr = sniffer.conf.data_repr;
     let tot_data_info = sniffer.info_traffic.tot_data_info;
 
-    let in_data = tot_data_info.incoming_data(data_repr);
-    let out_data = tot_data_info.outgoing_data(data_repr);
+    let in_data = tot_data_info.incoming_data(data_repr.data_unit);
+    let out_data = tot_data_info.outgoing_data(data_repr.data_unit);
     let dropped = sniffer.info_traffic.dropped_packets;
 
     let legend_col = Column::new()
@@ -495,7 +500,8 @@ fn donut_row(language: Language, sniffer: &Sniffer) -> Container<'_, Message, St
             language,
         ))
         .push(dropped.map(|d| {
-            let drop_tot = d.total(data_repr, tot_data_info);
+            // TODO: data rate dropped ?
+            let drop_tot = d.total(data_repr.data_unit, tot_data_info);
             donut_legend_entry(drop_tot, data_repr, RuleType::Dropped, language).push(
                 if drop_tot > 0 {
                     Some(get_info_tooltip(
@@ -504,8 +510,9 @@ fn donut_row(language: Language, sniffer: &Sniffer) -> Container<'_, Message, St
                             .push(
                                 Text::new(format!(
                                     "{SNIFFNET_TITLECASE}: {}",
-                                    data_repr
-                                        .formatted_string(d.by_sniffnet(data_repr, tot_data_info))
+                                    data_repr.formatted_string(
+                                        d.by_sniffnet(data_repr.data_unit, tot_data_info)
+                                    )
                                 ))
                                 .size(FONT_SIZE_FOOTER),
                             )
@@ -513,8 +520,9 @@ fn donut_row(language: Language, sniffer: &Sniffer) -> Container<'_, Message, St
                                 Text::new(format!(
                                     "{}: {}",
                                     network_adapter_translation(language),
-                                    data_repr
-                                        .formatted_string(d.by_adapter(data_repr, tot_data_info))
+                                    data_repr.formatted_string(
+                                        d.by_adapter(data_repr.data_unit, tot_data_info)
+                                    )
                                 ))
                                 .size(FONT_SIZE_FOOTER),
                             )
@@ -533,7 +541,7 @@ fn donut_row(language: Language, sniffer: &Sniffer) -> Container<'_, Message, St
             data_repr,
             in_data,
             out_data,
-            dropped.map(|d| d.total(data_repr, tot_data_info)),
+            dropped.map(|d| d.total(data_repr.data_unit, tot_data_info)),
             sniffer.thumbnail,
         ))
         .push(legend_col);
@@ -547,7 +555,7 @@ fn donut_row(language: Language, sniffer: &Sniffer) -> Container<'_, Message, St
 
 fn donut_legend_entry<'a>(
     value: u128,
-    data_repr: DataUnit,
+    data_repr: DataRepr,
     rule_type: RuleType,
     language: Language,
 ) -> Row<'a, Message, StyleType> {
@@ -570,13 +578,13 @@ fn donut_legend_entry<'a>(
 const MIN_BARS_LENGTH: f32 = 4.0;
 
 fn get_bars_length(
-    data_repr: DataUnit,
+    data_unit: DataUnit,
     first_entry: &DataInfo,
     data_info: &DataInfo,
 ) -> (u16, u16) {
-    let in_val = data_info.incoming_data(data_repr);
-    let out_val = data_info.outgoing_data(data_repr);
-    let first_entry_tot_val = first_entry.tot_data(data_repr);
+    let in_val = data_info.incoming_data(data_unit);
+    let out_val = data_info.outgoing_data(data_unit);
+    let first_entry_tot_val = first_entry.tot_data(data_unit);
 
     let tot_val = in_val + out_val;
     if tot_val == 0 {
@@ -626,11 +634,11 @@ fn get_bars_length(
 }
 
 pub fn get_bars<'a>(
-    data_repr: DataUnit,
+    data_unit: DataUnit,
     first_entry: &DataInfo,
     data_info: &DataInfo,
 ) -> Row<'a, Message, StyleType> {
-    let (in_len, out_len) = get_bars_length(data_repr, first_entry, data_info);
+    let (in_len, out_len) = get_bars_length(data_unit, first_entry, data_info);
 
     let in_all_round = out_len == 0;
     let out_all_round = in_len == 0;

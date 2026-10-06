@@ -92,22 +92,30 @@ impl InfoAddressPortPair {
         }
     }
 
-    pub fn transmitted_data(&self, data_repr: DataUnit) -> u128 {
-        match data_repr {
+    pub fn transmitted_data(&self, data_unit: DataUnit) -> u128 {
+        match data_unit {
             DataUnit::Packets => self.packets,
             DataUnit::Bytes => self.bytes,
             DataUnit::Bits => self.bytes * 8,
         }
     }
 
-    pub fn compare(&self, other: &Self, sort_type: SortType, data_repr: DataUnit) -> Ordering {
+    pub fn compare(&self, other: &Self, sort_type: SortType, data_unit: DataUnit) -> Ordering {
+        let self_data = self.transmitted_data(data_unit);
+        let other_data = other.transmitted_data(data_unit);
+
+        // handle cases where one or both have no data
+        if self_data == 0 && other_data == 0 {
+            return other.final_timestamp.cmp(&self.final_timestamp);
+        } else if self_data == 0 && other_data > 0 {
+            return Ordering::Greater;
+        } else if self_data > 0 && other_data == 0 {
+            return Ordering::Less;
+        }
+
         match sort_type {
-            SortType::Ascending => self
-                .transmitted_data(data_repr)
-                .cmp(&other.transmitted_data(data_repr)),
-            SortType::Descending => other
-                .transmitted_data(data_repr)
-                .cmp(&self.transmitted_data(data_repr)),
+            SortType::Ascending => self_data.cmp(&other_data),
+            SortType::Descending => other_data.cmp(&self_data),
             SortType::Neutral => other.final_timestamp.cmp(&self.final_timestamp),
         }
     }

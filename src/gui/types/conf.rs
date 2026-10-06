@@ -11,7 +11,7 @@ use crate::gui::types::ipfix_socket::MyIpfixSocket;
 use crate::gui::types::settings::Settings;
 use crate::networking::types::capture_context::CaptureSourcePicklist;
 use crate::networking::types::config_device::ConfigDevice;
-use crate::networking::types::data_representation::DataUnit;
+use crate::networking::types::data_representation::DataRepr;
 #[cfg(not(test))]
 use crate::networking::types::program::Program;
 #[cfg(not(test))]
@@ -63,7 +63,7 @@ pub struct Conf {
     pub last_opened_page: RunningPage,
     /// Data representation
     #[serde(deserialize_with = "deserialize_or_default")]
-    pub data_repr: DataUnit,
+    pub data_repr: DataRepr,
     /// Host sort type (overview page)
     #[serde(deserialize_with = "deserialize_or_default")]
     pub host_sort_type: SortType,

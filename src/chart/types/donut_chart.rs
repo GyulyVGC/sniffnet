@@ -1,6 +1,6 @@
 use crate::gui::styles::donut::Catalog;
 use crate::gui::styles::style_constants::{FONT_SIZE_FOOTER, FONT_SIZE_SUBTITLE, SARASA_MONO};
-use crate::networking::types::data_representation::DataUnit;
+use crate::networking::types::data_representation::DataRepr;
 use iced::alignment::Vertical;
 use iced::widget::canvas::path::Arc;
 use iced::widget::canvas::{Frame, Stroke, Text};
@@ -10,7 +10,7 @@ use iced::{Length, Radians, Renderer, mouse};
 use std::f32::consts;
 
 pub struct DonutChart {
-    data_repr: DataUnit,
+    data_repr: DataRepr,
     incoming: u128,
     outgoing: u128,
     dropped: Option<u128>,
@@ -19,7 +19,7 @@ pub struct DonutChart {
 
 impl DonutChart {
     fn new(
-        data_repr: DataUnit,
+        data_repr: DataRepr,
         incoming: u128,
         outgoing: u128,
         dropped: Option<u128>,
@@ -140,7 +140,7 @@ impl<Message, Theme: Catalog> canvas::Program<Message, Theme> for DonutChart {
 }
 
 pub fn donut_chart<Message, Theme: Catalog>(
-    data_repr: DataUnit,
+    data_repr: DataRepr,
     incoming: u128,
     outgoing: u128,
     dropped: Option<u128>,

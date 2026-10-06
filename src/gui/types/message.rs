@@ -37,8 +37,8 @@ pub enum Message {
     ToggleFilters,
     /// Change BPF filter string
     BpfFilter(String),
-    /// Select data representation to use
-    DataReprSelection(DataUnit),
+    /// Select data unit to use
+    DataUnitSelection(DataUnit),
     /// Select report sort type to be displayed (inspect page)
     ReportSortSelection(SortType),
     /// Select host sort type to be displayed (overview page)

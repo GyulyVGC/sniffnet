@@ -43,12 +43,12 @@ pub fn thumbnail_page(sniffer: &Sniffer) -> Container<'_, Message, StyleType> {
     let data_repr = sniffer.conf.data_repr;
     let tot_data_info = info_traffic.tot_data_info;
 
-    let in_data = tot_data_info.incoming_data(data_repr);
-    let out_data = tot_data_info.outgoing_data(data_repr);
+    let in_data = tot_data_info.incoming_data(data_repr.data_unit);
+    let out_data = tot_data_info.outgoing_data(data_repr.data_unit);
     let dropped = sniffer
         .info_traffic
         .dropped_packets
-        .map(|d| d.total(data_repr, tot_data_info));
+        .map(|d| d.total(data_repr.data_unit, tot_data_info));
 
     let charts = Row::new()
         .padding(5)

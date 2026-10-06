@@ -21,33 +21,33 @@ impl DroppedPackets {
 
     /// Returns the total number of dropped data,
     /// assuming that dropped packets have the same size as the average packet
-    pub fn total(self, data_repr: DataUnit, tot_data_info: DataInfo) -> u128 {
+    pub fn total(self, data_unit: DataUnit, tot_data_info: DataInfo) -> u128 {
         averaged_data(
             u128::from(self.by_adapter) + u128::from(self.by_sniffnet),
-            data_repr,
+            data_unit,
             tot_data_info,
         )
     }
 
     /// Returns the number of data dropped by the network adapter,
     /// assuming that dropped packets have the same size as the average packet
-    pub fn by_adapter(self, data_repr: DataUnit, tot_data_info: DataInfo) -> u128 {
-        averaged_data(u128::from(self.by_adapter), data_repr, tot_data_info)
+    pub fn by_adapter(self, data_unit: DataUnit, tot_data_info: DataInfo) -> u128 {
+        averaged_data(u128::from(self.by_adapter), data_unit, tot_data_info)
     }
 
     /// Returns the number of data dropped by the Sniffnet,
     /// assuming that dropped packets have the same size as the average packet
-    pub fn by_sniffnet(self, data_repr: DataUnit, tot_data_info: DataInfo) -> u128 {
-        averaged_data(u128::from(self.by_sniffnet), data_repr, tot_data_info)
+    pub fn by_sniffnet(self, data_unit: DataUnit, tot_data_info: DataInfo) -> u128 {
+        averaged_data(u128::from(self.by_sniffnet), data_unit, tot_data_info)
     }
 }
 
-fn averaged_data(dropped_packets: u128, data_repr: DataUnit, tot_data_info: DataInfo) -> u128 {
-    if data_repr == DataUnit::Packets {
+fn averaged_data(dropped_packets: u128, data_unit: DataUnit, tot_data_info: DataInfo) -> u128 {
+    if data_unit == DataUnit::Packets {
         return dropped_packets;
     }
 
-    let all = tot_data_info.tot_data(data_repr);
+    let all = tot_data_info.tot_data(data_unit);
     let all_packets = tot_data_info.tot_data(DataUnit::Packets);
     dropped_packets
         .saturating_mul(all)

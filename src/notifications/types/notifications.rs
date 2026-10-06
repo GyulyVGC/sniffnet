@@ -60,7 +60,7 @@ pub struct DataNotification {
     pub sound: Sound,
     /// Data representation
     #[serde(deserialize_with = "deserialize_or_default")]
-    pub data_repr: DataUnit,
+    pub data_unit: DataUnit,
     /// Threshold of received + sent bytes; if exceeded a notification is emitted
     #[serde(deserialize_with = "deserialize_or_default")]
     pub threshold: Option<u64>,
@@ -75,7 +75,7 @@ pub struct DataNotification {
 impl Default for DataNotification {
     fn default() -> Self {
         DataNotification {
-            data_repr: DataUnit::default(),
+            data_unit: DataUnit::default(),
             threshold: None,
             byte_multiple: ByteMultiple::KB,
             sound: Sound::Gulp,

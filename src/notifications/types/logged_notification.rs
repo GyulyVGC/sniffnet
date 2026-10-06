@@ -106,7 +106,7 @@ impl LoggedNotification {
 #[derive(Clone)]
 pub struct DataThresholdExceeded {
     pub(crate) id: usize,
-    pub(crate) data_repr: DataUnit,
+    pub(crate) data_unit: DataUnit,
     pub(crate) threshold: u64,
     pub(crate) data_info: DataInfo,
     pub(crate) timestamp: String,
@@ -118,10 +118,10 @@ pub struct DataThresholdExceeded {
 impl DataThresholdExceeded {
     fn to_json(&self) -> String {
         json!({
-            "info": self.data_repr.data_exceeded_translation(Language::EN),
+            "info": self.data_unit.data_exceeded_translation(Language::EN),
             "timestamp": self.timestamp,
-            "threshold": self.data_repr.formatted_string(self.threshold.into()),
-            "data": self.data_repr.formatted_string(self.data_info.tot_data(self.data_repr)),
+            "threshold": self.data_unit.formatted_string(self.threshold.into()),
+            "data": self.data_unit.formatted_string(self.data_info.tot_data(self.data_unit)),
         })
         .to_string()
     }
@@ -200,7 +200,7 @@ mod tests {
         data_info.add_packets(12, 1500, TrafficDirection::Incoming, Instant::now());
         let notification = DataThresholdExceeded {
             id: 1,
-            data_repr: DataUnit::Packets,
+            data_unit: DataUnit::Packets,
             threshold: 10,
             data_info,
             timestamp: "2024-06-01T12:00:00Z".to_string(),
