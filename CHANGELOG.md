@@ -3,6 +3,7 @@
 All Sniffnet releases with the relative changes are documented in this file.
 
 ## [UNRELEASED]
+- Avoid opening unsupported D-Bus devices for adapter previews, preventing Linux desktop operations from hanging (fixes [#1190](https://github.com/GyulyVGC/sniffnet/issues/1190))
 - IPFIX collector capabilities: receive and analyze network traffic from remote devices ([#1270](https://github.com/GyulyVGC/sniffnet/pull/1270) — fixes [#303](https://github.com/GyulyVGC/sniffnet/issues/303))
 - Service taxonomy: classify upper layer services into 20 different categories ([#1312](https://github.com/GyulyVGC/sniffnet/pull/1312) — fixes [#1102](https://github.com/GyulyVGC/sniffnet/issues/1102))
 - Added support for IGMP connections and messages ([#1301](https://github.com/GyulyVGC/sniffnet/pull/1301) — fixes [#1269](https://github.com/GyulyVGC/sniffnet/issues/1269))
