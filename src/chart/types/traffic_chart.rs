@@ -15,7 +15,7 @@ use crate::gui::sniffer::FONT_FAMILY_NAME;
 use crate::gui::styles::style_constants::CHARTS_LINE_BORDER;
 use crate::gui::styles::types::palette::to_rgb_color;
 use crate::gui::types::message::Message;
-use crate::networking::types::data_representation::DataUnit;
+use crate::networking::types::data_representation::{DataRepr, DataUnit};
 use crate::networking::types::info_traffic::InfoTraffic;
 use crate::networking::types::traffic_direction::TrafficDirection;
 use crate::translations::translations::{incoming_translation, outgoing_translation};
@@ -99,19 +99,19 @@ impl TrafficChart {
         #[allow(clippy::cast_precision_loss)]
         let out_bytes_entry = -(info_traffic_msg
             .tot_data_info
-            .outgoing_data(DataUnit::Bytes) as f32);
+            .outgoing_data(DataRepr::bytes(false)) as f32);
         #[allow(clippy::cast_precision_loss)]
         let in_bytes_entry = info_traffic_msg
             .tot_data_info
-            .incoming_data(DataUnit::Bytes) as f32;
+            .incoming_data(DataRepr::bytes(false)) as f32;
         #[allow(clippy::cast_precision_loss)]
         let out_packets_entry = -(info_traffic_msg
             .tot_data_info
-            .outgoing_data(DataUnit::Packets) as f32);
+            .outgoing_data(DataRepr::packets(false)) as f32);
         #[allow(clippy::cast_precision_loss)]
         let in_packets_entry = info_traffic_msg
             .tot_data_info
-            .incoming_data(DataUnit::Packets) as f32;
+            .incoming_data(DataRepr::packets(false)) as f32;
 
         let out_bytes_point = (tot_seconds, out_bytes_entry);
         let in_bytes_point = (tot_seconds, in_bytes_entry);

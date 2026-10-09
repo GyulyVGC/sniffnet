@@ -7,7 +7,7 @@ use crate::gui::types::conf::deserialize_or_default;
 use crate::gui::types::message::Message;
 use crate::networking::types::data_info::DataInfo;
 use crate::networking::types::data_info_host::DataInfoHost;
-use crate::networking::types::data_representation::{DataRepr, DataUnit};
+use crate::networking::types::data_representation::DataRepr;
 use crate::networking::types::host::Host;
 use crate::networking::types::info_traffic::InfoTraffic;
 use crate::networking::types::program::Program;
@@ -351,10 +351,7 @@ fn get_host_entries(
         info_traffic.hosts.iter().collect()
     };
 
-    sorted_vec.sort_by(|&(_, a), &(_, b)| {
-        a.data_info
-            .compare(&b.data_info, sort_type, data_repr.data_unit)
-    });
+    sorted_vec.sort_by(|&(_, a), &(_, b)| a.data_info.compare(&b.data_info, sort_type, data_repr));
 
     let n_entry = min(sorted_vec.len(), 30);
     sorted_vec[0..n_entry]
@@ -392,7 +389,7 @@ fn get_service_entries(
             .collect()
     };
 
-    sorted_vec.sort_by(|&(_, a), &(_, b)| a.compare(b, sort_type, data_repr.data_unit));
+    sorted_vec.sort_by(|&(_, a), &(_, b)| a.compare(b, sort_type, data_repr));
 
     let n_entry = min(sorted_vec.len(), 30);
     sorted_vec[0..n_entry]
@@ -429,19 +426,23 @@ fn get_program_entries(
             .programs()
             .iter()
             // Unknown may be inserted, and then all of its data could be reassigned to known programs
-            .filter(|(_, d)| d.tot_data(DataUnit::Packets) > 0)
+            .filter(|(_, d)| d.tot_data(DataRepr::packets(false)) > 0)
             .collect()
     };
 
     sorted_vec.sort_by(|&(p1, a), &(p2, b)| {
-        if sort_type == SortType::Neutral && a.is_within_same_second(b) {
+        if sort_type == SortType::Neutral
+            && a.tot_data(data_repr) > 0
+            && b.tot_data(data_repr) > 0
+            && a.is_within_same_second(b)
+        {
             if p1.is_unknown() {
                 return std::cmp::Ordering::Greater;
             } else if p2.is_unknown() {
                 return std::cmp::Ordering::Less;
             }
         }
-        a.compare(b, sort_type, data_repr.data_unit)
+        a.compare(b, sort_type, data_repr)
     });
 
     let n_entry = min(sorted_vec.len(), 30);

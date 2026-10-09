@@ -137,6 +137,8 @@ pub fn modify_or_insert_in_map(
                 is_blacklisted: _,
                 // determined later
                 program: _,
+                latest_packets: _,
+                latest_bytes: _,
             } = info;
 
             *tot_bytes += bytes;
@@ -176,6 +178,8 @@ pub fn modify_or_insert_in_map(
             vlan_id,
             is_blacklisted,
             program: Program::NotApplicable,
+            latest_packets: 0,
+            latest_bytes: 0,
         });
 
     (new_info.traffic_direction, new_info.service)

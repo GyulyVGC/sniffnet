@@ -117,14 +117,14 @@ fn col_favorite_item(
     let first_entry_data_info = entries
         .iter()
         .map(FavoriteItem::data_info)
-        .max_by_key(|d| d.tot_data(data_repr.data_unit))
+        .max_by_key(|d| d.tot_data(data_repr))
         .unwrap_or_default();
 
     for fi in &entries {
         let star_button = fi.star_button(&sniffer.conf.favorites);
         let data_info = fi.data_info();
 
-        let icon_opacity = if data_info.tot_data(DataUnit::Packets) == 0 {
+        let icon_opacity = if data_info.tot_data(data_repr) == 0 {
             style.get_extension().alpha_chart_badge
         } else {
             1.0
@@ -228,7 +228,7 @@ pub fn item_bar<'a>(
     data_repr: DataRepr,
     first_entry_data_info: DataInfo,
 ) -> Row<'a, Message, StyleType> {
-    let is_dimmed = data_info.tot_data(DataUnit::Packets) == 0;
+    let is_dimmed = data_info.tot_data(data_repr) == 0;
     Row::new()
         .height(ICONS_SIZE_BIG)
         .align_y(Alignment::Center)
@@ -250,21 +250,15 @@ pub fn item_bar<'a>(
                                 }),
                         )
                         .push(
-                            Text::new(
-                                data_repr.formatted_string(data_info.tot_data(data_repr.data_unit)),
-                            )
-                            .class(if is_dimmed {
-                                TextType::Dimmed
-                            } else {
-                                TextType::Standard
-                            }),
+                            Text::new(data_repr.formatted_string(data_info.tot_data(data_repr)))
+                                .class(if is_dimmed {
+                                    TextType::Dimmed
+                                } else {
+                                    TextType::Standard
+                                }),
                         ),
                 )
-                .push(get_bars(
-                    data_repr.data_unit,
-                    &first_entry_data_info,
-                    data_info,
-                )),
+                .push(get_bars(data_repr, &first_entry_data_info, data_info)),
         )
 }
 
@@ -481,9 +475,13 @@ fn donut_row(language: Language, sniffer: &Sniffer) -> Container<'_, Message, St
     let data_repr = sniffer.conf.data_repr;
     let tot_data_info = sniffer.info_traffic.tot_data_info;
 
-    let in_data = tot_data_info.incoming_data(data_repr.data_unit);
-    let out_data = tot_data_info.outgoing_data(data_repr.data_unit);
-    let dropped = sniffer.info_traffic.dropped_packets;
+    let in_data = tot_data_info.incoming_data(data_repr);
+    let out_data = tot_data_info.outgoing_data(data_repr);
+    let dropped = if data_repr.per_second {
+        sniffer.info_traffic.latest_dropped_packets
+    } else {
+        sniffer.info_traffic.dropped_packets
+    };
 
     let legend_col = Column::new()
         .spacing(5)
@@ -500,7 +498,6 @@ fn donut_row(language: Language, sniffer: &Sniffer) -> Container<'_, Message, St
             language,
         ))
         .push(dropped.map(|d| {
-            // TODO: data rate dropped ?
             let drop_tot = d.total(data_repr.data_unit, tot_data_info);
             donut_legend_entry(drop_tot, data_repr, RuleType::Dropped, language).push(
                 if drop_tot > 0 {
@@ -578,13 +575,13 @@ fn donut_legend_entry<'a>(
 const MIN_BARS_LENGTH: f32 = 4.0;
 
 fn get_bars_length(
-    data_unit: DataUnit,
+    data_repr: DataRepr,
     first_entry: &DataInfo,
     data_info: &DataInfo,
 ) -> (u16, u16) {
-    let in_val = data_info.incoming_data(data_unit);
-    let out_val = data_info.outgoing_data(data_unit);
-    let first_entry_tot_val = first_entry.tot_data(data_unit);
+    let in_val = data_info.incoming_data(data_repr);
+    let out_val = data_info.outgoing_data(data_repr);
+    let first_entry_tot_val = first_entry.tot_data(data_repr);
 
     let tot_val = in_val + out_val;
     if tot_val == 0 {
@@ -634,11 +631,11 @@ fn get_bars_length(
 }
 
 pub fn get_bars<'a>(
-    data_unit: DataUnit,
+    data_repr: DataRepr,
     first_entry: &DataInfo,
     data_info: &DataInfo,
 ) -> Row<'a, Message, StyleType> {
-    let (in_len, out_len) = get_bars_length(data_unit, first_entry, data_info);
+    let (in_len, out_len) = get_bars_length(data_repr, first_entry, data_info);
 
     let in_all_round = out_len == 0;
     let out_all_round = in_len == 0;
@@ -689,6 +686,22 @@ mod tests {
     use crate::gui::pages::overview_page::{MIN_BARS_LENGTH, get_bars_length};
     use crate::networking::types::data_info::DataInfo;
     use crate::networking::types::data_representation::DataUnit;
+
+    #[test]
+    fn rate_bars_use_latest_counters_for_values_and_maximum() {
+        use crate::networking::types::data_representation::DataRepr;
+        let mut largest_total = DataInfo::new_for_tests(1000, 0, 10_000, 0);
+        let mut largest_rate = DataInfo::default();
+        largest_total.refresh_interval(Some(DataInfo::new_for_tests(0, 2, 0, 200)));
+        largest_rate.refresh_interval(Some(DataInfo::new_for_tests(8, 0, 800, 0)));
+        let rate = DataRepr::packets(true);
+        let entries = [largest_total, largest_rate];
+        let maximum = entries.iter().max_by_key(|d| d.tot_data(rate)).unwrap();
+        assert_eq!(get_bars_length(rate, maximum, &largest_total), (0, 25));
+        assert_eq!(get_bars_length(rate, maximum, &largest_rate), (100, 0));
+        largest_total.refresh_interval(None);
+        assert_eq!(get_bars_length(rate, maximum, &largest_total), (0, 0));
+    }
 
     #[test]
     fn test_get_bars_length_simple() {

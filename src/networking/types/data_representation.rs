@@ -19,7 +19,6 @@ impl DataRepr {
         format!("{}{}", self.data_unit.formatted_string(amount), suffix)
     }
 
-    #[cfg(test)]
     pub fn packets(per_second: bool) -> DataRepr {
         DataRepr {
             data_unit: DataUnit::Packets,
@@ -27,7 +26,6 @@ impl DataRepr {
         }
     }
 
-    #[cfg(test)]
     pub fn bytes(per_second: bool) -> DataRepr {
         DataRepr {
             data_unit: DataUnit::Bytes,

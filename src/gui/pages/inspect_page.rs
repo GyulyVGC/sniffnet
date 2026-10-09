@@ -586,13 +586,13 @@ fn get_button_change_page<'a>(increment: bool) -> Button<'a, Message, StyleType>
 }
 
 fn get_agglomerates_row<'a>(tot: DataInfo, data_repr: DataRepr) -> Row<'a, Message, StyleType> {
-    let bars = get_bars(data_repr.data_unit, &tot, &tot).width(ReportCol::FILTER_COLUMNS_WIDTH);
+    let bars = get_bars(data_repr, &tot, &tot).width(ReportCol::FILTER_COLUMNS_WIDTH);
 
     let data_col = Column::new()
         .align_x(Alignment::Center)
         .width(ReportCol::Data.get_width())
         .push(Text::new(
-            data_repr.formatted_string(tot.tot_data(data_repr.data_unit)),
+            data_repr.formatted_string(tot.tot_data(data_repr)),
         ));
 
     Row::new()

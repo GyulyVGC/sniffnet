@@ -12,7 +12,7 @@ use crate::gui::styles::text::TextType;
 use crate::gui::styles::types::style_type::StyleType;
 use crate::gui::types::favorite::{Favorite, FavoriteItem};
 use crate::gui::types::message::Message;
-use crate::networking::types::data_representation::DataUnit;
+use crate::networking::types::data_representation::DataRepr;
 use crate::networking::types::host::ThumbnailHost;
 use crate::translations::types::language::Language;
 use crate::utils::formatted_strings::clip_text;
@@ -26,7 +26,7 @@ pub fn thumbnail_page(sniffer: &Sniffer) -> Container<'_, Message, StyleType> {
     let tot_packets = sniffer
         .info_traffic
         .tot_data_info
-        .tot_data(DataUnit::Packets);
+        .tot_data(DataRepr::packets(false));
 
     if tot_packets == 0 {
         return Container::new(
@@ -43,12 +43,14 @@ pub fn thumbnail_page(sniffer: &Sniffer) -> Container<'_, Message, StyleType> {
     let data_repr = sniffer.conf.data_repr;
     let tot_data_info = info_traffic.tot_data_info;
 
-    let in_data = tot_data_info.incoming_data(data_repr.data_unit);
-    let out_data = tot_data_info.outgoing_data(data_repr.data_unit);
-    let dropped = sniffer
-        .info_traffic
-        .dropped_packets
-        .map(|d| d.total(data_repr.data_unit, tot_data_info));
+    let in_data = tot_data_info.incoming_data(data_repr);
+    let out_data = tot_data_info.outgoing_data(data_repr);
+    let dropped = if data_repr.per_second {
+        sniffer.info_traffic.latest_dropped_packets
+    } else {
+        sniffer.info_traffic.dropped_packets
+    }
+    .map(|d| d.total(data_repr.data_unit, tot_data_info));
 
     let charts = Row::new()
         .padding(5)
@@ -103,7 +105,8 @@ fn host_col<'a>(sniffer: &Sniffer) -> Column<'a, Message, StyleType> {
 
         thumbnail_hosts.push(thumbnail_host);
 
-        let is_dimmed = data_info_host.data_info.tot_data(DataUnit::Packets) == 0;
+        let data_repr = sniffer.conf.data_repr;
+        let is_dimmed = data_info_host.data_info.tot_data(data_repr) == 0;
         let opacity = if is_dimmed {
             sniffer
                 .conf
@@ -146,7 +149,8 @@ fn service_col<'a>(sniffer: &Sniffer) -> Column<'a, Message, StyleType> {
 
         let text = clip_text(&service.to_string(), MAX_CHARS_SERVICE);
 
-        let is_dimmed = data_info.tot_data(DataUnit::Packets) == 0;
+        let data_repr = sniffer.conf.data_repr;
+        let is_dimmed = data_info.tot_data(data_repr) == 0;
         let opacity = if is_dimmed {
             sniffer
                 .conf

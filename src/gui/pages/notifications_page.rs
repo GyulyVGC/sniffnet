@@ -145,7 +145,7 @@ fn data_notification_log<'a>(
         &data_info,
         DataRepr {
             data_unit,
-            per_second: true,
+            per_second: false,
         },
         first_entry_data_info,
     );
@@ -319,7 +319,10 @@ fn get_button_clear_all<'a>(language: Language) -> Tooltip<'a, Message, StyleTyp
 
 fn logged_notifications(sniffer: &Sniffer) -> Column<'_, Message, StyleType> {
     let Settings { language, .. } = sniffer.conf.settings;
-    let data_repr = sniffer.conf.data_repr;
+    let data_repr = DataRepr {
+        per_second: false,
+        ..sniffer.conf.data_repr
+    };
     let mut ret_val = Column::new()
         .padding(Padding::ZERO.right(15).bottom(10))
         .spacing(10)
@@ -330,7 +333,7 @@ fn logged_notifications(sniffer: &Sniffer) -> Column<'_, Message, StyleType> {
         .notifications()
         .iter()
         .map(LoggedNotification::data_info)
-        .max_by_key(|d| d.tot_data(data_repr.data_unit))
+        .max_by_key(|d| d.tot_data(data_repr))
         .unwrap_or_default();
 
     for logged_notification in sniffer.logged_notifications.notifications() {

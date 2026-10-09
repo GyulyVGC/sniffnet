@@ -5,7 +5,7 @@ use crate::gui::styles::types::style_type::StyleType;
 use crate::gui::types::message::Message;
 use crate::gui::types::settings::Settings;
 use crate::networking::types::capture_context::{CaptureError, CaptureSource};
-use crate::networking::types::data_representation::DataUnit;
+use crate::networking::types::data_representation::DataRepr;
 use crate::translations::translations::{
     error_translation, no_addresses_translation, waiting_translation,
 };
@@ -30,7 +30,7 @@ pub fn waiting_page(sniffer: &Sniffer) -> Option<Container<'_, Message, StyleTyp
     let tot_packets = sniffer
         .info_traffic
         .tot_data_info
-        .tot_data(DataUnit::Packets);
+        .tot_data(DataRepr::packets(false));
 
     if tot_packets > 0 {
         return None;

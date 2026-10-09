@@ -3,7 +3,7 @@ use crate::networking::manage_packets::get_address_to_lookup;
 use crate::networking::types::capture_context::CaptureSource;
 use crate::networking::types::data_info::DataInfo;
 use crate::networking::types::data_info_host::DataInfoHost;
-use crate::networking::types::data_representation::DataUnit;
+use crate::networking::types::data_representation::DataRepr;
 use crate::networking::types::host::Host;
 use crate::networking::types::service::Service;
 use crate::notifications::types::logged_notification::{
@@ -48,17 +48,20 @@ pub fn notify_and_log(
 
     // data threshold
     if let Some(threshold) = notifications.data_notification.threshold {
-        let data_unit = notifications.data_notification.data_unit;
-        if data_info.tot_data(data_unit) > u128::from(threshold) {
+        let data_repr = DataRepr {
+            data_unit: notifications.data_notification.data_unit,
+            per_second: false,
+        };
+        if data_info.tot_data(data_repr) > u128::from(threshold) {
             let notification = LoggedNotification::DataThresholdExceeded(DataThresholdExceeded {
                 id: logged_notifications.tot(),
-                data_unit,
+                data_unit: data_repr.data_unit,
                 threshold,
                 data_info,
                 timestamp: get_formatted_timestamp(timestamp),
                 is_expanded: false,
-                hosts: threshold_hosts(info_traffic_msg, data_unit),
-                services: threshold_services(info_traffic_msg, data_unit),
+                hosts: threshold_hosts(info_traffic_msg, data_repr),
+                services: threshold_services(info_traffic_msg, data_repr),
             });
 
             //log this notification
@@ -163,7 +166,7 @@ pub fn notify_and_log(
 
 fn threshold_hosts(
     info_traffic_msg: &InfoTraffic,
-    data_unit: DataUnit,
+    data_repr: DataRepr,
 ) -> Vec<(Host, DataInfoHost)> {
     let mut hosts: Vec<(Host, DataInfoHost)> = info_traffic_msg
         .hosts
@@ -172,7 +175,7 @@ fn threshold_hosts(
         .collect();
     hosts.sort_by(|(_, a), (_, b)| {
         a.data_info
-            .compare(&b.data_info, SortType::Descending, data_unit)
+            .compare(&b.data_info, SortType::Descending, data_repr)
     });
     hosts.truncate(4);
     hosts
@@ -180,7 +183,7 @@ fn threshold_hosts(
 
 fn threshold_services(
     info_traffic_msg: &InfoTraffic,
-    data_unit: DataUnit,
+    data_repr: DataRepr,
 ) -> Vec<(Service, DataInfo)> {
     let mut services: Vec<(Service, DataInfo)> = info_traffic_msg
         .services
@@ -188,7 +191,7 @@ fn threshold_services(
         .filter(|(service, _)| service != &&Service::NotApplicable)
         .map(|(s, data_info)| (*s, *data_info))
         .collect();
-    services.sort_by(|(_, a), (_, b)| a.compare(b, SortType::Descending, data_unit));
+    services.sort_by(|(_, a), (_, b)| a.compare(b, SortType::Descending, data_repr));
     services.truncate(4);
     services
 }
@@ -218,7 +221,7 @@ fn favorites_last_interval(
             .values()
             .filter(|v| v.program.eq(p))
             .for_each(|v| data_info.refresh(v.data_info()));
-        if data_info.tot_data(DataUnit::Packets) > 0 {
+        if data_info.tot_data(DataRepr::packets(false)) > 0 {
             Some(FavoriteItem::Program((p.clone(), data_info)))
         } else {
             None

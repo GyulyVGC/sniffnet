@@ -235,7 +235,7 @@ fn col_info<'a>(
                 incoming_translation(language).to_lowercase()
             }
         ),
-        &data_repr.formatted_string(val.transmitted_data(data_repr.data_unit)),
+        &data_repr.formatted_string(val.transmitted_data(data_repr)),
     ));
 
     if measure_latency {

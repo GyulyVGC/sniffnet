@@ -1,5 +1,5 @@
 use crate::networking::types::data_info::DataInfo;
-use crate::networking::types::data_representation::DataUnit;
+use crate::networking::types::data_representation::{DataRepr, DataUnit};
 
 /// Represents the number of dropped packets
 #[derive(Debug, Default, Clone, Copy)]
@@ -16,6 +16,14 @@ impl DroppedPackets {
         Self {
             by_adapter: stats.if_dropped,
             by_sniffnet: stats.dropped,
+        }
+    }
+
+    /// Difference between consecutive cumulative capture statistics.
+    pub fn since(self, previous: Self) -> Self {
+        Self {
+            by_adapter: self.by_adapter.saturating_sub(previous.by_adapter),
+            by_sniffnet: self.by_sniffnet.saturating_sub(previous.by_sniffnet),
         }
     }
 
@@ -47,8 +55,11 @@ fn averaged_data(dropped_packets: u128, data_unit: DataUnit, tot_data_info: Data
         return dropped_packets;
     }
 
-    let all = tot_data_info.tot_data(data_unit);
-    let all_packets = tot_data_info.tot_data(DataUnit::Packets);
+    let all = tot_data_info.tot_data(DataRepr {
+        data_unit,
+        per_second: false,
+    });
+    let all_packets = tot_data_info.tot_data(DataRepr::packets(false));
     dropped_packets
         .saturating_mul(all)
         .checked_div(all_packets)

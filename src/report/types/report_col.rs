@@ -93,9 +93,7 @@ impl ReportCol {
             }
             ReportCol::Proto => key.protocol.to_string(),
             ReportCol::Service => val.service.to_string(),
-            ReportCol::Data => {
-                data_repr.formatted_string(val.transmitted_data(data_repr.data_unit))
-            }
+            ReportCol::Data => data_repr.formatted_string(val.transmitted_data(data_repr)),
         }
     }
 

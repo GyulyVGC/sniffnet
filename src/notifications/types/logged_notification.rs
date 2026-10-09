@@ -1,7 +1,7 @@
 use crate::gui::types::favorite::FavoriteItem;
 use crate::networking::types::data_info::DataInfo;
 use crate::networking::types::data_info_host::DataInfoHost;
-use crate::networking::types::data_representation::DataUnit;
+use crate::networking::types::data_representation::{DataRepr, DataUnit};
 use crate::networking::types::host::Host;
 use crate::networking::types::service::Service;
 use crate::translations::translations::favorite_transmitted_translation;
@@ -121,7 +121,7 @@ impl DataThresholdExceeded {
             "info": self.data_unit.data_exceeded_translation(Language::EN),
             "timestamp": self.timestamp,
             "threshold": self.data_unit.formatted_string(self.threshold.into()),
-            "data": self.data_unit.formatted_string(self.data_info.tot_data(self.data_unit)),
+            "data": self.data_unit.formatted_string(self.data_info.tot_data(DataRepr { data_unit: self.data_unit, per_second: false })),
         })
         .to_string()
     }
@@ -152,7 +152,7 @@ impl FavoriteTransmitted {
                     "program": program.to_string(),
                 }),
             },
-            "data": DataUnit::Bytes.formatted_string(self.favorite.data_info().tot_data(DataUnit::Bytes)),
+            "data": DataUnit::Bytes.formatted_string(self.favorite.data_info().tot_data(DataRepr::bytes(false))),
         })
         .to_string()
     }
@@ -178,7 +178,7 @@ impl BlacklistedTransmitted {
                 "domain": self.host.domain,
                 "asn": self.host.asn.name,
             },
-            "data": DataUnit::Bytes.formatted_string(self.data_info_host.data_info.tot_data(DataUnit::Bytes)),
+            "data": DataUnit::Bytes.formatted_string(self.data_info_host.data_info.tot_data(DataRepr::bytes(false))),
         })
         .to_string()
     }
