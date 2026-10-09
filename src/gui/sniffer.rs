@@ -306,6 +306,7 @@ impl Sniffer {
             Message::ToggleFilters => self.toggle_filters(),
             Message::BpfFilter(value) => self.bpf_filter(value),
             Message::DataUnitSelection(unit) => self.data_unit_selection(unit),
+            Message::ToggleDataRates => self.toggle_data_rates(),
             Message::ReportSortSelection(sort) => self.report_sort_selection(sort),
             Message::OpenWebPage(web_page) => Self::open_web_page(&web_page),
             Message::Start => return self.start(),
@@ -568,6 +569,10 @@ impl Sniffer {
     fn data_unit_selection(&mut self, unit: DataUnit) {
         self.conf.data_repr.data_unit = unit;
         self.traffic_chart.change_kind(unit);
+    }
+
+    fn toggle_data_rates(&mut self) {
+        self.conf.data_repr.per_second = !self.conf.data_repr.per_second;
     }
 
     fn report_sort_selection(&mut self, sort: SortType) {

@@ -25,7 +25,7 @@ use crate::networking::types::data_representation::{DataRepr, DataUnit};
 use crate::networking::types::ipfix_exporter::IpfixExporter;
 use crate::translations::translations::{
     active_filters_translation, incoming_translation, network_adapter_translation,
-    outgoing_translation, traffic_rate_translation,
+    outgoing_translation, per_second_translation, traffic_rate_translation,
 };
 use crate::translations::translations_2::{
     data_representation_translation, dropped_translation, only_top_30_items_translation,
@@ -41,7 +41,9 @@ use iced::alignment::{Horizontal, Vertical};
 use iced::widget::scrollable::Direction;
 use iced::widget::text::{LineHeight, Wrapping};
 use iced::widget::tooltip::Position;
-use iced::widget::{Button, Column, Container, Row, Scrollable, Space, Text, Tooltip, button};
+use iced::widget::{
+    Button, Checkbox, Column, Container, Row, Scrollable, Space, Text, Tooltip, button,
+};
 use iced::{Alignment, Element, Length, Padding};
 use std::collections::BTreeSet;
 
@@ -464,9 +466,15 @@ fn col_data_representation<'a>(
         .on_press(Message::DataUnitSelection(option))
     });
 
+    let checkbox = Checkbox::new(data_repr.per_second)
+        .label(per_second_translation(language))
+        .on_toggle(move |_| Message::ToggleDataRates)
+        .size(18);
+
     ret_val = ret_val
         .push(Row::new().spacing(5).push(bits).push(bytes))
-        .push(packets);
+        .push(packets)
+        .push(checkbox);
 
     ret_val
 }
