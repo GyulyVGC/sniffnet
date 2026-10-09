@@ -3,7 +3,7 @@
 
 use crate::Service;
 use crate::networking::types::data_info::DataInfo;
-use crate::networking::types::data_representation::DataUnit;
+use crate::networking::types::data_representation::{DataRepr, DataUnit};
 use crate::networking::types::message_type::MessageType;
 use crate::networking::types::program::Program;
 use crate::networking::types::traffic_direction::TrafficDirection;
@@ -27,6 +27,9 @@ pub struct InfoAddressPortPair {
     pub bytes: u128,
     /// Amount of packets transmitted between the pair.
     pub packets: u128,
+    /// Cumulative packets and bytes at the start of the displayed interval.
+    pub previous_packets: u128,
+    pub previous_bytes: u128,
     /// First occurrence of information exchange featuring the associate address:port pair as a source or destination.
     pub initial_timestamp: Timestamp,
     /// Last occurrence of information exchange featuring the associate address:port pair as a source or destination.
@@ -65,8 +68,12 @@ impl InfoAddressPortPair {
             is_blacklisted,
             // self.program MUST NOT be refreshed here
             program: _,
+            previous_packets,
+            previous_bytes,
         } = other;
 
+        self.previous_packets += previous_packets;
+        self.previous_bytes += previous_bytes;
         self.bytes += bytes;
         self.packets += packets;
         self.src_mac = *src_mac;
@@ -92,17 +99,30 @@ impl InfoAddressPortPair {
         }
     }
 
-    pub fn transmitted_data(&self, data_unit: DataUnit) -> u128 {
-        match data_unit {
-            DataUnit::Packets => self.packets,
-            DataUnit::Bytes => self.bytes,
-            DataUnit::Bits => self.bytes * 8,
+    pub fn start_interval(&mut self) {
+        self.previous_packets = self.packets;
+        self.previous_bytes = self.bytes;
+    }
+
+    pub fn transmitted_data(&self, data_repr: DataRepr) -> u128 {
+        let (packets, bytes) = if data_repr.per_second {
+            (
+                self.packets - self.previous_packets,
+                self.bytes - self.previous_bytes,
+            )
+        } else {
+            (self.packets, self.bytes)
+        };
+        match data_repr.data_unit {
+            DataUnit::Packets => packets,
+            DataUnit::Bytes => bytes,
+            DataUnit::Bits => bytes * 8,
         }
     }
 
-    pub fn compare(&self, other: &Self, sort_type: SortType, data_unit: DataUnit) -> Ordering {
-        let self_data = self.transmitted_data(data_unit);
-        let other_data = other.transmitted_data(data_unit);
+    pub fn compare(&self, other: &Self, sort_type: SortType, data_repr: DataRepr) -> Ordering {
+        let self_data = self.transmitted_data(data_repr);
+        let other_data = other.transmitted_data(data_repr);
 
         // handle cases where one or both have no data
         if self_data == 0 && other_data == 0 {
@@ -123,8 +143,15 @@ impl InfoAddressPortPair {
     pub fn data_info(&self) -> DataInfo {
         let mut data_info = DataInfo::default();
         data_info.add_packets(
-            self.packets,
-            self.bytes,
+            self.previous_packets,
+            self.previous_bytes,
+            self.traffic_direction,
+            self.final_instant,
+        );
+        data_info.start_interval();
+        data_info.add_packets(
+            self.packets - self.previous_packets,
+            self.bytes - self.previous_bytes,
             self.traffic_direction,
             self.final_instant,
         );
@@ -139,6 +166,8 @@ impl Default for InfoAddressPortPair {
             dst_mac: None,
             bytes: 0,
             packets: 0,
+            previous_packets: 0,
+            previous_bytes: 0,
             initial_timestamp: Timestamp::default(),
             final_timestamp: Timestamp::default(),
             final_instant: Instant::now(),
@@ -155,7 +184,6 @@ impl Default for InfoAddressPortPair {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::networking::types::data_representation::DataUnit;
     use crate::report::types::sort_type::SortType;
 
     #[test]
@@ -200,50 +228,50 @@ mod tests {
             ..Default::default()
         };
 
-        assert_eq!(pair1.transmitted_data(DataUnit::Bytes), 1000);
-        assert_eq!(pair1.transmitted_data(DataUnit::Packets), 10);
-        assert_eq!(pair1.transmitted_data(DataUnit::Bits), 8000);
+        assert_eq!(pair1.transmitted_data(DataRepr::bytes(false)), 1000);
+        assert_eq!(pair1.transmitted_data(DataRepr::packets(false)), 10);
+        assert_eq!(pair1.transmitted_data(DataRepr::bits(false)), 8000);
 
-        assert_eq!(pair2.transmitted_data(DataUnit::Bytes), 1100);
-        assert_eq!(pair2.transmitted_data(DataUnit::Packets), 8);
-        assert_eq!(pair2.transmitted_data(DataUnit::Bits), 8800);
+        assert_eq!(pair2.transmitted_data(DataRepr::bytes(false)), 1100);
+        assert_eq!(pair2.transmitted_data(DataRepr::packets(false)), 8);
+        assert_eq!(pair2.transmitted_data(DataRepr::bits(false)), 8800);
 
         assert_eq!(
-            pair1.compare(&pair2, SortType::Ascending, DataUnit::Bytes),
+            pair1.compare(&pair2, SortType::Ascending, DataRepr::bytes(false)),
             Ordering::Less
         );
         assert_eq!(
-            pair1.compare(&pair2, SortType::Descending, DataUnit::Bytes),
+            pair1.compare(&pair2, SortType::Descending, DataRepr::bytes(false)),
             Ordering::Greater
         );
         assert_eq!(
-            pair1.compare(&pair2, SortType::Neutral, DataUnit::Bytes),
-            Ordering::Greater
-        );
-
-        assert_eq!(
-            pair1.compare(&pair2, SortType::Ascending, DataUnit::Packets),
-            Ordering::Greater
-        );
-        assert_eq!(
-            pair1.compare(&pair2, SortType::Descending, DataUnit::Packets),
-            Ordering::Less
-        );
-        assert_eq!(
-            pair1.compare(&pair2, SortType::Neutral, DataUnit::Packets),
+            pair1.compare(&pair2, SortType::Neutral, DataRepr::bytes(false)),
             Ordering::Greater
         );
 
         assert_eq!(
-            pair1.compare(&pair2, SortType::Ascending, DataUnit::Bits),
-            Ordering::Less
-        );
-        assert_eq!(
-            pair1.compare(&pair2, SortType::Descending, DataUnit::Bits),
+            pair1.compare(&pair2, SortType::Ascending, DataRepr::packets(false)),
             Ordering::Greater
         );
         assert_eq!(
-            pair1.compare(&pair2, SortType::Neutral, DataUnit::Bits),
+            pair1.compare(&pair2, SortType::Descending, DataRepr::packets(false)),
+            Ordering::Less
+        );
+        assert_eq!(
+            pair1.compare(&pair2, SortType::Neutral, DataRepr::packets(false)),
+            Ordering::Greater
+        );
+
+        assert_eq!(
+            pair1.compare(&pair2, SortType::Ascending, DataRepr::bits(false)),
+            Ordering::Less
+        );
+        assert_eq!(
+            pair1.compare(&pair2, SortType::Descending, DataRepr::bits(false)),
+            Ordering::Greater
+        );
+        assert_eq!(
+            pair1.compare(&pair2, SortType::Neutral, DataRepr::bits(false)),
             Ordering::Greater
         );
     }

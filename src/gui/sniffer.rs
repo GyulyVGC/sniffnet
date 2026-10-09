@@ -40,7 +40,7 @@ use crate::networking::types::capture_context::{
     MyPcapImport,
 };
 use crate::networking::types::combobox_data_states::ComboboxDataStates;
-use crate::networking::types::data_representation::DataUnit;
+use crate::networking::types::data_representation::{DataRepr, DataUnit};
 use crate::networking::types::host::{Host, HostMessage};
 use crate::networking::types::info_traffic::InfoTraffic;
 use crate::networking::types::ip_blacklist::IpBlacklist;
@@ -934,6 +934,10 @@ impl Sniffer {
     fn offline_gap(&mut self, cap_id: usize, gap: u32) {
         if cap_id == self.current_capture_rx.0 {
             self.traffic_chart.push_offline_gap_to_splines(gap);
+            self.info_traffic.start_interval();
+            if let Some(program_lookup) = &mut self.program_lookup {
+                program_lookup.start_interval();
+            }
         }
     }
 
@@ -1033,7 +1037,12 @@ impl Sniffer {
     fn refresh_data(&mut self, mut msg: InfoTraffic, no_more_packets: bool) {
         self.info_traffic
             .refresh(&mut msg, &mut self.program_lookup);
-        if self.info_traffic.tot_data_info.tot_data(DataUnit::Packets) == 0 {
+        if self
+            .info_traffic
+            .tot_data_info
+            .tot_data(DataRepr::packets(false))
+            == 0
+        {
             return;
         }
         let emitted_notifications = notify_and_log(
@@ -1353,7 +1362,12 @@ impl Sniffer {
                 }
                 (Some(current_page), None, true) => {
                     // Running with no overlays
-                    if self.info_traffic.tot_data_info.tot_data(DataUnit::Packets) > 0 {
+                    if self
+                        .info_traffic
+                        .tot_data_info
+                        .tot_data(DataRepr::packets(false))
+                        > 0
+                    {
                         // Running with no overlays and some packets
                         let new_page = if next {
                             current_page.next()
@@ -1399,7 +1413,10 @@ impl Sniffer {
     // also called when the backspace shortcut is pressed
     fn reset_button_pressed(&mut self) -> Task<Message> {
         if self.running_page.is_some() {
-            let tot_packets = self.info_traffic.tot_data_info.tot_data(DataUnit::Packets);
+            let tot_packets = self
+                .info_traffic
+                .tot_data_info
+                .tot_data(DataRepr::packets(false));
             if tot_packets == 0 && self.settings_page.is_none() {
                 return self.reset();
             }
@@ -1409,7 +1426,10 @@ impl Sniffer {
     }
 
     fn quit_wrapper(&mut self) -> Task<Message> {
-        let tot_packets = self.info_traffic.tot_data_info.tot_data(DataUnit::Packets);
+        let tot_packets = self
+            .info_traffic
+            .tot_data_info
+            .tot_data(DataRepr::packets(false));
         if self.running_page.is_none() || tot_packets == 0 {
             self.quit()
         } else if self.thumbnail {
@@ -1497,11 +1517,13 @@ impl Sniffer {
     fn handle_new_host(&mut self, host_msg: HostMessage) {
         let HostMessage {
             host,
-            data_info_host,
+            mut data_info_host,
             address_to_lookup,
             rdns,
         } = host_msg;
 
+        // DNS results carry historical totals, not a new capture interval.
+        data_info_host.data_info.start_interval();
         self.info_traffic
             .hosts
             .entry(host.clone())
@@ -1605,6 +1627,49 @@ mod tests {
     use crate::notifications::types::sound::Sound;
     use crate::report::types::sort_type::SortType;
     use crate::{ByteMultiple, Language, RunningPage, Sniffer, StyleType};
+
+    #[test]
+    #[parallel]
+    fn delayed_host_resolution_preserves_rates_without_counting_history() {
+        use crate::networking::types::data_info_host::DataInfoHost;
+        use crate::networking::types::host::HostMessage;
+        use crate::networking::types::info_traffic::InfoTraffic;
+
+        let mut sniffer = Sniffer::new(Conf::default());
+        let host = Host {
+            domain: "example.test".into(),
+            ..Default::default()
+        };
+        let historical = HostMessage {
+            host: host.clone(),
+            data_info_host: DataInfoHost {
+                data_info: DataInfo::new_for_tests(10, 0, 1000, 0),
+                ..Default::default()
+            },
+            address_to_lookup: IpAddr::V4(Ipv4Addr::new(1, 1, 1, 1)),
+            rdns: host.domain.clone(),
+        };
+        sniffer.handle_new_host(historical.clone());
+        let data = sniffer.info_traffic.hosts[&host].data_info;
+        assert_eq!(data.tot_data(DataRepr::packets(false)), 10);
+        assert_eq!(data.tot_data(DataRepr::packets(true)), 0);
+
+        let mut interval = InfoTraffic::default();
+        interval.hosts.insert(
+            host.clone(),
+            DataInfoHost {
+                data_info: DataInfo::new_for_tests(3, 0, 300, 0),
+                ..Default::default()
+            },
+        );
+        sniffer.info_traffic.refresh(&mut interval, &mut None);
+        // Another resolved address can merge history into the same host mid-interval.
+        sniffer.handle_new_host(historical);
+        let data = sniffer.info_traffic.hosts[&host].data_info;
+        assert_eq!(data.tot_data(DataRepr::packets(false)), 23);
+        assert_eq!(data.tot_data(DataRepr::packets(true)), 3);
+        assert_eq!(data.tot_data(DataRepr::bytes(true)), 300);
+    }
 
     // helpful to clean up files generated from tests
     impl Drop for Sniffer {

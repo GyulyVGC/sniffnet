@@ -1,6 +1,6 @@
 //! Module defining the `DataInfo` struct, which represents incoming and outgoing packets and bytes.
 
-use crate::networking::types::data_representation::DataUnit;
+use crate::networking::types::data_representation::{DataRepr, DataUnit};
 use crate::networking::types::traffic_direction::TrafficDirection;
 use crate::report::types::sort_type::SortType;
 use std::cmp::Ordering;
@@ -18,29 +18,50 @@ pub struct DataInfo {
     incoming_bytes: u128,
     /// Outgoing bytes
     outgoing_bytes: u128,
+    /// Cumulative counters at the start of the displayed capture interval.
+    previous_incoming_packets: u128,
+    previous_outgoing_packets: u128,
+    previous_incoming_bytes: u128,
+    previous_outgoing_bytes: u128,
     /// Latest instant of occurrence. Initialized to None by Default.
     final_instant: Option<Instant>,
 }
 
 impl DataInfo {
-    pub fn incoming_data(&self, data_unit: DataUnit) -> u128 {
-        match data_unit {
-            DataUnit::Packets => self.incoming_packets,
-            DataUnit::Bytes => self.incoming_bytes,
-            DataUnit::Bits => self.incoming_bytes * 8,
+    pub fn incoming_data(&self, data_repr: DataRepr) -> u128 {
+        let (packets, bytes) = if data_repr.per_second {
+            (
+                self.incoming_packets - self.previous_incoming_packets,
+                self.incoming_bytes - self.previous_incoming_bytes,
+            )
+        } else {
+            (self.incoming_packets, self.incoming_bytes)
+        };
+        match data_repr.data_unit {
+            DataUnit::Packets => packets,
+            DataUnit::Bytes => bytes,
+            DataUnit::Bits => bytes * 8,
         }
     }
 
-    pub fn outgoing_data(&self, data_repr: DataUnit) -> u128 {
-        match data_repr {
-            DataUnit::Packets => self.outgoing_packets,
-            DataUnit::Bytes => self.outgoing_bytes,
-            DataUnit::Bits => self.outgoing_bytes * 8,
+    pub fn outgoing_data(&self, data_repr: DataRepr) -> u128 {
+        let (packets, bytes) = if data_repr.per_second {
+            (
+                self.outgoing_packets - self.previous_outgoing_packets,
+                self.outgoing_bytes - self.previous_outgoing_bytes,
+            )
+        } else {
+            (self.outgoing_packets, self.outgoing_bytes)
+        };
+        match data_repr.data_unit {
+            DataUnit::Packets => packets,
+            DataUnit::Bytes => bytes,
+            DataUnit::Bits => bytes * 8,
         }
     }
 
-    pub fn tot_data(&self, data_unit: DataUnit) -> u128 {
-        self.incoming_data(data_unit) + self.outgoing_data(data_unit)
+    pub fn tot_data(&self, data_repr: DataRepr) -> u128 {
+        self.incoming_data(data_repr) + self.outgoing_data(data_repr)
     }
 
     pub fn add_packets(
@@ -60,6 +81,8 @@ impl DataInfo {
         self.final_instant = Some(final_instant);
     }
 
+    /// Merge totals and their baselines together, preserving rates during reassignment.
+    /// Backend interval updates have zero baselines.
     pub fn refresh(&mut self, rhs: Self) {
         let Self {
             incoming_packets,
@@ -67,8 +90,16 @@ impl DataInfo {
             incoming_bytes,
             outgoing_bytes,
             final_instant,
+            previous_incoming_packets,
+            previous_outgoing_packets,
+            previous_incoming_bytes,
+            previous_outgoing_bytes,
         } = rhs;
 
+        self.previous_incoming_packets += previous_incoming_packets;
+        self.previous_outgoing_packets += previous_outgoing_packets;
+        self.previous_incoming_bytes += previous_incoming_bytes;
+        self.previous_outgoing_bytes += previous_outgoing_bytes;
         self.incoming_packets += incoming_packets;
         self.outgoing_packets += outgoing_packets;
         self.incoming_bytes += incoming_bytes;
@@ -79,9 +110,17 @@ impl DataInfo {
         }
     }
 
-    pub fn compare(&self, other: &Self, sort_type: SortType, data_unit: DataUnit) -> Ordering {
-        let self_data = self.tot_data(data_unit);
-        let other_data = other.tot_data(data_unit);
+    /// Start a new displayed interval without changing totals or timestamps.
+    pub fn start_interval(&mut self) {
+        self.previous_incoming_packets = self.incoming_packets;
+        self.previous_outgoing_packets = self.outgoing_packets;
+        self.previous_incoming_bytes = self.incoming_bytes;
+        self.previous_outgoing_bytes = self.outgoing_bytes;
+    }
+
+    pub fn compare(&self, other: &Self, sort_type: SortType, data_repr: DataRepr) -> Ordering {
+        let self_data = self.tot_data(data_repr);
+        let other_data = other.tot_data(data_repr);
 
         // handle cases where one or both have no data
         if self_data == 0 && other_data == 0 {
@@ -125,6 +164,7 @@ impl DataInfo {
             incoming_bytes,
             outgoing_bytes,
             final_instant: Some(Instant::now()),
+            ..Self::default()
         }
     }
 }
@@ -133,6 +173,40 @@ impl DataInfo {
 mod tests {
     use super::*;
     use crate::networking::types::traffic_direction::TrafficDirection;
+
+    #[test]
+    fn interval_values_and_sorting_use_selected_counters() {
+        let mut busy = DataInfo::new_for_tests(100, 100, 10_000, 10_000);
+        let mut active = DataInfo::default();
+        let interval = DataInfo::new_for_tests(2, 3, 200, 600);
+        busy.start_interval();
+        busy.refresh(interval);
+        active.refresh(DataInfo::new_for_tests(4, 4, 400, 400));
+        assert_eq!(busy.incoming_data(DataRepr::packets(true)), 2);
+        assert_eq!(busy.outgoing_data(DataRepr::bytes(true)), 600);
+        assert_eq!(busy.tot_data(DataRepr::bits(true)), 6400);
+        assert_eq!(busy.tot_data(DataRepr::bytes(false)), 20_800);
+        assert_eq!(
+            busy.compare(&active, SortType::Descending, DataRepr::packets(true)),
+            Ordering::Greater
+        );
+        assert_eq!(
+            busy.compare(&active, SortType::Descending, DataRepr::packets(false)),
+            Ordering::Less
+        );
+        busy.start_interval();
+        for sort in [SortType::Ascending, SortType::Descending, SortType::Neutral] {
+            assert_eq!(
+                busy.compare(&active, sort, DataRepr::packets(true)),
+                Ordering::Greater
+            );
+            assert_eq!(
+                active.compare(&busy, sort, DataRepr::packets(true)),
+                Ordering::Less
+            );
+        }
+        assert_eq!(busy.tot_data(DataRepr::packets(false)), 205);
+    }
 
     #[test]
     fn test_data_info() {
@@ -154,17 +228,17 @@ mod tests {
         assert_eq!(data_info_1.incoming_bytes, 723);
         assert_eq!(data_info_1.outgoing_bytes, 1400);
 
-        assert_eq!(data_info_1.tot_data(DataUnit::Packets), 19);
-        assert_eq!(data_info_1.tot_data(DataUnit::Bytes), 2123);
-        assert_eq!(data_info_1.tot_data(DataUnit::Bits), 16984);
+        assert_eq!(data_info_1.tot_data(DataRepr::packets(false)), 19);
+        assert_eq!(data_info_1.tot_data(DataRepr::bytes(false)), 2123);
+        assert_eq!(data_info_1.tot_data(DataRepr::bits(false)), 16984);
 
-        assert_eq!(data_info_1.incoming_data(DataUnit::Packets), 7);
-        assert_eq!(data_info_1.incoming_data(DataUnit::Bytes), 723);
-        assert_eq!(data_info_1.incoming_data(DataUnit::Bits), 5784);
+        assert_eq!(data_info_1.incoming_data(DataRepr::packets(false)), 7);
+        assert_eq!(data_info_1.incoming_data(DataRepr::bytes(false)), 723);
+        assert_eq!(data_info_1.incoming_data(DataRepr::bits(false)), 5784);
 
-        assert_eq!(data_info_1.outgoing_data(DataUnit::Packets), 12);
-        assert_eq!(data_info_1.outgoing_data(DataUnit::Bytes), 1400);
-        assert_eq!(data_info_1.outgoing_data(DataUnit::Bits), 11200);
+        assert_eq!(data_info_1.outgoing_data(DataRepr::packets(false)), 12);
+        assert_eq!(data_info_1.outgoing_data(DataRepr::bytes(false)), 1400);
+        assert_eq!(data_info_1.outgoing_data(DataRepr::bits(false)), 11200);
 
         // sleep a little to have a different final_instant
         std::thread::sleep(std::time::Duration::from_millis(10));
@@ -179,56 +253,56 @@ mod tests {
         assert_eq!(data_info_2.incoming_bytes, 0);
         assert_eq!(data_info_2.outgoing_bytes, 400);
 
-        assert_eq!(data_info_2.tot_data(DataUnit::Packets), 20);
-        assert_eq!(data_info_2.tot_data(DataUnit::Bytes), 400);
-        assert_eq!(data_info_2.tot_data(DataUnit::Bits), 3200);
+        assert_eq!(data_info_2.tot_data(DataRepr::packets(false)), 20);
+        assert_eq!(data_info_2.tot_data(DataRepr::bytes(false)), 400);
+        assert_eq!(data_info_2.tot_data(DataRepr::bits(false)), 3200);
 
-        assert_eq!(data_info_2.incoming_data(DataUnit::Packets), 0);
-        assert_eq!(data_info_2.incoming_data(DataUnit::Bytes), 0);
-        assert_eq!(data_info_2.incoming_data(DataUnit::Bits), 0);
+        assert_eq!(data_info_2.incoming_data(DataRepr::packets(false)), 0);
+        assert_eq!(data_info_2.incoming_data(DataRepr::bytes(false)), 0);
+        assert_eq!(data_info_2.incoming_data(DataRepr::bits(false)), 0);
 
-        assert_eq!(data_info_2.outgoing_data(DataUnit::Packets), 20);
-        assert_eq!(data_info_2.outgoing_data(DataUnit::Bytes), 400);
-        assert_eq!(data_info_2.outgoing_data(DataUnit::Bits), 3200);
+        assert_eq!(data_info_2.outgoing_data(DataRepr::packets(false)), 20);
+        assert_eq!(data_info_2.outgoing_data(DataRepr::bytes(false)), 400);
+        assert_eq!(data_info_2.outgoing_data(DataRepr::bits(false)), 3200);
 
         // compare data_info_1 and data_info_2
 
         assert_eq!(
-            data_info_1.compare(&data_info_2, SortType::Ascending, DataUnit::Packets),
+            data_info_1.compare(&data_info_2, SortType::Ascending, DataRepr::packets(false)),
             Ordering::Less
         );
         assert_eq!(
-            data_info_1.compare(&data_info_2, SortType::Descending, DataUnit::Packets),
+            data_info_1.compare(&data_info_2, SortType::Descending, DataRepr::packets(false)),
             Ordering::Greater
         );
         assert_eq!(
-            data_info_1.compare(&data_info_2, SortType::Neutral, DataUnit::Packets),
+            data_info_1.compare(&data_info_2, SortType::Neutral, DataRepr::packets(false)),
             Ordering::Greater
         );
 
         assert_eq!(
-            data_info_1.compare(&data_info_2, SortType::Ascending, DataUnit::Bytes),
+            data_info_1.compare(&data_info_2, SortType::Ascending, DataRepr::bytes(false)),
             Ordering::Greater
         );
         assert_eq!(
-            data_info_1.compare(&data_info_2, SortType::Descending, DataUnit::Bytes),
+            data_info_1.compare(&data_info_2, SortType::Descending, DataRepr::bytes(false)),
             Ordering::Less
         );
         assert_eq!(
-            data_info_1.compare(&data_info_2, SortType::Neutral, DataUnit::Bytes),
+            data_info_1.compare(&data_info_2, SortType::Neutral, DataRepr::bytes(false)),
             Ordering::Greater
         );
 
         assert_eq!(
-            data_info_1.compare(&data_info_2, SortType::Ascending, DataUnit::Bits),
+            data_info_1.compare(&data_info_2, SortType::Ascending, DataRepr::bits(false)),
             Ordering::Greater
         );
         assert_eq!(
-            data_info_1.compare(&data_info_2, SortType::Descending, DataUnit::Bits),
+            data_info_1.compare(&data_info_2, SortType::Descending, DataRepr::bits(false)),
             Ordering::Less
         );
         assert_eq!(
-            data_info_1.compare(&data_info_2, SortType::Neutral, DataUnit::Bits),
+            data_info_1.compare(&data_info_2, SortType::Neutral, DataRepr::bits(false)),
             Ordering::Greater
         );
 
