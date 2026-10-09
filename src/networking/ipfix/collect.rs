@@ -286,7 +286,7 @@ mod tests {
     use super::*;
     use crate::Protocol;
     use crate::networking::ipfix::wire::{self, IPFIX_VERSION};
-    use crate::networking::types::data_representation::DataUnit;
+    use crate::networking::types::data_representation::DataRepr;
     use crate::networking::types::traffic_direction::TrafficDirection;
     use std::net::{IpAddr, Ipv4Addr, Ipv6Addr};
 
@@ -547,8 +547,8 @@ mod tests {
         assert_eq!(entry.initial_timestamp, Timestamp::new(20, 0));
         assert_eq!(entry.final_timestamp, Timestamp::new(25, 0));
 
-        assert_eq!(info.tot_data_info.tot_data(DataUnit::Bytes), 1500);
-        assert_eq!(info.tot_data_info.tot_data(DataUnit::Packets), 10);
+        assert_eq!(info.tot_data_info.tot_data(DataRepr::bytes(false)), 1500);
+        assert_eq!(info.tot_data_info.tot_data(DataRepr::packets(false)), 10);
         assert_eq!(info.services.len(), 1);
         // no rDNS threads are running, so the address is left awaiting lookup
         assert_eq!(resolutions.addresses_waiting_resolution.len(), 1);
@@ -568,16 +568,16 @@ mod tests {
         assert!(succeeded);
 
         assert_eq!(info.map.len(), 2);
-        assert_eq!(info.tot_data_info.tot_data(DataUnit::Bytes), 2100);
-        assert_eq!(info.tot_data_info.tot_data(DataUnit::Packets), 14);
+        assert_eq!(info.tot_data_info.tot_data(DataRepr::bytes(false)), 2100);
+        assert_eq!(info.tot_data_info.tot_data(DataRepr::packets(false)), 14);
 
         // a template only has to arrive once: later datagrams may carry data alone
         let mut record = addrs;
         record.extend_from_slice(&record_tail(800, 5));
         let (info, _, succeeded) = run_all(&[&bytes, &datagram(&[set(256, &record)])]);
         assert!(succeeded);
-        assert_eq!(info.tot_data_info.tot_data(DataUnit::Packets), 19);
-        assert_eq!(info.tot_data_info.tot_data(DataUnit::Bytes), 2900);
+        assert_eq!(info.tot_data_info.tot_data(DataRepr::packets(false)), 19);
+        assert_eq!(info.tot_data_info.tot_data(DataRepr::bytes(false)), 2900);
     }
 
     #[test]
@@ -676,14 +676,14 @@ mod tests {
         assert_eq!(forward.traffic_direction, TrafficDirection::Outgoing);
         assert_eq!(reverse.traffic_direction, TrafficDirection::Incoming);
 
-        assert_eq!(info.tot_data_info.tot_data(DataUnit::Bytes), 10_500);
-        assert_eq!(info.tot_data_info.tot_data(DataUnit::Packets), 70);
+        assert_eq!(info.tot_data_info.tot_data(DataRepr::bytes(false)), 10_500);
+        assert_eq!(info.tot_data_info.tot_data(DataRepr::packets(false)), 70);
 
         // a biflow template on a conversation that only ever went one way
         let (info, _, succeeded) = run_all(&[&biflow(0, 0)]);
         assert!(succeeded);
         assert_eq!(info.map.len(), 1);
-        assert_eq!(info.tot_data_info.tot_data(DataUnit::Packets), 10);
+        assert_eq!(info.tot_data_info.tot_data(DataRepr::packets(false)), 10);
 
         // the same shape under a vendor PEN is not a biflow at all
         let vendor = fields_with_pen(9);
@@ -695,8 +695,8 @@ mod tests {
         assert!(succeeded);
 
         assert_eq!(info.map.len(), 1);
-        assert_eq!(info.tot_data_info.tot_data(DataUnit::Bytes), 1500);
-        assert_eq!(info.tot_data_info.tot_data(DataUnit::Packets), 10);
+        assert_eq!(info.tot_data_info.tot_data(DataRepr::bytes(false)), 1500);
+        assert_eq!(info.tot_data_info.tot_data(DataRepr::packets(false)), 10);
     }
 
     #[test]
@@ -720,10 +720,10 @@ mod tests {
         let entry = info.map.get(&totals_key()).unwrap();
         // 1500 + 2500 + 0 + 1000
         assert_eq!(entry.bytes, 5000);
-        assert_eq!(info.tot_data_info.tot_data(DataUnit::Bytes), 5000);
+        assert_eq!(info.tot_data_info.tot_data(DataRepr::bytes(false)), 5000);
         // 10 + 15 + 0 + 5
         assert_eq!(entry.packets, 30);
-        assert_eq!(info.tot_data_info.tot_data(DataUnit::Packets), 30);
+        assert_eq!(info.tot_data_info.tot_data(DataRepr::packets(false)), 30);
     }
 
     #[test]
@@ -766,8 +766,8 @@ mod tests {
         assert_eq!(entry.bytes, 800);
         assert_eq!(entry.packets, 4);
 
-        assert_eq!(info.tot_data_info.tot_data(DataUnit::Bytes), 6300);
-        assert_eq!(info.tot_data_info.tot_data(DataUnit::Packets), 39);
+        assert_eq!(info.tot_data_info.tot_data(DataRepr::bytes(false)), 6300);
+        assert_eq!(info.tot_data_info.tot_data(DataRepr::packets(false)), 39);
     }
 
     #[test]
@@ -790,8 +790,8 @@ mod tests {
         let entry = info.map.get(&totals_key()).unwrap();
         assert_eq!(entry.bytes, 4000);
         assert_eq!(entry.packets, 25);
-        assert_eq!(info.tot_data_info.tot_data(DataUnit::Bytes), 4000);
-        assert_eq!(info.tot_data_info.tot_data(DataUnit::Packets), 25);
+        assert_eq!(info.tot_data_info.tot_data(DataRepr::bytes(false)), 4000);
+        assert_eq!(info.tot_data_info.tot_data(DataRepr::packets(false)), 25);
     }
 
     #[test]
@@ -834,7 +834,7 @@ mod tests {
         ]);
         let (info, _) = run(&bytes);
         assert_eq!(info.map.len(), 1);
-        assert_eq!(info.tot_data_info.tot_data(DataUnit::Packets), 10);
+        assert_eq!(info.tot_data_info.tot_data(DataRepr::packets(false)), 10);
     }
 
     #[test]
@@ -849,7 +849,7 @@ mod tests {
         let (info, _, succeeded) = run_all(&[&bytes]);
         assert!(succeeded);
         assert_eq!(info.map.len(), 1);
-        assert_eq!(info.tot_data_info.tot_data(DataUnit::Packets), 10);
+        assert_eq!(info.tot_data_info.tot_data(DataRepr::packets(false)), 10);
 
         // a record cut short mid-field is dropped
         let bytes = datagram(&[
@@ -895,8 +895,8 @@ mod tests {
         for (bytes, packets) in [(0, 0), (1500, 0), (0, 10)] {
             let (info, _) = ingest(&flow_record(Some(bytes), Some(packets)));
             assert!(info.map.is_empty());
-            assert_eq!(info.tot_data_info.tot_data(DataUnit::Bytes), 0);
-            assert_eq!(info.tot_data_info.tot_data(DataUnit::Packets), 0);
+            assert_eq!(info.tot_data_info.tot_data(DataRepr::bytes(false)), 0);
+            assert_eq!(info.tot_data_info.tot_data(DataRepr::packets(false)), 0);
         }
 
         // and so does a key: a record without a 5-tuple names no flow

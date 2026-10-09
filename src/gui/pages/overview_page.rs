@@ -685,21 +685,21 @@ fn get_info_tooltip(tooltip_content: Element<Message, StyleType>) -> Tooltip<Mes
 mod tests {
     use crate::gui::pages::overview_page::{MIN_BARS_LENGTH, get_bars_length};
     use crate::networking::types::data_info::DataInfo;
-    use crate::networking::types::data_representation::DataUnit;
+    use crate::networking::types::data_representation::DataRepr;
 
     #[test]
-    fn rate_bars_use_latest_counters_for_values_and_maximum() {
-        use crate::networking::types::data_representation::DataRepr;
+    fn rate_bars_use_interval_deltas_for_values_and_maximum() {
         let mut largest_total = DataInfo::new_for_tests(1000, 0, 10_000, 0);
         let mut largest_rate = DataInfo::default();
-        largest_total.refresh_interval(Some(DataInfo::new_for_tests(0, 2, 0, 200)));
-        largest_rate.refresh_interval(Some(DataInfo::new_for_tests(8, 0, 800, 0)));
+        largest_total.start_interval();
+        largest_total.refresh(DataInfo::new_for_tests(0, 2, 0, 200));
+        largest_rate.refresh(DataInfo::new_for_tests(8, 0, 800, 0));
         let rate = DataRepr::packets(true);
         let entries = [largest_total, largest_rate];
         let maximum = entries.iter().max_by_key(|d| d.tot_data(rate)).unwrap();
         assert_eq!(get_bars_length(rate, maximum, &largest_total), (0, 25));
         assert_eq!(get_bars_length(rate, maximum, &largest_rate), (100, 0));
-        largest_total.refresh_interval(None);
+        largest_total.start_interval();
         assert_eq!(get_bars_length(rate, maximum, &largest_total), (0, 0));
     }
 
@@ -708,15 +708,15 @@ mod tests {
         let first_entry = DataInfo::new_for_tests(50, 50, 150, 50);
         let data_info = DataInfo::new_for_tests(25, 55, 165, 30);
         assert_eq!(
-            get_bars_length(DataUnit::Packets, &first_entry, &data_info),
+            get_bars_length(DataRepr::packets(false), &first_entry, &data_info),
             (25, 55)
         );
         assert_eq!(
-            get_bars_length(DataUnit::Bytes, &first_entry, &data_info),
+            get_bars_length(DataRepr::bytes(false), &first_entry, &data_info),
             (83, 15)
         );
         assert_eq!(
-            get_bars_length(DataUnit::Bits, &first_entry, &data_info),
+            get_bars_length(DataRepr::bits(false), &first_entry, &data_info),
             (83, 15)
         );
     }
@@ -726,21 +726,21 @@ mod tests {
         let first_entry = DataInfo::new_for_tests(50, 50, 150, 50);
         let mut data_info = DataInfo::new_for_tests(2, 1, 1, 0);
         assert_eq!(
-            get_bars_length(DataUnit::Packets, &first_entry, &data_info),
+            get_bars_length(DataRepr::packets(false), &first_entry, &data_info),
             (MIN_BARS_LENGTH as u16 / 2, MIN_BARS_LENGTH as u16 / 2)
         );
         assert_eq!(
-            get_bars_length(DataUnit::Bytes, &first_entry, &data_info),
+            get_bars_length(DataRepr::bytes(false), &first_entry, &data_info),
             (MIN_BARS_LENGTH as u16, 0)
         );
 
         data_info = DataInfo::new_for_tests(0, 3, 0, 2);
         assert_eq!(
-            get_bars_length(DataUnit::Packets, &first_entry, &data_info),
+            get_bars_length(DataRepr::packets(false), &first_entry, &data_info),
             (0, MIN_BARS_LENGTH as u16)
         );
         assert_eq!(
-            get_bars_length(DataUnit::Bytes, &first_entry, &data_info),
+            get_bars_length(DataRepr::bytes(false), &first_entry, &data_info),
             (0, MIN_BARS_LENGTH as u16)
         );
     }
@@ -751,31 +751,31 @@ mod tests {
             DataInfo::new_for_tests(u128::MAX / 2, u128::MAX / 2, u128::MAX / 2, u128::MAX / 2);
         let mut data_info = DataInfo::new_for_tests(1, 1, 1, 1);
         assert_eq!(
-            get_bars_length(DataUnit::Packets, &first_entry, &data_info),
+            get_bars_length(DataRepr::packets(false), &first_entry, &data_info),
             (MIN_BARS_LENGTH as u16 / 2, MIN_BARS_LENGTH as u16 / 2)
         );
         assert_eq!(
-            get_bars_length(DataUnit::Bytes, &first_entry, &data_info),
+            get_bars_length(DataRepr::bytes(false), &first_entry, &data_info),
             (MIN_BARS_LENGTH as u16 / 2, MIN_BARS_LENGTH as u16 / 2)
         );
 
         data_info = DataInfo::new_for_tests(0, 1, 0, 1);
         assert_eq!(
-            get_bars_length(DataUnit::Packets, &first_entry, &data_info),
+            get_bars_length(DataRepr::packets(false), &first_entry, &data_info),
             (0, MIN_BARS_LENGTH as u16)
         );
         assert_eq!(
-            get_bars_length(DataUnit::Bytes, &first_entry, &data_info),
+            get_bars_length(DataRepr::bytes(false), &first_entry, &data_info),
             (0, MIN_BARS_LENGTH as u16)
         );
 
         data_info = DataInfo::new_for_tests(1, 0, 1, 0);
         assert_eq!(
-            get_bars_length(DataUnit::Packets, &first_entry, &data_info),
+            get_bars_length(DataRepr::packets(false), &first_entry, &data_info),
             (MIN_BARS_LENGTH as u16, 0)
         );
         assert_eq!(
-            get_bars_length(DataUnit::Bytes, &first_entry, &data_info),
+            get_bars_length(DataRepr::bytes(false), &first_entry, &data_info),
             (MIN_BARS_LENGTH as u16, 0)
         );
     }
@@ -786,93 +786,93 @@ mod tests {
 
         let mut data_info = DataInfo::new_for_tests(0, 9, 0, 10);
         assert_eq!(
-            get_bars_length(DataUnit::Packets, &first_entry, &data_info),
+            get_bars_length(DataRepr::packets(false), &first_entry, &data_info),
             (0, 16)
         );
         assert_eq!(
-            get_bars_length(DataUnit::Bytes, &first_entry, &data_info),
+            get_bars_length(DataRepr::bytes(false), &first_entry, &data_info),
             (0, 71)
         );
         data_info = DataInfo::new_for_tests(9, 0, 13, 0);
         assert_eq!(
-            get_bars_length(DataUnit::Packets, &first_entry, &data_info),
+            get_bars_length(DataRepr::packets(false), &first_entry, &data_info),
             (16, 0)
         );
         assert_eq!(
-            get_bars_length(DataUnit::Bytes, &first_entry, &data_info),
+            get_bars_length(DataRepr::bytes(false), &first_entry, &data_info),
             (93, 0)
         );
 
         data_info = DataInfo::new_for_tests(4, 5, 6, 7);
         assert_eq!(
-            get_bars_length(DataUnit::Packets, &first_entry, &data_info),
+            get_bars_length(DataRepr::packets(false), &first_entry, &data_info),
             (7, 9)
         );
         assert_eq!(
-            get_bars_length(DataUnit::Bytes, &first_entry, &data_info),
+            get_bars_length(DataRepr::bytes(false), &first_entry, &data_info),
             (43, 50)
         );
         data_info = DataInfo::new_for_tests(5, 4, 7, 6);
         assert_eq!(
-            get_bars_length(DataUnit::Packets, &first_entry, &data_info),
+            get_bars_length(DataRepr::packets(false), &first_entry, &data_info),
             (9, 7)
         );
         assert_eq!(
-            get_bars_length(DataUnit::Bytes, &first_entry, &data_info),
+            get_bars_length(DataRepr::bytes(false), &first_entry, &data_info),
             (50, 43)
         );
 
         data_info = DataInfo::new_for_tests(1, 8, 1, 12);
         assert_eq!(
-            get_bars_length(DataUnit::Packets, &first_entry, &data_info),
+            get_bars_length(DataRepr::packets(false), &first_entry, &data_info),
             (MIN_BARS_LENGTH as u16 / 2, 14)
         );
         assert_eq!(
-            get_bars_length(DataUnit::Bytes, &first_entry, &data_info),
+            get_bars_length(DataRepr::bytes(false), &first_entry, &data_info),
             (7, 86)
         );
         data_info = DataInfo::new_for_tests(8, 1, 12, 1);
         assert_eq!(
-            get_bars_length(DataUnit::Packets, &first_entry, &data_info),
+            get_bars_length(DataRepr::packets(false), &first_entry, &data_info),
             (14, MIN_BARS_LENGTH as u16 / 2)
         );
         assert_eq!(
-            get_bars_length(DataUnit::Bytes, &first_entry, &data_info),
+            get_bars_length(DataRepr::bytes(false), &first_entry, &data_info),
             (86, 7)
         );
 
         data_info = DataInfo::new_for_tests(6, 1, 10, 1);
         assert_eq!(
-            get_bars_length(DataUnit::Packets, &first_entry, &data_info),
+            get_bars_length(DataRepr::packets(false), &first_entry, &data_info),
             (11, MIN_BARS_LENGTH as u16 / 2)
         );
         assert_eq!(
-            get_bars_length(DataUnit::Bytes, &first_entry, &data_info),
+            get_bars_length(DataRepr::bytes(false), &first_entry, &data_info),
             (71, 7)
         );
         data_info = DataInfo::new_for_tests(1, 6, 1, 9);
         assert_eq!(
-            get_bars_length(DataUnit::Packets, &first_entry, &data_info),
+            get_bars_length(DataRepr::packets(false), &first_entry, &data_info),
             (MIN_BARS_LENGTH as u16 / 2, 11,)
         );
         assert_eq!(
-            get_bars_length(DataUnit::Bytes, &first_entry, &data_info),
+            get_bars_length(DataRepr::bytes(false), &first_entry, &data_info),
             (7, 64)
         );
 
         data_info = DataInfo::new_for_tests(1, 6, 5, 5);
         assert_eq!(
-            get_bars_length(DataUnit::Bytes, &first_entry, &data_info),
+            get_bars_length(DataRepr::bytes(false), &first_entry, &data_info),
             (36, 36)
         );
 
         data_info = DataInfo::new_for_tests(0, 0, 0, 0);
         assert_eq!(
-            get_bars_length(DataUnit::Packets, &first_entry, &data_info),
+            get_bars_length(DataRepr::packets(false), &first_entry, &data_info),
             (0, 0)
         );
         assert_eq!(
-            get_bars_length(DataUnit::Bytes, &first_entry, &data_info),
+            get_bars_length(DataRepr::bytes(false), &first_entry, &data_info),
             (0, 0)
         );
     }
