@@ -1,5 +1,3 @@
-// EXTRA NEEDED CHARACTERS: Б
-
 use iced::widget::Text;
 
 use crate::StyleType;
@@ -1198,29 +1196,29 @@ pub fn error_translation(language: Language) -> &'static str {
 
 pub fn packets_translation(language: Language) -> &'static str {
     match language {
-        Language::EN => "packets",
-        Language::CS => "pakety",
-        Language::IT => "pacchetti",
-        Language::FR => "paquets",
-        Language::ES => "paquetes",
-        Language::PL => "pakiety",
+        Language::EN => "Packets",
+        Language::CS => "Pakety",
+        Language::IT => "Pacchetti",
+        Language::FR => "Paquets",
+        Language::ES => "Paquetes",
+        Language::PL => "Pakiety",
         Language::DE => "Pakete",
-        Language::UK => "пакети",
+        Language::UK => "Пакети",
         Language::ZH => "数据包",
         Language::ZH_TW => "封包",
-        Language::RO => "pachete",
+        Language::RO => "Pachete",
         Language::KO => "패킷",
-        Language::TR | Language::SV | Language::ID => "paket",
-        Language::RU => "пакетов",
-        Language::PT => "pacotes",
-        Language::EL => "πακέτα",
+        Language::TR | Language::SV | Language::ID => "Paket",
+        Language::RU => "Пакетов",
+        Language::PT => "Pacotes",
+        Language::EL => "Πακέτα",
         // Language::FA => "بسته ها",
-        Language::FI => "paketit",
+        Language::FI => "Paketit",
         Language::JA => "パケット",
-        Language::UZ => "paketlar",
-        Language::VI => "các gói tin",
-        Language::NL => "pakketten",
-        Language::HU => "csomagok",
+        Language::UZ => "Paketlar",
+        Language::VI => "Các gói tin",
+        Language::NL => "Pakketten",
+        Language::HU => "Csomagok",
         Language::SI => "පැකට්",
     }
 }
@@ -1265,22 +1263,22 @@ pub fn bytes_translation(language: Language) -> &'static str {
         | Language::VI
         | Language::ID
         | Language::NL
-        | Language::DE => "bytes",
+        | Language::DE => "Bytes",
         Language::EL => "ψηφιολέξεις",
-        Language::CS => "bajtů",
-        Language::FR => "octets",
-        Language::PL => "bajty",
-        Language::UK => "байти",
+        Language::CS => "Bajtů",
+        Language::FR => "Octets",
+        Language::PL => "Bajty",
+        Language::UK => "Байти",
         Language::ZH => "网络流量",
         Language::ZH_TW => "位元組",
-        Language::RO => "octeți",
+        Language::RO => "Octeți",
         Language::KO => "바이트",
-        Language::TR | Language::UZ => "bayt",
-        Language::RU => "байтов",
+        Language::TR | Language::UZ => "Bayt",
+        Language::RU => "Байтов",
         // Language::FA => "بایت ها",
-        Language::FI => "tavua",
+        Language::FI => "Tavua",
         Language::JA => "バイト",
-        Language::HU => "bájtok",
+        Language::HU => "Bájtok",
         Language::SI => "බයිට්",
     }
 }

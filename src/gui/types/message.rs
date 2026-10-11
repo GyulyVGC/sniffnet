@@ -39,8 +39,8 @@ pub enum Message {
     BpfFilter(String),
     /// Select data unit to use
     DataUnitSelection(DataUnit),
-    /// Toggle data rates (total vs per second)
-    ToggleDataRates,
+    /// Update data rates (total vs per second)
+    UpdateDataRates(bool),
     /// Select report sort type to be displayed (inspect page)
     ReportSortSelection(SortType),
     /// Select host sort type to be displayed (overview page)

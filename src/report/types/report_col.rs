@@ -45,14 +45,7 @@ impl ReportCol {
             ReportCol::SrcPort | ReportCol::DstPort => port_translation(language).to_string(),
             ReportCol::Proto => protocol_translation(language).to_string(),
             ReportCol::Service => service_translation(language).to_string(),
-            ReportCol::Data => {
-                let mut str = data_unit.get_label(language).to_string();
-                if str.is_empty() {
-                    str
-                } else {
-                    str.remove(0).to_uppercase().to_string() + &str
-                }
-            }
+            ReportCol::Data => data_unit.get_label(language).to_string(),
         }
     }
 

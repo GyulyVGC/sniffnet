@@ -25,12 +25,16 @@ use crate::networking::types::data_representation::{DataRepr, DataUnit};
 use crate::networking::types::ipfix_exporter::IpfixExporter;
 use crate::translations::translations::{
     active_filters_translation, incoming_translation, network_adapter_translation,
-    outgoing_translation, per_second_translation, traffic_rate_translation,
+    outgoing_translation, traffic_rate_translation,
 };
-use crate::translations::translations_2::{dropped_translation, only_top_30_items_translation};
+use crate::translations::translations_2::{
+    data_representation_translation, dropped_translation, only_top_30_items_translation,
+};
 use crate::translations::translations_3::export_capture_translation;
 use crate::translations::translations_5::no_favorites_saved_translation;
-use crate::translations::translations_6::ipfix_exporter_translation;
+use crate::translations::translations_6::{
+    current_rates_translation, ipfix_exporter_translation, totals_translation,
+};
 use crate::utils::formatted_strings::full_print_link_type;
 use crate::utils::types::icon::Icon;
 use crate::{Language, RunningPage, SNIFFNET_TITLECASE, StyleType};
@@ -39,9 +43,7 @@ use iced::alignment::{Horizontal, Vertical};
 use iced::widget::scrollable::Direction;
 use iced::widget::text::{LineHeight, Wrapping};
 use iced::widget::tooltip::Position;
-use iced::widget::{
-    Button, Checkbox, Column, Container, Row, Scrollable, Space, Text, Tooltip, button,
-};
+use iced::widget::{Button, Column, Container, Row, Scrollable, Space, Text, Tooltip, button};
 use iced::{Alignment, Element, Length, Padding};
 use std::collections::BTreeSet;
 
@@ -441,37 +443,94 @@ fn col_data_representation<'a>(
     language: Language,
     data_repr: DataRepr,
 ) -> Column<'a, Message, StyleType> {
-    let mut ret_val = Column::new().align_x(Horizontal::Center);
+    let mut ret_val = Column::new()
+        .spacing(10)
+        .push(Text::new(data_representation_translation(language)).class(TextType::Subtitle));
 
     let [bits, bytes, packets] = DataUnit::ALL.map(|option| {
         let is_active = data_repr.data_unit.eq(&option);
-        Button::new(
-            Text::new(option.get_label(language).to_owned())
+        let button = Button::new(
+            option
+                .get_icon()
                 .width(Length::Fill)
                 .align_x(Alignment::Center)
                 .align_y(Alignment::Center),
         )
         .width(Length::Fill)
-        .height(33)
+        .height(25)
         .class(if is_active {
             ButtonType::BorderedRoundSelected
         } else {
             ButtonType::BorderedRound
         })
-        .on_press(Message::DataUnitSelection(option))
+        .on_press(Message::DataUnitSelection(option));
+
+        Tooltip::new(
+            button,
+            Text::new(option.get_label(language).to_owned()).size(FONT_SIZE_FOOTER),
+            Position::FollowCursor,
+        )
+        .class(ContainerType::Tooltip)
+        .delay(TOOLTIP_DELAY)
     });
 
-    let checkbox = Checkbox::new(data_repr.per_second)
-        .label(per_second_translation(language))
-        .on_toggle(move |_| Message::ToggleDataRates)
-        .size(18);
+    let per_second = data_repr.per_second;
+
+    let totals_button = Button::new(
+        Icon::Totals
+            .to_text()
+            .width(Length::Fill)
+            .align_x(Alignment::Center)
+            .align_y(Alignment::Center),
+    )
+    .width(Length::Fill)
+    .height(25)
+    .class(if per_second {
+        ButtonType::BorderedRound
+    } else {
+        ButtonType::BorderedRoundSelected
+    })
+    .on_press(Message::UpdateDataRates(false));
+    let totals_tooltip = Tooltip::new(
+        totals_button,
+        Text::new(totals_translation(language)).size(FONT_SIZE_FOOTER),
+        Position::FollowCursor,
+    )
+    .class(ContainerType::Tooltip)
+    .delay(TOOLTIP_DELAY);
+
+    let rates_button = Button::new(
+        Icon::LiveRate
+            .to_text()
+            .size(18)
+            .width(Length::Fill)
+            .align_x(Alignment::Center)
+            .align_y(Alignment::Center),
+    )
+    .width(Length::Fill)
+    .height(25)
+    .class(if per_second {
+        ButtonType::BorderedRoundSelected
+    } else {
+        ButtonType::BorderedRound
+    })
+    .on_press(Message::UpdateDataRates(true));
+    let rates_tooltip = Tooltip::new(
+        rates_button,
+        Text::new(current_rates_translation(language)).size(FONT_SIZE_FOOTER),
+        Position::FollowCursor,
+    )
+    .class(ContainerType::Tooltip)
+    .delay(TOOLTIP_DELAY);
 
     ret_val = ret_val
-        .push(Row::new().spacing(5).push(bits).push(bytes))
-        .push(Space::new().height(5))
-        .push(packets)
-        .push(Space::new().height(15))
-        .push(checkbox);
+        .push(Row::new().spacing(5).push(bits).push(bytes).push(packets))
+        .push(
+            Row::new()
+                .spacing(5)
+                .push(totals_tooltip)
+                .push(rates_tooltip),
+        );
 
     ret_val
 }

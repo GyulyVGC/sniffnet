@@ -1,8 +1,3 @@
-use iced::widget::scrollable::Direction;
-use iced::widget::{Button, Slider, row};
-use iced::widget::{Checkbox, Column, Container, Row, Scrollable, Space, Text, TextInput};
-use iced::{Alignment, Length, Padding};
-
 use crate::gui::components::button::button_hide;
 use crate::gui::components::tab::get_settings_tabs;
 use crate::gui::pages::types::settings_page::SettingsPage;
@@ -10,7 +5,9 @@ use crate::gui::styles::button::ButtonType;
 use crate::gui::styles::container::ContainerType;
 use crate::gui::styles::rule::RuleType;
 use crate::gui::styles::scrollbar::ScrollbarType;
-use crate::gui::styles::style_constants::{FONT_SIZE_FOOTER, FONT_SIZE_SUBTITLE, FONT_SIZE_TITLE};
+use crate::gui::styles::style_constants::{
+    FONT_SIZE_FOOTER, FONT_SIZE_SUBTITLE, FONT_SIZE_TITLE, TOOLTIP_DELAY,
+};
 use crate::gui::styles::text::TextType;
 use crate::gui::styles::types::gradient_type::GradientType;
 use crate::gui::types::message::Message;
@@ -30,6 +27,11 @@ use crate::translations::translations_5::{
 };
 use crate::utils::types::icon::Icon;
 use crate::{Language, Sniffer, StyleType};
+use iced::widget::scrollable::Direction;
+use iced::widget::tooltip::Position;
+use iced::widget::{Button, Slider, Tooltip, row};
+use iced::widget::{Checkbox, Column, Container, Row, Scrollable, Space, Text, TextInput};
+use iced::{Alignment, Length, Padding};
 
 const CONTAINERS_WIDTH: f32 = 715.0;
 
@@ -435,28 +437,36 @@ fn row_data_representation<'a>(
 
     for option in DataUnit::ALL {
         let is_active = data_repr.eq(&option);
-        ret_val = ret_val.push(
-            Button::new(
-                Text::new(option.get_label(language).to_owned())
-                    .size(FONT_SIZE_FOOTER)
-                    .align_x(Alignment::Center)
-                    .align_y(Alignment::Center),
-            )
-            .padding(Padding::ZERO.left(15).right(15))
-            .height(25)
-            .class(if is_active {
-                ButtonType::BorderedRoundSelected
-            } else {
-                ButtonType::BorderedRound
-            })
-            .on_press(Message::UpdateNotificationSettings(
-                Notification::Data(DataNotification {
-                    data_unit: option,
-                    ..data_notification
-                }),
-                false,
-            )),
-        );
+        let button = Button::new(
+            option
+                .get_icon()
+                .align_x(Alignment::Center)
+                .align_y(Alignment::Center),
+        )
+        .padding(Padding::ZERO.left(15).right(15))
+        .height(25)
+        .class(if is_active {
+            ButtonType::BorderedRoundSelected
+        } else {
+            ButtonType::BorderedRound
+        })
+        .on_press(Message::UpdateNotificationSettings(
+            Notification::Data(DataNotification {
+                data_unit: option,
+                ..data_notification
+            }),
+            false,
+        ));
+
+        let tooltip = Tooltip::new(
+            button,
+            Text::new(option.get_label(language).to_owned()).size(FONT_SIZE_FOOTER),
+            Position::FollowCursor,
+        )
+        .class(ContainerType::Tooltip)
+        .delay(TOOLTIP_DELAY);
+
+        ret_val = ret_val.push(tooltip);
     }
     ret_val.wrap()
 }

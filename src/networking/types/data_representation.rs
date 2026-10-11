@@ -1,9 +1,12 @@
+use crate::gui::styles::types::style_type::StyleType;
 use crate::translations::translations::{
     bytes_exceeded_translation, bytes_translation, packets_exceeded_translation,
     packets_translation,
 };
 use crate::translations::translations_4::{bits_exceeded_translation, bits_translation};
 use crate::translations::types::language::Language;
+use crate::utils::types::icon::Icon;
+use iced::widget::Text;
 use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize, Default)]
@@ -58,6 +61,14 @@ impl DataUnit {
             DataUnit::Packets => packets_translation(language),
             DataUnit::Bytes => bytes_translation(language),
             DataUnit::Bits => bits_translation(language),
+        }
+    }
+
+    pub fn get_icon<'a>(self) -> Text<'a, StyleType> {
+        match self {
+            DataUnit::Packets => Icon::Packet.to_text(),
+            DataUnit::Bytes => Text::new("B").size(15),
+            DataUnit::Bits => Text::new("b").size(15),
         }
     }
 

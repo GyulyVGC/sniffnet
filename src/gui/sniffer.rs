@@ -306,7 +306,7 @@ impl Sniffer {
             Message::ToggleFilters => self.toggle_filters(),
             Message::BpfFilter(value) => self.bpf_filter(value),
             Message::DataUnitSelection(unit) => self.data_unit_selection(unit),
-            Message::ToggleDataRates => self.toggle_data_rates(),
+            Message::UpdateDataRates(per_second) => self.update_data_rates(per_second),
             Message::ReportSortSelection(sort) => self.report_sort_selection(sort),
             Message::OpenWebPage(web_page) => Self::open_web_page(&web_page),
             Message::Start => return self.start(),
@@ -571,8 +571,8 @@ impl Sniffer {
         self.traffic_chart.change_kind(unit);
     }
 
-    fn toggle_data_rates(&mut self) {
-        self.conf.data_repr.per_second = !self.conf.data_repr.per_second;
+    fn update_data_rates(&mut self, per_second: bool) {
+        self.conf.data_repr.per_second = per_second;
     }
 
     fn report_sort_selection(&mut self, sort: SortType) {

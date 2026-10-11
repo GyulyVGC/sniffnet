@@ -91,3 +91,19 @@ pub fn expanded_view_translation(language: Language) -> &'static str {
         _ => "Expanded view",
     }
 }
+
+pub fn totals_translation(language: Language) -> &'static str {
+    match language {
+        Language::EN => "Totals",
+        Language::IT => "Totali",
+        _ => "Totals",
+    }
+}
+
+pub fn current_rates_translation(language: Language) -> &'static str {
+    match language {
+        Language::EN => "Current rates",
+        Language::IT => "Intensità attuale",
+        _ => "Current rates",
+    }
+}
