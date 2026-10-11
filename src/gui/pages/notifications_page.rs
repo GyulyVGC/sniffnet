@@ -160,7 +160,7 @@ fn data_notification_log<'a>(
     .size(80)
     .line_height(LineHeight::Relative(1.0));
     let threshold_str = format!(
-        "{}: {data_string} {}",
+        "{}: {data_string} ({})",
         threshold_translation(language),
         per_second_translation(language)
     );

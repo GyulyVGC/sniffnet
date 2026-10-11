@@ -27,9 +27,7 @@ use crate::translations::translations::{
     active_filters_translation, incoming_translation, network_adapter_translation,
     outgoing_translation, per_second_translation, traffic_rate_translation,
 };
-use crate::translations::translations_2::{
-    data_representation_translation, dropped_translation, only_top_30_items_translation,
-};
+use crate::translations::translations_2::{dropped_translation, only_top_30_items_translation};
 use crate::translations::translations_3::export_capture_translation;
 use crate::translations::translations_5::no_favorites_saved_translation;
 use crate::translations::translations_6::ipfix_exporter_translation;
@@ -443,10 +441,7 @@ fn col_data_representation<'a>(
     language: Language,
     data_repr: DataRepr,
 ) -> Column<'a, Message, StyleType> {
-    let mut ret_val = Column::new().spacing(5).push(
-        Text::new(format!("{}:", data_representation_translation(language)))
-            .class(TextType::Subtitle),
-    );
+    let mut ret_val = Column::new().align_x(Horizontal::Center);
 
     let [bits, bytes, packets] = DataUnit::ALL.map(|option| {
         let is_active = data_repr.data_unit.eq(&option);
@@ -473,7 +468,9 @@ fn col_data_representation<'a>(
 
     ret_val = ret_val
         .push(Row::new().spacing(5).push(bits).push(bytes))
+        .push(Space::new().height(5))
         .push(packets)
+        .push(Space::new().height(15))
         .push(checkbox);
 
     ret_val

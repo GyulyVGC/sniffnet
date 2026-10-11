@@ -293,7 +293,7 @@ fn input_group_bytes<'a>(
             .width(100),
         )
         .push(
-            Text::new(per_second_translation(language))
+            Text::new(format!("({})", per_second_translation(language)))
                 .align_y(Alignment::Center)
                 .size(FONT_SIZE_FOOTER),
         );
