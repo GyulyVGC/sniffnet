@@ -258,10 +258,13 @@ fn row_report_entry<'a>(
     val: &InfoAddressPortPair,
     data_repr: DataRepr,
 ) -> Row<'a, Message, StyleType> {
-    let text_type = if val.traffic_direction == TrafficDirection::Outgoing {
-        TextType::Outgoing
-    } else {
-        TextType::Incoming
+    let is_zero = val.transmitted_data(data_repr) == 0;
+
+    let text_type = match (val.traffic_direction, is_zero) {
+        (TrafficDirection::Incoming, false) => TextType::Incoming,
+        (TrafficDirection::Incoming, true) => TextType::DimmedIncoming,
+        (TrafficDirection::Outgoing, false) => TextType::Outgoing,
+        (TrafficDirection::Outgoing, true) => TextType::DimmedOutgoing,
     };
 
     let mut ret_val = Row::new().align_y(Alignment::Center);

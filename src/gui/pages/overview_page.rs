@@ -654,19 +654,21 @@ pub fn get_bars<'a>(
                 .width(Length::FillPortion(in_len))
                 .push(RuleType::Incoming(in_all_round).horizontal(5))
         } else {
-            Row::new()
+            Row::new().height(5)
         })
         .push(if out_len > 0 {
             Row::new()
                 .width(Length::FillPortion(out_len))
                 .push(RuleType::Outgoing(out_all_round).horizontal(5))
         } else {
-            Row::new()
+            Row::new().height(5)
         })
         .push(if in_len + out_len < 100 {
-            Row::new().width(Length::FillPortion(100 - in_len - out_len))
-        } else {
             Row::new()
+                .width(Length::FillPortion(100 - in_len - out_len))
+                .height(5)
+        } else {
+            Row::new().height(5)
         })
 }
 
