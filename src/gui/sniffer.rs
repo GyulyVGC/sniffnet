@@ -1123,7 +1123,14 @@ impl Sniffer {
                 let capture_source = self.capture_source.clone();
                 self.traffic_chart
                     .change_capture_source(capture_source.supports_live_chart());
-                let (tx, rx) = async_channel::unbounded();
+                // Offline PCAP imports can run much faster than the UI consumes updates.
+                // Apply backpressure only to imports so queued snapshots cannot grow without
+                // bound; keep live capture non-blocking to avoid adding packet loss here.
+                let (tx, rx) = if matches!(&self.capture_source, CaptureSource::File(_)) {
+                    async_channel::bounded(2)
+                } else {
+                    async_channel::unbounded()
+                };
                 let (freeze_tx, freeze_rx) = tokio::sync::broadcast::channel(1_048_575);
                 let freeze_rx2 = freeze_tx.subscribe();
                 let filters = self.conf.filters.clone();
