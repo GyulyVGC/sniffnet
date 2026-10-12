@@ -33,6 +33,7 @@ use crate::mmdb::asn::ASN_MMDB;
 use crate::mmdb::country::COUNTRY_MMDB;
 use crate::mmdb::types::mmdb_reader::{MmdbReader, MmdbReaders};
 use crate::networking::capture::BackendTrafficMessage;
+use crate::networking::capture::capture_update_channel;
 use crate::networking::capture::spawn_capture_thread;
 use crate::networking::traffic_preview::{TrafficPreview, traffic_preview};
 use crate::networking::types::capture_context::{
@@ -1126,11 +1127,10 @@ impl Sniffer {
                 // Offline PCAP imports can run much faster than the UI consumes updates.
                 // Apply backpressure only to imports so queued snapshots cannot grow without
                 // bound; keep live capture non-blocking to avoid adding packet loss here.
-                let (tx, rx) = if matches!(&self.capture_source, CaptureSource::File(_)) {
-                    async_channel::bounded(2)
-                } else {
-                    async_channel::unbounded()
-                };
+                let (tx, rx) = capture_update_channel(matches!(
+                    &self.capture_source,
+                    CaptureSource::File(_)
+                ));
                 let (freeze_tx, freeze_rx) = tokio::sync::broadcast::channel(1_048_575);
                 let freeze_rx2 = freeze_tx.subscribe();
                 let filters = self.conf.filters.clone();
