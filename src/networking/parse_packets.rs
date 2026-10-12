@@ -702,7 +702,7 @@ mod offline_import_tests {
         fs::remove_file(path).unwrap();
 
         assert_eq!(tick_count, TIMESTAMP_COUNT);
-        assert_eq!(final_timestamp, Some(TIMESTAMP_COUNT));
+        assert_eq!(final_timestamp, Some(i64::from(TIMESTAMP_COUNT)));
         assert!(saw_final_tick, "the final traffic snapshot must be emitted");
         assert!(
             saw_pending_hosts,
