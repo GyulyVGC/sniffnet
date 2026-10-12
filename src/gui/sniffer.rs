@@ -1289,7 +1289,7 @@ impl Sniffer {
         let data_notification = self.conf.settings.notifications.data_notification;
         let sound = match notification {
             Notification::Data(DataNotification {
-                data_unit: data_repr,
+                data_unit,
                 threshold,
                 byte_multiple,
                 sound,
@@ -1302,7 +1302,7 @@ impl Sniffer {
                 {
                     temp_threshold = DataNotification {
                         sound,
-                        data_unit: data_repr,
+                        data_unit,
                         threshold,
                         byte_multiple,
                         previous_threshold,
@@ -1323,7 +1323,7 @@ impl Sniffer {
                         .previous_threshold = previous_threshold;
                 }
                 self.conf.settings.notifications.data_notification.sound = sound;
-                self.conf.settings.notifications.data_notification.data_unit = data_repr;
+                self.conf.settings.notifications.data_notification.data_unit = data_unit;
                 sound
             }
             Notification::Favorite(favorite_notification) => {
@@ -1692,19 +1692,19 @@ mod tests {
     fn test_correctly_update_chart_kind() {
         let mut sniffer = Sniffer::new(Conf::default());
 
-        assert_eq!(sniffer.traffic_chart.data_repr, DataUnit::Bytes);
+        assert_eq!(sniffer.traffic_chart.data_unit, DataUnit::Bytes);
         assert_eq!(sniffer.conf.data_repr, DataRepr::bytes(false));
         sniffer.update(Message::DataUnitSelection(DataUnit::Packets));
-        assert_eq!(sniffer.traffic_chart.data_repr, DataUnit::Packets);
+        assert_eq!(sniffer.traffic_chart.data_unit, DataUnit::Packets);
         assert_eq!(sniffer.conf.data_repr, DataRepr::packets(false));
         sniffer.update(Message::DataUnitSelection(DataUnit::Packets));
-        assert_eq!(sniffer.traffic_chart.data_repr, DataUnit::Packets);
+        assert_eq!(sniffer.traffic_chart.data_unit, DataUnit::Packets);
         assert_eq!(sniffer.conf.data_repr, DataRepr::packets(false));
         sniffer.update(Message::DataUnitSelection(DataUnit::Bytes));
-        assert_eq!(sniffer.traffic_chart.data_repr, DataUnit::Bytes);
+        assert_eq!(sniffer.traffic_chart.data_unit, DataUnit::Bytes);
         assert_eq!(sniffer.conf.data_repr, DataRepr::bytes(false));
         sniffer.update(Message::DataUnitSelection(DataUnit::Bits));
-        assert_eq!(sniffer.traffic_chart.data_repr, DataUnit::Bits);
+        assert_eq!(sniffer.traffic_chart.data_unit, DataUnit::Bits);
         assert_eq!(sniffer.conf.data_repr, DataRepr::bits(false));
     }
 

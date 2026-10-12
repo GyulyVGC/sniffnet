@@ -204,11 +204,11 @@ fn report_header_row(
 
 fn title_report_col_display(
     report_col: &ReportCol,
-    data_repr: DataUnit,
+    data_unit: DataUnit,
     language: Language,
 ) -> (String, String, String) {
     let max_chars = report_col.get_max_chars(Some(language));
-    let title = report_col.get_title(language, data_repr);
+    let title = report_col.get_title(language, data_unit);
     let title_direction_info = report_col.get_title_direction_info(language);
     let chars_title = title.chars().collect::<Vec<char>>();
     let chars_title_direction_info = title_direction_info.chars().collect::<Vec<char>>();

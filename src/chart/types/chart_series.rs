@@ -214,7 +214,7 @@ mod tests {
             min_packets: -1000.0,
             max_packets: 21000.0,
             language: Language::default(),
-            data_repr: DataUnit::Packets,
+            data_unit: DataUnit::Packets,
             style: StyleType::default(),
             thumbnail: false,
             is_live_capture: true,

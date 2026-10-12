@@ -50,7 +50,7 @@ pub struct TrafficChart {
     /// Language used for the chart legend
     pub language: Language,
     /// Packets or bytes
-    pub data_repr: DataUnit,
+    pub data_unit: DataUnit,
     /// Style of the chart
     pub style: StyleType,
     /// Whether the chart is for the thumbnail page
@@ -64,7 +64,7 @@ pub struct TrafficChart {
 }
 
 impl TrafficChart {
-    pub fn new(style: StyleType, language: Language, data_repr: DataUnit) -> Self {
+    pub fn new(style: StyleType, language: Language, data_unit: DataUnit) -> Self {
         Self {
             ticks: 0,
             out_bytes: ChartSeries::default(),
@@ -76,7 +76,7 @@ impl TrafficChart {
             min_packets: 0.0,
             max_packets: 0.0,
             language,
-            data_repr,
+            data_unit,
             style,
             thumbnail: false,
             is_live_capture: true,
@@ -182,7 +182,7 @@ impl TrafficChart {
     }
 
     pub fn change_kind(&mut self, kind: DataUnit) {
-        self.data_repr = kind;
+        self.data_unit = kind;
     }
 
     pub fn change_language(&mut self, language: Language) {
@@ -235,7 +235,7 @@ impl TrafficChart {
     }
 
     fn y_axis_range(&self) -> Range<f32> {
-        let (min, max) = match self.data_repr {
+        let (min, max) = match self.data_unit {
             DataUnit::Packets => (self.min_packets, self.max_packets),
             DataUnit::Bytes => (self.min_bytes, self.max_bytes),
             DataUnit::Bits => (self.min_bytes * 8.0, self.max_bytes * 8.0),
@@ -253,7 +253,7 @@ impl TrafficChart {
     }
 
     fn spline_to_plot(&self, direction: TrafficDirection) -> &Spline<f32, f32> {
-        match self.data_repr {
+        match self.data_unit {
             DataUnit::Packets => match direction {
                 TrafficDirection::Incoming => &self.in_packets.spline,
                 TrafficDirection::Outgoing => &self.out_packets.spline,
@@ -286,7 +286,7 @@ impl TrafficChart {
         let color = self.series_color(direction);
         let alpha = self.style.get_extension().alpha_chart_badge;
         let spline = self.spline_to_plot(direction);
-        let multiplier = if self.data_repr == DataUnit::Bits {
+        let multiplier = if self.data_unit == DataUnit::Bits {
             8.0
         } else {
             1.0
@@ -410,7 +410,7 @@ impl Chart<Message> for TrafficChart {
             .y_labels(min(5, y_labels))
             .y_label_formatter(
                 #[allow(clippy::cast_possible_truncation, clippy::cast_sign_loss)]
-                &|amount| self.data_repr.formatted_string(amount.abs() as u128),
+                &|amount| self.data_unit.formatted_string(amount.abs() as u128),
             )
             .x_labels(min(6, x_labels))
             .x_label_formatter(
