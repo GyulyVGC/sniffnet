@@ -353,7 +353,11 @@ mod offline_import_tests {
         frame
     }
 
-    fn write_synthetic_pcap(path: &std::path::Path) {
+    fn write_synthetic_pcap(
+        path: &std::path::Path,
+        timestamps: &[u32],
+        packets_per_timestamp: u16,
+    ) {
         let mut bytes = Vec::new();
         // Classic PCAP, little-endian, microsecond timestamps, Ethernet link type.
         bytes.extend_from_slice(&[0xd4, 0xc3, 0xb2, 0xa1]);
@@ -365,8 +369,8 @@ mod offline_import_tests {
         write_u32_le(&mut bytes, 1);
 
         let mut packet_count = 0_u16;
-        for seconds in [1_u32, 2, 10, 11] {
-            for _ in 0..3 {
+        for &seconds in timestamps {
+            for _ in 0..packets_per_timestamp {
                 let frame = synthetic_udp_frame(20_000 + packet_count, 30_000 + packet_count);
                 write_u32_le(&mut bytes, seconds);
                 write_u32_le(&mut bytes, u32::from(packet_count) * 100);
@@ -391,7 +395,7 @@ mod offline_import_tests {
             "sniffnet-offline-import-{}-{nonce}.pcap",
             std::process::id()
         ));
-        write_synthetic_pcap(&path);
+        write_synthetic_pcap(&path, &[1, 2, 10, 11], 3);
 
         let source = CaptureSource::File(MyPcapImport::new(path.to_string_lossy().into_owned()));
         let context = CaptureContext::new(&source, None, &Filters::default());
@@ -465,5 +469,79 @@ mod offline_import_tests {
             "import took too long: {elapsed:?}"
         );
         eprintln!("synthetic PCAP import with slow consumer: {elapsed:?}");
+    }
+
+    #[test]
+    fn synthetic_pcap_import_stress_keeps_up_with_many_ui_updates() {
+        const TIMESTAMP_COUNT: u32 = 256;
+        let nonce = SystemTime::now()
+            .duration_since(UNIX_EPOCH)
+            .unwrap()
+            .as_nanos();
+        let path = std::env::temp_dir().join(format!(
+            "sniffnet-offline-stress-{}-{nonce}.pcap",
+            std::process::id()
+        ));
+        let timestamps: Vec<u32> = (1..=TIMESTAMP_COUNT).collect();
+        write_synthetic_pcap(&path, &timestamps, 1);
+
+        let source = CaptureSource::File(MyPcapImport::new(path.to_string_lossy().into_owned()));
+        let context = CaptureContext::new(&source, None, &Filters::default());
+        assert!(context.error().is_none(), "stress PCAP must open");
+        let readers = MmdbReaders {
+            country: Arc::new(MmdbReader::Empty),
+            asn: Arc::new(MmdbReader::Empty),
+        };
+        let (tx, rx) = capture_update_channel(true);
+        let (freeze_tx_1, freeze_rx_1) = tokio::sync::broadcast::channel(1);
+        let (freeze_tx_2, freeze_rx_2) = tokio::sync::broadcast::channel(1);
+        let worker = std::thread::spawn(move || {
+            parse_packets(
+                8,
+                source,
+                &readers,
+                &IpBlacklist::default(),
+                context,
+                Filters::default(),
+                &tx,
+                (freeze_rx_1, freeze_rx_2),
+            );
+        });
+
+        let started = Instant::now();
+        let deadline = Instant::now() + Duration::from_secs(10);
+        let mut tick_count = 0_u32;
+        let mut saw_pending_hosts = false;
+        loop {
+            match rx.try_recv() {
+                Ok(BackendTrafficMessage::TickRun(8, _, _, _)) => tick_count += 1,
+                Ok(BackendTrafficMessage::PendingHosts(8, _)) => {
+                    saw_pending_hosts = true;
+                    break;
+                }
+                Ok(_) => {}
+                Err(async_channel::TryRecvError::Empty) if Instant::now() < deadline => {
+                    std::thread::sleep(Duration::from_millis(1));
+                    continue;
+                }
+                Err(error) => panic!("timed out waiting for stress PCAP import: {error}"),
+            }
+            // Deliberately slower than the producer, so the bounded channel fills repeatedly.
+            std::thread::sleep(Duration::from_millis(1));
+        }
+        worker.join().unwrap();
+        let elapsed = started.elapsed();
+        fs::remove_file(path).unwrap();
+
+        assert_eq!(tick_count, TIMESTAMP_COUNT);
+        assert!(saw_pending_hosts);
+        assert!(
+            elapsed < Duration::from_secs(10),
+            "stress import took {elapsed:?}"
+        );
+        eprintln!(
+            "synthetic PCAP stress import: {TIMESTAMP_COUNT} timestamp updates, slow consumer, {elapsed:?}"
+        );
+        let _ = (freeze_tx_1, freeze_tx_2);
     }
 }
