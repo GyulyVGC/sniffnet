@@ -46,7 +46,7 @@ jobs:
         run: sudo apt-get update -y && sudo apt-get install -y libpcap-dev libasound2-dev
 
       - name: Install Windows dependencies
-        if: matrix.os == 'windows' && github.event_name != 'pull_request' && secrets.NPCAP_OEM_URL != ''
+        if: matrix.os == 'windows' && github.event_name != 'pull_request' && github.repository == 'GyulyVGC/sniffnet'
         run: |
           Invoke-WebRequest -Uri "https://npcap.com/dist/npcap-sdk-1.16.zip" -OutFile "C:/npcap-sdk.zip"
           Expand-Archive -LiteralPath C:/npcap-sdk.zip -DestinationPath C:/npcap-sdk
@@ -58,11 +58,11 @@ jobs:
         run: cargo fmt --all -- --check
 
       - name: build
-        if: matrix.os != 'windows' || (github.event_name != 'pull_request' && secrets.NPCAP_OEM_URL != '')
+        if: matrix.os != 'windows' || (github.event_name != 'pull_request' && github.repository == 'GyulyVGC/sniffnet')
         run: cargo build --verbose
 
       - name: clippy
-        if: matrix.os != 'windows' || (github.event_name != 'pull_request' && secrets.NPCAP_OEM_URL != '')
+        if: matrix.os != 'windows' || (github.event_name != 'pull_request' && github.repository == 'GyulyVGC/sniffnet')
         run: cargo clippy -- -D warnings
 
       # needed to make latency tests succeed
@@ -71,7 +71,7 @@ jobs:
         run: sudo sysctl -w net.ipv4.ping_group_range="0 2147483647"
 
       - name: test
-        if: matrix.os != 'windows' || (github.event_name != 'pull_request' && secrets.NPCAP_OEM_URL != '')
+        if: matrix.os != 'windows' || (github.event_name != 'pull_request' && github.repository == 'GyulyVGC/sniffnet')
         run: cargo test --verbose -- --nocapture
 
 #      - name: Install cargo-llvm-cov
