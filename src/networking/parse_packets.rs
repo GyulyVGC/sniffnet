@@ -471,6 +471,92 @@ mod offline_import_tests {
         eprintln!("synthetic PCAP import with slow consumer: {elapsed:?}");
     }
 
+    fn measure_synthetic_import_producer_time(is_offline_import: bool, label: &str) -> Duration {
+        const TIMESTAMP_COUNT: u32 = 256;
+        let nonce = SystemTime::now()
+            .duration_since(UNIX_EPOCH)
+            .unwrap()
+            .as_nanos();
+        let path = std::env::temp_dir().join(format!(
+            "sniffnet-channel-compare-{}-{nonce}.pcap",
+            std::process::id()
+        ));
+        let timestamps: Vec<u32> = (1..=TIMESTAMP_COUNT).collect();
+        write_synthetic_pcap(&path, &timestamps, 1);
+
+        let source = CaptureSource::File(MyPcapImport::new(path.to_string_lossy().into_owned()));
+        let context = CaptureContext::new(&source, None, &Filters::default());
+        assert!(context.error().is_none(), "comparison PCAP must open");
+        let readers = MmdbReaders {
+            country: Arc::new(MmdbReader::Empty),
+            asn: Arc::new(MmdbReader::Empty),
+        };
+        let (tx, rx) = capture_update_channel(is_offline_import);
+        let (freeze_tx_1, freeze_rx_1) = tokio::sync::broadcast::channel(1);
+        let (freeze_tx_2, freeze_rx_2) = tokio::sync::broadcast::channel(1);
+        let (producer_done_tx, producer_done_rx) = std::sync::mpsc::channel();
+        let worker = std::thread::spawn(move || {
+            let started = Instant::now();
+            parse_packets(
+                9,
+                source,
+                &readers,
+                &IpBlacklist::default(),
+                context,
+                Filters::default(),
+                &tx,
+                (freeze_rx_1, freeze_rx_2),
+            );
+            producer_done_tx.send(started.elapsed()).unwrap();
+        });
+
+        let consumer_started = Instant::now();
+        let deadline = Instant::now() + Duration::from_secs(10);
+        let mut tick_count = 0_u32;
+        let mut saw_pending_hosts = false;
+        loop {
+            match rx.try_recv() {
+                Ok(BackendTrafficMessage::TickRun(9, _, _, _)) => tick_count += 1,
+                Ok(BackendTrafficMessage::PendingHosts(9, _)) => {
+                    saw_pending_hosts = true;
+                    break;
+                }
+                Ok(_) => {}
+                Err(async_channel::TryRecvError::Empty) if Instant::now() < deadline => {
+                    std::thread::sleep(Duration::from_millis(1));
+                    continue;
+                }
+                Err(error) => panic!("timed out waiting for {label} comparison import: {error}"),
+            }
+            // Same deliberately slow UI-consumer behavior for both channel modes.
+            std::thread::sleep(Duration::from_millis(1));
+        }
+        let consumer_elapsed = consumer_started.elapsed();
+        let producer_elapsed = producer_done_rx
+            .recv_timeout(Duration::from_secs(2))
+            .expect("producer should finish after final messages are consumed");
+        worker.join().unwrap();
+        fs::remove_file(path).unwrap();
+
+        assert_eq!(tick_count, TIMESTAMP_COUNT);
+        assert!(saw_pending_hosts);
+        eprintln!(
+            "synthetic PCAP channel comparison ({label}): producer={producer_elapsed:?}, consumer-drain={consumer_elapsed:?}, updates={tick_count}"
+        );
+        let _ = (freeze_tx_1, freeze_tx_2);
+        producer_elapsed
+    }
+
+    #[test]
+    fn synthetic_pcap_compares_bounded_and_unbounded_producer_time() {
+        // Informational measurement only: CI scheduling is noisy, so do not assert a speed ratio.
+        let bounded = measure_synthetic_import_producer_time(true, "bounded/offline");
+        let unbounded = measure_synthetic_import_producer_time(false, "unbounded/live-style");
+        eprintln!(
+            "synthetic PCAP producer-time comparison: bounded={bounded:?}, unbounded={unbounded:?}"
+        );
+    }
+
     #[test]
     fn synthetic_pcap_import_stress_keeps_up_with_many_ui_updates() {
         const TIMESTAMP_COUNT: u32 = 256;
