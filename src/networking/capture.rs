@@ -38,7 +38,10 @@ const REVERSE_DNS_LOOKUP_THREADS: usize = 5;
 /// Live captures remain unbounded so a slow UI does not block packet processing.
 pub(crate) fn capture_update_channel(
     is_offline_import: bool,
-) -> (Sender<BackendTrafficMessage>, async_channel::Receiver<BackendTrafficMessage>) {
+) -> (
+    Sender<BackendTrafficMessage>,
+    async_channel::Receiver<BackendTrafficMessage>,
+) {
     if is_offline_import {
         async_channel::bounded(2)
     } else {
@@ -260,8 +263,10 @@ mod update_channel_tests {
     #[test]
     fn offline_update_channel_applies_backpressure_until_ui_consumes_a_message() {
         let (tx, rx) = capture_update_channel(true);
-        tx.send_blocking(BackendTrafficMessage::OfflineGap(1, 1)).unwrap();
-        tx.send_blocking(BackendTrafficMessage::OfflineGap(1, 2)).unwrap();
+        tx.send_blocking(BackendTrafficMessage::OfflineGap(1, 1))
+            .unwrap();
+        tx.send_blocking(BackendTrafficMessage::OfflineGap(1, 2))
+            .unwrap();
 
         let (started_tx, started_rx) = mpsc::channel();
         let (done_tx, done_rx) = mpsc::channel();
@@ -282,17 +287,21 @@ mod update_channel_tests {
     fn live_update_channel_does_not_block_producer_when_ui_is_slow() {
         let (tx, _rx) = capture_update_channel(false);
         for i in 0..100 {
-            tx.send_blocking(BackendTrafficMessage::OfflineGap(1, i)).unwrap();
+            tx.send_blocking(BackendTrafficMessage::OfflineGap(1, i))
+                .unwrap();
         }
     }
 
     #[test]
     fn closing_offline_update_channel_unblocks_a_blocked_producer() {
         let (tx, rx) = capture_update_channel(true);
-        tx.send_blocking(BackendTrafficMessage::OfflineGap(1, 1)).unwrap();
-        tx.send_blocking(BackendTrafficMessage::OfflineGap(1, 2)).unwrap();
+        tx.send_blocking(BackendTrafficMessage::OfflineGap(1, 1))
+            .unwrap();
+        tx.send_blocking(BackendTrafficMessage::OfflineGap(1, 2))
+            .unwrap();
         let producer = std::thread::spawn(move || {
-            tx.send_blocking(BackendTrafficMessage::OfflineGap(1, 3)).is_err()
+            tx.send_blocking(BackendTrafficMessage::OfflineGap(1, 3))
+                .is_err()
         });
         rx.close();
         assert!(producer.join().unwrap());

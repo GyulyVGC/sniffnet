@@ -1127,10 +1127,8 @@ impl Sniffer {
                 // Offline PCAP imports can run much faster than the UI consumes updates.
                 // Apply backpressure only to imports so queued snapshots cannot grow without
                 // bound; keep live capture non-blocking to avoid adding packet loss here.
-                let (tx, rx) = capture_update_channel(matches!(
-                    &self.capture_source,
-                    CaptureSource::File(_)
-                ));
+                let (tx, rx) =
+                    capture_update_channel(matches!(&self.capture_source, CaptureSource::File(_)));
                 let (freeze_tx, freeze_rx) = tokio::sync::broadcast::channel(1_048_575);
                 let freeze_rx2 = freeze_tx.subscribe();
                 let filters = self.conf.filters.clone();
