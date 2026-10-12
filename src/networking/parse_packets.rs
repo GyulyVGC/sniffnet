@@ -315,3 +315,155 @@ mod tests {
         assert!(pending_hosts.unwrap().is_empty());
     }
 }
+
+#[cfg(test)]
+mod offline_import_tests {
+    use super::parse_packets;
+    use crate::gui::types::filters::Filters;
+    use crate::mmdb::types::mmdb_reader::{MmdbReader, MmdbReaders};
+    use crate::networking::capture::{BackendTrafficMessage, capture_update_channel};
+    use crate::networking::types::capture_context::{CaptureContext, CaptureSource, MyPcapImport};
+    use crate::networking::types::ip_blacklist::IpBlacklist;
+    use std::fs::{self, File};
+    use std::io::Write;
+    use std::sync::Arc;
+    use std::time::{Duration, Instant, SystemTime, UNIX_EPOCH};
+
+    fn write_u16_le(out: &mut Vec<u8>, value: u16) {
+        out.extend_from_slice(&value.to_le_bytes());
+    }
+
+    fn write_u32_le(out: &mut Vec<u8>, value: u32) {
+        out.extend_from_slice(&value.to_le_bytes());
+    }
+
+    fn synthetic_udp_frame(source_port: u16, destination_port: u16) -> Vec<u8> {
+        let mut frame = Vec::with_capacity(42);
+        // Ethernet II header: fixed locally administered MAC addresses, IPv4 payload.
+        frame.extend_from_slice(&[0x02, 0, 0, 0, 0, 2, 0x02, 0, 0, 0, 0, 1]);
+        frame.extend_from_slice(&[0x08, 0x00]);
+        // Minimal IPv4 header (checksum is ignored by the packet parser).
+        frame.extend_from_slice(&[
+            0x45, 0, 0, 28, 0, 1, 0, 0, 64, 17, 0, 0, 127, 0, 0, 1, 127, 0, 0, 1,
+        ]);
+        // UDP header with no payload.
+        frame.extend_from_slice(&source_port.to_be_bytes());
+        frame.extend_from_slice(&destination_port.to_be_bytes());
+        frame.extend_from_slice(&[0, 8, 0, 0]);
+        frame
+    }
+
+    fn write_synthetic_pcap(path: &std::path::Path) {
+        let mut bytes = Vec::new();
+        // Classic PCAP, little-endian, microsecond timestamps, Ethernet link type.
+        bytes.extend_from_slice(&[0xd4, 0xc3, 0xb2, 0xa1]);
+        write_u16_le(&mut bytes, 2);
+        write_u16_le(&mut bytes, 4);
+        write_u32_le(&mut bytes, 0);
+        write_u32_le(&mut bytes, 0);
+        write_u32_le(&mut bytes, 65_535);
+        write_u32_le(&mut bytes, 1);
+
+        let mut packet_count = 0_u16;
+        for seconds in [1_u32, 2, 10, 11] {
+            for _ in 0..3 {
+                let frame = synthetic_udp_frame(20_000 + packet_count, 30_000 + packet_count);
+                write_u32_le(&mut bytes, seconds);
+                write_u32_le(&mut bytes, u32::from(packet_count) * 100);
+                let frame_len = u32::try_from(frame.len()).unwrap();
+                write_u32_le(&mut bytes, frame_len);
+                write_u32_le(&mut bytes, frame_len);
+                bytes.extend_from_slice(&frame);
+                packet_count += 1;
+            }
+        }
+
+        File::create(path).unwrap().write_all(&bytes).unwrap();
+    }
+
+    #[test]
+    fn synthetic_pcap_import_handles_time_gaps_with_a_slow_ui_consumer() {
+        let nonce = SystemTime::now()
+            .duration_since(UNIX_EPOCH)
+            .unwrap()
+            .as_nanos();
+        let path = std::env::temp_dir().join(format!(
+            "sniffnet-offline-import-{}-{nonce}.pcap",
+            std::process::id()
+        ));
+        write_synthetic_pcap(&path);
+
+        let source = CaptureSource::File(MyPcapImport::new(path.to_string_lossy().into_owned()));
+        let context = CaptureContext::new(&source, None, &Filters::default());
+        assert!(context.error().is_none(), "synthetic PCAP must open");
+
+        let readers = MmdbReaders {
+            country: Arc::new(MmdbReader::Empty),
+            asn: Arc::new(MmdbReader::Empty),
+        };
+        let (tx, rx) = capture_update_channel(true);
+        let (freeze_tx_1, freeze_rx_1) = tokio::sync::broadcast::channel(1);
+        let (freeze_tx_2, freeze_rx_2) = tokio::sync::broadcast::channel(1);
+        let worker = std::thread::spawn(move || {
+            parse_packets(
+                7,
+                source,
+                &readers,
+                &IpBlacklist::default(),
+                context,
+                Filters::default(),
+                &tx,
+                (freeze_rx_1, freeze_rx_2),
+            );
+        });
+
+        let started = Instant::now();
+        let mut tick_count = 0;
+        let mut saw_final_tick = false;
+        let mut observed_gap = None;
+        let mut saw_pending_hosts = false;
+        let deadline = Instant::now() + Duration::from_secs(10);
+        loop {
+            match rx.try_recv() {
+                Ok(BackendTrafficMessage::TickRun(7, info, _, is_final)) => {
+                    tick_count += 1;
+                    saw_final_tick |= is_final;
+                    if is_final {
+                        assert!(info.last_packet_timestamp.secs() >= 11);
+                    }
+                }
+                Ok(BackendTrafficMessage::OfflineGap(7, seconds)) => {
+                    observed_gap = Some(seconds);
+                }
+                Ok(BackendTrafficMessage::PendingHosts(7, _)) => {
+                    saw_pending_hosts = true;
+                    break;
+                }
+                Ok(_) => {}
+                Err(async_channel::TryRecvError::Empty) if Instant::now() < deadline => {
+                    std::thread::sleep(Duration::from_millis(1));
+                    continue;
+                }
+                Err(error) => panic!("timed out waiting for synthetic PCAP import: {error}"),
+            }
+            // Simulate a UI consumer that is slower than the packet producer.
+            std::thread::sleep(Duration::from_millis(2));
+        }
+        worker.join().unwrap();
+        let elapsed = started.elapsed();
+        fs::remove_file(path).unwrap();
+
+        assert_eq!(
+            tick_count, 4,
+            "one tick per timestamp boundary plus final tick"
+        );
+        assert_eq!(observed_gap, Some(7), "the 2s-to-10s gap must be preserved");
+        assert!(saw_final_tick, "the final traffic snapshot must be emitted");
+        assert!(saw_pending_hosts, "the import must finish host delivery");
+        assert!(
+            elapsed < Duration::from_secs(10),
+            "import took too long: {elapsed:?}"
+        );
+        eprintln!("synthetic PCAP import with slow consumer: {elapsed:?}");
+    }
+}
