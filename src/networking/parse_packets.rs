@@ -314,93 +314,6 @@ mod tests {
         assert!(pending_hosts.is_some());
         assert!(pending_hosts.unwrap().is_empty());
     }
-
-    #[test]
-    fn synthetic_pcap_large_import_preserves_updates_with_slow_consumer() {
-        const TIMESTAMP_COUNT: u32 = 2_048;
-        let nonce = SystemTime::now()
-            .duration_since(UNIX_EPOCH)
-            .unwrap()
-            .as_nanos();
-        let path = std::env::temp_dir().join(format!(
-            "sniffnet-offline-large-stress-{}-{nonce}.pcap",
-            std::process::id()
-        ));
-        let timestamps: Vec<u32> = (1..=TIMESTAMP_COUNT).collect();
-        write_synthetic_pcap(&path, &timestamps, 1);
-
-        let source = CaptureSource::File(MyPcapImport::new(path.to_string_lossy().into_owned()));
-        let context = CaptureContext::new(&source, None, &Filters::default());
-        assert!(context.error().is_none(), "large stress PCAP must open");
-        let readers = MmdbReaders {
-            country: Arc::new(MmdbReader::Empty),
-            asn: Arc::new(MmdbReader::Empty),
-        };
-        let (tx, rx) = capture_update_channel(true);
-        let (freeze_tx_1, freeze_rx_1) = tokio::sync::broadcast::channel(1);
-        let (freeze_tx_2, freeze_rx_2) = tokio::sync::broadcast::channel(1);
-        let worker = std::thread::spawn(move || {
-            parse_packets(
-                10,
-                source,
-                &readers,
-                &IpBlacklist::default(),
-                context,
-                Filters::default(),
-                &tx,
-                (freeze_rx_1, freeze_rx_2),
-            );
-        });
-
-        let started = Instant::now();
-        let deadline = Instant::now() + Duration::from_secs(20);
-        let mut tick_count = 0_u32;
-        let mut final_timestamp = None;
-        let mut saw_final_tick = false;
-        let mut saw_pending_hosts = false;
-        loop {
-            match rx.try_recv() {
-                Ok(BackendTrafficMessage::TickRun(10, info, _, is_final)) => {
-                    tick_count += 1;
-                    if is_final {
-                        final_timestamp = Some(info.last_packet_timestamp.secs());
-                        saw_final_tick = true;
-                    }
-                }
-                Ok(BackendTrafficMessage::PendingHosts(10, _)) => {
-                    saw_pending_hosts = true;
-                    break;
-                }
-                Ok(_) => {}
-                Err(async_channel::TryRecvError::Empty) if Instant::now() < deadline => {
-                    std::thread::sleep(Duration::from_millis(1));
-                    continue;
-                }
-                Err(error) => panic!("timed out waiting for large stress PCAP import: {error}"),
-            }
-            // Force repeated backpressure while retaining every UI update.
-            std::thread::sleep(Duration::from_millis(1));
-        }
-        worker.join().unwrap();
-        let elapsed = started.elapsed();
-        fs::remove_file(path).unwrap();
-
-        assert_eq!(tick_count, TIMESTAMP_COUNT);
-        assert_eq!(final_timestamp, Some(TIMESTAMP_COUNT));
-        assert!(saw_final_tick, "the final traffic snapshot must be emitted");
-        assert!(
-            saw_pending_hosts,
-            "the large import must finish host delivery"
-        );
-        assert!(
-            elapsed < Duration::from_secs(20),
-            "large stress import took {elapsed:?}"
-        );
-        eprintln!(
-            "synthetic PCAP large stress import: {TIMESTAMP_COUNT} timestamp updates, slow consumer, {elapsed:?}"
-        );
-        let _ = (freeze_tx_1, freeze_tx_2);
-    }
 }
 
 #[cfg(test)]
@@ -714,6 +627,93 @@ mod offline_import_tests {
         );
         eprintln!(
             "synthetic PCAP stress import: {TIMESTAMP_COUNT} timestamp updates, slow consumer, {elapsed:?}"
+        );
+        let _ = (freeze_tx_1, freeze_tx_2);
+    }
+
+    #[test]
+    fn synthetic_pcap_large_import_preserves_updates_with_slow_consumer() {
+        const TIMESTAMP_COUNT: u32 = 2_048;
+        let nonce = SystemTime::now()
+            .duration_since(UNIX_EPOCH)
+            .unwrap()
+            .as_nanos();
+        let path = std::env::temp_dir().join(format!(
+            "sniffnet-offline-large-stress-{}-{nonce}.pcap",
+            std::process::id()
+        ));
+        let timestamps: Vec<u32> = (1..=TIMESTAMP_COUNT).collect();
+        write_synthetic_pcap(&path, &timestamps, 1);
+
+        let source = CaptureSource::File(MyPcapImport::new(path.to_string_lossy().into_owned()));
+        let context = CaptureContext::new(&source, None, &Filters::default());
+        assert!(context.error().is_none(), "large stress PCAP must open");
+        let readers = MmdbReaders {
+            country: Arc::new(MmdbReader::Empty),
+            asn: Arc::new(MmdbReader::Empty),
+        };
+        let (tx, rx) = capture_update_channel(true);
+        let (freeze_tx_1, freeze_rx_1) = tokio::sync::broadcast::channel(1);
+        let (freeze_tx_2, freeze_rx_2) = tokio::sync::broadcast::channel(1);
+        let worker = std::thread::spawn(move || {
+            parse_packets(
+                10,
+                source,
+                &readers,
+                &IpBlacklist::default(),
+                context,
+                Filters::default(),
+                &tx,
+                (freeze_rx_1, freeze_rx_2),
+            );
+        });
+
+        let started = Instant::now();
+        let deadline = Instant::now() + Duration::from_secs(20);
+        let mut tick_count = 0_u32;
+        let mut final_timestamp = None;
+        let mut saw_final_tick = false;
+        let mut saw_pending_hosts = false;
+        loop {
+            match rx.try_recv() {
+                Ok(BackendTrafficMessage::TickRun(10, info, _, is_final)) => {
+                    tick_count += 1;
+                    if is_final {
+                        final_timestamp = Some(info.last_packet_timestamp.secs());
+                        saw_final_tick = true;
+                    }
+                }
+                Ok(BackendTrafficMessage::PendingHosts(10, _)) => {
+                    saw_pending_hosts = true;
+                    break;
+                }
+                Ok(_) => {}
+                Err(async_channel::TryRecvError::Empty) if Instant::now() < deadline => {
+                    std::thread::sleep(Duration::from_millis(1));
+                    continue;
+                }
+                Err(error) => panic!("timed out waiting for large stress PCAP import: {error}"),
+            }
+            // Force repeated backpressure while retaining every UI update.
+            std::thread::sleep(Duration::from_millis(1));
+        }
+        worker.join().unwrap();
+        let elapsed = started.elapsed();
+        fs::remove_file(path).unwrap();
+
+        assert_eq!(tick_count, TIMESTAMP_COUNT);
+        assert_eq!(final_timestamp, Some(TIMESTAMP_COUNT));
+        assert!(saw_final_tick, "the final traffic snapshot must be emitted");
+        assert!(
+            saw_pending_hosts,
+            "the large import must finish host delivery"
+        );
+        assert!(
+            elapsed < Duration::from_secs(20),
+            "large stress import took {elapsed:?}"
+        );
+        eprintln!(
+            "synthetic PCAP large stress import: {TIMESTAMP_COUNT} timestamp updates, slow consumer, {elapsed:?}"
         );
         let _ = (freeze_tx_1, freeze_tx_2);
     }
