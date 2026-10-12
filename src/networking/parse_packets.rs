@@ -22,6 +22,22 @@ use std::thread;
 use std::time::{Duration, Instant};
 use tokio::sync::broadcast::Receiver;
 
+/// Wait for reverse-DNS results while allowing a cancelled capture to stop promptly.
+fn wait_for_pending_hosts(
+    tx: &Sender<BackendTrafficMessage>,
+    resolutions_state: &mut AddressesResolutionState,
+) -> Option<Vec<crate::networking::types::host::HostMessage>> {
+    let mut pending_hosts = Vec::new();
+    while !resolutions_state.addresses_waiting_resolution.is_empty() {
+        if tx.is_closed() {
+            return None;
+        }
+        pending_hosts.extend(resolutions_state.new_hosts_to_send());
+        thread::sleep(Duration::from_secs(1));
+    }
+    Some(pending_hosts)
+}
+
 /// The calling thread enters a loop in which it waits for network packets
 #[allow(clippy::too_many_lines, clippy::too_many_arguments)]
 pub fn parse_packets(
@@ -100,12 +116,11 @@ pub fn parse_packets(
                         resolutions_state.new_hosts_to_send(),
                         true,
                     ));
-                    // wait until there is still some IP address waiting for resolution
-                    let mut pending_hosts = Vec::new();
-                    while !resolutions_state.addresses_waiting_resolution.is_empty() {
-                        pending_hosts.extend(resolutions_state.new_hosts_to_send());
-                        thread::sleep(Duration::from_secs(1));
-                    }
+                    // Wait for pending reverse-DNS resolutions unless the capture is cancelled.
+                    let Some(pending_hosts) = wait_for_pending_hosts(tx, &mut resolutions_state)
+                    else {
+                        return;
+                    };
                     // send one last message including all pending hosts
                     let _ = tx
                         .send_blocking(BackendTrafficMessage::PendingHosts(cap_id, pending_hosts));
@@ -247,4 +262,56 @@ fn packet_stream(
 struct PacketOwned {
     header: PacketHeader,
     data: Box<[u8]>,
+}
+
+#[cfg(test)]
+mod tests {
+    use super::wait_for_pending_hosts;
+    use crate::networking::capture::AddressesResolutionState;
+    use crate::networking::types::data_info::DataInfo;
+    use std::net::{IpAddr, Ipv4Addr};
+    use std::time::Duration;
+
+    #[test]
+    fn pending_host_wait_returns_when_capture_channel_closes_during_wait() {
+        let (tx, rx) = async_channel::bounded(1);
+        let mut state = AddressesResolutionState::new_for_tests();
+        state
+            .addresses_waiting_resolution
+            .insert(IpAddr::V4(Ipv4Addr::LOCALHOST), DataInfo::default());
+        let waiter = std::thread::spawn(move || wait_for_pending_hosts(&tx, &mut state).is_none());
+
+        // Let the worker enter its wait before simulating capture cancellation.
+        std::thread::sleep(Duration::from_millis(50));
+        drop(rx);
+
+        assert!(waiter.join().unwrap());
+    }
+
+    #[test]
+    fn closing_full_capture_channel_unblocks_blocked_backend_send() {
+        let (tx, rx) = async_channel::bounded(1);
+        tx.send_blocking(crate::networking::capture::BackendTrafficMessage::OfflineGap(0, 1))
+            .unwrap();
+
+        let blocked_sender = std::thread::spawn(move || {
+            tx.send_blocking(crate::networking::capture::BackendTrafficMessage::OfflineGap(0, 2))
+                .is_err()
+        });
+
+        // Closing the receiver must release a producer waiting for queue capacity.
+        rx.close();
+        assert!(blocked_sender.join().unwrap());
+    }
+
+    #[test]
+    fn pending_host_wait_completes_when_no_resolutions_remain() {
+        let (tx, _rx) = async_channel::bounded(1);
+        let mut state = AddressesResolutionState::new_for_tests();
+
+        let pending_hosts = wait_for_pending_hosts(&tx, &mut state);
+
+        assert!(pending_hosts.is_some());
+        assert!(pending_hosts.unwrap().is_empty());
+    }
 }
