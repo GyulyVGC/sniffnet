@@ -96,6 +96,8 @@ pub fn totals_translation(language: Language) -> &'static str {
     match language {
         Language::EN => "Totals",
         Language::IT => "Totali",
+        Language::ZH => "总计",
+        Language::ZH_TW => "總計",
         _ => "Totals",
     }
 }
@@ -104,6 +106,8 @@ pub fn current_rates_translation(language: Language) -> &'static str {
     match language {
         Language::EN => "Current rates",
         Language::IT => "Intensità attuale",
+        Language::ZH => "当前速率",
+        Language::ZH_TW => "目前速率",
         _ => "Current rates",
     }
 }
