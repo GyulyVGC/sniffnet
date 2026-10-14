@@ -170,7 +170,7 @@ mod tests {
     use super::*;
 
     #[test]
-    fn idle_intervals_have_no_arcs_and_keep_zero_rate_title() {
+    fn test_empty_donut_chart() {
         for dropped in [None, Some(0)] {
             for thumbnail in [false, true] {
                 let chart = DonutChart::new(DataRepr::bytes(true), 0, 0, dropped, thumbnail);
@@ -185,11 +185,18 @@ mod tests {
     }
 
     #[test]
-    fn active_intervals_keep_proportional_arcs() {
-        let chart = DonutChart::new(DataRepr::bytes(true), 100, 300, Some(0), false);
-        let angles = chart.angles();
-        assert!((angles[0].1.0 - angles[0].0.0 - consts::FRAC_PI_2).abs() < 0.000_001);
-        assert!((angles[1].1.0 - angles[1].0.0 - 3.0 * consts::FRAC_PI_2).abs() < 0.000_001);
-        assert_eq!(angles[2].0, angles[2].1);
+    fn test_donut_chart_angles() {
+        for thumbnail in [false, true] {
+            for per_second in [false, true] {
+                let chart =
+                    DonutChart::new(DataRepr::bytes(per_second), 100, 200, Some(100), thumbnail);
+                let angles = chart.angles();
+                assert!((angles[0].1.0 - angles[0].0.0 - consts::FRAC_PI_2).abs() < 0.000_001);
+                assert!(
+                    (angles[1].1.0 - angles[1].0.0 - 2.0 * consts::FRAC_PI_2).abs() < 0.000_001
+                );
+                assert!((angles[2].1.0 - angles[2].0.0 - consts::FRAC_PI_2).abs() < 0.000_001);
+            }
+        }
     }
 }
