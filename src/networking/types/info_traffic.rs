@@ -18,8 +18,6 @@ pub struct InfoTraffic {
     pub tot_data_info: DataInfo,
     /// Number of dropped packets, if applicable
     pub dropped_packets: Option<DroppedPackets>,
-    /// Dropped packets during the latest capture interval, if available.
-    pub latest_dropped_packets: Option<DroppedPackets>,
     /// Timestamp of the latest parsed packet
     pub last_packet_timestamp: Timestamp,
     /// Map of the traffic
@@ -35,7 +33,6 @@ impl InfoTraffic {
         let Self {
             tot_data_info,
             dropped_packets,
-            latest_dropped_packets: _,
             last_packet_timestamp,
             map,
             services,
@@ -48,9 +45,11 @@ impl InfoTraffic {
             program_lookup.start_interval();
         }
 
-        self.latest_dropped_packets =
-            dropped_packets.map(|current| current.since(self.dropped_packets.unwrap_or_default()));
-        self.dropped_packets = *dropped_packets;
+        self.dropped_packets = dropped_packets.map(|current| {
+            let mut updated = self.dropped_packets.unwrap_or_default();
+            updated.refresh(current);
+            updated
+        });
 
         // it can happen they're equal due to dis-alignments in the PCAP timestamp
         if self.last_packet_timestamp.secs() == last_packet_timestamp.secs() {
@@ -110,7 +109,9 @@ impl InfoTraffic {
     /// Snapshot totals so inactive entries display zero in the next interval.
     pub fn start_interval(&mut self) {
         self.tot_data_info.start_interval();
-        self.latest_dropped_packets = self.dropped_packets.map(|_| DroppedPackets::default());
+        if let Some(dropped_packets) = &mut self.dropped_packets {
+            dropped_packets.start_interval();
+        }
         for value in self.map.values_mut() {
             value.start_interval();
         }
@@ -136,7 +137,7 @@ impl InfoTraffic {
 mod tests {
     use super::*;
     use crate::Protocol;
-    use crate::networking::types::data_representation::{DataRepr, DataUnit};
+    use crate::networking::types::data_representation::DataRepr;
     use crate::networking::types::program::Program;
     use crate::networking::types::traffic_direction::TrafficDirection;
     use listeners::Process;
@@ -366,31 +367,31 @@ mod tests {
         traffic.refresh(&mut msg, &mut None);
         assert_eq!(
             traffic
-                .latest_dropped_packets
+                .dropped_packets
                 .unwrap()
-                .total(DataUnit::Packets, traffic.tot_data_info),
+                .total(DataRepr::packets(true), traffic.tot_data_info),
             4
         );
         assert_eq!(
             traffic
                 .dropped_packets
                 .unwrap()
-                .total(DataUnit::Packets, traffic.tot_data_info),
+                .total(DataRepr::packets(false), traffic.tot_data_info),
             9
         );
         traffic.start_interval();
         assert_eq!(
             traffic
-                .latest_dropped_packets
+                .dropped_packets
                 .unwrap()
-                .total(DataUnit::Packets, traffic.tot_data_info),
+                .total(DataRepr::packets(true), traffic.tot_data_info),
             0
         );
         assert_eq!(
             traffic
                 .dropped_packets
                 .unwrap()
-                .total(DataUnit::Packets, traffic.tot_data_info),
+                .total(DataRepr::packets(false), traffic.tot_data_info),
             9
         );
     }

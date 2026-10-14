@@ -541,11 +541,7 @@ fn donut_row(language: Language, sniffer: &Sniffer) -> Container<'_, Message, St
 
     let in_data = tot_data_info.incoming_data(data_repr);
     let out_data = tot_data_info.outgoing_data(data_repr);
-    let dropped = if data_repr.per_second {
-        sniffer.info_traffic.latest_dropped_packets
-    } else {
-        sniffer.info_traffic.dropped_packets
-    };
+    let dropped = sniffer.info_traffic.dropped_packets;
 
     let legend_col = Column::new()
         .spacing(5)
@@ -562,7 +558,7 @@ fn donut_row(language: Language, sniffer: &Sniffer) -> Container<'_, Message, St
             language,
         ))
         .push(dropped.map(|d| {
-            let drop_tot = d.total(data_repr.data_unit, tot_data_info);
+            let drop_tot = d.total(data_repr, tot_data_info);
             donut_legend_entry(drop_tot, data_repr, RuleType::Dropped, language).push(
                 if drop_tot > 0 {
                     Some(get_info_tooltip(
@@ -571,9 +567,8 @@ fn donut_row(language: Language, sniffer: &Sniffer) -> Container<'_, Message, St
                             .push(
                                 Text::new(format!(
                                     "{SNIFFNET_TITLECASE}: {}",
-                                    data_repr.formatted_string(
-                                        d.by_sniffnet(data_repr.data_unit, tot_data_info)
-                                    )
+                                    data_repr
+                                        .formatted_string(d.by_sniffnet(data_repr, tot_data_info))
                                 ))
                                 .size(FONT_SIZE_FOOTER),
                             )
@@ -581,9 +576,8 @@ fn donut_row(language: Language, sniffer: &Sniffer) -> Container<'_, Message, St
                                 Text::new(format!(
                                     "{}: {}",
                                     network_adapter_translation(language),
-                                    data_repr.formatted_string(
-                                        d.by_adapter(data_repr.data_unit, tot_data_info)
-                                    )
+                                    data_repr
+                                        .formatted_string(d.by_adapter(data_repr, tot_data_info))
                                 ))
                                 .size(FONT_SIZE_FOOTER),
                             )
@@ -602,7 +596,7 @@ fn donut_row(language: Language, sniffer: &Sniffer) -> Container<'_, Message, St
             data_repr,
             in_data,
             out_data,
-            dropped.map(|d| d.total(data_repr.data_unit, tot_data_info)),
+            dropped.map(|d| d.total(data_repr, tot_data_info)),
             sniffer.thumbnail,
         ))
         .push(legend_col);
