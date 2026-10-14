@@ -27,8 +27,9 @@ pub struct InfoAddressPortPair {
     pub bytes: u128,
     /// Amount of packets transmitted between the pair.
     pub packets: u128,
-    /// Cumulative packets and bytes at the start of the displayed interval.
+    /// Previous interval's packets
     pub previous_packets: u128,
+    /// Previous interval's bytes
     pub previous_bytes: u128,
     /// First occurrence of information exchange featuring the associate address:port pair as a source or destination.
     pub initial_timestamp: Timestamp,
