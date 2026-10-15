@@ -55,7 +55,7 @@ pub fn notify_and_log(
         if data_info.tot_data(data_repr) > u128::from(threshold) {
             let notification = LoggedNotification::DataThresholdExceeded(DataThresholdExceeded {
                 id: logged_notifications.tot(),
-                data_unit: data_repr.data_unit,
+                data_repr,
                 threshold,
                 data_info,
                 timestamp: get_formatted_timestamp(timestamp),

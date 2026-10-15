@@ -1,4 +1,5 @@
 use crate::gui::styles::types::style_type::StyleType;
+use crate::gui::types::conf::deserialize_or_default;
 use crate::translations::translations::{
     bytes_exceeded_translation, bytes_translation, packets_exceeded_translation,
     packets_translation,
@@ -12,7 +13,9 @@ use serde::{Deserialize, Serialize};
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize, Default)]
 #[serde(default)]
 pub struct DataRepr {
+    #[serde(deserialize_with = "deserialize_or_default")]
     pub(crate) data_unit: DataUnit,
+    #[serde(deserialize_with = "deserialize_or_default")]
     pub(crate) per_second: bool,
 }
 

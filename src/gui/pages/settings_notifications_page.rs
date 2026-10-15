@@ -137,8 +137,7 @@ fn get_data_notify<'a>(
             .width(CONTAINERS_WIDTH)
             .class(ContainerType::BorderedRound)
     } else {
-        let data_representation_row =
-            row_data_representation(data_notification, language, data_notification.data_unit);
+        let data_representation_row = row_data_representation(data_notification, language);
         let input_row = input_group_bytes(data_notification, language);
         let sound_row = sound_buttons(Notification::Data(data_notification), language);
         ret_val = ret_val
@@ -423,7 +422,6 @@ pub fn settings_header<'a>(
 fn row_data_representation<'a>(
     data_notification: DataNotification,
     language: Language,
-    data_unit: DataUnit,
 ) -> row::Wrapping<'a, Message, StyleType> {
     let mut ret_val = Row::new()
         .width(Length::Shrink)
@@ -436,7 +434,7 @@ fn row_data_representation<'a>(
         )));
 
     for option in DataUnit::ALL {
-        let is_active = data_unit.eq(&option);
+        let is_active = data_notification.data_unit.eq(&option);
         let button = Button::new(
             option
                 .get_icon()

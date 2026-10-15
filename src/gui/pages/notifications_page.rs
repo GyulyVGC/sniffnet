@@ -137,21 +137,21 @@ fn data_notification_log<'a>(
     language: Language,
 ) -> Container<'a, Message, StyleType> {
     let data_info = logged_notification.data_info;
-    let data_unit = logged_notification.data_unit;
-    let main_info = data_unit.data_exceeded_translation(language).to_string();
+    let data_repr = logged_notification.data_repr;
+    let main_info = data_repr
+        .data_unit
+        .data_exceeded_translation(language)
+        .to_string();
     let threshold_bar = item_bar(
         threshold_tooltip(main_info.clone()),
         String::new(),
         &data_info,
-        DataRepr {
-            data_unit,
-            per_second: false,
-        },
+        data_repr,
         first_entry_data_info,
     );
 
-    let data_string = data_unit.formatted_string(logged_notification.threshold.into());
-    let icon = if data_unit == DataUnit::Packets {
+    let data_string = data_repr.formatted_string(logged_notification.threshold.into());
+    let icon = if data_repr.data_unit == DataUnit::Packets {
         Icon::PacketsThreshold
     } else {
         Icon::BytesThreshold
@@ -403,10 +403,7 @@ fn data_notification_extra<'a>(
     #[allow(clippy::cast_precision_loss)]
     let height = (ICONS_SIZE_BIG + spacing) * max_entries as f32;
 
-    let data_repr = DataRepr {
-        data_unit: logged_notification.data_unit,
-        per_second: false,
-    };
+    let data_repr = logged_notification.data_repr;
 
     let mut hosts_col = Column::new().spacing(spacing).width(Length::FillPortion(2));
     let first_data_info = logged_notification

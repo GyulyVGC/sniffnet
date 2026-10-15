@@ -2204,7 +2204,7 @@ mod tests {
             .set_notifications(VecDeque::from([LoggedNotification::DataThresholdExceeded(
                 DataThresholdExceeded {
                     id: 1,
-                    data_unit: DataUnit::Packets,
+                    data_repr: DataRepr::packets(false),
                     threshold: 0,
                     data_info: DataInfo::default(),
                     timestamp: "".to_string(),
