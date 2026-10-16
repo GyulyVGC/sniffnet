@@ -1083,6 +1083,15 @@
       "contributions": [
         "financial"
       ]
+    },
+    {
+      "login": "jason081112",
+      "name": "Jason Wang",
+      "avatar_url": "https://avatars.githubusercontent.com/u/58059436?v=4",
+      "profile": "https://github.com/jason081112",
+      "contributions": [
+        "translation"
+      ]
     }
   ],
   "contributorsPerLine": 7,
