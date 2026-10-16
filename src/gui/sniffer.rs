@@ -939,10 +939,7 @@ impl Sniffer {
     fn offline_gap(&mut self, cap_id: usize, gap: u32) {
         if cap_id == self.current_capture_rx.0 {
             self.traffic_chart.push_offline_gap_to_splines(gap);
-            self.info_traffic.start_interval();
-            if let Some(program_lookup) = &mut self.program_lookup {
-                program_lookup.start_interval();
-            }
+            self.info_traffic.start_interval(&mut self.program_lookup);
         }
     }
 

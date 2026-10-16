@@ -48,10 +48,7 @@ impl InfoTraffic {
             hosts_active_last_interval: _,
         } = msg;
 
-        self.start_interval();
-        if let Some(program_lookup) = program_lookup_opt {
-            program_lookup.start_interval();
-        }
+        self.start_interval(program_lookup_opt);
 
         self.tot_data_info.refresh(*tot_data_info);
 
@@ -120,21 +117,29 @@ impl InfoTraffic {
     }
 
     /// Assign current totals to previous values, to be used as baselines for the next interval
-    pub fn start_interval(&mut self) {
+    pub fn start_interval(&mut self, program_lookup_opt: &mut Option<ProgramLookup>) {
+        if let Some(program_lookup) = program_lookup_opt {
+            program_lookup.start_interval();
+        }
+
         self.tot_data_info.start_interval();
+
         if let Some(dropped_packets) = &mut self.dropped_packets {
             dropped_packets.start_interval();
         }
+
         for key in self.connections_active_last_interval.drain(..) {
             if let Some(value) = self.map.get_mut(&key) {
                 value.start_interval();
             }
         }
+
         for key in self.services_active_last_interval.drain(..) {
             if let Some(value) = self.services.get_mut(&key) {
                 value.start_interval();
             }
         }
+
         for key in self.hosts_active_last_interval.drain(..) {
             if let Some(value) = self.hosts.get_mut(&key) {
                 value.data_info.start_interval();
@@ -354,8 +359,7 @@ mod tests {
         assert_eq!(traffic.map[&key(1000)].program, known);
 
         // An offline gap invalidates rates, retaining all cumulative counters.
-        traffic.start_interval();
-        lookup.as_mut().unwrap().start_interval();
+        traffic.start_interval(&mut lookup);
         assert_eq!(traffic.tot_data_info.tot_data(DataRepr::packets(true)), 0);
         assert_eq!(traffic.tot_data_info.tot_data(DataRepr::packets(false)), 18);
         assert_eq!(
@@ -398,7 +402,7 @@ mod tests {
                 .total(DataRepr::packets(false), traffic.tot_data_info),
             9
         );
-        traffic.start_interval();
+        traffic.start_interval(&mut None);
         assert_eq!(
             traffic
                 .dropped_packets
