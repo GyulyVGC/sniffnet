@@ -40,7 +40,7 @@ use crate::networking::types::capture_context::{
     MyPcapImport,
 };
 use crate::networking::types::combobox_data_states::ComboboxDataStates;
-use crate::networking::types::data_representation::DataRepr;
+use crate::networking::types::data_representation::{DataRepr, DataUnit};
 use crate::networking::types::host::{Host, HostMessage};
 use crate::networking::types::info_traffic::InfoTraffic;
 use crate::networking::types::ip_blacklist::IpBlacklist;
@@ -176,7 +176,7 @@ impl Sniffer {
             capture_source,
             capture_error: None,
             dots_pulse: (".".to_string(), 0),
-            traffic_chart: TrafficChart::new(style, language, data_repr),
+            traffic_chart: TrafficChart::new(style, language, data_repr.data_unit),
             preview_charts,
             modal: None,
             settings_page: None,
@@ -305,7 +305,8 @@ impl Sniffer {
             Message::SetCaptureSource(cs_pick) => self.set_capture_source(cs_pick),
             Message::ToggleFilters => self.toggle_filters(),
             Message::BpfFilter(value) => self.bpf_filter(value),
-            Message::DataReprSelection(unit) => self.data_repr_selection(unit),
+            Message::DataUnitSelection(unit) => self.data_unit_selection(unit),
+            Message::UpdateDataRates(per_second) => self.update_data_rates(per_second),
             Message::ReportSortSelection(sort) => self.report_sort_selection(sort),
             Message::OpenWebPage(web_page) => Self::open_web_page(&web_page),
             Message::Start => return self.start(),
@@ -565,9 +566,13 @@ impl Sniffer {
         self.conf.filters.set_bpf(value);
     }
 
-    fn data_repr_selection(&mut self, unit: DataRepr) {
-        self.conf.data_repr = unit;
+    fn data_unit_selection(&mut self, unit: DataUnit) {
+        self.conf.data_repr.data_unit = unit;
         self.traffic_chart.change_kind(unit);
+    }
+
+    fn update_data_rates(&mut self, per_second: bool) {
+        self.conf.data_repr.per_second = per_second;
     }
 
     fn report_sort_selection(&mut self, sort: SortType) {
@@ -934,6 +939,7 @@ impl Sniffer {
     fn offline_gap(&mut self, cap_id: usize, gap: u32) {
         if cap_id == self.current_capture_rx.0 {
             self.traffic_chart.push_offline_gap_to_splines(gap);
+            self.info_traffic.start_interval(&mut self.program_lookup);
         }
     }
 
@@ -1033,7 +1039,12 @@ impl Sniffer {
     fn refresh_data(&mut self, mut msg: InfoTraffic, no_more_packets: bool) {
         self.info_traffic
             .refresh(&mut msg, &mut self.program_lookup);
-        if self.info_traffic.tot_data_info.tot_data(DataRepr::Packets) == 0 {
+        if self
+            .info_traffic
+            .tot_data_info
+            .tot_data(DataRepr::packets(false))
+            == 0
+        {
             return;
         }
         let emitted_notifications = notify_and_log(
@@ -1201,7 +1212,7 @@ impl Sniffer {
         self.latency_statuses = HashMap::new();
         self.logged_notifications = LoggedNotifications::default();
         self.capture_error = None;
-        self.traffic_chart = TrafficChart::new(style, language, self.conf.data_repr);
+        self.traffic_chart = TrafficChart::new(style, language, self.conf.data_repr.data_unit);
         self.modal = None;
         self.settings_page = None;
         self.running_page = None;
@@ -1275,7 +1286,7 @@ impl Sniffer {
         let data_notification = self.conf.settings.notifications.data_notification;
         let sound = match notification {
             Notification::Data(DataNotification {
-                data_repr,
+                data_unit,
                 threshold,
                 byte_multiple,
                 sound,
@@ -1288,7 +1299,7 @@ impl Sniffer {
                 {
                     temp_threshold = DataNotification {
                         sound,
-                        data_repr,
+                        data_unit,
                         threshold,
                         byte_multiple,
                         previous_threshold,
@@ -1309,7 +1320,7 @@ impl Sniffer {
                         .previous_threshold = previous_threshold;
                 }
                 self.conf.settings.notifications.data_notification.sound = sound;
-                self.conf.settings.notifications.data_notification.data_repr = data_repr;
+                self.conf.settings.notifications.data_notification.data_unit = data_unit;
                 sound
             }
             Notification::Favorite(favorite_notification) => {
@@ -1353,7 +1364,12 @@ impl Sniffer {
                 }
                 (Some(current_page), None, true) => {
                     // Running with no overlays
-                    if self.info_traffic.tot_data_info.tot_data(DataRepr::Packets) > 0 {
+                    if self
+                        .info_traffic
+                        .tot_data_info
+                        .tot_data(DataRepr::packets(false))
+                        > 0
+                    {
                         // Running with no overlays and some packets
                         let new_page = if next {
                             current_page.next()
@@ -1399,7 +1415,10 @@ impl Sniffer {
     // also called when the backspace shortcut is pressed
     fn reset_button_pressed(&mut self) -> Task<Message> {
         if self.running_page.is_some() {
-            let tot_packets = self.info_traffic.tot_data_info.tot_data(DataRepr::Packets);
+            let tot_packets = self
+                .info_traffic
+                .tot_data_info
+                .tot_data(DataRepr::packets(false));
             if tot_packets == 0 && self.settings_page.is_none() {
                 return self.reset();
             }
@@ -1409,7 +1428,10 @@ impl Sniffer {
     }
 
     fn quit_wrapper(&mut self) -> Task<Message> {
-        let tot_packets = self.info_traffic.tot_data_info.tot_data(DataRepr::Packets);
+        let tot_packets = self
+            .info_traffic
+            .tot_data_info
+            .tot_data(DataRepr::packets(false));
         if self.running_page.is_none() || tot_packets == 0 {
             self.quit()
         } else if self.thumbnail {
@@ -1497,11 +1519,13 @@ impl Sniffer {
     fn handle_new_host(&mut self, host_msg: HostMessage) {
         let HostMessage {
             host,
-            data_info_host,
+            mut data_info_host,
             address_to_lookup,
             rdns,
         } = host_msg;
 
+        // DNS results carry historical totals, not a new capture interval.
+        data_info_host.data_info.start_interval();
         self.info_traffic
             .hosts
             .entry(host.clone())
@@ -1590,7 +1614,7 @@ mod tests {
     use crate::networking::types::capture_context::CaptureSourcePicklist;
     use crate::networking::types::config_device::ConfigDevice;
     use crate::networking::types::data_info::DataInfo;
-    use crate::networking::types::data_representation::DataRepr;
+    use crate::networking::types::data_representation::{DataRepr, DataUnit};
     use crate::networking::types::host::Host;
     use crate::networking::types::latency::LatencyStatus;
     use crate::networking::types::program::Program;
@@ -1605,6 +1629,49 @@ mod tests {
     use crate::notifications::types::sound::Sound;
     use crate::report::types::sort_type::SortType;
     use crate::{ByteMultiple, Language, RunningPage, Sniffer, StyleType};
+
+    #[test]
+    #[parallel]
+    fn delayed_host_resolution_preserves_rates_without_counting_history() {
+        use crate::networking::types::data_info_host::DataInfoHost;
+        use crate::networking::types::host::HostMessage;
+        use crate::networking::types::info_traffic::InfoTraffic;
+
+        let mut sniffer = Sniffer::new(Conf::default());
+        let host = Host {
+            domain: "example.test".into(),
+            ..Default::default()
+        };
+        let historical = HostMessage {
+            host: host.clone(),
+            data_info_host: DataInfoHost {
+                data_info: DataInfo::new_for_tests(10, 0, 1000, 0),
+                ..Default::default()
+            },
+            address_to_lookup: IpAddr::V4(Ipv4Addr::new(1, 1, 1, 1)),
+            rdns: host.domain.clone(),
+        };
+        sniffer.handle_new_host(historical.clone());
+        let data = sniffer.info_traffic.hosts[&host].data_info;
+        assert_eq!(data.tot_data(DataRepr::packets(false)), 10);
+        assert_eq!(data.tot_data(DataRepr::packets(true)), 0);
+
+        let mut interval = InfoTraffic::default();
+        interval.hosts.insert(
+            host.clone(),
+            DataInfoHost {
+                data_info: DataInfo::new_for_tests(3, 0, 300, 0),
+                ..Default::default()
+            },
+        );
+        sniffer.info_traffic.refresh(&mut interval, &mut None);
+        // Another resolved address can merge history into the same host mid-interval.
+        sniffer.handle_new_host(historical);
+        let data = sniffer.info_traffic.hosts[&host].data_info;
+        assert_eq!(data.tot_data(DataRepr::packets(false)), 23);
+        assert_eq!(data.tot_data(DataRepr::packets(true)), 3);
+        assert_eq!(data.tot_data(DataRepr::bytes(true)), 300);
+    }
 
     // helpful to clean up files generated from tests
     impl Drop for Sniffer {
@@ -1622,20 +1689,20 @@ mod tests {
     fn test_correctly_update_chart_kind() {
         let mut sniffer = Sniffer::new(Conf::default());
 
-        assert_eq!(sniffer.traffic_chart.data_repr, DataRepr::Bytes);
-        assert_eq!(sniffer.conf.data_repr, DataRepr::Bytes);
-        sniffer.update(Message::DataReprSelection(DataRepr::Packets));
-        assert_eq!(sniffer.traffic_chart.data_repr, DataRepr::Packets);
-        assert_eq!(sniffer.conf.data_repr, DataRepr::Packets);
-        sniffer.update(Message::DataReprSelection(DataRepr::Packets));
-        assert_eq!(sniffer.traffic_chart.data_repr, DataRepr::Packets);
-        assert_eq!(sniffer.conf.data_repr, DataRepr::Packets);
-        sniffer.update(Message::DataReprSelection(DataRepr::Bytes));
-        assert_eq!(sniffer.traffic_chart.data_repr, DataRepr::Bytes);
-        assert_eq!(sniffer.conf.data_repr, DataRepr::Bytes);
-        sniffer.update(Message::DataReprSelection(DataRepr::Bits));
-        assert_eq!(sniffer.traffic_chart.data_repr, DataRepr::Bits);
-        assert_eq!(sniffer.conf.data_repr, DataRepr::Bits);
+        assert_eq!(sniffer.traffic_chart.data_unit, DataUnit::Bytes);
+        assert_eq!(sniffer.conf.data_repr, DataRepr::bytes(false));
+        sniffer.update(Message::DataUnitSelection(DataUnit::Packets));
+        assert_eq!(sniffer.traffic_chart.data_unit, DataUnit::Packets);
+        assert_eq!(sniffer.conf.data_repr, DataRepr::packets(false));
+        sniffer.update(Message::DataUnitSelection(DataUnit::Packets));
+        assert_eq!(sniffer.traffic_chart.data_unit, DataUnit::Packets);
+        assert_eq!(sniffer.conf.data_repr, DataRepr::packets(false));
+        sniffer.update(Message::DataUnitSelection(DataUnit::Bytes));
+        assert_eq!(sniffer.traffic_chart.data_unit, DataUnit::Bytes);
+        assert_eq!(sniffer.conf.data_repr, DataRepr::bytes(false));
+        sniffer.update(Message::DataUnitSelection(DataUnit::Bits));
+        assert_eq!(sniffer.traffic_chart.data_unit, DataUnit::Bits);
+        assert_eq!(sniffer.conf.data_repr, DataRepr::bits(false));
     }
 
     #[test]
@@ -1950,7 +2017,7 @@ mod tests {
         let mut sniffer = Sniffer::new(Conf::default());
 
         let bytes_notification_init = DataNotification {
-            data_repr: DataRepr::Bytes,
+            data_unit: DataUnit::Bytes,
             threshold: None,
             byte_multiple: ByteMultiple::KB,
             sound: Sound::Gulp,
@@ -1958,7 +2025,7 @@ mod tests {
         };
 
         let bytes_notification_toggled_on = DataNotification {
-            data_repr: DataRepr::Bytes,
+            data_unit: DataUnit::Bytes,
             threshold: Some(800_000),
             byte_multiple: ByteMultiple::GB,
             sound: Sound::Gulp,
@@ -1966,7 +2033,7 @@ mod tests {
         };
 
         let bytes_notification_adjusted_threshold_sound_off = DataNotification {
-            data_repr: DataRepr::Bytes,
+            data_unit: DataUnit::Bytes,
             threshold: Some(3),
             byte_multiple: ByteMultiple::KB,
             sound: Sound::None,
@@ -1974,7 +2041,7 @@ mod tests {
         };
 
         let bytes_notification_sound_off_only = DataNotification {
-            data_repr: DataRepr::Bytes,
+            data_unit: DataUnit::Bytes,
             threshold: Some(800_000),
             byte_multiple: ByteMultiple::GB,
             sound: Sound::None,
@@ -2134,7 +2201,7 @@ mod tests {
             .set_notifications(VecDeque::from([LoggedNotification::DataThresholdExceeded(
                 DataThresholdExceeded {
                     id: 1,
-                    data_repr: DataRepr::Packets,
+                    data_repr: DataRepr::packets(false),
                     threshold: 0,
                     data_info: DataInfo::default(),
                     timestamp: "".to_string(),
@@ -2281,7 +2348,7 @@ mod tests {
         sniffer.update(Message::SetPcapImport("/test.pcap".to_string()));
         sniffer.update(Message::ToggleExpandedView);
         sniffer.update(Message::ChangeRunningPage(RunningPage::Notifications));
-        sniffer.update(Message::DataReprSelection(DataRepr::Bits));
+        sniffer.update(Message::DataUnitSelection(DataUnit::Bits));
         sniffer.update(Message::LoadIpBlacklist("blacklist_file.csv".to_string()));
         sniffer.update(Message::AddOrRemoveFavorite(
             FavoriteKey::Service(Service::Name("https")),
@@ -2343,7 +2410,7 @@ mod tests {
                 export_pcap,
                 import_pcap_path: "/test.pcap".to_string(),
                 ipfix_socket: Default::default(),
-                data_repr: DataRepr::Bits,
+                data_repr: DataRepr::bits(false),
             }
         );
     }

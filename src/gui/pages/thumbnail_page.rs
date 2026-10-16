@@ -26,7 +26,7 @@ pub fn thumbnail_page(sniffer: &Sniffer) -> Container<'_, Message, StyleType> {
     let tot_packets = sniffer
         .info_traffic
         .tot_data_info
-        .tot_data(DataRepr::Packets);
+        .tot_data(DataRepr::packets(false));
 
     if tot_packets == 0 {
         return Container::new(
@@ -45,8 +45,7 @@ pub fn thumbnail_page(sniffer: &Sniffer) -> Container<'_, Message, StyleType> {
 
     let in_data = tot_data_info.incoming_data(data_repr);
     let out_data = tot_data_info.outgoing_data(data_repr);
-    let dropped = sniffer
-        .info_traffic
+    let dropped = info_traffic
         .dropped_packets
         .map(|d| d.total(data_repr, tot_data_info));
 
@@ -103,7 +102,8 @@ fn host_col<'a>(sniffer: &Sniffer) -> Column<'a, Message, StyleType> {
 
         thumbnail_hosts.push(thumbnail_host);
 
-        let is_dimmed = data_info_host.data_info.tot_data(DataRepr::Packets) == 0;
+        let data_repr = sniffer.conf.data_repr;
+        let is_dimmed = data_info_host.data_info.tot_data(data_repr) == 0;
         let opacity = if is_dimmed {
             sniffer
                 .conf
@@ -146,7 +146,8 @@ fn service_col<'a>(sniffer: &Sniffer) -> Column<'a, Message, StyleType> {
 
         let text = clip_text(&service.to_string(), MAX_CHARS_SERVICE);
 
-        let is_dimmed = data_info.tot_data(DataRepr::Packets) == 0;
+        let data_repr = sniffer.conf.data_repr;
+        let is_dimmed = data_info.tot_data(data_repr) == 0;
         let opacity = if is_dimmed {
             sniffer
                 .conf

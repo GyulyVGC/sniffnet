@@ -21,9 +21,8 @@ use crate::gui::types::message::Message;
 use crate::gui::types::settings::Settings;
 use crate::networking::types::capture_context::CaptureSource;
 use crate::networking::types::data_info::DataInfo;
-use crate::networking::types::data_representation::DataRepr;
+use crate::networking::types::data_representation::{DataRepr, DataUnit};
 use crate::networking::types::ipfix_exporter::IpfixExporter;
-use crate::report::types::sort_type::SortType;
 use crate::translations::translations::{
     active_filters_translation, incoming_translation, network_adapter_translation,
     outgoing_translation, traffic_rate_translation,
@@ -33,7 +32,9 @@ use crate::translations::translations_2::{
 };
 use crate::translations::translations_3::export_capture_translation;
 use crate::translations::translations_5::no_favorites_saved_translation;
-use crate::translations::translations_6::ipfix_exporter_translation;
+use crate::translations::translations_6::{
+    current_rates_translation, ipfix_exporter_translation, totals_translation,
+};
 use crate::utils::formatted_strings::full_print_link_type;
 use crate::utils::types::icon::Icon;
 use crate::{Language, RunningPage, SNIFFNET_TITLECASE, StyleType};
@@ -118,14 +119,14 @@ fn col_favorite_item(
     let first_entry_data_info = entries
         .iter()
         .map(FavoriteItem::data_info)
-        .max_by(|d1, d2| d1.compare(d2, SortType::Ascending, data_repr))
+        .max_by_key(|d| d.tot_data(data_repr))
         .unwrap_or_default();
 
     for fi in &entries {
         let star_button = fi.star_button(&sniffer.conf.favorites);
         let data_info = fi.data_info();
 
-        let icon_opacity = if data_info.tot_data(DataRepr::Packets) == 0 {
+        let icon_opacity = if data_info.tot_data(data_repr) == 0 {
             style.get_extension().alpha_chart_badge
         } else {
             1.0
@@ -229,7 +230,7 @@ pub fn item_bar<'a>(
     data_repr: DataRepr,
     first_entry_data_info: DataInfo,
 ) -> Row<'a, Message, StyleType> {
-    let is_dimmed = data_info.tot_data(DataRepr::Packets) == 0;
+    let is_dimmed = data_info.tot_data(data_repr) == 0;
     Row::new()
         .height(ICONS_SIZE_BIG)
         .align_y(Alignment::Center)
@@ -442,32 +443,94 @@ fn col_data_representation<'a>(
     language: Language,
     data_repr: DataRepr,
 ) -> Column<'a, Message, StyleType> {
-    let mut ret_val = Column::new().spacing(5).push(
-        Text::new(format!("{}:", data_representation_translation(language)))
-            .class(TextType::Subtitle),
-    );
+    let mut ret_val = Column::new()
+        .spacing(10)
+        .push(Text::new(data_representation_translation(language)).class(TextType::Subtitle));
 
-    let [bits, bytes, packets] = DataRepr::ALL.map(|option| {
-        let is_active = data_repr.eq(&option);
-        Button::new(
-            Text::new(option.get_label(language).to_owned())
+    let [bits, bytes, packets] = DataUnit::ALL.map(|option| {
+        let is_active = data_repr.data_unit.eq(&option);
+        let button = Button::new(
+            option
+                .get_icon()
                 .width(Length::Fill)
                 .align_x(Alignment::Center)
                 .align_y(Alignment::Center),
         )
         .width(Length::Fill)
-        .height(33)
+        .height(25)
         .class(if is_active {
             ButtonType::BorderedRoundSelected
         } else {
             ButtonType::BorderedRound
         })
-        .on_press(Message::DataReprSelection(option))
+        .on_press(Message::DataUnitSelection(option));
+
+        Tooltip::new(
+            button,
+            Text::new(option.get_label(language).to_owned()).size(FONT_SIZE_FOOTER),
+            Position::FollowCursor,
+        )
+        .class(ContainerType::Tooltip)
+        .delay(TOOLTIP_DELAY)
     });
 
+    let per_second = data_repr.per_second;
+
+    let totals_button = Button::new(
+        Icon::Totals
+            .to_text()
+            .width(Length::Fill)
+            .align_x(Alignment::Center)
+            .align_y(Alignment::Center),
+    )
+    .width(Length::Fill)
+    .height(25)
+    .class(if per_second {
+        ButtonType::BorderedRound
+    } else {
+        ButtonType::BorderedRoundSelected
+    })
+    .on_press(Message::UpdateDataRates(false));
+    let totals_tooltip = Tooltip::new(
+        totals_button,
+        Text::new(totals_translation(language)).size(FONT_SIZE_FOOTER),
+        Position::FollowCursor,
+    )
+    .class(ContainerType::Tooltip)
+    .delay(TOOLTIP_DELAY);
+
+    let rates_button = Button::new(
+        Icon::LiveRate
+            .to_text()
+            .size(18)
+            .width(Length::Fill)
+            .align_x(Alignment::Center)
+            .align_y(Alignment::Center),
+    )
+    .width(Length::Fill)
+    .height(25)
+    .class(if per_second {
+        ButtonType::BorderedRoundSelected
+    } else {
+        ButtonType::BorderedRound
+    })
+    .on_press(Message::UpdateDataRates(true));
+    let rates_tooltip = Tooltip::new(
+        rates_button,
+        Text::new(current_rates_translation(language)).size(FONT_SIZE_FOOTER),
+        Position::FollowCursor,
+    )
+    .class(ContainerType::Tooltip)
+    .delay(TOOLTIP_DELAY);
+
     ret_val = ret_val
-        .push(Row::new().spacing(5).push(bits).push(bytes))
-        .push(packets);
+        .push(Row::new().spacing(5).push(bits).push(bytes).push(packets))
+        .push(
+            Row::new()
+                .spacing(5)
+                .push(totals_tooltip)
+                .push(rates_tooltip),
+        );
 
     ret_val
 }
@@ -641,19 +704,21 @@ pub fn get_bars<'a>(
                 .width(Length::FillPortion(in_len))
                 .push(RuleType::Incoming(in_all_round).horizontal(5))
         } else {
-            Row::new()
+            Row::new().height(5)
         })
         .push(if out_len > 0 {
             Row::new()
                 .width(Length::FillPortion(out_len))
                 .push(RuleType::Outgoing(out_all_round).horizontal(5))
         } else {
-            Row::new()
+            Row::new().height(5)
         })
         .push(if in_len + out_len < 100 {
-            Row::new().width(Length::FillPortion(100 - in_len - out_len))
-        } else {
             Row::new()
+                .width(Length::FillPortion(100 - in_len - out_len))
+                .height(5)
+        } else {
+            Row::new().height(5)
         })
 }
 
@@ -683,19 +748,35 @@ mod tests {
     use crate::networking::types::data_representation::DataRepr;
 
     #[test]
+    fn rate_bars_use_interval_deltas_for_values_and_maximum() {
+        let mut largest_total = DataInfo::new_for_tests(1000, 0, 10_000, 0);
+        let mut largest_rate = DataInfo::default();
+        largest_total.start_interval();
+        largest_total.refresh(DataInfo::new_for_tests(0, 2, 0, 200));
+        largest_rate.refresh(DataInfo::new_for_tests(8, 0, 800, 0));
+        let rate = DataRepr::packets(true);
+        let entries = [largest_total, largest_rate];
+        let maximum = entries.iter().max_by_key(|d| d.tot_data(rate)).unwrap();
+        assert_eq!(get_bars_length(rate, maximum, &largest_total), (0, 25));
+        assert_eq!(get_bars_length(rate, maximum, &largest_rate), (100, 0));
+        largest_total.start_interval();
+        assert_eq!(get_bars_length(rate, maximum, &largest_total), (0, 0));
+    }
+
+    #[test]
     fn test_get_bars_length_simple() {
         let first_entry = DataInfo::new_for_tests(50, 50, 150, 50);
         let data_info = DataInfo::new_for_tests(25, 55, 165, 30);
         assert_eq!(
-            get_bars_length(DataRepr::Packets, &first_entry, &data_info),
+            get_bars_length(DataRepr::packets(false), &first_entry, &data_info),
             (25, 55)
         );
         assert_eq!(
-            get_bars_length(DataRepr::Bytes, &first_entry, &data_info),
+            get_bars_length(DataRepr::bytes(false), &first_entry, &data_info),
             (83, 15)
         );
         assert_eq!(
-            get_bars_length(DataRepr::Bits, &first_entry, &data_info),
+            get_bars_length(DataRepr::bits(false), &first_entry, &data_info),
             (83, 15)
         );
     }
@@ -705,21 +786,21 @@ mod tests {
         let first_entry = DataInfo::new_for_tests(50, 50, 150, 50);
         let mut data_info = DataInfo::new_for_tests(2, 1, 1, 0);
         assert_eq!(
-            get_bars_length(DataRepr::Packets, &first_entry, &data_info),
+            get_bars_length(DataRepr::packets(false), &first_entry, &data_info),
             (MIN_BARS_LENGTH as u16 / 2, MIN_BARS_LENGTH as u16 / 2)
         );
         assert_eq!(
-            get_bars_length(DataRepr::Bytes, &first_entry, &data_info),
+            get_bars_length(DataRepr::bytes(false), &first_entry, &data_info),
             (MIN_BARS_LENGTH as u16, 0)
         );
 
         data_info = DataInfo::new_for_tests(0, 3, 0, 2);
         assert_eq!(
-            get_bars_length(DataRepr::Packets, &first_entry, &data_info),
+            get_bars_length(DataRepr::packets(false), &first_entry, &data_info),
             (0, MIN_BARS_LENGTH as u16)
         );
         assert_eq!(
-            get_bars_length(DataRepr::Bytes, &first_entry, &data_info),
+            get_bars_length(DataRepr::bytes(false), &first_entry, &data_info),
             (0, MIN_BARS_LENGTH as u16)
         );
     }
@@ -730,31 +811,31 @@ mod tests {
             DataInfo::new_for_tests(u128::MAX / 2, u128::MAX / 2, u128::MAX / 2, u128::MAX / 2);
         let mut data_info = DataInfo::new_for_tests(1, 1, 1, 1);
         assert_eq!(
-            get_bars_length(DataRepr::Packets, &first_entry, &data_info),
+            get_bars_length(DataRepr::packets(false), &first_entry, &data_info),
             (MIN_BARS_LENGTH as u16 / 2, MIN_BARS_LENGTH as u16 / 2)
         );
         assert_eq!(
-            get_bars_length(DataRepr::Bytes, &first_entry, &data_info),
+            get_bars_length(DataRepr::bytes(false), &first_entry, &data_info),
             (MIN_BARS_LENGTH as u16 / 2, MIN_BARS_LENGTH as u16 / 2)
         );
 
         data_info = DataInfo::new_for_tests(0, 1, 0, 1);
         assert_eq!(
-            get_bars_length(DataRepr::Packets, &first_entry, &data_info),
+            get_bars_length(DataRepr::packets(false), &first_entry, &data_info),
             (0, MIN_BARS_LENGTH as u16)
         );
         assert_eq!(
-            get_bars_length(DataRepr::Bytes, &first_entry, &data_info),
+            get_bars_length(DataRepr::bytes(false), &first_entry, &data_info),
             (0, MIN_BARS_LENGTH as u16)
         );
 
         data_info = DataInfo::new_for_tests(1, 0, 1, 0);
         assert_eq!(
-            get_bars_length(DataRepr::Packets, &first_entry, &data_info),
+            get_bars_length(DataRepr::packets(false), &first_entry, &data_info),
             (MIN_BARS_LENGTH as u16, 0)
         );
         assert_eq!(
-            get_bars_length(DataRepr::Bytes, &first_entry, &data_info),
+            get_bars_length(DataRepr::bytes(false), &first_entry, &data_info),
             (MIN_BARS_LENGTH as u16, 0)
         );
     }
@@ -765,93 +846,93 @@ mod tests {
 
         let mut data_info = DataInfo::new_for_tests(0, 9, 0, 10);
         assert_eq!(
-            get_bars_length(DataRepr::Packets, &first_entry, &data_info),
+            get_bars_length(DataRepr::packets(false), &first_entry, &data_info),
             (0, 16)
         );
         assert_eq!(
-            get_bars_length(DataRepr::Bytes, &first_entry, &data_info),
+            get_bars_length(DataRepr::bytes(false), &first_entry, &data_info),
             (0, 71)
         );
         data_info = DataInfo::new_for_tests(9, 0, 13, 0);
         assert_eq!(
-            get_bars_length(DataRepr::Packets, &first_entry, &data_info),
+            get_bars_length(DataRepr::packets(false), &first_entry, &data_info),
             (16, 0)
         );
         assert_eq!(
-            get_bars_length(DataRepr::Bytes, &first_entry, &data_info),
+            get_bars_length(DataRepr::bytes(false), &first_entry, &data_info),
             (93, 0)
         );
 
         data_info = DataInfo::new_for_tests(4, 5, 6, 7);
         assert_eq!(
-            get_bars_length(DataRepr::Packets, &first_entry, &data_info),
+            get_bars_length(DataRepr::packets(false), &first_entry, &data_info),
             (7, 9)
         );
         assert_eq!(
-            get_bars_length(DataRepr::Bytes, &first_entry, &data_info),
+            get_bars_length(DataRepr::bytes(false), &first_entry, &data_info),
             (43, 50)
         );
         data_info = DataInfo::new_for_tests(5, 4, 7, 6);
         assert_eq!(
-            get_bars_length(DataRepr::Packets, &first_entry, &data_info),
+            get_bars_length(DataRepr::packets(false), &first_entry, &data_info),
             (9, 7)
         );
         assert_eq!(
-            get_bars_length(DataRepr::Bytes, &first_entry, &data_info),
+            get_bars_length(DataRepr::bytes(false), &first_entry, &data_info),
             (50, 43)
         );
 
         data_info = DataInfo::new_for_tests(1, 8, 1, 12);
         assert_eq!(
-            get_bars_length(DataRepr::Packets, &first_entry, &data_info),
+            get_bars_length(DataRepr::packets(false), &first_entry, &data_info),
             (MIN_BARS_LENGTH as u16 / 2, 14)
         );
         assert_eq!(
-            get_bars_length(DataRepr::Bytes, &first_entry, &data_info),
+            get_bars_length(DataRepr::bytes(false), &first_entry, &data_info),
             (7, 86)
         );
         data_info = DataInfo::new_for_tests(8, 1, 12, 1);
         assert_eq!(
-            get_bars_length(DataRepr::Packets, &first_entry, &data_info),
+            get_bars_length(DataRepr::packets(false), &first_entry, &data_info),
             (14, MIN_BARS_LENGTH as u16 / 2)
         );
         assert_eq!(
-            get_bars_length(DataRepr::Bytes, &first_entry, &data_info),
+            get_bars_length(DataRepr::bytes(false), &first_entry, &data_info),
             (86, 7)
         );
 
         data_info = DataInfo::new_for_tests(6, 1, 10, 1);
         assert_eq!(
-            get_bars_length(DataRepr::Packets, &first_entry, &data_info),
+            get_bars_length(DataRepr::packets(false), &first_entry, &data_info),
             (11, MIN_BARS_LENGTH as u16 / 2)
         );
         assert_eq!(
-            get_bars_length(DataRepr::Bytes, &first_entry, &data_info),
+            get_bars_length(DataRepr::bytes(false), &first_entry, &data_info),
             (71, 7)
         );
         data_info = DataInfo::new_for_tests(1, 6, 1, 9);
         assert_eq!(
-            get_bars_length(DataRepr::Packets, &first_entry, &data_info),
+            get_bars_length(DataRepr::packets(false), &first_entry, &data_info),
             (MIN_BARS_LENGTH as u16 / 2, 11,)
         );
         assert_eq!(
-            get_bars_length(DataRepr::Bytes, &first_entry, &data_info),
+            get_bars_length(DataRepr::bytes(false), &first_entry, &data_info),
             (7, 64)
         );
 
         data_info = DataInfo::new_for_tests(1, 6, 5, 5);
         assert_eq!(
-            get_bars_length(DataRepr::Bytes, &first_entry, &data_info),
+            get_bars_length(DataRepr::bytes(false), &first_entry, &data_info),
             (36, 36)
         );
 
         data_info = DataInfo::new_for_tests(0, 0, 0, 0);
         assert_eq!(
-            get_bars_length(DataRepr::Packets, &first_entry, &data_info),
+            get_bars_length(DataRepr::packets(false), &first_entry, &data_info),
             (0, 0)
         );
         assert_eq!(
-            get_bars_length(DataRepr::Bytes, &first_entry, &data_info),
+            get_bars_length(DataRepr::bytes(false), &first_entry, &data_info),
             (0, 0)
         );
     }

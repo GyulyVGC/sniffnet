@@ -20,6 +20,8 @@ pub enum TextType {
     Sponsor,
     Welcome(f32),
     Dimmed,
+    DimmedIncoming,
+    DimmedOutgoing,
 }
 
 /// Returns a formatted caption followed by subtitle, new line, tab, and desc
@@ -81,6 +83,14 @@ pub fn highlight(style: &StyleType, element: TextType) -> Color {
         TextType::Dimmed => Color {
             a: ext.alpha_chart_badge,
             ..colors.text_body
+        },
+        TextType::DimmedIncoming => Color {
+            a: ext.alpha_chart_badge,
+            ..colors.secondary
+        },
+        TextType::DimmedOutgoing => Color {
+            a: ext.alpha_chart_badge,
+            ..colors.outgoing
         },
     }
 }
