@@ -34,6 +34,21 @@ use crate::utils::formatted_strings::get_domain_from_r_dns;
 
 const REVERSE_DNS_LOOKUP_THREADS: usize = 5;
 
+/// Create the backend-to-UI update channel, applying backpressure only to offline imports.
+/// Live captures remain unbounded so a slow UI does not block packet processing.
+pub(crate) fn capture_update_channel(
+    is_offline_import: bool,
+) -> (
+    Sender<BackendTrafficMessage>,
+    async_channel::Receiver<BackendTrafficMessage>,
+) {
+    if is_offline_import {
+        async_channel::bounded(2)
+    } else {
+        async_channel::unbounded()
+    }
+}
+
 /// Spawns the backend thread that feeds `tx` with traffic updates.
 #[allow(clippy::too_many_arguments)]
 pub fn spawn_capture_thread(
@@ -237,4 +252,58 @@ pub enum BackendTrafficMessage {
     PendingHosts(usize, Vec<HostMessage>),
     OfflineGap(usize, u32),
     IpfixUndecodable(usize),
+}
+
+#[cfg(test)]
+mod update_channel_tests {
+    use super::{BackendTrafficMessage, capture_update_channel};
+    use std::sync::mpsc;
+    use std::time::Duration;
+
+    #[test]
+    fn offline_update_channel_applies_backpressure_until_ui_consumes_a_message() {
+        let (tx, rx) = capture_update_channel(true);
+        tx.send_blocking(BackendTrafficMessage::OfflineGap(1, 1))
+            .unwrap();
+        tx.send_blocking(BackendTrafficMessage::OfflineGap(1, 2))
+            .unwrap();
+
+        let (started_tx, started_rx) = mpsc::channel();
+        let (done_tx, done_rx) = mpsc::channel();
+        let producer = std::thread::spawn(move || {
+            started_tx.send(()).unwrap();
+            let result = tx.send_blocking(BackendTrafficMessage::OfflineGap(1, 3));
+            done_tx.send(result.is_ok()).unwrap();
+        });
+
+        started_rx.recv().unwrap();
+        assert!(done_rx.recv_timeout(Duration::from_millis(50)).is_err());
+        let _ = rx.recv_blocking().unwrap();
+        assert!(done_rx.recv_timeout(Duration::from_secs(1)).unwrap());
+        producer.join().unwrap();
+    }
+
+    #[test]
+    fn live_update_channel_does_not_block_producer_when_ui_is_slow() {
+        let (tx, _rx) = capture_update_channel(false);
+        for i in 0..100 {
+            tx.send_blocking(BackendTrafficMessage::OfflineGap(1, i))
+                .unwrap();
+        }
+    }
+
+    #[test]
+    fn closing_offline_update_channel_unblocks_a_blocked_producer() {
+        let (tx, rx) = capture_update_channel(true);
+        tx.send_blocking(BackendTrafficMessage::OfflineGap(1, 1))
+            .unwrap();
+        tx.send_blocking(BackendTrafficMessage::OfflineGap(1, 2))
+            .unwrap();
+        let producer = std::thread::spawn(move || {
+            tx.send_blocking(BackendTrafficMessage::OfflineGap(1, 3))
+                .is_err()
+        });
+        rx.close();
+        assert!(producer.join().unwrap());
+    }
 }
