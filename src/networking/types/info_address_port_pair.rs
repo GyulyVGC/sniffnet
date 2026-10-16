@@ -152,8 +152,8 @@ impl InfoAddressPortPair {
         );
         data_info.start_interval();
         data_info.add_packets(
-            self.packets - self.previous_packets,
-            self.bytes - self.previous_bytes,
+            self.packets.saturating_sub(self.previous_packets),
+            self.bytes.saturating_sub(self.previous_bytes),
             self.traffic_direction,
             self.final_instant,
         );
@@ -213,6 +213,24 @@ mod tests {
         });
         assert_eq!(pair.initial_timestamp, Timestamp::new(5, 0));
         assert_eq!(pair.final_timestamp, Timestamp::new(25, 0));
+    }
+
+    #[test]
+    fn data_info_preserves_totals_and_interval_data() {
+        let pair = InfoAddressPortPair {
+            packets: 13,
+            bytes: 1300,
+            previous_packets: 10,
+            previous_bytes: 1000,
+            traffic_direction: TrafficDirection::Outgoing,
+            ..Default::default()
+        };
+
+        let data_info = pair.data_info();
+        assert_eq!(data_info.outgoing_data(DataRepr::packets(false)), 13);
+        assert_eq!(data_info.outgoing_data(DataRepr::packets(true)), 3);
+        assert_eq!(data_info.outgoing_data(DataRepr::bytes(false)), 1300);
+        assert_eq!(data_info.outgoing_data(DataRepr::bytes(true)), 300);
     }
 
     #[test]
