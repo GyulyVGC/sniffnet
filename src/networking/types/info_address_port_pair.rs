@@ -100,6 +100,7 @@ impl InfoAddressPortPair {
         }
     }
 
+    /// Assign current totals to previous values, to be used as baselines for the next interval
     pub fn start_interval(&mut self) {
         self.previous_packets = self.packets;
         self.previous_bytes = self.bytes;
@@ -108,8 +109,8 @@ impl InfoAddressPortPair {
     pub fn transmitted_data(&self, data_repr: DataRepr) -> u128 {
         let (packets, bytes) = if data_repr.per_second {
             (
-                self.packets - self.previous_packets,
-                self.bytes - self.previous_bytes,
+                self.packets.saturating_sub(self.previous_packets),
+                self.bytes.saturating_sub(self.previous_bytes),
             )
         } else {
             (self.packets, self.bytes)

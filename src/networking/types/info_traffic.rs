@@ -106,7 +106,7 @@ impl InfoTraffic {
         }
     }
 
-    /// Snapshot totals so inactive entries display zero in the next interval.
+    /// Assign current totals to previous values, to be used as baselines for the next interval
     pub fn start_interval(&mut self) {
         self.tot_data_info.start_interval();
         if let Some(dropped_packets) = &mut self.dropped_packets {

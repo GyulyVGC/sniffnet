@@ -37,7 +37,7 @@ impl DroppedPackets {
         self.by_sniffnet = by_sniffnet;
     }
 
-    /// Start a new displayed interval without changing the cumulative counters.
+    /// Assign current totals to previous values, to be used as baselines for the next interval
     pub fn start_interval(&mut self) {
         self.previous_by_adapter = self.by_adapter;
         self.previous_by_sniffnet = self.by_sniffnet;
