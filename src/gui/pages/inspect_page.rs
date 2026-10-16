@@ -23,7 +23,7 @@ use crate::gui::types::settings::Settings;
 use crate::networking::types::address_port_pair::AddressPortPair;
 use crate::networking::types::combobox_data_states::ComboboxStates;
 use crate::networking::types::data_info::DataInfo;
-use crate::networking::types::data_representation::DataRepr;
+use crate::networking::types::data_representation::{DataRepr, DataUnit};
 use crate::networking::types::info_address_port_pair::InfoAddressPortPair;
 use crate::networking::types::program_lookup::ProgramLookup;
 use crate::networking::types::traffic_direction::TrafficDirection;
@@ -67,7 +67,7 @@ pub fn inspect_page(sniffer: &Sniffer) -> Container<'_, Message, StyleType> {
             language,
             &sniffer.search,
             sniffer.conf.report_sort_type,
-            sniffer.conf.data_repr,
+            sniffer.conf.data_repr.data_unit,
         ))
         .push(Space::new().height(4))
         .push(RuleType::Standard.horizontal(5))
@@ -157,12 +157,12 @@ fn report_header_row(
     language: Language,
     search_params: &SearchParameters,
     sort_type: SortType,
-    data_repr: DataRepr,
+    data_unit: DataUnit,
 ) -> Row<'_, Message, StyleType> {
     let mut ret_val = Row::new().padding([0, 2]).align_y(Alignment::Center);
     for report_col in ReportCol::ALL {
         let (title_display, title_small_display, tooltip_val) =
-            title_report_col_display(&report_col, data_repr, language);
+            title_report_col_display(&report_col, data_unit, language);
         let title_row = Row::new()
             .align_y(Alignment::End)
             .push(Text::new(title_display))
@@ -204,11 +204,11 @@ fn report_header_row(
 
 fn title_report_col_display(
     report_col: &ReportCol,
-    data_repr: DataRepr,
+    data_unit: DataUnit,
     language: Language,
 ) -> (String, String, String) {
     let max_chars = report_col.get_max_chars(Some(language));
-    let title = report_col.get_title(language, data_repr);
+    let title = report_col.get_title(language, data_unit);
     let title_direction_info = report_col.get_title_direction_info(language);
     let chars_title = title.chars().collect::<Vec<char>>();
     let chars_title_direction_info = title_direction_info.chars().collect::<Vec<char>>();
@@ -258,10 +258,13 @@ fn row_report_entry<'a>(
     val: &InfoAddressPortPair,
     data_repr: DataRepr,
 ) -> Row<'a, Message, StyleType> {
-    let text_type = if val.traffic_direction == TrafficDirection::Outgoing {
-        TextType::Outgoing
-    } else {
-        TextType::Incoming
+    let is_zero = val.transmitted_data(data_repr) == 0;
+
+    let text_type = match (val.traffic_direction, is_zero) {
+        (TrafficDirection::Incoming, false) => TextType::Incoming,
+        (TrafficDirection::Incoming, true) => TextType::DimmedIncoming,
+        (TrafficDirection::Outgoing, false) => TextType::Outgoing,
+        (TrafficDirection::Outgoing, true) => TextType::DimmedOutgoing,
     };
 
     let mut ret_val = Row::new().align_y(Alignment::Center);
@@ -653,7 +656,7 @@ fn button_clear_filter<'a>(
 #[cfg(test)]
 mod tests {
     use crate::gui::pages::inspect_page::title_report_col_display;
-    use crate::networking::types::data_representation::DataRepr;
+    use crate::networking::types::data_representation::DataUnit;
     use crate::report::types::report_col::ReportCol;
     use crate::translations::types::language::Language;
 
@@ -662,7 +665,7 @@ mod tests {
         // check glyph len when adding new language...
         assert_eq!(Language::ALL.len(), 25);
         for report_col in ReportCol::ALL {
-            for data_repr in DataRepr::ALL {
+            for data_repr in DataUnit::ALL {
                 for language in Language::ALL {
                     let (title, title_small, tooltip_val) =
                         title_report_col_display(&report_col, data_repr, language);

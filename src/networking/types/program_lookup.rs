@@ -66,6 +66,12 @@ impl ProgramLookup {
         res
     }
 
+    pub fn start_interval(&mut self) {
+        for data in self.programs.values_mut() {
+            data.start_interval();
+        }
+    }
+
     pub fn pending_results(&mut self) -> Vec<(u16, Protocol, Option<Process>)> {
         let mut res = Vec::new();
         while let Ok(lookup_res) = self.program_rx.try_recv() {
@@ -154,7 +160,7 @@ impl ProgramLookup {
                     reassigned_data.refresh(v.data_info());
                 });
 
-            if reassigned_data.tot_data(DataRepr::Packets) > 0 {
+            if reassigned_data.tot_data(DataRepr::packets(false)) > 0 {
                 // assign to known
                 self.programs
                     .entry(program)

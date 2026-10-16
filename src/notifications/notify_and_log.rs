@@ -48,7 +48,10 @@ pub fn notify_and_log(
 
     // data threshold
     if let Some(threshold) = notifications.data_notification.threshold {
-        let data_repr = notifications.data_notification.data_repr;
+        let data_repr = DataRepr {
+            data_unit: notifications.data_notification.data_unit,
+            per_second: false,
+        };
         if data_info.tot_data(data_repr) > u128::from(threshold) {
             let notification = LoggedNotification::DataThresholdExceeded(DataThresholdExceeded {
                 id: logged_notifications.tot(),
@@ -218,7 +221,7 @@ fn favorites_last_interval(
             .values()
             .filter(|v| v.program.eq(p))
             .for_each(|v| data_info.refresh(v.data_info()));
-        if data_info.tot_data(DataRepr::Packets) > 0 {
+        if data_info.tot_data(DataRepr::packets(false)) > 0 {
             Some(FavoriteItem::Program((p.clone(), data_info)))
         } else {
             None
