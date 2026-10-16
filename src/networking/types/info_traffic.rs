@@ -26,6 +26,12 @@ pub struct InfoTraffic {
     pub services: HashMap<Service, DataInfo>,
     /// Map of the hosts with their data info
     pub hosts: HashMap<Host, DataInfoHost>,
+    /// Connections that need their rate reset at the start of the next interval
+    connections_active_last_interval: Vec<AddressPortPair>,
+    /// Services that need their rate reset at the start of the next interval
+    services_active_last_interval: Vec<Service>,
+    /// Hosts that need their rate reset at the start of the next interval
+    hosts_active_last_interval: Vec<Host>,
 }
 
 impl InfoTraffic {
@@ -37,13 +43,17 @@ impl InfoTraffic {
             map,
             services,
             hosts,
+            connections_active_last_interval: _,
+            services_active_last_interval: _,
+            hosts_active_last_interval: _,
         } = msg;
 
         self.start_interval();
-        self.tot_data_info.refresh(*tot_data_info);
         if let Some(program_lookup) = program_lookup_opt {
             program_lookup.start_interval();
         }
+
+        self.tot_data_info.refresh(*tot_data_info);
 
         self.dropped_packets = dropped_packets.map(|current| {
             let mut updated = self.dropped_packets.unwrap_or_default();
@@ -58,6 +68,7 @@ impl InfoTraffic {
         self.last_packet_timestamp = *last_packet_timestamp;
 
         for (key, value) in &mut *map {
+            self.connections_active_last_interval.push(*key);
             let local_port = get_local_port(key, value.traffic_direction);
             let entry = self.map.entry(*key);
             match entry {
@@ -92,6 +103,7 @@ impl InfoTraffic {
         }
 
         for (key, value) in &*services {
+            self.services_active_last_interval.push(*key);
             self.services
                 .entry(*key)
                 .and_modify(|x| x.refresh(*value))
@@ -99,6 +111,7 @@ impl InfoTraffic {
         }
 
         for (key, value) in &*hosts {
+            self.hosts_active_last_interval.push(key.clone());
             self.hosts
                 .entry(key.clone())
                 .and_modify(|x| x.refresh(value))
@@ -112,14 +125,20 @@ impl InfoTraffic {
         if let Some(dropped_packets) = &mut self.dropped_packets {
             dropped_packets.start_interval();
         }
-        for value in self.map.values_mut() {
-            value.start_interval();
+        for key in self.connections_active_last_interval.drain(..) {
+            if let Some(value) = self.map.get_mut(&key) {
+                value.start_interval();
+            }
         }
-        for value in self.services.values_mut() {
-            value.start_interval();
+        for key in self.services_active_last_interval.drain(..) {
+            if let Some(value) = self.services.get_mut(&key) {
+                value.start_interval();
+            }
         }
-        for value in self.hosts.values_mut() {
-            value.data_info.start_interval();
+        for key in self.hosts_active_last_interval.drain(..) {
+            if let Some(value) = self.hosts.get_mut(&key) {
+                value.data_info.start_interval();
+            }
         }
     }
 

@@ -221,11 +221,9 @@ mod tests {
             first_packet_timestamp: Timestamp::default(),
             no_more_packets: false,
         };
-        let mut info_traffic = InfoTraffic {
-            tot_data_info,
-            dropped_packets: Some(Default::default()),
-            ..Default::default()
-        };
+        let mut info_traffic = InfoTraffic::default();
+        info_traffic.tot_data_info = tot_data_info;
+        info_traffic.dropped_packets = Some(Default::default());
 
         assert_eq!(sent.get_min(), -1000.0);
         assert_eq!(received.get_max(), 21000.0);

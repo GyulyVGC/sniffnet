@@ -28,6 +28,7 @@ pub struct ProgramLookup {
     picon_rx: Receiver<(String, IconHandle)>,
     state: HashMap<(u16, Protocol), LookedUpProgram>,
     programs: HashMap<Program, DataInfo>,
+    programs_active_last_interval: HashSet<Program>,
     picons: HashMap<String, IconHandle>,
 }
 
@@ -45,6 +46,7 @@ impl ProgramLookup {
             picon_rx,
             state: HashMap::new(),
             programs: HashMap::new(),
+            programs_active_last_interval: HashSet::new(),
             picons: HashMap::new(),
         }
     }
@@ -62,13 +64,16 @@ impl ProgramLookup {
             .entry(res.clone())
             .and_modify(|d| d.refresh(new_data))
             .or_insert(new_data);
+        self.programs_active_last_interval.insert(res.clone());
 
         res
     }
 
     pub fn start_interval(&mut self) {
-        for data in self.programs.values_mut() {
-            data.start_interval();
+        for program in self.programs_active_last_interval.drain() {
+            if let Some(data) = self.programs.get_mut(&program) {
+                data.start_interval();
+            }
         }
     }
 
@@ -162,6 +167,7 @@ impl ProgramLookup {
 
             if reassigned_data.tot_data(DataRepr::packets(false)) > 0 {
                 // assign to known
+                self.programs_active_last_interval.insert(program.clone());
                 self.programs
                     .entry(program)
                     .and_modify(|d| d.refresh(reassigned_data))
@@ -177,6 +183,7 @@ impl ProgramLookup {
                         unknown_data.refresh(v.data_info());
                     });
                 // or_insert not needed: Unknown is already in the map since reassigned data came from it
+                self.programs_active_last_interval.insert(Program::Unknown);
                 self.programs
                     .entry(Program::Unknown)
                     .and_modify(|d| *d = unknown_data);
