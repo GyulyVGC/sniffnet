@@ -1,5 +1,5 @@
 use crate::networking::types::data_info::DataInfo;
-use crate::networking::types::data_representation::DataRepr;
+use crate::networking::types::data_representation::{DataRepr, DataUnit};
 
 /// Represents the number of dropped packets
 #[derive(Debug, Default, Clone, Copy)]
@@ -8,6 +8,10 @@ pub struct DroppedPackets {
     by_adapter: u32,
     /// Packets dropped because they weren't being read fast enough (PCAP buffer was full)
     by_sniffnet: u32,
+    /// Previous interval's `by_adapter` value
+    previous_by_adapter: u32,
+    /// Previous interval's `by_sniffnet` value
+    previous_by_sniffnet: u32,
 }
 
 impl DroppedPackets {
@@ -16,15 +20,36 @@ impl DroppedPackets {
         Self {
             by_adapter: stats.if_dropped,
             by_sniffnet: stats.dropped,
+            ..Self::default()
         }
+    }
+
+    /// Update the cumulative counters without changing the current interval's baseline.
+    pub fn refresh(&mut self, rhs: Self) {
+        let Self {
+            by_adapter,
+            by_sniffnet,
+            previous_by_adapter: _,
+            previous_by_sniffnet: _,
+        } = rhs;
+
+        self.by_adapter = by_adapter;
+        self.by_sniffnet = by_sniffnet;
+    }
+
+    /// Assign current totals to previous values, to be used as baselines for the next interval
+    pub fn start_interval(&mut self) {
+        self.previous_by_adapter = self.by_adapter;
+        self.previous_by_sniffnet = self.by_sniffnet;
     }
 
     /// Returns the total number of dropped data,
     /// assuming that dropped packets have the same size as the average packet
     pub fn total(self, data_repr: DataRepr, tot_data_info: DataInfo) -> u128 {
+        let (by_adapter, by_sniffnet) = self.counters(data_repr);
         averaged_data(
-            u128::from(self.by_adapter) + u128::from(self.by_sniffnet),
-            data_repr,
+            u128::from(by_adapter) + u128::from(by_sniffnet),
+            data_repr.data_unit,
             tot_data_info,
         )
     }
@@ -32,23 +57,39 @@ impl DroppedPackets {
     /// Returns the number of data dropped by the network adapter,
     /// assuming that dropped packets have the same size as the average packet
     pub fn by_adapter(self, data_repr: DataRepr, tot_data_info: DataInfo) -> u128 {
-        averaged_data(u128::from(self.by_adapter), data_repr, tot_data_info)
+        let (by_adapter, _) = self.counters(data_repr);
+        averaged_data(u128::from(by_adapter), data_repr.data_unit, tot_data_info)
     }
 
     /// Returns the number of data dropped by the Sniffnet,
     /// assuming that dropped packets have the same size as the average packet
     pub fn by_sniffnet(self, data_repr: DataRepr, tot_data_info: DataInfo) -> u128 {
-        averaged_data(u128::from(self.by_sniffnet), data_repr, tot_data_info)
+        let (_, by_sniffnet) = self.counters(data_repr);
+        averaged_data(u128::from(by_sniffnet), data_repr.data_unit, tot_data_info)
+    }
+
+    fn counters(self, data_repr: DataRepr) -> (u32, u32) {
+        if data_repr.per_second {
+            (
+                self.by_adapter.saturating_sub(self.previous_by_adapter),
+                self.by_sniffnet.saturating_sub(self.previous_by_sniffnet),
+            )
+        } else {
+            (self.by_adapter, self.by_sniffnet)
+        }
     }
 }
 
-fn averaged_data(dropped_packets: u128, data_repr: DataRepr, tot_data_info: DataInfo) -> u128 {
-    if data_repr == DataRepr::Packets {
+fn averaged_data(dropped_packets: u128, data_unit: DataUnit, tot_data_info: DataInfo) -> u128 {
+    if data_unit == DataUnit::Packets {
         return dropped_packets;
     }
 
-    let all = tot_data_info.tot_data(data_repr);
-    let all_packets = tot_data_info.tot_data(DataRepr::Packets);
+    let all = tot_data_info.tot_data(DataRepr {
+        data_unit,
+        per_second: false,
+    });
+    let all_packets = tot_data_info.tot_data(DataRepr::packets(false));
     dropped_packets
         .saturating_mul(all)
         .checked_div(all_packets)
@@ -64,28 +105,28 @@ mod tests {
         // 6 packets carrying 100 bytes in total
         let data_info = DataInfo::new_for_tests(2, 4, 30, 70);
 
-        assert_eq!(averaged_data(3, DataRepr::Packets, data_info), 3);
+        assert_eq!(averaged_data(3, DataUnit::Packets, data_info), 3);
         // multiply before dividing to avoid truncating the average packet size.
-        assert_eq!(averaged_data(3, DataRepr::Bytes, data_info), 50);
-        assert_eq!(averaged_data(3, DataRepr::Bits, data_info), 400);
+        assert_eq!(averaged_data(3, DataUnit::Bytes, data_info), 50);
+        assert_eq!(averaged_data(3, DataUnit::Bits, data_info), 400);
 
         // fractional results are truncated only after scaling by dropped packets.
-        assert_eq!(averaged_data(1, DataRepr::Bytes, data_info), 16);
-        assert_eq!(averaged_data(1, DataRepr::Bits, data_info), 133);
-        assert_eq!(averaged_data(9, DataRepr::Bytes, data_info), 150);
+        assert_eq!(averaged_data(1, DataUnit::Bytes, data_info), 16);
+        assert_eq!(averaged_data(1, DataUnit::Bits, data_info), 133);
+        assert_eq!(averaged_data(9, DataUnit::Bytes, data_info), 150);
 
-        assert_eq!(averaged_data(0, DataRepr::Packets, data_info), 0);
-        assert_eq!(averaged_data(0, DataRepr::Bytes, data_info), 0);
-        assert_eq!(averaged_data(0, DataRepr::Bits, data_info), 0);
+        assert_eq!(averaged_data(0, DataUnit::Packets, data_info), 0);
+        assert_eq!(averaged_data(0, DataUnit::Bytes, data_info), 0);
+        assert_eq!(averaged_data(0, DataUnit::Bits, data_info), 0);
     }
 
     #[test]
     fn test_averaged_data_no_observed_packets() {
         let data_info = DataInfo::default();
 
-        assert_eq!(averaged_data(3, DataRepr::Packets, data_info), 3);
-        assert_eq!(averaged_data(3, DataRepr::Bytes, data_info), 0);
-        assert_eq!(averaged_data(3, DataRepr::Bits, data_info), 0);
+        assert_eq!(averaged_data(3, DataUnit::Packets, data_info), 3);
+        assert_eq!(averaged_data(3, DataUnit::Bytes, data_info), 0);
+        assert_eq!(averaged_data(3, DataUnit::Bits, data_info), 0);
     }
 
     #[test]
@@ -93,11 +134,45 @@ mod tests {
         let dropped = DroppedPackets {
             by_adapter: u32::MAX,
             by_sniffnet: u32::MAX,
+            ..Default::default()
         };
         let data_info = DataInfo::new_for_tests(1, 1, 100, 100);
 
-        assert_eq!(dropped.total(DataRepr::Packets, data_info), 8_589_934_590);
-        assert_eq!(dropped.total(DataRepr::Bytes, data_info), 858_993_459_000);
-        assert_eq!(dropped.total(DataRepr::Bits, data_info), 6_871_947_672_000);
+        assert_eq!(
+            dropped.total(DataRepr::packets(false), data_info),
+            8_589_934_590
+        );
+        assert_eq!(
+            dropped.total(DataRepr::bytes(false), data_info),
+            858_993_459_000
+        );
+        assert_eq!(
+            dropped.total(DataRepr::bits(false), data_info),
+            6_871_947_672_000
+        );
+    }
+
+    #[test]
+    fn interval_values_use_previous_counters() {
+        let data_info = DataInfo::new_for_tests(1, 1, 100, 100);
+        let mut dropped = DroppedPackets {
+            by_adapter: 2,
+            by_sniffnet: 3,
+            ..Default::default()
+        };
+
+        dropped.start_interval();
+        dropped.refresh(DroppedPackets {
+            by_adapter: 5,
+            by_sniffnet: 4,
+            ..Default::default()
+        });
+
+        assert_eq!(dropped.total(DataRepr::packets(true), data_info), 4);
+        assert_eq!(dropped.total(DataRepr::packets(false), data_info), 9);
+
+        dropped.start_interval();
+        assert_eq!(dropped.total(DataRepr::packets(true), data_info), 0);
+        assert_eq!(dropped.total(DataRepr::packets(false), data_info), 9);
     }
 }

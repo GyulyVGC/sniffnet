@@ -30,7 +30,7 @@ pub fn waiting_page(sniffer: &Sniffer) -> Option<Container<'_, Message, StyleTyp
     let tot_packets = sniffer
         .info_traffic
         .tot_data_info
-        .tot_data(DataRepr::Packets);
+        .tot_data(DataRepr::packets(false));
 
     if tot_packets > 0 {
         return None;
