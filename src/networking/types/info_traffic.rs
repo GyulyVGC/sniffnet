@@ -26,6 +26,12 @@ pub struct InfoTraffic {
     pub services: HashMap<Service, DataInfo>,
     /// Map of the hosts with their data info
     pub hosts: HashMap<Host, DataInfoHost>,
+    /// Connections that need their rate reset at the start of the next interval
+    connections_active_last_interval: Vec<AddressPortPair>,
+    /// Services that need their rate reset at the start of the next interval
+    services_active_last_interval: Vec<Service>,
+    /// Hosts that need their rate reset at the start of the next interval
+    hosts_active_last_interval: Vec<Host>,
 }
 
 impl InfoTraffic {
@@ -37,13 +43,14 @@ impl InfoTraffic {
             map,
             services,
             hosts,
+            connections_active_last_interval: _,
+            services_active_last_interval: _,
+            hosts_active_last_interval: _,
         } = msg;
 
-        self.start_interval();
+        self.start_interval(program_lookup_opt);
+
         self.tot_data_info.refresh(*tot_data_info);
-        if let Some(program_lookup) = program_lookup_opt {
-            program_lookup.start_interval();
-        }
 
         self.dropped_packets = dropped_packets.map(|current| {
             let mut updated = self.dropped_packets.unwrap_or_default();
@@ -58,6 +65,7 @@ impl InfoTraffic {
         self.last_packet_timestamp = *last_packet_timestamp;
 
         for (key, value) in &mut *map {
+            self.connections_active_last_interval.push(*key);
             let local_port = get_local_port(key, value.traffic_direction);
             let entry = self.map.entry(*key);
             match entry {
@@ -70,7 +78,7 @@ impl InfoTraffic {
                             false,
                             value.data_info(),
                         );
-                        // set program in msg (used for favorite notifications)
+                        // keep the interval message annotated with its program
                         value.program = program;
                     }
 
@@ -82,7 +90,7 @@ impl InfoTraffic {
                     {
                         let program =
                             program_lookup.lookup_and_add_data(local_port, true, value.data_info());
-                        // set program in msg (used for favorite notifications)
+                        // annotate the message before cloning it into the cumulative map
                         value.program = program;
                     }
 
@@ -92,6 +100,7 @@ impl InfoTraffic {
         }
 
         for (key, value) in &*services {
+            self.services_active_last_interval.push(*key);
             self.services
                 .entry(*key)
                 .and_modify(|x| x.refresh(*value))
@@ -99,6 +108,7 @@ impl InfoTraffic {
         }
 
         for (key, value) in &*hosts {
+            self.hosts_active_last_interval.push(key.clone());
             self.hosts
                 .entry(key.clone())
                 .and_modify(|x| x.refresh(value))
@@ -106,20 +116,34 @@ impl InfoTraffic {
         }
     }
 
-    /// Snapshot totals so inactive entries display zero in the next interval.
-    pub fn start_interval(&mut self) {
+    /// Assign current totals to previous values, to be used as baselines for the next interval
+    pub fn start_interval(&mut self, program_lookup_opt: &mut Option<ProgramLookup>) {
+        if let Some(program_lookup) = program_lookup_opt {
+            program_lookup.start_interval();
+        }
+
         self.tot_data_info.start_interval();
+
         if let Some(dropped_packets) = &mut self.dropped_packets {
             dropped_packets.start_interval();
         }
-        for value in self.map.values_mut() {
-            value.start_interval();
+
+        for key in self.connections_active_last_interval.drain(..) {
+            if let Some(value) = self.map.get_mut(&key) {
+                value.start_interval();
+            }
         }
-        for value in self.services.values_mut() {
-            value.start_interval();
+
+        for key in self.services_active_last_interval.drain(..) {
+            if let Some(value) = self.services.get_mut(&key) {
+                value.start_interval();
+            }
         }
-        for value in self.hosts.values_mut() {
-            value.data_info.start_interval();
+
+        for key in self.hosts_active_last_interval.drain(..) {
+            if let Some(value) = self.hosts.get_mut(&key) {
+                value.data_info.start_interval();
+            }
         }
     }
 
@@ -335,8 +359,7 @@ mod tests {
         assert_eq!(traffic.map[&key(1000)].program, known);
 
         // An offline gap invalidates rates, retaining all cumulative counters.
-        traffic.start_interval();
-        lookup.as_mut().unwrap().start_interval();
+        traffic.start_interval(&mut lookup);
         assert_eq!(traffic.tot_data_info.tot_data(DataRepr::packets(true)), 0);
         assert_eq!(traffic.tot_data_info.tot_data(DataRepr::packets(false)), 18);
         assert_eq!(
@@ -379,7 +402,7 @@ mod tests {
                 .total(DataRepr::packets(false), traffic.tot_data_info),
             9
         );
-        traffic.start_interval();
+        traffic.start_interval(&mut None);
         assert_eq!(
             traffic
                 .dropped_packets

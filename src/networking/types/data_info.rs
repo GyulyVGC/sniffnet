@@ -34,8 +34,8 @@ impl DataInfo {
     pub fn incoming_data(&self, data_repr: DataRepr) -> u128 {
         let (packets, bytes) = if data_repr.per_second {
             (
-                self.in_packets - self.previous_in_packets,
-                self.in_bytes - self.previous_in_bytes,
+                self.in_packets.saturating_sub(self.previous_in_packets),
+                self.in_bytes.saturating_sub(self.previous_in_bytes),
             )
         } else {
             (self.in_packets, self.in_bytes)
@@ -50,8 +50,8 @@ impl DataInfo {
     pub fn outgoing_data(&self, data_repr: DataRepr) -> u128 {
         let (packets, bytes) = if data_repr.per_second {
             (
-                self.out_packets - self.previous_out_packets,
-                self.out_bytes - self.previous_out_bytes,
+                self.out_packets.saturating_sub(self.previous_out_packets),
+                self.out_bytes.saturating_sub(self.previous_out_bytes),
             )
         } else {
             (self.out_packets, self.out_bytes)
@@ -88,37 +88,49 @@ impl DataInfo {
     /// Backend interval updates have zero baselines.
     pub fn refresh(&mut self, rhs: Self) {
         let Self {
-            in_packets: incoming_packets,
-            out_packets: outgoing_packets,
-            in_bytes: incoming_bytes,
-            out_bytes: outgoing_bytes,
+            in_packets,
+            out_packets,
+            in_bytes,
+            out_bytes,
             final_instant,
-            previous_in_packets: previous_incoming_packets,
-            previous_out_packets: previous_outgoing_packets,
-            previous_in_bytes: previous_incoming_bytes,
-            previous_out_bytes: previous_outgoing_bytes,
+            previous_in_packets,
+            previous_out_packets,
+            previous_in_bytes,
+            previous_out_bytes,
         } = rhs;
 
-        self.previous_in_packets += previous_incoming_packets;
-        self.previous_out_packets += previous_outgoing_packets;
-        self.previous_in_bytes += previous_incoming_bytes;
-        self.previous_out_bytes += previous_outgoing_bytes;
-        self.in_packets += incoming_packets;
-        self.out_packets += outgoing_packets;
-        self.in_bytes += incoming_bytes;
-        self.out_bytes += outgoing_bytes;
+        self.previous_in_packets += previous_in_packets;
+        self.previous_out_packets += previous_out_packets;
+        self.previous_in_bytes += previous_in_bytes;
+        self.previous_out_bytes += previous_out_bytes;
+        self.in_packets += in_packets;
+        self.out_packets += out_packets;
+        self.in_bytes += in_bytes;
+        self.out_bytes += out_bytes;
         // None < Some(_) by Option's Ord, so a Some will always win over a default None
         if final_instant > self.final_instant {
             self.final_instant = final_instant;
         }
     }
 
-    /// Start a new displayed interval without changing totals or timestamps.
+    /// Assign current totals to previous values, to be used as baselines for the next interval
     pub fn start_interval(&mut self) {
         self.previous_in_packets = self.in_packets;
         self.previous_out_packets = self.out_packets;
         self.previous_in_bytes = self.in_bytes;
         self.previous_out_bytes = self.out_bytes;
+    }
+
+    /// Return the data exchanged during the current interval as standalone totals.
+    pub fn interval_data(&self) -> Self {
+        Self {
+            in_packets: self.in_packets.saturating_sub(self.previous_in_packets),
+            out_packets: self.out_packets.saturating_sub(self.previous_out_packets),
+            in_bytes: self.in_bytes.saturating_sub(self.previous_in_bytes),
+            out_bytes: self.out_bytes.saturating_sub(self.previous_out_bytes),
+            final_instant: self.final_instant,
+            ..Self::default()
+        }
     }
 
     pub fn compare(&self, other: &Self, sort_type: SortType, data_repr: DataRepr) -> Ordering {
@@ -156,16 +168,16 @@ impl DataInfo {
 
     #[cfg(test)]
     pub fn new_for_tests(
-        incoming_packets: u128,
-        outgoing_packets: u128,
-        incoming_bytes: u128,
-        outgoing_bytes: u128,
+        in_packets: u128,
+        out_packets: u128,
+        in_bytes: u128,
+        out_bytes: u128,
     ) -> Self {
         Self {
-            in_packets: incoming_packets,
-            out_packets: outgoing_packets,
-            in_bytes: incoming_bytes,
-            out_bytes: outgoing_bytes,
+            in_packets,
+            out_packets,
+            in_bytes,
+            out_bytes,
             final_instant: Some(Instant::now()),
             ..Self::default()
         }
@@ -189,6 +201,10 @@ mod tests {
         assert_eq!(busy.outgoing_data(DataRepr::bytes(true)), 600);
         assert_eq!(busy.tot_data(DataRepr::bits(true)), 6400);
         assert_eq!(busy.tot_data(DataRepr::bytes(false)), 20_800);
+        let interval_data = busy.interval_data();
+        assert_eq!(interval_data.tot_data(DataRepr::packets(false)), 5);
+        assert_eq!(interval_data.tot_data(DataRepr::bytes(false)), 800);
+        assert_eq!(interval_data.tot_data(DataRepr::packets(true)), 5);
         assert_eq!(
             busy.compare(&active, SortType::Descending, DataRepr::packets(true)),
             Ordering::Greater
