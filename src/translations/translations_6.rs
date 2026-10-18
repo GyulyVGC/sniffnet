@@ -1,4 +1,3 @@
-
 #![allow(clippy::match_same_arms)]
 
 use crate::translations::types::language::Language;
@@ -38,7 +37,7 @@ pub fn waiting_ipfix_connections_translation(language: Language) -> &'static str
         Language::EN => "No traffic has been observed yet. Waiting for IPFIX flows...",
         Language::IT => "Nessun tipo di traffico è stato osservato finora. Attendo flussi IPFIX...",
         Language::RU => "Пока трафик не наблюдался. Ожидание потоков IPFIX...",
-        Language::FR => "Aucun trafic n’a encore été observé. En attente de flux IPFIX...",
+        Language::FR => "Aucun trafic n'a encore été observé. En attente de flux IPFIX...",
         _ => "No traffic has been observed yet. Waiting for IPFIX flows...",
     }
 }
@@ -61,9 +60,8 @@ pub fn make_sure_valid_ipfix_translation(language: Language) -> &'static str {
         }
         Language::RU => {
             "Убедитесь, что экспортёр отправляет корректные потоки IPFIX на этот коллектор."
-        Language::FR => {
-            "Vérifiez que l’exportateur envoie des flux IPFIX valides à ce collecteur."
         }
+        Language::FR => "Vérifiez que l'exportateur envoie des flux IPFIX valides à ce collecteur.",
         _ => "Make sure the exporter is sending valid IPFIX flows to this collector.",
     }
 }
@@ -83,7 +81,7 @@ pub fn notify_on_updates_translation(language: Language) -> &'static str {
         Language::EN => "Notify when updates are available",
         Language::IT => "Avvisami quando sono disponibili aggiornamenti",
         Language::RU => "Уведомлять о доступных обновлениях",
-        Language::FR => "M’avertir lorsque des mises à jour sont disponibles",
+        Language::FR => "M'avertir lorsque des mises à jour sont disponibles",
         _ => "Notify when updates are available",
     }
 }
