@@ -153,17 +153,21 @@ impl ProgramLookup {
         // associate unassigned recent connections on port with the program
         if proc.is_some() {
             let mut reassigned_data = DataInfo::default();
-            connections
-                .iter_mut()
-                .filter(|(k, v)| {
-                    v.program.is_unknown()
-                        && v.final_instant.elapsed().as_millis() < VALID_PROGRAM_TIMEOUT
-                        && get_local_port(k, v.traffic_direction) == Some(key)
-                })
-                .for_each(|(_, v)| {
+            let mut unknown_data = DataInfo::default();
+            for (k, v) in connections.iter_mut() {
+                if !v.program.is_unknown() {
+                    continue;
+                }
+
+                if v.final_instant.elapsed().as_millis() < VALID_PROGRAM_TIMEOUT
+                    && get_local_port(k, v.traffic_direction) == Some(key)
+                {
                     v.program = program.clone();
                     reassigned_data.refresh(v.data_info());
-                });
+                } else {
+                    unknown_data.refresh(v.data_info());
+                }
+            }
 
             if reassigned_data.tot_data(DataRepr::packets(false)) > 0 {
                 // assign to known
@@ -173,17 +177,9 @@ impl ProgramLookup {
                     .and_modify(|d| d.refresh(reassigned_data))
                     .or_insert(reassigned_data);
                 // remove from Unknown
-                // NOTE: subtracting reassigned_data from Unknown wouldn't correctly reassign final_instant,
-                // so let's just reiterate through all the Unknown connections
-                let mut unknown_data = DataInfo::default();
-                connections
-                    .iter()
-                    .filter(|(_, v)| v.program.is_unknown())
-                    .for_each(|(_, v)| {
-                        unknown_data.refresh(v.data_info());
-                    });
-                // or_insert not needed: Unknown is already in the map since reassigned data came from it
+                // NOTE: subtracting reassigned_data from Unknown wouldn't correctly reassign final_instant
                 self.programs_active_last_interval.insert(Program::Unknown);
+                // or_insert not needed: Unknown is already in the map since reassigned data came from it
                 self.programs
                     .entry(Program::Unknown)
                     .and_modify(|d| *d = unknown_data);

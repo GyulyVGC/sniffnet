@@ -1052,6 +1052,7 @@ impl Sniffer {
             &self.conf.settings.notifications,
             &msg,
             &self.conf.favorites,
+            self.program_lookup.as_ref(),
             &self.capture_source,
             &self.addresses_resolved,
         );

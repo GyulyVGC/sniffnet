@@ -121,6 +121,18 @@ impl DataInfo {
         self.previous_out_bytes = self.out_bytes;
     }
 
+    /// Return the data exchanged during the current interval as standalone totals.
+    pub fn interval_data(&self) -> Self {
+        Self {
+            in_packets: self.in_packets.saturating_sub(self.previous_in_packets),
+            out_packets: self.out_packets.saturating_sub(self.previous_out_packets),
+            in_bytes: self.in_bytes.saturating_sub(self.previous_in_bytes),
+            out_bytes: self.out_bytes.saturating_sub(self.previous_out_bytes),
+            final_instant: self.final_instant,
+            ..Self::default()
+        }
+    }
+
     pub fn compare(&self, other: &Self, sort_type: SortType, data_repr: DataRepr) -> Ordering {
         let self_data = self.tot_data(data_repr);
         let other_data = other.tot_data(data_repr);
@@ -189,6 +201,10 @@ mod tests {
         assert_eq!(busy.outgoing_data(DataRepr::bytes(true)), 600);
         assert_eq!(busy.tot_data(DataRepr::bits(true)), 6400);
         assert_eq!(busy.tot_data(DataRepr::bytes(false)), 20_800);
+        let interval_data = busy.interval_data();
+        assert_eq!(interval_data.tot_data(DataRepr::packets(false)), 5);
+        assert_eq!(interval_data.tot_data(DataRepr::bytes(false)), 800);
+        assert_eq!(interval_data.tot_data(DataRepr::packets(true)), 5);
         assert_eq!(
             busy.compare(&active, SortType::Descending, DataRepr::packets(true)),
             Ordering::Greater

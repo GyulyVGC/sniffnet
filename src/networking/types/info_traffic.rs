@@ -78,7 +78,7 @@ impl InfoTraffic {
                             false,
                             value.data_info(),
                         );
-                        // set program in msg (used for favorite notifications)
+                        // keep the interval message annotated with its program
                         value.program = program;
                     }
 
@@ -90,7 +90,7 @@ impl InfoTraffic {
                     {
                         let program =
                             program_lookup.lookup_and_add_data(local_port, true, value.data_info());
-                        // set program in msg (used for favorite notifications)
+                        // annotate the message before cloning it into the cumulative map
                         value.program = program;
                     }
 

@@ -5,6 +5,7 @@ use crate::networking::types::data_info::DataInfo;
 use crate::networking::types::data_info_host::DataInfoHost;
 use crate::networking::types::data_representation::DataRepr;
 use crate::networking::types::host::Host;
+use crate::networking::types::program_lookup::ProgramLookup;
 use crate::networking::types::service::Service;
 use crate::notifications::types::logged_notification::{
     BlacklistedTransmitted, DataThresholdExceeded, FavoriteTransmitted, LoggedNotification,
@@ -38,6 +39,7 @@ pub fn notify_and_log(
     notifications: &Notifications,
     info_traffic_msg: &InfoTraffic,
     favorites: &Favorites,
+    program_lookup: Option<&ProgramLookup>,
     cs: &CaptureSource,
     addresses_resolved: &HashMap<IpAddr, (String, Host)>,
 ) -> usize {
@@ -79,7 +81,8 @@ pub fn notify_and_log(
 
     // from favorites
     if notifications.favorite_notification.is_active {
-        let favorites_last_interval = favorites_last_interval(info_traffic_msg, favorites);
+        let favorites_last_interval =
+            favorites_last_interval(info_traffic_msg, favorites, program_lookup);
 
         if !favorites_last_interval.is_empty() {
             for favorite in favorites_last_interval {
@@ -199,6 +202,7 @@ fn threshold_services(
 fn favorites_last_interval(
     info_traffic_msg: &InfoTraffic,
     favorites: &Favorites,
+    program_lookup: Option<&ProgramLookup>,
 ) -> Vec<FavoriteItem> {
     let hosts = favorites.hosts().iter().filter_map(|h| {
         info_traffic_msg
@@ -215,12 +219,7 @@ fn favorites_last_interval(
     });
 
     let programs = favorites.programs().iter().filter_map(|p| {
-        let mut data_info = DataInfo::default();
-        info_traffic_msg
-            .map
-            .values()
-            .filter(|v| v.program.eq(p))
-            .for_each(|v| data_info.refresh(v.data_info()));
+        let data_info = program_lookup?.programs().get(p)?.interval_data();
         if data_info.tot_data(DataRepr::packets(false)) > 0 {
             Some(FavoriteItem::Program((p.clone(), data_info)))
         } else {
