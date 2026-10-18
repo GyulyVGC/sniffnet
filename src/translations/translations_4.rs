@@ -303,21 +303,21 @@ pub fn bits_translation(language: Language) -> &'static str {
         | Language::FR
         | Language::ID
         | Language::ES
-        | Language::SV => "bits",
-        Language::CS => "bity",
+        | Language::SV => "Bits",
+        Language::CS => "Bity",
         // Language::FA => "بیت",
         Language::JA => "ビット",
         Language::ZH => "比特",
-        Language::UZ => "bitlar",
+        Language::UZ => "Bitlar",
         Language::EL => "Δυφία",
-        Language::RO => "biți",
+        Language::RO => "Biți",
         Language::ZH_TW => "位元",
-        Language::VI | Language::TR => "bit",
-        Language::UK => "біти",
-        Language::HU => "bitek",
+        Language::VI | Language::TR => "Bit",
+        Language::UK => "Біти",
+        Language::HU => "Bitek",
         Language::SI => "බිට්",
-        Language::RU => "биты",
-        _ => "bits",
+        Language::RU => "Биты",
+        _ => "Bits",
     }
 }
 

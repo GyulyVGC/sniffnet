@@ -51,6 +51,10 @@ impl DonutChart {
             self.dropped.unwrap_or_default() as f32,
         ];
         let total: f32 = values.iter().sum();
+        if total == 0.0 {
+            let angle = Radians(-consts::FRAC_PI_2);
+            return [(angle, angle); 3];
+        }
         let min_val = 2.0 * total / 100.0;
         let mut diff = 0.0;
 
@@ -99,6 +103,9 @@ impl<Message, Theme: Catalog> canvas::Program<Message, Theme> for DonutChart {
         let colors = [style.incoming, style.outgoing, style.dropped];
 
         for ((start_angle, end_angle), color) in self.angles().into_iter().zip(colors) {
+            if start_angle == end_angle {
+                continue;
+            }
             let path = canvas::Path::new(|builder| {
                 // build path using just an arc with thickness, because iced's paths are limited:
                 // - no single close path can be constructed as the one we want (drawing an arc starts a new sub-path)
@@ -156,4 +163,40 @@ pub fn donut_chart<Message, Theme: Catalog>(
     ))
     .width(size)
     .height(size)
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_empty_donut_chart() {
+        for dropped in [None, Some(0)] {
+            for thumbnail in [false, true] {
+                let chart = DonutChart::new(DataRepr::bytes(true), 0, 0, dropped, thumbnail);
+                assert_eq!(chart.title(), "0 B/s");
+                for (start, end) in chart.angles() {
+                    assert!(start.0.is_finite());
+                    assert!(end.0.is_finite());
+                    assert_eq!(start, end);
+                }
+            }
+        }
+    }
+
+    #[test]
+    fn test_donut_chart_angles() {
+        for thumbnail in [false, true] {
+            for per_second in [false, true] {
+                let chart =
+                    DonutChart::new(DataRepr::bytes(per_second), 100, 200, Some(100), thumbnail);
+                let angles = chart.angles();
+                assert!((angles[0].1.0 - angles[0].0.0 - consts::FRAC_PI_2).abs() < 0.000_001);
+                assert!(
+                    (angles[1].1.0 - angles[1].0.0 - 2.0 * consts::FRAC_PI_2).abs() < 0.000_001
+                );
+                assert!((angles[2].1.0 - angles[2].0.0 - consts::FRAC_PI_2).abs() < 0.000_001);
+            }
+        }
+    }
 }
