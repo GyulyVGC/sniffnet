@@ -246,7 +246,8 @@ pub fn data_exceeded_translation(language: Language) -> &'static str {
         Language::IT => "Soglia di dati superata",
         Language::FR => "Seuil de données dépassé",
         Language::JA => "データの閾値を超えました",
-        Language::ZH | Language::ZH_TW => "已超出数据阈值",
+        Language::ZH => "已超出数据阈值",
+        Language::ZH_TW => "已超出數據閾值",
         Language::NL => "Gegevenslimiet overschreden",
         Language::ES => "Umbral de datos superado",
         Language::RO => "Limita de date depășită",
@@ -302,21 +303,21 @@ pub fn bits_translation(language: Language) -> &'static str {
         | Language::FR
         | Language::ID
         | Language::ES
-        | Language::SV => "bits",
-        Language::CS => "bity",
+        | Language::SV => "Bits",
+        Language::CS => "Bity",
         // Language::FA => "بیت",
         Language::JA => "ビット",
         Language::ZH => "比特",
-        Language::UZ => "bitlar",
+        Language::UZ => "Bitlar",
         Language::EL => "Δυφία",
-        Language::RO => "biți",
+        Language::RO => "Biți",
         Language::ZH_TW => "位元",
-        Language::VI | Language::TR => "bit",
-        Language::UK => "біти",
-        Language::HU => "bitek",
+        Language::VI | Language::TR => "Bit",
+        Language::UK => "Біти",
+        Language::HU => "Bitek",
         Language::SI => "බිට්",
-        Language::RU => "биты",
-        _ => "bits",
+        Language::RU => "Биты",
+        _ => "Bits",
     }
 }
 
