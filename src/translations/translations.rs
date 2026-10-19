@@ -119,7 +119,7 @@ pub fn start_translation(language: Language) -> &'static str {
         Language::ID => "Mulai!",
         Language::HU => "Kezdés!",
         Language::SI => "ආරම්භ කරන්න!",
-        Language::AR => "ابدأ!",
+        // Language::AR => "ابدأ!",
     }
 }
 
@@ -148,7 +148,7 @@ pub fn address_translation(language: Language) -> &'static str {
         Language::ID => "Alamat",
         Language::HU => "Cím",
         Language::SI => "ලිපිනය",
-        Language::AR => "عنوان",
+        // Language::AR => "عنوان",
     }
 }
 
@@ -262,7 +262,7 @@ pub fn protocol_translation(language: Language) -> &'static str {
         Language::VI => "Phương thức",
         Language::ID | Language::CS => "Protokol",
         Language::SI => "ප්‍රොටෝකෝලය",
-        Language::AR => "بروتوكول",
+        // Language::AR => "بروتوكول",
     }
 }
 
@@ -294,7 +294,7 @@ pub fn traffic_rate_translation<'a>(language: Language) -> Text<'a, StyleType> {
         Language::NL => "Verkeerssnelheid",
         Language::HU => "Adatráta",
         Language::SI => "ට්‍රැෆික් ප්‍රමාණය",
-        Language::AR => "معدل حركة البيانات",
+        // Language::AR => "معدل حركة البيانات",
     })
 }
 
@@ -353,7 +353,7 @@ pub fn settings_translation(language: Language) -> &'static str {
         Language::NL => "Instellingen",
         Language::HU => "Beállítások",
         Language::SI => "සැකසුම්",
-        Language::AR => "الإعدادات",
+        // Language::AR => "الإعدادات",
     }
 }
 
@@ -382,7 +382,7 @@ pub fn yes_translation<'a>(language: Language) -> Text<'a, StyleType> {
         Language::ID => "Ya",
         Language::HU => "Igen",
         Language::SI => "ඔව්",
-        Language::AR => "نعم",
+        // Language::AR => "نعم",
     })
 }
 
@@ -414,7 +414,7 @@ pub fn ask_quit_translation<'a>(language: Language) -> Text<'a, StyleType> {
         Language::NL => "Weet je zeker dat je deze analyse wilt afsluiten?",
         Language::HU => "Biztosan le akarod állítani ezt az elemzést?",
         Language::SI => "ඔබට මෙම විශ්ලේෂණයෙන් ඉවත් වීමට අවශ්‍යද?",
-        Language::AR => "هل أنت متأكد من أنك تريد إنهاء هذا التحليل؟",
+        // Language::AR => "هل أنت متأكد من أنك تريد إنهاء هذا التحليل؟",
     })
 }
 
@@ -446,7 +446,7 @@ pub fn quit_analysis_translation(language: Language) -> &'static str {
         Language::NL => "Analyse afsluiten",
         Language::HU => "Elemzés leállítása",
         Language::SI => "විශ්ලේෂණයෙන් ඉවත් වන්න",
-        Language::AR => "إنهاء التحليل",
+        // Language::AR => "إنهاء التحليل",
     }
 }
 
@@ -478,7 +478,7 @@ pub fn ask_clear_all_translation<'a>(language: Language) -> Text<'a, StyleType> 
         Language::NL => "Weet je zeker dat je alle meldingen wilt wissen?",
         Language::HU => "Biztosan törölni akarod az értesítéseket?",
         Language::SI => "ඔබට සියලු දැනුම්දීම් මකා දැමීමට අවශ්‍යද?",
-        Language::AR => "هل أنت متأكد من أنك تريد مسح الإشعارات؟",
+        // Language::AR => "هل أنت متأكد من أنك تريد مسح الإشعارات؟",
     })
 }
 
@@ -509,7 +509,7 @@ pub fn clear_all_translation(language: Language) -> &'static str {
         Language::NL => "Alles wissen",
         Language::HU => "Összes törlése",
         Language::SI => "සියල්ල මකා දමන්න",
-        Language::AR => "مسح الكل",
+        // Language::AR => "مسح الكل",
     }
 }
 
@@ -540,7 +540,7 @@ pub fn hide_translation(language: Language) -> &'static str {
         Language::NL | Language::DE => "Verbergen",
         Language::HU => "Elrejtés",
         Language::SI => "සඟවන්න",
-        Language::AR => "إخفاء",
+        // Language::AR => "إخفاء",
     }
 }
 
@@ -571,7 +571,7 @@ pub fn network_adapter_translation(language: Language) -> &'static str {
         Language::NL => "Netwerkadapter",
         Language::HU => "Hálózati adapter",
         Language::SI => "නෙට්වර්ක් ඇඩැප්ටරය",
-        Language::AR => "محول الشبكة",
+        // Language::AR => "محول الشبكة",
     }
 }
 
@@ -677,13 +677,13 @@ pub fn no_addresses_translation(language: Language) -> &'static str {
             "Nem megfigyelhető a forgalom mivel a kiválasztott adapternek nincs aktív címe...\n\n\
                                 Ha biztos vagy benne, hogy csatlakozva vagy az internethez, próbálj meg egy másik adaptert használni."
         }
+        // Language::AR => {
+        //     "لا يمكن رصد أي حركة مرور لأن محول الشبكة المحدد لا يحتوي على عناوين نشطة...\n\n\
+        //                         إذا كنت متأكدًا من اتصالك بالإنترنت، فجرّب اختيار محول آخر."
+        // }
         Language::SI => {
             "ඔබ තෝරාගත් ඇඩැප්ටරයට සක්‍රිය ලිපින නොමැති නිසා කිසිවක් නිරීක්ෂණය කළ නොහැක...\n\n\
                                  ඔබ අන්තර්ජාලයට සම්බන්ධ වී ඇති බව විශ්වාස නම්, වෙනත් ඇඩැප්ටරයක් තෝරා බලන්න."
-        }
-        Language::AR => {
-            "لا يمكن رصد أي حركة مرور لأن محول الشبكة المحدد لا يحتوي على عناوين نشطة...\n\n\
-                                إذا كنت متأكدًا من اتصالك بالإنترنت، فجرّب اختيار محول آخر."
         }
     }
 }
@@ -790,13 +790,13 @@ pub fn waiting_translation(language: Language) -> &'static str {
             "Nem észleltünk még forgalmat. Várakozás hálózati csomagokra...\n\n\
                                  Biztosan csatlakozva vagy az internethez és helyes adaptert választottál ki?"
         }
+        // Language::AR => {
+        //     "لم تُرصد أي حركة مرور بعد. في انتظار وصول حزم الشبكة...\n\n\
+        //                         هل أنت متأكد من اتصالك بالإنترنت واختيارك محول الشبكة الصحيح؟"
+        // }
         Language::SI => {
             "තවම කිසිදු ට්‍රැෆික් එකක් නිරීක්ෂණය වී නැත. නෙට්වර්ක් පැකට් ලැබෙනතෙක් රැඳෙන්න...\n\n\
                                  ඔබ අන්තර්ජාලයට සම්බන්ධ වී නිවැරදි ඇඩැප්ටරය තෝරා ඇති බව ඔබට විශ්වාසද?"
-        }
-        Language::AR => {
-            "لم تُرصد أي حركة مرور بعد. في انتظار وصول حزم الشبكة...\n\n\
-                                هل أنت متأكد من اتصالك بالإنترنت واختيارك محول الشبكة الصحيح؟"
         }
     }
 }
@@ -1152,7 +1152,7 @@ pub fn error_translation(language: Language) -> &'static str {
         Language::NL => "Er is een fout opgetreden!",
         Language::HU => "Hiba történt!",
         Language::SI => "දෝෂයක් ඇති විය!",
-        Language::AR => "حدث خطأ!",
+        // Language::AR => "حدث خطأ!",
     }
 }
 
@@ -1262,7 +1262,7 @@ pub fn packets_translation(language: Language) -> &'static str {
         Language::NL => "Pakketten",
         Language::HU => "Csomagok",
         Language::SI => "පැකට්",
-        Language::AR => "الحزم",
+        // Language::AR => "الحزم",
     }
 }
 
@@ -1324,7 +1324,7 @@ pub fn bytes_translation(language: Language) -> &'static str {
         Language::JA => "バイト",
         Language::HU => "Bájtok",
         Language::SI => "බයිට්",
-        Language::AR => "بايتات",
+        // Language::AR => "بايتات",
     }
 }
 
@@ -1502,7 +1502,7 @@ pub fn notifications_title_translation<'a>(language: Language) -> Text<'a, Style
         Language::NL => "Pas je meldingen aan",
         Language::HU => "Értesítések személyre szabása",
         Language::SI => "ඔබේ දැනුම්දීම් අභිරුචිකරණය කරන්න",
-        Language::AR => "تخصيص الإشعارات",
+        // Language::AR => "تخصيص الإشعارات",
     })
 }
 
@@ -1534,7 +1534,7 @@ pub fn appearance_title_translation<'a>(language: Language) -> Text<'a, StyleTyp
         Language::NL => "Kies je favoriete thema",
         Language::HU => "Válaszd ki a kedvenc témád",
         Language::SI => "ඔබේ කැමති තේමාව තෝරන්න",
-        Language::AR => "اختر السمة المفضلة لديك",
+        // Language::AR => "اختر السمة المفضلة لديك",
     })
 }
 
@@ -1566,7 +1566,7 @@ pub fn active_filters_translation(language: Language) -> &'static str {
         Language::NL => "Actieve filters",
         Language::HU => "Aktív szűrők",
         Language::SI => "සක්‍රිය පෙරහන්",
-        Language::AR => "المرشحات النشطة",
+        // Language::AR => "المرشحات النشطة",
     }
 }
 
@@ -1752,7 +1752,7 @@ pub fn incoming_translation(language: Language) -> &'static str {
         Language::NL => "Inkomend",
         Language::HU => "Beérkező",
         Language::SI => "එන",
-        Language::AR => "الوارد",
+        // Language::AR => "الوارد",
     }
 }
 
@@ -1783,7 +1783,7 @@ pub fn outgoing_translation(language: Language) -> &'static str {
         Language::NL => "Uitgaand",
         Language::HU => "Kimenő",
         Language::SI => "යන",
-        Language::AR => "الصادر",
+        // Language::AR => "الصادر",
     }
 }
 
@@ -1812,7 +1812,7 @@ pub fn notifications_translation(language: Language) -> &'static str {
         Language::NL => "Notificaties",
         Language::HU => "Értesítések",
         Language::SI => "දැනුම්දීම්",
-        Language::AR => "الإشعارات",
+        // Language::AR => "الإشعارات",
     }
 }
 
@@ -1838,7 +1838,7 @@ pub fn style_translation(language: Language) -> &'static str {
         Language::NL => "Stijl",
         Language::HU => "Kinézet",
         Language::SI => "ශෛලිය",
-        Language::AR => "النمط",
+        // Language::AR => "النمط",
     }
 }
 
@@ -1870,7 +1870,7 @@ pub fn language_translation(language: Language) -> &'static str {
         Language::NL => "Taal",
         Language::HU => "Nyelv",
         Language::SI => "භාෂාව",
-        Language::AR => "اللغة",
+        // Language::AR => "اللغة",
     }
 }
 
@@ -1902,7 +1902,7 @@ pub fn overview_translation(language: Language) -> &'static str {
         Language::NL => "Overzicht",
         Language::HU => "Áttekintés",
         Language::SI => "දළ විශ්ලේෂණය",
-        Language::AR => "نظرة عامة",
+        // Language::AR => "نظرة عامة",
     }
 }
 
@@ -1993,7 +1993,7 @@ pub fn per_second_translation(language: Language) -> &'static str {
         Language::NL => "per seconde",
         Language::HU => "másodpercenként",
         Language::SI => "තත්පරයකට",
-        Language::AR => "في الثانية",
+        // Language::AR => "في الثانية",
     }
 }
 
@@ -2089,7 +2089,7 @@ pub fn threshold_translation(language: Language) -> &'static str {
         Language::NL => "Grens",
         Language::HU => "Küszöb",
         Language::SI => "සීමාව",
-        Language::AR => "الحد",
+        // Language::AR => "الحد",
     }
 }
 
@@ -2116,7 +2116,7 @@ pub fn volume_translation(language: Language) -> &'static str {
         Language::ID => "Bunyi",
         Language::HU => "Hangerő",
         Language::SI => "ශබ්ද මට්ටම",
-        Language::AR => "مستوى الصوت",
+        // Language::AR => "مستوى الصوت",
     }
 }
 
@@ -2146,7 +2146,7 @@ pub fn sound_translation(language: Language) -> &'static str {
         Language::NL => "Geluid",
         Language::HU => "Hang",
         Language::SI => "ශබ්දය",
-        Language::AR => "الصوت",
+        // Language::AR => "الصوت",
     }
 }
 
@@ -2178,7 +2178,7 @@ pub fn bytes_exceeded_translation(language: Language) -> &'static str {
         Language::NL => "Byte-drempel overschreden",
         Language::HU => "Bájtküszöb meghaladva",
         Language::SI => "බයිට් සීමාව ඉක්මවා ඇත",
-        Language::AR => "تم تجاوز حد البايتات",
+        // Language::AR => "تم تجاوز حد البايتات",
     }
 }
 
@@ -2241,7 +2241,7 @@ pub fn packets_exceeded_translation(language: Language) -> &'static str {
         Language::NL => "Pakketdrempel overschreden",
         Language::HU => "Csomagküszöb meghaladva",
         Language::SI => "පැකට් සීමාව ඉක්මවා ඇත",
-        Language::AR => "تم تجاوز حد الحزم",
+        // Language::AR => "تم تجاوز حد الحزم",
     }
 }
 
@@ -2331,7 +2331,7 @@ pub fn favorite_transmitted_translation(language: Language) -> &'static str {
         Language::NL => "Nieuwe gegevens uitgewisseld van favorieten",
         Language::HU => "Új adatforgalom a kedvencekből",
         Language::SI => "ප්‍රියතමවලින් නව දත්ත හුවමාරු විය",
-        Language::AR => "تم تبادل بيانات جديدة من المفضلة",
+        // Language::AR => "تم تبادل بيانات جديدة من المفضلة",
     }
 }
 
@@ -2461,15 +2461,15 @@ pub fn no_notifications_set_translation<'a>(language: Language) -> Text<'a, Styl
                                  Miután engedélyezed őket, ez az oldal fogja mutatni az összes értesítésed.\n\n\
                                  A beállításokban tudod őket engedélyezni:"
         }
+        // Language::AR => {
+        //     "لم تقم بتمكين الإشعارات بعد!\n\n\
+        //                         بعد تمكينها، سيتم عرض سجل الإشعارات في هذه الصفحة\n\n\
+        //                         يمكنك تمكين الإشعارات من الإعدادات:"
+        // }
         Language::SI => {
             "ඔබ තවම දැනුම්දීම් සක්‍රිය කර නැත!\n\n\
                                  ඒවා සක්‍රිය කළ පසු, මෙම පිටුව ඔබේ දැනුම්දීම් පෙන්වනු ඇත\n\n\
                                  ඔබට සැකසුම් තුළින් දැනුම්දීම් සක්‍රිය කළ හැක:"
-        }
-        Language::AR => {
-            "لم تقم بتمكين الإشعارات بعد!\n\n\
-                                بعد تمكينها، سيتم عرض سجل الإشعارات في هذه الصفحة\n\n\
-                                يمكنك تمكين الإشعارات من الإعدادات:"
         }
     })
 }
@@ -2577,13 +2577,13 @@ pub fn no_notifications_received_translation<'a>(language: Language) -> Text<'a,
             "Semmi látnivaló...\n\n\
                                  Amint érkezik egy értesítés, azt itt fogod látni"
         }
+        // Language::AR => {
+        //     "لا يوجد ما يمكن عرضه في الوقت الحالي...\n\n\
+        //                         عند استلام إشعار، سيظهر هنا"
+        // }
         Language::SI => {
             "මේ මොහොතේ පෙන්වීමට කිසිවක් නැත...\n\n\
                                  ඔබට දැනුම්දීමක් ලැබුණු විට එය මෙහි දිස්වනු ඇත"
-        }
-        Language::AR => {
-            "لا يوجد ما يمكن عرضه في الوقت الحالي...\n\n\
-                                عند استلام إشعار، سيظهر هنا"
         }
     })
 }
@@ -2616,6 +2616,6 @@ pub fn only_last_30_translation(language: Language) -> &'static str {
         Language::NL => "Alleen de laatste 30 meldingen worden weergegeven",
         Language::HU => "Itt csak az utolsó 30 értesítés van megjelenítve",
         Language::SI => "අවසන් දැනුම්දීම් 30 පමණක් පෙන්වනු ලැබේ",
-        Language::AR => "يتم عرض آخر 30 إشعارًا فقط",
+        // Language::AR => "يتم عرض آخر 30 إشعارًا فقط",
     }
 }

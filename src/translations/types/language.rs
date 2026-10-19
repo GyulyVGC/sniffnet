@@ -6,8 +6,8 @@ use serde::{Deserialize, Serialize};
 
 use crate::StyleType;
 use crate::countries::flags_pictures::{
-    CN, CZ, DE, ES, FI, FR, GB, GR, HU, ICONS_SIZE_BIG, ID, IT, JP, KR, LK, NL, PL, PT, RO, RU, SA,
-    SE, TR, TW, UA, UZ, VN,
+    CN, CZ, DE, ES, FI, FR, GB, GR, HU, ICONS_SIZE_BIG, ID, IT, JP, KR, LK, NL, PL, PT, RO, RU, SE,
+    TR, TW, UA, UZ, VN,
 };
 
 /// This enum defines the available languages.
@@ -67,14 +67,14 @@ pub enum Language {
     HU,
     /// Sinhala
     SI,
-    /// Arabic
-    AR,
+    // /// Arabic
+    // AR,
 }
 
 impl Language {
-    pub const ALL: [Language; 26] = [
+    pub const ALL: [Language; 25] = [
         Language::EN,
-        Language::AR,
+        // Language::AR,
         Language::CS,
         Language::DE,
         Language::EL,
@@ -129,7 +129,7 @@ impl Language {
             Language::CS => CZ,
             Language::HU => HU,
             Language::SI => LK,
-            Language::AR => SA,
+            // Language::AR => SA,
         })))
         .width(ICONS_SIZE_BIG)
     }
@@ -138,7 +138,7 @@ impl Language {
         matches!(
             self,
             Language::EN
-                | Language::AR
+                // | Language::AR
                 | Language::IT
                 | Language::ZH
                 | Language::ZH_TW
@@ -177,7 +177,7 @@ impl fmt::Display for Language {
             Language::CS => "Čeština",
             Language::HU => "Magyar",
             Language::SI => "සිංහල",
-            Language::AR => "العربية",
+            // Language::AR => "العربية",
         };
         write!(f, "{self:?} - {lang_str}")
     }
