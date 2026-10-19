@@ -1,3 +1,5 @@
+#![allow(clippy::unwrap_used)]
+
 use ipnet::IpNet;
 use std::net::IpAddr;
 

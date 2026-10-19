@@ -2,7 +2,7 @@ use serde::{Deserialize, Serialize};
 
 use crate::ByteMultiple;
 use crate::gui::types::conf::deserialize_or_default;
-use crate::networking::types::data_representation::DataRepr;
+use crate::networking::types::data_representation::DataUnit;
 use crate::notifications::types::sound::Sound;
 
 /// Used to contain the notifications configuration set by the user
@@ -60,7 +60,7 @@ pub struct DataNotification {
     pub sound: Sound,
     /// Data representation
     #[serde(deserialize_with = "deserialize_or_default")]
-    pub data_repr: DataRepr,
+    pub data_unit: DataUnit,
     /// Threshold of received + sent bytes; if exceeded a notification is emitted
     #[serde(deserialize_with = "deserialize_or_default")]
     pub threshold: Option<u64>,
@@ -75,7 +75,7 @@ pub struct DataNotification {
 impl Default for DataNotification {
     fn default() -> Self {
         DataNotification {
-            data_repr: DataRepr::default(),
+            data_unit: DataUnit::default(),
             threshold: None,
             byte_multiple: ByteMultiple::KB,
             sound: Sound::Gulp,
@@ -103,8 +103,10 @@ impl DataNotification {
             let without_multiple: String = chars[0..chars.len() - 1].iter().collect();
             if without_multiple.parse::<u64>().is_ok()
                 && TryInto::<u64>::try_into(
-                    without_multiple.parse::<u128>().unwrap_or_default()
-                        * u128::from(byte_multiple_inserted.multiplier()),
+                    without_multiple
+                        .parse::<u128>()
+                        .unwrap_or_default()
+                        .saturating_mul(u128::from(byte_multiple_inserted.multiplier())),
                 )
                 .is_ok()
             {

@@ -1,0 +1,395 @@
+Format: https://www.debian.org/doc/packaging-manuals/copyright-format/1.0/
+Upstream-Name: sniffnet
+Upstream-Contact: Giuliano Bellini <gyulyvgc99@gmail.com>
+Source: https://github.com/GyulyVGC/sniffnet
+Comment:
+ Vendored license declarations and bundled notices are recorded in
+ vendor-inventory.json and vendor-notices.txt. These files are installed under
+ /usr/share/doc/sniffnet/. This is not a complete file-level license audit.
+ Source and license records are incomplete for some bundled assets, including
+ sounds, the icon font, MMDB databases and services.txt.
+
+Files: src/* build.rs Cargo.toml Cargo.lock
+ debian/changelog debian/control debian/rules debian/copyright
+ debian/sniffnet.* debian/source/* debian/clean
+Copyright: 2022-2026 Giuliano Bellini <gyulyvgc99@gmail.com>
+License: MIT or Apache-2.0
+
+Files: debian/*-notices.txt
+Copyright: See the copyright statements reproduced in the individual notices.
+License: collected-notices
+ The individual notices reproduced in these files retain their respective
+ license terms, as identified in the text of each notice.
+
+License: MIT
+ Permission is hereby granted, free of charge, to any person obtaining a copy
+ of this software and associated documentation files (the "Software"), to deal
+ in the Software without restriction, including without limitation the rights
+ to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ copies of the Software, and to permit persons to whom the Software is
+ furnished to do so, subject to the following conditions:
+ .
+ The above copyright notice and this permission notice shall be included in all
+ copies or substantial portions of the Software.
+ .
+ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ SOFTWARE.
+
+License: Apache-2.0
+ On Debian systems, the complete text of the Apache License, Version 2.0,
+ can be found in /usr/share/common-licenses/Apache-2.0.
+
+Files: resources/embedded_icons/countries/ad.svg
+ resources/embedded_icons/countries/ae.svg
+ resources/embedded_icons/countries/af.svg
+ resources/embedded_icons/countries/ag.svg
+ resources/embedded_icons/countries/ai.svg
+ resources/embedded_icons/countries/al.svg
+ resources/embedded_icons/countries/am.svg
+ resources/embedded_icons/countries/ao.svg
+ resources/embedded_icons/countries/aq.svg
+ resources/embedded_icons/countries/ar.svg
+ resources/embedded_icons/countries/as.svg
+ resources/embedded_icons/countries/at.svg
+ resources/embedded_icons/countries/au.svg
+ resources/embedded_icons/countries/aw.svg
+ resources/embedded_icons/countries/ax.svg
+ resources/embedded_icons/countries/az.svg
+ resources/embedded_icons/countries/ba.svg
+ resources/embedded_icons/countries/bb.svg
+ resources/embedded_icons/countries/bd.svg
+ resources/embedded_icons/countries/be.svg
+ resources/embedded_icons/countries/bf.svg
+ resources/embedded_icons/countries/bg.svg
+ resources/embedded_icons/countries/bh.svg
+ resources/embedded_icons/countries/bi.svg
+ resources/embedded_icons/countries/bj.svg
+ resources/embedded_icons/countries/bm.svg
+ resources/embedded_icons/countries/bn.svg
+ resources/embedded_icons/countries/bo.svg
+ resources/embedded_icons/countries/br.svg
+ resources/embedded_icons/countries/bs.svg
+ resources/embedded_icons/countries/bt.svg
+ resources/embedded_icons/countries/bw.svg
+ resources/embedded_icons/countries/by.svg
+ resources/embedded_icons/countries/bz.svg
+ resources/embedded_icons/countries/ca.svg
+ resources/embedded_icons/countries/cc.svg
+ resources/embedded_icons/countries/cd.svg
+ resources/embedded_icons/countries/cf.svg
+ resources/embedded_icons/countries/cg.svg
+ resources/embedded_icons/countries/ch.svg
+ resources/embedded_icons/countries/ci.svg
+ resources/embedded_icons/countries/ck.svg
+ resources/embedded_icons/countries/cl.svg
+ resources/embedded_icons/countries/cm.svg
+ resources/embedded_icons/countries/cn.svg
+ resources/embedded_icons/countries/co.svg
+ resources/embedded_icons/countries/cr.svg
+ resources/embedded_icons/countries/cu.svg
+ resources/embedded_icons/countries/cv.svg
+ resources/embedded_icons/countries/cw.svg
+ resources/embedded_icons/countries/cx.svg
+ resources/embedded_icons/countries/cy.svg
+ resources/embedded_icons/countries/cz.svg
+ resources/embedded_icons/countries/de.svg
+ resources/embedded_icons/countries/dj.svg
+ resources/embedded_icons/countries/dk.svg
+ resources/embedded_icons/countries/dm.svg
+ resources/embedded_icons/countries/do.svg
+ resources/embedded_icons/countries/dz.svg
+ resources/embedded_icons/countries/ec.svg
+ resources/embedded_icons/countries/ee.svg
+ resources/embedded_icons/countries/eg.svg
+ resources/embedded_icons/countries/eh.svg
+ resources/embedded_icons/countries/er.svg
+ resources/embedded_icons/countries/es.svg
+ resources/embedded_icons/countries/et.svg
+ resources/embedded_icons/countries/fi.svg
+ resources/embedded_icons/countries/fj.svg
+ resources/embedded_icons/countries/fk.svg
+ resources/embedded_icons/countries/fm.svg
+ resources/embedded_icons/countries/fo.svg
+ resources/embedded_icons/countries/fr.svg
+ resources/embedded_icons/countries/ga.svg
+ resources/embedded_icons/countries/gb.svg
+ resources/embedded_icons/countries/gd.svg
+ resources/embedded_icons/countries/ge.svg
+ resources/embedded_icons/countries/gg.svg
+ resources/embedded_icons/countries/gh.svg
+ resources/embedded_icons/countries/gi.svg
+ resources/embedded_icons/countries/gl.svg
+ resources/embedded_icons/countries/gm.svg
+ resources/embedded_icons/countries/gn.svg
+ resources/embedded_icons/countries/gq.svg
+ resources/embedded_icons/countries/gr.svg
+ resources/embedded_icons/countries/gs.svg
+ resources/embedded_icons/countries/gt.svg
+ resources/embedded_icons/countries/gu.svg
+ resources/embedded_icons/countries/gw.svg
+ resources/embedded_icons/countries/gy.svg
+ resources/embedded_icons/countries/hk.svg
+ resources/embedded_icons/countries/hn.svg
+ resources/embedded_icons/countries/hr.svg
+ resources/embedded_icons/countries/ht.svg
+ resources/embedded_icons/countries/hu.svg
+ resources/embedded_icons/countries/id.svg
+ resources/embedded_icons/countries/ie.svg
+ resources/embedded_icons/countries/il.svg
+ resources/embedded_icons/countries/im.svg
+ resources/embedded_icons/countries/in.svg
+ resources/embedded_icons/countries/io.svg
+ resources/embedded_icons/countries/iq.svg
+ resources/embedded_icons/countries/ir.svg
+ resources/embedded_icons/countries/is.svg
+ resources/embedded_icons/countries/it.svg
+ resources/embedded_icons/countries/je.svg
+ resources/embedded_icons/countries/jm.svg
+ resources/embedded_icons/countries/jo.svg
+ resources/embedded_icons/countries/jp.svg
+ resources/embedded_icons/countries/ke.svg
+ resources/embedded_icons/countries/kg.svg
+ resources/embedded_icons/countries/kh.svg
+ resources/embedded_icons/countries/ki.svg
+ resources/embedded_icons/countries/km.svg
+ resources/embedded_icons/countries/kn.svg
+ resources/embedded_icons/countries/kp.svg
+ resources/embedded_icons/countries/kr.svg
+ resources/embedded_icons/countries/kw.svg
+ resources/embedded_icons/countries/ky.svg
+ resources/embedded_icons/countries/kz.svg
+ resources/embedded_icons/countries/la.svg
+ resources/embedded_icons/countries/lb.svg
+ resources/embedded_icons/countries/lc.svg
+ resources/embedded_icons/countries/li.svg
+ resources/embedded_icons/countries/lk.svg
+ resources/embedded_icons/countries/lr.svg
+ resources/embedded_icons/countries/ls.svg
+ resources/embedded_icons/countries/lt.svg
+ resources/embedded_icons/countries/lu.svg
+ resources/embedded_icons/countries/lv.svg
+ resources/embedded_icons/countries/ly.svg
+ resources/embedded_icons/countries/ma.svg
+ resources/embedded_icons/countries/mc.svg
+ resources/embedded_icons/countries/md.svg
+ resources/embedded_icons/countries/me.svg
+ resources/embedded_icons/countries/mg.svg
+ resources/embedded_icons/countries/mh.svg
+ resources/embedded_icons/countries/mk.svg
+ resources/embedded_icons/countries/ml.svg
+ resources/embedded_icons/countries/mm.svg
+ resources/embedded_icons/countries/mn.svg
+ resources/embedded_icons/countries/mo.svg
+ resources/embedded_icons/countries/mp.svg
+ resources/embedded_icons/countries/mr.svg
+ resources/embedded_icons/countries/ms.svg
+ resources/embedded_icons/countries/mt.svg
+ resources/embedded_icons/countries/mu.svg
+ resources/embedded_icons/countries/mv.svg
+ resources/embedded_icons/countries/mw.svg
+ resources/embedded_icons/countries/mx.svg
+ resources/embedded_icons/countries/my.svg
+ resources/embedded_icons/countries/mz.svg
+ resources/embedded_icons/countries/na.svg
+ resources/embedded_icons/countries/nc.svg
+ resources/embedded_icons/countries/ne.svg
+ resources/embedded_icons/countries/nf.svg
+ resources/embedded_icons/countries/ng.svg
+ resources/embedded_icons/countries/ni.svg
+ resources/embedded_icons/countries/nl.svg
+ resources/embedded_icons/countries/no.svg
+ resources/embedded_icons/countries/np.svg
+ resources/embedded_icons/countries/nr.svg
+ resources/embedded_icons/countries/nu.svg
+ resources/embedded_icons/countries/nz.svg
+ resources/embedded_icons/countries/om.svg
+ resources/embedded_icons/countries/pa.svg
+ resources/embedded_icons/countries/pe.svg
+ resources/embedded_icons/countries/pf.svg
+ resources/embedded_icons/countries/pg.svg
+ resources/embedded_icons/countries/ph.svg
+ resources/embedded_icons/countries/pk.svg
+ resources/embedded_icons/countries/pl.svg
+ resources/embedded_icons/countries/pn.svg
+ resources/embedded_icons/countries/pr.svg
+ resources/embedded_icons/countries/ps.svg
+ resources/embedded_icons/countries/pt.svg
+ resources/embedded_icons/countries/pw.svg
+ resources/embedded_icons/countries/py.svg
+ resources/embedded_icons/countries/qa.svg
+ resources/embedded_icons/countries/ro.svg
+ resources/embedded_icons/countries/rs.svg
+ resources/embedded_icons/countries/ru.svg
+ resources/embedded_icons/countries/rw.svg
+ resources/embedded_icons/countries/sa.svg
+ resources/embedded_icons/countries/sb.svg
+ resources/embedded_icons/countries/sc.svg
+ resources/embedded_icons/countries/sd.svg
+ resources/embedded_icons/countries/se.svg
+ resources/embedded_icons/countries/sg.svg
+ resources/embedded_icons/countries/si.svg
+ resources/embedded_icons/countries/sk.svg
+ resources/embedded_icons/countries/sl.svg
+ resources/embedded_icons/countries/sm.svg
+ resources/embedded_icons/countries/sn.svg
+ resources/embedded_icons/countries/so.svg
+ resources/embedded_icons/countries/sr.svg
+ resources/embedded_icons/countries/ss.svg
+ resources/embedded_icons/countries/st.svg
+ resources/embedded_icons/countries/sv.svg
+ resources/embedded_icons/countries/sx.svg
+ resources/embedded_icons/countries/sy.svg
+ resources/embedded_icons/countries/sz.svg
+ resources/embedded_icons/countries/tc.svg
+ resources/embedded_icons/countries/td.svg
+ resources/embedded_icons/countries/tf.svg
+ resources/embedded_icons/countries/tg.svg
+ resources/embedded_icons/countries/th.svg
+ resources/embedded_icons/countries/tj.svg
+ resources/embedded_icons/countries/tk.svg
+ resources/embedded_icons/countries/tl.svg
+ resources/embedded_icons/countries/tm.svg
+ resources/embedded_icons/countries/tn.svg
+ resources/embedded_icons/countries/to.svg
+ resources/embedded_icons/countries/tr.svg
+ resources/embedded_icons/countries/tt.svg
+ resources/embedded_icons/countries/tv.svg
+ resources/embedded_icons/countries/tw.svg
+ resources/embedded_icons/countries/tz.svg
+ resources/embedded_icons/countries/ua.svg
+ resources/embedded_icons/countries/ug.svg
+ resources/embedded_icons/countries/us.svg
+ resources/embedded_icons/countries/uy.svg
+ resources/embedded_icons/countries/uz.svg
+ resources/embedded_icons/countries/va.svg
+ resources/embedded_icons/countries/vc.svg
+ resources/embedded_icons/countries/ve.svg
+ resources/embedded_icons/countries/vg.svg
+ resources/embedded_icons/countries/vi.svg
+ resources/embedded_icons/countries/vn.svg
+ resources/embedded_icons/countries/vu.svg
+ resources/embedded_icons/countries/ws.svg
+ resources/embedded_icons/countries/ye.svg
+ resources/embedded_icons/countries/za.svg
+ resources/embedded_icons/countries/zm.svg
+ resources/embedded_icons/countries/zw.svg
+Copyright: 2026 HatScripts
+License: MIT
+Comment: Exact matches to the corresponding HatScripts/circle-flags SVGs.
+
+Files: resources/fonts/full/sarasa-mono-sc-regular.ttf
+ resources/fonts/subset/sarasa-mono-sc-regular.subset.ttf
+Copyright: 2015-2022, Renzhi Li (aka. Belleve Invis, belleve@typeof.net)
+ 2016-2020, The Inter Project Authors
+ 2014-2015, Adobe Systems Incorporated
+ 2012, Google Inc.
+License: OFL-1.1
+Comment: Copyright holders are taken from the bundled font's name table.
+ The upstream license text is also preserved in asset-notices.txt.
+
+License: OFL-1.1
+ SIL Open Font License v1.1
+ ====================================================
+ .
+ .
+ Preamble
+ ----------
+ .
+ The goals of the Open Font License (OFL) are to stimulate worldwide
+ development of collaborative font projects, to support the font creation
+ efforts of academic and linguistic communities, and to provide a free and
+ open framework in which fonts may be shared and improved in partnership
+ with others.
+ .
+ The OFL allows the licensed fonts to be used, studied, modified and
+ redistributed freely as long as they are not sold by themselves. The
+ fonts, including any derivative works, can be bundled, embedded,
+ redistributed and/or sold with any software provided that any reserved
+ names are not used by derivative works. The fonts and derivatives,
+ however, cannot be released under any other type of license. The
+ requirement for fonts to remain under this license does not apply
+ to any document created using the fonts or their derivatives.
+ .
+ .
+ Definitions
+ -------------
+ .
+ `"Font Software"` refers to the set of files released by the Copyright
+ Holder(s) under this license and clearly marked as such. This may
+ include source files, build scripts and documentation.
+ .
+ `"Reserved Font Name"` refers to any names specified as such after the
+ copyright statement(s).
+ .
+ `"Original Version"` refers to the collection of Font Software components as
+ distributed by the Copyright Holder(s).
+ .
+ `"Modified Version"` refers to any derivative made by adding to, deleting,
+ or substituting -- in part or in whole -- any of the components of the
+ Original Version, by changing formats or by porting the Font Software to a
+ new environment.
+ .
+ `"Author"` refers to any designer, engineer, programmer, technical
+ writer or other person who contributed to the Font Software.
+ .
+ .
+ Permission & Conditions
+ ------------------------
+ .
+ Permission is hereby granted, free of charge, to any person obtaining
+ a copy of the Font Software, to use, study, copy, merge, embed, modify,
+ redistribute, and sell modified and unmodified copies of the Font
+ Software, subject to the following conditions:
+ .
+ 1. Neither the Font Software nor any of its individual components,
+    in Original or Modified Versions, may be sold by itself.
+ .
+ 2. Original or Modified Versions of the Font Software may be bundled,
+    redistributed and/or sold with any software, provided that each copy
+    contains the above copyright notice and this license. These can be
+    included either as stand-alone text files, human-readable headers or
+    in the appropriate machine-readable metadata fields within text or
+    binary files as long as those fields can be easily viewed by the user.
+ .
+ 3. No Modified Version of the Font Software may use the Reserved Font
+    Name(s) unless explicit written permission is granted by the corresponding
+    Copyright Holder. This restriction only applies to the primary font name as
+    presented to the users.
+ .
+ 4. The name(s) of the Copyright Holder(s) or the Author(s) of the Font
+    Software shall not be used to promote, endorse or advertise any
+    Modified Version, except to acknowledge the contribution(s) of the
+    Copyright Holder(s) and the Author(s) or with their explicit written
+    permission.
+ .
+ 5. The Font Software, modified or unmodified, in part or in whole,
+    must be distributed entirely under this license, and must not be
+    distributed under any other license. The requirement for fonts to
+    remain under this license does not apply to any document created
+    using the Font Software.
+ .
+ .
+ .
+ Termination
+ -----------
+ .
+ This license becomes null and void if any of the above conditions are
+ not met.
+ .
+ .
+     DISCLAIMER
+ .
+     THE FONT SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+     EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO ANY WARRANTIES OF
+     MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT
+     OF COPYRIGHT, PATENT, TRADEMARK, OR OTHER RIGHT. IN NO EVENT SHALL THE
+     COPYRIGHT HOLDER BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY,
+     INCLUDING ANY GENERAL, SPECIAL, INDIRECT, INCIDENTAL, OR CONSEQUENTIAL
+     DAMAGES, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
+     FROM, OUT OF THE USE OR INABILITY TO USE THE FONT SOFTWARE OR FROM
+     OTHER DEALINGS IN THE FONT SOFTWARE.

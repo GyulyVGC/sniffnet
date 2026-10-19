@@ -20,7 +20,7 @@ For all security-related communications, please write to `security@sniffnet.app`
 ## 1. Project overview and scope of this document
 
 - **Project name:** Sniffnet
-- **Brief description:** Cross-platform desktop application to monitor Internet traffic.
+- **Brief description:** Cross-platform desktop application to monitor network traffic.
 - **Key features in scope of this model:**
   - Packet capture and parsing from a local network adapter or imported PCAP file
   - User-provided files (custom MaxMind MMDB databases, IP blacklists, custom

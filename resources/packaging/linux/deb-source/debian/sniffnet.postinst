@@ -1,0 +1,10 @@
+#!/bin/sh
+set -e
+
+case "$1" in
+    configure)
+        setcap cap_net_raw,cap_net_admin=eip /usr/bin/sniffnet
+        ;;
+esac
+
+#DEBHELPER#

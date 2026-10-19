@@ -8,7 +8,7 @@
 <a href="https://sniffnet.app"><img alt="" title="Website" src="https://raw.githubusercontent.com/GyulyVGC/sniffnet/main/resources/repository/badges/website.svg"/></a>
 <a href="https://github.com/GyulyVGC/sniffnet/wiki"><img alt="" title="Wiki" src="https://raw.githubusercontent.com/GyulyVGC/sniffnet/main/resources/repository/badges/wiki.svg"/></a>
 
-Application to comfortably monitor your Internet traffic.<br>
+Application to comfortably monitor your network traffic.<br>
 Cross-platform. Intuitive. Reliable.
 
 Translated in:<br>
@@ -90,9 +90,9 @@ A special shout-out to these awesome organizations and folks who are sponsoring 
       <picture><img alt="Linux" title="Linux" height="85px" src="https://raw.githubusercontent.com/GyulyVGC/sniffnet/main/resources/repository/badges/linux.svg"/></picture>
     </td>
     <td>
-      AppImage: <a href="https://github.com/GyulyVGC/sniffnet/releases/latest/download/Sniffnet_LinuxAppImage_amd64.AppImage">amd64</a> | <a href="https://github.com/GyulyVGC/sniffnet/releases/latest/download/Sniffnet_LinuxAppImage_arm64.AppImage">arm64</a> | <a href="https://github.com/GyulyVGC/sniffnet/releases/latest/download/Sniffnet_LinuxAppImage_i386.AppImage">i386</a> | <a href="https://github.com/GyulyVGC/sniffnet/releases/latest/download/Sniffnet_LinuxAppImage_armhf.AppImage">armhf</a> <br>
-      DEB: <a href="https://github.com/GyulyVGC/sniffnet/releases/latest/download/Sniffnet_LinuxDEB_amd64.deb">amd64</a> | <a href="https://github.com/GyulyVGC/sniffnet/releases/latest/download/Sniffnet_LinuxDEB_arm64.deb">arm64</a> | <a href="https://github.com/GyulyVGC/sniffnet/releases/latest/download/Sniffnet_LinuxDEB_i386.deb">i386</a> | <a href="https://github.com/GyulyVGC/sniffnet/releases/latest/download/Sniffnet_LinuxDEB_armhf.deb">armhf</a> <br>
-      RPM: <a href="https://github.com/GyulyVGC/sniffnet/releases/latest/download/Sniffnet_LinuxRPM_x86_64.rpm">x86_64</a> | <a href="https://github.com/GyulyVGC/sniffnet/releases/latest/download/Sniffnet_LinuxRPM_aarch64.rpm">aarch64</a>
+      DEB: <a href="https://github.com/GyulyVGC/sniffnet/releases/latest/download/Sniffnet_LinuxDEB_amd64.deb">amd64</a> | <a href="https://github.com/GyulyVGC/sniffnet/releases/latest/download/Sniffnet_LinuxDEB_arm64.deb">arm64</a> | <a href="https://github.com/GyulyVGC/sniffnet/releases/latest/download/Sniffnet_LinuxDEB_i386.deb">i386</a> | <a href="https://github.com/GyulyVGC/sniffnet/releases/latest/download/Sniffnet_LinuxDEB_armhf.deb">armhf</a><br>
+      RPM: <a href="https://github.com/GyulyVGC/sniffnet/releases/latest/download/Sniffnet_LinuxRPM_x86_64.rpm">x86_64</a> | <a href="https://github.com/GyulyVGC/sniffnet/releases/latest/download/Sniffnet_LinuxRPM_aarch64.rpm">aarch64</a><br>
+      AppImage: <a href="https://github.com/GyulyVGC/sniffnet/releases/latest/download/Sniffnet_LinuxAppImage_amd64.AppImage">amd64</a> | <a href="https://github.com/GyulyVGC/sniffnet/releases/latest/download/Sniffnet_LinuxAppImage_arm64.AppImage">arm64</a> | <a href="https://github.com/GyulyVGC/sniffnet/releases/latest/download/Sniffnet_LinuxAppImage_i386.AppImage">i386</a> | <a href="https://github.com/GyulyVGC/sniffnet/releases/latest/download/Sniffnet_LinuxAppImage_armhf.AppImage">armhf</a>
     </td>
   </tr>
 </table>
@@ -115,7 +115,7 @@ Not what you're looking for? Check out [alternative installation methods](https:
 - 🌍 discover the **geographical location** of remote hosts
 - 🌐 find out **domain name** and **ASN** of the hosts you are exchanging traffic with
 - 📖 identify **6000+ upper layer services**, protocols, trojans, and worms
-- 🎮 see which **programs** are generating network traffic
+- 🎮 see which **programs** are generating network bandwidth
 - ⭐ save your **favorite** network hosts, services, and programs
 - 📌 keep an eye on your network even when the application is **minimized**
 - ️🔎 search and **inspect** each of your network connections in real time
@@ -178,7 +178,7 @@ ICED_BACKEND=tiny-skia
 ## Stay in the loop
 
 Wait... there's more!<br>Sniffnet is rapidly evolving, and new features are added on a regular basis.<br>
-Follow the <a href="https://sniffnet.app/news"><b>news</b></a> and Sniffnet socials to never miss an update.
+Follow the <a href="https://sniffnet.app/news/"><b>news</b></a> and Sniffnet socials to never miss an update.
 
 <table align="center">
   <tr>

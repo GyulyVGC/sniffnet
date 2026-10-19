@@ -15,8 +15,8 @@ use iced::window::settings::PlatformSpecific;
 use iced::{Font, Pixels, application, window};
 use networking::types::data_representation::ByteMultiple;
 use networking::types::info_traffic::InfoTraffic;
-use networking::types::protocol::Protocol;
 use networking::types::service::Service;
+use sniffnet_packet_parser::Protocol;
 use translations::types::language::Language;
 use utils::formatted_strings::print_cli_welcome_message;
 

@@ -31,25 +31,30 @@ pub(crate) struct Args {
 
 impl Args {
     /// Handle and return CLI arguments
+    #[allow(clippy::print_stdout, clippy::print_stderr)]
     pub fn handle() -> Self {
         let args = Args::parse();
 
         #[cfg(all(windows, not(debug_assertions)))]
         if let Some(logs_file) = crate::utils::formatted_strings::get_logs_file_path() {
+            use crate::utils::error_logger::{ErrorLogger, Location};
             if args.logs {
-                std::process::Command::new("explorer")
+                if let Ok(mut explorer) = std::process::Command::new("explorer")
                     .arg(logs_file)
                     .spawn()
-                    .unwrap()
-                    .wait()
-                    .unwrap_or_default();
-                std::process::exit(0);
+                    .log_err(crate::location!())
+                {
+                    let _ = explorer.wait().log_err(crate::location!());
+                    std::process::exit(0);
+                }
+                std::process::exit(1);
             } else {
                 // truncate logs file
                 let _ = std::fs::OpenOptions::new()
                     .write(true)
                     .truncate(true)
-                    .open(logs_file);
+                    .open(logs_file)
+                    .log_err(crate::location!());
             }
         }
 
@@ -57,10 +62,9 @@ impl Args {
             if Conf::default().store().is_ok() {
                 println!("Restored default settings");
                 std::process::exit(0);
-            } else {
-                eprintln!("Could not restore default settings");
-                std::process::exit(1);
             }
+            eprintln!("Could not restore default settings");
+            std::process::exit(1);
         }
 
         if args.config_path {
@@ -69,10 +73,9 @@ impl Args {
             {
                 println!("{}", config_path.display());
                 std::process::exit(0);
-            } else {
-                eprintln!("Could not retrieve configuration file path");
-                std::process::exit(1);
             }
+            eprintln!("Could not retrieve configuration file path");
+            std::process::exit(1);
         }
 
         args
@@ -101,6 +104,7 @@ mod tests {
     use crate::gui::pages::types::settings_page::SettingsPage;
     use crate::gui::styles::types::gradient_type::GradientType;
     use crate::gui::types::conf::Conf;
+    use crate::gui::types::config_updates::ConfigUpdates;
     use crate::gui::types::config_window::ConfigWindow;
     use crate::gui::types::export_pcap::ExportPcap;
     use crate::gui::types::favorite::{FavoriteKey, Favorites};
@@ -124,6 +128,7 @@ mod tests {
                 color_gradient: GradientType::Wild,
                 language: Language::ZH,
                 scale_factor: 0.65,
+                expanded_view: true,
                 mmdb_country: "countrymmdb".to_string(),
                 mmdb_asn: "asnmmdb".to_string(),
                 style_path: format!(
@@ -145,6 +150,7 @@ mod tests {
                 device_name: "hey-hey".to_string(),
             },
             window: ConfigWindow::new((452.0, 870.0), (440.0, 99.0), (20.0, 20.0)),
+            updates: ConfigUpdates::default(),
             capture_source_picklist: CaptureSourcePicklist::File,
             report_sort_type: SortType::Ascending,
             host_favorites_filter: false,
@@ -158,14 +164,11 @@ mod tests {
                 expanded: true,
             },
             import_pcap_path: "whole_day.pcapng".to_string(),
-            export_pcap: ExportPcap {
-                enabled: true,
-                file_name: "sniffnet.pcap".to_string(),
-                directory: "home".to_string(),
-            },
+            ipfix_socket: Default::default(),
+            export_pcap: ExportPcap::default(),
             last_opened_setting: SettingsPage::General,
             last_opened_page: RunningPage::Inspect,
-            data_repr: DataRepr::Packets,
+            data_repr: DataRepr::default(),
         };
         // we want to be sure that modified config is different from defaults
         assert_ne!(Conf::default(), modified_conf);

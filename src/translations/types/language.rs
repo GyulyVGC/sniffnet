@@ -140,21 +140,10 @@ impl Language {
             Language::EN
                 | Language::AR
                 | Language::IT
-                | Language::JA
-                | Language::RO
-                | Language::TR
                 | Language::ZH
                 | Language::ZH_TW
-                | Language::DE
-                | Language::UK
                 | Language::FR
-                | Language::ID
-                | Language::ES
-                | Language::SV
-                | Language::EL
-                | Language::HU
                 | Language::RU
-                | Language::SI
         )
     }
 }

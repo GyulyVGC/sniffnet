@@ -18,12 +18,12 @@ use crate::countries::flags_pictures::{
 };
 use crate::countries::types::country::Country;
 use crate::gui::styles::container::ContainerType;
-use crate::gui::styles::style_constants::TOOLTIP_DELAY;
+use crate::gui::styles::style_constants::{FONT_SIZE_FOOTER, TOOLTIP_DELAY};
 use crate::gui::types::message::Message;
 use crate::networking::types::data_info_host::DataInfoHost;
 use crate::networking::types::traffic_type::TrafficType;
 use crate::translations::translations_2::{
-    local_translation, unknown_translation, your_network_adapter_translation,
+    local_network_translation, unknown_location_translation, your_network_adapter_translation,
 };
 use crate::translations::translations_4::reserved_address_translation;
 use crate::{Language, StyleType};
@@ -296,11 +296,11 @@ fn get_flag_from_country<'a>(
             } else if traffic_type.eq(&TrafficType::Broadcast) {
                 (BROADCAST, "Broadcast".to_string())
             } else if is_local {
-                (HOME, local_translation(language).to_string())
+                (HOME, local_network_translation(language).to_string())
             } else if let Some(bogon) = is_bogon {
                 (BOGON, reserved_address_translation(language, bogon))
             } else {
-                (UNKNOWN, unknown_translation(language).to_string())
+                (UNKNOWN, unknown_location_translation(language).to_string())
             };
             tooltip = new_tooltip;
             flag
@@ -347,10 +347,14 @@ pub fn get_flag_tooltip<'a>(
         ContainerType::Tooltip
     };
 
-    Tooltip::new(content, Text::new(actual_tooltip), Position::FollowCursor)
-        .snap_within_viewport(true)
-        .class(tooltip_style)
-        .delay(TOOLTIP_DELAY)
+    Tooltip::new(
+        content,
+        Text::new(actual_tooltip).size(FONT_SIZE_FOOTER),
+        Position::FollowCursor,
+    )
+    .snap_within_viewport(true)
+    .class(tooltip_style)
+    .delay(TOOLTIP_DELAY)
 }
 
 pub fn get_computer_tooltip<'a>(
@@ -377,13 +381,19 @@ pub fn get_computer_tooltip<'a>(
         (true, _, _, _) => your_network_adapter_translation(language).to_string(),
         (false, _, _, TrafficType::Multicast) => "Multicast".to_string(),
         (false, _, _, TrafficType::Broadcast) => "Broadcast".to_string(),
-        (false, true, _, _) => local_translation(language).to_string(),
+        (false, true, _, _) => local_network_translation(language).to_string(),
         (false, false, Some(t), _) => reserved_address_translation(language, t),
-        (false, false, None, TrafficType::Unicast) => unknown_translation(language).to_string(),
+        (false, false, None, TrafficType::Unicast) => {
+            unknown_location_translation(language).to_string()
+        }
     };
 
-    Tooltip::new(content, Text::new(tooltip), Position::FollowCursor)
-        .snap_within_viewport(true)
-        .class(ContainerType::Tooltip)
-        .delay(TOOLTIP_DELAY)
+    Tooltip::new(
+        content,
+        Text::new(tooltip).size(FONT_SIZE_FOOTER),
+        Position::FollowCursor,
+    )
+    .snap_within_viewport(true)
+    .class(ContainerType::Tooltip)
+    .delay(TOOLTIP_DELAY)
 }

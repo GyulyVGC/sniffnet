@@ -1,15 +1,12 @@
 use crate::gui::types::filters::Filters;
 use crate::location;
-use crate::networking::manage_packets::analyze_headers;
-use crate::networking::parse_packets::get_sniffable_headers;
-use crate::networking::types::arp_type::ArpType;
 use crate::networking::types::capture_context::{CaptureContext, CaptureSource, CaptureType};
-use crate::networking::types::icmp_type::IcmpType;
 use crate::networking::types::my_device::MyDevice;
-use crate::networking::types::my_link_type::MyLinkType;
 use crate::utils::error_logger::{ErrorLogger, Location};
 use async_channel::Sender;
 use pcap::{Device, Stat};
+use sniffnet_packet_parser::LinkType;
+use sniffnet_packet_parser::ParsedPacket;
 use std::collections::HashMap;
 use std::thread;
 use std::time::{Duration, Instant};
@@ -44,17 +41,7 @@ pub fn traffic_preview(tx: &Sender<TrafficPreview>) {
 
         if let Ok(packet) = packet_res {
             let dev_info = packet.dev_info;
-            let my_link_type = dev_info.my_link_type;
-            if let Some(headers) = get_sniffable_headers(&packet.data, my_link_type)
-                && analyze_headers(
-                    headers,
-                    &mut (None, None),
-                    &mut 0,
-                    &mut IcmpType::default(),
-                    &mut ArpType::default(),
-                )
-                .is_some()
-            {
+            if ParsedPacket::from_bytes(&packet.data, dev_info.link_type).is_some() {
                 data.entry(dev_info.name)
                     .and_modify(|p| *p += 1)
                     .or_insert(1);
@@ -80,15 +67,17 @@ fn handle_devices_and_previews(
         traffic_preview.data.push((my_dev.clone(), 0));
         let capture_source = CaptureSource::Device(my_dev);
         let capture_context = CaptureContext::new(&capture_source, None, &Filters::default());
-        let my_link_type = capture_context.my_link_type();
-        if !my_link_type.is_supported() {
+        let Some(link_type) = capture_context.link_type() else {
+            continue;
+        };
+        if !link_type.is_supported() {
             continue;
         }
         let pcap_tx = pcap_tx.clone();
         let thread_name = format!("thread_traffic_preview_{dev_name}");
         let dev_info = DevInfo {
             name: dev_name,
-            my_link_type,
+            link_type,
         };
         let (Some(cap), _) = capture_context.consume() else {
             continue;
@@ -126,7 +115,7 @@ fn packet_stream(
 #[derive(Clone)]
 struct DevInfo {
     name: String,
-    my_link_type: MyLinkType,
+    link_type: LinkType,
 }
 
 struct PacketOwned {

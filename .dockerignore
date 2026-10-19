@@ -3,11 +3,15 @@
 
 # Explicitly allow files
 !src/**/*.rs
+!lib/**/*.rs
+!lib/**/Cargo.toml
+!lib/**/README.md
 !build.rs
 !Cargo.toml
 !Cargo.lock
 !Dockerfile
-!services.txt
+!resources/services/categories.txt
+!resources/services/services.txt
 !resources/embedded_icons/**/*.svg
 !resources/DB/*.mmdb
 !resources/fonts/subset/*.ttf

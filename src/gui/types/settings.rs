@@ -17,6 +17,8 @@ pub struct Settings {
     #[serde(deserialize_with = "deserialize_or_default")]
     pub scale_factor: f32,
     #[serde(deserialize_with = "deserialize_or_default")]
+    pub expanded_view: bool,
+    #[serde(deserialize_with = "deserialize_or_default")]
     pub mmdb_country: String,
     #[serde(deserialize_with = "deserialize_or_default")]
     pub mmdb_asn: String,
@@ -35,6 +37,7 @@ impl Default for Settings {
             color_gradient: GradientType::default(),
             language: Language::default(),
             scale_factor: 1.0,
+            expanded_view: false,
             mmdb_country: String::new(),
             mmdb_asn: String::new(),
             ip_blacklist: String::new(),

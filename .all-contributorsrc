@@ -1056,10 +1056,55 @@
       "contributions": [
         "code"
       ]
+    },
+    {
+      "login": "karpovantonme",
+      "name": "Anton Karpov",
+      "avatar_url": "https://avatars.githubusercontent.com/u/30812217?v=4",
+      "profile": "http://karpovanton.com",
+      "contributions": [
+        "code"
+      ]
+    },
+    {
+      "login": "cuyua9",
+      "name": "cuyua9",
+      "avatar_url": "https://avatars.githubusercontent.com/u/274972707?v=4",
+      "profile": "https://github.com/cuyua9",
+      "contributions": [
+        "code"
+      ]
+    },
+    {
+      "login": "jorgemonizribeiro-blip",
+      "name": "jorgemonizribeiro-blip",
+      "avatar_url": "https://avatars.githubusercontent.com/u/323172005?v=4",
+      "profile": "https://github.com/jorgemonizribeiro-blip",
+      "contributions": [
+        "financial"
+      ]
+    },
+    {
+      "login": "jason081112",
+      "name": "Jason Wang",
+      "avatar_url": "https://avatars.githubusercontent.com/u/58059436?v=4",
+      "profile": "https://github.com/jason081112",
+      "contributions": [
+        "translation"
+      ]
+    },
+    {
+      "login": "mrvi0",
+      "name": "Vi",
+      "avatar_url": "https://avatars.githubusercontent.com/u/196581611?v=4",
+      "profile": "http://b4dcat.ru",
+      "contributions": [
+        "translation"
+      ]
     }
   ],
   "contributorsPerLine": 7,
-  "skipCi": true,
+  "skipCi": false,
   "repoType": "github",
   "repoHost": "https://github.com",
   "projectName": "sniffnet",

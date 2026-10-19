@@ -1,5 +1,5 @@
 use crate::networking::types::address_port_pair::AddressPortPair;
-use crate::networking::types::data_representation::DataRepr;
+use crate::networking::types::data_representation::{DataRepr, DataUnit};
 use crate::networking::types::info_address_port_pair::InfoAddressPortPair;
 use crate::report::types::search_parameters::FilterInputType;
 use crate::translations::translations::{address_translation, protocol_translation};
@@ -39,16 +39,13 @@ impl ReportCol {
 
     pub(crate) const FILTER_COLUMNS_WIDTH: f32 = 4.0 * SMALL_COL_WIDTH + 2.0 * LARGE_COL_WIDTH;
 
-    pub(crate) fn get_title(&self, language: Language, data_repr: DataRepr) -> String {
+    pub(crate) fn get_title(&self, language: Language, data_unit: DataUnit) -> String {
         match self {
             ReportCol::SrcIp | ReportCol::DstIp => address_translation(language).to_string(),
             ReportCol::SrcPort | ReportCol::DstPort => port_translation(language).to_string(),
             ReportCol::Proto => protocol_translation(language).to_string(),
             ReportCol::Service => service_translation(language).to_string(),
-            ReportCol::Data => {
-                let mut str = data_repr.get_label(language).to_string();
-                str.remove(0).to_uppercase().to_string() + &str
-            }
+            ReportCol::Data => data_unit.get_label(language).to_string(),
         }
     }
 
@@ -71,17 +68,17 @@ impl ReportCol {
         data_repr: DataRepr,
     ) -> String {
         match self {
-            ReportCol::SrcIp => key.source.to_string(),
+            ReportCol::SrcIp => key.src_ip.to_string(),
             ReportCol::SrcPort => {
-                if let Some(port) = key.sport {
+                if let Some(port) = key.src_port {
                     port.to_string()
                 } else {
                     "-".to_string()
                 }
             }
-            ReportCol::DstIp => key.dest.to_string(),
+            ReportCol::DstIp => key.dst_ip.to_string(),
             ReportCol::DstPort => {
-                if let Some(port) = key.dport {
+                if let Some(port) = key.dst_port {
                     port.to_string()
                 } else {
                     "-".to_string()

@@ -81,7 +81,7 @@ jobs:
 
       - name: Check crate
         if: matrix.os == 'macos' || matrix.os == 'windows' || matrix.os == 'ubuntu' && matrix.arch == 'amd64'
-        run: cargo publish --dry-run --target ${{ matrix.target }}
+        run: cargo publish --workspace --dry-run --target ${{ matrix.target }}
 
       - name: Clippy (release mode)
         run: cargo clippy --release -- -D warnings
@@ -411,7 +411,7 @@ jobs:
           if-no-files-found: error
 
       - name: Sign package artifacts
-        uses: signpath/github-action-submit-signing-request@b9d91eadd323de506c0c81cf0c7fe7438f3360fd # v2.2
+        uses: signpath/github-action-submit-signing-request@f6d04783b4569d051e0c80105fe66e82819d0092 # v3.0
         with:
           api-token: '${{ secrets.SIGNPATH_API_TOKEN }}'
           organization-id: '3b533e02-73c3-4908-a018-d09a34498a6a'

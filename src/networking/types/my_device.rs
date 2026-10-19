@@ -1,6 +1,6 @@
 use pcap::{Address, Device, DeviceFlags};
 
-use crate::networking::types::my_link_type::MyLinkType;
+use sniffnet_packet_parser::LinkType;
 
 /// Represents the current inspected device.
 /// Used to keep in sync the device addresses in case of changes
@@ -10,7 +10,7 @@ pub struct MyDevice {
     name: String,
     desc: Option<String>,
     addresses: Vec<Address>,
-    link_type: MyLinkType,
+    link_type: Option<LinkType>,
 }
 
 impl MyDevice {
@@ -33,7 +33,7 @@ impl MyDevice {
             name: device.name,
             desc: device.desc,
             addresses: device.addresses,
-            link_type: MyLinkType::default(),
+            link_type: None,
         }
     }
 
@@ -53,11 +53,11 @@ impl MyDevice {
         self.addresses = addresses;
     }
 
-    pub fn get_link_type(&self) -> MyLinkType {
+    pub fn get_link_type(&self) -> Option<LinkType> {
         self.link_type
     }
 
-    pub fn set_link_type(&mut self, link_type: MyLinkType) {
+    pub fn set_link_type(&mut self, link_type: Option<LinkType>) {
         self.link_type = link_type;
     }
 }

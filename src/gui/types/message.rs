@@ -3,9 +3,10 @@ use crate::gui::pages::types::running_page::RunningPage;
 use crate::gui::pages::types::settings_page::SettingsPage;
 use crate::gui::styles::types::gradient_type::GradientType;
 use crate::gui::types::favorite::FavoriteKey;
+use crate::gui::types::update_status::UpdateStatus;
 use crate::networking::traffic_preview::TrafficPreview;
 use crate::networking::types::capture_context::CaptureSourcePicklist;
-use crate::networking::types::data_representation::DataRepr;
+use crate::networking::types::data_representation::DataUnit;
 use crate::networking::types::host::HostMessage;
 use crate::networking::types::info_traffic::InfoTraffic;
 use crate::networking::types::ip_blacklist::IpBlacklist;
@@ -36,8 +37,10 @@ pub enum Message {
     ToggleFilters,
     /// Change BPF filter string
     BpfFilter(String),
-    /// Select data representation to use
-    DataReprSelection(DataRepr),
+    /// Select data unit to use
+    DataUnitSelection(DataUnit),
+    /// Update data rates (total vs per second)
+    UpdateDataRates(bool),
     /// Select report sort type to be displayed (inspect page)
     ReportSortSelection(SortType),
     /// Select host sort type to be displayed (overview page)
@@ -146,14 +149,26 @@ pub enum Message {
     CtrlSpacePressed,
     /// Edit scale factor via keyboard shortcut
     ScaleFactorShortcut(bool),
+    /// Check for a newer release
+    CheckNewerRelease,
     /// Set new release status
-    SetNewerReleaseStatus(Option<bool>),
+    SetUpdateStatus(UpdateStatus),
+    /// Toggle whether to notify about new releases
+    ToggleNotifyUpdates,
+    /// Toggle whether to check for new releases
+    ToggleDisableUpdateChecks,
     /// Set the pcap import path
     SetPcapImport(String),
+    /// Set the IPFIX collector bind address
+    SetIpfixAddr(String),
+    /// Set the IPFIX collector bind port
+    SetIpfixPort(String),
     /// Sent by the backend parsing packets at the end of an offline capture; includes all the pending hosts
     PendingHosts(usize, Vec<HostMessage>),
     /// Sent by offline captures: ticks without packets
     OfflineGap(usize, u32),
+    /// Sent by the IPFIX collector: incoming datagrams aren't decodable as IPFIX
+    IpfixUndecodable(usize),
     /// Emitted every second to repeat certain tasks (such as fetching the network devices)
     Periodic,
     /// Expand or collapse the given logged notification
@@ -166,4 +181,6 @@ pub enum Message {
     Freeze,
     /// Traffic preview
     TrafficPreview(TrafficPreview),
+    /// Toggle expanded view
+    ToggleExpandedView,
 }

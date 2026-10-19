@@ -8,7 +8,9 @@ use iced::widget::button::{Catalog, Status, Style};
 use iced::{Background, Border, Color, Shadow, Vector};
 
 use crate::StyleType;
-use crate::gui::styles::style_constants::{BORDER_BUTTON_RADIUS, BORDER_WIDTH};
+use crate::gui::styles::style_constants::{
+    BORDER_BUTTON_RADIUS, BORDER_ROUNDED_RADIUS, BORDER_WIDTH,
+};
 use crate::gui::styles::types::gradient_type::{
     GradientType, get_gradient_buttons, get_gradient_hovered_buttons,
 };
@@ -66,7 +68,7 @@ impl ButtonType {
                     ButtonType::TabActive | ButtonType::TabInactive => Radius::new(0).bottom(30),
                     ButtonType::BorderedRound
                     | ButtonType::BorderedRoundSelected
-                    | ButtonType::Gradient(_) => 12.0.into(),
+                    | ButtonType::Gradient(_) => BORDER_ROUNDED_RADIUS.into(),
                     ButtonType::Starred | ButtonType::NotStarred => 100.0.into(),
                     _ => BORDER_BUTTON_RADIUS.into(),
                 },
@@ -158,7 +160,7 @@ impl ButtonType {
                     ButtonType::TabActive | ButtonType::TabInactive => Radius::new(0).bottom(30),
                     ButtonType::BorderedRound
                     | ButtonType::BorderedRoundSelected
-                    | ButtonType::Gradient(_) => 12.0.into(),
+                    | ButtonType::Gradient(_) => BORDER_ROUNDED_RADIUS.into(),
                     ButtonType::Starred | ButtonType::NotStarred => 100.0.into(),
                     _ => BORDER_BUTTON_RADIUS.into(),
                 },
@@ -214,7 +216,7 @@ impl ButtonType {
                     _ => Background::Color(ext.buttons_color),
                 }),
                 border: Border {
-                    radius: 12.0.into(),
+                    radius: BORDER_ROUNDED_RADIUS.into(),
                     width: BORDER_WIDTH,
                     color: Color {
                         a: ext.alpha_chart_badge,

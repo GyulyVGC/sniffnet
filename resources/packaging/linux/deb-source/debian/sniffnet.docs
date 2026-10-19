@@ -1,0 +1,5 @@
+README.md
+debian/vendor-inventory.json
+debian/vendor-notices.txt
+debian/asset-notices.txt
+debian/upstream-source.json

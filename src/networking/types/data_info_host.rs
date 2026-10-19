@@ -20,10 +20,18 @@ pub struct DataInfoHost {
 
 impl DataInfoHost {
     pub fn refresh(&mut self, other: &Self) {
-        self.data_info.refresh(other.data_info);
-        self.is_loopback = other.is_loopback;
-        self.is_local = other.is_local;
-        self.is_bogon = other.is_bogon;
-        self.traffic_type = other.traffic_type;
+        let Self {
+            data_info,
+            is_loopback,
+            is_local,
+            is_bogon,
+            traffic_type,
+        } = other;
+
+        self.data_info.refresh(*data_info);
+        self.is_loopback = *is_loopback;
+        self.is_local = *is_local;
+        self.is_bogon = *is_bogon;
+        self.traffic_type = *traffic_type;
     }
 }

@@ -1,37 +1,39 @@
 //! GUI bottom footer
 
-use iced::widget::Space;
+use crate::gui::components::button::row_open_link_tooltip;
+use crate::gui::components::types::my_modal::MyModal;
+use crate::gui::styles::button::ButtonType;
+use crate::gui::styles::container::ContainerType;
+use crate::gui::styles::style_constants::{FONT_SIZE_FOOTER, FONT_SIZE_TITLE, TOOLTIP_DELAY};
+use crate::gui::styles::text::TextType;
+use crate::gui::styles::types::gradient_type::GradientType;
+use crate::gui::styles::types::style_type::StyleType;
+use crate::gui::types::message::Message;
+use crate::gui::types::update_status::UpdateStatus;
+use crate::translations::translations_6::update_status_translation;
+use crate::utils::formatted_strings::APP_VERSION;
+use crate::utils::types::icon::Icon;
+use crate::utils::types::web_page::WebPage;
+use crate::{Language, SNIFFNET_TITLECASE};
 use iced::widget::text::LineHeight;
 use iced::widget::tooltip::Position;
 use iced::widget::{Column, Container, Row, Text, Tooltip, button, rich_text, span};
 use iced::{Alignment, Length, Padding};
 
-use crate::gui::components::button::row_open_link_tooltip;
-use crate::gui::styles::button::ButtonType;
-use crate::gui::styles::container::ContainerType;
-use crate::gui::styles::style_constants::{FONT_SIZE_FOOTER, FONT_SIZE_SUBTITLE, TOOLTIP_DELAY};
-use crate::gui::styles::text::TextType;
-use crate::gui::styles::types::gradient_type::GradientType;
-use crate::gui::styles::types::style_type::StyleType;
-use crate::gui::types::message::Message;
-use crate::translations::translations_2::new_version_available_translation;
-use crate::utils::formatted_strings::APP_VERSION;
-use crate::utils::types::icon::Icon;
-use crate::utils::types::web_page::WebPage;
-use crate::{Language, SNIFFNET_TITLECASE};
-
 pub fn footer<'a>(
     thumbnail: bool,
     language: Language,
     color_gradient: GradientType,
-    newer_release_available: Option<bool>,
+    update_status: &UpdateStatus,
     dots_pulse: &(String, u8),
-) -> Container<'a, Message, StyleType> {
-    if thumbnail {
-        return thumbnail_footer();
+    expanded_view: bool,
+) -> Option<Container<'a, Message, StyleType>> {
+    if thumbnail || expanded_view {
+        return None;
     }
 
-    let release_details_row = get_release_details(language, newer_release_available);
+    let release_details_row =
+        get_release_details(language, update_status, dots_pulse, expanded_view);
 
     let heart_size = match dots_pulse.1 {
         1 => 17.0,
@@ -80,10 +82,12 @@ pub fn footer<'a>(
                 ),
         );
 
-    Container::new(footer_row)
-        .height(45)
-        .align_y(Alignment::Center)
-        .class(ContainerType::Gradient(color_gradient))
+    Some(
+        Container::new(footer_row)
+            .height(45)
+            .align_y(Alignment::Center)
+            .class(ContainerType::Gradient(color_gradient)),
+    )
 }
 
 fn get_button_roadmap<'a>() -> Tooltip<'a, Message, StyleType> {
@@ -184,48 +188,69 @@ fn get_button_sponsor<'a>() -> Tooltip<'a, Message, StyleType> {
         .delay(TOOLTIP_DELAY)
 }
 
-fn get_release_details<'a>(
+pub(super) fn get_release_details<'a>(
     language: Language,
-    newer_release_available: Option<bool>,
+    update_status: &UpdateStatus,
+    dots_pulse: &(String, u8),
+    expanded_view: bool,
 ) -> Row<'a, Message, StyleType> {
     let mut ret_val = Row::new()
+        .spacing(5)
         .align_y(Alignment::Center)
         .height(Length::Fill)
-        .width(Length::Fill)
-        .push(Text::new(format!("{SNIFFNET_TITLECASE} {APP_VERSION}")).size(FONT_SIZE_FOOTER));
-    if let Some(boolean_response) = newer_release_available {
-        if boolean_response {
-            // a newer release is available on GitHub
-            let button = button(
-                Icon::NewerVersion
-                    .to_text()
-                    .size(23)
-                    .align_x(Alignment::Center)
-                    .align_y(Alignment::Center)
-                    .line_height(LineHeight::Relative(0.8)),
-            )
-            .padding(0)
-            .height(35)
-            .width(35)
-            .class(ButtonType::Alert)
-            .on_press(Message::OpenWebPage(WebPage::WebsiteDownload));
-            let tooltip = Tooltip::new(
-                button,
-                row_open_link_tooltip(new_version_available_translation(language)),
-                Position::Top,
-            )
-            .gap(7.5)
-            .class(ContainerType::Tooltip)
-            .delay(TOOLTIP_DELAY);
-            ret_val = ret_val.push(Space::new().width(10)).push(tooltip);
+        .width(if expanded_view {
+            Length::Shrink
         } else {
-            // this is the latest release
-            ret_val = ret_val.push(Text::new(" ✔").size(FONT_SIZE_SUBTITLE));
-        }
-    }
-    ret_val
-}
+            Length::Fill
+        });
 
-fn thumbnail_footer<'a>() -> Container<'a, Message, StyleType> {
-    Container::new(Space::new().width(Length::Fill)).height(0)
+    if expanded_view {
+        ret_val = ret_val.push(
+            Icon::Sniffnet
+                .to_text()
+                .align_y(Alignment::Center)
+                .height(Length::Fill)
+                .size(45),
+        );
+    }
+
+    let text = if expanded_view {
+        Text::new(SNIFFNET_TITLECASE).size(FONT_SIZE_TITLE)
+    } else {
+        Text::new(format!("{SNIFFNET_TITLECASE} {APP_VERSION}")).size(FONT_SIZE_FOOTER)
+    };
+
+    ret_val = ret_val.push(text);
+
+    let mut button = button(
+        update_status
+            .icon(dots_pulse.0.len())
+            .align_x(Alignment::Center)
+            .align_y(Alignment::Center)
+            .line_height(LineHeight::Relative(1.0)),
+    )
+    .padding(0)
+    .height(35)
+    .width(35)
+    .on_press(Message::ShowModal(MyModal::UpdateStatus(true)));
+
+    if matches!(update_status, UpdateStatus::UpdateAvailable(_)) {
+        button = button.class(ButtonType::Alert);
+    }
+
+    let tooltip = Tooltip::new(
+        button,
+        Text::new(update_status_translation(language)).size(FONT_SIZE_FOOTER),
+        if expanded_view {
+            Position::FollowCursor
+        } else {
+            Position::Right
+        },
+    )
+    .gap(5)
+    .class(ContainerType::Tooltip)
+    .delay(TOOLTIP_DELAY);
+    ret_val = ret_val.push(tooltip);
+
+    ret_val
 }

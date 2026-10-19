@@ -19,7 +19,8 @@ pub enum Icon {
     Generals,
     Error,
     // Expand,
-    Feedback,
+    ExpandedView,
+    // Feedback,
     File,
     Forbidden,
     Funnel,
@@ -65,6 +66,9 @@ pub enum Icon {
     Waves,
     Pause,
     Resume,
+    Packet,
+    Totals,
+    LiveRate,
 }
 
 impl Icon {
@@ -82,7 +86,7 @@ impl Icon {
             Icon::Clock => '9',
             Icon::Generals => 'Q',
             Icon::Error => 'U',
-            Icon::Feedback => '=',
+            // Icon::Feedback => '=',
             Icon::File => '8',
             Icon::Forbidden => 'x',
             Icon::Funnel => 'V',
@@ -129,8 +133,12 @@ impl Icon {
             // Icon::Update3 => '&',
             // Icon::Expand => 'p',
             // Icon::Collapse => 'q',
+            Icon::ExpandedView => 'w',
             Icon::Pause => '-',
             Icon::Resume => '+',
+            Icon::Packet => '.',
+            Icon::Totals => '*',
+            Icon::LiveRate => ')',
         }
     }
 

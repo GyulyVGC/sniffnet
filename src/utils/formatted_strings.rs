@@ -1,8 +1,13 @@
 use std::cmp::min;
+use std::collections::HashMap;
+use std::fmt::{Display, Write};
 use std::net::IpAddr;
 
+use crate::translations::translations_3::link_type_translation;
+use crate::translations::types::language::Language;
 use crate::utils::types::timestamp::Timestamp;
 use jiff::tz::TimeZone;
+use sniffnet_packet_parser::LinkType;
 
 /// Application version number (to be displayed in gui footer)
 pub const APP_VERSION: &str = env!("CARGO_PKG_VERSION");
@@ -20,6 +25,7 @@ pub const APP_VERSION: &str = env!("CARGO_PKG_VERSION");
 //     }
 // }
 
+#[allow(clippy::print_stdout)]
 pub fn print_cli_welcome_message() {
     let ver = APP_VERSION;
     print!(
@@ -156,6 +162,42 @@ pub fn clip_text(text: &str, max_chars: usize) -> String {
     [slice.trim(), suspensions].concat()
 }
 
+/// Converts a MAC address in its hexadecimal form
+pub fn mac_from_dec_to_hex(mac_dec: [u8; 6]) -> String {
+    let mut mac_hex = String::with_capacity(17);
+    for n in &mac_dec {
+        let _ = write!(mac_hex, "{n:02x}:");
+    }
+    mac_hex.pop();
+    mac_hex
+}
+
+/// Used to print ICMP, IGMP, and ARP message types
+pub fn pretty_print_message_types<T: Display>(map: &HashMap<T, usize>) -> String {
+    let mut ret_val = String::new();
+
+    let mut vec: Vec<(&T, &usize)> = map.iter().collect();
+    vec.sort_by(|(_, a), (_, b)| b.cmp(a));
+
+    for (msg_type, n) in vec {
+        let _ = writeln!(ret_val, "   {msg_type} ({n})");
+    }
+    ret_val
+}
+
+/// Pretty print the link type with its description
+pub fn full_print_link_type(link_type: Option<LinkType>, language: Language) -> String {
+    let Some(link_type) = link_type else {
+        return format!("{}: -", link_type_translation(language));
+    };
+
+    format!(
+        "{}: {}",
+        link_type_translation(language),
+        link_type.description()
+    )
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -282,5 +324,13 @@ mod tests {
             clip_text("        protocol90 23456          ", 26),
             "protocol90 23456"
         );
+    }
+
+    #[test]
+    fn test_mac_from_dec_to_hex() {
+        let result = mac_from_dec_to_hex([255, 255, 10, 177, 9, 15]);
+        assert_eq!(result, "ff:ff:0a:b1:09:0f".to_string());
+        let result = mac_from_dec_to_hex([0, 0, 0, 0, 0, 0]);
+        assert_eq!(result, "00:00:00:00:00:00".to_string());
     }
 }

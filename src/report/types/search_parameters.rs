@@ -28,6 +28,8 @@ pub struct SearchParameters {
     pub as_name: String,
     /// Program name
     pub program: String,
+    /// IPFIX exporter
+    pub exporter: String,
     /// Whether to display only favorites
     pub only_favorites: bool,
     /// Whether to display only blacklisted
@@ -68,10 +70,7 @@ impl SearchParameters {
     }
 
     fn is_some_host_filter_active(&self) -> bool {
-        self.only_favorites
-            || !self.country.is_empty()
-            || !self.as_name.is_empty()
-            || !self.domain.is_empty()
+        !self.country.is_empty() || !self.as_name.is_empty() || !self.domain.is_empty()
     }
 
     pub fn new_host_search(host: &Host) -> Self {
@@ -114,10 +113,11 @@ pub enum FilterInputType {
     Domain,
     AsName,
     Program,
+    Exporter,
 }
 
 impl FilterInputType {
-    pub const ALL: [FilterInputType; 10] = [
+    pub const ALL: [FilterInputType; 11] = [
         Self::AddressSrc,
         Self::PortSrc,
         Self::AddressDst,
@@ -128,6 +128,7 @@ impl FilterInputType {
         Self::Domain,
         Self::AsName,
         Self::Program,
+        Self::Exporter,
     ];
 
     pub fn matches_entry(
@@ -172,27 +173,28 @@ impl FilterInputType {
             FilterInputType::Domain => &search_params.domain,
             FilterInputType::AsName => &search_params.as_name,
             FilterInputType::Program => &search_params.program,
+            FilterInputType::Exporter => &search_params.exporter,
         }
     }
 
-    pub fn entry_value(
+    fn entry_value(
         self,
         key: &AddressPortPair,
         value: &InfoAddressPortPair,
         r_dns_host: Option<&(String, Host)>,
     ) -> String {
         match self {
-            FilterInputType::AddressSrc => key.source.to_string(),
+            FilterInputType::AddressSrc => key.src_ip.to_string(),
             FilterInputType::PortSrc => {
-                if let Some(port) = key.sport {
+                if let Some(port) = key.src_port {
                     port.to_string()
                 } else {
                     "-".to_string()
                 }
             }
-            FilterInputType::AddressDst => key.dest.to_string(),
+            FilterInputType::AddressDst => key.dst_ip.to_string(),
             FilterInputType::PortDst => {
-                if let Some(port) = key.dport {
+                if let Some(port) = key.dst_port {
                     port.to_string()
                 } else {
                     "-".to_string()
@@ -216,6 +218,9 @@ impl FilterInputType {
                 .name
                 .clone(),
             FilterInputType::Program => value.program.to_string(),
+            FilterInputType::Exporter => key
+                .exporter
+                .map_or_else(|| "-".to_string(), |exporter| exporter.to_string()),
         }
     }
 
@@ -232,6 +237,7 @@ impl FilterInputType {
             FilterInputType::Country => result.country = String::new(),
             FilterInputType::AsName => result.as_name = String::new(),
             FilterInputType::Program => result.program = String::new(),
+            FilterInputType::Exporter => result.exporter = String::new(),
         }
         result
     }
@@ -250,6 +256,7 @@ impl FilterInputType {
             FilterInputType::Country => result.country = trimmed,
             FilterInputType::AsName => result.as_name = trimmed,
             FilterInputType::Program => result.program = trimmed,
+            FilterInputType::Exporter => result.exporter = trimmed,
         }
         result
     }

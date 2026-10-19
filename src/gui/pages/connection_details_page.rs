@@ -5,7 +5,7 @@ use crate::gui::components::button::button_hide;
 use crate::gui::styles::container::ContainerType;
 use crate::gui::styles::rule::RuleType;
 use crate::gui::styles::scrollbar::ScrollbarType;
-use crate::gui::styles::style_constants::{FONT_SIZE_TITLE, TOOLTIP_DELAY};
+use crate::gui::styles::style_constants::{FONT_SIZE_FOOTER, FONT_SIZE_TITLE, TOOLTIP_DELAY};
 use crate::gui::styles::text::TextType;
 use crate::gui::styles::types::gradient_type::GradientType;
 use crate::gui::types::message::Message;
@@ -15,19 +15,14 @@ use crate::networking::manage_packets::{
     get_address_to_lookup, get_traffic_type, is_local_connection, is_my_address,
 };
 use crate::networking::types::address_port_pair::AddressPortPair;
-use crate::networking::types::arp_type::ArpType;
 use crate::networking::types::bogon::is_bogon;
-use crate::networking::types::capture_context::CaptureSource;
-use crate::networking::types::data_representation::DataRepr;
 use crate::networking::types::host::Host;
-use crate::networking::types::icmp_type::IcmpType;
 use crate::networking::types::info_address_port_pair::InfoAddressPortPair;
 use crate::networking::types::latency::LatencyStatus;
 use crate::networking::types::traffic_direction::TrafficDirection;
 use crate::networking::types::traffic_type::TrafficType;
 use crate::translations::translations::{
-    address_translation, incoming_translation, outgoing_translation, packets_translation,
-    protocol_translation,
+    address_translation, incoming_translation, outgoing_translation, protocol_translation,
 };
 use crate::translations::translations_2::{
     connection_details_translation, destination_translation, fqdn_translation,
@@ -38,10 +33,12 @@ use crate::translations::translations_3::{
     copy_translation, messages_translation, service_translation,
 };
 use crate::translations::translations_5::program_translation;
-use crate::translations::translations_6::latency_translation;
-use crate::utils::formatted_strings::{get_formatted_timestamp, get_socket_address};
+use crate::translations::translations_6::{ipfix_exporter_translation, latency_translation};
+use crate::utils::formatted_strings::{
+    get_formatted_timestamp, get_socket_address, mac_from_dec_to_hex, pretty_print_message_types,
+};
 use crate::utils::types::icon::Icon;
-use crate::{Language, Protocol, Sniffer, StyleType};
+use crate::{Language, Sniffer, StyleType};
 use iced::alignment::Vertical;
 use iced::widget::scrollable::Direction;
 use iced::widget::tooltip::Position;
@@ -94,7 +91,7 @@ fn page_content<'a>(sniffer: &Sniffer, key: &AddressPortPair) -> Container<'a, M
         let host_info = host_info_option.unwrap_or_default();
         let flag = get_flag_tooltip(host.country, &host_info, language, false, 1.0);
         let computer = get_local_tooltip(sniffer, &address_to_lookup, key);
-        if address_to_lookup.eq(&key.source) {
+        if address_to_lookup.eq(&key.src_ip) {
             source_caption = source_caption.push(flag);
             dest_caption = dest_caption.push(computer);
         } else {
@@ -105,22 +102,22 @@ fn page_content<'a>(sniffer: &Sniffer, key: &AddressPortPair) -> Container<'a, M
 
     let mut source_col = get_src_or_dest_col(
         source_caption,
-        &key.source,
-        key.sport,
-        val.mac_address1.as_ref(),
+        &key.src_ip,
+        key.src_port,
+        val.src_mac,
         language,
         &sniffer.timing_events,
     );
     let mut dest_col = get_src_or_dest_col(
         dest_caption,
-        &key.dest,
-        key.dport,
-        val.mac_address2.as_ref(),
+        &key.dst_ip,
+        key.dst_port,
+        val.dst_mac,
         language,
         &sniffer.timing_events,
     );
 
-    if address_to_lookup.eq(&key.source) {
+    if address_to_lookup.eq(&key.src_ip) {
         source_col = source_col.push(host_info_col);
     } else {
         dest_col = dest_col.push(host_info_col);
@@ -162,6 +159,7 @@ fn page_header<'a>(
     .class(ContainerType::Gradient(color_gradient))
 }
 
+#[allow(clippy::too_many_lines)]
 fn col_info<'a>(
     sniffer: &Sniffer,
     key: &AddressPortPair,
@@ -175,9 +173,7 @@ fn col_info<'a>(
         sniffer.capture_source.get_addresses(),
         val.traffic_direction,
     ) == TrafficType::Unicast;
-    let measure_latency = matches!(sniffer.capture_source, CaptureSource::Device(_)) && is_unicast;
-    let is_icmp = key.protocol.eq(&Protocol::ICMP);
-    let is_arp = key.protocol.eq(&Protocol::ARP);
+    let measure_latency = sniffer.capture_source.supports_latency() && is_unicast;
 
     let mut ret_val = Column::new()
         .spacing(10)
@@ -194,22 +190,39 @@ fn col_info<'a>(
                     get_formatted_timestamp(val.initial_timestamp),
                     get_formatted_timestamp(val.final_timestamp)
                 ))),
-        )
-        .push(TextType::highlighted_subtitle_with_desc(
-            protocol_translation(language),
-            &key.protocol.to_string(),
-        ));
+        );
 
-    if !is_icmp && !is_arp {
-        ret_val = ret_val
-            .push(TextType::highlighted_subtitle_with_desc(
-                service_translation(language),
-                &val.service.to_string(),
-            ))
-            .push(TextType::highlighted_subtitle_with_desc(
+    // only IPFIX flows are reported by an exporter
+    if let Some(exporter) = key.exporter {
+        ret_val = ret_val.push(TextType::highlighted_subtitle_with_desc(
+            ipfix_exporter_translation(language),
+            &exporter.to_string(),
+        ));
+    }
+
+    if let Some(vlan_id) = val.vlan_id {
+        ret_val = ret_val.push(TextType::highlighted_subtitle_with_desc(
+            "VLAN ID",
+            &vlan_id.to_string(),
+        ));
+    }
+
+    ret_val = ret_val.push(TextType::highlighted_subtitle_with_desc(
+        protocol_translation(language),
+        &key.protocol.to_string(),
+    ));
+
+    if !key.protocol.is_portless() {
+        ret_val = ret_val.push(TextType::highlighted_subtitle_with_desc(
+            service_translation(language),
+            &val.service.to_string(),
+        ));
+        if sniffer.program_lookup.is_some() {
+            ret_val = ret_val.push(TextType::highlighted_subtitle_with_desc(
                 program_translation(language),
                 &val.program.to_string(),
             ));
+        }
     }
 
     ret_val = ret_val.push(TextType::highlighted_subtitle_with_desc(
@@ -222,13 +235,7 @@ fn col_info<'a>(
                 incoming_translation(language).to_lowercase()
             }
         ),
-        &(data_repr.formatted_string(val.transmitted_data(data_repr))
-            + if data_repr == DataRepr::Packets {
-                format!(" {}", packets_translation(language))
-            } else {
-                String::new()
-            }
-            .as_ref()),
+        &data_repr.formatted_string(val.transmitted_data(data_repr)),
     ));
 
     if measure_latency {
@@ -242,7 +249,9 @@ fn col_info<'a>(
         ));
     }
 
-    if is_icmp || is_arp {
+    let messages = pretty_print_message_types(&val.message_types);
+
+    if !messages.is_empty() {
         ret_val = ret_val.push(
             Column::new()
                 .push(
@@ -252,11 +261,7 @@ fn col_info<'a>(
                 .push(Scrollable::with_direction(
                     Column::new()
                         .padding(Padding::ZERO.right(10).bottom(10))
-                        .push(Text::new(if is_icmp {
-                            IcmpType::pretty_print_types(&val.icmp_types)
-                        } else {
-                            ArpType::pretty_print_types(&val.arp_types)
-                        })),
+                        .push(Text::new(messages)),
                     Direction::Both {
                         vertical: ScrollbarType::properties(),
                         horizontal: ScrollbarType::properties(),
@@ -304,7 +309,7 @@ fn latency_row<'a>(
 fn get_error_tooltip<'a>(error: &str) -> Tooltip<'a, Message, StyleType> {
     Tooltip::new(
         Icon::Error.to_text(),
-        Text::new(error.to_string()),
+        Text::new(error.to_string()).size(FONT_SIZE_FOOTER),
         Position::FollowCursor,
     )
     .class(ContainerType::Tooltip)
@@ -343,10 +348,10 @@ fn get_local_tooltip<'a>(
 ) -> Tooltip<'a, Message, StyleType> {
     let Settings { language, .. } = sniffer.conf.settings;
 
-    let local_address = if address_to_lookup.eq(&key.source) {
-        &key.dest
+    let local_address = if address_to_lookup.eq(&key.src_ip) {
+        &key.dst_ip
     } else {
-        &key.source
+        &key.src_ip
     };
     let my_interface_addresses = sniffer.capture_source.get_addresses();
     get_computer_tooltip(
@@ -354,10 +359,10 @@ fn get_local_tooltip<'a>(
         is_local_connection(local_address, my_interface_addresses),
         is_bogon(local_address),
         get_traffic_type(
-            if address_to_lookup.eq(&key.source) {
-                &key.dest
+            if address_to_lookup.eq(&key.src_ip) {
+                &key.dst_ip
             } else {
-                &key.source
+                &key.src_ip
             },
             my_interface_addresses,
             TrafficDirection::Outgoing,
@@ -370,7 +375,7 @@ fn get_src_or_dest_col<'a>(
     caption: Row<'a, Message, StyleType>,
     ip: &IpAddr,
     port: Option<u16>,
-    mac: Option<&String>,
+    mac: Option<[u8; 6]>,
     language: Language,
     timing_events: &TimingEvents,
 ) -> Column<'a, Message, StyleType> {
@@ -379,8 +384,6 @@ fn get_src_or_dest_col<'a>(
     } else {
         address_translation(language)
     };
-
-    let mac_str = if let Some(val) = mac { val } else { "-" };
 
     Column::new()
         .spacing(4)
@@ -400,10 +403,10 @@ fn get_src_or_dest_col<'a>(
                 ))
                 .push(get_button_copy(language, ip, timing_events)),
         )
-        .push(TextType::highlighted_subtitle_with_desc(
-            mac_address_translation(language),
-            mac_str,
-        ))
+        .push(mac.map(|m| {
+            let mac_str = mac_from_dec_to_hex(m);
+            TextType::highlighted_subtitle_with_desc(mac_address_translation(language), &mac_str)
+        }))
 }
 
 fn assemble_widgets<'a>(
@@ -456,7 +459,7 @@ fn get_button_copy<'a>(
 
     Tooltip::new(
         content,
-        Text::new(format!("{} (IP)", copy_translation(language))),
+        Text::new(format!("{} (IP)", copy_translation(language))).size(FONT_SIZE_FOOTER),
         Position::Right,
     )
     .gap(5)
@@ -484,8 +487,12 @@ fn get_button_ping(
         button = button.on_press(Message::MeasureLatency(ip));
     }
 
-    Tooltip::new(button, "Ping", Position::Right)
-        .gap(5)
-        .class(ContainerType::Tooltip)
-        .delay(TOOLTIP_DELAY)
+    Tooltip::new(
+        button,
+        Text::new("Ping").size(FONT_SIZE_FOOTER),
+        Position::Right,
+    )
+    .gap(5)
+    .class(ContainerType::Tooltip)
+    .delay(TOOLTIP_DELAY)
 }

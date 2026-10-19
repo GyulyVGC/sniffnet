@@ -1,0 +1,96 @@
+name: Publish PPA
+
+on:
+  workflow_dispatch:
+    inputs:
+      upload:
+        description: Sign and publish to ppa:gyulyvgc/sniffnet
+        type: boolean
+        default: true
+
+permissions:
+  contents: read
+
+concurrency:
+  group: sniffnet-ppa
+  cancel-in-progress: false
+
+jobs:
+  source:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    env:
+      SIGNING_FINGERPRINT: 63372C5D3D0593D02C9650CB2D776907E2D66B88
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Install source packaging tools
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends debhelper devscripts dput gnupg
+          rustup toolchain install 1.97.1 --profile minimal
+          rustup default 1.97.1
+
+      - name: Prepare tagged source upload
+        id: source
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 resources/packaging/linux/deb-source/prepare.py --build-source
+          changes=(target/debian-source/*_source.changes)
+          test "${#changes[@]}" -eq 1 && test -f "${changes[0]}"
+          echo "changes=${changes[0]}" >> "$GITHUB_OUTPUT"
+          cat target/debian-source/sniffnet-*/debian/upstream-source.json >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Sign source upload
+        if: inputs.upload
+        shell: bash
+        env:
+          PPA_GPG_PRIVATE_KEY: ${{ secrets.PPA_GPG_PRIVATE_KEY }}
+          PPA_GPG_PASSPHRASE: ${{ secrets.PPA_GPG_PASSPHRASE }}
+          SOURCE_CHANGES: ${{ steps.source.outputs.changes }}
+        run: |
+          set -euo pipefail
+          if [[ -z "$PPA_GPG_PRIVATE_KEY" ]]; then
+            echo 'Missing PPA_GPG_PRIVATE_KEY repository secret.' >&2
+            exit 1
+          fi
+          export GNUPGHOME
+          GNUPGHOME=$(mktemp -d "$RUNNER_TEMP/ppa-gnupg.XXXXXX")
+          trap 'gpgconf --kill gpg-agent || true; rm -rf "$GNUPGHOME"' EXIT
+          chmod 700 "$GNUPGHOME"
+          printf '%s' "$PPA_GPG_PRIVATE_KEY" | gpg --batch --import
+          gpg --batch --list-secret-keys "$SIGNING_FINGERPRINT" >/dev/null
+          gpg --armor --export "$SIGNING_FINGERPRINT" > "$RUNNER_TEMP/ppa-public-key.asc"
+          cat > "$GNUPGHOME/sign" <<'SIGNER'
+          #!/usr/bin/env bash
+          exec gpg --batch --yes --pinentry-mode loopback --passphrase-fd 3 "$@" 3<<<"$PPA_GPG_PASSPHRASE"
+          SIGNER
+          chmod 700 "$GNUPGHOME/sign"
+          debsign --no-conf -p"$GNUPGHOME/sign" -k"$SIGNING_FINGERPRINT" "$SOURCE_CHANGES"
+          for file in target/debian-source/*.dsc target/debian-source/*_source.buildinfo "$SOURCE_CHANGES"; do
+            gpg --batch --verify "$file"
+          done
+
+      - name: Save source upload artifact
+        uses: actions/upload-artifact@v7
+        with:
+          name: sniffnet-ppa-source-${{ github.run_id }}-${{ github.run_attempt }}
+          compression-level: 0
+          if-no-files-found: error
+          path: |
+            target/debian-source/*.dsc
+            target/debian-source/*.tar.*
+            target/debian-source/*_source.buildinfo
+            target/debian-source/*_source.changes
+
+      - name: Upload to Launchpad
+        if: inputs.upload
+        env:
+          SOURCE_CHANGES: ${{ steps.source.outputs.changes }}
+        run: |
+          gpg --batch --import "$RUNNER_TEMP/ppa-public-key.asc"
+          dput ppa:gyulyvgc/sniffnet "$SOURCE_CHANGES"

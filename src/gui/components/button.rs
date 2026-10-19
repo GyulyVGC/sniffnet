@@ -6,7 +6,7 @@ use iced::widget::tooltip::Position;
 use iced::widget::{Row, Text, Tooltip, button};
 
 use crate::gui::styles::container::ContainerType;
-use crate::gui::styles::style_constants::TOOLTIP_DELAY;
+use crate::gui::styles::style_constants::{FONT_SIZE_FOOTER, TOOLTIP_DELAY};
 use crate::gui::styles::text::TextType;
 use crate::gui::types::message::Message;
 use crate::translations::translations::hide_translation;
@@ -27,7 +27,7 @@ pub fn button_hide<'a>(message: Message, language: Language) -> Tooltip<'a, Mess
         .height(20)
         .width(20)
         .on_press(message),
-        Text::new(hide_translation(language)),
+        Text::new(hide_translation(language)).size(FONT_SIZE_FOOTER),
         Position::Right,
     )
     .gap(5)
@@ -62,21 +62,25 @@ pub fn button_open_file<'a>(
         button = button.on_press(Message::OpenFile(old_file, file_info, action));
     }
 
-    Tooltip::new(button, Text::new(tooltip_str), Position::Right)
-        .gap(5)
-        .class(tooltip_style)
-        .delay(TOOLTIP_DELAY)
+    Tooltip::new(
+        button,
+        Text::new(tooltip_str).size(FONT_SIZE_FOOTER),
+        Position::Right,
+    )
+    .gap(5)
+    .class(tooltip_style)
+    .delay(TOOLTIP_DELAY)
 }
 
 pub fn row_open_link_tooltip<'a>(str: &'static str) -> Row<'a, Message, StyleType> {
     let text = if str.is_empty() {
         None
     } else {
-        Some(Text::new(str))
+        Some(Text::new(str).size(FONT_SIZE_FOOTER))
     };
     Row::new()
         .align_y(Alignment::Center)
-        .spacing(10)
+        .spacing(7)
         .push(text)
-        .push(Icon::OpenLink.to_text().size(16).class(TextType::Title))
+        .push(Icon::OpenLink.to_text().size(13).class(TextType::Title))
 }

@@ -21,18 +21,23 @@ use crate::gui::types::message::Message;
 use crate::gui::types::settings::Settings;
 use crate::networking::types::capture_context::CaptureSource;
 use crate::networking::types::data_info::DataInfo;
-use crate::networking::types::data_representation::DataRepr;
-use crate::report::types::sort_type::SortType;
+use crate::networking::types::data_representation::{DataRepr, DataUnit};
+use crate::networking::types::ipfix_exporter::IpfixExporter;
 use crate::translations::translations::{
-    active_filters_translation, incoming_translation, none_translation, outgoing_translation,
-    traffic_rate_translation,
+    active_filters_translation, incoming_translation, network_adapter_translation,
+    outgoing_translation, traffic_rate_translation,
 };
 use crate::translations::translations_2::{
     data_representation_translation, dropped_translation, only_top_30_items_translation,
 };
+use crate::translations::translations_3::export_capture_translation;
 use crate::translations::translations_5::no_favorites_saved_translation;
+use crate::translations::translations_6::{
+    current_rates_translation, ipfix_exporter_translation, totals_translation,
+};
+use crate::utils::formatted_strings::full_print_link_type;
 use crate::utils::types::icon::Icon;
-use crate::{Language, RunningPage, StyleType};
+use crate::{Language, RunningPage, SNIFFNET_TITLECASE, StyleType};
 use iced::Length::Fill;
 use iced::alignment::{Horizontal, Vertical};
 use iced::widget::scrollable::Direction;
@@ -40,6 +45,7 @@ use iced::widget::text::{LineHeight, Wrapping};
 use iced::widget::tooltip::Position;
 use iced::widget::{Button, Column, Container, Row, Scrollable, Space, Text, Tooltip, button};
 use iced::{Alignment, Element, Length, Padding};
+use std::collections::BTreeSet;
 
 /// Computes the body of gui overview page
 pub fn overview_page(sniffer: &Sniffer) -> Container<'_, Message, StyleType> {
@@ -113,19 +119,19 @@ fn col_favorite_item(
     let first_entry_data_info = entries
         .iter()
         .map(FavoriteItem::data_info)
-        .max_by(|d1, d2| d1.compare(d2, SortType::Ascending, data_repr))
+        .max_by_key(|d| d.tot_data(data_repr))
         .unwrap_or_default();
 
     for fi in &entries {
         let star_button = fi.star_button(&sniffer.conf.favorites);
         let data_info = fi.data_info();
 
-        let icon_opacity = if data_info.tot_data(DataRepr::Packets) == 0 {
+        let icon_opacity = if data_info.tot_data(data_repr) == 0 {
             style.get_extension().alpha_chart_badge
         } else {
             1.0
         };
-        let icon = fi.icon(language, program_lookup, false, icon_opacity);
+        let icon = fi.icon(language, program_lookup, icon_opacity);
         let item_bar = item_bar(
             icon,
             fi.to_entry_string(),
@@ -224,7 +230,7 @@ pub fn item_bar<'a>(
     data_repr: DataRepr,
     first_entry_data_info: DataInfo,
 ) -> Row<'a, Message, StyleType> {
-    let is_dimmed = data_info.tot_data(DataRepr::Packets) == 0;
+    let is_dimmed = data_info.tot_data(data_repr) == 0;
     Row::new()
         .height(ICONS_SIZE_BIG)
         .align_y(Alignment::Center)
@@ -261,7 +267,13 @@ pub fn item_bar<'a>(
 fn col_info(sniffer: &Sniffer) -> Container<'_, Message, StyleType> {
     let Settings { language, .. } = sniffer.conf.settings;
 
-    let col_device = col_device(language, &sniffer.capture_source, &sniffer.conf.filters);
+    let col_device = col_device(
+        language,
+        &sniffer.capture_source,
+        &sniffer.conf.filters,
+        &sniffer.combobox_data_states.data.exporters.0,
+        sniffer.conf.export_pcap.full_path(),
+    );
 
     let col_data_representation = col_data_representation(language, sniffer.conf.data_repr);
 
@@ -319,6 +331,8 @@ pub(crate) fn col_device<'a>(
     language: Language,
     cs: &'a CaptureSource,
     filters: &'a Filters,
+    exporters: &'a BTreeSet<IpfixExporter>,
+    export_pcap: Option<String>,
 ) -> Column<'a, Message, StyleType> {
     let link_type = cs.get_link_type();
     #[cfg(not(target_os = "windows"))]
@@ -326,14 +340,17 @@ pub(crate) fn col_device<'a>(
     #[cfg(target_os = "windows")]
     let cs_info = cs.get_desc().unwrap_or(cs.get_name());
 
-    let filters_desc: Element<Message, StyleType> = if filters.is_some_filter_active() {
-        Row::new()
-            .spacing(10)
-            .push(Text::new("BPF"))
-            .push(get_info_tooltip(Text::new(filters.bpf()).into()))
-            .into()
+    let tooltip_content: Option<Element<Message, StyleType>> = if cs.supports_link_type() {
+        Some(
+            Column::new()
+                .spacing(10)
+                .push(Text::new(full_print_link_type(link_type, language)).size(FONT_SIZE_FOOTER))
+                .push(get_addresses_row(link_type, cs.get_addresses()))
+                .into(),
+        )
     } else {
-        Text::new(none_translation(language)).into()
+        // show bind addresses for IPFIX collector listening on unspecified IP
+        get_addresses_row(link_type, cs.get_ipfix_unspecified_bound_addresses()).map(Element::from)
     };
 
     Column::new()
@@ -346,63 +363,185 @@ pub(crate) fn col_device<'a>(
                     Row::new()
                         .spacing(10)
                         .push(Text::new(format!("   {cs_info}")))
-                        .push(get_info_tooltip(
-                            Column::new()
-                                .spacing(10)
-                                .push(Text::new(link_type.full_print_on_one_line(language)))
-                                .push(get_addresses_row(link_type, cs.get_addresses()))
-                                .into(),
-                        )),
+                        .push(tooltip_content.map(get_info_tooltip)),
                 ),
         )
+        .push(if cs.supports_exporters() && !exporters.is_empty() {
+            Some(get_exporters_col(language, exporters))
+        } else {
+            None
+        })
+        .push(if cs.supports_filters() {
+            filters.is_some_filter_active().then(|| {
+                Row::new()
+                    .spacing(10)
+                    .push(Text::new(active_filters_translation(language)).class(TextType::Subtitle))
+                    .push(get_info_tooltip(
+                        Text::new(filters.bpf()).size(FONT_SIZE_FOOTER).into(),
+                    ))
+            })
+        } else {
+            None
+        })
         .push(
-            Column::new()
-                .push(
-                    Text::new(format!("{}:", active_filters_translation(language)))
-                        .class(TextType::Subtitle),
+            if cs.supports_export_pcap()
+                && let Some(path) = export_pcap
+            {
+                Some(
+                    Row::new()
+                        .spacing(10)
+                        .push(
+                            Text::new(export_capture_translation(language))
+                                .class(TextType::Subtitle),
+                        )
+                        .push(get_info_tooltip(
+                            Text::new(path).size(FONT_SIZE_FOOTER).into(),
+                        )),
                 )
-                .push(Row::new().push(Text::new("   ")).push(filters_desc)),
+            } else {
+                None
+            },
         )
+}
+
+fn get_exporters_col<'a>(
+    language: Language,
+    exporters: &BTreeSet<IpfixExporter>,
+) -> Column<'a, Message, StyleType> {
+    let info: Element<Message, StyleType> = if exporters.len() == 1 {
+        Text::new(format!(
+            "   {}",
+            exporters
+                .iter()
+                .next()
+                .map(ToString::to_string)
+                .unwrap_or_default()
+        ))
+        .into()
+    } else {
+        let mut exporters_info = Column::new().spacing(5);
+        for exporter in exporters {
+            exporters_info =
+                exporters_info.push(Text::new(exporter.to_string()).size(FONT_SIZE_FOOTER));
+        }
+        Row::new()
+            .spacing(10)
+            .push(Text::new(format!("   ({})", exporters.len())))
+            .push(get_info_tooltip(exporters_info.into()))
+            .into()
+    };
+
+    Column::new()
+        .push(
+            Text::new(format!("{}:", ipfix_exporter_translation(language)))
+                .class(TextType::Subtitle),
+        )
+        .push(info)
 }
 
 fn col_data_representation<'a>(
     language: Language,
     data_repr: DataRepr,
 ) -> Column<'a, Message, StyleType> {
-    let mut ret_val = Column::new().spacing(5).push(
-        Text::new(format!("{}:", data_representation_translation(language)))
-            .class(TextType::Subtitle),
-    );
+    let mut ret_val = Column::new()
+        .spacing(10)
+        .push(Text::new(data_representation_translation(language)).class(TextType::Subtitle));
 
-    let [bits, bytes, packets] = DataRepr::ALL.map(|option| {
-        let is_active = data_repr.eq(&option);
-        Button::new(
-            Text::new(option.get_label(language).to_owned())
+    let [bits, bytes, packets] = DataUnit::ALL.map(|option| {
+        let is_active = data_repr.data_unit.eq(&option);
+        let button = Button::new(
+            option
+                .get_icon()
                 .width(Length::Fill)
                 .align_x(Alignment::Center)
                 .align_y(Alignment::Center),
         )
         .width(Length::Fill)
-        .height(33)
+        .height(25)
         .class(if is_active {
             ButtonType::BorderedRoundSelected
         } else {
             ButtonType::BorderedRound
         })
-        .on_press(Message::DataReprSelection(option))
+        .on_press(Message::DataUnitSelection(option));
+
+        Tooltip::new(
+            button,
+            Text::new(option.get_label(language).to_owned()).size(FONT_SIZE_FOOTER),
+            Position::FollowCursor,
+        )
+        .class(ContainerType::Tooltip)
+        .delay(TOOLTIP_DELAY)
     });
 
+    let per_second = data_repr.per_second;
+
+    let totals_button = Button::new(
+        Icon::Totals
+            .to_text()
+            .width(Length::Fill)
+            .align_x(Alignment::Center)
+            .align_y(Alignment::Center),
+    )
+    .width(Length::Fill)
+    .height(25)
+    .class(if per_second {
+        ButtonType::BorderedRound
+    } else {
+        ButtonType::BorderedRoundSelected
+    })
+    .on_press(Message::UpdateDataRates(false));
+    let totals_tooltip = Tooltip::new(
+        totals_button,
+        Text::new(totals_translation(language)).size(FONT_SIZE_FOOTER),
+        Position::FollowCursor,
+    )
+    .class(ContainerType::Tooltip)
+    .delay(TOOLTIP_DELAY);
+
+    let rates_button = Button::new(
+        Icon::LiveRate
+            .to_text()
+            .size(18)
+            .width(Length::Fill)
+            .align_x(Alignment::Center)
+            .align_y(Alignment::Center),
+    )
+    .width(Length::Fill)
+    .height(25)
+    .class(if per_second {
+        ButtonType::BorderedRoundSelected
+    } else {
+        ButtonType::BorderedRound
+    })
+    .on_press(Message::UpdateDataRates(true));
+    let rates_tooltip = Tooltip::new(
+        rates_button,
+        Text::new(current_rates_translation(language)).size(FONT_SIZE_FOOTER),
+        Position::FollowCursor,
+    )
+    .class(ContainerType::Tooltip)
+    .delay(TOOLTIP_DELAY);
+
     ret_val = ret_val
-        .push(Row::new().spacing(5).push(bits).push(bytes))
-        .push(packets);
+        .push(Row::new().spacing(5).push(bits).push(bytes).push(packets))
+        .push(
+            Row::new()
+                .spacing(5)
+                .push(totals_tooltip)
+                .push(rates_tooltip),
+        );
 
     ret_val
 }
 
 fn donut_row(language: Language, sniffer: &Sniffer) -> Container<'_, Message, StyleType> {
     let data_repr = sniffer.conf.data_repr;
+    let tot_data_info = sniffer.info_traffic.tot_data_info;
 
-    let (in_data, out_data, dropped) = sniffer.info_traffic.get_thumbnail_data(data_repr);
+    let in_data = tot_data_info.incoming_data(data_repr);
+    let out_data = tot_data_info.outgoing_data(data_repr);
+    let dropped = sniffer.info_traffic.dropped_packets;
 
     let legend_col = Column::new()
         .spacing(5)
@@ -418,12 +557,37 @@ fn donut_row(language: Language, sniffer: &Sniffer) -> Container<'_, Message, St
             RuleType::Outgoing(true),
             language,
         ))
-        .push(donut_legend_entry(
-            dropped,
-            data_repr,
-            RuleType::Dropped,
-            language,
-        ));
+        .push(dropped.map(|d| {
+            let drop_tot = d.total(data_repr, tot_data_info);
+            donut_legend_entry(drop_tot, data_repr, RuleType::Dropped, language).push(
+                if drop_tot > 0 {
+                    Some(get_info_tooltip(
+                        Column::new()
+                            .spacing(5)
+                            .push(
+                                Text::new(format!(
+                                    "{SNIFFNET_TITLECASE}: {}",
+                                    data_repr
+                                        .formatted_string(d.by_sniffnet(data_repr, tot_data_info))
+                                ))
+                                .size(FONT_SIZE_FOOTER),
+                            )
+                            .push(
+                                Text::new(format!(
+                                    "{}: {}",
+                                    network_adapter_translation(language),
+                                    data_repr
+                                        .formatted_string(d.by_adapter(data_repr, tot_data_info))
+                                ))
+                                .size(FONT_SIZE_FOOTER),
+                            )
+                            .into(),
+                    ))
+                } else {
+                    None
+                },
+            )
+        }));
 
     let donut_row = Row::new()
         .align_y(Vertical::Center)
@@ -432,7 +596,7 @@ fn donut_row(language: Language, sniffer: &Sniffer) -> Container<'_, Message, St
             data_repr,
             in_data,
             out_data,
-            dropped,
+            dropped.map(|d| d.total(data_repr, tot_data_info)),
             sniffer.thumbnail,
         ))
         .push(legend_col);
@@ -540,19 +704,21 @@ pub fn get_bars<'a>(
                 .width(Length::FillPortion(in_len))
                 .push(RuleType::Incoming(in_all_round).horizontal(5))
         } else {
-            Row::new()
+            Row::new().height(5)
         })
         .push(if out_len > 0 {
             Row::new()
                 .width(Length::FillPortion(out_len))
                 .push(RuleType::Outgoing(out_all_round).horizontal(5))
         } else {
-            Row::new()
+            Row::new().height(5)
         })
         .push(if in_len + out_len < 100 {
-            Row::new().width(Length::FillPortion(100 - in_len - out_len))
-        } else {
             Row::new()
+                .width(Length::FillPortion(100 - in_len - out_len))
+                .height(5)
+        } else {
+            Row::new().height(5)
         })
 }
 
@@ -582,19 +748,35 @@ mod tests {
     use crate::networking::types::data_representation::DataRepr;
 
     #[test]
+    fn rate_bars_use_interval_deltas_for_values_and_maximum() {
+        let mut largest_total = DataInfo::new_for_tests(1000, 0, 10_000, 0);
+        let mut largest_rate = DataInfo::default();
+        largest_total.start_interval();
+        largest_total.refresh(DataInfo::new_for_tests(0, 2, 0, 200));
+        largest_rate.refresh(DataInfo::new_for_tests(8, 0, 800, 0));
+        let rate = DataRepr::packets(true);
+        let entries = [largest_total, largest_rate];
+        let maximum = entries.iter().max_by_key(|d| d.tot_data(rate)).unwrap();
+        assert_eq!(get_bars_length(rate, maximum, &largest_total), (0, 25));
+        assert_eq!(get_bars_length(rate, maximum, &largest_rate), (100, 0));
+        largest_total.start_interval();
+        assert_eq!(get_bars_length(rate, maximum, &largest_total), (0, 0));
+    }
+
+    #[test]
     fn test_get_bars_length_simple() {
         let first_entry = DataInfo::new_for_tests(50, 50, 150, 50);
         let data_info = DataInfo::new_for_tests(25, 55, 165, 30);
         assert_eq!(
-            get_bars_length(DataRepr::Packets, &first_entry, &data_info),
+            get_bars_length(DataRepr::packets(false), &first_entry, &data_info),
             (25, 55)
         );
         assert_eq!(
-            get_bars_length(DataRepr::Bytes, &first_entry, &data_info),
+            get_bars_length(DataRepr::bytes(false), &first_entry, &data_info),
             (83, 15)
         );
         assert_eq!(
-            get_bars_length(DataRepr::Bits, &first_entry, &data_info),
+            get_bars_length(DataRepr::bits(false), &first_entry, &data_info),
             (83, 15)
         );
     }
@@ -604,21 +786,21 @@ mod tests {
         let first_entry = DataInfo::new_for_tests(50, 50, 150, 50);
         let mut data_info = DataInfo::new_for_tests(2, 1, 1, 0);
         assert_eq!(
-            get_bars_length(DataRepr::Packets, &first_entry, &data_info),
+            get_bars_length(DataRepr::packets(false), &first_entry, &data_info),
             (MIN_BARS_LENGTH as u16 / 2, MIN_BARS_LENGTH as u16 / 2)
         );
         assert_eq!(
-            get_bars_length(DataRepr::Bytes, &first_entry, &data_info),
+            get_bars_length(DataRepr::bytes(false), &first_entry, &data_info),
             (MIN_BARS_LENGTH as u16, 0)
         );
 
         data_info = DataInfo::new_for_tests(0, 3, 0, 2);
         assert_eq!(
-            get_bars_length(DataRepr::Packets, &first_entry, &data_info),
+            get_bars_length(DataRepr::packets(false), &first_entry, &data_info),
             (0, MIN_BARS_LENGTH as u16)
         );
         assert_eq!(
-            get_bars_length(DataRepr::Bytes, &first_entry, &data_info),
+            get_bars_length(DataRepr::bytes(false), &first_entry, &data_info),
             (0, MIN_BARS_LENGTH as u16)
         );
     }
@@ -629,31 +811,31 @@ mod tests {
             DataInfo::new_for_tests(u128::MAX / 2, u128::MAX / 2, u128::MAX / 2, u128::MAX / 2);
         let mut data_info = DataInfo::new_for_tests(1, 1, 1, 1);
         assert_eq!(
-            get_bars_length(DataRepr::Packets, &first_entry, &data_info),
+            get_bars_length(DataRepr::packets(false), &first_entry, &data_info),
             (MIN_BARS_LENGTH as u16 / 2, MIN_BARS_LENGTH as u16 / 2)
         );
         assert_eq!(
-            get_bars_length(DataRepr::Bytes, &first_entry, &data_info),
+            get_bars_length(DataRepr::bytes(false), &first_entry, &data_info),
             (MIN_BARS_LENGTH as u16 / 2, MIN_BARS_LENGTH as u16 / 2)
         );
 
         data_info = DataInfo::new_for_tests(0, 1, 0, 1);
         assert_eq!(
-            get_bars_length(DataRepr::Packets, &first_entry, &data_info),
+            get_bars_length(DataRepr::packets(false), &first_entry, &data_info),
             (0, MIN_BARS_LENGTH as u16)
         );
         assert_eq!(
-            get_bars_length(DataRepr::Bytes, &first_entry, &data_info),
+            get_bars_length(DataRepr::bytes(false), &first_entry, &data_info),
             (0, MIN_BARS_LENGTH as u16)
         );
 
         data_info = DataInfo::new_for_tests(1, 0, 1, 0);
         assert_eq!(
-            get_bars_length(DataRepr::Packets, &first_entry, &data_info),
+            get_bars_length(DataRepr::packets(false), &first_entry, &data_info),
             (MIN_BARS_LENGTH as u16, 0)
         );
         assert_eq!(
-            get_bars_length(DataRepr::Bytes, &first_entry, &data_info),
+            get_bars_length(DataRepr::bytes(false), &first_entry, &data_info),
             (MIN_BARS_LENGTH as u16, 0)
         );
     }
@@ -664,93 +846,93 @@ mod tests {
 
         let mut data_info = DataInfo::new_for_tests(0, 9, 0, 10);
         assert_eq!(
-            get_bars_length(DataRepr::Packets, &first_entry, &data_info),
+            get_bars_length(DataRepr::packets(false), &first_entry, &data_info),
             (0, 16)
         );
         assert_eq!(
-            get_bars_length(DataRepr::Bytes, &first_entry, &data_info),
+            get_bars_length(DataRepr::bytes(false), &first_entry, &data_info),
             (0, 71)
         );
         data_info = DataInfo::new_for_tests(9, 0, 13, 0);
         assert_eq!(
-            get_bars_length(DataRepr::Packets, &first_entry, &data_info),
+            get_bars_length(DataRepr::packets(false), &first_entry, &data_info),
             (16, 0)
         );
         assert_eq!(
-            get_bars_length(DataRepr::Bytes, &first_entry, &data_info),
+            get_bars_length(DataRepr::bytes(false), &first_entry, &data_info),
             (93, 0)
         );
 
         data_info = DataInfo::new_for_tests(4, 5, 6, 7);
         assert_eq!(
-            get_bars_length(DataRepr::Packets, &first_entry, &data_info),
+            get_bars_length(DataRepr::packets(false), &first_entry, &data_info),
             (7, 9)
         );
         assert_eq!(
-            get_bars_length(DataRepr::Bytes, &first_entry, &data_info),
+            get_bars_length(DataRepr::bytes(false), &first_entry, &data_info),
             (43, 50)
         );
         data_info = DataInfo::new_for_tests(5, 4, 7, 6);
         assert_eq!(
-            get_bars_length(DataRepr::Packets, &first_entry, &data_info),
+            get_bars_length(DataRepr::packets(false), &first_entry, &data_info),
             (9, 7)
         );
         assert_eq!(
-            get_bars_length(DataRepr::Bytes, &first_entry, &data_info),
+            get_bars_length(DataRepr::bytes(false), &first_entry, &data_info),
             (50, 43)
         );
 
         data_info = DataInfo::new_for_tests(1, 8, 1, 12);
         assert_eq!(
-            get_bars_length(DataRepr::Packets, &first_entry, &data_info),
+            get_bars_length(DataRepr::packets(false), &first_entry, &data_info),
             (MIN_BARS_LENGTH as u16 / 2, 14)
         );
         assert_eq!(
-            get_bars_length(DataRepr::Bytes, &first_entry, &data_info),
+            get_bars_length(DataRepr::bytes(false), &first_entry, &data_info),
             (7, 86)
         );
         data_info = DataInfo::new_for_tests(8, 1, 12, 1);
         assert_eq!(
-            get_bars_length(DataRepr::Packets, &first_entry, &data_info),
+            get_bars_length(DataRepr::packets(false), &first_entry, &data_info),
             (14, MIN_BARS_LENGTH as u16 / 2)
         );
         assert_eq!(
-            get_bars_length(DataRepr::Bytes, &first_entry, &data_info),
+            get_bars_length(DataRepr::bytes(false), &first_entry, &data_info),
             (86, 7)
         );
 
         data_info = DataInfo::new_for_tests(6, 1, 10, 1);
         assert_eq!(
-            get_bars_length(DataRepr::Packets, &first_entry, &data_info),
+            get_bars_length(DataRepr::packets(false), &first_entry, &data_info),
             (11, MIN_BARS_LENGTH as u16 / 2)
         );
         assert_eq!(
-            get_bars_length(DataRepr::Bytes, &first_entry, &data_info),
+            get_bars_length(DataRepr::bytes(false), &first_entry, &data_info),
             (71, 7)
         );
         data_info = DataInfo::new_for_tests(1, 6, 1, 9);
         assert_eq!(
-            get_bars_length(DataRepr::Packets, &first_entry, &data_info),
+            get_bars_length(DataRepr::packets(false), &first_entry, &data_info),
             (MIN_BARS_LENGTH as u16 / 2, 11,)
         );
         assert_eq!(
-            get_bars_length(DataRepr::Bytes, &first_entry, &data_info),
+            get_bars_length(DataRepr::bytes(false), &first_entry, &data_info),
             (7, 64)
         );
 
         data_info = DataInfo::new_for_tests(1, 6, 5, 5);
         assert_eq!(
-            get_bars_length(DataRepr::Bytes, &first_entry, &data_info),
+            get_bars_length(DataRepr::bytes(false), &first_entry, &data_info),
             (36, 36)
         );
 
         data_info = DataInfo::new_for_tests(0, 0, 0, 0);
         assert_eq!(
-            get_bars_length(DataRepr::Packets, &first_entry, &data_info),
+            get_bars_length(DataRepr::packets(false), &first_entry, &data_info),
             (0, 0)
         );
         assert_eq!(
-            get_bars_length(DataRepr::Bytes, &first_entry, &data_info),
+            get_bars_length(DataRepr::bytes(false), &first_entry, &data_info),
             (0, 0)
         );
     }

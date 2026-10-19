@@ -5,6 +5,7 @@ use crate::networking::types::data_info::DataInfo;
 use crate::networking::types::data_info_host::DataInfoHost;
 use crate::networking::types::data_representation::DataRepr;
 use crate::networking::types::host::Host;
+use crate::networking::types::program_lookup::ProgramLookup;
 use crate::networking::types::service::Service;
 use crate::notifications::types::logged_notification::{
     BlacklistedTransmitted, DataThresholdExceeded, FavoriteTransmitted, LoggedNotification,
@@ -19,6 +20,16 @@ use crate::utils::formatted_strings::get_formatted_timestamp;
 use crate::{InfoTraffic, SNIFFNET_LOWERCASE, location};
 use std::collections::HashMap;
 use std::net::IpAddr;
+use std::sync::LazyLock;
+
+/// Client used to send remote notifications; it's shared to reuse the underlying connection pool
+static REMOTE_NOTIFICATIONS_CLIENT: LazyLock<Option<reqwest::Client>> = LazyLock::new(|| {
+    reqwest::Client::builder()
+        .user_agent(format!("{SNIFFNET_LOWERCASE}-{APP_VERSION}"))
+        .build()
+        .log_err(location!())
+        .ok()
+});
 
 /// Checks if one or more notifications have to be emitted and logs them.
 ///
@@ -28,6 +39,7 @@ pub fn notify_and_log(
     notifications: &Notifications,
     info_traffic_msg: &InfoTraffic,
     favorites: &Favorites,
+    program_lookup: Option<&ProgramLookup>,
     cs: &CaptureSource,
     addresses_resolved: &HashMap<IpAddr, (String, Host)>,
 ) -> usize {
@@ -38,7 +50,10 @@ pub fn notify_and_log(
 
     // data threshold
     if let Some(threshold) = notifications.data_notification.threshold {
-        let data_repr = notifications.data_notification.data_repr;
+        let data_repr = DataRepr {
+            data_unit: notifications.data_notification.data_unit,
+            per_second: false,
+        };
         if data_info.tot_data(data_repr) > u128::from(threshold) {
             let notification = LoggedNotification::DataThresholdExceeded(DataThresholdExceeded {
                 id: logged_notifications.tot(),
@@ -66,7 +81,8 @@ pub fn notify_and_log(
 
     // from favorites
     if notifications.favorite_notification.is_active {
-        let favorites_last_interval = favorites_last_interval(info_traffic_msg, favorites);
+        let favorites_last_interval =
+            favorites_last_interval(info_traffic_msg, favorites, program_lookup);
 
         if !favorites_last_interval.is_empty() {
             for favorite in favorites_last_interval {
@@ -144,7 +160,7 @@ pub fn notify_and_log(
     }
 
     // don't play sound when importing data from pcap file
-    if matches!(cs, CaptureSource::Device(_)) {
+    if cs.supports_notification_sound() {
         play(sound_to_play, notifications.volume);
     }
 
@@ -186,6 +202,7 @@ fn threshold_services(
 fn favorites_last_interval(
     info_traffic_msg: &InfoTraffic,
     favorites: &Favorites,
+    program_lookup: Option<&ProgramLookup>,
 ) -> Vec<FavoriteItem> {
     let hosts = favorites.hosts().iter().filter_map(|h| {
         info_traffic_msg
@@ -202,13 +219,8 @@ fn favorites_last_interval(
     });
 
     let programs = favorites.programs().iter().filter_map(|p| {
-        let mut data_info = DataInfo::default();
-        info_traffic_msg
-            .map
-            .values()
-            .filter(|v| v.program.eq(p))
-            .for_each(|v| data_info.refresh(v.data_info()));
-        if data_info.tot_data(DataRepr::Packets) > 0 {
+        let data_info = program_lookup?.programs().get(p)?.interval_data();
+        if data_info.tot_data(DataRepr::packets(false)) > 0 {
             Some(FavoriteItem::Program((p.clone(), data_info)))
         } else {
             None
@@ -224,16 +236,12 @@ fn send_remote_notification(
 ) {
     if remote_notifications.is_active_and_set() {
         tokio::task::spawn(async move {
-            let Ok(client) = reqwest::Client::builder()
-                .user_agent(format!("{SNIFFNET_LOWERCASE}-{APP_VERSION}"))
-                .build()
-                .log_err(location!())
-            else {
+            let Some(client) = REMOTE_NOTIFICATIONS_CLIENT.as_ref() else {
                 return;
             };
             let Ok(response) = client
                 .post(remote_notifications.url())
-                .header("User-agent", format!("{SNIFFNET_LOWERCASE}-{APP_VERSION}"))
+                .header("Content-Type", "application/json")
                 .body(notification.to_json())
                 .send()
                 .await

@@ -3,7 +3,9 @@
 use crate::chart::types::preview_chart::PreviewChart;
 use crate::gui::components::footer::footer;
 use crate::gui::components::header::header;
-use crate::gui::components::modal::{get_clear_all_overlay, get_exit_overlay, modal};
+use crate::gui::components::modal::{
+    get_clear_all_overlay, get_exit_overlay, get_update_status_overlay, modal,
+};
 use crate::gui::components::types::my_modal::MyModal;
 use crate::gui::pages::connection_details_page::connection_details_page;
 use crate::gui::pages::initial_page::initial_page;
@@ -26,17 +28,19 @@ use crate::gui::types::favorite::FavoriteKey;
 use crate::gui::types::message::Message;
 use crate::gui::types::settings::Settings;
 use crate::gui::types::timing_events::TimingEvents;
+use crate::gui::types::update_status::UpdateStatus;
 use crate::mmdb::asn::ASN_MMDB;
 use crate::mmdb::country::COUNTRY_MMDB;
 use crate::mmdb::types::mmdb_reader::{MmdbReader, MmdbReaders};
-use crate::networking::parse_packets::BackendTrafficMessage;
-use crate::networking::parse_packets::parse_packets;
+use crate::networking::capture::BackendTrafficMessage;
+use crate::networking::capture::spawn_capture_thread;
 use crate::networking::traffic_preview::{TrafficPreview, traffic_preview};
 use crate::networking::types::capture_context::{
-    CaptureContext, CaptureSource, CaptureSourcePicklist, MyPcapImport,
+    CaptureContext, CaptureError, CaptureSource, CaptureSourcePicklist, MyIpfixCollector,
+    MyPcapImport,
 };
 use crate::networking::types::combobox_data_states::ComboboxDataStates;
-use crate::networking::types::data_representation::DataRepr;
+use crate::networking::types::data_representation::{DataRepr, DataUnit};
 use crate::networking::types::host::{Host, HostMessage};
 use crate::networking::types::info_traffic::InfoTraffic;
 use crate::networking::types::ip_blacklist::IpBlacklist;
@@ -52,7 +56,7 @@ use crate::report::get_report_entries::get_searched_entries;
 use crate::report::types::search_parameters::SearchParameters;
 use crate::report::types::sort_type::SortType;
 use crate::translations::types::language::Language;
-use crate::utils::check_updates::set_newer_release_status;
+use crate::utils::check_updates::is_newer_release_available;
 use crate::utils::error_logger::{ErrorLogger, Location};
 use crate::utils::types::file_info::FileInfo;
 use crate::utils::types::icon::Icon;
@@ -102,11 +106,11 @@ pub struct Sniffer {
     /// Log of the displayed notifications, with the total number of notifications for this capture
     pub logged_notifications: LoggedNotifications,
     /// Reports if a newer release of the software is available on GitHub
-    pub newer_release_available: Option<bool>,
+    pub update_status: UpdateStatus,
     /// Network device to be analyzed, or PCAP file to be imported
     pub capture_source: CaptureSource,
-    /// Signals if a pcap error occurred
-    pub pcap_error: Option<String>,
+    /// Signals if the capture backend reported a problem
+    pub capture_error: Option<CaptureError>,
     /// Messages status
     pub dots_pulse: (String, u8),
     /// Traffic chart displayed in the Overview page
@@ -168,11 +172,11 @@ impl Sniffer {
             info_traffic: InfoTraffic::default(),
             addresses_resolved: HashMap::new(),
             logged_notifications: LoggedNotifications::default(),
-            newer_release_available: None,
+            update_status: UpdateStatus::default(),
             capture_source,
-            pcap_error: None,
+            capture_error: None,
             dots_pulse: (".".to_string(), 0),
-            traffic_chart: TrafficChart::new(style, language, data_repr),
+            traffic_chart: TrafficChart::new(style, language, data_repr.data_unit),
             preview_charts,
             modal: None,
             settings_page: None,
@@ -260,7 +264,7 @@ impl Sniffer {
     }
 
     fn time_subscription(&self) -> Subscription<Message> {
-        if let Some((w, _)) = self.welcome {
+        let welcome_sub = if let Some((w, _)) = self.welcome {
             let sub = iced::time::every(Duration::from_millis(100));
             if w {
                 sub.map(|_| Message::Welcome)
@@ -268,8 +272,14 @@ impl Sniffer {
                 sub.map(|_| Message::Quit)
             }
         } else {
-            iced::time::every(Duration::from_secs(1)).map(|_| Message::Periodic)
-        }
+            Subscription::none()
+        };
+
+        Subscription::batch([
+            iced::time::every(Duration::from_secs(1)).map(|_| Message::Periodic),
+            welcome_sub,
+            iced::time::every(Duration::from_hours(24)).map(|_| Message::CheckNewerRelease),
+        ])
     }
 
     fn window_subscription() -> Subscription<Message> {
@@ -295,7 +305,8 @@ impl Sniffer {
             Message::SetCaptureSource(cs_pick) => self.set_capture_source(cs_pick),
             Message::ToggleFilters => self.toggle_filters(),
             Message::BpfFilter(value) => self.bpf_filter(value),
-            Message::DataReprSelection(unit) => self.data_repr_selection(unit),
+            Message::DataUnitSelection(unit) => self.data_unit_selection(unit),
+            Message::UpdateDataRates(per_second) => self.update_data_rates(per_second),
             Message::ReportSortSelection(sort) => self.report_sort_selection(sort),
             Message::OpenWebPage(web_page) => Self::open_web_page(&web_page),
             Message::Start => return self.start(),
@@ -349,7 +360,7 @@ impl Sniffer {
             Message::ProgramFavoritesFilterToggle => self.program_favorites_filter_toggle(),
             Message::ToggleExportPcap => self.toggle_export_pcap(),
             Message::OutputPcapDir(path) => self.output_pcap_dir(path),
-            Message::OutputPcapFile(name) => self.output_pcap_file(&name),
+            Message::OutputPcapFile(name) => self.output_pcap_file(name),
             Message::ToggleThumbnail(triggered_by_resize) => {
                 return self.toggle_thumbnail(triggered_by_resize);
             }
@@ -357,16 +368,23 @@ impl Sniffer {
             Message::CtrlTPressed => return self.ctrl_t_pressed(),
             Message::CtrlSpacePressed => self.ctrl_space_pressed(),
             Message::ScaleFactorShortcut(increase) => self.scale_factor_shortcut(increase),
-            Message::SetNewerReleaseStatus(status) => self.set_newer_release_status(status),
+            Message::CheckNewerRelease => return self.check_newer_release(),
+            Message::SetUpdateStatus(status) => return self.set_update_status(status),
+            Message::ToggleNotifyUpdates => self.toggle_notify_updates(),
+            Message::ToggleDisableUpdateChecks => return self.toggle_disable_update_checks(),
             Message::SetPcapImport(path) => self.set_pcap_import(path),
+            Message::SetIpfixAddr(addr) => self.set_ipfix_addr(addr),
+            Message::SetIpfixPort(port) => self.set_ipfix_port(port),
             Message::PendingHosts(cap_id, host_msgs) => self.pending_hosts(cap_id, host_msgs),
             Message::OfflineGap(cap_id, gap) => self.offline_gap(cap_id, gap),
+            Message::IpfixUndecodable(cap_id) => self.ipfix_undecodable(cap_id),
             Message::Periodic => self.periodic(),
             Message::ExpandNotification(id, expand) => self.expand_notification(id, expand),
             Message::ToggleRemoteNotifications => self.toggle_remote_notifications(),
             Message::RemoteNotificationsUrl(url) => self.remote_notifications_url(&url),
             Message::Freeze => self.freeze(),
             Message::TrafficPreview(msg) => self.traffic_preview(msg),
+            Message::ToggleExpandedView => self.toggle_expanded_view(),
         }
         Task::none()
     }
@@ -375,6 +393,7 @@ impl Sniffer {
         let Settings {
             language,
             color_gradient,
+            expanded_view,
             ..
         } = self.conf.settings;
 
@@ -407,8 +426,9 @@ impl Sniffer {
             self.thumbnail,
             language,
             color_gradient,
-            self.newer_release_available,
+            &self.update_status,
             &self.dots_pulse,
+            expanded_view,
         );
 
         let content: Element<Message, StyleType> =
@@ -430,15 +450,35 @@ impl Sniffer {
                 }
             }
             Some(m) => {
-                let overlay: Element<Message, StyleType> = match m {
-                    MyModal::Reset => get_exit_overlay(Message::Reset, color_gradient, language),
-                    MyModal::Quit => get_exit_overlay(Message::Quit, color_gradient, language),
-                    MyModal::ClearAll => get_clear_all_overlay(color_gradient, language),
-                    MyModal::ConnectionDetails(key) => connection_details_page(self, *key),
-                }
-                .into();
+                let (overlay, close_on_blur): (Element<Message, StyleType>, bool) = match m {
+                    MyModal::Reset => (
+                        get_exit_overlay(Message::Reset, color_gradient, language).into(),
+                        true,
+                    ),
+                    MyModal::Quit => (
+                        get_exit_overlay(Message::Quit, color_gradient, language).into(),
+                        true,
+                    ),
+                    MyModal::ClearAll => {
+                        (get_clear_all_overlay(color_gradient, language).into(), true)
+                    }
+                    MyModal::ConnectionDetails(key) => {
+                        (connection_details_page(self, *key).into(), true)
+                    }
+                    MyModal::UpdateStatus(close_on_blur) => (
+                        get_update_status_overlay(
+                            color_gradient,
+                            language,
+                            self.conf.updates,
+                            &self.update_status,
+                            &self.dots_pulse,
+                        )
+                        .into(),
+                        *close_on_blur,
+                    ),
+                };
 
-                modal(content, overlay, Message::HideModal)
+                modal(content, overlay, close_on_blur.then(|| Message::HideModal))
             }
         };
 
@@ -475,7 +515,7 @@ impl Sniffer {
         let previews_task = self.start_traffic_previews();
         Task::batch([
             Sniffer::register_sigint_handler(),
-            Task::perform(set_newer_release_status(), Message::SetNewerReleaseStatus),
+            self.check_newer_release(),
             previews_task,
             self.load_ip_blacklist(self.conf.settings.ip_blacklist.clone()),
         ])
@@ -504,10 +544,17 @@ impl Sniffer {
 
     fn set_capture_source(&mut self, cs_pick: CaptureSourcePicklist) {
         self.conf.capture_source_picklist = cs_pick;
-        if cs_pick == CaptureSourcePicklist::File {
-            self.set_pcap_import(self.conf.import_pcap_path.clone());
-        } else {
-            self.device_selection(&self.conf.device.device_name.clone());
+        match cs_pick {
+            CaptureSourcePicklist::File => {
+                self.set_pcap_import(self.conf.import_pcap_path.clone());
+            }
+            CaptureSourcePicklist::Ipfix => {
+                self.capture_source =
+                    CaptureSource::Ipfix(MyIpfixCollector::new(self.conf.ipfix_socket.clone()));
+            }
+            CaptureSourcePicklist::Device => {
+                self.device_selection(&self.conf.device.device_name.clone());
+            }
         }
     }
 
@@ -519,9 +566,13 @@ impl Sniffer {
         self.conf.filters.set_bpf(value);
     }
 
-    fn data_repr_selection(&mut self, unit: DataRepr) {
-        self.conf.data_repr = unit;
+    fn data_unit_selection(&mut self, unit: DataUnit) {
+        self.conf.data_repr.data_unit = unit;
         self.traffic_chart.change_kind(unit);
+    }
+
+    fn update_data_rates(&mut self, per_second: bool) {
+        self.conf.data_repr.per_second = per_second;
     }
 
     fn report_sort_selection(&mut self, sort: SortType) {
@@ -596,6 +647,7 @@ impl Sniffer {
         combobox_data.asns.1 = self.search.as_name != parameters.as_name;
         combobox_data.domains.1 = self.search.domain != parameters.domain;
         combobox_data.programs.1 = self.search.program != parameters.program;
+        combobox_data.exporters.1 = self.search.exporter != parameters.exporter;
         self.combobox_data_states.update_states(&parameters);
 
         self.page_number = 1;
@@ -738,7 +790,7 @@ impl Sniffer {
         self.conf.export_pcap.set_directory(path);
     }
 
-    fn output_pcap_file(&mut self, name: &str) {
+    fn output_pcap_file(&mut self, name: String) {
         self.conf.export_pcap.set_file_name(name);
     }
 
@@ -815,8 +867,46 @@ impl Sniffer {
         }
     }
 
-    fn set_newer_release_status(&mut self, status: Option<bool>) {
-        self.newer_release_available = status;
+    fn check_newer_release(&mut self) -> Task<Message> {
+        if self.conf.updates.disable_checks() {
+            Task::none()
+        } else {
+            self.update_status = UpdateStatus::InProgress;
+            Task::perform(is_newer_release_available(), Message::SetUpdateStatus)
+        }
+    }
+
+    fn set_update_status(&mut self, status: UpdateStatus) -> Task<Message> {
+        self.update_status = status;
+
+        if self.conf.updates.notify_updates()
+            && !self.conf.updates.disable_checks()
+            && matches!(self.update_status, UpdateStatus::UpdateAvailable(_))
+        {
+            if self.thumbnail {
+                return self
+                    .toggle_thumbnail(false)
+                    .chain(Task::done(Message::ShowModal(MyModal::UpdateStatus(false))));
+            }
+
+            self.hide_modal();
+            self.close_settings();
+            self.show_modal(MyModal::UpdateStatus(false));
+        }
+        Task::none()
+    }
+
+    fn toggle_notify_updates(&mut self) {
+        self.conf.updates.toggle_notify_updates();
+    }
+
+    fn toggle_disable_update_checks(&mut self) -> Task<Message> {
+        self.conf.updates.toggle_disable_checks();
+        if !self.conf.updates.disable_checks() && self.update_status == UpdateStatus::Unknown {
+            self.check_newer_release()
+        } else {
+            Task::none()
+        }
     }
 
     fn set_pcap_import(&mut self, path: String) {
@@ -824,6 +914,18 @@ impl Sniffer {
             self.conf.import_pcap_path.clone_from(&path);
             self.capture_source = CaptureSource::File(MyPcapImport::new(path));
         }
+    }
+
+    fn set_ipfix_addr(&mut self, addr: String) {
+        self.conf.ipfix_socket.set_addr(addr);
+        self.capture_source =
+            CaptureSource::Ipfix(MyIpfixCollector::new(self.conf.ipfix_socket.clone()));
+    }
+
+    fn set_ipfix_port(&mut self, port: String) {
+        self.conf.ipfix_socket.set_port(port);
+        self.capture_source =
+            CaptureSource::Ipfix(MyIpfixCollector::new(self.conf.ipfix_socket.clone()));
     }
 
     fn pending_hosts(&mut self, cap_id: usize, host_msgs: Vec<HostMessage>) {
@@ -837,6 +939,13 @@ impl Sniffer {
     fn offline_gap(&mut self, cap_id: usize, gap: u32) {
         if cap_id == self.current_capture_rx.0 {
             self.traffic_chart.push_offline_gap_to_splines(gap);
+            self.info_traffic.start_interval(&mut self.program_lookup);
+        }
+    }
+
+    fn ipfix_undecodable(&mut self, cap_id: usize) {
+        if cap_id == self.current_capture_rx.0 {
+            self.capture_error = Some(CaptureError::IpfixUndecodable);
         }
     }
 
@@ -904,6 +1013,10 @@ impl Sniffer {
             .sort_by(|(_, c1), (_, c2)| c2.tot_packets.total_cmp(&c1.tot_packets));
     }
 
+    fn toggle_expanded_view(&mut self) {
+        self.conf.settings.expanded_view = !self.conf.settings.expanded_view;
+    }
+
     /// Updates threshold if it hasn't been edited for a while
     fn update_threshold(&mut self) {
         // Ignore if just edited
@@ -926,7 +1039,12 @@ impl Sniffer {
     fn refresh_data(&mut self, mut msg: InfoTraffic, no_more_packets: bool) {
         self.info_traffic
             .refresh(&mut msg, &mut self.program_lookup);
-        if self.info_traffic.tot_data_info.tot_data(DataRepr::Packets) == 0 {
+        if self
+            .info_traffic
+            .tot_data_info
+            .tot_data(DataRepr::packets(false))
+            == 0
+        {
             return;
         }
         let emitted_notifications = notify_and_log(
@@ -934,6 +1052,7 @@ impl Sniffer {
             &self.conf.settings.notifications,
             &msg,
             &self.conf.favorites,
+            self.program_lookup.as_ref(),
             &self.capture_source,
             &self.addresses_resolved,
         );
@@ -946,6 +1065,9 @@ impl Sniffer {
         }
         self.traffic_chart.update_charts_data(&msg, no_more_packets);
 
+        self.combobox_data_states
+            .data
+            .update_exporters(msg.map.keys().filter_map(|k| k.exporter));
         // update combobox dropdowns
         self.combobox_data_states.update_states(&self.search);
     }
@@ -986,46 +1108,51 @@ impl Sniffer {
                 let current_device_name = &self.capture_source.get_name();
                 self.device_selection(current_device_name);
             }
+            self.conf.export_pcap.sanitize_file_name();
             let pcap_path = self.conf.export_pcap.full_path();
             let capture_context =
                 CaptureContext::new(&self.capture_source, pcap_path.as_ref(), &self.conf.filters);
-            self.pcap_error = capture_context.error().map(ToString::to_string);
+            self.capture_error = capture_context
+                .error()
+                .map(|e| CaptureError::Fatal(e.to_string()));
             self.running_page = Some(self.conf.last_opened_page);
 
+            if let CaptureContext::Ipfix(udp_socket) = &capture_context
+                && let CaptureSource::Ipfix(collector) = &mut self.capture_source
+                && let Ok(local) = udp_socket.local_addr()
+            {
+                collector.set_actually_bind_addr(local);
+            }
+
             if capture_context.error().is_none() {
-                // no pcap error
+                // no fatal pcap error
                 let curr_cap_id = self.current_capture_rx.0;
                 let mmdb_readers = self.mmdb_readers.clone();
                 let ip_blacklist = self.ip_blacklist.clone();
                 self.capture_source
-                    .set_link_type(capture_context.my_link_type());
+                    .set_link_type(capture_context.link_type());
                 self.capture_source.set_addresses();
                 let capture_source = self.capture_source.clone();
                 self.traffic_chart
-                    .change_capture_source(matches!(capture_source, CaptureSource::Device(_)));
+                    .change_capture_source(capture_source.supports_live_chart());
                 let (tx, rx) = async_channel::unbounded();
                 let (freeze_tx, freeze_rx) = tokio::sync::broadcast::channel(1_048_575);
                 let freeze_rx2 = freeze_tx.subscribe();
                 let filters = self.conf.filters.clone();
-                let _ = thread::Builder::new()
-                    .name("thread_parse_packets".to_string())
-                    .spawn(move || {
-                        parse_packets(
-                            curr_cap_id,
-                            capture_source,
-                            &mmdb_readers,
-                            &ip_blacklist,
-                            capture_context,
-                            filters,
-                            &tx,
-                            (freeze_rx, freeze_rx2),
-                        );
-                    })
-                    .log_err(location!());
+                spawn_capture_thread(
+                    curr_cap_id,
+                    capture_source,
+                    capture_context,
+                    mmdb_readers,
+                    ip_blacklist,
+                    filters,
+                    tx,
+                    (freeze_rx, freeze_rx2),
+                );
                 self.current_capture_rx.1 = Some(rx.clone());
                 self.freeze_tx = Some(freeze_tx);
 
-                if matches!(self.capture_source, CaptureSource::Device(_)) {
+                if self.capture_source.supports_programs() {
                     let (port_tx, port_rx) = std::sync::mpsc::channel();
                     let (program_tx, program_rx) = std::sync::mpsc::channel();
                     let _ = thread::Builder::new()
@@ -1062,6 +1189,9 @@ impl Sniffer {
                     BackendTrafficMessage::OfflineGap(cap_id, gap) => {
                         Message::OfflineGap(cap_id, gap)
                     }
+                    BackendTrafficMessage::IpfixUndecodable(cap_id) => {
+                        Message::IpfixUndecodable(cap_id)
+                    }
                 });
             }
         }
@@ -1082,8 +1212,8 @@ impl Sniffer {
         self.addresses_resolved = HashMap::new();
         self.latency_statuses = HashMap::new();
         self.logged_notifications = LoggedNotifications::default();
-        self.pcap_error = None;
-        self.traffic_chart = TrafficChart::new(style, language, self.conf.data_repr);
+        self.capture_error = None;
+        self.traffic_chart = TrafficChart::new(style, language, self.conf.data_repr.data_unit);
         self.modal = None;
         self.settings_page = None;
         self.running_page = None;
@@ -1095,6 +1225,14 @@ impl Sniffer {
         self.frozen = false;
         self.freeze_tx = None;
         self.program_lookup = None;
+        // reset IPFIX collector's socket to match configuration
+        // (particularly relevant for port = 0 that was rewritten with the actual UDP bind)
+        if matches!(self.capture_source, CaptureSource::Ipfix(_))
+            && self.conf.capture_source_picklist == CaptureSourcePicklist::Ipfix
+        {
+            self.capture_source =
+                CaptureSource::Ipfix(MyIpfixCollector::new(self.conf.ipfix_socket.clone()));
+        }
         self.start_traffic_previews()
     }
 
@@ -1123,12 +1261,10 @@ impl Sniffer {
     }
 
     fn update_waiting_dots(&mut self) {
-        if !self.frozen {
-            if self.dots_pulse.0.len() > 2 {
-                self.dots_pulse.0 = String::new();
-            }
-            self.dots_pulse.0 = ".".repeat(self.dots_pulse.0.len() + 1);
+        if self.dots_pulse.0.len() > 2 {
+            self.dots_pulse.0 = String::new();
         }
+        self.dots_pulse.0 = ".".repeat(self.dots_pulse.0.len() + 1);
     }
 
     fn add_or_remove_favorite(&mut self, fav: &FavoriteKey, add: bool) {
@@ -1151,7 +1287,7 @@ impl Sniffer {
         let data_notification = self.conf.settings.notifications.data_notification;
         let sound = match notification {
             Notification::Data(DataNotification {
-                data_repr,
+                data_unit,
                 threshold,
                 byte_multiple,
                 sound,
@@ -1164,7 +1300,7 @@ impl Sniffer {
                 {
                     temp_threshold = DataNotification {
                         sound,
-                        data_repr,
+                        data_unit,
                         threshold,
                         byte_multiple,
                         previous_threshold,
@@ -1185,7 +1321,7 @@ impl Sniffer {
                         .previous_threshold = previous_threshold;
                 }
                 self.conf.settings.notifications.data_notification.sound = sound;
-                self.conf.settings.notifications.data_notification.data_repr = data_repr;
+                self.conf.settings.notifications.data_notification.data_unit = data_unit;
                 sound
             }
             Notification::Favorite(favorite_notification) => {
@@ -1229,7 +1365,12 @@ impl Sniffer {
                 }
                 (Some(current_page), None, true) => {
                     // Running with no overlays
-                    if self.info_traffic.tot_data_info.tot_data(DataRepr::Packets) > 0 {
+                    if self
+                        .info_traffic
+                        .tot_data_info
+                        .tot_data(DataRepr::packets(false))
+                        > 0
+                    {
                         // Running with no overlays and some packets
                         let new_page = if next {
                             current_page.next()
@@ -1275,7 +1416,10 @@ impl Sniffer {
     // also called when the backspace shortcut is pressed
     fn reset_button_pressed(&mut self) -> Task<Message> {
         if self.running_page.is_some() {
-            let tot_packets = self.info_traffic.tot_data_info.tot_data(DataRepr::Packets);
+            let tot_packets = self
+                .info_traffic
+                .tot_data_info
+                .tot_data(DataRepr::packets(false));
             if tot_packets == 0 && self.settings_page.is_none() {
                 return self.reset();
             }
@@ -1285,7 +1429,10 @@ impl Sniffer {
     }
 
     fn quit_wrapper(&mut self) -> Task<Message> {
-        let tot_packets = self.info_traffic.tot_data_info.tot_data(DataRepr::Packets);
+        let tot_packets = self
+            .info_traffic
+            .tot_data_info
+            .tot_data(DataRepr::packets(false));
         if self.running_page.is_none() || tot_packets == 0 {
             self.quit()
         } else if self.thumbnail {
@@ -1373,11 +1520,13 @@ impl Sniffer {
     fn handle_new_host(&mut self, host_msg: HostMessage) {
         let HostMessage {
             host,
-            data_info_host,
+            mut data_info_host,
             address_to_lookup,
             rdns,
         } = host_msg;
 
+        // DNS results carry historical totals, not a new capture interval.
+        data_info_host.data_info.start_interval();
         self.info_traffic
             .hosts
             .entry(host.clone())
@@ -1421,10 +1570,12 @@ impl Sniffer {
     }
 
     pub fn is_capture_source_consistent(&self) -> bool {
-        self.conf.capture_source_picklist == CaptureSourcePicklist::Device
-            && matches!(self.capture_source, CaptureSource::Device(_))
-            || self.conf.capture_source_picklist == CaptureSourcePicklist::File
-                && matches!(self.capture_source, CaptureSource::File(_))
+        matches!(
+            (self.conf.capture_source_picklist, &self.capture_source),
+            (CaptureSourcePicklist::Device, CaptureSource::Device(_))
+                | (CaptureSourcePicklist::File, CaptureSource::File(_))
+                | (CaptureSourcePicklist::Ipfix, CaptureSource::Ipfix(_))
+        )
     }
 
     fn change_charts_style(&mut self) {
@@ -1446,13 +1597,14 @@ mod tests {
     use std::fs::remove_file;
     use std::net::{IpAddr, Ipv4Addr};
     use std::path::Path;
-    use std::time::Duration;
+    use std::time::{Duration, Instant};
 
     use crate::countries::types::country::Country;
     use crate::gui::components::types::my_modal::MyModal;
     use crate::gui::pages::types::settings_page::SettingsPage;
     use crate::gui::styles::types::gradient_type::GradientType;
     use crate::gui::types::conf::Conf;
+    use crate::gui::types::config_updates::ConfigUpdates;
     use crate::gui::types::config_window::ConfigWindow;
     use crate::gui::types::export_pcap::ExportPcap;
     use crate::gui::types::favorite::{FavoriteKey, Favorites};
@@ -1463,7 +1615,7 @@ mod tests {
     use crate::networking::types::capture_context::CaptureSourcePicklist;
     use crate::networking::types::config_device::ConfigDevice;
     use crate::networking::types::data_info::DataInfo;
-    use crate::networking::types::data_representation::DataRepr;
+    use crate::networking::types::data_representation::{DataRepr, DataUnit};
     use crate::networking::types::host::Host;
     use crate::networking::types::latency::LatencyStatus;
     use crate::networking::types::program::Program;
@@ -1478,6 +1630,49 @@ mod tests {
     use crate::notifications::types::sound::Sound;
     use crate::report::types::sort_type::SortType;
     use crate::{ByteMultiple, Language, RunningPage, Sniffer, StyleType};
+
+    #[test]
+    #[parallel]
+    fn delayed_host_resolution_preserves_rates_without_counting_history() {
+        use crate::networking::types::data_info_host::DataInfoHost;
+        use crate::networking::types::host::HostMessage;
+        use crate::networking::types::info_traffic::InfoTraffic;
+
+        let mut sniffer = Sniffer::new(Conf::default());
+        let host = Host {
+            domain: "example.test".into(),
+            ..Default::default()
+        };
+        let historical = HostMessage {
+            host: host.clone(),
+            data_info_host: DataInfoHost {
+                data_info: DataInfo::new_for_tests(10, 0, 1000, 0),
+                ..Default::default()
+            },
+            address_to_lookup: IpAddr::V4(Ipv4Addr::new(1, 1, 1, 1)),
+            rdns: host.domain.clone(),
+        };
+        sniffer.handle_new_host(historical.clone());
+        let data = sniffer.info_traffic.hosts[&host].data_info;
+        assert_eq!(data.tot_data(DataRepr::packets(false)), 10);
+        assert_eq!(data.tot_data(DataRepr::packets(true)), 0);
+
+        let mut interval = InfoTraffic::default();
+        interval.hosts.insert(
+            host.clone(),
+            DataInfoHost {
+                data_info: DataInfo::new_for_tests(3, 0, 300, 0),
+                ..Default::default()
+            },
+        );
+        sniffer.info_traffic.refresh(&mut interval, &mut None);
+        // Another resolved address can merge history into the same host mid-interval.
+        sniffer.handle_new_host(historical);
+        let data = sniffer.info_traffic.hosts[&host].data_info;
+        assert_eq!(data.tot_data(DataRepr::packets(false)), 23);
+        assert_eq!(data.tot_data(DataRepr::packets(true)), 3);
+        assert_eq!(data.tot_data(DataRepr::bytes(true)), 300);
+    }
 
     // helpful to clean up files generated from tests
     impl Drop for Sniffer {
@@ -1495,20 +1690,20 @@ mod tests {
     fn test_correctly_update_chart_kind() {
         let mut sniffer = Sniffer::new(Conf::default());
 
-        assert_eq!(sniffer.traffic_chart.data_repr, DataRepr::Bytes);
-        assert_eq!(sniffer.conf.data_repr, DataRepr::Bytes);
-        sniffer.update(Message::DataReprSelection(DataRepr::Packets));
-        assert_eq!(sniffer.traffic_chart.data_repr, DataRepr::Packets);
-        assert_eq!(sniffer.conf.data_repr, DataRepr::Packets);
-        sniffer.update(Message::DataReprSelection(DataRepr::Packets));
-        assert_eq!(sniffer.traffic_chart.data_repr, DataRepr::Packets);
-        assert_eq!(sniffer.conf.data_repr, DataRepr::Packets);
-        sniffer.update(Message::DataReprSelection(DataRepr::Bytes));
-        assert_eq!(sniffer.traffic_chart.data_repr, DataRepr::Bytes);
-        assert_eq!(sniffer.conf.data_repr, DataRepr::Bytes);
-        sniffer.update(Message::DataReprSelection(DataRepr::Bits));
-        assert_eq!(sniffer.traffic_chart.data_repr, DataRepr::Bits);
-        assert_eq!(sniffer.conf.data_repr, DataRepr::Bits);
+        assert_eq!(sniffer.traffic_chart.data_unit, DataUnit::Bytes);
+        assert_eq!(sniffer.conf.data_repr, DataRepr::bytes(false));
+        sniffer.update(Message::DataUnitSelection(DataUnit::Packets));
+        assert_eq!(sniffer.traffic_chart.data_unit, DataUnit::Packets);
+        assert_eq!(sniffer.conf.data_repr, DataRepr::packets(false));
+        sniffer.update(Message::DataUnitSelection(DataUnit::Packets));
+        assert_eq!(sniffer.traffic_chart.data_unit, DataUnit::Packets);
+        assert_eq!(sniffer.conf.data_repr, DataRepr::packets(false));
+        sniffer.update(Message::DataUnitSelection(DataUnit::Bytes));
+        assert_eq!(sniffer.traffic_chart.data_unit, DataUnit::Bytes);
+        assert_eq!(sniffer.conf.data_repr, DataRepr::bytes(false));
+        sniffer.update(Message::DataUnitSelection(DataUnit::Bits));
+        assert_eq!(sniffer.traffic_chart.data_unit, DataUnit::Bits);
+        assert_eq!(sniffer.conf.data_repr, DataRepr::bits(false));
     }
 
     #[test]
@@ -1620,20 +1815,6 @@ mod tests {
 
         sniffer.update(Message::Periodic);
         assert_eq!(sniffer.dots_pulse, (".".to_string(), 0));
-
-        // if frozen, string won't update
-        sniffer.frozen = true;
-
-        sniffer.update(Message::Periodic);
-        assert_eq!(sniffer.dots_pulse, (".".to_string(), 1));
-
-        sniffer.update(Message::BpfFilter(String::new()));
-        assert_eq!(sniffer.dots_pulse, (".".to_string(), 2));
-
-        sniffer.frozen = false;
-
-        sniffer.update(Message::Periodic);
-        assert_eq!(sniffer.dots_pulse, ("..".to_string(), 0));
     }
 
     #[test]
@@ -1824,10 +2005,12 @@ mod tests {
             ));
             // Threshold adjustments won't be updated if `info_traffic.tot_in_packets`
             // and `info_traffic.tot_out_packets` are both `0`.
-            sniffer
-                .info_traffic
-                .tot_data_info
-                .add_packet(0, TrafficDirection::Outgoing);
+            sniffer.info_traffic.tot_data_info.add_packets(
+                1,
+                0,
+                TrafficDirection::Outgoing,
+                Instant::now(),
+            );
 
             // Simulate an update to apply the settings
             sniffer.update(Message::Periodic);
@@ -1835,7 +2018,7 @@ mod tests {
         let mut sniffer = Sniffer::new(Conf::default());
 
         let bytes_notification_init = DataNotification {
-            data_repr: DataRepr::Bytes,
+            data_unit: DataUnit::Bytes,
             threshold: None,
             byte_multiple: ByteMultiple::KB,
             sound: Sound::Gulp,
@@ -1843,7 +2026,7 @@ mod tests {
         };
 
         let bytes_notification_toggled_on = DataNotification {
-            data_repr: DataRepr::Bytes,
+            data_unit: DataUnit::Bytes,
             threshold: Some(800_000),
             byte_multiple: ByteMultiple::GB,
             sound: Sound::Gulp,
@@ -1851,7 +2034,7 @@ mod tests {
         };
 
         let bytes_notification_adjusted_threshold_sound_off = DataNotification {
-            data_repr: DataRepr::Bytes,
+            data_unit: DataUnit::Bytes,
             threshold: Some(3),
             byte_multiple: ByteMultiple::KB,
             sound: Sound::None,
@@ -1859,7 +2042,7 @@ mod tests {
         };
 
         let bytes_notification_sound_off_only = DataNotification {
-            data_repr: DataRepr::Bytes,
+            data_unit: DataUnit::Bytes,
             threshold: Some(800_000),
             byte_multiple: ByteMultiple::GB,
             sound: Sound::None,
@@ -2019,7 +2202,7 @@ mod tests {
             .set_notifications(VecDeque::from([LoggedNotification::DataThresholdExceeded(
                 DataThresholdExceeded {
                     id: 1,
-                    data_repr: DataRepr::Packets,
+                    data_repr: DataRepr::packets(false),
                     threshold: 0,
                     data_info: DataInfo::default(),
                     timestamp: "".to_string(),
@@ -2090,10 +2273,12 @@ mod tests {
         assert_eq!(sniffer.running_page, Some(RunningPage::Overview));
         assert_eq!(sniffer.settings_page, None);
         // switch with closed setting and some packets received => change running page
-        sniffer
-            .info_traffic
-            .tot_data_info
-            .add_packet(0, TrafficDirection::Outgoing);
+        sniffer.info_traffic.tot_data_info.add_packets(
+            1,
+            0,
+            TrafficDirection::Outgoing,
+            Instant::now(),
+        );
         sniffer.update(Message::SwitchPage(true));
         assert_eq!(sniffer.running_page, Some(RunningPage::Inspect));
         assert_eq!(sniffer.settings_page, None);
@@ -2159,11 +2344,12 @@ mod tests {
         sniffer.update(Message::ProgramFavoritesFilterToggle);
         sniffer.update(Message::OpenSettings(SettingsPage::Appearance));
         sniffer.update(Message::ToggleExportPcap);
-        sniffer.update(Message::OutputPcapFile("test.cap".to_string()));
-        sniffer.update(Message::OutputPcapDir("/".to_string()));
+        sniffer.update(Message::OutputPcapFile("test.pcap".to_string()));
+        sniffer.update(Message::OutputPcapDir("/test".to_string()));
         sniffer.update(Message::SetPcapImport("/test.pcap".to_string()));
+        sniffer.update(Message::ToggleExpandedView);
         sniffer.update(Message::ChangeRunningPage(RunningPage::Notifications));
-        sniffer.update(Message::DataReprSelection(DataRepr::Bits));
+        sniffer.update(Message::DataUnitSelection(DataUnit::Bits));
         sniffer.update(Message::LoadIpBlacklist("blacklist_file.csv".to_string()));
         sniffer.update(Message::AddOrRemoveFavorite(
             FavoriteKey::Service(Service::Name("https")),
@@ -2176,6 +2362,11 @@ mod tests {
 
         assert!(path.exists());
 
+        let mut export_pcap = ExportPcap::default();
+        export_pcap.set_file_name("test.pcap".to_string());
+        export_pcap.set_directory("/test".to_string());
+        export_pcap.toggle();
+
         // check that updated configs are inherited by a new sniffer instance
         let conf_end = Sniffer::new(Conf::load()).conf.clone();
         assert_eq!(
@@ -2187,6 +2378,7 @@ mod tests {
                     scale_factor: 0.5,
                     mmdb_country: "countrymmdb".to_string(),
                     mmdb_asn: "asnmmdb".to_string(),
+                    expanded_view: true,
                     style_path: format!(
                         "{}/resources/themes/catppuccin.toml",
                         env!("CARGO_MANIFEST_DIR")
@@ -2204,6 +2396,7 @@ mod tests {
                 program_favorites_filter: true,
                 window: ConfigWindow::new((1000.0, 999.0), (-5.0, 277.5), (20.0, 20.0)),
                 device: ConfigDevice::default(),
+                updates: ConfigUpdates::default(),
                 capture_source_picklist: CaptureSourcePicklist::File,
                 filters: Filters {
                     expanded: true,
@@ -2215,13 +2408,10 @@ mod tests {
                 program_sort_type: SortType::Neutral,
                 last_opened_setting: SettingsPage::Appearance,
                 last_opened_page: RunningPage::Notifications,
-                export_pcap: ExportPcap {
-                    enabled: true,
-                    file_name: "test.cap".to_string(),
-                    directory: "/".to_string()
-                },
+                export_pcap,
                 import_pcap_path: "/test.pcap".to_string(),
-                data_repr: DataRepr::Bits,
+                ipfix_socket: Default::default(),
+                data_repr: DataRepr::bits(false),
             }
         );
     }

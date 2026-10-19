@@ -2,10 +2,9 @@
 //! to keep track of statistics about the sniffed traffic.
 
 use crate::Service;
-use crate::networking::types::arp_type::ArpType;
 use crate::networking::types::data_info::DataInfo;
-use crate::networking::types::data_representation::DataRepr;
-use crate::networking::types::icmp_type::IcmpType;
+use crate::networking::types::data_representation::{DataRepr, DataUnit};
+use crate::networking::types::message_type::MessageType;
 use crate::networking::types::program::Program;
 use crate::networking::types::traffic_direction::TrafficDirection;
 use crate::report::types::sort_type::SortType;
@@ -19,14 +18,19 @@ use std::time::Instant;
 /// Each `InfoAddressPortPair` struct is associated to a single address:port pair.
 #[derive(Clone, Debug)]
 pub struct InfoAddressPortPair {
-    /// Source MAC address
-    pub mac_address1: Option<String>,
-    /// Destination MAC address
-    pub mac_address2: Option<String>,
+    // TODO: overridden with the latest values, should be a list of all MAC addresses with their counts?
+    /// Source MAC address (last seen), if available
+    pub src_mac: Option<[u8; 6]>,
+    /// Destination MAC address (last seen), if available
+    pub dst_mac: Option<[u8; 6]>,
     /// Amount of bytes transmitted between the pair.
-    pub transmitted_bytes: u128,
+    pub bytes: u128,
     /// Amount of packets transmitted between the pair.
-    pub transmitted_packets: u128,
+    pub packets: u128,
+    /// Previous interval's packets
+    pub previous_packets: u128,
+    /// Previous interval's bytes
+    pub previous_bytes: u128,
     /// First occurrence of information exchange featuring the associate address:port pair as a source or destination.
     pub initial_timestamp: Timestamp,
     /// Last occurrence of information exchange featuring the associate address:port pair as a source or destination.
@@ -37,10 +41,11 @@ pub struct InfoAddressPortPair {
     pub service: Service,
     /// Determines if the connection is incoming or outgoing
     pub traffic_direction: TrafficDirection,
-    /// Types of the ICMP messages exchanged, with the relative count (this is empty if not ICMP)
-    pub icmp_types: HashMap<IcmpType, usize>,
-    /// Types of the ARP operations, with the relative count (this is empty if not ARP)
-    pub arp_types: HashMap<ArpType, usize>,
+    /// Types of the messages exchanged, with the relative count (this is empty for protocols without message types)
+    pub message_types: HashMap<MessageType, usize>,
+    // TODO: vlan_id is overridden with the latest value, maybe should be moved in AddressPortPair
+    /// Latest VLAN ID of the associated address:port pair, if any
+    pub vlan_id: Option<u16>,
     /// Whether the remote address is blacklisted
     pub is_blacklisted: bool,
     /// The program associated to this pair
@@ -49,44 +54,90 @@ pub struct InfoAddressPortPair {
 
 impl InfoAddressPortPair {
     pub fn refresh(&mut self, other: &Self) {
-        // self.program MUST NOT be refreshed here
-        self.transmitted_bytes += other.transmitted_bytes;
-        self.transmitted_packets += other.transmitted_packets;
-        self.final_timestamp = other.final_timestamp;
-        self.final_instant = other.final_instant;
-        self.service = other.service;
-        self.is_blacklisted = other.is_blacklisted;
-        self.traffic_direction = other.traffic_direction;
-        for (icmp_type, count) in &other.icmp_types {
-            self.icmp_types
-                .entry(*icmp_type)
-                .and_modify(|v| *v += count)
-                .or_insert(*count);
+        let Self {
+            src_mac,
+            dst_mac,
+            bytes,
+            packets,
+            initial_timestamp,
+            final_timestamp,
+            final_instant,
+            service,
+            traffic_direction,
+            message_types,
+            vlan_id,
+            is_blacklisted,
+            // self.program MUST NOT be refreshed here
+            program: _,
+            previous_packets,
+            previous_bytes,
+        } = other;
+
+        self.previous_packets += previous_packets;
+        self.previous_bytes += previous_bytes;
+        self.bytes += bytes;
+        self.packets += packets;
+        self.src_mac = *src_mac;
+        self.dst_mac = *dst_mac;
+        self.vlan_id = *vlan_id;
+        if *initial_timestamp < self.initial_timestamp {
+            self.initial_timestamp = *initial_timestamp;
         }
-        for (arp_type, count) in &other.arp_types {
-            self.arp_types
-                .entry(*arp_type)
+        if *final_timestamp > self.final_timestamp {
+            self.final_timestamp = *final_timestamp;
+        }
+        if *final_instant > self.final_instant {
+            self.final_instant = *final_instant;
+        }
+        self.service = *service;
+        self.is_blacklisted = *is_blacklisted;
+        self.traffic_direction = *traffic_direction;
+        for (message_type, count) in message_types {
+            self.message_types
+                .entry(*message_type)
                 .and_modify(|v| *v += count)
                 .or_insert(*count);
         }
     }
 
+    /// Assign current totals to previous values, to be used as baselines for the next interval
+    pub fn start_interval(&mut self) {
+        self.previous_packets = self.packets;
+        self.previous_bytes = self.bytes;
+    }
+
     pub fn transmitted_data(&self, data_repr: DataRepr) -> u128 {
-        match data_repr {
-            DataRepr::Packets => self.transmitted_packets,
-            DataRepr::Bytes => self.transmitted_bytes,
-            DataRepr::Bits => self.transmitted_bytes * 8,
+        let (packets, bytes) = if data_repr.per_second {
+            (
+                self.packets.saturating_sub(self.previous_packets),
+                self.bytes.saturating_sub(self.previous_bytes),
+            )
+        } else {
+            (self.packets, self.bytes)
+        };
+        match data_repr.data_unit {
+            DataUnit::Packets => packets,
+            DataUnit::Bytes => bytes,
+            DataUnit::Bits => bytes * 8,
         }
     }
 
     pub fn compare(&self, other: &Self, sort_type: SortType, data_repr: DataRepr) -> Ordering {
+        let self_data = self.transmitted_data(data_repr);
+        let other_data = other.transmitted_data(data_repr);
+
+        // handle cases where one or both have no data
+        if self_data == 0 && other_data == 0 {
+            return other.final_timestamp.cmp(&self.final_timestamp);
+        } else if self_data == 0 && other_data > 0 {
+            return Ordering::Greater;
+        } else if self_data > 0 && other_data == 0 {
+            return Ordering::Less;
+        }
+
         match sort_type {
-            SortType::Ascending => self
-                .transmitted_data(data_repr)
-                .cmp(&other.transmitted_data(data_repr)),
-            SortType::Descending => other
-                .transmitted_data(data_repr)
-                .cmp(&self.transmitted_data(data_repr)),
+            SortType::Ascending => self_data.cmp(&other_data),
+            SortType::Descending => other_data.cmp(&self_data),
             SortType::Neutral => other.final_timestamp.cmp(&self.final_timestamp),
         }
     }
@@ -94,8 +145,15 @@ impl InfoAddressPortPair {
     pub fn data_info(&self) -> DataInfo {
         let mut data_info = DataInfo::default();
         data_info.add_packets(
-            self.transmitted_packets,
-            self.transmitted_bytes,
+            self.previous_packets,
+            self.previous_bytes,
+            self.traffic_direction,
+            self.final_instant,
+        );
+        data_info.start_interval();
+        data_info.add_packets(
+            self.packets.saturating_sub(self.previous_packets),
+            self.bytes.saturating_sub(self.previous_bytes),
             self.traffic_direction,
             self.final_instant,
         );
@@ -106,17 +164,19 @@ impl InfoAddressPortPair {
 impl Default for InfoAddressPortPair {
     fn default() -> Self {
         Self {
-            mac_address1: None,
-            mac_address2: None,
-            transmitted_bytes: 0,
-            transmitted_packets: 0,
+            src_mac: None,
+            dst_mac: None,
+            bytes: 0,
+            packets: 0,
+            previous_packets: 0,
+            previous_bytes: 0,
             initial_timestamp: Timestamp::default(),
             final_timestamp: Timestamp::default(),
             final_instant: Instant::now(),
             service: Service::default(),
             traffic_direction: TrafficDirection::default(),
-            icmp_types: HashMap::new(),
-            arp_types: HashMap::new(),
+            message_types: HashMap::new(),
+            vlan_id: None,
             is_blacklisted: false,
             program: Program::default(),
         }
@@ -126,68 +186,112 @@ impl Default for InfoAddressPortPair {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::networking::types::data_representation::DataRepr;
     use crate::report::types::sort_type::SortType;
+
+    #[test]
+    fn test_refresh_only_widens_the_timestamp_window() {
+        let mut pair = InfoAddressPortPair {
+            initial_timestamp: Timestamp::new(10, 0),
+            final_timestamp: Timestamp::new(20, 0),
+            ..Default::default()
+        };
+
+        // inside the window does not change anything
+        pair.refresh(&InfoAddressPortPair {
+            initial_timestamp: Timestamp::new(12, 0),
+            final_timestamp: Timestamp::new(18, 0),
+            ..Default::default()
+        });
+        assert_eq!(pair.initial_timestamp, Timestamp::new(10, 0));
+        assert_eq!(pair.final_timestamp, Timestamp::new(20, 0));
+
+        // outside the window extends
+        pair.refresh(&InfoAddressPortPair {
+            initial_timestamp: Timestamp::new(5, 0),
+            final_timestamp: Timestamp::new(25, 0),
+            ..Default::default()
+        });
+        assert_eq!(pair.initial_timestamp, Timestamp::new(5, 0));
+        assert_eq!(pair.final_timestamp, Timestamp::new(25, 0));
+    }
+
+    #[test]
+    fn data_info_preserves_totals_and_interval_data() {
+        let pair = InfoAddressPortPair {
+            packets: 13,
+            bytes: 1300,
+            previous_packets: 10,
+            previous_bytes: 1000,
+            traffic_direction: TrafficDirection::Outgoing,
+            ..Default::default()
+        };
+
+        let data_info = pair.data_info();
+        assert_eq!(data_info.outgoing_data(DataRepr::packets(false)), 13);
+        assert_eq!(data_info.outgoing_data(DataRepr::packets(true)), 3);
+        assert_eq!(data_info.outgoing_data(DataRepr::bytes(false)), 1300);
+        assert_eq!(data_info.outgoing_data(DataRepr::bytes(true)), 300);
+    }
 
     #[test]
     fn test_info_address_port_pair_data() {
         let pair1 = InfoAddressPortPair {
-            transmitted_bytes: 1000,
-            transmitted_packets: 10,
+            bytes: 1000,
+            packets: 10,
             final_timestamp: Timestamp::new(8, 1300),
             ..Default::default()
         };
         let pair2 = InfoAddressPortPair {
-            transmitted_bytes: 1100,
-            transmitted_packets: 8,
+            bytes: 1100,
+            packets: 8,
             final_timestamp: Timestamp::new(15, 0),
             ..Default::default()
         };
 
-        assert_eq!(pair1.transmitted_data(DataRepr::Bytes), 1000);
-        assert_eq!(pair1.transmitted_data(DataRepr::Packets), 10);
-        assert_eq!(pair1.transmitted_data(DataRepr::Bits), 8000);
+        assert_eq!(pair1.transmitted_data(DataRepr::bytes(false)), 1000);
+        assert_eq!(pair1.transmitted_data(DataRepr::packets(false)), 10);
+        assert_eq!(pair1.transmitted_data(DataRepr::bits(false)), 8000);
 
-        assert_eq!(pair2.transmitted_data(DataRepr::Bytes), 1100);
-        assert_eq!(pair2.transmitted_data(DataRepr::Packets), 8);
-        assert_eq!(pair2.transmitted_data(DataRepr::Bits), 8800);
+        assert_eq!(pair2.transmitted_data(DataRepr::bytes(false)), 1100);
+        assert_eq!(pair2.transmitted_data(DataRepr::packets(false)), 8);
+        assert_eq!(pair2.transmitted_data(DataRepr::bits(false)), 8800);
 
         assert_eq!(
-            pair1.compare(&pair2, SortType::Ascending, DataRepr::Bytes),
+            pair1.compare(&pair2, SortType::Ascending, DataRepr::bytes(false)),
             Ordering::Less
         );
         assert_eq!(
-            pair1.compare(&pair2, SortType::Descending, DataRepr::Bytes),
+            pair1.compare(&pair2, SortType::Descending, DataRepr::bytes(false)),
             Ordering::Greater
         );
         assert_eq!(
-            pair1.compare(&pair2, SortType::Neutral, DataRepr::Bytes),
-            Ordering::Greater
-        );
-
-        assert_eq!(
-            pair1.compare(&pair2, SortType::Ascending, DataRepr::Packets),
-            Ordering::Greater
-        );
-        assert_eq!(
-            pair1.compare(&pair2, SortType::Descending, DataRepr::Packets),
-            Ordering::Less
-        );
-        assert_eq!(
-            pair1.compare(&pair2, SortType::Neutral, DataRepr::Packets),
+            pair1.compare(&pair2, SortType::Neutral, DataRepr::bytes(false)),
             Ordering::Greater
         );
 
         assert_eq!(
-            pair1.compare(&pair2, SortType::Ascending, DataRepr::Bits),
-            Ordering::Less
-        );
-        assert_eq!(
-            pair1.compare(&pair2, SortType::Descending, DataRepr::Bits),
+            pair1.compare(&pair2, SortType::Ascending, DataRepr::packets(false)),
             Ordering::Greater
         );
         assert_eq!(
-            pair1.compare(&pair2, SortType::Neutral, DataRepr::Bits),
+            pair1.compare(&pair2, SortType::Descending, DataRepr::packets(false)),
+            Ordering::Less
+        );
+        assert_eq!(
+            pair1.compare(&pair2, SortType::Neutral, DataRepr::packets(false)),
+            Ordering::Greater
+        );
+
+        assert_eq!(
+            pair1.compare(&pair2, SortType::Ascending, DataRepr::bits(false)),
+            Ordering::Less
+        );
+        assert_eq!(
+            pair1.compare(&pair2, SortType::Descending, DataRepr::bits(false)),
+            Ordering::Greater
+        );
+        assert_eq!(
+            pair1.compare(&pair2, SortType::Neutral, DataRepr::bits(false)),
             Ordering::Greater
         );
     }

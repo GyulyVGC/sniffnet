@@ -1,5 +1,3 @@
-// EXTRA NEEDED CHARACTERS: Б
-
 use iced::widget::Text;
 
 use crate::StyleType;
@@ -1240,29 +1238,29 @@ pub fn error_translation(language: Language) -> &'static str {
 
 pub fn packets_translation(language: Language) -> &'static str {
     match language {
-        Language::EN => "packets",
-        Language::CS => "pakety",
-        Language::IT => "pacchetti",
-        Language::FR => "paquets",
-        Language::ES => "paquetes",
-        Language::PL => "pakiety",
+        Language::EN => "Packets",
+        Language::CS => "Pakety",
+        Language::IT => "Pacchetti",
+        Language::FR => "Paquets",
+        Language::ES => "Paquetes",
+        Language::PL => "Pakiety",
         Language::DE => "Pakete",
-        Language::UK => "пакети",
+        Language::UK => "Пакети",
         Language::ZH => "数据包",
         Language::ZH_TW => "封包",
-        Language::RO => "pachete",
+        Language::RO => "Pachete",
         Language::KO => "패킷",
-        Language::TR | Language::SV | Language::ID => "paket",
-        Language::RU => "пакетов",
-        Language::PT => "pacotes",
-        Language::EL => "πακέτα",
+        Language::TR | Language::SV | Language::ID => "Paket",
+        Language::RU => "Пакетов",
+        Language::PT => "Pacotes",
+        Language::EL => "Πακέτα",
         // Language::FA => "بسته ها",
-        Language::FI => "paketit",
+        Language::FI => "Paketit",
         Language::JA => "パケット",
-        Language::UZ => "paketlar",
-        Language::VI => "các gói tin",
-        Language::NL => "pakketten",
-        Language::HU => "csomagok",
+        Language::UZ => "Paketlar",
+        Language::VI => "Các gói tin",
+        Language::NL => "Pakketten",
+        Language::HU => "Csomagok",
         Language::SI => "පැකට්",
         Language::AR => "الحزم",
     }
@@ -1309,22 +1307,22 @@ pub fn bytes_translation(language: Language) -> &'static str {
         | Language::VI
         | Language::ID
         | Language::NL
-        | Language::DE => "bytes",
+        | Language::DE => "Bytes",
         Language::EL => "ψηφιολέξεις",
-        Language::CS => "bajtů",
-        Language::FR => "octets",
-        Language::PL => "bajty",
-        Language::UK => "байти",
+        Language::CS => "Bajtů",
+        Language::FR => "Octets",
+        Language::PL => "Bajty",
+        Language::UK => "Байти",
         Language::ZH => "网络流量",
         Language::ZH_TW => "位元組",
-        Language::RO => "octeți",
+        Language::RO => "Octeți",
         Language::KO => "바이트",
-        Language::TR | Language::UZ => "bayt",
-        Language::RU => "байтов",
+        Language::TR | Language::UZ => "Bayt",
+        Language::RU => "Байтов",
         // Language::FA => "بایت ها",
-        Language::FI => "tavua",
+        Language::FI => "Tavua",
         Language::JA => "バイト",
-        Language::HU => "bájtok",
+        Language::HU => "Bájtok",
         Language::SI => "බයිට්",
         Language::AR => "بايتات",
     }
@@ -1572,37 +1570,37 @@ pub fn active_filters_translation(language: Language) -> &'static str {
     }
 }
 
-pub fn none_translation(language: Language) -> &'static str {
-    match language {
-        Language::EN => "none",
-        Language::CS => "žádný",
-        Language::IT => "nessuno",
-        Language::FR => "aucun",
-        Language::ES => "ninguno",
-        Language::PL => "brak",
-        Language::DE => "Keine",
-        Language::UK => "бракує",
-        Language::ZH_TW => "無",
-        Language::ZH => "无",
-        Language::RO => "niciunul",
-        Language::KO => "없음",
-        Language::TR => "hiç biri",
-        Language::RU => "ничего",
-        Language::PT => "nenhum",
-        Language::EL => "κανένα",
-        // Language::FA => "هیچ کدام",
-        Language::SV => "inga",
-        Language::FI => "ei mitään",
-        Language::JA => "なし",
-        Language::UZ => "hech biri",
-        Language::VI => "không có",
-        Language::ID => "Tidak ada",
-        Language::NL => "geen",
-        Language::HU => "semmi",
-        Language::SI => "කිසිවක් නැත",
-        Language::AR => "لا شيء",
-    }
-}
+// pub fn none_translation(language: Language) -> &'static str {
+//     match language {
+//         Language::EN => "none",
+//         Language::CS => "žádný",
+//         Language::IT => "nessuno",
+//         Language::FR => "aucun",
+//         Language::ES => "ninguno",
+//         Language::PL => "brak",
+//         Language::DE => "Keine",
+//         Language::UK => "бракує",
+//         Language::ZH_TW => "無",
+//         Language::ZH => "无",
+//         Language::RO => "niciunul",
+//         Language::KO => "없음",
+//         Language::TR => "hiç biri",
+//         Language::RU => "ничего",
+//         Language::PT => "nenhum",
+//         Language::EL => "κανένα",
+//         // Language::FA => "هیچ کدام",
+//         Language::SV => "inga",
+//         Language::FI => "ei mitään",
+//         Language::JA => "なし",
+//         Language::UZ => "hech biri",
+//         Language::VI => "không có",
+//         Language::ID => "Tidak ada",
+//         Language::NL => "geen",
+//         Language::HU => "semmi",
+//         Language::SI => "කිසිවක් නැත",
+//         Language::AR => "لا شيء",
+//     }
+// }
 
 // pub fn yeti_night_translation(language: Language) -> &'static str {
 //     match language {
@@ -1972,30 +1970,30 @@ pub fn overview_translation(language: Language) -> &'static str {
 
 pub fn per_second_translation(language: Language) -> &'static str {
     match language {
-        Language::EN => "(per second)",
-        Language::CS => "(za sekundu)",
-        Language::IT => "(al secondo)",
-        Language::FR => "(par seconde)",
-        Language::ES | Language::PT => "(por segundo)",
-        Language::PL => "(na sekundę)",
-        Language::DE => "(pro Sekunde)",
-        Language::UK => "(на секунду)",
-        Language::ZH | Language::JA | Language::ZH_TW => "(每秒)",
-        Language::RO => "(pe secundă)",
-        Language::KO => "(초당)",
-        Language::TR => "(her saniye)",
-        Language::RU => "(в секунду)",
-        Language::EL => "(ανά δευτερόλεπτο)",
-        // Language::FA => "(در ثانیه)",
-        Language::SV => "(per sekund)",
-        Language::FI => "(sekunnissa)",
-        Language::UZ => "(soniyasiga)",
-        Language::VI => "(trên giây)",
-        Language::ID => "(per detik)",
-        Language::NL => "(per seconde)",
-        Language::HU => "(másodpercenként)",
-        Language::SI => "(තත්පරයකට)",
-        Language::AR => "(في الثانية)",
+        Language::EN => "per second",
+        Language::CS => "za sekundu",
+        Language::IT => "al secondo",
+        Language::FR => "par seconde",
+        Language::ES | Language::PT => "por segundo",
+        Language::PL => "na sekundę",
+        Language::DE => "pro Sekunde",
+        Language::UK => "на секунду",
+        Language::ZH | Language::JA | Language::ZH_TW => "每秒",
+        Language::RO => "pe secundă",
+        Language::KO => "초당",
+        Language::TR => "her saniye",
+        Language::RU => "в секунду",
+        Language::EL => "ανά δευτερόλεπτο",
+        // Language::FA => "در ثانیه",
+        Language::SV => "per sekund",
+        Language::FI => "sekunnissa",
+        Language::UZ => "soniyasiga",
+        Language::VI => "trên giây",
+        Language::ID => "per detik",
+        Language::NL => "per seconde",
+        Language::HU => "másodpercenként",
+        Language::SI => "තත්පරයකට",
+        Language::AR => "في الثانية",
     }
 }
 
@@ -2468,7 +2466,8 @@ pub fn no_notifications_set_translation<'a>(language: Language) -> Text<'a, Styl
                                  ඒවා සක්‍රිය කළ පසු, මෙම පිටුව ඔබේ දැනුම්දීම් පෙන්වනු ඇත\n\n\
                                  ඔබට සැකසුම් තුළින් දැනුම්දීම් සක්‍රිය කළ හැක:"
         }
-        Language::AR => { "لم تقم بتمكين الإشعارات بعد!\n\n\
+        Language::AR => {
+            "لم تقم بتمكين الإشعارات بعد!\n\n\
                                 بعد تمكينها، سيتم عرض سجل الإشعارات في هذه الصفحة\n\n\
                                 يمكنك تمكين الإشعارات من الإعدادات:"
         }
@@ -2582,7 +2581,8 @@ pub fn no_notifications_received_translation<'a>(language: Language) -> Text<'a,
             "මේ මොහොතේ පෙන්වීමට කිසිවක් නැත...\n\n\
                                  ඔබට දැනුම්දීමක් ලැබුණු විට එය මෙහි දිස්වනු ඇත"
         }
-        Language::AR => { "لا يوجد ما يمكن عرضه في الوقت الحالي...\n\n\
+        Language::AR => {
+            "لا يوجد ما يمكن عرضه في الوقت الحالي...\n\n\
                                 عند استلام إشعار، سيظهر هنا"
         }
     })

@@ -1,8 +1,11 @@
 pub mod conf;
+pub mod config_updates;
 pub mod config_window;
 pub mod export_pcap;
 pub mod favorite;
 pub mod filters;
+pub mod ipfix_socket;
 pub mod message;
 pub mod settings;
 pub mod timing_events;
+pub mod update_status;
