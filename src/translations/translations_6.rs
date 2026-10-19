@@ -10,6 +10,7 @@ pub fn latency_translation(language: Language) -> &'static str {
         Language::ZH_TW => "延遲",
         Language::RU => "Задержка",
         Language::FR => "Latence",
+        // Language::AR => "زمن الاستجابة",
         _ => "Latency",
     }
 }
@@ -22,6 +23,7 @@ pub fn ipfix_exporter_translation(language: Language) -> &'static str {
         Language::ZH_TW => "IPFIX 匯出器",
         Language::RU => "Экспортёр IPFIX",
         Language::FR => "Exportateur IPFIX",
+        // Language::AR => "مُصدِّر IPFIX",
         _ => "IPFIX exporter",
     }
 }
@@ -34,6 +36,7 @@ pub fn ipfix_collector_translation(language: Language) -> &'static str {
         Language::ZH_TW => "IPFIX 收集器",
         Language::RU => "Коллектор IPFIX",
         Language::FR => "Collecteur IPFIX",
+        // Language::AR => "مُجمِّع IPFIX",
         _ => "IPFIX collector",
     }
 }
@@ -46,6 +49,7 @@ pub fn waiting_ipfix_connections_translation(language: Language) -> &'static str
         Language::ZH_TW => "尚未觀察到任何流量。正在等待 IPFIX 流量...",
         Language::RU => "Пока трафик не наблюдался. Ожидание потоков IPFIX...",
         Language::FR => "Aucun trafic n'a encore été observé. En attente de flux IPFIX...",
+        // Language::AR => "لم تُرصد أي حركة مرور بعد. في انتظار تدفقات IPFIX...",
         _ => "No traffic has been observed yet. Waiting for IPFIX flows...",
     }
 }
@@ -58,6 +62,7 @@ pub fn invalid_ipfix_received_translation(language: Language) -> &'static str {
         Language::ZH_TW => "傳入的流量無法解碼為 IPFIX...",
         Language::RU => "Входящий трафик невозможно декодировать как IPFIX...",
         Language::FR => "Le trafic entrant ne peut pas être décodé au format IPFIX...",
+        // Language::AR => "يتعذر فك ترميز حركة المرور الواردة بصيغة IPFIX...",
         _ => "Incoming traffic isn't decodable as IPFIX...",
     }
 }
@@ -74,6 +79,7 @@ pub fn make_sure_valid_ipfix_translation(language: Language) -> &'static str {
             "Убедитесь, что экспортёр отправляет корректные потоки IPFIX на этот коллектор."
         }
         Language::FR => "Vérifiez que l'exportateur envoie des flux IPFIX valides à ce collecteur.",
+        // Language::AR => "تأكد من أن المُصدِّر يرسل تدفقات IPFIX صالحة إلى هذا المُجمِّع.",
         _ => "Make sure the exporter is sending valid IPFIX flows to this collector.",
     }
 }
@@ -86,6 +92,7 @@ pub fn disable_update_checks_translation(language: Language) -> &'static str {
         Language::ZH_TW => "停用更新檢查",
         Language::RU => "Отключить проверку обновлений",
         Language::FR => "Désactiver la recherche de mises à jour",
+        // Language::AR => "تعطيل التحقق من وجود تحديثات",
         _ => "Disable update checks",
     }
 }
@@ -98,6 +105,7 @@ pub fn notify_on_updates_translation(language: Language) -> &'static str {
         Language::ZH_TW => "有可用更新時通知我",
         Language::RU => "Уведомлять о доступных обновлениях",
         Language::FR => "M'avertir lorsque des mises à jour sont disponibles",
+        // Language::AR => "إشعاري عند توفر تحديثات",
         _ => "Notify when updates are available",
     }
 }
@@ -110,6 +118,7 @@ pub fn update_status_translation(language: Language) -> &'static str {
         Language::ZH_TW => "更新狀態",
         Language::RU => "Статус обновлений",
         Language::FR => "État des mises à jour",
+        // Language::AR => "حالة التحديث",
         _ => "Update status",
     }
 }
@@ -122,6 +131,7 @@ pub fn up_to_date_translation(language: Language) -> &'static str {
         Language::ZH_TW => "您已是最新版本！",
         Language::RU => "У вас актуальная версия!",
         Language::FR => "Vous êtes à jour !",
+        // Language::AR => "أنت تستخدم أحدث إصدار!",
         _ => "You are up to date!",
     }
 }
@@ -134,6 +144,7 @@ pub fn expanded_view_translation(language: Language) -> &'static str {
         Language::ZH_TW => "展開檢視",
         Language::RU => "Расширенный вид",
         Language::FR => "Vue développée",
+        // Language::AR => "العرض الموسع",
         _ => "Expanded view",
     }
 }
@@ -146,6 +157,7 @@ pub fn totals_translation(language: Language) -> &'static str {
         Language::ZH_TW => "總計",
         Language::RU => "Итого",
         Language::FR => "Totaux",
+        // Language::AR => "الإجماليات",
         _ => "Totals",
     }
 }
@@ -158,6 +170,7 @@ pub fn current_rates_translation(language: Language) -> &'static str {
         Language::ZH_TW => "目前速率",
         Language::RU => "Текущие скорости",
         Language::FR => "Débits actuels",
+        // Language::AR => "معدلات النقل الحالية",
         _ => "Current rates",
     }
 }
