@@ -56,7 +56,11 @@ fn handle_devices_and_previews(
     pcap_tx: &std::sync::mpsc::SyncSender<(Result<PacketOwned, pcap::Error>, Option<Stat>)>,
 ) {
     let mut traffic_preview = TrafficPreview::default();
-    for dev in Device::list().unwrap_or_default() {
+    for dev in Device::list()
+        .unwrap_or_default()
+        .into_iter()
+        .filter(is_device_allowed)
+    {
         let dev_name = dev.name.clone();
         let my_dev = MyDevice::from_pcap_device(dev);
         if let Some(n) = data.get(&dev_name) {
@@ -121,4 +125,15 @@ struct DevInfo {
 struct PacketOwned {
     data: Box<[u8]>,
     dev_info: DevInfo,
+}
+
+// avoid opening captures on Linux D-Bus devices, causing system operations to hang (issue #1190)
+#[allow(clippy::used_underscore_binding)]
+fn is_device_allowed(_device: &Device) -> bool {
+    #[cfg(not(target_os = "linux"))]
+    return true;
+
+    #[cfg(target_os = "linux")]
+    return !matches!(_device.name.as_str(), "dbus-system" | "dbus-session")
+        && !_device.name.starts_with("dbus://");
 }
