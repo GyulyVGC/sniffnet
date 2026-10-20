@@ -1110,6 +1110,15 @@
       "contributions": [
         "translation"
       ]
+    },
+    {
+      "login": "Src-Bhavesh",
+      "name": "Src-Bhavesh",
+      "avatar_url": "https://avatars.githubusercontent.com/u/246823470?v=4",
+      "profile": "https://github.com/Src-Bhavesh",
+      "contributions": [
+        "bug"
+      ]
     }
   ],
   "contributorsPerLine": 7,
