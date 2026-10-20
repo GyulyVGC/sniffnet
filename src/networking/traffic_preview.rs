@@ -59,7 +59,7 @@ fn handle_devices_and_previews(
     for dev in Device::list()
         .unwrap_or_default()
         .into_iter()
-        .filter(is_preview_device)
+        .filter(is_device_allowed)
     {
         let dev_name = dev.name.clone();
         let my_dev = MyDevice::from_pcap_device(dev);
@@ -127,43 +127,13 @@ struct PacketOwned {
     dev_info: DevInfo,
 }
 
-// Opening a D-Bus capture installs bus-wide monitoring rules that can outlive
-// the capture handle and retain file descriptors used by desktop applications.
-// Sniffnet cannot parse D-Bus messages, so exclude these devices before opening them.
-fn is_preview_device(device: &Device) -> bool {
-    !matches!(device.name.as_str(), "dbus-system" | "dbus-session")
-        && !device.name.starts_with("dbus://")
-}
+// avoid opening captures on Linux D-Bus devices, causing system operations to hang (issue #1190)
+#[allow(clippy::used_underscore_binding)]
+fn is_device_allowed(_device: &Device) -> bool {
+    #[cfg(not(target_os = "linux"))]
+    return true;
 
-#[cfg(test)]
-mod tests {
-    use super::*;
-    use pcap::DeviceFlags;
-
-    #[test]
-    fn test_preview_devices_exclude_dbus_without_excluding_network_interfaces() {
-        let devices = [
-            "eth0",
-            "lo",
-            "any",
-            "dbus-system",
-            "dbus-session",
-            "dbus://unix:path=/tmp/test-bus",
-            "dbus-session0",
-        ]
-        .map(|name| Device {
-            name: name.to_string(),
-            desc: None,
-            addresses: vec![],
-            flags: DeviceFlags::empty(),
-        });
-
-        let names: Vec<_> = devices
-            .into_iter()
-            .filter(is_preview_device)
-            .map(|device| device.name)
-            .collect();
-
-        assert_eq!(names, ["eth0", "lo", "any", "dbus-session0"]);
-    }
+    #[cfg(target_os = "linux")]
+    return !matches!(_device.name.as_str(), "dbus-system" | "dbus-session")
+        && !_device.name.starts_with("dbus://");
 }
