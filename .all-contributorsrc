@@ -1083,6 +1083,33 @@
       "contributions": [
         "financial"
       ]
+    },
+    {
+      "login": "jason081112",
+      "name": "Jason Wang",
+      "avatar_url": "https://avatars.githubusercontent.com/u/58059436?v=4",
+      "profile": "https://github.com/jason081112",
+      "contributions": [
+        "translation"
+      ]
+    },
+    {
+      "login": "mrvi0",
+      "name": "Vi",
+      "avatar_url": "https://avatars.githubusercontent.com/u/196581611?v=4",
+      "profile": "http://b4dcat.ru",
+      "contributions": [
+        "translation"
+      ]
+    },
+    {
+      "login": "isecvirus",
+      "name": "Virus",
+      "avatar_url": "https://avatars.githubusercontent.com/u/43806178?v=4",
+      "profile": "https://github.com/isecvirus",
+      "contributions": [
+        "translation"
+      ]
     }
   ],
   "contributorsPerLine": 7,
