@@ -17,6 +17,7 @@ All Sniffnet releases with the relative changes are documented in this file.
   - Traditional Chinese (Taiwan) ([#1323](https://github.com/GyulyVGC/sniffnet/pull/1323))
   - Russian ([#1328](https://github.com/GyulyVGC/sniffnet/pull/1328))
   - French ([#1330](https://github.com/GyulyVGC/sniffnet/pull/1330))
+- Avoid opening captures on Linux D-Bus devices, preventing system operations from hanging ([#1320](https://github.com/GyulyVGC/sniffnet/pull/1320) — fixes [#1190](https://github.com/GyulyVGC/sniffnet/issues/1190))
 - Fix the app freezing and exhausting memory when importing a PCAP file containing a large time gap between consecutive packets ([`4605ec7`](https://github.com/GyulyVGC/sniffnet/pull/1290/commits/4605ec717bbaf8fa34268805814d5585f084201e))
 - Restrict the PCAP export file to have a valid PCAP extension, so that files of other types can't be overwritten ([`5b4801b`](https://github.com/GyulyVGC/sniffnet/pull/1290/commits/5b4801b438ff1c7968cfac423a8e8585778309a8))
 - Correctly filter by favorites-only before rDNS completes ([#1275](https://github.com/GyulyVGC/sniffnet/pull/1275))
