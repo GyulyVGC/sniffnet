@@ -1,6 +1,6 @@
 [package]
 name = "sniffnet"
-version = "1.5.1"
+version = "1.6.0"
 description = "Application to comfortably monitor your network traffic"
 readme = "README.md"
 documentation = "https://github.com/GyulyVGC/sniffnet/wiki"

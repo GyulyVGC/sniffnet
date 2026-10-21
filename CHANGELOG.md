@@ -2,7 +2,7 @@
 
 All Sniffnet releases with the relative changes are documented in this file.
 
-## [UNRELEASED]
+## [1.6.0] - 2026-11-XX
 - IPFIX collector capabilities: receive and analyze network traffic from remote devices ([#1270](https://github.com/GyulyVGC/sniffnet/pull/1270) — fixes [#303](https://github.com/GyulyVGC/sniffnet/issues/303))
 - Show current data rates ([#1324](https://github.com/GyulyVGC/sniffnet/pull/1324) — fixes [#1077](https://github.com/GyulyVGC/sniffnet/issues/1077), [#1135](https://github.com/GyulyVGC/sniffnet/issues/1135))
 - Service taxonomy: classify upper layer services into 20 different categories ([#1312](https://github.com/GyulyVGC/sniffnet/pull/1312) — fixes [#1102](https://github.com/GyulyVGC/sniffnet/issues/1102))
