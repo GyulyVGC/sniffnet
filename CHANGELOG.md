@@ -133,7 +133,7 @@ All Sniffnet releases with the relative changes are documented in this file.
 - Added Vietnamese translation 🇻🇳 ([#577](https://github.com/GyulyVGC/sniffnet/pull/577))
 - Ask for quit confirmation before stopping an ongoing analysis ([#652](https://github.com/GyulyVGC/sniffnet/pull/652) — fixes [#570](https://github.com/GyulyVGC/sniffnet/issues/570))
 - Redirect `stderr` and `stdout` to file on Windows release builds ([#645](https://github.com/GyulyVGC/sniffnet/pull/645) — fixes [#578](https://github.com/GyulyVGC/sniffnet/issues/578))
-- Added Wiki page describing [command line arguments](https://github.com/GyulyVGC/sniffnet/wiki/Command-line-arguments) (fixes [#642](https://github.com/GyulyVGC/sniffnet/issues/642))
+- Added Wiki page describing [command line arguments](https://sniffnet.app/wiki/Command-line-arguments) (fixes [#642](https://github.com/GyulyVGC/sniffnet/issues/642))
 - Updated some of the existing translations to v1.3: 
   - Chinese ([#575](https://github.com/GyulyVGC/sniffnet/pull/575))
   - Korean ([#604](https://github.com/GyulyVGC/sniffnet/pull/604))
