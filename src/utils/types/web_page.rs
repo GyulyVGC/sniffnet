@@ -34,7 +34,7 @@ impl WebPage {
             WebPage::Roadmap => "https://whimsical.com/sniffnet-roadmap-Damodrdfx22V9jGnpHSCGo",
             // WebPage::Issues => "https://github.com/GyulyVGC/sniffnet/issues",
             WebPage::IssueLanguages => "https://github.com/GyulyVGC/sniffnet/issues/60",
-            WebPage::Wiki => "https://sniffnet.app/wiki",
+            WebPage::Wiki => "https://sniffnet.app/wiki/",
             WebPage::MyGitHub => "https://github.com/GyulyVGC",
         }
     }

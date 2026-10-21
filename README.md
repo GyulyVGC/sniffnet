@@ -6,7 +6,7 @@
 <a href="#download"><img alt="" title="Download" src="https://raw.githubusercontent.com/GyulyVGC/sniffnet/main/resources/repository/badges/download.svg"/></a>
 <a href="https://github.com/GyulyVGC/sniffnet/blob/main/ROADMAP.md"><img alt="" title="Roadmap" src="https://raw.githubusercontent.com/GyulyVGC/sniffnet/main/resources/repository/badges/roadmap.svg"/></a>
 <a href="https://sniffnet.app"><img alt="" title="Website" src="https://raw.githubusercontent.com/GyulyVGC/sniffnet/main/resources/repository/badges/website.svg"/></a>
-<a href="https://sniffnet.app/wiki"><img alt="" title="Wiki" src="https://raw.githubusercontent.com/GyulyVGC/sniffnet/main/resources/repository/badges/wiki.svg"/></a>
+<a href="https://sniffnet.app/wiki/"><img alt="" title="Wiki" src="https://raw.githubusercontent.com/GyulyVGC/sniffnet/main/resources/repository/badges/wiki.svg"/></a>
 
 Application to comfortably monitor your network traffic.<br>
 Cross-platform. Intuitive. Reliable.
@@ -98,11 +98,11 @@ A special shout-out to these awesome organizations and folks who are sponsoring 
 </table>
 
 Links in the table above will download the latest version of Sniffnet directly from [GitHub releases](https://github.com/GyulyVGC/sniffnet/releases). <br>
-Not what you're looking for? Check out [alternative installation methods](https://sniffnet.app/wiki/Alternative-installation-methods).
+Not what you're looking for? Check out [alternative installation methods](https://sniffnet.app/wiki/alternative-installation-methods/).
 
 > [!NOTE]
 >
-> Remember to also install the [required dependencies](https://sniffnet.app/wiki/Required-dependencies) for your operating system.
+> Remember to also install the [required dependencies](https://sniffnet.app/wiki/required-dependencies/) for your operating system.
 
 ## Features
 
@@ -127,12 +127,12 @@ Not what you're looking for? Check out [alternative installation methods](https:
 ## User manual
 
 Do you want to **learn more**? <br>
-Check out the [**Sniffnet Wiki**](https://sniffnet.app/wiki), a comprehensive manual to help you
+Check out the [**Sniffnet Wiki**](https://sniffnet.app/wiki/), a comprehensive manual to help you
 thoroughly master the application from a basic setup to the most advanced functionalities. <br>
 The Wiki includes step-by-step guides, tips, examples of usage, and answers to frequent questions.
 
 <p align="center">
-<a href="https://sniffnet.app/wiki">
+<a href="https://sniffnet.app/wiki/">
 <img alt="" title="Sniffnet Wiki" src="https://raw.githubusercontent.com/GyulyVGC/sniffnet/main/resources/logos/wiki/wikilogo.svg" width="300px"/>
 </a>
 </p>
@@ -147,7 +147,7 @@ The Wiki includes step-by-step guides, tips, examples of usage, and answers to f
 
 Most of the errors that may arise are likely due to your system missing dependencies
 required to correctly analyze a network adapter. <br>
-Check the [required dependencies page](https://sniffnet.app/wiki/Required-dependencies) 
+Check the [required dependencies page](https://sniffnet.app/wiki/required-dependencies/)
 for instructions on how to proceed depending on your operating system.
 
 ### Rendering problems

@@ -11,4 +11,4 @@ text_headers = "#232634"      # header and footer text color
 starred = "#e5c890"           # favorites' star color
 ```
 
-For more information, refer to the [Custom themes](https://sniffnet.app/wiki/Custom-themes) page in the wiki.
+For more information, refer to the [Custom themes](https://sniffnet.app/wiki/custom-themes/) page in the wiki.

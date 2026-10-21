@@ -14,6 +14,6 @@ For this reason, you're encouraged to read the following points before submittin
 10. be mindful that reviewing the PR may take a while, especially if it introduces substantial changes
 11. be mindful that the contribution can still be rejected at our discretion (even if it satisfies all the points above) if it doesn't align with the project's vision or if it introduces unnecessary complexity
 
-You can read the [_Build from source_](https://sniffnet.app/wiki/Build-from-source) Wiki page to learn how to set up the development environment, and the [_Code of Conduct_](https://github.com/GyulyVGC/sniffnet/blob/main/CODE_OF_CONDUCT.md) for the expected behavior in the community.
+You can read the [_Build from source_](https://sniffnet.app/wiki/build-from-source/) Wiki page to learn how to set up the development environment, and the [_Code of Conduct_](https://github.com/GyulyVGC/sniffnet/blob/main/CODE_OF_CONDUCT.md) for the expected behavior in the community.
 
 Despite our strictness, don't be afraid to share your thoughts: all proposals to enlarge or improve Sniffnet are warmly welcomed!
