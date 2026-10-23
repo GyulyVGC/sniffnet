@@ -23,6 +23,7 @@ pub fn reserved_address_translation(language: Language, info: &str) -> String {
         Language::EL => format!("Δεσμευμένη διεύθυνση ({info})"),
         Language::VI => format!("Địa chỉ dự trữ ({info})"),
         Language::TR => format!("Rezerve edilmiş adres ({info})"),
+        Language::SQ => format!("Adresa e rezervuar ({info})"),
         Language::SV => format!("Reserverad adress ({info})"),
         Language::HU => format!("Foglalt cím ({info})"),
         Language::SI => format!("වෙන් කළ ලිපිනය ({info})"),
@@ -52,6 +53,7 @@ pub fn reserved_address_translation(language: Language, info: &str) -> String {
 //         Language::VI => "Chia sẻ phản hồi của bạn",
 //         Language::TR => "Geri bildirimlerinizi paylaşın",
 //         Language::UK => "Надіслати відгук",
+//         Language::SQ => "Jepni mendimin tuaj",
 //         Language::SV => "Dela din feedback",
 //         Language::HU => "Visszajelzés megosztása",
 //         Language::SI => "ඔබේ අදහස් ලබා දෙන්න",
@@ -80,6 +82,7 @@ pub fn reserved_address_translation(language: Language, info: &str) -> String {
 //         Language::ID => "Kecuali",
 //         Language::ES => "Excluidos",
 //         Language::VI => "Loại trừ",
+//         Language::SQ => "Përjashtimet",
 //         Language::TR => "Hariç tutulan",
 //         Language::HU => "Kizárva",
 //         Language::RU => "Исключено",
@@ -108,6 +111,7 @@ pub fn capture_file_translation(language: Language) -> &'static str {
         Language::VI => "Bắt tệp tin",
         Language::TR => "Yakalama dosyası",
         Language::UK => "Захопити файл",
+        Language::SQ => "Skedari arkivor",
         Language::SV => "Inspelningsfil",
         Language::HU => "Adatforgalmi fájl",
         Language::SI => "කැප්චර් (Capture) ගොනුව",
@@ -137,6 +141,7 @@ pub fn select_file_translation(language: Language) -> &'static str {
         Language::VI => "Chọn tệp",
         Language::TR => "Dosya seç",
         Language::UK => "Обрати файл",
+        Language::SQ => "Përzgjidhni skedarin",
         Language::SV => "Välj fil",
         Language::HU => "Fájl kiválasztása",
         Language::SI => "ගොනුව තෝරන්න",
@@ -220,6 +225,10 @@ pub fn reading_from_pcap_translation(language: Language) -> &'static str {
             "Читання пакетів із файлу...\n\n\
                                  Ви впевнені, що вибраний файл не порожній?"
         }
+        Language::SQ => {
+            "Lexon paketat nga skedari...\n\n\
+                                 Jeni të sigurt që skedari i përzgjedhur nuk është bosh?"
+        }
         Language::SV => {
             "Läser paket från fil...\n\n\
                                 Är du säker på att filen du valde inte är tom?"
@@ -267,6 +276,7 @@ pub fn data_exceeded_translation(language: Language) -> &'static str {
         Language::VI => "Đã vượt ngưỡng dữ liệu",
         Language::TR => "Veri limiti aşıldı",
         Language::UK => "Перевищено ліміт даних",
+        Language::SQ => "Kapërcej pragun e të dhënave",
         Language::SV => "Datagräns överskriden",
         Language::HU => "Adatküszöb túllépve",
         Language::SI => "දත්ත සීමාව ඉක්මවා ඇත",
@@ -296,6 +306,7 @@ pub fn bits_exceeded_translation(language: Language) -> &'static str {
         Language::VI => "Đã vượt ngưỡng bit",
         Language::TR => "Bit limiti aşıldı",
         Language::UK => "Перевищено ліміт бітів",
+        Language::SQ => "U kapërcye pragu i bitëve",
         Language::SV => "Bitgräns överskriden",
         Language::HU => "Bitküszöb túllépve",
         Language::SI => "බිට් සීමාව ඉක්මවා ඇත",
@@ -322,6 +333,7 @@ pub fn bits_translation(language: Language) -> &'static str {
         Language::UZ => "Bitlar",
         Language::EL => "Δυφία",
         Language::RO => "Biți",
+        Language::SQ => "Bitë",
         Language::ZH_TW => "位元",
         Language::VI | Language::TR => "Bit",
         Language::UK => "Біти",
@@ -344,6 +356,7 @@ pub fn pause_translation(language: Language) -> &'static str {
         Language::ZH => "暂停",
         Language::NL => "Pauzeren",
         Language::RO => "Pauză",
+        Language::SQ => "Pushoj",
         Language::UZ => "To'xtatish",
         Language::ID => "Dijeda",
         Language::ZH_TW => "暫停",
@@ -379,6 +392,7 @@ pub fn resume_translation(language: Language) -> &'static str {
         Language::VI => "Tiếp tục",
         Language::TR => "Devam et",
         Language::UK => "Продовжити",
+        Language::SQ => "Rifilloj",
         Language::SV => "Återuppta",
         Language::HU => "Folytatás",
         Language::SI => "නැවත ආරම්භ කරන්න",
