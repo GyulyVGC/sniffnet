@@ -84,7 +84,9 @@ pub fn make_sure_valid_ipfix_translation(language: Language) -> &'static str {
             "Убедитесь, что экспортёр отправляет корректные потоки IPFIX на этот коллектор."
         }
         Language::FR => "Vérifiez que l'exportateur envoie des flux IPFIX valides à ce collecteur.",
-        Language::VI => "Đảm bảo bên xuất dữ liệu đang gửi các luồng IPFIX hợp lệ tới bộ thu thập này",
+        Language::VI => {
+            "Đảm bảo bên xuất dữ liệu đang gửi các luồng IPFIX hợp lệ tới bộ thu thập này"
+        }
         // Language::AR => "تأكد من أن المُصدِّر يرسل تدفقات IPFIX صالحة إلى هذا المُجمِّع.",
         _ => "Make sure the exporter is sending valid IPFIX flows to this collector.",
     }
