@@ -663,7 +663,7 @@ mod tests {
     #[test]
     fn test_table_titles_display_and_tooltip_values_for_each_language() {
         // check glyph len when adding new language...
-        assert_eq!(Language::ALL.len(), 25);
+        assert_eq!(Language::ALL.len(), 26);
         for report_col in ReportCol::ALL {
             for data_repr in DataUnit::ALL {
                 for language in Language::ALL {
