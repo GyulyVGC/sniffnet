@@ -13,6 +13,7 @@ All Sniffnet releases with the relative changes are documented in this file.
 - Enhance update checks ([#1307](https://github.com/GyulyVGC/sniffnet/pull/1307) — fixes [#1027](https://github.com/GyulyVGC/sniffnet/issues/1027))
 - Show output file path in Overview page when exporting a PCAP file ([`3f2c42c`](https://github.com/GyulyVGC/sniffnet/pull/1290/commits/3f2c42c70f06d5d29ddad80dde956281c6705511))
 - Show more details about dropped packets ([#1306](https://github.com/GyulyVGC/sniffnet/pull/1306) — fixes [#1079](https://github.com/GyulyVGC/sniffnet/issues/1079))
+- The Sniffnet Wiki has been moved from GitHub to [sniffnet.app/wiki](https://sniffnet.app/wiki/)
 - Updated some of the existing translations to v1.6:
   - Simplified Chinese ([#1322](https://github.com/GyulyVGC/sniffnet/pull/1322))
   - Traditional Chinese (Taiwan) ([#1323](https://github.com/GyulyVGC/sniffnet/pull/1323))

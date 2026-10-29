@@ -12,7 +12,7 @@ Application to comfortably monitor your network traffic.<br>
 Cross-platform. Intuitive. Reliable.
 
 Translated in:<br>
-🇨🇳 🇩🇪 🇫🇷 🇷🇺 🇵🇹 🇪🇦 🇮🇹 🇵🇱 [+&nbsp;19&nbsp;more&nbsp;languages](https://github.com/GyulyVGC/sniffnet/issues/60)
+🇨🇳 🇩🇪 🇫🇷 🇷🇺 🇵🇹 🇪🇦 🇮🇹 🇵🇱 [+&nbsp;20&nbsp;more&nbsp;languages](https://github.com/GyulyVGC/sniffnet/issues/60)
 </div>
 
 <p>
@@ -82,7 +82,7 @@ A special shout-out to these awesome organizations and folks who are sponsoring 
       <picture><img alt="macOS" title="macOS" height="85px" src="https://raw.githubusercontent.com/GyulyVGC/sniffnet/main/resources/repository/badges/macos.svg"/></picture>
     </td>
     <td>
-      <a href="https://github.com/GyulyVGC/sniffnet/releases/latest/download/Sniffnet_macOS_Intel.dmg">Intel</a> | <a href="https://github.com/GyulyVGC/sniffnet/releases/latest/download/Sniffnet_macOS_AppleSilicon.dmg">Apple silicon</a>
+      <a href="https://github.com/GyulyVGC/sniffnet/releases/latest/download/Sniffnet_macOS_AppleSilicon.dmg">Apple silicon</a> | <a href="https://github.com/GyulyVGC/sniffnet/releases/latest/download/Sniffnet_macOS_Intel.dmg">Intel</a>
     </td>
   </tr>
   <tr>
@@ -109,20 +109,20 @@ Not what you're looking for? Check out [alternative installation methods](https:
 - 💻 choose a **network adapter** of your PC to inspect
 - 🏷️ select a set of **filters** to apply to the observed traffic
 - 📁 **import** and **export** comprehensive capture reports as **PCAP** files
+- 📡 collect and analyze **IPFIX flow data** exported by other devices
 - 📊 view overall **statistics** about your Internet traffic
-- 📈 view **real-time charts** about traffic intensity
+- 📈 view **real-time charts** of traffic intensity
 - 🏠 identify connections in your **local network**
 - 🌍 discover the **geographical location** of remote hosts
 - 🌐 find out **domain name** and **ASN** of the hosts you are exchanging traffic with
-- 📖 identify **6000+ upper layer services**, protocols, trojans, and worms
-- 🎮 see which **programs** are generating network bandwidth
+- 📖 identify **6000+ upper-layer services**, protocols, trojans, and worms
+- 🎮 see which **programs** are using network bandwidth
 - ⭐ save your **favorite** network hosts, services, and programs
 - 📌 keep an eye on your network even when the application is **minimized**
-- ️🔎 search and **inspect** each of your network connections in real time
-- 🔉 set custom **notifications** to inform you when defined network events occur
+- 🔎 search and **inspect** each of your network connections in real time
+- 🔉 set custom **notifications** for specific network events
 - 🚫 import custom **IP blacklists** to highlight potentially dangerous connections
-- 🎨 choose the **style** that fits you the most, including custom themes support
-- ...and more!
+- 🎨 choose the **style** that suits you best, with support for custom themes
 
 ## User manual
 
@@ -172,7 +172,7 @@ ICED_BACKEND=tiny-skia
 - The graphical user interface has been realized with [iced](https://github.com/iced-rs/iced), a cross-platform GUI library for Rust focused on simplicity and type-safety
 - IP geolocation and ASN data are provided by [MaxMind](https://www.maxmind.com)
 - Free code signing for Windows Installer is provided by [SignPath.io](https://about.signpath.io/), certificate by [SignPath Foundation](https://signpath.org/)
-- Last but not least, thanks to [every single stargazer](https://github.com/GyulyVGC/sniffnet/stargazers): all forms of support made it possible to keep improving Sniffnet!
+- Last but not least, thanks to every single stargazer: all forms of support made it possible to keep improving Sniffnet!
 
 ## Stay in the loop
 
