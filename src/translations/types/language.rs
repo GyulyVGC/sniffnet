@@ -6,8 +6,8 @@ use serde::{Deserialize, Serialize};
 
 use crate::StyleType;
 use crate::countries::flags_pictures::{
-    CN, CZ, DE, ES, FI, FR, GB, GR, HU, ICONS_SIZE_BIG, ID, IT, JP, KR, LK, NL, PL, PT, RO, RU, SE,
-    SQ, TR, TW, UA, UZ, VN,
+    AL, CN, CZ, DE, ES, FI, FR, GB, GR, HU, ICONS_SIZE_BIG, ID, IT, JP, KR, LK, NL, PL, PT, RO, RU,
+    SE, TR, TW, UA, UZ, VN,
 };
 
 /// This enum defines the available languages.
@@ -122,7 +122,7 @@ impl Language {
             Language::UK => UA,
             Language::EL => GR,
             // Language::FA => IR,
-            Language::SQ => SQ,
+            Language::SQ => AL,
             Language::SV => SE,
             Language::FI => FI,
             Language::JA => JP,
@@ -142,12 +142,14 @@ impl Language {
         matches!(
             self,
             Language::EN
-                // | Language::AR
                 | Language::IT
                 | Language::ZH
                 | Language::ZH_TW
                 | Language::FR
                 | Language::RU
+                | Language::SQ
+                | Language::VI
+                | Language::ES
         )
     }
 }

@@ -130,7 +130,7 @@ pub fn start_translation(language: Language) -> &'static str {
 pub fn address_translation(language: Language) -> &'static str {
     match language {
         Language::EN => "Address",
-        Language::CS => "Adresa",
+        Language::CS | Language::SQ => "Adresa",
         Language::IT => "Indirizzo",
         Language::FR | Language::DE => "Adresse",
         Language::ES => "Dirección",
@@ -144,7 +144,6 @@ pub fn address_translation(language: Language) -> &'static str {
         Language::PT => "Endereço",
         Language::EL => "Διεύθυνση",
         // Language::FA => "نشانی",
-        Language::SQ => "Adresa",
         Language::SV => "Adress",
         Language::FI => "Osoite",
         Language::JA => "アドレス",
