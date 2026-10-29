@@ -23,7 +23,8 @@ include = [
     "/resources/logos/raw/icon.png",
     "/resources/packaging/windows/graphics/sniffnet.ico",
     "/resources/sounds/*.mp3",
-    "/services.txt",
+    "/resources/services/categories.txt",
+    "/resources/services/services.txt",
     "/build.rs",
 ]
 
@@ -49,13 +50,13 @@ sniffnet-packet-parser = { path = "lib/sniffnet-packet-parser", version = "0.2.1
 pcap.workspace = true
 
 async-channel = "2.5.0"
-clap = { version = "4.6.6", features = ["derive"] }
+clap = { version = "4.6.7", features = ["derive"] }
 confy = "2.0.0"
 ctrlc = { version = "3.5.2", features = ["termination"] }
-dns-lookup = "4.0.1"
+dns-lookup = "4.0.2"
 iced = { version = "0.14.0", features = ["tokio", "svg", "advanced", "lazy", "image"] }
 ipnet = "2.12.2"
-jiff = "0.2.35"
+jiff = "0.2.38"
 listeners = "0.6.1"
 maxminddb = "0.32.0"
 nom = "8.0.0"
@@ -67,14 +68,14 @@ plotters-iced2 = "0.14.0"
 prefix-trie = { version = "0.10.1", features = ["ipnet"] }
 reqwest = { version = "0.13.5", features = ["json"] }
 rfd = "0.17.2"
-rodio = { version = "0.22.2", default-features = false, features = ["mp3", "playback"] }
+rodio = { version = "0.23.0", default-features = false, features = ["mp3", "playback"] }
 semver = "1.0.28"
 serde = { version = "1.0.229", features = ["derive"] }
-serde_json = { version = "1.0.151", features = ["preserve_order"] }
+serde_json = { version = "1.0.154", features = ["preserve_order"] }
 splines = "5.0.0"
-surge-ping = "0.9.0"
-tokio = { version = "1.53.0", features = ["macros", "fs"] }
-toml = "1.1.6"
+surge-ping = "0.9.1"
+tokio = { version = "1.53.3", features = ["macros", "fs"] }
+toml = "1.1.8"
 
 [target.'cfg(windows)'.dependencies]
 gag = "1.0.0"
@@ -97,7 +98,7 @@ phf_shared = "0.14.0"
 rustrict = { version = "0.7.39", default-features = false, features = ["censor"] }
 
 [target."cfg(windows)".build-dependencies]
-winresource = "0.1.31"
+winresource = "0.1.34"
 
 #═══════════════════════════════════════════════════════════════════════════════════════════════════════════════════════
 

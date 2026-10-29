@@ -72,9 +72,9 @@ pub fn header(sniffer: &Sniffer) -> Container<'_, Message, StyleType> {
             })
             .push(Space::new().width(Length::Fill))
             .push(Container::new(Space::new().width(80)))
-            .push(Space::new().width(20))
+            .push(Space::new().width(40))
             .push(logo)
-            .push(Space::new().width(20))
+            .push(Space::new().width(40))
             .push(if is_running {
                 Container::new(get_button_freeze(language, sniffer.frozen, false))
             } else {

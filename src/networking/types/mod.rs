@@ -19,6 +19,7 @@ pub mod my_device;
 pub mod program;
 pub mod program_lookup;
 pub mod service;
+pub mod service_category;
 pub mod service_query;
 pub mod traffic_direction;
 pub mod traffic_type;

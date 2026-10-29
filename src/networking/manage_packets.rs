@@ -137,6 +137,8 @@ pub fn modify_or_insert_in_map(
                 is_blacklisted: _,
                 // determined later
                 program: _,
+                previous_packets: _,
+                previous_bytes: _,
             } = info;
 
             *tot_bytes += bytes;
@@ -176,6 +178,8 @@ pub fn modify_or_insert_in_map(
             vlan_id,
             is_blacklisted,
             program: Program::NotApplicable,
+            previous_packets: 0,
+            previous_bytes: 0,
         });
 
     (new_info.traffic_direction, new_info.service)
@@ -1526,7 +1530,7 @@ mod tests {
             // just to count and verify number of distinct services
             distinct_services.insert(name.to_string());
         }
-        assert_eq!(distinct_services.len(), 6465);
+        assert_eq!(distinct_services.len(), 6466);
     }
 
     #[test]

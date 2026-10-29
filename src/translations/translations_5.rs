@@ -24,6 +24,7 @@ pub fn filter_traffic_translation(language: Language) -> String {
         Language::SI => "ට්‍රැෆික් පෙරහන් කරන්න",
         Language::RU => "Фильтр трафика",
         Language::VI => "Lọc lưu lượng truy cập",
+        // Language::AR => "تصفية حركة المرور",
         _ => "Filter traffic",
     }
     .to_string()
@@ -52,6 +53,7 @@ pub fn traffic_source_translation(language: Language) -> &'static str {
         Language::SI => "ට්‍රැෆික් මූලාශ්‍රය",
         Language::RU => "Источник трафика",
         Language::VI => "Nguồn lưu lượng truy cập",
+        // Language::AR => "مصدر حركة المرور",
         _ => "Traffic source",
     }
 }
@@ -77,6 +79,7 @@ pub fn remote_notifications_translation(language: Language) -> &'static str {
         Language::SI => "දුරස්ථ දැනුම්දීම්",
         Language::RU => "Удалённые уведомления",
         Language::VI => "Thông báo từ xa",
+        // Language::AR => "الإشعارات عن بُعد",
         _ => "Remote notifications",
     }
 }
@@ -102,6 +105,7 @@ pub fn ip_blacklist_translation(language: Language) -> &'static str {
         Language::SI => "IP කළු ලැයිස්තුව",
         Language::RU => "Черный список IP",
         Language::VI => "Danh sách IP đen",
+        // Language::AR => "قائمة عناوين IP المحظورة",
         _ => "IP blacklist",
     }
 }
@@ -127,6 +131,7 @@ pub fn blacklisted_transmitted_translation(language: Language) -> &'static str {
         Language::SI => "කළු ලැයිස්තුගත IP එකකින් නව දත්ත හුවමාරු විය",
         Language::RU => "Новые данные от IP из черного списка",
         Language::VI => "Dữ liệu mới được trao đổi từ một địa chỉ trong danh sách đen",
+        // Language::AR => "تم تبادل بيانات جديدة من عنوان IP محظور",
         _ => "New data exchanged from a blacklisted IP",
     }
 }
@@ -152,6 +157,7 @@ pub fn only_show_blacklisted_translation(language: Language) -> &'static str {
         Language::SI => "කළු ලැයිස්තුගත ඒවා පමණක් පෙන්වන්න",
         Language::RU => "Показывать только из черного списка",
         Language::VI => "Chỉ hiển thị các địa chỉ trong danh sách đen",
+        // Language::AR => "عرض عناوين IP المحظورة فقط",
         _ => "Only show blacklisted",
     }
 }
@@ -174,6 +180,7 @@ pub fn program_translation(language: Language) -> &'static str {
         Language::SI => "මෘදුකාංගය",
         Language::RU => "Программа",
         Language::VI => "Chương trình",
+        // Language::AR => "البرنامج",
         _ => "Program",
     }
 }
@@ -199,6 +206,7 @@ pub fn no_favorites_saved_translation(language: Language) -> &'static str {
         Language::SI => "ප්‍රියතම කිසිවක් එක්කර නොමැත",
         Language::RU => "В избранном пока пусто",
         Language::VI => "Chưa có mục nào được lưu trong danh sách yêu thích",
+        // Language::AR => "لم تُحفظ أي عناصر في المفضلة بعد",
         _ => "No favorites saved yet",
     }
 }

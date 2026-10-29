@@ -27,7 +27,7 @@ jobs:
     name: ${{ matrix.os }}-latest
     runs-on: ${{ matrix.os }}-latest
     strategy:
-      fail-fast: true
+      fail-fast: false
       matrix:
         include:
           - os: ubuntu

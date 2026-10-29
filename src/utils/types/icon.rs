@@ -66,6 +66,9 @@ pub enum Icon {
     Waves,
     Pause,
     Resume,
+    Packet,
+    Totals,
+    LiveRate,
 }
 
 impl Icon {
@@ -133,6 +136,9 @@ impl Icon {
             Icon::ExpandedView => 'w',
             Icon::Pause => '-',
             Icon::Resume => '+',
+            Icon::Packet => '.',
+            Icon::Totals => '*',
+            Icon::LiveRate => ')',
         }
     }
 
