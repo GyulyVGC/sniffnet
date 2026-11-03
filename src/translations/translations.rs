@@ -2671,7 +2671,7 @@ pub fn no_notifications_received_translation<'a>(language: Language) -> Text<'a,
         // }
         Language::SI => {
             "දැනට කිසිවක් නැත...\n\n\
-                                 ඔබට දැනුම්දීමක් ලැබුණු විට එය මෙහි දිස්වනු ඇත"
+                                 ඔබට දැනුම්දීමක් ලැබුණු විට මෙහි දිස්වනු ඇත"
         }
     })
 }
