@@ -122,7 +122,7 @@ pub fn start_translation(language: Language) -> &'static str {
         Language::VI => "Bắt đầu!",
         Language::ID => "Mulai!",
         Language::HU => "Kezdés!",
-        Language::SI => "ආරම්භ කරන්න!",
+        Language::SI => "අරඹන්න!",
         // Language::AR => "ابدأ!",
     }
 }
@@ -269,7 +269,7 @@ pub fn protocol_translation(language: Language) -> &'static str {
         Language::UZ => "Protokoli",
         Language::VI => "Phương thức",
         Language::ID | Language::CS => "Protokol",
-        Language::SI => "ප්‍රොටෝකෝලය",
+        Language::SI => "නියමාවලිය",
         // Language::AR => "بروتوكول",
     }
 }
@@ -302,7 +302,7 @@ pub fn traffic_rate_translation<'a>(language: Language) -> Text<'a, StyleType> {
         Language::ID => "Tingkat lalulintas",
         Language::NL => "Verkeerssnelheid",
         Language::HU => "Adatráta",
-        Language::SI => "ට්‍රැෆික් ප්‍රමාණය",
+        Language::SI => "ගමනාගමන අනුපාතය",
         // Language::AR => "معدل حركة البيانات",
     })
 }
@@ -492,7 +492,7 @@ pub fn ask_clear_all_translation<'a>(language: Language) -> Text<'a, StyleType> 
         Language::ID => "Apa kamu yakin untuk membersihkan notifikasi?",
         Language::NL => "Weet je zeker dat je alle meldingen wilt wissen?",
         Language::HU => "Biztosan törölni akarod az értesítéseket?",
-        Language::SI => "ඔබට සියලු දැනුම්දීම් මකා දැමීමට අවශ්‍යද?",
+        Language::SI => "ඔබට සියලු දැනුම්දීම් මැකීමට අවශ්‍යද?",
         // Language::AR => "هل أنت متأكد من أنك تريد مسح الإشعارات؟",
     })
 }
@@ -524,7 +524,7 @@ pub fn clear_all_translation(language: Language) -> &'static str {
         Language::ID => "Bersihkan semua",
         Language::NL => "Alles wissen",
         Language::HU => "Összes törlése",
-        Language::SI => "සියල්ල මකා දමන්න",
+        Language::SI => "සියල්ල මකන්න",
         // Language::AR => "مسح الكل",
     }
 }
@@ -588,7 +588,7 @@ pub fn network_adapter_translation(language: Language) -> &'static str {
         Language::ID => "Adapter jaringan",
         Language::NL => "Netwerkadapter",
         Language::HU => "Hálózati adapter",
-        Language::SI => "නෙට්වර්ක් ඇඩැප්ටරය",
+        Language::SI => "ජාල අනුහුරුව",
         // Language::AR => "محول الشبكة",
     }
 }
@@ -704,8 +704,8 @@ pub fn no_addresses_translation(language: Language) -> &'static str {
         //                         إذا كنت متأكدًا من اتصالك بالإنترنت، فجرّب اختيار محول آخر."
         // }
         Language::SI => {
-            "ඔබ තෝරාගත් ඇඩැප්ටරයට සක්‍රිය ලිපින නොමැති නිසා කිසිවක් නිරීක්ෂණය කළ නොහැක...\n\n\
-                                 ඔබ අන්තර්ජාලයට සම්බන්ධ වී ඇති බව විශ්වාස නම්, වෙනත් ඇඩැප්ටරයක් තෝරා බලන්න."
+            "ඔබ තේරූ අනුහුරුවෙහි සක්‍රිය ලිපින නැති නිසා කිසිවක් නිරීක්‍ෂණයට නොහැකිය...\n\n\
+                                 ඔබ අන්තර්ජාලයට සම්බන්‍ධ බව විශ්වාස නම්, වෙනත් අනුහුරුවක් තෝරා බලන්න."
         }
     }
 }
@@ -821,8 +821,8 @@ pub fn waiting_translation(language: Language) -> &'static str {
         //                         هل أنت متأكد من اتصالك بالإنترنت واختيارك محول الشبكة الصحيح؟"
         // }
         Language::SI => {
-            "තවම කිසිදු ට්‍රැෆික් එකක් නිරීක්ෂණය වී නැත. නෙට්වර්ක් පැකට් ලැබෙනතෙක් රැඳෙන්න...\n\n\
-                                 ඔබ අන්තර්ජාලයට සම්බන්ධ වී නිවැරදි ඇඩැප්ටරය තෝරා ඇති බව ඔබට විශ්වාසද?"
+            "තවමත් කිසිදු ගමනාගමනයක් නිරීක්‍ෂණය නොවිණි. ජාල පැකට් සඳහා රැඳෙමින්...\n\n\
+                                 ඔබ අන්තර්ජාලයට සම්බන්‍ධ සහ නිවැරදි අනුහුරුව තෝරාගත් බව විශ්වාසද?"
         }
     }
 }
@@ -1189,7 +1189,7 @@ pub fn error_translation(language: Language) -> &'static str {
         Language::ID => "Terjadi kesalahan!",
         Language::NL => "Er is een fout opgetreden!",
         Language::HU => "Hiba történt!",
-        Language::SI => "දෝෂයක් ඇති විය!",
+        Language::SI => "දෝෂයක් සිදු විය!",
         // Language::AR => "حدث خطأ!",
     }
 }
@@ -1551,7 +1551,7 @@ pub fn notifications_title_translation<'a>(language: Language) -> Text<'a, Style
         Language::ID => "Sesuaikan notifikasi Anda",
         Language::NL => "Pas je meldingen aan",
         Language::HU => "Értesítések személyre szabása",
-        Language::SI => "ඔබේ දැනුම්දීම් අභිරුචිකරණය කරන්න",
+        Language::SI => "දැනුම්දීම් අභිරුචිකරණය",
         // Language::AR => "تخصيص الإشعارات",
     })
 }
@@ -1584,7 +1584,7 @@ pub fn appearance_title_translation<'a>(language: Language) -> Text<'a, StyleTyp
         Language::ID => "Pilih tema favorit Kamu",
         Language::NL => "Kies je favoriete thema",
         Language::HU => "Válaszd ki a kedvenc témád",
-        Language::SI => "ඔබේ කැමති තේමාව තෝරන්න",
+        Language::SI => "ප්‍රියතම තේමාව",
         // Language::AR => "اختر السمة المفضلة لديك",
     })
 }
@@ -2157,7 +2157,7 @@ pub fn threshold_translation(language: Language) -> &'static str {
         Language::ID => "Ambang batas",
         Language::NL => "Grens",
         Language::HU => "Küszöb",
-        Language::SI => "සීමාව",
+        Language::SI => "සීමකය",
         // Language::AR => "الحد",
     }
 }
@@ -2185,7 +2185,7 @@ pub fn volume_translation(language: Language) -> &'static str {
         Language::VI => "Âm lượng",
         Language::ID => "Bunyi",
         Language::HU => "Hangerő",
-        Language::SI => "ශබ්ද මට්ටම",
+        Language::SI => "පරිමාව",
         // Language::AR => "مستوى الصوت",
     }
 }
@@ -2249,7 +2249,7 @@ pub fn bytes_exceeded_translation(language: Language) -> &'static str {
         Language::ID => "Ambang batas byte terlampaui",
         Language::NL => "Byte-drempel overschreden",
         Language::HU => "Bájtküszöb meghaladva",
-        Language::SI => "බයිට් සීමාව ඉක්මවා ඇත",
+        Language::SI => "බයිට් සීමකය ඉක්මවා ඇත",
         // Language::AR => "تم تجاوز حد البايتات",
     }
 }
@@ -2314,7 +2314,7 @@ pub fn packets_exceeded_translation(language: Language) -> &'static str {
         Language::ID => "Ambang batas paket terlampaui",
         Language::NL => "Pakketdrempel overschreden",
         Language::HU => "Csomagküszöb meghaladva",
-        Language::SI => "පැකට් සීමාව ඉක්මවා ඇත",
+        Language::SI => "පැකට් සීමකය ඉක්මවා ඇත",
         // Language::AR => "تم تجاوز حد الحزم",
     }
 }
@@ -2409,7 +2409,7 @@ pub fn favorite_transmitted_translation(language: Language) -> &'static str {
         Language::ID => "Data baru dipertukarkan dari favorit",
         Language::NL => "Nieuwe gegevens uitgewisseld van favorieten",
         Language::HU => "Új adatforgalom a kedvencekből",
-        Language::SI => "ප්‍රියතමවලින් නව දත්ත හුවමාරු විය",
+        Language::SI => "ප්‍රියතම වලින් නව දත්ත හුවමාරු විය",
         // Language::AR => "تم تبادل بيانات جديدة من المفضلة",
     }
 }
@@ -2551,9 +2551,9 @@ pub fn no_notifications_set_translation<'a>(language: Language) -> Text<'a, Styl
         //                         يمكنك تمكين الإشعارات من الإعدادات:"
         // }
         Language::SI => {
-            "ඔබ තවම දැනුම්දීම් සක්‍රිය කර නැත!\n\n\
-                                 ඒවා සක්‍රිය කළ පසු, මෙම පිටුව ඔබේ දැනුම්දීම් පෙන්වනු ඇත\n\n\
-                                 ඔබට සැකසුම් තුළින් දැනුම්දීම් සක්‍රිය කළ හැක:"
+            "ඔබ තවමත් දැනුම්දීම් සක්‍රිය කර නැත!\n\n\
+                                 ඒවා සක්‍රිය කළ පසු, මෙම පිටුවේ දැනුම්දීම් සටහනක් පෙන්වනු ඇත\n\n\
+                                 ඔබට සැකසුම් තුළ දැනුම්දීම් සබල කළ හැකිය:"
         }
     })
 }
@@ -2670,7 +2670,7 @@ pub fn no_notifications_received_translation<'a>(language: Language) -> Text<'a,
         //                         عند استلام إشعار، سيظهر هنا"
         // }
         Language::SI => {
-            "මේ මොහොතේ පෙන්වීමට කිසිවක් නැත...\n\n\
+            "දැනට කිසිවක් නැත...\n\n\
                                  ඔබට දැනුම්දීමක් ලැබුණු විට එය මෙහි දිස්වනු ඇත"
         }
     })
@@ -2704,7 +2704,7 @@ pub fn only_last_30_translation(language: Language) -> &'static str {
         Language::ID => "Hanya 30 notifikasi terakhir yang ditampilkan",
         Language::NL => "Alleen de laatste 30 meldingen worden weergegeven",
         Language::HU => "Itt csak az utolsó 30 értesítés van megjelenítve",
-        Language::SI => "අවසන් දැනුම්දීම් 30 පමණක් පෙන්වනු ලැබේ",
+        Language::SI => "අවසන් දැනුම්දීම් 30 පමණක් දිස්වනු ඇත",
         // Language::AR => "يتم عرض آخر 30 إشعارًا فقط",
     }
 }
