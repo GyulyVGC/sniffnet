@@ -26,6 +26,7 @@ pub fn filter_traffic_translation(language: Language) -> String {
         Language::RU => "Фильтр трафика",
         Language::VI => "Lọc lưu lượng truy cập",
         // Language::AR => "تصفية حركة المرور",
+        Language::PL => "Filtruj ruch",
         _ => "Filter traffic",
     }
     .to_string()
@@ -56,6 +57,7 @@ pub fn traffic_source_translation(language: Language) -> &'static str {
         Language::RU => "Источник трафика",
         Language::VI => "Nguồn lưu lượng truy cập",
         // Language::AR => "مصدر حركة المرور",
+        Language::PL => "Źródło ruchu",
         _ => "Traffic source",
     }
 }
@@ -83,6 +85,7 @@ pub fn remote_notifications_translation(language: Language) -> &'static str {
         Language::RU => "Удалённые уведомления",
         Language::VI => "Thông báo từ xa",
         // Language::AR => "الإشعارات عن بُعد",
+        Language::PL => "Powiadomienia zdalne",
         _ => "Remote notifications",
     }
 }
@@ -110,6 +113,7 @@ pub fn ip_blacklist_translation(language: Language) -> &'static str {
         Language::RU => "Черный список IP",
         Language::VI => "Danh sách IP đen",
         // Language::AR => "قائمة عناوين IP المحظورة",
+        Language::PL => "Czarna lista IP",
         _ => "IP blacklist",
     }
 }
@@ -137,6 +141,7 @@ pub fn blacklisted_transmitted_translation(language: Language) -> &'static str {
         Language::RU => "Новые данные от IP из черного списка",
         Language::VI => "Dữ liệu mới được trao đổi từ một địa chỉ trong danh sách đen",
         // Language::AR => "تم تبادل بيانات جديدة من عنوان IP محظور",
+        Language::PL => "Nowe dane wymienione z adresem IP z czarnej listy",
         _ => "New data exchanged from a blacklisted IP",
     }
 }
@@ -164,6 +169,7 @@ pub fn only_show_blacklisted_translation(language: Language) -> &'static str {
         Language::RU => "Показывать только из черного списка",
         Language::VI => "Chỉ hiển thị các địa chỉ trong danh sách đen",
         // Language::AR => "عرض عناوين IP المحظورة فقط",
+        Language::PL => "Pokaż tylko adresy z czarnej listy",
         _ => "Only show blacklisted",
     }
 }
@@ -188,6 +194,7 @@ pub fn program_translation(language: Language) -> &'static str {
         Language::RU => "Программа",
         Language::VI => "Chương trình",
         // Language::AR => "البرنامج",
+        Language::PL => "Program",
         _ => "Program",
     }
 }
@@ -215,6 +222,7 @@ pub fn no_favorites_saved_translation(language: Language) -> &'static str {
         Language::RU => "В избранном пока пусто",
         Language::VI => "Chưa có mục nào được lưu trong danh sách yêu thích",
         // Language::AR => "لم تُحفظ أي عناصر في المفضلة بعد",
+        Language::PL => "Nie zapisano jeszcze żadnych ulubionych",
         _ => "No favorites saved yet",
     }
 }
