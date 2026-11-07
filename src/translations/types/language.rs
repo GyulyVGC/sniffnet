@@ -76,7 +76,6 @@ pub enum Language {
 impl Language {
     pub const ALL: [Language; 26] = [
         Language::EN,
-        // Language::AR,
         Language::CS,
         Language::DE,
         Language::EL,
@@ -150,6 +149,9 @@ impl Language {
                 | Language::SQ
                 | Language::VI
                 | Language::ES
+                | Language::ID
+                | Language::UZ
+                | Language::PL
         )
     }
 }

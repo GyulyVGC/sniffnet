@@ -1128,6 +1128,33 @@
       "contributions": [
         "translation"
       ]
+    },
+    {
+      "login": "Ptraaah",
+      "name": "ptraaa",
+      "avatar_url": "https://avatars.githubusercontent.com/u/122882415?v=4",
+      "profile": "https://amerta.pages.dev",
+      "contributions": [
+        "translation"
+      ]
+    },
+    {
+      "login": "turgunovabb1",
+      "name": "Abbos Turgunov",
+      "avatar_url": "https://avatars.githubusercontent.com/u/353710796?v=4",
+      "profile": "https://medium.com/@abbturgunov",
+      "contributions": [
+        "translation"
+      ]
+    },
+    {
+      "login": "przemekperon",
+      "name": "Przemek Peron",
+      "avatar_url": "https://avatars.githubusercontent.com/u/169778?v=4",
+      "profile": "https://redkorn.pl",
+      "contributions": [
+        "translation"
+      ]
     }
   ],
   "contributorsPerLine": 7,
