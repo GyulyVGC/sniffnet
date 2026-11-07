@@ -150,6 +150,8 @@ impl Language {
                 | Language::VI
                 | Language::ES
                 | Language::ID
+                | Language::UZ
+                | Language::PL
         )
     }
 }
