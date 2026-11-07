@@ -81,10 +81,10 @@ jobs:
 
       - name: Check crate
         if: matrix.os == 'macos' || matrix.os == 'windows' || matrix.os == 'ubuntu' && matrix.arch == 'amd64'
-        run: cargo publish --workspace --dry-run --target ${{ matrix.target }}
+        run: cargo publish --locked --workspace --dry-run --target ${{ matrix.target }}
 
       - name: Clippy (release mode)
-        run: cargo clippy --release -- -D warnings
+        run: cargo clippy --locked --release -- -D warnings
 
       # needed to make latency tests succeed
       - name: Enable unprivileged ICMP (Linux)
@@ -94,7 +94,7 @@ jobs:
       - name: Test (release mode)
         if: matrix.os == 'macos' || matrix.os == 'ubuntu' || matrix.os == 'windows' && matrix.arch == 'amd64'
         run: |
-          cargo test --release --verbose -- --nocapture &&
+          cargo test --locked --release --verbose -- --nocapture &&
           cargo clean
 
       - name: Install Cross
@@ -114,11 +114,11 @@ jobs:
             armhf) export PKG_CONFIG_PATH=/usr/lib/arm-linux-gnueabihf/pkgconfig ;;
             arm64) export PKG_CONFIG_PATH=/usr/lib/aarch64-linux-gnu/pkgconfig ;;
           esac
-          cross build --release --target ${{ matrix.target }}
+          cross build --locked --release --target ${{ matrix.target }}
 
       - name: Build binary (macOS/Windows)
         if: matrix.os == 'macos' || matrix.os == 'windows'
-        run: cargo build --release --target ${{ matrix.target }}
+        run: cargo build --locked --release --target ${{ matrix.target }}
 
       - name: Upload build artifacts
         uses: actions/upload-artifact@v7

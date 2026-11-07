@@ -58,11 +58,11 @@ jobs:
 
       - name: build
         if: matrix.os != 'windows' || github.event_name != 'pull_request'
-        run: cargo build --verbose
+        run: cargo build --locked --verbose
 
       - name: clippy
         if: matrix.os != 'windows' || github.event_name != 'pull_request'
-        run: cargo clippy -- -D warnings
+        run: cargo clippy --locked -- -D warnings
 
       # needed to make latency tests succeed
       - name: Enable unprivileged ICMP (Linux)
@@ -71,7 +71,7 @@ jobs:
 
       - name: test
         if: matrix.os != 'windows' || github.event_name != 'pull_request'
-        run: cargo test --verbose -- --nocapture
+        run: cargo test --locked --verbose -- --nocapture
 
 #      - name: Install cargo-llvm-cov
 #        if: matrix.os == 'ubuntu'
