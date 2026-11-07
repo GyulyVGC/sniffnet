@@ -124,6 +124,7 @@ pub fn make_sure_valid_ipfix_translation(language: Language) -> &'static str {
         Language::ID => "Pastikan pengekspor mengirim aliran IPFIX yang valid ke pengumpul ini.",
         Language::PL => {
             "Upewnij się, że eksporter wysyła do tego kolektora prawidłowe przepływy IPFIX."
+        }
         Language::UZ => {
             "Eksportyor ushbu kollektorga to'g'ri IPFIX oqimlarini yuborayotganiga ishonch hosil qiling."
         }

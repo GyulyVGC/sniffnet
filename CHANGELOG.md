@@ -21,6 +21,7 @@ All Sniffnet releases with the relative changes are documented in this file.
   - Spanish ([#1339](https://github.com/GyulyVGC/sniffnet/pull/1339))
   - Vietnamese ([#1342](https://github.com/GyulyVGC/sniffnet/pull/1342))
   - Indonesian ([#1345](https://github.com/GyulyVGC/sniffnet/pull/1345))
+  - Uzbek ([#1352](https://github.com/GyulyVGC/sniffnet/pull/1352))
   - Polish ([#1353](https://github.com/GyulyVGC/sniffnet/pull/1353))
 - Avoid opening captures on Linux D-Bus devices, preventing system operations from hanging ([#1320](https://github.com/GyulyVGC/sniffnet/pull/1320) — fixes [#1190](https://github.com/GyulyVGC/sniffnet/issues/1190))
 - Fix the app freezing and exhausting memory when importing a PCAP file containing a large time gap between consecutive packets ([`4605ec7`](https://github.com/GyulyVGC/sniffnet/pull/1290/commits/4605ec717bbaf8fa34268805814d5585f084201e))
