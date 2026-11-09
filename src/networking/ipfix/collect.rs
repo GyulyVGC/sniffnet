@@ -26,6 +26,10 @@ const RECV_BUF_LEN: usize = 65_535;
 /// Max number of datagrams discarded when resuming a capture (queued on the socket while paused)
 const MAX_RESUME_DRAIN: usize = 10_000;
 
+/// Templates with more fields are ignored: real ones have a few dozen, and every exporter may
+/// register many templates (see `MAX_TEMPLATES`)
+const MAX_TEMPLATE_FIELDS: usize = 512;
+
 /// State the collector needs to carry across datagrams: registered templates and cumulative counters
 struct CollectorState {
     templates: TemplateCache,
@@ -151,9 +155,20 @@ fn process_datagram(
     for set in &message.sets {
         if let Set::Template(records) = set {
             for record in records {
+                // fields without bytes carry nothing but would be visited for every record:
+                // without them each field takes at least one byte of the datagram
+                let fields: Vec<_> = record
+                    .fields
+                    .iter()
+                    .filter(|f| f.length != 0)
+                    .copied()
+                    .collect();
+                if fields.len() > MAX_TEMPLATE_FIELDS {
+                    continue;
+                }
                 state
                     .templates
-                    .insert(peer, odid, record.template_id, record.fields.clone(), now);
+                    .insert(peer, odid, record.template_id, fields, now);
             }
         }
     }
@@ -869,6 +884,39 @@ mod tests {
             let (info, _, succeeded) = run_all(&[&bytes]);
             assert!(succeeded);
             assert!(info.map.is_empty());
+        }
+    }
+
+    /// A template can't make the collector burn CPU or memory with fields that carry no bytes or
+    /// with too many fields
+    #[test]
+    fn test_process_datagram_hostile_templates() {
+        // 16,000 fields without bytes: each record would cost 16,001 field visits for one byte
+        let mut empty = vec![(1_u16, 0_u16); 16_000];
+        empty.push((1, 1));
+        let data = datagram(&[set(256, &vec![0x55; 65_000])]);
+        let started = Instant::now();
+        let (_, _, succeeded) = run_all(&[&datagram(&[template_set(256, &empty)]), &data, &data]);
+        assert!(succeeded);
+        assert!(started.elapsed() < std::time::Duration::from_secs(2));
+
+        // the limit is on the number of fields
+        let mut state = CollectorState::new(Instant::now());
+        for (fields, cached) in [
+            (MAX_TEMPLATE_FIELDS + 1, false),
+            (MAX_TEMPLATE_FIELDS, true),
+        ] {
+            let template = datagram(&[template_set(256, &vec![(1_u16, 1_u16); fields])]);
+            assert!(process_datagram(
+                &template,
+                peer(),
+                &mut state,
+                &mut InfoTraffic::default(),
+                &IpBlacklist::default(),
+                &mut AddressesResolutionState::new_for_tests(),
+            ));
+            let found = state.templates.get(peer(), 0, 256, Instant::now());
+            assert_eq!(found.is_some(), cached);
         }
     }
 
