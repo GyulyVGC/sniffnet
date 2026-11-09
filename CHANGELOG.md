@@ -4,7 +4,7 @@ All Sniffnet releases with the relative changes are documented in this file.
 
 ## [UNRELEASED]
 - IPFIX collector capabilities: receive and analyze network traffic from remote devices ([#1270](https://github.com/GyulyVGC/sniffnet/pull/1270) — fixes [#303](https://github.com/GyulyVGC/sniffnet/issues/303))
-- IPFIX collector: ignore templates with more than 512 fields and fields of length 0, which allowed remote CPU and memory exhaustion
+- IPFIX collector: ignore templates with more than 512 fields and fields of length 0, which allowed remote CPU and memory exhaustion ([#1357](https://github.com/GyulyVGC/sniffnet/pull/1357))
 - Show current data rates ([#1324](https://github.com/GyulyVGC/sniffnet/pull/1324) — fixes [#1077](https://github.com/GyulyVGC/sniffnet/issues/1077), [#1135](https://github.com/GyulyVGC/sniffnet/issues/1135))
 - Service taxonomy: classify upper layer services into 20 different categories ([#1312](https://github.com/GyulyVGC/sniffnet/pull/1312) — fixes [#1102](https://github.com/GyulyVGC/sniffnet/issues/1102))
 - Added support for IGMP connections and messages ([#1301](https://github.com/GyulyVGC/sniffnet/pull/1301) — fixes [#1269](https://github.com/GyulyVGC/sniffnet/issues/1269))
