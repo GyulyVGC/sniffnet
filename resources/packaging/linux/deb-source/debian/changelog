@@ -1,5 +1,5 @@
-sniffnet (1.5.1-1~resolute1) resolute; urgency=medium
+sniffnet (1.6.0-1~resolute1) resolute; urgency=medium
 
-  * Initial source package with vendored Rust dependencies.
+  * New upstream release 1.6.0.
 
- -- Giuliano Bellini <gyulyvgc99@gmail.com>  Mon, 14 Sep 2026 12:00:00 +0200
+ -- Giuliano Bellini <gyulyvgc99@gmail.com>  Xxx, XX Nov 2026 12:00:00 +0200
