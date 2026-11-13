@@ -117,8 +117,7 @@ pub fn notify_and_log(
             let address_to_lookup = &get_address_to_lookup(k, v.traffic_direction);
             let host = addresses_resolved
                 .get(address_to_lookup)
-                .map(|(_, h)| h.clone())
-                .unwrap_or_default();
+                .map_or_default(|(_, h)| h.clone());
             let mut data_info_host = info_traffic_msg
                 .hosts
                 .get(&host)

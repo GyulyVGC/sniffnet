@@ -411,11 +411,7 @@ fn get_exporters_col<'a>(
     let info: Element<Message, StyleType> = if exporters.len() == 1 {
         Text::new(format!(
             "   {}",
-            exporters
-                .iter()
-                .next()
-                .map(ToString::to_string)
-                .unwrap_or_default()
+            exporters.iter().next().map_or_default(ToString::to_string)
         ))
         .into()
     } else {
