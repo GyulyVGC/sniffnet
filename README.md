@@ -6,13 +6,13 @@
 <a href="#download"><img alt="" title="Download" src="https://raw.githubusercontent.com/GyulyVGC/sniffnet/main/resources/repository/badges/download.svg"/></a>
 <a href="https://github.com/GyulyVGC/sniffnet/blob/main/ROADMAP.md"><img alt="" title="Roadmap" src="https://raw.githubusercontent.com/GyulyVGC/sniffnet/main/resources/repository/badges/roadmap.svg"/></a>
 <a href="https://sniffnet.app"><img alt="" title="Website" src="https://raw.githubusercontent.com/GyulyVGC/sniffnet/main/resources/repository/badges/website.svg"/></a>
-<a href="https://github.com/GyulyVGC/sniffnet/wiki"><img alt="" title="Wiki" src="https://raw.githubusercontent.com/GyulyVGC/sniffnet/main/resources/repository/badges/wiki.svg"/></a>
+<a href="https://sniffnet.app/wiki/"><img alt="" title="Wiki" src="https://raw.githubusercontent.com/GyulyVGC/sniffnet/main/resources/repository/badges/wiki.svg"/></a>
 
 Application to comfortably monitor your network traffic.<br>
 Cross-platform. Intuitive. Reliable.
 
 Translated in:<br>
-🇨🇳 🇩🇪 🇫🇷 🇷🇺 🇵🇹 🇪🇦 🇮🇹 🇵🇱 [+&nbsp;18&nbsp;more&nbsp;languages](https://github.com/GyulyVGC/sniffnet/issues/60)
+🇨🇳 🇩🇪 🇫🇷 🇷🇺 🇵🇹 🇪🇦 🇮🇹 🇵🇱 [+&nbsp;20&nbsp;more&nbsp;languages](https://github.com/GyulyVGC/sniffnet/issues/60)
 </div>
 
 <p>
@@ -53,10 +53,10 @@ A special shout-out to these awesome organizations and folks who are sponsoring 
 </td></tr></table>
 
 <p>
-<a href="https://nlnet.nl" title="NLnet"><img src="https://nlnet.nl/logo/logo.svg" width="60px" alt="NLnet"/></a>&nbsp;&nbsp;
+<a href="https://nlnet.nl" title="NLnet"><img src="https://nlnet.nl/hex/vault/NLnet.greycutout.hex.svg" width="60px" alt="NLnet"/></a>&nbsp;&nbsp;
 <a href="https://www.coderabbit.ai/?utm_source=cr_org&utm_medium=github" title="CodeRabbit"><img src="https://avatars.githubusercontent.com/u/132028505?s=200&v=4" width="60px" alt="CodeRabbit"/></a>&nbsp;&nbsp;
 <a href="https://ipinfo.io" title="IPinfo"><img src="https://avatars.githubusercontent.com/ipinfo?v=4" width="60px" alt="IPinfo"/></a>&nbsp;&nbsp;
-<a href="https://ads.fund" title="ADS Fund"><img src="https://avatars.githubusercontent.com/ADS-Fund?v=4" width="60px" alt="ADS Fund"/></a>&nbsp;&nbsp;
+<a href="https://github.com/github" title="GitHub"><img src="https://avatars.githubusercontent.com/u/9919?v=4" width="60px" alt="GitHub"/></a>&nbsp;&nbsp;
 <a href="https://github.com/Cthulu201" title="Cthulu201"><img src="https://avatars.githubusercontent.com/Cthulu201?v=4" width="60px" alt="Cthulu201"/></a>&nbsp;&nbsp;
 <a href="https://github.com/ZEROF" title="ZEROF"><img src="https://avatars.githubusercontent.com/ZEROF?v=4" width="60px" alt="ZEROF"/></a>&nbsp;&nbsp;
 <a href="https://www.janwalter.org/" title="Jan Walter"><img src="https://avatars.githubusercontent.com/wahn?v=4" width="60px" alt="Jan Walter"/></a>
@@ -82,7 +82,7 @@ A special shout-out to these awesome organizations and folks who are sponsoring 
       <picture><img alt="macOS" title="macOS" height="85px" src="https://raw.githubusercontent.com/GyulyVGC/sniffnet/main/resources/repository/badges/macos.svg"/></picture>
     </td>
     <td>
-      <a href="https://github.com/GyulyVGC/sniffnet/releases/latest/download/Sniffnet_macOS_Intel.dmg">Intel</a> | <a href="https://github.com/GyulyVGC/sniffnet/releases/latest/download/Sniffnet_macOS_AppleSilicon.dmg">Apple silicon</a>
+      <a href="https://github.com/GyulyVGC/sniffnet/releases/latest/download/Sniffnet_macOS_AppleSilicon.dmg">Apple silicon</a> | <a href="https://github.com/GyulyVGC/sniffnet/releases/latest/download/Sniffnet_macOS_Intel.dmg">Intel</a>
     </td>
   </tr>
   <tr>
@@ -98,41 +98,41 @@ A special shout-out to these awesome organizations and folks who are sponsoring 
 </table>
 
 Links in the table above will download the latest version of Sniffnet directly from [GitHub releases](https://github.com/GyulyVGC/sniffnet/releases). <br>
-Not what you're looking for? Check out [alternative installation methods](https://github.com/GyulyVGC/sniffnet/wiki/Alternative-installation-methods).
+Not what you're looking for? Check out [alternative installation methods](https://sniffnet.app/wiki/alternative-installation-methods/).
 
 > [!NOTE]
 >
-> Remember to also install the [required dependencies](https://github.com/GyulyVGC/sniffnet/wiki/Required-dependencies) for your operating system.
+> Remember to also install the [required dependencies](https://sniffnet.app/wiki/required-dependencies/) for your operating system.
 
 ## Features
 
 - 💻 choose a **network adapter** of your PC to inspect
 - 🏷️ select a set of **filters** to apply to the observed traffic
 - 📁 **import** and **export** comprehensive capture reports as **PCAP** files
+- 📡 collect and analyze **IPFIX flow data** exported by other devices
 - 📊 view overall **statistics** about your Internet traffic
-- 📈 view **real-time charts** about traffic intensity
+- 📈 view **real-time charts** of traffic intensity
 - 🏠 identify connections in your **local network**
 - 🌍 discover the **geographical location** of remote hosts
 - 🌐 find out **domain name** and **ASN** of the hosts you are exchanging traffic with
-- 📖 identify **6000+ upper layer services**, protocols, trojans, and worms
-- 🎮 see which **programs** are generating network bandwidth
+- 📖 identify **6000+ upper-layer services**, protocols, trojans, and worms
+- 🎮 see which **programs** are using network bandwidth
 - ⭐ save your **favorite** network hosts, services, and programs
 - 📌 keep an eye on your network even when the application is **minimized**
-- ️🔎 search and **inspect** each of your network connections in real time
-- 🔉 set custom **notifications** to inform you when defined network events occur
+- 🔎 search and **inspect** each of your network connections in real time
+- 🔉 set custom **notifications** for specific network events
 - 🚫 import custom **IP blacklists** to highlight potentially dangerous connections
-- 🎨 choose the **style** that fits you the most, including custom themes support
-- ...and more!
+- 🎨 choose the **style** that suits you best, with support for custom themes
 
 ## User manual
 
 Do you want to **learn more**? <br>
-Check out the [**Sniffnet Wiki**](https://github.com/GyulyVGC/sniffnet/wiki), a comprehensive manual to help you
+Check out the [**Sniffnet Wiki**](https://sniffnet.app/wiki/), a comprehensive manual to help you
 thoroughly master the application from a basic setup to the most advanced functionalities. <br>
 The Wiki includes step-by-step guides, tips, examples of usage, and answers to frequent questions.
 
 <p align="center">
-<a href="https://github.com/GyulyVGC/sniffnet/wiki">
+<a href="https://sniffnet.app/wiki/">
 <img alt="" title="Sniffnet Wiki" src="https://raw.githubusercontent.com/GyulyVGC/sniffnet/main/resources/logos/wiki/wikilogo.svg" width="300px"/>
 </a>
 </p>
@@ -147,7 +147,7 @@ The Wiki includes step-by-step guides, tips, examples of usage, and answers to f
 
 Most of the errors that may arise are likely due to your system missing dependencies
 required to correctly analyze a network adapter. <br>
-Check the [required dependencies page](https://github.com/GyulyVGC/sniffnet/wiki/Required-dependencies) 
+Check the [required dependencies page](https://sniffnet.app/wiki/required-dependencies/)
 for instructions on how to proceed depending on your operating system.
 
 ### Rendering problems
@@ -172,8 +172,7 @@ ICED_BACKEND=tiny-skia
 - The graphical user interface has been realized with [iced](https://github.com/iced-rs/iced), a cross-platform GUI library for Rust focused on simplicity and type-safety
 - IP geolocation and ASN data are provided by [MaxMind](https://www.maxmind.com)
 - Free code signing for Windows Installer is provided by [SignPath.io](https://about.signpath.io/), certificate by [SignPath Foundation](https://signpath.org/)
-- [Sniffnet](https://ads.fund/token/0xadfc251f8ef00ceaeca2b5c1882dabe5db0833df) project is supported by ADS.FUND
-- Last but not least, thanks to [every single stargazer](https://github.com/GyulyVGC/sniffnet/stargazers): all forms of support made it possible to keep improving Sniffnet!
+- Last but not least, thanks to every single stargazer: all forms of support made it possible to keep improving Sniffnet!
 
 ## Stay in the loop
 

@@ -1,9 +1,9 @@
 [package]
 name = "sniffnet"
-version = "1.5.1"
+version = "1.6.0"
 description = "Application to comfortably monitor your network traffic"
 readme = "README.md"
-documentation = "https://github.com/GyulyVGC/sniffnet/wiki"
+documentation = "https://sniffnet.app/wiki/"
 keywords = ["filter", "network", "packet", "sniffer", "gui"]
 categories = ["visualization", "gui", "network-programming"]
 authors.workspace = true
@@ -56,26 +56,26 @@ ctrlc = { version = "3.5.2", features = ["termination"] }
 dns-lookup = "4.0.2"
 iced = { version = "0.14.0", features = ["tokio", "svg", "advanced", "lazy", "image"] }
 ipnet = "2.12.2"
-jiff = "0.2.38"
+jiff = "0.2.43"
 listeners = "0.6.1"
-maxminddb = "0.32.0"
+maxminddb = "0.33.0"
 nom = "8.0.0"
 phf = "0.14.0"
 phf_shared = "0.14.0"
 picon = "0.1.0"
 plotters = { version = "0.3.7", default-features = false, features = ["area_series", "line_series"] }
 plotters-iced2 = "0.14.0"
-prefix-trie = { version = "0.10.1", features = ["ipnet"] }
+prefix-trie = { version = "0.10.2", features = ["ipnet"] }
 reqwest = { version = "0.13.5", features = ["json"] }
-rfd = "0.17.2"
+rfd = "0.18.0"
 rodio = { version = "0.23.0", default-features = false, features = ["mp3", "playback"] }
 semver = "1.0.28"
 serde = { version = "1.0.229", features = ["derive"] }
 serde_json = { version = "1.0.154", features = ["preserve_order"] }
 splines = "5.0.0"
 surge-ping = "0.9.1"
-tokio = { version = "1.53.3", features = ["macros", "fs"] }
-toml = "1.1.8"
+tokio = { version = "1.54.1", features = ["macros", "fs"] }
+toml = "1.2.1"
 
 [target.'cfg(windows)'.dependencies]
 gag = "1.0.0"
@@ -83,7 +83,7 @@ gag = "1.0.0"
 #───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
 
 [dev-dependencies]
-rstest = "0.27.0"
+rstest = "0.28.0"
 serde_test = "1.0.177"
 serial_test = { version = "4.0.1", default-features = false }
 
@@ -210,3 +210,8 @@ unreachable = "warn"
 dbg_macro = "warn"
 print_stdout = "warn"
 print_stderr = "warn"
+
+[workspace.lints.cargo]
+default = { level = "deny", priority = -1 }
+pedantic = { level = "deny", priority = -1 }
+manual_readme = "allow" # cargo package makes inferred readmes explicit

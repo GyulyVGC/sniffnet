@@ -1,4 +1,4 @@
-FROM rust:1.88-slim AS builder
+FROM rust:1.99.1-slim-bookworm AS builder
 
 # Install build dependencies for both X11 and Wayland
 RUN apt-get update && apt-get install -y \
@@ -11,7 +11,7 @@ RUN apt-get update && apt-get install -y \
 WORKDIR /usr/src/sniffnet
 COPY . .
 
-RUN cargo build --release
+RUN cargo build --locked --release
 
 # Runtime stage
 FROM debian:bookworm-slim
