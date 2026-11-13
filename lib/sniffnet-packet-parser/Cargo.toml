@@ -2,6 +2,7 @@
 name = "sniffnet-packet-parser"
 version = "0.2.1"
 description = "Network packet parser for Sniffnet"
+readme = "README.md"
 keywords = ["network", "packet", "sniffer", "parser", "pcap"]
 categories = ["parser-implementations", "network-programming"]
 authors.workspace = true
