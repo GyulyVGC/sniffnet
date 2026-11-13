@@ -1367,7 +1367,7 @@ pub fn bytes_translation(language: Language) -> &'static str {
         Language::FI => "Tavua",
         Language::JA => "バイト",
         Language::HU => "Bájtok",
-        Language::SI => "බයිට්",
+        Language::SI => "බයිට",
         // Language::AR => "بايتات",
     }
 }
@@ -2249,7 +2249,7 @@ pub fn bytes_exceeded_translation(language: Language) -> &'static str {
         Language::ID => "Ambang batas byte terlampaui",
         Language::NL => "Byte-drempel overschreden",
         Language::HU => "Bájtküszöb meghaladva",
-        Language::SI => "බයිට් එළිපත් සීමාව ඉක්මවා ඇත",
+        Language::SI => "බයිට එළිපත් සීමාව ඉක්මවා ඇත",
         // Language::AR => "تم تجاوز حد البايتات",
     }
 }
