@@ -33,7 +33,7 @@ pub fn ipfix_exporter_translation(language: Language) -> &'static str {
         Language::VI => "Bộ xuất IPFIX",
         // Language::AR => "مُصدِّر IPFIX",
         Language::ID => "Pengekspor IPFIX",
-        Language::SI => "",
+        Language::SI => "IPFIX නිර්යාතකය",
         _ => "IPFIX exporter",
     }
 }
@@ -51,7 +51,7 @@ pub fn ipfix_collector_translation(language: Language) -> &'static str {
         Language::VI => "Bộ thu thập IPFIX",
         // Language::AR => "مُجمِّع IPFIX",
         Language::ID => "Pengumpul IPFIX",
-        Language::SI => "",
+        Language::SI => "IPFIX සංග්‍රාහකය",
         _ => "IPFIX collector",
     }
 }
@@ -69,7 +69,7 @@ pub fn waiting_ipfix_connections_translation(language: Language) -> &'static str
         Language::VI => "Chưa ghi nhận lưu lượng nào. Hiện đang chờ các luồng IPFIX...",
         // Language::AR => "لم تُرصد أي حركة مرور بعد. في انتظار تدفقات IPFIX...",
         Language::ID => "Belum ada lalu lintas yang teramati. Menunggu aliran IPFIX...",
-        Language::SI => "",
+        Language::SI => "තවමත් කිසිදු ගමනාගමනයක් නිරීක්‍ෂණය නොවිණි. IPFIX ප්‍රවාහ සඳහා රැඳෙමින්...",
         _ => "No traffic has been observed yet. Waiting for IPFIX flows...",
     }
 }
@@ -87,7 +87,7 @@ pub fn invalid_ipfix_received_translation(language: Language) -> &'static str {
         Language::VI => "Lưu lượng truy cập đến không thể giải mã dưới dạng IPFIX...",
         // Language::AR => "يتعذر فك ترميز حركة المرور الواردة بصيغة IPFIX...",
         Language::ID => "Lalu lintas masuk tidak dapat diuraikan sebagai IPFIX...",
-        Language::SI => "",
+        Language::SI => "එන ගමනාගමනය IPFIX ලෙස විකේතනයට නොහැකිය...",
         _ => "Incoming traffic isn't decodable as IPFIX...",
     }
 }
@@ -115,7 +115,7 @@ pub fn make_sure_valid_ipfix_translation(language: Language) -> &'static str {
         }
         // Language::AR => "تأكد من أن المُصدِّر يرسل تدفقات IPFIX صالحة إلى هذا المُجمِّع.",
         Language::ID => "Pastikan pengekspor mengirim aliran IPFIX yang valid ke pengumpul ini.",
-        Language::SI => "",
+        Language::SI => "නිර්යාතකය මෙම සංග්‍රාහකය වෙත වලංගු IPFIX ප්‍රවාහ යවන බවට වග බලා ගන්න.",
         _ => "Make sure the exporter is sending valid IPFIX flows to this collector.",
     }
 }
@@ -133,7 +133,7 @@ pub fn disable_update_checks_translation(language: Language) -> &'static str {
         Language::VI => "Ngừng kiểm tra bản cập nhật mới",
         // Language::AR => "تعطيل التحقق من وجود تحديثات",
         Language::ID => "Nonaktifkan pemeriksaan pembaruan",
-        Language::SI => "යාවත්කාල පරීක්‍ෂාව අබල කරන්න",
+        Language::SI => "යාවත්කාල පරීක්‍ෂා අබල කරන්න",
         _ => "Disable update checks",
     }
 }
