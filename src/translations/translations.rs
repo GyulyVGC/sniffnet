@@ -2157,7 +2157,7 @@ pub fn threshold_translation(language: Language) -> &'static str {
         Language::ID => "Ambang batas",
         Language::NL => "Grens",
         Language::HU => "Küszöb",
-        Language::SI => "සීමකය",
+        Language::SI => "එළිපත් සීමාව",
         // Language::AR => "الحد",
     }
 }
@@ -2249,7 +2249,7 @@ pub fn bytes_exceeded_translation(language: Language) -> &'static str {
         Language::ID => "Ambang batas byte terlampaui",
         Language::NL => "Byte-drempel overschreden",
         Language::HU => "Bájtküszöb meghaladva",
-        Language::SI => "බයිට් සීමකය ඉක්මවා ඇත",
+        Language::SI => "බයිට් එළිපත් සීමාව ඉක්මවා ඇත",
         // Language::AR => "تم تجاوز حد البايتات",
     }
 }
@@ -2314,7 +2314,7 @@ pub fn packets_exceeded_translation(language: Language) -> &'static str {
         Language::ID => "Ambang batas paket terlampaui",
         Language::NL => "Pakketdrempel overschreden",
         Language::HU => "Csomagküszöb meghaladva",
-        Language::SI => "පැකට් සීමකය ඉක්මවා ඇත",
+        Language::SI => "පැකට් එළිපත් සීමාව ඉක්මවා ඇත",
         // Language::AR => "تم تجاوز حد الحزم",
     }
 }
