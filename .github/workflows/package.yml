@@ -399,7 +399,7 @@ jobs:
         shell: powershell
         run: |
           New-Item -ItemType Directory -Path artifacts
-          cargo wix --no-build --nocapture --target ${{ matrix.target }}
+          cargo wix --package sniffnet --no-build --nocapture --target ${{ matrix.target }}
           Move-Item -Path target\wix\sniffnet*.msi -Destination .\artifacts\Sniffnet_Windows_${{ matrix.arch }}.msi
 
       - name: Upload unsigned package artifacts
