@@ -2,7 +2,6 @@
 name = "sniffnet"
 version = "1.6.0"
 description = "Application to comfortably monitor your network traffic"
-readme = "README.md"
 documentation = "https://sniffnet.app/wiki/"
 keywords = ["filter", "network", "packet", "sniffer", "gui"]
 categories = ["visualization", "gui", "network-programming"]
@@ -210,3 +209,7 @@ unreachable = "warn"
 dbg_macro = "warn"
 print_stdout = "warn"
 print_stderr = "warn"
+
+[workspace.lints.cargo]
+default = { level = "deny", priority = -1 }
+pedantic = { level = "deny", priority = -1 }
