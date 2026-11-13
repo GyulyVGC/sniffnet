@@ -334,6 +334,26 @@ jobs:
             target/release/bundle/osx/Sniffnet.app/Contents/MacOS/
           cp resources/packaging/macos/wrapper.sh \
             target/release/bundle/osx/Sniffnet.app/Contents/MacOS/
+
+      - name: Codesign Sniffnet.app (optional)
+        env:
+          APPLE_CERTIFICATE_P12: ${{ secrets.APPLE_CERTIFICATE_P12 }}
+          APPLE_CERTIFICATE_PASSWORD: ${{ secrets.APPLE_CERTIFICATE_PASSWORD }}
+          APPLE_CODESIGN_IDENTITY: ${{ secrets.APPLE_CODESIGN_IDENTITY }}
+          APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
+          APPLE_ID: ${{ secrets.APPLE_ID }}
+          APPLE_APP_PASSWORD: ${{ secrets.APPLE_APP_PASSWORD }}
+          APPLE_API_KEY: ${{ secrets.APPLE_API_KEY }}
+          APPLE_API_KEY_ID: ${{ secrets.APPLE_API_KEY_ID }}
+          APPLE_API_ISSUER: ${{ secrets.APPLE_API_ISSUER }}
+        shell: bash
+        run: |
+          bash resources/packaging/macos/sign-and-notarize.sh sign-app \
+            "target/release/bundle/osx/Sniffnet.app"
+
+      - name: Build DMG
+        shell: bash
+        run: |
           create-dmg \
             --volname "Sniffnet Installer" \
             --background "resources/packaging/macos/graphics/dmg_bg.png" \
@@ -345,6 +365,22 @@ jobs:
             --hide-extension "Sniffnet.app" \
             "artifacts/Sniffnet_macOS_${{ matrix.arch }}.dmg" \
             "target/release/bundle/osx/"
+
+      - name: Notarize and staple DMG (optional)
+        env:
+          APPLE_CERTIFICATE_P12: ${{ secrets.APPLE_CERTIFICATE_P12 }}
+          APPLE_CERTIFICATE_PASSWORD: ${{ secrets.APPLE_CERTIFICATE_PASSWORD }}
+          APPLE_CODESIGN_IDENTITY: ${{ secrets.APPLE_CODESIGN_IDENTITY }}
+          APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
+          APPLE_ID: ${{ secrets.APPLE_ID }}
+          APPLE_APP_PASSWORD: ${{ secrets.APPLE_APP_PASSWORD }}
+          APPLE_API_KEY: ${{ secrets.APPLE_API_KEY }}
+          APPLE_API_KEY_ID: ${{ secrets.APPLE_API_KEY_ID }}
+          APPLE_API_ISSUER: ${{ secrets.APPLE_API_ISSUER }}
+        shell: bash
+        run: |
+          bash resources/packaging/macos/sign-and-notarize.sh notarize-dmg \
+            "artifacts/Sniffnet_macOS_${{ matrix.arch }}.dmg"
 
       - name: Upload package artifacts
         uses: actions/upload-artifact@v7
