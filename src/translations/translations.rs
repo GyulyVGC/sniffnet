@@ -405,7 +405,7 @@ pub fn ask_quit_translation<'a>(language: Language) -> Text<'a, StyleType> {
         Language::IT => "Sei sicuro di voler interrompere questa analisi?",
         Language::FR => "Êtes-vous sûr de vouloir quitter l'application ?",
         Language::ES => "¿Estás seguro de que quieres dejar este análisis?",
-        Language::PL => "Jesteś pewien, że chcesz zakończyć analizę?",
+        Language::PL => "Czy na pewno chcesz zakończyć analizę?",
         Language::DE => "Bist du sicher, dass du diese Analyse beenden willst?",
         Language::UK => "Чи справді хочете закінчити аналіз?",
         Language::ZH => "您确定退出当前监控吗?",
@@ -438,7 +438,7 @@ pub fn quit_analysis_translation(language: Language) -> &'static str {
         Language::IT => "Interrompi analisi",
         Language::FR => "Quitter l'analyse",
         Language::ES => "Quitar el análisis",
-        Language::PL => "Zakończ analize",
+        Language::PL => "Zakończ analizę",
         Language::DE => "Analyse beenden",
         Language::UK => "Закінчити аналіз",
         Language::ZH => "退出监控",
@@ -618,7 +618,7 @@ pub fn no_addresses_translation(language: Language) -> &'static str {
         }
         Language::PL => {
             "Nie można zaobserwować żadnego ruchu, ponieważ wybrany adapter nie ma aktywnych adresów...\n\n\
-                                 Jeśli jesteś pewien, że jesteś podłączony do internetu, spróbuj wybrać inny adapter."
+                                 Jeśli połączenie z internetem jest aktywne, spróbuj wybrać inny adapter."
         }
         Language::DE => {
             "Es kann kein Netzwerkverkehr beobachtet werden, weil der Adapter keine aktiven Adressen hat...\n\n\
@@ -734,8 +734,8 @@ pub fn waiting_translation(language: Language) -> &'static str {
                                  ¿Está seguro de que está conectado a Internet y ha seleccionado la tarjeta de red correcta?"
         }
         Language::PL => {
-            "Nie zaobserowano żadnego ruchu sieciowego. Oczekiwanie na pakiety...\n\n\
-                                 Czy na pewno jesteś podłączony do internetu i wybrałeś właściwy adapter?"
+            "Nie zaobserwowano jeszcze żadnego ruchu. Oczekiwanie na pakiety sieciowe...\n\n\
+                                 Czy na pewno masz połączenie z internetem i wybrany jest właściwy adapter?"
         }
         Language::DE => {
             "Noch kein Netzwerkverkehr beobachtet. Warten auf Pakete...\n\n\
@@ -2228,7 +2228,7 @@ pub fn bytes_exceeded_translation(language: Language) -> &'static str {
         Language::IT => "Soglia di Byte superata",
         Language::FR => "Seuil de donnée atteint",
         Language::ES => "¡Límite de bytes superado",
-        Language::PL => "Próg bajtów przekroczony",
+        Language::PL => "Przekroczono próg bajtów",
         Language::DE => "Byte-Grenzwert überschritten",
         Language::UK => "Ліміт байтів перевищено",
         Language::ZH => "达到设定的网络流量阈值",
@@ -2388,7 +2388,7 @@ pub fn favorite_transmitted_translation(language: Language) -> &'static str {
         Language::IT => "Nuovi dati scambiati dai preferiti",
         Language::FR => "Nouvel échange de donnée depuis un favori",
         Language::ES => "¡Nuevos datos intercambiados de favoritos",
-        Language::PL => "Nowe dane wymienione z ulubionych",
+        Language::PL => "Nowe dane wymienione z ulubionymi",
         Language::DE => "Neue Daten mit deinen Favoriten ausgetauscht",
         Language::UK => "Нові дані обміняно з улюблених",
         Language::ZH => "收藏夹内的连接有新活动",
@@ -2443,9 +2443,9 @@ pub fn no_notifications_set_translation<'a>(language: Language) -> Text<'a, Styl
                                  Puedes activar las notificaciones desde los ajustes:"
         }
         Language::PL => {
-            "Nie włączyłeś jeszcze powiadomień!\n\n\
-                                 Po ich włączeniu, ta strona wyświetli dziennik twoich powiadomień\n\n\
-                                 Możesz włączyć powiadomienia w ustawieniach:"
+            "Powiadomienia nie zostały jeszcze włączone!\n\n\
+                                 Po ich włączeniu na tej stronie pojawi się dziennik powiadomień\n\n\
+                                 Możesz je włączyć w ustawieniach:"
         }
         Language::DE => {
             "Benachrichtigungen wurden noch nicht aktiviert!\n\n\
@@ -2582,7 +2582,7 @@ pub fn no_notifications_received_translation<'a>(language: Language) -> Text<'a,
                                  Cuando reciba una notificación, aparecerá aquí"
         }
         Language::PL => {
-            "Nic do wyświetlenia w tej chwili...\n\n\
+            "Na razie nic tu nie ma...\n\n\
                                  Gdy otrzymasz powiadomienie, pojawi się ono tutaj"
         }
         Language::DE => {
@@ -2683,7 +2683,7 @@ pub fn only_last_30_translation(language: Language) -> &'static str {
         Language::IT => "Solo le ultime 30 notifiche sono mostrate",
         Language::FR => "Seulement les 30 dernières notifications sont affichées",
         Language::ES => "Sólo se muestran las últimas 30 notificaciones",
-        Language::PL => "Wyświetlane jest tylko 30 ostatnich powiadomień",
+        Language::PL => "Wyświetlanych jest tylko 30 ostatnich powiadomień",
         Language::DE => "Nur die letzten 30 Benachrichtigungen werden angezeigt",
         Language::UK => "Можете побачити лише 30 останніх повідомлень",
         Language::ZH => "仅显示最近 30 条通知",

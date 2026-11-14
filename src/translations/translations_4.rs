@@ -29,6 +29,7 @@ pub fn reserved_address_translation(language: Language, info: &str) -> String {
         Language::SI => format!("වෙන්කළ ලිපිනය ({info})"),
         Language::RU => format!("Зарезервированный адрес ({info})"),
         // Language::AR => format!("عنوان محجوز ({info})"),
+        Language::PL => format!("Adres zarezerwowany ({info})"),
         _ => format!("Reserved address ({info})"),
     }
 }
@@ -117,6 +118,7 @@ pub fn capture_file_translation(language: Language) -> &'static str {
         Language::SI => "ග්‍රහණ ගොනුව",
         Language::RU => "Файл захвата",
         // Language::AR => "ملف الالتقاط",
+        Language::PL => "Plik przechwytywania",
         _ => "Capture file",
     }
 }
@@ -147,6 +149,7 @@ pub fn select_file_translation(language: Language) -> &'static str {
         Language::SI => "ගොනුව තෝරන්න",
         Language::RU => "Выбрать файл",
         // Language::AR => "اختيار ملف",
+        Language::PL => "Wybierz plik",
         _ => "Select file",
     }
 }
@@ -249,6 +252,10 @@ pub fn reading_from_pcap_translation(language: Language) -> &'static str {
         //     "جارٍ قراءة الحزم من الملف...\n\n\
         //                          هل أنت متأكد من أن الملف الذي حددته ليس فارغًا؟"
         // }
+        Language::PL => {
+            "Odczytywanie pakietów z pliku...\n\n\
+                                Upewnij się, że wybrany plik nie jest pusty."
+        }
         _ => {
             "Reading packets from file...\n\n\
                                 Are you sure the file you selected isn't empty?"
@@ -282,6 +289,7 @@ pub fn data_exceeded_translation(language: Language) -> &'static str {
         Language::SI => "දත්ත එළිපත් සීමාව ඉක්මවා ඇත",
         Language::RU => "Превышен лимит данных",
         // Language::AR => "تم تجاوز حد البيانات",
+        Language::PL => "Przekroczono próg danych",
         _ => "Data threshold exceeded",
     }
 }
@@ -312,6 +320,7 @@ pub fn bits_exceeded_translation(language: Language) -> &'static str {
         Language::SI => "බිටු එළිපත් සීමාව ඉක්මවා ඇත",
         Language::RU => "Превышен лимит битов",
         // Language::AR => "تم تجاوز حد البتات",
+        Language::PL => "Przekroczono próg bitów",
         _ => "Bits threshold exceeded",
     }
 }
@@ -341,6 +350,7 @@ pub fn bits_translation(language: Language) -> &'static str {
         Language::SI => "බිටු",
         Language::RU => "Биты",
         // Language::AR => "بتات",
+        Language::PL => "Bity",
         _ => "Bits",
     }
 }
@@ -367,6 +377,7 @@ pub fn pause_translation(language: Language) -> &'static str {
         Language::HU => "Szüneteltetés",
         Language::SI => "විරාමය",
         // Language::AR => "إيقاف مؤقت",
+        Language::PL => "Wstrzymaj",
         _ => "Pause",
     }
 }
@@ -398,6 +409,7 @@ pub fn resume_translation(language: Language) -> &'static str {
         Language::SI => "නැවතත්",
         Language::RU => "Продолжить",
         // Language::AR => "استئناف",
+        Language::PL => "Wznów",
         _ => "Resume",
     }
 }

@@ -269,7 +269,7 @@ pub fn messages_translation(language: Language) -> &'static str {
         Language::ES => "Mensajes",
         Language::IT => "Messaggi",
         Language::DE => "Nachrichten",
-        Language::PL => "Wiadomości",
+        Language::PL => "Komunikaty",
         Language::RU => "Сообщения",
         Language::RO => "Mesaje",
         Language::JA => "メッセージ",
@@ -302,7 +302,7 @@ pub fn link_type_translation(language: Language) -> &'static str {
         Language::IT => "Tipo di collegamento",
         Language::FR => "Type de connexion",
         Language::DE => "Verbindungsart",
-        Language::PL => "Rodzaj połączenia", // "Typ łącza"?
+        Language::PL => "Typ łącza",
         Language::RU => "Тип соединения",
         Language::RO => "Tipul conexiunii",
         Language::JA => "リンク タイプ",
@@ -347,7 +347,7 @@ pub fn unsupported_link_type_translation(language: Language) -> &'static str {
             "Die Verbindungsart dieses Adapters wird noch nicht von Sniffnet unterstützt..."
         }
         Language::PL => {
-            "Rodzaj połączenia powiązany z tym adapterem nie jest jeszcze obsługiwany przez Sniffnet..."
+            "Typ łącza powiązany z tym adapterem nie jest jeszcze obsługiwany przez Sniffnet..."
         }
         Language::RU => {
             "Тип соединения, связанный с этим адаптером, пока не поддерживается Sniffnet..."
@@ -595,7 +595,7 @@ pub fn select_dest_directory_translation(language: Language) -> &'static str {
         Language::IT => "Seleziona cartella di destinazione",
         Language::FR => "Sélectionner le répertoire de destination",
         Language::DE => "Zielordner wählen",
-        Language::PL => "Wybierz katalog docelowy", // "Wybierz folder docelowy"?
+        Language::PL => "Wybierz katalog docelowy",
         Language::RU => "Выберите директорию назначения",
         Language::RO => "Selectează directorul destinație",
         Language::JA => "宛先のディレクトリーを選択する",
