@@ -3,9 +3,9 @@
 export CARGO_HOME = $(CURDIR)/debian/cargo-home
 export CARGO_TARGET_DIR = $(CURDIR)/target
 export CARGO_NET_OFFLINE = true
-export RUSTC = /usr/bin/rustc-1.97
-export RUSTDOC = /usr/bin/rustdoc-1.97
-CARGO = /usr/bin/cargo-1.97
+export RUSTC = /usr/bin/rustc-1.98
+export RUSTDOC = /usr/bin/rustdoc-1.98
+CARGO = /usr/bin/cargo-1.98
 # Let debhelper handle stripping and debug symbols.
 export CARGO_PROFILE_RELEASE_STRIP = false
 export CARGO_PROFILE_RELEASE_DEBUG = 2
