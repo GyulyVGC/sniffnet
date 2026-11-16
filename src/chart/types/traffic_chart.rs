@@ -302,7 +302,7 @@ impl TrafficChart {
             .border_style(ShapeStyle::from(&color).stroke_width(CHARTS_LINE_BORDER))
     }
 
-    // pub fn sample_for_screenshot(style: StyleType) -> Self {
+    // pub fn sample_for_screenshot(style: StyleType, thumbnail: bool) -> Self {
     //     use crate::translations::types::language::Language;
     //     use splines::{Interpolation, Key};
     //     use std::io::Read;
@@ -315,7 +315,8 @@ impl TrafficChart {
     //         x as f32 / 255.0 * 2.0 * delta - delta
     //     };
     //
-    //     let mut chart = TrafficChart::new(style, Language::default(), DataRepr::default());
+    //     let mut chart = TrafficChart::new(style, Language::default(), DataUnit::default());
+    //     chart.thumbnail = thumbnail;
     //
     //     chart.ticks = 5 * 60 - 2;
     //     let x_range = chart.ticks - 30..chart.ticks;

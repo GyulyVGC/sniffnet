@@ -5,7 +5,7 @@ use crate::networking::ipfix::ttl_map::TtlMap;
 use crate::networking::ipfix::wire::FieldSpec;
 
 /// Maximum number of templates cached
-const MAX_TEMPLATES: usize = 10_000;
+const MAX_TEMPLATES: usize = 1_000;
 
 /// Per-exporter IPFIX template cache.
 /// The cache is keyed by `(peer, observation_domain, template_id)`:

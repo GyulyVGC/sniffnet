@@ -5,6 +5,8 @@
 use std::borrow::Cow;
 
 use chart::types::traffic_chart::TrafficChart;
+#[cfg(all(windows, debug_assertions))] // avoid unused_dependencies lint in debug builds
+use gag as _;
 use gui::pages::types::running_page::RunningPage;
 use gui::sniffer::Sniffer;
 use gui::styles::style_constants::FONT_SIZE_BODY;

@@ -151,9 +151,17 @@ fn process_datagram(
     for set in &message.sets {
         if let Set::Template(records) = set {
             for record in records {
+                // fields without bytes carry nothing but would be visited for every record:
+                // without them each field takes at least one byte of the datagram
+                let fields: Vec<_> = record
+                    .fields
+                    .iter()
+                    .filter(|f| f.length != 0)
+                    .copied()
+                    .collect();
                 state
                     .templates
-                    .insert(peer, odid, record.template_id, record.fields.clone(), now);
+                    .insert(peer, odid, record.template_id, fields, now);
             }
         }
     }
@@ -870,6 +878,52 @@ mod tests {
             assert!(succeeded);
             assert!(info.map.is_empty());
         }
+    }
+
+    /// A template can't make the collector burn CPU with fields that carry no bytes
+    #[test]
+    fn test_process_datagram_hostile_templates() {
+        // 16,000 fields without bytes: each record would cost 16,001 field visits for one byte
+        let mut empty = vec![(1_u16, 0_u16); 16_000];
+        empty.push((1, 1));
+        let hostile_template = datagram(&[template_set(256, &empty)]);
+        let data = datagram(&[set(256, &vec![0x55; 65_000])]);
+        let started = Instant::now();
+        let (_, _, succeeded) = run_all(&[&hostile_template, &data, &data]);
+        assert!(succeeded);
+        assert!(started.elapsed() < std::time::Duration::from_secs(2));
+
+        // zero-length fields are removed rather than merely tolerated by the record loop
+        let mut state = CollectorState::new(Instant::now());
+        assert!(process_datagram(
+            &hostile_template,
+            peer(),
+            &mut state,
+            &mut InfoTraffic::default(),
+            &IpBlacklist::default(),
+            &mut AddressesResolutionState::new_for_tests(),
+        ));
+        let fields = state.templates.get(peer(), 0, 256, Instant::now()).unwrap();
+        assert_eq!(fields.len(), 1);
+        assert_eq!(fields[0].length, 1);
+
+        // large templates remain supported as long as their fields consume data
+        let template = datagram(&[template_set(257, &vec![(1_u16, 1_u16); 16_000])]);
+        assert!(process_datagram(
+            &template,
+            peer(),
+            &mut state,
+            &mut InfoTraffic::default(),
+            &IpBlacklist::default(),
+            &mut AddressesResolutionState::new_for_tests(),
+        ));
+        assert_eq!(
+            state
+                .templates
+                .get(peer(), 0, 257, Instant::now())
+                .map(|fields| fields.len()),
+            Some(16_000)
+        );
     }
 
     #[test]

@@ -160,7 +160,6 @@ fn get_valid_service_fmt_const(s: &str) -> String {
         {
             panic!("Invalid service name found: {invalid}")
         }
-        #[cfg(debug_assertions)]
         inappropriate
             if rustrict::Censor::from_str(inappropriate)
                 .with_trie(&SAFE_WORDS_FOR_SERVICE_NAME)
@@ -186,7 +185,6 @@ fn get_valid_service_query(s: &str) -> ServiceQuery {
     ServiceQuery(port, protocol)
 }
 
-#[cfg(debug_assertions)]
 static SAFE_WORDS_FOR_SERVICE_NAME: std::sync::LazyLock<rustrict::Trie> =
     std::sync::LazyLock::new(|| {
         let mut safe_words = rustrict::Trie::default();

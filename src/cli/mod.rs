@@ -48,14 +48,13 @@ impl Args {
                     std::process::exit(0);
                 }
                 std::process::exit(1);
-            } else {
-                // truncate logs file
-                let _ = std::fs::OpenOptions::new()
-                    .write(true)
-                    .truncate(true)
-                    .open(logs_file)
-                    .log_err(crate::location!());
             }
+            // else truncate logs file
+            let _ = std::fs::OpenOptions::new()
+                .write(true)
+                .truncate(true)
+                .open(logs_file)
+                .log_err(crate::location!());
         }
 
         if args.restore_default {
