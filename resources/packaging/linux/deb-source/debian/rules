@@ -20,7 +20,7 @@ override_dh_auto_test:
 ifeq (,$(filter nocheck,$(DEB_BUILD_OPTIONS)))
 # These integration tests need Internet access or raw-socket privileges.
 	+$(CARGO) test --frozen --release --workspace -- \
-		--skip utils::check_updates::tests::fetch_latest_release_from_github \
+		--skip utils::check_updates::tests::test_fetch_latest_release_from_github \
 		--skip networking::types::latency::tests::test_measures_ipv4_loopback_latency \
 		--skip networking::types::latency::tests::test_measures_ipv6_loopback_latency
 endif
