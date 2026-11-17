@@ -31,8 +31,8 @@ jobs:
         run: |
           sudo apt-get update
           sudo apt-get install -y --no-install-recommends debhelper devscripts dput gnupg
-          rustup toolchain install 1.97.1 --profile minimal
-          rustup default 1.97.1
+          rustup toolchain install 1.98.1 --profile minimal
+          rustup default 1.98.1
 
       - name: Prepare tagged source upload
         id: source

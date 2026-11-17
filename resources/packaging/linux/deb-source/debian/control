@@ -3,8 +3,8 @@ Section: net
 Priority: optional
 Maintainer: Giuliano Bellini <gyulyvgc99@gmail.com>
 Build-Depends: debhelper-compat (= 13),
- cargo-1.97 (>= 1.97.1),
- rustc-1.97 (>= 1.97.1),
+ cargo-1.98 (>= 1.98.1),
+ rustc-1.98 (>= 1.98.1),
  pkgconf,
  libpcap-dev,
  libasound2-dev,
