@@ -112,7 +112,7 @@ section = "Network"
 license-file = "resources/packaging/LICENSE"
 extended-description-file = "resources/packaging/linux/description.txt"
 maintainer-scripts = "resources/packaging/linux/scripts/"
-depends = "libasound2, libpcap0.8, libfontconfig1"
+depends = "libasound2, libpcap0.8, libfontconfig1, libxkbcommon-x11-0"
 assets = [
     ["target/release/sniffnet", "/usr/bin/", "755"],
     ["resources/packaging/linux/sniffnet.desktop", "/usr/share/applications/", "644"],
@@ -167,6 +167,7 @@ assets = [
 alsa-lib = "*"
 libpcap = "*"
 fontconfig = "*"
+libxkbcommon-x11 = "*"
 
 #───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
 

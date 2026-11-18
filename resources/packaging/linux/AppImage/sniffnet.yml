@@ -3,6 +3,7 @@ ingredients:
   dist: buster
   packages:
     - libpcap0.8
+    - libxkbcommon-x11-0
   sources:
     - deb https://archive.debian.org/debian buster main
   debs:

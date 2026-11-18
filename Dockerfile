@@ -21,6 +21,7 @@ RUN apt-get update && apt-get install -y \
     libpcap0.8 \
     libasound2 \
     libfontconfig1 \
+    libxkbcommon-x11-0 \
     && rm -rf /var/lib/apt/lists/*
 
 COPY --from=builder /usr/src/sniffnet/target/release/sniffnet /usr/local/bin/sniffnet
