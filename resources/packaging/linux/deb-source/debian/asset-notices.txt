@@ -1,11 +1,13 @@
 Sarasa Gothic font license
 Source: https://github.com/be5invis/Sarasa-Gothic/blob/master/LICENSE
-The bundled font metadata identifies Renzhi Li, The Inter Project Authors, Adobe Systems Incorporated, and Google Inc.
+Sinhala source: https://github.com/notofonts/sinhala/releases/tag/NotoSansSinhala-v3.000
+The bundled font metadata identifies Renzhi Li, The Inter Project Authors, Adobe Systems Incorporated, Google Inc., and The Noto Project Authors.
 
 Copyright (c) 2015-2025, Renzhi Li (aka. Belleve Invis, belleve@typeof.net).
 Portions Copyright (c) 2016 The Inter Project Authors.
 Portions Copyright (c) 2014-2021 Adobe Systems Incorporated (http://www.adobe.com/), with Reserved Font Name 'Source'.
 Portions Copyright (c) 2012 Google Inc.
+Sinhala portions Copyright 2022 The Noto Project Authors (https://github.com/notofonts/sinhala).
 
 This Font Software is licensed under the SIL Open Font License, Version 1.1.
 
