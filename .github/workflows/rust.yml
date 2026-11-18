@@ -60,6 +60,10 @@ jobs:
         if: matrix.os != 'windows' || github.event_name != 'pull_request'
         run: cargo build --locked --verbose
 
+      - name: Audit Linux runtime dependencies
+        if: matrix.os == 'ubuntu'
+        run: resources/packaging/linux/audit-runtime-dependencies.py --binary target/debug/sniffnet
+
       - name: clippy
         if: matrix.os != 'windows' || github.event_name != 'pull_request'
         run: cargo clippy --locked -- -D warnings

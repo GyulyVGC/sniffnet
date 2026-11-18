@@ -20,8 +20,16 @@ FROM debian:bookworm-slim
 RUN apt-get update && apt-get install -y \
     libpcap0.8 \
     libasound2 \
+    ca-certificates \
     libfontconfig1 \
+    libdbus-1-3 \
+    libxkbcommon0 \
     libxkbcommon-x11-0 \
+    libwayland-client0 \
+    libx11-6 \
+    libx11-xcb1 \
+    libxcursor1 \
+    libxi6 \
     && rm -rf /var/lib/apt/lists/*
 
 COPY --from=builder /usr/src/sniffnet/target/release/sniffnet /usr/local/bin/sniffnet

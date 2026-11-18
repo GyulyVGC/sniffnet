@@ -289,6 +289,81 @@ jobs:
           path: artifacts/
           if-no-files-found: error
 
+  linux-smoke:
+    name: Linux package smoke tests
+    runs-on: ubuntu-latest
+    needs: [deb, appimage, rpm]
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v7
+
+      - name: Install test dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y rpm weston xvfb
+
+      - name: Download Debian package
+        uses: actions/download-artifact@v8
+        with:
+          name: deb-amd64
+          path: artifacts/deb
+
+      - name: Download RPM package
+        uses: actions/download-artifact@v8
+        with:
+          name: rpm-x86_64
+          path: artifacts/rpm
+
+      - name: Download AppImage package
+        uses: actions/download-artifact@v8
+        with:
+          name: appimage-amd64
+          path: artifacts/appimage
+
+      - name: Audit package dependencies
+        shell: bash
+        run: |
+          mkdir deb-root
+          dpkg-deb --extract artifacts/deb/Sniffnet_LinuxDEB_amd64.deb deb-root
+          resources/packaging/linux/audit-runtime-dependencies.py \
+            --binary deb-root/usr/bin/sniffnet \
+            --deb artifacts/deb/Sniffnet_LinuxDEB_amd64.deb \
+            --rpm artifacts/rpm/Sniffnet_LinuxRPM_x86_64.rpm
+
+      - name: Audit bundled AppImage libraries
+        shell: bash
+        run: |
+          chmod +x artifacts/appimage/Sniffnet_LinuxAppImage_amd64.AppImage
+          mkdir appimage-contents
+          cd appimage-contents
+          ../artifacts/appimage/Sniffnet_LinuxAppImage_amd64.AppImage --appimage-extract >/dev/null
+          for library in \
+            libpcap.so.0.8 \
+            libdbus-1.so.3 \
+            libxkbcommon.so.0 \
+            libxkbcommon-x11.so.0 \
+            libXcursor.so.1 \
+            libXi.so.6
+          do
+            find squashfs-root -name "$library" -print -quit | grep -q . || {
+              echo "$library is not bundled in the AppImage" >&2
+              exit 1
+            }
+          done
+
+      - name: Build clean package test images
+        run: |
+          docker build -f resources/packaging/linux/smoke/Dockerfile.deb -t sniffnet-deb-smoke artifacts/deb
+          docker build -f resources/packaging/linux/smoke/Dockerfile.rpm -t sniffnet-rpm-smoke artifacts/rpm
+          docker build -f resources/packaging/linux/smoke/Dockerfile.appimage -t sniffnet-appimage-smoke artifacts/appimage
+
+      - name: Test packages on X11 and Wayland
+        run: |
+          resources/packaging/linux/smoke/run-smoke-tests.sh sniffnet-deb-smoke /usr/bin/sniffnet
+          resources/packaging/linux/smoke/run-smoke-tests.sh sniffnet-rpm-smoke /usr/bin/sniffnet
+          resources/packaging/linux/smoke/run-smoke-tests.sh sniffnet-appimage-smoke /opt/sniffnet.AppImage
+
   dmg:
     runs-on: macos-latest
     needs: build

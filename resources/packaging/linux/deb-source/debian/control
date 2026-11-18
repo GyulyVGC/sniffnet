@@ -20,9 +20,9 @@ Vcs-Browser: https://github.com/GyulyVGC/sniffnet/tree/main
 Package: sniffnet
 Architecture: amd64
 Depends: ${shlibs:Depends}, ${misc:Depends}, libcap2-bin, ca-certificates,
- libfontconfig1, libxkbcommon0, libxkbcommon-x11-0, libwayland-client0,
+ libfontconfig1, libdbus-1-3, libxkbcommon0, libxkbcommon-x11-0, libwayland-client0,
  libx11-6, libx11-xcb1,
- libxcursor1, libxi6, libxrandr2
+ libxcursor1, libxi6
 Recommends: xdg-desktop-portal, libvulkan1, libgl1, libegl1
 Description: comfortably monitor your network traffic
  Sniffnet provides a graphical overview of network traffic, including

@@ -1,0 +1,6 @@
+FROM ubuntu:24.04
+
+COPY Sniffnet_LinuxDEB_amd64.deb /tmp/sniffnet.deb
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends /tmp/sniffnet.deb \
+    && rm -rf /var/lib/apt/lists/* /tmp/sniffnet.deb

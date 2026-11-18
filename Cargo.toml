@@ -112,7 +112,7 @@ section = "Network"
 license-file = "resources/packaging/LICENSE"
 extended-description-file = "resources/packaging/linux/description.txt"
 maintainer-scripts = "resources/packaging/linux/scripts/"
-depends = "libasound2, libpcap0.8, libfontconfig1, libxkbcommon-x11-0"
+depends = "libasound2, libpcap0.8, libcap2-bin, ca-certificates, libfontconfig1, libdbus-1-3, libxkbcommon0, libxkbcommon-x11-0, libwayland-client0, libx11-6, libx11-xcb1, libxcursor1, libxi6"
 assets = [
     ["target/release/sniffnet", "/usr/bin/", "755"],
     ["resources/packaging/linux/sniffnet.desktop", "/usr/share/applications/", "644"],
@@ -166,8 +166,17 @@ assets = [
 [package.metadata.generate-rpm.requires]
 alsa-lib = "*"
 libpcap = "*"
+libcap = "*"
+ca-certificates = "*"
 fontconfig = "*"
+dbus-libs = "*"
+libxkbcommon = "*"
 libxkbcommon-x11 = "*"
+libwayland-client = "*"
+libX11 = "*"
+libX11-xcb = "*"
+libXcursor = "*"
+libXi = "*"
 
 #───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
 

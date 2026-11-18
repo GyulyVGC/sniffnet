@@ -1,0 +1,6 @@
+FROM fedora:latest
+
+COPY Sniffnet_LinuxRPM_x86_64.rpm /tmp/sniffnet.rpm
+RUN dnf install -y /tmp/sniffnet.rpm \
+    && dnf clean all \
+    && rm -f /tmp/sniffnet.rpm

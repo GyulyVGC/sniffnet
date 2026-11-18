@@ -1,0 +1,17 @@
+FROM ubuntu:22.04
+
+# pkg2appimage deliberately relies on the host for these base desktop libraries.
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends \
+        libasound2 \
+        libegl1 \
+        libfontconfig1 \
+        libwayland-client0 \
+        libx11-6 \
+        libx11-xcb1 \
+    && rm -rf /var/lib/apt/lists/*
+
+COPY Sniffnet_LinuxAppImage_amd64.AppImage /opt/sniffnet.AppImage
+RUN chmod +x /opt/sniffnet.AppImage
+
+ENV APPIMAGE_EXTRACT_AND_RUN=1
