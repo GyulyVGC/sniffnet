@@ -15,6 +15,7 @@ pub fn latency_translation(language: Language) -> &'static str {
         Language::VI => "Độ trễ",
         // Language::AR => "زمن الاستجابة",
         Language::ID => "Latensi",
+        Language::SI => "ගුප්තතාව",
         Language::PL => "Opóźnienie",
         Language::UZ => "Kechikish",
         _ => "Latency",
@@ -34,6 +35,7 @@ pub fn ipfix_exporter_translation(language: Language) -> &'static str {
         Language::VI => "Bộ xuất IPFIX",
         // Language::AR => "مُصدِّر IPFIX",
         Language::ID => "Pengekspor IPFIX",
+        Language::SI => "IPFIX නිර්යාතකය",
         Language::PL => "Eksporter IPFIX",
         Language::UZ => "IPFIX eksportyori",
         _ => "IPFIX exporter",
@@ -53,6 +55,7 @@ pub fn ipfix_collector_translation(language: Language) -> &'static str {
         Language::VI => "Bộ thu thập IPFIX",
         // Language::AR => "مُجمِّع IPFIX",
         Language::ID => "Pengumpul IPFIX",
+        Language::SI => "IPFIX සංග්‍රාහකය",
         Language::PL => "Kolektor IPFIX",
         Language::UZ => "IPFIX kollektori",
         _ => "IPFIX collector",
@@ -72,6 +75,7 @@ pub fn waiting_ipfix_connections_translation(language: Language) -> &'static str
         Language::VI => "Chưa ghi nhận lưu lượng nào. Hiện đang chờ các luồng IPFIX...",
         // Language::AR => "لم تُرصد أي حركة مرور بعد. في انتظار تدفقات IPFIX...",
         Language::ID => "Belum ada lalu lintas yang teramati. Menunggu aliran IPFIX...",
+        Language::SI => "තවමත් කිසිදු ගමනාගමනයක් නිරීක්‍ෂණය නොවිණි. IPFIX ප්‍රවාහ සඳහා රැඳෙමින්...",
         Language::PL => {
             "Nie zaobserwowano jeszcze żadnego ruchu. Oczekiwanie na przepływy IPFIX..."
         }
@@ -93,6 +97,7 @@ pub fn invalid_ipfix_received_translation(language: Language) -> &'static str {
         Language::VI => "Lưu lượng truy cập đến không thể giải mã dưới dạng IPFIX...",
         // Language::AR => "يتعذر فك ترميز حركة المرور الواردة بصيغة IPFIX...",
         Language::ID => "Lalu lintas masuk tidak dapat diuraikan sebagai IPFIX...",
+        Language::SI => "එන ගමනාගමනය IPFIX ලෙස විකේතනයට නොහැකිය...",
         Language::PL => "Nie można zdekodować ruchu przychodzącego jako IPFIX...",
         Language::UZ => "Kiruvchi trafikni IPFIX sifatida dekodlab bo'lmayapti...",
         _ => "Incoming traffic isn't decodable as IPFIX...",
@@ -122,6 +127,7 @@ pub fn make_sure_valid_ipfix_translation(language: Language) -> &'static str {
         }
         // Language::AR => "تأكد من أن المُصدِّر يرسل تدفقات IPFIX صالحة إلى هذا المُجمِّع.",
         Language::ID => "Pastikan pengekspor mengirim aliran IPFIX yang valid ke pengumpul ini.",
+        Language::SI => "නිර්යාතකය මෙම සංග්‍රාහකය වෙත වලංගු IPFIX ප්‍රවාහ යවන බවට වග බලා ගන්න.",
         Language::PL => {
             "Upewnij się, że eksporter wysyła do tego kolektora prawidłowe przepływy IPFIX."
         }
@@ -145,6 +151,7 @@ pub fn disable_update_checks_translation(language: Language) -> &'static str {
         Language::VI => "Ngừng kiểm tra bản cập nhật mới",
         // Language::AR => "تعطيل التحقق من وجود تحديثات",
         Language::ID => "Nonaktifkan pemeriksaan pembaruan",
+        Language::SI => "යාවත්කාල පරීක්‍ෂා අබල කරන්න",
         Language::PL => "Wyłącz sprawdzanie aktualizacji",
         Language::UZ => "Yangilanishlarni tekshirishni o'chirish",
         _ => "Disable update checks",
@@ -164,6 +171,7 @@ pub fn notify_on_updates_translation(language: Language) -> &'static str {
         Language::VI => "Thông báo khi có bản cập nhật mới",
         // Language::AR => "إشعاري عند توفر تحديثات",
         Language::ID => "Beri tahu saat pembaruan tersedia",
+        Language::SI => "යාවත්කාල තිබෙන විට දන්වන්න",
         Language::PL => "Powiadamiaj o dostępnych aktualizacjach",
         Language::UZ => "Yangilanish chiqqanda xabardor qilish",
         _ => "Notify when updates are available",
@@ -183,6 +191,7 @@ pub fn update_status_translation(language: Language) -> &'static str {
         Language::VI => "Cập nhật trạng thái",
         // Language::AR => "حالة التحديث",
         Language::ID => "Status pembaruan",
+        Language::SI => "යාවත්කාල තත්‍වය",
         Language::PL => "Stan aktualizacji",
         Language::UZ => "Yangilanish holati",
         _ => "Update status",
@@ -202,6 +211,7 @@ pub fn up_to_date_translation(language: Language) -> &'static str {
         Language::VI => "Bạn đang dùng phiên bản mới nhất!",
         // Language::AR => "أنت تستخدم أحدث إصدار!",
         Language::ID => "Anda sudah menggunakan versi terbaru!",
+        Language::SI => "ඔබ යාවත්කාලීනයි!",
         Language::PL => "Masz najnowszą wersję!",
         Language::UZ => "Dasturingiz so'nggi versiyada!",
         _ => "You are up to date!",
@@ -221,6 +231,7 @@ pub fn expanded_view_translation(language: Language) -> &'static str {
         Language::VI => "Chế độ xem mở rộng",
         // Language::AR => "العرض الموسع",
         Language::ID => "Tampilan diperluas",
+        Language::SI => "විහිදි දැක්ම",
         Language::PL => "Widok rozszerzony",
         Language::UZ => "Kengaytirilgan ko'rinish",
         _ => "Expanded view",
@@ -239,6 +250,7 @@ pub fn totals_translation(language: Language) -> &'static str {
         Language::VI => "Tổng cộng",
         // Language::AR => "الإجماليات",
         Language::ID => "Total",
+        Language::SI => "මුළු",
         Language::PL => "Łącznie",
         Language::UZ => "Jami",
         _ => "Totals",
@@ -258,6 +270,7 @@ pub fn current_rates_translation(language: Language) -> &'static str {
         Language::VI => "Mức phí hiện tại",
         // Language::AR => "معدلات النقل الحالية",
         Language::ID => "Laju saat ini",
+        Language::SI => "වත්මන් අනුපාත",
         Language::PL => "Bieżące prędkości",
         Language::UZ => "Joriy tezlik",
         _ => "Current rates",

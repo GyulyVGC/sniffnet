@@ -95,7 +95,7 @@ pub fn mmdb_files_translation(language: Language) -> &'static str {
         Language::NL => "Database bestanden",
         Language::EL => "Αρχεία βάσης δεδομένων",
         Language::HU => "Adatbázis fájlok",
-        Language::SI => "ඩේටාබේස් ගොනු",
+        Language::SI => "දත්තසමුදා ගොනු",
         // Language::AR => "ملفات قاعدة البيانات",
         _ => "Database files",
     }
@@ -130,7 +130,7 @@ pub fn params_not_editable_translation(language: Language) -> &'static str {
             "Οι ακόλουθες παράμετροι δεν μπορούν να τροποποιηθούν κατά τη διάρκεια της ανάλυσης"
         }
         Language::HU => "A következő paramétereken nem lehet elemzés közben változtatni",
-        Language::SI => "විශ්ලේෂණය අතරතුර පහත පරාමිතීන් වෙනස් කළ නොහැක",
+        Language::SI => "විශ්ලේෂණය අතරතුර පහත පරාමිති සංශෝධනයට නොහැකිය",
         // Language::AR => "لا يمكن تعديل المعلمات التالية أثناء التحليل",
         _ => "The following parameters can't be modified during the analysis",
     }
@@ -193,7 +193,7 @@ pub fn copy_translation(language: Language) -> &'static str {
         Language::NL => "Kopiëren",
         Language::EL => "Αντιγραφή",
         Language::HU => "Másolás",
-        Language::SI => "කොපි කරන්න",
+        Language::SI => "පිටපතක්",
         // Language::AR => "نسخ",
         _ => "Copy",
     }
@@ -224,7 +224,7 @@ pub fn port_translation(language: Language) -> &'static str {
         Language::UK => "Порт",
         Language::NL => "Poort",
         Language::EL => "Θύρα",
-        Language::SI => "පෝට්",
+        Language::SI => "තොට",
         // Language::AR => "المنفذ",
         _ => "Port",
     }
@@ -390,7 +390,7 @@ pub fn unsupported_link_type_translation(language: Language) -> &'static str {
         Language::HU => {
             "Az ezzel az adapterrel asszociált link típust még nem támogatja a Sniffnet..."
         }
-        Language::SI => "මෙම ඇඩැප්ටරයට සම්බන්ධ සබැඳි වර්ගයට දැනට Sniffnet සහාය නොමැත...",
+        Language::SI => "මෙම අනුහුරුව ආශ්‍රිත සබැඳි වර්ගයට ස්නිෆ්නෙට් තවමත් සහාය නොදක්වයි...",
         // Language::AR => "نوع الرابط المرتبط بهذا المحوّل غير مدعوم من Sniffnet بعد...",
         _ => "The link type associated with this adapter is not supported by Sniffnet yet...",
     }
@@ -549,7 +549,7 @@ pub fn export_capture_translation(language: Language) -> &'static str {
         Language::NL => "Exporteer capture bestand",
         Language::EL => "Εξαγωγή αρχείου καταγραφής",
         Language::HU => "Gyűjtött forgalom exportálása fájlba",
-        Language::SI => "කැප්චර් (Capture) ගොනුව අපනයනය කරන්න",
+        Language::SI => "ග්‍රහණ ගොනුව නිර්යාත කරන්න",
         // Language::AR => "تصدير ملف الالتقاط",
         _ => "Export capture file",
     }
@@ -647,7 +647,7 @@ pub fn file_name_translation(language: Language) -> &'static str {
         Language::NL => "Bestandsnaam",
         Language::EL => "Όνομα αρχείου",
         Language::HU => "Fájlnév",
-        Language::SI => "ගොනු නාමය",
+        Language::SI => "ගොනුවේ නම",
         // Language::AR => "اسم الملف",
         _ => "File name",
     }
@@ -679,7 +679,7 @@ pub fn thumbnail_mode_translation(language: Language) -> &'static str {
         Language::NL => "Miniatuur modus",
         Language::EL => "Λειτουργία μικρογραφιών",
         Language::HU => "Miniatűr nézet",
-        Language::SI => "කුඩා රූප මාදිලිය",
+        Language::SI => "සිඟිති රූප ප්‍රකාරය",
         // Language::AR => "الوضع المصغّر",
         _ => "Thumbnail mode",
     }
