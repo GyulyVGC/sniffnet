@@ -12,6 +12,21 @@
         <key>CFBundlePackageType</key><string>APPL</string>
         <key>CFBundleShortVersionString</key><string>0.0.0</string>
         <key>CFBundleVersion</key><string>fffffff</string>
+        <key>CFBundleDocumentTypes</key>
+        <array>
+            <dict>
+                <key>CFBundleTypeExtensions</key>
+                <array>
+                    <string>pcap</string>
+                    <string>pcapng</string>
+                    <string>cap</string>
+                    <string>dmp</string>
+                </array>
+                <key>CFBundleTypeIconFile</key><string>sniffnet.icns</string>
+                <key>CFBundleTypeName</key><string>Packet capture</string>
+                <key>CFBundleTypeRole</key><string>Viewer</string>
+            </dict>
+        </array>
         <key>CSResourcesFileMapped</key><true/>
         <key>LSApplicationCategoryType</key><string>public.app-category.utilities</string>
         <key>LSRequiresCarbon</key><true/>
