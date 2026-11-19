@@ -1173,6 +1173,16 @@
       "contributions": [
         "financial"
       ]
+    },
+    {
+      "login": "dinithija",
+      "name": "දිනිති ජයවර්ධන          Dinithi Jayawardhana",
+      "avatar_url": "https://avatars.githubusercontent.com/u/80757159?v=4",
+      "profile": "https://github.com/dinithija",
+      "contributions": [
+        "translation",
+        "bug"
+      ]
     }
   ],
   "contributorsPerLine": 7,
