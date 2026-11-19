@@ -1,5 +1,17 @@
-sniffnet (1.5.1-1~resolute1) resolute; urgency=medium
+sniffnet (1.6.0-1~resolute3) resolute; urgency=medium
 
-  * Initial source package with vendored Rust dependencies.
+  * Skip the network-dependent update check during package tests.
 
- -- Giuliano Bellini <gyulyvgc99@gmail.com>  Mon, 14 Sep 2026 12:00:00 +0200
+ -- Giuliano Bellini <gyulyvgc99@gmail.com>  Mon, 16 Nov 2026 23:36:35 +0100
+
+sniffnet (1.6.0-1~resolute2) resolute; urgency=medium
+
+  * Build the PPA package with Rust 1.98.1.
+
+ -- Giuliano Bellini <gyulyvgc99@gmail.com>  Mon, 16 Nov 2026 16:52:29 +0100
+
+sniffnet (1.6.0-1~resolute1) resolute; urgency=medium
+
+  * New upstream release 1.6.0.
+
+ -- Giuliano Bellini <gyulyvgc99@gmail.com>  Mon, 16 Nov 2026 12:00:00 +0200
