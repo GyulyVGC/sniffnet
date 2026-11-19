@@ -2,6 +2,11 @@
 
 All Sniffnet releases with the relative changes are documented in this file.
 
+## [UNRELEASED]
+- Updated some of the existing translations to v1.6:
+  - Sinhala ([#1362](https://github.com/GyulyVGC/sniffnet/pull/1362))
+- Fix broken Sinhala text rendering (fixes [#1363](https://github.com/GyulyVGC/sniffnet/issues/1363))
+
 ## [1.6.0] - 2026-11-16
 - IPFIX collector capabilities: receive and analyze network traffic from remote devices ([#1270](https://github.com/GyulyVGC/sniffnet/pull/1270) — fixes [#303](https://github.com/GyulyVGC/sniffnet/issues/303))
 - Show current data rates ([#1324](https://github.com/GyulyVGC/sniffnet/pull/1324) — fixes [#1077](https://github.com/GyulyVGC/sniffnet/issues/1077), [#1135](https://github.com/GyulyVGC/sniffnet/issues/1135))

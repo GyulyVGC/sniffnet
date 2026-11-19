@@ -152,6 +152,7 @@ impl Language {
                 | Language::ID
                 | Language::UZ
                 | Language::PL
+                | Language::SI
         )
     }
 }
