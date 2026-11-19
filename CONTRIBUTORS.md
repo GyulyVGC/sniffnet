@@ -169,6 +169,7 @@ A big shout-out to all the contributors of Sniffnet ([emoji key](https://allcont
     </tr>
     <tr>
       <td align="center" valign="top" width="14.28%"><a href="http://www.backbox.org"><img src="https://avatars.githubusercontent.com/u/2687905?v=4&size=100" width="100px" height="100px" alt="ZEROF"/><br /><sub><b>ZEROF</b></sub></a><br /><a href="#financial-ZEROF" title="Financial">💵</a></td>
+      <td align="center" valign="top" width="14.28%"><a href="https://github.com/dinithija"><img src="https://avatars.githubusercontent.com/u/80757159?v=4&size=100" width="100px" height="100px" alt="දිනිති ජයවර්ධන          Dinithi Jayawardhana"/><br /><sub><b>දිනිති ජයවර්ධන          Dinithi Jayawardhana</b></sub></a><br /><a href="#translation-dinithija" title="Translation">🌍</a> <a href="https://github.com/GyulyVGC/sniffnet/issues?q=author%3Adinithija" title="Bug reports">🐛</a></td>
       <td align="center" valign="top" width="14.28%"><a href="https://github.com/cxw620"><img src="https://avatars.githubusercontent.com/u/70561268?v=4&size=100" width="100px" height="100px" alt="陈寒彤"/><br /><sub><b>陈寒彤</b></sub></a><br /><a href="#translation-cxw620" title="Translation">🌍</a></td>
     </tr>
   </tbody>
