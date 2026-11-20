@@ -110,7 +110,15 @@ fn parse_set(input: &[u8]) -> IResult<&[u8], Set<'_>> {
 
     let set = match set_id {
         SET_ID_TEMPLATE => {
-            let (_, templates) = many0(parse_template_record).parse(body)?;
+            let mut templates = Vec::new();
+            let mut remaining = body;
+            // A UDP template definition needs a 4-byte header and at least one
+            // 4-byte field specifier. A shorter tail can be set padding.
+            while remaining.len() >= 8 {
+                let (next, template) = parse_template_record(remaining)?;
+                templates.push(template);
+                remaining = next;
+            }
             Set::Template(templates)
         }
         id if id >= MIN_DATA_SET_ID => Set::Data {
@@ -732,6 +740,18 @@ mod tests {
                 }],
             }])
         );
+
+        // Even nonzero bytes can be legal padding below the minimum record size.
+        for padding in 0..8 {
+            let mut padded = body.clone();
+            padded.extend_from_slice(&[0xff; 7][..padding]);
+            assert_eq!(parse_set(&set(SET_ID_TEMPLATE, &padded)).unwrap().1, parsed);
+        }
+
+        // A second record declares two fields but carries just one.
+        let mut incomplete = body;
+        incomplete.extend_from_slice(&[1, 1, 0, 2, 0, 8, 0, 4]);
+        assert!(parse_message(&datagram(&[set(SET_ID_TEMPLATE, &incomplete)])).is_err());
 
         // a data set keeps its payload for the caller to decode against a template
         let bytes = set(MIN_DATA_SET_ID, &[0xDE, 0xAD]);
