@@ -151,7 +151,7 @@ fn process_datagram(
     for set in &message.sets {
         if let Set::Template(records) = set {
             for record in records {
-                // UDP collectors must ignore template withdrawals (RFC 7011 §8.4).
+                // UDP collectors must ignore template withdrawals (RFC 7011 8.4)
                 if record.fields.is_empty() {
                     continue;
                 }
@@ -368,7 +368,8 @@ mod tests {
 
     fn set(set_id: u16, body: &[u8]) -> Vec<u8> {
         let mut out = set_id.to_be_bytes().to_vec();
-        out.extend_from_slice(&u16::try_from(body.len() + 4).unwrap().to_be_bytes());
+        let length = u16::try_from(body.len() + usize::from(wire::SET_HEADER_LEN)).unwrap();
+        out.extend_from_slice(&length.to_be_bytes());
         out.extend_from_slice(body);
         out
     }
@@ -832,14 +833,20 @@ mod tests {
         let definition = datagram(&[template_set(256, &TOTALS_FIELDS)]);
         let withdrawal = template_set(256, &[]);
         let other_definition = template_set(257, &TOTALS_FIELDS);
-        let mixed = set(
+        let header_len = usize::from(wire::SET_HEADER_LEN);
+        let mixed = datagram(&[set(
             wire::SET_ID_TEMPLATE,
-            &[&withdrawal[4..], &other_definition[4..]].concat(),
-        );
-        let data = datagram(&[set(256, &totals_record(1500, 10))]);
+            &[&withdrawal[header_len..], &other_definition[header_len..]].concat(),
+        )]);
         let withdraw_all = template_set(wire::SET_ID_TEMPLATE, &[]);
-        for template_set in [withdrawal, withdraw_all, mixed] {
-            let (info, _, succeeded) = run_all(&[&definition, &datagram(&[template_set]), &data]);
+        for (message, data_id) in [
+            (&datagram(&[withdrawal]), 256),
+            (&datagram(&[withdraw_all]), 256),
+            (&mixed, 256),
+            (&mixed, 257),
+        ] {
+            let data = datagram(&[set(data_id, &totals_record(1500, 10))]);
+            let (info, _, succeeded) = run_all(&[&definition, message, &data]);
             assert!(succeeded);
             assert_eq!(info.map[&totals_key()].packets, 10);
         }

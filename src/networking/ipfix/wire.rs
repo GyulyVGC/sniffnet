@@ -27,9 +27,10 @@ pub(super) const VARIABLE_LENGTH: u16 = 0xFFFF;
 pub(super) const REVERSE_PEN: u32 = 29305;
 /// The minimum set id for a data set
 const MIN_DATA_SET_ID: u16 = 256;
-
+/// IPFIX header length in bytes
 const MESSAGE_HEADER_LEN: u16 = 16;
-const SET_HEADER_LEN: u16 = 4;
+/// Length of a set header in bytes
+pub(super) const SET_HEADER_LEN: u16 = 4;
 
 /// IPFIX complete message
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -584,14 +585,14 @@ mod tests {
 
     /// Wrap `body` in a set header carrying `set_id`
     fn set(set_id: u16, body: &[u8]) -> Vec<u8> {
-        let length = u16::try_from(body.len() + 4).unwrap();
+        let length = u16::try_from(body.len() + usize::from(SET_HEADER_LEN)).unwrap();
         [&set_id.to_be_bytes()[..], &length.to_be_bytes(), body].concat()
     }
 
     /// Wrap `sets` in an IPFIX message header (export time, sequence and odid all zero)
     fn datagram(sets: &[Vec<u8>]) -> Vec<u8> {
         let body = sets.concat();
-        let length = u16::try_from(body.len() + 16).unwrap();
+        let length = u16::try_from(body.len() + usize::from(MESSAGE_HEADER_LEN)).unwrap();
         [
             &IPFIX_VERSION.to_be_bytes()[..],
             &length.to_be_bytes(),
@@ -777,7 +778,7 @@ mod tests {
         }
 
         for length in 0..SET_HEADER_LEN {
-            let mut bytes = set(SET_ID_TEMPLATE, &[]);
+            let mut bytes = set(MIN_DATA_SET_ID, &[]);
             bytes[2..4].copy_from_slice(&length.to_be_bytes());
             assert!(parse_set(&bytes).is_err());
         }
