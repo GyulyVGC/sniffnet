@@ -30,6 +30,7 @@ pub fn reserved_address_translation(language: Language, info: &str) -> String {
         Language::RU => format!("Зарезервированный адрес ({info})"),
         // Language::AR => format!("عنوان محجوز ({info})"),
         Language::PL => format!("Adres zarezerwowany ({info})"),
+        Language::KO => format!("예약된 주소 ({info})"),
         _ => format!("Reserved address ({info})"),
     }
 }
@@ -119,6 +120,7 @@ pub fn capture_file_translation(language: Language) -> &'static str {
         Language::RU => "Файл захвата",
         // Language::AR => "ملف الالتقاط",
         Language::PL => "Plik przechwytywania",
+        Language::KO => "캡처 파일",
         _ => "Capture file",
     }
 }
@@ -150,6 +152,7 @@ pub fn select_file_translation(language: Language) -> &'static str {
         Language::RU => "Выбрать файл",
         // Language::AR => "اختيار ملف",
         Language::PL => "Wybierz plik",
+        Language::KO => "파일 선택",
         _ => "Select file",
     }
 }
@@ -159,6 +162,10 @@ pub fn reading_from_pcap_translation(language: Language) -> &'static str {
         Language::EN => {
             "Reading packets from file...\n\n\
                                  Are you sure the file you selected isn't empty?"
+        }
+        Language::KO => {
+            "파일에서 패킷을 읽는 중...\n\n\
+                                 선택한 파일이 비어 있지 않은지 확인하셨나요?"
         }
         Language::CS => {
             "Čtení paketů ze souuboru...\n\n\
@@ -290,6 +297,7 @@ pub fn data_exceeded_translation(language: Language) -> &'static str {
         Language::RU => "Превышен лимит данных",
         // Language::AR => "تم تجاوز حد البيانات",
         Language::PL => "Przekroczono próg danych",
+        Language::KO => "데이터 임계값 초과",
         _ => "Data threshold exceeded",
     }
 }
@@ -321,6 +329,7 @@ pub fn bits_exceeded_translation(language: Language) -> &'static str {
         Language::RU => "Превышен лимит битов",
         // Language::AR => "تم تجاوز حد البتات",
         Language::PL => "Przekroczono próg bitów",
+        Language::KO => "비트 임계값 초과",
         _ => "Bits threshold exceeded",
     }
 }
@@ -351,6 +360,7 @@ pub fn bits_translation(language: Language) -> &'static str {
         Language::RU => "Биты",
         // Language::AR => "بتات",
         Language::PL => "Bity",
+        Language::KO => "비트",
         _ => "Bits",
     }
 }
@@ -378,6 +388,7 @@ pub fn pause_translation(language: Language) -> &'static str {
         Language::SI => "විරාමය",
         // Language::AR => "إيقاف مؤقت",
         Language::PL => "Wstrzymaj",
+        Language::KO => "일시정지",
         _ => "Pause",
     }
 }
@@ -410,6 +421,7 @@ pub fn resume_translation(language: Language) -> &'static str {
         Language::RU => "Продолжить",
         // Language::AR => "استئناف",
         Language::PL => "Wznów",
+        Language::KO => "재개",
         _ => "Resume",
     }
 }
