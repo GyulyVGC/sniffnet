@@ -12,7 +12,7 @@ use crate::utils::types::timestamp::Timestamp;
 use nom::IResult;
 use nom::Parser;
 use nom::bytes::complete::take;
-use nom::combinator::verify;
+use nom::combinator::{all_consuming, verify};
 use nom::multi::many0;
 use nom::number::complete::{be_u8, be_u16, be_u32};
 use std::net::{IpAddr, Ipv4Addr, Ipv6Addr};
@@ -27,6 +27,9 @@ pub(super) const VARIABLE_LENGTH: u16 = 0xFFFF;
 pub(super) const REVERSE_PEN: u32 = 29305;
 /// The minimum set id for a data set
 const MIN_DATA_SET_ID: u16 = 256;
+
+const MESSAGE_HEADER_LEN: u16 = 16;
+const SET_HEADER_LEN: u16 = 4;
 
 /// IPFIX complete message
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -72,16 +75,16 @@ pub(super) struct FieldSpec {
 pub(super) fn parse_message(input: &[u8]) -> IResult<&[u8], IpfixMessage<'_>> {
     let (input, header) = parse_message_header(input)?;
     // header.length includes the 16-byte header already parsed
-    let payload_len = header.length.saturating_sub(16);
+    let payload_len = header.length - MESSAGE_HEADER_LEN;
     let (rest, payload) = take(payload_len)(input)?;
-    let (_, sets) = many0(parse_set).parse(payload)?;
+    let (_, sets) = all_consuming(many0(parse_set)).parse(payload)?;
     Ok((rest, IpfixMessage { header, sets }))
 }
 
 /// Parse an IPFIX message header (16 bytes)
 fn parse_message_header(input: &[u8]) -> IResult<&[u8], MessageHeader> {
     let (input, version) = verify(be_u16, |v: &u16| *v == IPFIX_VERSION).parse(input)?;
-    let (input, length) = be_u16(input)?;
+    let (input, length) = verify(be_u16, |len| *len >= MESSAGE_HEADER_LEN).parse(input)?;
     let (input, export_time) = be_u32(input)?;
     let (input, sequence_number) = be_u32(input)?;
     let (input, observation_domain_id) = be_u32(input)?;
@@ -100,9 +103,9 @@ fn parse_message_header(input: &[u8]) -> IResult<&[u8], MessageHeader> {
 /// Parse a single IPFIX set
 fn parse_set(input: &[u8]) -> IResult<&[u8], Set<'_>> {
     let (input, set_id) = be_u16(input)?;
-    let (input, set_length) = be_u16(input)?;
+    let (input, set_length) = verify(be_u16, |len| *len >= SET_HEADER_LEN).parse(input)?;
     // set_length includes the 4-byte set header already parsed
-    let body_len = set_length.saturating_sub(4);
+    let body_len = set_length - SET_HEADER_LEN;
     let (rest, body) = take(body_len)(input)?;
 
     let set = match set_id {
@@ -637,6 +640,12 @@ mod tests {
         assert_eq!(hdr.sequence_number, 0x0102_0304);
         assert_eq!(hdr.observation_domain_id, 7);
 
+        for length in 0..MESSAGE_HEADER_LEN {
+            let mut bytes = valid.clone();
+            bytes[2..4].copy_from_slice(&length.to_be_bytes());
+            assert!(parse_message(&bytes).is_err());
+        }
+
         // a NetFlow v9 header is rejected
         assert!(parse_message_header(&header(9)).is_err());
         // so is a header cut short
@@ -743,10 +752,11 @@ mod tests {
             assert!(rest.is_empty(), "set id {set_id} left its body unconsumed");
         }
 
-        // a set claiming less than its own 4-byte header doesn't underflow
-        let (rest, parsed) = parse_set(&[0x00, 0x02, 0x00, 0x00, 0xAA]).unwrap();
-        assert_eq!(parsed, Set::Template(vec![]));
-        assert_eq!(rest, &[0xAA][..]);
+        for length in 0..SET_HEADER_LEN {
+            let mut bytes = set(SET_ID_TEMPLATE, &[]);
+            bytes[2..4].copy_from_slice(&length.to_be_bytes());
+            assert!(parse_set(&bytes).is_err());
+        }
     }
 
     #[test]

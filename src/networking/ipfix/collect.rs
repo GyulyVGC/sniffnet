@@ -824,6 +824,20 @@ mod tests {
     }
 
     #[test]
+    fn test_malformed_set_discards_entire_message() {
+        let mut incomplete_set = set(256, &[0]);
+        incomplete_set.pop();
+        let (_, _, succeeded) = run_all(&[&datagram(&[incomplete_set.clone()])]);
+        assert!(!succeeded);
+
+        let rejected = datagram(&[template_set(256, &TOTALS_FIELDS), incomplete_set]);
+        let later_data = datagram(&[set(256, &totals_record(1500, 10))]);
+        let (info, _, succeeded) = run_all(&[&rejected, &later_data]);
+        assert!(!succeeded);
+        assert!(info.map.is_empty());
+    }
+
+    #[test]
     fn test_process_datagram_skips_unusable_sets() {
         // data referencing a template that hasn't arrived is skipped silently
         let bytes = datagram(&[set(256, &[0xAA; 58])]);
