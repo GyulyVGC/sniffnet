@@ -151,6 +151,10 @@ fn process_datagram(
     for set in &message.sets {
         if let Set::Template(records) = set {
             for record in records {
+                // UDP collectors must ignore template withdrawals (RFC 7011 8.4)
+                if record.fields.is_empty() {
+                    continue;
+                }
                 // fields without bytes carry nothing but would be visited for every record:
                 // without them each field takes at least one byte of the datagram
                 let fields: Vec<_> = record
@@ -364,7 +368,8 @@ mod tests {
 
     fn set(set_id: u16, body: &[u8]) -> Vec<u8> {
         let mut out = set_id.to_be_bytes().to_vec();
-        out.extend_from_slice(&u16::try_from(body.len() + 4).unwrap().to_be_bytes());
+        let length = u16::try_from(body.len() + usize::from(wire::SET_HEADER_LEN)).unwrap();
+        out.extend_from_slice(&length.to_be_bytes());
         out.extend_from_slice(body);
         out
     }
@@ -819,6 +824,44 @@ mod tests {
 
         // an empty datagram
         let (info, _, succeeded) = run_all(&[&[]]);
+        assert!(!succeeded);
+        assert!(info.map.is_empty());
+    }
+
+    #[test]
+    fn test_udp_withdrawal_preserves_template() {
+        let definition = datagram(&[template_set(256, &TOTALS_FIELDS)]);
+        let withdrawal = template_set(256, &[]);
+        let other_definition = template_set(257, &TOTALS_FIELDS);
+        let header_len = usize::from(wire::SET_HEADER_LEN);
+        let mixed = datagram(&[set(
+            wire::SET_ID_TEMPLATE,
+            &[&withdrawal[header_len..], &other_definition[header_len..]].concat(),
+        )]);
+        let withdraw_all = template_set(wire::SET_ID_TEMPLATE, &[]);
+        for (message, data_id) in [
+            (&datagram(&[withdrawal]), 256),
+            (&datagram(&[withdraw_all]), 256),
+            (&mixed, 256),
+            (&mixed, 257),
+        ] {
+            let data = datagram(&[set(data_id, &totals_record(1500, 10))]);
+            let (info, _, succeeded) = run_all(&[&definition, message, &data]);
+            assert!(succeeded);
+            assert_eq!(info.map[&totals_key()].packets, 10);
+        }
+    }
+
+    #[test]
+    fn test_malformed_set_discards_entire_message() {
+        let mut incomplete_set = set(256, &[0]);
+        incomplete_set.pop();
+        let (_, _, succeeded) = run_all(&[&datagram(&[incomplete_set.clone()])]);
+        assert!(!succeeded);
+
+        let rejected = datagram(&[template_set(256, &TOTALS_FIELDS), incomplete_set]);
+        let later_data = datagram(&[set(256, &totals_record(1500, 10))]);
+        let (info, _, succeeded) = run_all(&[&rejected, &later_data]);
         assert!(!succeeded);
         assert!(info.map.is_empty());
     }

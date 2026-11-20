@@ -12,7 +12,7 @@ use crate::utils::types::timestamp::Timestamp;
 use nom::IResult;
 use nom::Parser;
 use nom::bytes::complete::take;
-use nom::combinator::verify;
+use nom::combinator::{all_consuming, verify};
 use nom::multi::many0;
 use nom::number::complete::{be_u8, be_u16, be_u32};
 use std::net::{IpAddr, Ipv4Addr, Ipv6Addr};
@@ -27,6 +27,10 @@ pub(super) const VARIABLE_LENGTH: u16 = 0xFFFF;
 pub(super) const REVERSE_PEN: u32 = 29305;
 /// The minimum set id for a data set
 const MIN_DATA_SET_ID: u16 = 256;
+/// IPFIX header length in bytes
+const MESSAGE_HEADER_LEN: u16 = 16;
+/// Length of a set header in bytes
+pub(super) const SET_HEADER_LEN: u16 = 4;
 
 /// IPFIX complete message
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -72,16 +76,16 @@ pub(super) struct FieldSpec {
 pub(super) fn parse_message(input: &[u8]) -> IResult<&[u8], IpfixMessage<'_>> {
     let (input, header) = parse_message_header(input)?;
     // header.length includes the 16-byte header already parsed
-    let payload_len = header.length.saturating_sub(16);
+    let payload_len = header.length - MESSAGE_HEADER_LEN;
     let (rest, payload) = take(payload_len)(input)?;
-    let (_, sets) = many0(parse_set).parse(payload)?;
+    let (_, sets) = all_consuming(many0(parse_set)).parse(payload)?;
     Ok((rest, IpfixMessage { header, sets }))
 }
 
 /// Parse an IPFIX message header (16 bytes)
 fn parse_message_header(input: &[u8]) -> IResult<&[u8], MessageHeader> {
     let (input, version) = verify(be_u16, |v: &u16| *v == IPFIX_VERSION).parse(input)?;
-    let (input, length) = be_u16(input)?;
+    let (input, length) = verify(be_u16, |len| *len >= MESSAGE_HEADER_LEN).parse(input)?;
     let (input, export_time) = be_u32(input)?;
     let (input, sequence_number) = be_u32(input)?;
     let (input, observation_domain_id) = be_u32(input)?;
@@ -100,14 +104,22 @@ fn parse_message_header(input: &[u8]) -> IResult<&[u8], MessageHeader> {
 /// Parse a single IPFIX set
 fn parse_set(input: &[u8]) -> IResult<&[u8], Set<'_>> {
     let (input, set_id) = be_u16(input)?;
-    let (input, set_length) = be_u16(input)?;
+    let (input, set_length) = verify(be_u16, |len| *len >= SET_HEADER_LEN).parse(input)?;
     // set_length includes the 4-byte set header already parsed
-    let body_len = set_length.saturating_sub(4);
+    let body_len = set_length - SET_HEADER_LEN;
     let (rest, body) = take(body_len)(input)?;
 
     let set = match set_id {
         SET_ID_TEMPLATE => {
-            let (_, templates) = many0(parse_template_record).parse(body)?;
+            let (mut remaining, first) = parse_template_record(body)?;
+            let mut templates = vec![first];
+            // A UDP template definition needs a 4-byte header and at least one
+            // 4-byte field specifier. A shorter tail can be set padding.
+            while remaining.len() >= 8 {
+                let (next, template) = parse_template_record(remaining)?;
+                templates.push(template);
+                remaining = next;
+            }
             Set::Template(templates)
         }
         id if id >= MIN_DATA_SET_ID => Set::Data {
@@ -122,8 +134,11 @@ fn parse_set(input: &[u8]) -> IResult<&[u8], Set<'_>> {
 
 /// Parse a single template record from a template set
 fn parse_template_record(input: &[u8]) -> IResult<&[u8], TemplateRecord> {
-    let (input, template_id) = be_u16(input)?;
-    let (input, field_count) = be_u16(input)?;
+    // ID 2 with zero fields withdraws all ordinary templates.
+    let (input, (template_id, field_count)) = verify((be_u16, be_u16), |&(id, count)| {
+        id >= MIN_DATA_SET_ID || (id == SET_ID_TEMPLATE && count == 0)
+    })
+    .parse(input)?;
     let mut remaining = input;
     let mut fields = Vec::with_capacity(field_count as usize);
     for _ in 0..field_count {
@@ -570,14 +585,14 @@ mod tests {
 
     /// Wrap `body` in a set header carrying `set_id`
     fn set(set_id: u16, body: &[u8]) -> Vec<u8> {
-        let length = u16::try_from(body.len() + 4).unwrap();
+        let length = u16::try_from(body.len() + usize::from(SET_HEADER_LEN)).unwrap();
         [&set_id.to_be_bytes()[..], &length.to_be_bytes(), body].concat()
     }
 
     /// Wrap `sets` in an IPFIX message header (export time, sequence and odid all zero)
     fn datagram(sets: &[Vec<u8>]) -> Vec<u8> {
         let body = sets.concat();
-        let length = u16::try_from(body.len() + 16).unwrap();
+        let length = u16::try_from(body.len() + usize::from(MESSAGE_HEADER_LEN)).unwrap();
         [
             &IPFIX_VERSION.to_be_bytes()[..],
             &length.to_be_bytes(),
@@ -636,6 +651,12 @@ mod tests {
         assert_eq!(hdr.export_time, 0xDEAD_BEEF);
         assert_eq!(hdr.sequence_number, 0x0102_0304);
         assert_eq!(hdr.observation_domain_id, 7);
+
+        for length in 0..MESSAGE_HEADER_LEN {
+            let mut bytes = valid.clone();
+            bytes[2..4].copy_from_slice(&length.to_be_bytes());
+            assert!(parse_message(&bytes).is_err());
+        }
 
         // a NetFlow v9 header is rejected
         assert!(parse_message_header(&header(9)).is_err());
@@ -724,6 +745,19 @@ mod tests {
             }])
         );
 
+        // Padding must follow a record. Collectors also tolerate nonzero padding.
+        for padding in 0..8 {
+            assert!(parse_set(&set(SET_ID_TEMPLATE, &[0; 7][..padding])).is_err());
+            let mut padded = body.clone();
+            padded.extend_from_slice(&[0xff; 7][..padding]);
+            assert_eq!(parse_set(&set(SET_ID_TEMPLATE, &padded)).unwrap().1, parsed);
+        }
+
+        // A second record declares two fields but carries just one.
+        let mut incomplete = body;
+        incomplete.extend_from_slice(&[1, 1, 0, 2, 0, 8, 0, 4]);
+        assert!(parse_message(&datagram(&[set(SET_ID_TEMPLATE, &incomplete)])).is_err());
+
         // a data set keeps its payload for the caller to decode against a template
         let bytes = set(MIN_DATA_SET_ID, &[0xDE, 0xAD]);
         let (_, parsed) = parse_set(&bytes).unwrap();
@@ -743,10 +777,11 @@ mod tests {
             assert!(rest.is_empty(), "set id {set_id} left its body unconsumed");
         }
 
-        // a set claiming less than its own 4-byte header doesn't underflow
-        let (rest, parsed) = parse_set(&[0x00, 0x02, 0x00, 0x00, 0xAA]).unwrap();
-        assert_eq!(parsed, Set::Template(vec![]));
-        assert_eq!(rest, &[0xAA][..]);
+        for length in 0..SET_HEADER_LEN {
+            let mut bytes = set(MIN_DATA_SET_ID, &[]);
+            bytes[2..4].copy_from_slice(&length.to_be_bytes());
+            assert!(parse_set(&bytes).is_err());
+        }
     }
 
     #[test]
