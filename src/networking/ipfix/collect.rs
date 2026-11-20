@@ -151,6 +151,10 @@ fn process_datagram(
     for set in &message.sets {
         if let Set::Template(records) = set {
             for record in records {
+                // UDP collectors must ignore template withdrawals (RFC 7011 §8.4).
+                if record.fields.is_empty() {
+                    continue;
+                }
                 // fields without bytes carry nothing but would be visited for every record:
                 // without them each field takes at least one byte of the datagram
                 let fields: Vec<_> = record
@@ -821,6 +825,16 @@ mod tests {
         let (info, _, succeeded) = run_all(&[&[]]);
         assert!(!succeeded);
         assert!(info.map.is_empty());
+    }
+
+    #[test]
+    fn test_udp_withdrawal_preserves_template() {
+        let definition = datagram(&[template_set(256, &TOTALS_FIELDS)]);
+        let withdrawal = datagram(&[template_set(256, &[])]);
+        let data = datagram(&[set(256, &totals_record(1500, 10))]);
+        let (info, _, succeeded) = run_all(&[&definition, &withdrawal, &data]);
+        assert!(succeeded);
+        assert_eq!(info.map[&totals_key()].packets, 10);
     }
 
     #[test]
