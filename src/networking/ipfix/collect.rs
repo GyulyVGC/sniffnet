@@ -830,11 +830,19 @@ mod tests {
     #[test]
     fn test_udp_withdrawal_preserves_template() {
         let definition = datagram(&[template_set(256, &TOTALS_FIELDS)]);
-        let withdrawal = datagram(&[template_set(256, &[])]);
+        let withdrawal = template_set(256, &[]);
+        let other_definition = template_set(257, &TOTALS_FIELDS);
+        let mixed = set(
+            wire::SET_ID_TEMPLATE,
+            &[&withdrawal[4..], &other_definition[4..]].concat(),
+        );
         let data = datagram(&[set(256, &totals_record(1500, 10))]);
-        let (info, _, succeeded) = run_all(&[&definition, &withdrawal, &data]);
-        assert!(succeeded);
-        assert_eq!(info.map[&totals_key()].packets, 10);
+        let withdraw_all = template_set(wire::SET_ID_TEMPLATE, &[]);
+        for template_set in [withdrawal, withdraw_all, mixed] {
+            let (info, _, succeeded) = run_all(&[&definition, &datagram(&[template_set]), &data]);
+            assert!(succeeded);
+            assert_eq!(info.map[&totals_key()].packets, 10);
+        }
     }
 
     #[test]
