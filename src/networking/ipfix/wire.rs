@@ -110,8 +110,8 @@ fn parse_set(input: &[u8]) -> IResult<&[u8], Set<'_>> {
 
     let set = match set_id {
         SET_ID_TEMPLATE => {
-            let mut templates = Vec::new();
-            let mut remaining = body;
+            let (mut remaining, first) = parse_template_record(body)?;
+            let mut templates = vec![first];
             // A UDP template definition needs a 4-byte header and at least one
             // 4-byte field specifier. A shorter tail can be set padding.
             while remaining.len() >= 8 {
@@ -133,8 +133,11 @@ fn parse_set(input: &[u8]) -> IResult<&[u8], Set<'_>> {
 
 /// Parse a single template record from a template set
 fn parse_template_record(input: &[u8]) -> IResult<&[u8], TemplateRecord> {
-    let (input, template_id) = be_u16(input)?;
-    let (input, field_count) = be_u16(input)?;
+    // ID 2 with zero fields withdraws all ordinary templates.
+    let (input, (template_id, field_count)) = verify((be_u16, be_u16), |&(id, count)| {
+        id >= MIN_DATA_SET_ID || (id == SET_ID_TEMPLATE && count == 0)
+    })
+    .parse(input)?;
     let mut remaining = input;
     let mut fields = Vec::with_capacity(field_count as usize);
     for _ in 0..field_count {
@@ -741,8 +744,9 @@ mod tests {
             }])
         );
 
-        // Even nonzero bytes can be legal padding below the minimum record size.
+        // Padding must follow a record. Collectors also tolerate nonzero padding.
         for padding in 0..8 {
+            assert!(parse_set(&set(SET_ID_TEMPLATE, &[0; 7][..padding])).is_err());
             let mut padded = body.clone();
             padded.extend_from_slice(&[0xff; 7][..padding]);
             assert_eq!(parse_set(&set(SET_ID_TEMPLATE, &padded)).unwrap().1, parsed);
