@@ -18,6 +18,7 @@ pub fn latency_translation(language: Language) -> &'static str {
         Language::SI => "ගුප්තතාව",
         Language::PL => "Opóźnienie",
         Language::UZ => "Kechikish",
+        Language::KO => "지연 시간",
         _ => "Latency",
     }
 }
@@ -38,6 +39,7 @@ pub fn ipfix_exporter_translation(language: Language) -> &'static str {
         Language::SI => "IPFIX නිර්යාතකය",
         Language::PL => "Eksporter IPFIX",
         Language::UZ => "IPFIX eksportyori",
+        Language::KO => "IPFIX 익스포터",
         _ => "IPFIX exporter",
     }
 }
@@ -58,6 +60,7 @@ pub fn ipfix_collector_translation(language: Language) -> &'static str {
         Language::SI => "IPFIX සංග්‍රාහකය",
         Language::PL => "Kolektor IPFIX",
         Language::UZ => "IPFIX kollektori",
+        Language::KO => "IPFIX 컬렉터",
         _ => "IPFIX collector",
     }
 }
@@ -80,6 +83,7 @@ pub fn waiting_ipfix_connections_translation(language: Language) -> &'static str
             "Nie zaobserwowano jeszcze żadnego ruchu. Oczekiwanie na przepływy IPFIX..."
         }
         Language::UZ => "Hozircha trafik kuzatilmadi. IPFIX oqimlari kutilmoqda...",
+        Language::KO => "아직 관측된 트래픽이 없습니다. IPFIX 플로우를 기다리는 중...",
         _ => "No traffic has been observed yet. Waiting for IPFIX flows...",
     }
 }
@@ -100,6 +104,7 @@ pub fn invalid_ipfix_received_translation(language: Language) -> &'static str {
         Language::SI => "එන ගමනාගමනය IPFIX ලෙස විකේතනයට නොහැකිය...",
         Language::PL => "Nie można zdekodować ruchu przychodzącego jako IPFIX...",
         Language::UZ => "Kiruvchi trafikni IPFIX sifatida dekodlab bo'lmayapti...",
+        Language::KO => "수신 트래픽을 IPFIX로 디코딩할 수 없습니다...",
         _ => "Incoming traffic isn't decodable as IPFIX...",
     }
 }
@@ -134,6 +139,7 @@ pub fn make_sure_valid_ipfix_translation(language: Language) -> &'static str {
         Language::UZ => {
             "Eksportyor ushbu kollektorga to'g'ri IPFIX oqimlarini yuborayotganiga ishonch hosil qiling."
         }
+        Language::KO => "익스포터가 이 컬렉터로 유효한 IPFIX 플로우를 보내는지 확인하세요.",
         _ => "Make sure the exporter is sending valid IPFIX flows to this collector.",
     }
 }
@@ -154,6 +160,7 @@ pub fn disable_update_checks_translation(language: Language) -> &'static str {
         Language::SI => "යාවත්කාල පරීක්‍ෂා අබල කරන්න",
         Language::PL => "Wyłącz sprawdzanie aktualizacji",
         Language::UZ => "Yangilanishlarni tekshirishni o'chirish",
+        Language::KO => "업데이트 확인 비활성화",
         _ => "Disable update checks",
     }
 }
@@ -174,6 +181,7 @@ pub fn notify_on_updates_translation(language: Language) -> &'static str {
         Language::SI => "යාවත්කාල තිබෙන විට දන්වන්න",
         Language::PL => "Powiadamiaj o dostępnych aktualizacjach",
         Language::UZ => "Yangilanish chiqqanda xabardor qilish",
+        Language::KO => "업데이트가 있을 때 알림",
         _ => "Notify when updates are available",
     }
 }
@@ -194,6 +202,7 @@ pub fn update_status_translation(language: Language) -> &'static str {
         Language::SI => "යාවත්කාල තත්‍වය",
         Language::PL => "Stan aktualizacji",
         Language::UZ => "Yangilanish holati",
+        Language::KO => "업데이트 상태",
         _ => "Update status",
     }
 }
@@ -214,6 +223,7 @@ pub fn up_to_date_translation(language: Language) -> &'static str {
         Language::SI => "ඔබ යාවත්කාලීනයි!",
         Language::PL => "Masz najnowszą wersję!",
         Language::UZ => "Dasturingiz so'nggi versiyada!",
+        Language::KO => "최신 버전입니다!",
         _ => "You are up to date!",
     }
 }
@@ -234,6 +244,7 @@ pub fn expanded_view_translation(language: Language) -> &'static str {
         Language::SI => "විහිදි දැක්ම",
         Language::PL => "Widok rozszerzony",
         Language::UZ => "Kengaytirilgan ko'rinish",
+        Language::KO => "확장 보기",
         _ => "Expanded view",
     }
 }
@@ -253,6 +264,7 @@ pub fn totals_translation(language: Language) -> &'static str {
         Language::SI => "මුළු",
         Language::PL => "Łącznie",
         Language::UZ => "Jami",
+        Language::KO => "총계",
         _ => "Totals",
     }
 }
@@ -273,6 +285,7 @@ pub fn current_rates_translation(language: Language) -> &'static str {
         Language::SI => "වත්මන් අනුපාත",
         Language::PL => "Bieżące prędkości",
         Language::UZ => "Joriy tezlik",
+        Language::KO => "현재 속도",
         _ => "Current rates",
     }
 }

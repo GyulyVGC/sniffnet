@@ -28,6 +28,7 @@ pub fn filter_traffic_translation(language: Language) -> String {
         // Language::AR => "تصفية حركة المرور",
         Language::PL => "Filtruj ruch",
         Language::UZ => "Trafikni filtrlash",
+        Language::KO => "트래픽 필터링",
         _ => "Filter traffic",
     }
     .to_string()
@@ -60,6 +61,7 @@ pub fn traffic_source_translation(language: Language) -> &'static str {
         // Language::AR => "مصدر حركة المرور",
         Language::PL => "Źródło ruchu",
         Language::UZ => "Trafik manbai",
+        Language::KO => "트래픽 출처",
         _ => "Traffic source",
     }
 }
@@ -89,6 +91,7 @@ pub fn remote_notifications_translation(language: Language) -> &'static str {
         // Language::AR => "الإشعارات عن بُعد",
         Language::PL => "Powiadomienia zdalne",
         Language::UZ => "Masofaviy bildirishnomalar",
+        Language::KO => "원격 알림",
         _ => "Remote notifications",
     }
 }
@@ -118,6 +121,7 @@ pub fn ip_blacklist_translation(language: Language) -> &'static str {
         // Language::AR => "قائمة عناوين IP المحظورة",
         Language::PL => "Czarna lista IP",
         Language::UZ => "IP qora ro'yxati",
+        Language::KO => "IP 차단 목록",
         _ => "IP blacklist",
     }
 }
@@ -147,6 +151,7 @@ pub fn blacklisted_transmitted_translation(language: Language) -> &'static str {
         // Language::AR => "تم تبادل بيانات جديدة من عنوان IP محظور",
         Language::PL => "Nowe dane wymienione z adresem IP z czarnej listy",
         Language::UZ => "Qora ro'yxatdagi IP manzil bilan yangi ma'lumot almashindi",
+        Language::KO => "차단 목록의 IP와 새 데이터 교환",
         _ => "New data exchanged from a blacklisted IP",
     }
 }
@@ -176,6 +181,7 @@ pub fn only_show_blacklisted_translation(language: Language) -> &'static str {
         // Language::AR => "عرض عناوين IP المحظورة فقط",
         Language::PL => "Pokaż tylko adresy z czarnej listy",
         Language::UZ => "Faqat qora ro'yxatdagilarni ko'rsatish",
+        Language::KO => "차단 목록만 표시",
         _ => "Only show blacklisted",
     }
 }
@@ -202,6 +208,7 @@ pub fn program_translation(language: Language) -> &'static str {
         // Language::AR => "البرنامج",
         Language::PL => "Program",
         Language::UZ => "Dastur",
+        Language::KO => "프로그램",
         _ => "Program",
     }
 }
@@ -231,6 +238,7 @@ pub fn no_favorites_saved_translation(language: Language) -> &'static str {
         // Language::AR => "لم تُحفظ أي عناصر في المفضلة بعد",
         Language::PL => "Nie zapisano jeszcze żadnych ulubionych",
         Language::UZ => "Hozircha sevimlilar saqlanmagan",
+        Language::KO => "아직 저장된 즐겨찾기가 없습니다",
         _ => "No favorites saved yet",
     }
 }
