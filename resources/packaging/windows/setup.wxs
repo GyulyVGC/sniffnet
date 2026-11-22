@@ -63,6 +63,51 @@
                             System="yes"
                         />
                     </Component>
+                    <Component Id="PcapFileAssociation" Guid="A7E4F263-CC9A-4968-840B-2555F3861153">
+                        <RegistryValue
+                            Root="HKCR"
+                            Key=".pcap"
+                            Value="Sniffnet.PcapFile"
+                            Type="string"
+                            KeyPath="yes"
+                        />
+                        <RegistryValue
+                            Root="HKCR"
+                            Key=".pcapng"
+                            Value="Sniffnet.PcapFile"
+                            Type="string"
+                        />
+                        <RegistryValue
+                            Root="HKCR"
+                            Key=".cap"
+                            Value="Sniffnet.PcapFile"
+                            Type="string"
+                        />
+                        <RegistryValue
+                            Root="HKCR"
+                            Key=".dmp"
+                            Value="Sniffnet.PcapFile"
+                            Type="string"
+                        />
+                        <RegistryValue
+                            Root="HKCR"
+                            Key="Sniffnet.PcapFile"
+                            Value="Packet capture"
+                            Type="string"
+                        />
+                        <RegistryValue
+                            Root="HKCR"
+                            Key="Sniffnet.PcapFile\DefaultIcon"
+                            Value="[#exe0],0"
+                            Type="string"
+                        />
+                        <RegistryValue
+                            Root="HKCR"
+                            Key="Sniffnet.PcapFile\shell\open\command"
+                            Value="&quot;[#exe0]&quot; &quot;%1&quot;"
+                            Type="string"
+                        />
+                    </Component>
                 </Directory>
             </Directory>
 
@@ -123,6 +168,7 @@
         >
             <ComponentRef Id="License"/>
             <ComponentRef Id="binary0"/>
+            <ComponentRef Id="PcapFileAssociation"/>
 
             <Feature
                 Id="Environment"
