@@ -1183,6 +1183,15 @@
         "translation",
         "bug"
       ]
+    },
+    {
+      "login": "LWatch12",
+      "name": "LWatch12",
+      "avatar_url": "https://avatars.githubusercontent.com/u/252517774?v=4",
+      "profile": "https://github.com/LWatch12",
+      "contributions": [
+        "translation"
+      ]
     }
   ],
   "contributorsPerLine": 7,
