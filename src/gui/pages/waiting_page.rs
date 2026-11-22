@@ -60,12 +60,17 @@ pub fn waiting_page(sniffer: &Sniffer) -> Option<Container<'_, Message, StyleTyp
                 make_sure_valid_ipfix_translation(language)
             ),
         )
+    } else if matches!(cs, CaptureSource::Stdin(None)) {
+        (
+            Icon::get_hourglass(dots.len()).size(60),
+            waiting_translation(language).to_string(),
+        )
     } else if !link_type.is_some_and(LinkType::is_supported) {
         (
             Icon::Forbidden.to_text().size(60),
             unsupported_link_type_translation(language).to_string(),
         )
-    } else if matches!(cs, CaptureSource::File(_)) {
+    } else if matches!(cs, CaptureSource::File(_) | CaptureSource::Stdin(_)) {
         (
             Icon::File.to_text().size(60),
             reading_from_pcap_translation(language).to_string(),

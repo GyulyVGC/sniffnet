@@ -86,7 +86,7 @@ impl TrafficChart {
     }
 
     pub fn update_charts_data(&mut self, info_traffic_msg: &InfoTraffic, no_more_packets: bool) {
-        self.no_more_packets = no_more_packets;
+        self.no_more_packets = no_more_packets && !self.is_live_capture;
 
         if self.ticks == 0 {
             self.first_packet_timestamp = info_traffic_msg.last_packet_timestamp;

@@ -17,6 +17,9 @@ pub(crate) struct Args {
     /// Start sniffing packets from the supplied network adapter
     #[arg(short, long, value_name = "NAME", default_missing_value = CONF.device.device_name.as_str(), num_args = 0..=1)]
     adapter: Option<String>,
+    /// Read a live pcap stream from standard input
+    #[arg(long, conflicts_with = "adapter")]
+    stdin: bool,
     /// Print the path to the configuration file
     #[arg(short, long, exclusive = true)]
     config_path: bool,
@@ -81,7 +84,8 @@ impl Args {
     }
 
     pub fn get_boot_task_chain(&self) -> Task<Message> {
-        let mut boot_task_chain = window::latest().map(Message::StartApp);
+        let stdin = self.stdin;
+        let mut boot_task_chain = window::latest().map(move |id| Message::StartApp(id, stdin));
         if let Some(adapter) = self.adapter.clone() {
             boot_task_chain = boot_task_chain
                 .chain(Task::done(Message::SetCaptureSource(
@@ -116,6 +120,21 @@ mod tests {
     use crate::notifications::types::notifications::Notifications;
     use crate::report::types::sort_type::SortType;
     use crate::{Language, Sniffer, StyleType};
+
+    #[test]
+    #[serial]
+    fn stdin_is_an_explicit_alternative_to_adapter() {
+        use super::Args;
+        use clap::{Parser, error::ErrorKind};
+
+        assert!(Args::try_parse_from(["sniffnet", "--stdin"]).unwrap().stdin);
+        assert!(!Args::try_parse_from(["sniffnet"]).unwrap().stdin);
+        let err = Args::try_parse_from(["sniffnet", "--stdin", "--adapter", "eth0"]).unwrap_err();
+        assert_eq!(err.kind(), ErrorKind::ArgumentConflict);
+
+        // Parsing the adapter default loads the test configuration.
+        Sniffer::new(Conf::default());
+    }
 
     #[test]
     #[serial]

@@ -19,6 +19,8 @@ pub enum CaptureContext {
     Live(Live),
     LiveWithSavefile(LiveWithSavefile),
     Offline(Offline),
+    /// Open stdin on the capture thread because its header may arrive later.
+    PendingStdin,
     Ipfix(UdpSocket),
     Error(String),
 }
@@ -33,20 +35,17 @@ pub enum CaptureError {
 
 impl CaptureContext {
     pub fn new(source: &CaptureSource, pcap_out_path: Option<&String>, filters: &Filters) -> Self {
-        let mut cap_type = match source {
-            CaptureSource::Device(device) => {
-                match CaptureType::from_device(device, pcap_out_path) {
-                    Ok(c) => c,
-                    Err(e) => return Self::Error(e),
-                }
-            }
-            CaptureSource::File(file) => match CaptureType::from_file(file) {
-                Ok(c) => c,
-                Err(e) => return Self::Error(e),
-            },
+        let cap_type = match source {
+            CaptureSource::Device(device) => CaptureType::from_device(device, pcap_out_path),
+            CaptureSource::File(file) => CaptureType::from_file(&file.path),
+            CaptureSource::Stdin(_) => CaptureType::from_file("-"),
             CaptureSource::Ipfix(ipfix) => {
                 return Self::new_ipfix(&ipfix.socket).unwrap_or_else(Self::Error);
             }
+        };
+        let mut cap_type = match cap_type {
+            Ok(cap) => cap,
+            Err(error) => return Self::Error(error),
         };
 
         // only apply BPF filter if it is active, and return an error if it fails to apply
@@ -101,7 +100,7 @@ impl CaptureContext {
                 (Some(CaptureType::Live(onws.live.cap)), Some(onws.savefile))
             }
             Self::Offline(off) => (Some(CaptureType::Offline(off.cap)), None),
-            Self::Ipfix(_) | Self::Error(_) => (None, None),
+            Self::PendingStdin | Self::Ipfix(_) | Self::Error(_) => (None, None),
         }
     }
 
@@ -110,7 +109,7 @@ impl CaptureContext {
             Self::Live(on) => Some(LinkType::from_pcap(on.cap.get_datalink())),
             Self::LiveWithSavefile(onws) => Some(LinkType::from_pcap(onws.live.cap.get_datalink())),
             Self::Offline(off) => Some(LinkType::from_pcap(off.cap.get_datalink())),
-            Self::Ipfix(_) | Self::Error(_) => None,
+            Self::PendingStdin | Self::Ipfix(_) | Self::Error(_) => None,
         }
     }
 
@@ -193,9 +192,9 @@ impl CaptureType {
         Ok(Self::Live(cap))
     }
 
-    fn from_file(file: &MyPcapImport) -> Result<Self, String> {
+    fn from_file(path: &str) -> Result<Self, String> {
         Ok(Self::Offline(
-            Capture::from_file(&file.path).map_err(|e| e.to_string())?,
+            Capture::from_file(path).map_err(|e| e.to_string())?,
         ))
     }
 
@@ -227,6 +226,7 @@ impl CaptureType {
 pub enum CaptureSource {
     Device(MyDevice),
     File(MyPcapImport),
+    Stdin(Option<LinkType>),
     Ipfix(MyIpfixCollector),
 }
 
@@ -251,7 +251,7 @@ impl CaptureSource {
     pub fn title(&self, language: Language) -> &str {
         match self {
             Self::Device(_) => network_adapter_translation(language),
-            Self::File(_) => capture_file_translation(language),
+            Self::File(_) | Self::Stdin(_) => capture_file_translation(language),
             Self::Ipfix(_) => ipfix_collector_translation(language),
         }
     }
@@ -261,14 +261,14 @@ impl CaptureSource {
     pub fn get_ipfix_unspecified_bound_addresses(&self) -> &[Address] {
         match self {
             Self::Ipfix(collector) => &collector.unspecified_bound_addresses,
-            Self::Device(_) | Self::File(_) => &[],
+            Self::Device(_) | Self::File(_) | Self::Stdin(_) => &[],
         }
     }
 
     pub fn get_addresses(&self) -> &[Address] {
         match self {
             Self::Device(device) => device.get_addresses(),
-            Self::File(_) | Self::Ipfix(_) => &[],
+            Self::File(_) | Self::Stdin(_) | Self::Ipfix(_) => &[],
         }
     }
 
@@ -290,13 +290,14 @@ impl CaptureSource {
                 my_device.set_addresses(addresses);
             }
             Self::Ipfix(collector) => collector.set_unspecified_bound_addresses(),
-            Self::File(_) => {}
+            Self::File(_) | Self::Stdin(_) => {}
         }
     }
 
     pub fn get_link_type(&self) -> Option<LinkType> {
         match self {
             Self::Device(device) => device.get_link_type(),
+            Self::Stdin(link_type) => *link_type,
             Self::File(file) => file.link_type,
             Self::Ipfix(_) => None,
         }
@@ -305,6 +306,7 @@ impl CaptureSource {
     pub fn set_link_type(&mut self, link_type: Option<LinkType>) {
         match self {
             Self::Device(device) => device.set_link_type(link_type),
+            Self::Stdin(current) => *current = link_type,
             Self::File(file) => file.link_type = link_type,
             Self::Ipfix(_) => {}
         }
@@ -313,6 +315,7 @@ impl CaptureSource {
     pub fn get_name(&self) -> String {
         match self {
             Self::Device(device) => device.get_name().clone(),
+            Self::Stdin(_) => "stdin".to_owned(),
             Self::File(file) => file.path.clone(),
             Self::Ipfix(collector) => collector.socket.display_name(),
         }
@@ -322,20 +325,20 @@ impl CaptureSource {
     pub fn get_desc(&self) -> Option<String> {
         match self {
             Self::Device(device) => device.get_desc().cloned(),
-            Self::File(_) | Self::Ipfix(_) => None,
+            Self::File(_) | Self::Stdin(_) | Self::Ipfix(_) => None,
         }
     }
 
     pub fn supports_link_type(&self) -> bool {
         match self {
-            Self::Device(_) | Self::File(_) => true,
+            Self::Device(_) | Self::File(_) | Self::Stdin(_) => true,
             Self::Ipfix(_) => false,
         }
     }
 
     pub fn supports_filters(&self) -> bool {
         match self {
-            Self::Device(_) | Self::File(_) => true,
+            Self::Device(_) | Self::File(_) | Self::Stdin(_) => true,
             Self::Ipfix(_) => false,
         }
     }
@@ -343,20 +346,20 @@ impl CaptureSource {
     pub fn supports_export_pcap(&self) -> bool {
         match self {
             Self::Device(_) => true,
-            Self::Ipfix(_) | Self::File(_) => false,
+            Self::Ipfix(_) | Self::File(_) | Self::Stdin(_) => false,
         }
     }
 
     pub fn supports_latency(&self) -> bool {
         match self {
             Self::Device(_) => true,
-            Self::Ipfix(_) | Self::File(_) => false,
+            Self::Ipfix(_) | Self::File(_) | Self::Stdin(_) => false,
         }
     }
 
     pub fn supports_live_chart(&self) -> bool {
         match self {
-            Self::Device(_) | Self::Ipfix(_) => true,
+            Self::Device(_) | Self::Ipfix(_) | Self::Stdin(_) => true,
             Self::File(_) => false,
         }
     }
@@ -364,20 +367,20 @@ impl CaptureSource {
     pub fn supports_exporters(&self) -> bool {
         match self {
             Self::Ipfix(_) => true,
-            Self::Device(_) | Self::File(_) => false,
+            Self::Device(_) | Self::File(_) | Self::Stdin(_) => false,
         }
     }
 
     pub fn supports_programs(&self) -> bool {
         match self {
             Self::Device(_) => true,
-            Self::File(_) | Self::Ipfix(_) => false,
+            Self::File(_) | Self::Stdin(_) | Self::Ipfix(_) => false,
         }
     }
 
     pub fn supports_notification_sound(&self) -> bool {
         match self {
-            Self::Device(_) | Self::Ipfix(_) => true,
+            Self::Device(_) | Self::Ipfix(_) | Self::Stdin(_) => true,
             Self::File(_) => false,
         }
     }

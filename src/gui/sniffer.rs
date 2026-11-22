@@ -297,7 +297,7 @@ impl Sniffer {
     pub fn update(&mut self, message: Message) -> Task<Message> {
         self.dots_pulse.1 = (self.dots_pulse.1 + 1) % 3;
         match message {
-            Message::StartApp(id) => return self.start_app(id),
+            Message::StartApp(id, stdin) => return self.start_app(id, stdin),
             Message::TickRun(cap_id, msg, host_msgs, no_more_packets) => {
                 self.tick_run(cap_id, msg, host_msgs, no_more_packets);
             }
@@ -309,6 +309,14 @@ impl Sniffer {
             Message::UpdateDataRates(per_second) => self.update_data_rates(per_second),
             Message::ReportSortSelection(sort) => self.report_sort_selection(sort),
             Message::OpenWebPage(web_page) => Self::open_web_page(&web_page),
+            Message::StdinOpened(id, result) => {
+                if id == self.current_capture_rx.0 {
+                    match result {
+                        Ok(link_type) => self.capture_source.set_link_type(Some(link_type)),
+                        Err(error) => self.capture_error = Some(CaptureError::Fatal(error)),
+                    }
+                }
+            }
             Message::Start => return self.start(),
             Message::Reset => return self.reset(),
             Message::Style(style) => self.style(style),
@@ -510,13 +518,18 @@ impl Sniffer {
         self.conf.settings.scale_factor
     }
 
-    fn start_app(&mut self, id: Option<Id>) -> Task<Message> {
+    fn start_app(&mut self, id: Option<Id>, stdin: bool) -> Task<Message> {
         self.id = id;
-        let previews_task = self.start_traffic_previews();
+        let capture_task = if stdin {
+            self.capture_source = CaptureSource::Stdin(None);
+            self.start()
+        } else {
+            self.start_traffic_previews()
+        };
         Task::batch([
             Sniffer::register_sigint_handler(),
             self.check_newer_release(),
-            previews_task,
+            capture_task,
             self.load_ip_blacklist(self.conf.settings.ip_blacklist.clone()),
         ])
     }
@@ -1105,13 +1118,15 @@ impl Sniffer {
                 .for_each(|(_, chart)| *chart = PreviewChart::new(self.conf.settings.style));
 
             if matches!(&self.capture_source, CaptureSource::Device(_)) {
-                let current_device_name = &self.capture_source.get_name();
-                self.device_selection(current_device_name);
+                self.device_selection(&self.capture_source.get_name());
             }
             self.conf.export_pcap.sanitize_file_name();
             let pcap_path = self.conf.export_pcap.full_path();
-            let capture_context =
-                CaptureContext::new(&self.capture_source, pcap_path.as_ref(), &self.conf.filters);
+            let capture_context = if matches!(self.capture_source, CaptureSource::Stdin(_)) {
+                CaptureContext::PendingStdin
+            } else {
+                CaptureContext::new(&self.capture_source, pcap_path.as_ref(), &self.conf.filters)
+            };
             self.capture_error = capture_context
                 .error()
                 .map(|e| CaptureError::Fatal(e.to_string()));
@@ -1183,6 +1198,9 @@ impl Sniffer {
                     BackendTrafficMessage::TickRun(cap_id, msg, host_msg, no_more_packets) => {
                         Message::TickRun(cap_id, msg, host_msg, no_more_packets)
                     }
+                    BackendTrafficMessage::StdinOpened(id, result) => {
+                        Message::StdinOpened(id, result)
+                    }
                     BackendTrafficMessage::PendingHosts(cap_id, host_msg) => {
                         Message::PendingHosts(cap_id, host_msg)
                     }
@@ -1225,6 +1243,9 @@ impl Sniffer {
         self.frozen = false;
         self.freeze_tx = None;
         self.program_lookup = None;
+        if matches!(self.capture_source, CaptureSource::Stdin(_)) {
+            self.capture_source = CaptureSource::from_conf(&self.conf);
+        }
         // reset IPFIX collector's socket to match configuration
         // (particularly relevant for port = 0 that was rewritten with the actual UDP bind)
         if matches!(self.capture_source, CaptureSource::Ipfix(_))
@@ -1572,7 +1593,8 @@ impl Sniffer {
     pub fn is_capture_source_consistent(&self) -> bool {
         matches!(
             (self.conf.capture_source_picklist, &self.capture_source),
-            (CaptureSourcePicklist::Device, CaptureSource::Device(_))
+            (_, CaptureSource::Stdin(_))
+                | (CaptureSourcePicklist::Device, CaptureSource::Device(_))
                 | (CaptureSourcePicklist::File, CaptureSource::File(_))
                 | (CaptureSourcePicklist::Ipfix, CaptureSource::Ipfix(_))
         )

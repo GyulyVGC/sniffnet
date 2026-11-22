@@ -36,6 +36,21 @@ pub fn parse_packets(
 ) {
     let (mut freeze_rx, mut freeze_rx_2) = freeze_rxs;
 
+    let capture_context = if matches!(capture_context, CaptureContext::PendingStdin) {
+        let opened = CaptureContext::new(&cs, None, &filters);
+        let result = opened
+            .link_type()
+            .ok_or_else(|| opened.error().unwrap_or_default().to_owned());
+        if tx
+            .send_blocking(BackendTrafficMessage::StdinOpened(cap_id, result))
+            .is_err()
+        {
+            return;
+        }
+        opened
+    } else {
+        capture_context
+    };
     let Some(link_type) = capture_context.link_type() else {
         return;
     };
@@ -77,7 +92,7 @@ pub fn parse_packets(
             return;
         }
 
-        if matches!(cs, CaptureSource::Device(_))
+        if cs.supports_live_chart()
             && maybe_send_tick(
                 cap_id,
                 &mut info_traffic_msg,
