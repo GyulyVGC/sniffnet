@@ -1,4 +1,4 @@
-#![allow(clippy::match_same_arms)]
+#![allow(clippy::match_same_arms, clippy::match_wildcard_for_single_variants)]
 
 use crate::translations::types::language::Language;
 
@@ -157,6 +157,7 @@ pub fn select_file_translation(language: Language) -> &'static str {
     }
 }
 
+#[allow(clippy::too_many_lines)]
 pub fn reading_from_pcap_translation(language: Language) -> &'static str {
     match language {
         Language::EN => {

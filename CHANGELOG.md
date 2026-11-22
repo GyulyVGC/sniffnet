@@ -6,6 +6,7 @@ All Sniffnet releases with the relative changes are documented in this file.
 - Improve RFC 7011 compliance for IPFIX message validation and template handling ([#1374](https://github.com/GyulyVGC/sniffnet/pull/1374) — fixes [#1373](https://github.com/GyulyVGC/sniffnet/issues/1373))
 - Updated some of the existing translations to v1.6:
   - Sinhala ([#1362](https://github.com/GyulyVGC/sniffnet/pull/1362))
+  - Korean ([#1375](https://github.com/GyulyVGC/sniffnet/pull/1375))
 - Fix broken Sinhala text rendering (fixes [#1363](https://github.com/GyulyVGC/sniffnet/issues/1363))
 
 ## [1.6.0] - 2026-11-16
