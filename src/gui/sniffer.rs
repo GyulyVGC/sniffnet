@@ -1217,6 +1217,9 @@ impl Sniffer {
     }
 
     fn reset(&mut self) -> Task<Message> {
+        if matches!(self.capture_source, CaptureSource::Stdin(_)) {
+            return self.quit();
+        }
         // close capture channel to kill previous captures
         if let Some(rx) = &self.current_capture_rx.1 {
             rx.close();
@@ -1243,9 +1246,6 @@ impl Sniffer {
         self.frozen = false;
         self.freeze_tx = None;
         self.program_lookup = None;
-        if matches!(self.capture_source, CaptureSource::Stdin(_)) {
-            self.capture_source = CaptureSource::from_conf(&self.conf);
-        }
         // reset IPFIX collector's socket to match configuration
         // (particularly relevant for port = 0 that was rewritten with the actual UDP bind)
         if matches!(self.capture_source, CaptureSource::Ipfix(_))
@@ -1652,6 +1652,33 @@ mod tests {
     use crate::notifications::types::sound::Sound;
     use crate::report::types::sort_type::SortType;
     use crate::{ByteMultiple, Language, RunningPage, Sniffer, StyleType};
+
+    #[test]
+    #[parallel]
+    fn stdin_results_stay_open_until_stop_is_confirmed() {
+        use crate::networking::types::capture_context::CaptureSource;
+        use crate::networking::types::info_traffic::InfoTraffic;
+
+        let mut sniffer = Sniffer::new(Conf::default());
+        sniffer.welcome = None;
+        sniffer.capture_source = CaptureSource::Stdin(None);
+        sniffer.running_page = Some(RunningPage::Overview);
+        let mut interval = InfoTraffic::default();
+        interval.tot_data_info = DataInfo::new_for_tests(1, 0, 64, 0);
+        sniffer.update(Message::TickRun(
+            sniffer.current_capture_rx.0,
+            interval,
+            vec![],
+            true,
+        ));
+        assert!(sniffer.welcome.is_none());
+        assert_eq!(sniffer.running_page, Some(RunningPage::Overview));
+
+        sniffer.update(Message::ResetButtonPressed);
+        assert_eq!(sniffer.modal, Some(MyModal::Reset));
+        sniffer.update(Message::ReturnKeyPressed);
+        assert!(matches!(sniffer.welcome, Some((false, _))));
+    }
 
     #[test]
     #[parallel]
