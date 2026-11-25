@@ -76,7 +76,7 @@ pub fn main() -> iced::Result {
     let position = Position::Specific(conf.window.position());
 
     application(
-        move || (Sniffer::new(conf.clone()), args.get_boot_task_chain()),
+        move || args.boot(conf.clone()),
         Sniffer::update,
         Sniffer::view,
     )

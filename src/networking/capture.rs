@@ -236,5 +236,6 @@ pub enum BackendTrafficMessage {
     TickRun(usize, InfoTraffic, Vec<HostMessage>, bool),
     PendingHosts(usize, Vec<HostMessage>),
     OfflineGap(usize, u32),
+    StdinOpened(usize, Result<sniffnet_packet_parser::LinkType, String>),
     IpfixUndecodable(usize),
 }

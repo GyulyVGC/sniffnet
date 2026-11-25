@@ -11,6 +11,13 @@ Sniffnet provides a graphical overview of network traffic, including bandwidth u
 .BR \-a ", " \-\-adapter " [NAME]"
 Start capturing packets from the supplied network adapter. If NAME is omitted, use the configured adapter.
 .TP
+.BR \-s ", " \-\-stdin
+Read a PCAP stream from standard input. This option is mutually exclusive with
+.BR \-\-adapter .
+.TP
+.BR \-f ", " \-\-filter " EXPRESSION"
+Set the BPF capture filter. Quote expressions containing spaces. The filter is saved with the other settings on exit.
+.TP
 .BR \-c ", " \-\-config-path
 Print the path to the configuration file and exit.
 .TP
@@ -29,6 +36,9 @@ Open the graphical interface.
 .TP
 .B sniffnet \-\-adapter eth0
 Start capturing on eth0.
+.TP
+.B tcpdump \-i eth0 \-U \-w \- | sniffnet \-\-stdin
+Monitor packets as tcpdump writes them to the pipe.
 .SH FILES
 Run
 .B sniffnet \-\-config-path

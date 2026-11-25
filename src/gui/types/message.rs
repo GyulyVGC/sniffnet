@@ -24,13 +24,15 @@ use std::net::IpAddr;
 /// Messages types that permit reacting to application interactions/subscriptions
 pub enum Message {
     /// Run tasks to initialize the app
-    StartApp(Option<window::Id>),
+    StartApp(Option<window::Id>, bool),
     /// Animate welcome page
     Welcome,
     /// Sent by the backend parsing packets; includes the capture id, new data, new hosts batched data, and whether an offline capture has finished
     TickRun(usize, InfoTraffic, Vec<HostMessage>, bool),
     /// Capture source selected from the picklist
     SetCaptureSource(CaptureSourcePicklist),
+    /// Select the pcap stream on standard input
+    SelectStdin,
     /// Select network device
     DeviceSelection(String),
     /// Toggle BPF filter checkbox
@@ -61,6 +63,8 @@ pub enum Message {
     OpenWebPage(WebPage),
     /// Start sniffing packets
     Start,
+    /// Result of reading the pcap header from standard input
+    StdinOpened(usize, Result<sniffnet_packet_parser::LinkType, String>),
     /// Stop sniffing process and return to initial page
     Reset,
     /// Change application style

@@ -297,18 +297,27 @@ impl Sniffer {
     pub fn update(&mut self, message: Message) -> Task<Message> {
         self.dots_pulse.1 = (self.dots_pulse.1 + 1) % 3;
         match message {
-            Message::StartApp(id) => return self.start_app(id),
+            Message::StartApp(id, show_previews) => return self.start_app(id, show_previews),
             Message::TickRun(cap_id, msg, host_msgs, no_more_packets) => {
                 self.tick_run(cap_id, msg, host_msgs, no_more_packets);
             }
             Message::DeviceSelection(name) => self.device_selection(&name),
             Message::SetCaptureSource(cs_pick) => self.set_capture_source(cs_pick),
+            Message::SelectStdin => self.capture_source = CaptureSource::Stdin(None),
             Message::ToggleFilters => self.toggle_filters(),
             Message::BpfFilter(value) => self.bpf_filter(value),
             Message::DataUnitSelection(unit) => self.data_unit_selection(unit),
             Message::UpdateDataRates(per_second) => self.update_data_rates(per_second),
             Message::ReportSortSelection(sort) => self.report_sort_selection(sort),
             Message::OpenWebPage(web_page) => Self::open_web_page(&web_page),
+            Message::StdinOpened(id, result) => {
+                if id == self.current_capture_rx.0 {
+                    match result {
+                        Ok(link_type) => self.capture_source.set_link_type(Some(link_type)),
+                        Err(error) => self.capture_error = Some(CaptureError::Fatal(error)),
+                    }
+                }
+            }
             Message::Start => return self.start(),
             Message::Reset => return self.reset(),
             Message::Style(style) => self.style(style),
@@ -510,14 +519,18 @@ impl Sniffer {
         self.conf.settings.scale_factor
     }
 
-    fn start_app(&mut self, id: Option<Id>) -> Task<Message> {
+    fn start_app(&mut self, id: Option<Id>, show_previews: bool) -> Task<Message> {
         self.id = id;
-        let previews_task = self.start_traffic_previews();
+        let blacklist = self.load_ip_blacklist(self.conf.settings.ip_blacklist.clone());
+        let capture = if show_previews {
+            Task::batch([self.start_traffic_previews(), blacklist])
+        } else {
+            blacklist.chain(Task::done(Message::Start))
+        };
         Task::batch([
             Sniffer::register_sigint_handler(),
             self.check_newer_release(),
-            previews_task,
-            self.load_ip_blacklist(self.conf.settings.ip_blacklist.clone()),
+            capture,
         ])
     }
 
@@ -1105,13 +1118,15 @@ impl Sniffer {
                 .for_each(|(_, chart)| *chart = PreviewChart::new(self.conf.settings.style));
 
             if matches!(&self.capture_source, CaptureSource::Device(_)) {
-                let current_device_name = &self.capture_source.get_name();
-                self.device_selection(current_device_name);
+                self.device_selection(&self.capture_source.get_name());
             }
             self.conf.export_pcap.sanitize_file_name();
             let pcap_path = self.conf.export_pcap.full_path();
-            let capture_context =
-                CaptureContext::new(&self.capture_source, pcap_path.as_ref(), &self.conf.filters);
+            let capture_context = if matches!(self.capture_source, CaptureSource::Stdin(_)) {
+                CaptureContext::PendingStdin
+            } else {
+                CaptureContext::new(&self.capture_source, pcap_path.as_ref(), &self.conf.filters)
+            };
             self.capture_error = capture_context
                 .error()
                 .map(|e| CaptureError::Fatal(e.to_string()));
@@ -1183,6 +1198,9 @@ impl Sniffer {
                     BackendTrafficMessage::TickRun(cap_id, msg, host_msg, no_more_packets) => {
                         Message::TickRun(cap_id, msg, host_msg, no_more_packets)
                     }
+                    BackendTrafficMessage::StdinOpened(id, result) => {
+                        Message::StdinOpened(id, result)
+                    }
                     BackendTrafficMessage::PendingHosts(cap_id, host_msg) => {
                         Message::PendingHosts(cap_id, host_msg)
                     }
@@ -1199,6 +1217,9 @@ impl Sniffer {
     }
 
     fn reset(&mut self) -> Task<Message> {
+        if matches!(self.capture_source, CaptureSource::Stdin(_)) {
+            return self.quit();
+        }
         // close capture channel to kill previous captures
         if let Some(rx) = &self.current_capture_rx.1 {
             rx.close();
@@ -1572,7 +1593,8 @@ impl Sniffer {
     pub fn is_capture_source_consistent(&self) -> bool {
         matches!(
             (self.conf.capture_source_picklist, &self.capture_source),
-            (CaptureSourcePicklist::Device, CaptureSource::Device(_))
+            (_, CaptureSource::Stdin(_))
+                | (CaptureSourcePicklist::Device, CaptureSource::Device(_))
                 | (CaptureSourcePicklist::File, CaptureSource::File(_))
                 | (CaptureSourcePicklist::Ipfix, CaptureSource::Ipfix(_))
         )
@@ -1630,6 +1652,33 @@ mod tests {
     use crate::notifications::types::sound::Sound;
     use crate::report::types::sort_type::SortType;
     use crate::{ByteMultiple, Language, RunningPage, Sniffer, StyleType};
+
+    #[test]
+    #[parallel]
+    fn stdin_results_stay_open_until_stop_is_confirmed() {
+        use crate::networking::types::capture_context::CaptureSource;
+        use crate::networking::types::info_traffic::InfoTraffic;
+
+        let mut sniffer = Sniffer::new(Conf::default());
+        sniffer.welcome = None;
+        sniffer.capture_source = CaptureSource::Stdin(None);
+        sniffer.running_page = Some(RunningPage::Overview);
+        let mut interval = InfoTraffic::default();
+        interval.tot_data_info = DataInfo::new_for_tests(1, 0, 64, 0);
+        sniffer.update(Message::TickRun(
+            sniffer.current_capture_rx.0,
+            interval,
+            vec![],
+            true,
+        ));
+        assert!(sniffer.welcome.is_none());
+        assert_eq!(sniffer.running_page, Some(RunningPage::Overview));
+
+        sniffer.update(Message::ResetButtonPressed);
+        assert_eq!(sniffer.modal, Some(MyModal::Reset));
+        sniffer.update(Message::ReturnKeyPressed);
+        assert!(matches!(sniffer.welcome, Some((false, _))));
+    }
 
     #[test]
     #[parallel]
