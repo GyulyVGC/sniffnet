@@ -289,3 +289,12 @@ pub fn current_rates_translation(language: Language) -> &'static str {
         _ => "Current rates",
     }
 }
+
+pub fn traffic_sound_translation(language: Language) -> &'static str {
+    match language {
+        Language::IT => "Riproduci un tono più acuto quando aumenta il traffico",
+        Language::FR => "Jouer un son plus aigu lorsque le débit augmente",
+        Language::ES => "Reproducir un tono más agudo al aumentar el tráfico",
+        _ => "Play a higher tone as the traffic rate increases",
+    }
+}

@@ -11,6 +11,8 @@ use crate::notifications::types::sound::Sound;
 pub struct Notifications {
     #[serde(deserialize_with = "deserialize_or_default")]
     pub volume: u8,
+    #[serde(deserialize_with = "deserialize_or_default")]
+    pub traffic_sound: bool,
     // ---------------------------------------------------------------------------------------------
     #[serde(deserialize_with = "deserialize_or_default")]
     pub data_notification: DataNotification,
@@ -27,6 +29,7 @@ impl Default for Notifications {
     fn default() -> Self {
         Notifications {
             volume: 50,
+            traffic_sound: false,
             data_notification: DataNotification::default(),
             favorite_notification: SimpleNotification {
                 is_active: false,

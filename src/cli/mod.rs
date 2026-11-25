@@ -136,6 +136,7 @@ mod tests {
                 ),
                 notifications: Notifications {
                     volume: 100,
+                    traffic_sound: false,
                     data_notification: Default::default(),
                     favorite_notification: Default::default(),
                     remote_notifications: Default::default(),

@@ -51,7 +51,7 @@ use crate::networking::types::program_lookup::{ProgramLookup, get_picon, lookup_
 use crate::notifications::notify_and_log::notify_and_log;
 use crate::notifications::types::logged_notification::LoggedNotifications;
 use crate::notifications::types::notifications::{DataNotification, Notification};
-use crate::notifications::types::sound::{Sound, play};
+use crate::notifications::types::sound::{Sound, TrafficSound, play};
 use crate::report::get_report_entries::get_searched_entries;
 use crate::report::types::search_parameters::SearchParameters;
 use crate::report::types::sort_type::SortType;
@@ -113,6 +113,7 @@ pub struct Sniffer {
     pub capture_error: Option<CaptureError>,
     /// Messages status
     pub dots_pulse: (String, u8),
+    traffic_sound: TrafficSound,
     /// Traffic chart displayed in the Overview page
     pub traffic_chart: TrafficChart,
     /// Traffic preview charts displayed in the initial page
@@ -176,6 +177,7 @@ impl Sniffer {
             capture_source,
             capture_error: None,
             dots_pulse: (".".to_string(), 0),
+            traffic_sound: TrafficSound::default(),
             traffic_chart: TrafficChart::new(style, language, data_repr.data_unit),
             preview_charts,
             modal: None,
@@ -323,6 +325,12 @@ impl Sniffer {
             Message::LanguageSelection(language) => self.language_selection(language),
             Message::UpdateNotificationSettings(notification, emit_sound) => {
                 self.update_notifications_settings(notification, emit_sound);
+            }
+            Message::SetTrafficSound(enabled) => {
+                self.conf.settings.notifications.traffic_sound = enabled;
+                if !enabled {
+                    self.traffic_sound = TrafficSound::default();
+                }
             }
             Message::ChangeVolume(volume) => self.change_volume(volume),
             Message::ClearAllNotifications => self.clear_all_notifications(),
@@ -1047,6 +1055,13 @@ impl Sniffer {
         {
             return;
         }
+        let settings = &self.conf.settings.notifications;
+        if settings.traffic_sound && self.capture_source.supports_live_chart() && !self.frozen {
+            self.traffic_sound.pulse(
+                msg.tot_data_info.tot_data(DataRepr::bytes(true)),
+                settings.volume,
+            );
+        }
         let emitted_notifications = notify_and_log(
             &mut self.logged_notifications,
             &self.conf.settings.notifications,
@@ -1208,6 +1223,7 @@ impl Sniffer {
         } = self.conf.settings;
         // increment capture id to ignore pending messages from previous captures
         self.current_capture_rx = (self.current_capture_rx.0 + 1, None);
+        self.traffic_sound = TrafficSound::default();
         self.info_traffic = InfoTraffic::default();
         self.addresses_resolved = HashMap::new();
         self.latency_statuses = HashMap::new();
@@ -2330,6 +2346,7 @@ mod tests {
         )));
         sniffer.update(Message::Style(StyleType::DraculaDark));
         sniffer.update(Message::ChangeVolume(100));
+        sniffer.update(Message::SetTrafficSound(true));
         sniffer.update(Message::WindowMoved(-10.0, 555.0));
         sniffer.update(Message::WindowResized(1000.0, 999.0));
         sniffer.thumbnail = true;
@@ -2385,6 +2402,7 @@ mod tests {
                     ),
                     notifications: Notifications {
                         volume: 100,
+                        traffic_sound: true,
                         ..Notifications::default()
                     },
                     style: StyleType::DraculaDark,

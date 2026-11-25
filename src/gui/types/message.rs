@@ -87,6 +87,8 @@ pub enum Message {
     ClearAllNotifications,
     /// Set notifications volume
     ChangeVolume(u8),
+    /// Enable or disable the live traffic tone
+    SetTrafficSound(bool),
     /// Switch from a page to the next (previous) one if true (false), when the tab (shift+tab) key is pressed.
     SwitchPage(bool),
     /// The enter (return) key has been pressed

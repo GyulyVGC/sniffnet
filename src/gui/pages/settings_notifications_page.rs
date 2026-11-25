@@ -25,6 +25,7 @@ use crate::translations::translations_4::data_exceeded_translation;
 use crate::translations::translations_5::{
     blacklisted_transmitted_translation, remote_notifications_translation,
 };
+use crate::translations::translations_6::traffic_sound_translation;
 use crate::utils::types::icon::Icon;
 use crate::{Language, Sniffer, StyleType};
 use iced::widget::scrollable::Direction;
@@ -74,6 +75,17 @@ pub fn settings_notifications_page<'a>(sniffer: &Sniffer) -> Container<'a, Messa
                 .spacing(10)
                 .align_x(Alignment::Center)
                 .width(Length::Fill)
+                .push(
+                    Container::new(
+                        Checkbox::new(notifications.traffic_sound)
+                            .label(traffic_sound_translation(language))
+                            .on_toggle(Message::SetTrafficSound)
+                            .size(18),
+                    )
+                    .padding(15)
+                    .width(CONTAINERS_WIDTH)
+                    .class(ContainerType::BorderedRound),
+                )
                 .push(get_data_notify(notifications.data_notification, language))
                 .push(get_favorite_notify(
                     notifications.favorite_notification,
