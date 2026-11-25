@@ -1,7 +1,8 @@
 use crate::SNIFFNET_LOWERCASE;
+use crate::gui::sniffer::Sniffer;
 use crate::gui::types::conf::{CONF, Conf};
 use crate::gui::types::message::Message;
-use crate::networking::types::capture_context::CaptureSourcePicklist;
+use crate::networking::types::capture_context::{CaptureSource, CaptureSourcePicklist};
 use crate::utils::formatted_strings::APP_VERSION;
 use clap::Parser;
 use iced::{Task, window};
@@ -83,19 +84,27 @@ impl Args {
         args
     }
 
-    pub fn get_boot_task_chain(&self) -> Task<Message> {
-        let stdin = self.stdin;
-        let mut boot_task_chain = window::latest().map(move |id| Message::StartApp(id, stdin));
-        if let Some(adapter) = self.adapter.clone() {
+    pub fn boot(&self, conf: Conf) -> (Sniffer, Task<Message>) {
+        let mut sniffer = Sniffer::new(conf);
+        let show_previews = !self.stdin && self.adapter.is_none();
+        let mut boot_task_chain =
+            window::latest().map(move |id| Message::StartApp(id, show_previews));
+        if self.stdin {
+            sniffer.capture_source = CaptureSource::Stdin(None);
+        } else if let Some(adapter) = self.adapter.clone() {
             boot_task_chain = boot_task_chain
                 .chain(Task::done(Message::SetCaptureSource(
                     CaptureSourcePicklist::Device,
                 )))
-                .chain(Task::done(Message::DeviceSelection(adapter)))
-                .chain(Task::done(Message::Start));
+                .chain(Task::done(Message::DeviceSelection(adapter)));
+        }
+        boot_task_chain = boot_task_chain
+            .chain(sniffer.load_ip_blacklist(sniffer.conf.settings.ip_blacklist.clone()));
+        if !show_previews {
+            boot_task_chain = boot_task_chain.chain(Task::done(Message::Start));
         }
 
-        boot_task_chain
+        (sniffer, boot_task_chain)
     }
 }
 

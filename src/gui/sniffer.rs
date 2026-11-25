@@ -297,7 +297,7 @@ impl Sniffer {
     pub fn update(&mut self, message: Message) -> Task<Message> {
         self.dots_pulse.1 = (self.dots_pulse.1 + 1) % 3;
         match message {
-            Message::StartApp(id, stdin) => return self.start_app(id, stdin),
+            Message::StartApp(id, show_previews) => return self.start_app(id, show_previews),
             Message::TickRun(cap_id, msg, host_msgs, no_more_packets) => {
                 self.tick_run(cap_id, msg, host_msgs, no_more_packets);
             }
@@ -518,19 +518,17 @@ impl Sniffer {
         self.conf.settings.scale_factor
     }
 
-    fn start_app(&mut self, id: Option<Id>, stdin: bool) -> Task<Message> {
+    fn start_app(&mut self, id: Option<Id>, show_previews: bool) -> Task<Message> {
         self.id = id;
-        let capture_task = if stdin {
-            self.capture_source = CaptureSource::Stdin(None);
-            self.start()
-        } else {
+        let previews = if show_previews {
             self.start_traffic_previews()
+        } else {
+            Task::none()
         };
         Task::batch([
             Sniffer::register_sigint_handler(),
             self.check_newer_release(),
-            capture_task,
-            self.load_ip_blacklist(self.conf.settings.ip_blacklist.clone()),
+            previews,
         ])
     }
 
@@ -733,7 +731,7 @@ impl Sniffer {
         self.conf.settings.mmdb_asn = db;
     }
 
-    fn load_ip_blacklist(&mut self, path: String) -> Task<Message> {
+    pub fn load_ip_blacklist(&mut self, path: String) -> Task<Message> {
         self.conf.settings.ip_blacklist.clone_from(&path);
         if path.is_empty() {
             self.ip_blacklist = IpBlacklist::default();
