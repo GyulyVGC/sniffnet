@@ -2,7 +2,7 @@ use crate::SNIFFNET_LOWERCASE;
 use crate::gui::sniffer::Sniffer;
 use crate::gui::types::conf::{CONF, Conf};
 use crate::gui::types::message::Message;
-use crate::networking::types::capture_context::{CaptureSource, CaptureSourcePicklist};
+use crate::networking::types::capture_context::CaptureSourcePicklist;
 use crate::utils::formatted_strings::APP_VERSION;
 use clap::Parser;
 use iced::{Task, window};
@@ -18,9 +18,9 @@ pub(crate) struct Args {
     /// Start sniffing packets from the supplied network adapter
     #[arg(short, long, value_name = "NAME", default_missing_value = CONF.device.device_name.as_str(), num_args = 0..=1)]
     adapter: Option<String>,
-    /// Read a live pcap stream from standard input
-    #[arg(long, conflicts_with = "adapter")]
-    stdin: bool,
+    /// Set the BPF capture filter (e.g. "tcp port 443")
+    #[arg(short, long, value_name = "EXPRESSION")]
+    filter: Option<String>,
     /// Print the path to the configuration file
     #[arg(short, long, exclusive = true)]
     config_path: bool,
@@ -31,6 +31,9 @@ pub(crate) struct Args {
     /// Restore default settings
     #[arg(short, long, exclusive = true)]
     restore_default: bool,
+    /// Read a live pcap stream from standard input
+    #[arg(short, long, conflicts_with = "adapter")]
+    stdin: bool,
 }
 
 impl Args {
@@ -85,26 +88,32 @@ impl Args {
     }
 
     pub fn boot(&self, conf: Conf) -> (Sniffer, Task<Message>) {
-        let mut sniffer = Sniffer::new(conf);
         let show_previews = !self.stdin && self.adapter.is_none();
-        let mut boot_task_chain =
-            window::latest().map(move |id| Message::StartApp(id, show_previews));
-        if self.stdin {
-            sniffer.capture_source = CaptureSource::Stdin(None);
-        } else if let Some(adapter) = self.adapter.clone() {
-            boot_task_chain = boot_task_chain
-                .chain(Task::done(Message::SetCaptureSource(
-                    CaptureSourcePicklist::Device,
-                )))
-                .chain(Task::done(Message::DeviceSelection(adapter)));
+        let mut boot = Task::none();
+        for message in self.boot_messages(&conf) {
+            boot = boot.chain(Task::done(message));
         }
-        boot_task_chain = boot_task_chain
-            .chain(sniffer.load_ip_blacklist(sniffer.conf.settings.ip_blacklist.clone()));
-        if !show_previews {
-            boot_task_chain = boot_task_chain.chain(Task::done(Message::Start));
-        }
+        boot = boot.chain(window::latest().map(move |id| Message::StartApp(id, show_previews)));
+        (Sniffer::new(conf), boot)
+    }
 
-        (sniffer, boot_task_chain)
+    fn boot_messages(&self, conf: &Conf) -> Vec<Message> {
+        let mut messages = Vec::new();
+        if let Some(filter) = &self.filter {
+            let filter = filter.trim();
+            let expand = !filter.is_empty();
+            if conf.filters.expanded() != expand {
+                messages.push(Message::ToggleFilters);
+            }
+            messages.push(Message::BpfFilter(filter.to_owned()));
+        }
+        if self.stdin {
+            messages.push(Message::SelectStdin);
+        } else if let Some(adapter) = &self.adapter {
+            messages.push(Message::SetCaptureSource(CaptureSourcePicklist::Device));
+            messages.push(Message::DeviceSelection(adapter.clone()));
+        }
+        messages
     }
 }
 
@@ -137,12 +146,68 @@ mod tests {
         use clap::{Parser, error::ErrorKind};
 
         assert!(Args::try_parse_from(["sniffnet", "--stdin"]).unwrap().stdin);
+        let args = Args::try_parse_from(["sniffnet", "-s", "-f", "udp port 53"]).unwrap();
+        assert!(args.stdin);
+        assert_eq!(args.filter.as_deref(), Some("udp port 53"));
         assert!(!Args::try_parse_from(["sniffnet"]).unwrap().stdin);
         let err = Args::try_parse_from(["sniffnet", "--stdin", "--adapter", "eth0"]).unwrap_err();
         assert_eq!(err.kind(), ErrorKind::ArgumentConflict);
 
         // Parsing the adapter default loads the test configuration.
         Sniffer::new(Conf::default());
+    }
+
+    #[test]
+    #[serial]
+    fn filter_overrides_saved_bpf_before_capture() {
+        use super::Args;
+        use clap::Parser;
+
+        let mut conf = Conf::default();
+        conf.filters.set_bpf("udp".to_owned());
+        for source in [&["--adapter", "eth0"][..], &["--stdin"], &[]] {
+            let args = Args::try_parse_from(
+                ["sniffnet", "--filter", "tcp port 443"]
+                    .into_iter()
+                    .chain(source.iter().copied()),
+            )
+            .unwrap();
+            let mut sniffer = Sniffer::new(conf.clone());
+            for message in args.boot_messages(&conf) {
+                let _ = sniffer.update(message);
+            }
+            assert!(sniffer.conf.filters.is_some_filter_active());
+            assert_eq!(sniffer.conf.filters.bpf(), "tcp port 443");
+        }
+
+        assert!(
+            Args::try_parse_from(["sniffnet"])
+                .unwrap()
+                .boot_messages(&conf)
+                .is_empty()
+        );
+    }
+
+    #[test]
+    #[serial]
+    fn blank_filter_clears_and_collapses_saved_filter() {
+        use super::Args;
+        use clap::Parser;
+
+        for expanded in [false, true] {
+            for blank in ["", "  "] {
+                let mut conf = Conf::default();
+                conf.filters.expanded = expanded;
+                conf.filters.set_bpf("udp".to_owned());
+                let args = Args::try_parse_from(["sniffnet", "--filter", blank]).unwrap();
+                let mut sniffer = Sniffer::new(conf.clone());
+                for message in args.boot_messages(&conf) {
+                    let _ = sniffer.update(message);
+                }
+                assert!(!sniffer.conf.filters.expanded());
+                assert_eq!(sniffer.conf.filters.bpf(), "");
+            }
+        }
     }
 
     #[test]

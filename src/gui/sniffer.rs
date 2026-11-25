@@ -303,6 +303,7 @@ impl Sniffer {
             }
             Message::DeviceSelection(name) => self.device_selection(&name),
             Message::SetCaptureSource(cs_pick) => self.set_capture_source(cs_pick),
+            Message::SelectStdin => self.capture_source = CaptureSource::Stdin(None),
             Message::ToggleFilters => self.toggle_filters(),
             Message::BpfFilter(value) => self.bpf_filter(value),
             Message::DataUnitSelection(unit) => self.data_unit_selection(unit),
@@ -520,15 +521,16 @@ impl Sniffer {
 
     fn start_app(&mut self, id: Option<Id>, show_previews: bool) -> Task<Message> {
         self.id = id;
-        let previews = if show_previews {
-            self.start_traffic_previews()
+        let blacklist = self.load_ip_blacklist(self.conf.settings.ip_blacklist.clone());
+        let capture = if show_previews {
+            Task::batch([self.start_traffic_previews(), blacklist])
         } else {
-            Task::none()
+            blacklist.chain(Task::done(Message::Start))
         };
         Task::batch([
             Sniffer::register_sigint_handler(),
             self.check_newer_release(),
-            previews,
+            capture,
         ])
     }
 
@@ -731,7 +733,7 @@ impl Sniffer {
         self.conf.settings.mmdb_asn = db;
     }
 
-    pub fn load_ip_blacklist(&mut self, path: String) -> Task<Message> {
+    fn load_ip_blacklist(&mut self, path: String) -> Task<Message> {
         self.conf.settings.ip_blacklist.clone_from(&path);
         if path.is_empty() {
             self.ip_blacklist = IpBlacklist::default();

@@ -31,6 +31,8 @@ pub enum Message {
     TickRun(usize, InfoTraffic, Vec<HostMessage>, bool),
     /// Capture source selected from the picklist
     SetCaptureSource(CaptureSourcePicklist),
+    /// Select the pcap stream on standard input
+    SelectStdin,
     /// Select network device
     DeviceSelection(String),
     /// Toggle BPF filter checkbox
