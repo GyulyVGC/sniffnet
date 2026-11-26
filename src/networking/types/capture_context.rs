@@ -33,28 +33,34 @@ pub enum CaptureError {
 
 impl CaptureContext {
     pub fn new(source: &CaptureSource, pcap_out_path: Option<&String>, filters: &Filters) -> Self {
-        let mut cap_type = match source {
+        let cap_type = match source {
             CaptureSource::Device(device) => {
-                match CaptureType::from_device(device, pcap_out_path) {
+                match CaptureType::from_device_with_filters(
+                    device,
+                    pcap_out_path.is_some(),
+                    filters,
+                ) {
                     Ok(c) => c,
                     Err(e) => return Self::Error(e),
                 }
             }
-            CaptureSource::File(file) => match CaptureType::from_file(file) {
-                Ok(c) => c,
-                Err(e) => return Self::Error(e),
-            },
+            CaptureSource::File(file) => {
+                let mut cap = match CaptureType::from_file(file) {
+                    Ok(c) => c,
+                    Err(e) => return Self::Error(e),
+                };
+                // only apply BPF filter if it is active, and return an error if it fails to apply
+                if filters.is_some_filter_active()
+                    && let Err(e) = cap.set_bpf(filters.bpf())
+                {
+                    return Self::Error(e.to_string());
+                }
+                cap
+            }
             CaptureSource::Ipfix(ipfix) => {
                 return Self::new_ipfix(&ipfix.socket).unwrap_or_else(Self::Error);
             }
         };
-
-        // only apply BPF filter if it is active, and return an error if it fails to apply
-        if filters.is_some_filter_active()
-            && let Err(e) = cap_type.set_bpf(filters.bpf())
-        {
-            return Self::Error(e.to_string());
-        }
 
         let cap = match cap_type {
             CaptureType::Live(cap) => cap,
@@ -176,12 +182,33 @@ impl CaptureType {
         }
     }
 
-    fn from_device(device: &MyDevice, pcap_out_path: Option<&String>) -> Result<Self, String> {
+    pub fn link_type(&self) -> LinkType {
+        match self {
+            Self::Live(on) => LinkType::from_pcap(on.get_datalink()),
+            Self::Offline(off) => LinkType::from_pcap(off.get_datalink()),
+        }
+    }
+
+    pub(crate) fn from_device_with_filters(
+        device: &MyDevice,
+        full_snaplen: bool,
+        filters: &Filters,
+    ) -> Result<Self, String> {
+        let mut cap = Self::from_device(device, full_snaplen)?;
+        if filters.is_some_filter_active()
+            && let Err(e) = cap.set_bpf(filters.bpf())
+        {
+            return Err(e.to_string());
+        }
+        Ok(cap)
+    }
+
+    fn from_device(device: &MyDevice, full_snaplen: bool) -> Result<Self, String> {
         let inactive = Capture::from_device(device.to_pcap_device()).map_err(|e| e.to_string())?;
         let cap = inactive
             .promisc(false)
             .buffer_size(2_000_000) // 2MB buffer -> 10k packets of 200 bytes
-            .snaplen(if pcap_out_path.is_some() {
+            .snaplen(if full_snaplen {
                 i32::from(u16::MAX)
             } else {
                 200 // limit stored packets slice dimension (to keep more in the buffer)
@@ -208,18 +235,19 @@ impl CaptureType {
 
     pub fn pause(&mut self) {
         if let Self::Live(cap) = self {
-            let _ = cap.filter("less 2", true).log_err(location!());
+            let _ = cap.filter("less 2", true);
         }
     }
 
-    pub fn resume(&mut self, filters: &Filters) {
+    pub fn resume(&mut self, filters: &Filters) -> Result<(), Error> {
         if let Self::Live(cap) = self {
             if filters.is_some_filter_active() {
-                let _ = cap.filter(filters.bpf(), true).log_err(location!());
-            } else if cap.filter("", true).log_err(location!()).is_err() {
-                let _ = cap.filter("greater 0", true).log_err(location!());
+                return cap.filter(filters.bpf(), true);
+            } else if cap.filter("", true).is_err() {
+                return cap.filter("greater 0", true);
             }
         }
+        Ok(())
     }
 }
 
