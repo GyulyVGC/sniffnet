@@ -1192,6 +1192,15 @@
       "contributions": [
         "translation"
       ]
+    },
+    {
+      "login": "Mangolito",
+      "name": "Mangolito",
+      "avatar_url": "https://avatars.githubusercontent.com/u/65034032?v=4",
+      "profile": "https://github.com/Mangolito",
+      "contributions": [
+        "financial"
+      ]
     }
   ],
   "contributorsPerLine": 7,
