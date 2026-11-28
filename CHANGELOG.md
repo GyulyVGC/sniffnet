@@ -3,6 +3,7 @@
 All Sniffnet releases with the relative changes are documented in this file.
 
 ## [UNRELEASED]
+- Fix infinite spinning loops and re-instantiate captures when a network interface is taken down and brought back up ([#1379](https://github.com/GyulyVGC/sniffnet/pull/1379) — fixes [#1028](https://github.com/GyulyVGC/sniffnet/issues/1028))
 - Improve RFC 7011 compliance for IPFIX message validation and template handling ([#1374](https://github.com/GyulyVGC/sniffnet/pull/1374) — fixes [#1373](https://github.com/GyulyVGC/sniffnet/issues/1373))
 - Updated some of the existing translations to v1.6:
   - Sinhala ([#1362](https://github.com/GyulyVGC/sniffnet/pull/1362))
